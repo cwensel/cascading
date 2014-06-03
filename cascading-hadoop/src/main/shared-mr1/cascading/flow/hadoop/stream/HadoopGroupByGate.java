@@ -20,8 +20,6 @@
 
 package cascading.flow.hadoop.stream;
 
-import java.util.Map;
-
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopGroupByClosure;
@@ -41,18 +39,10 @@ public class HadoopGroupByGate extends HadoopGroupGate
     super( flowProcess, groupBy, role );
     }
 
-  protected void makePosMap( Map<Duct, Integer> posMap )
-    {
-    for( int i = 0; i < orderedPrevious.length; i++ )
-      {
-      if( orderedPrevious[ i ] != null )
-        posMap.put( orderedPrevious[ i ], 0 ); // map all to zero
-      }
-    }
-
   @Override
   protected HadoopGroupByClosure createClosure()
     {
+    // todo: collapse keyFields here if an array size > 1
     return new HadoopGroupByClosure( flowProcess, keyFields, valuesFields );
     }
 

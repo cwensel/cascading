@@ -226,28 +226,6 @@ public class StreamGraph
     return predecessors.toArray( new Duct[ predecessors.size() ] );
     }
 
-  public Duct[] findAllOrderedPreviousFor( Duct current, int expected )
-    {
-    Duct[] allPrevious = findAllPreviousFor( current );
-
-    if( expected == -1 && allPrevious.length < 2 )
-      return allPrevious;
-
-    Duct[] ordered = new Duct[ expected != -1 ? expected : allPrevious.length ];
-
-    for( Duct previous : allPrevious )
-      {
-      DuctGraph.Ordinal edge = ductGraph.getEdge( previous, current );
-
-      if( ordered[ edge.ordinal ] != null && ordered[ edge.ordinal ] != previous )
-        throw new IllegalStateException( "ordinal duplicated between " + previous + " and " + current );
-
-      ordered[ edge.ordinal ] = previous;
-      }
-
-    return ordered;
-    }
-
   public Map<Duct, Integer> getOrdinalMap( Duct current )
     {
     Duct[] allPrevious = findAllPreviousFor( current );

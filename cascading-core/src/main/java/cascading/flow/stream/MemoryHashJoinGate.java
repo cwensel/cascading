@@ -55,8 +55,8 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     {
     super.bind( streamGraph );
 
-    count.set( numIncomingPaths ); // the number of paths incoming
-    latch = new CountDownLatch( numIncomingPaths - 1 );
+    count.set( numIncomingEventingPaths ); // the number of paths incoming
+    latch = new CountDownLatch( numIncomingEventingPaths - 1 );
     }
 
   @Override
@@ -65,7 +65,7 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     super.prepare();
 
     streamedCollection = new ArrayList<Tuple>( Arrays.asList( new Tuple() ) ); // placeholder in collection
-    collections = new Collection[ getNumIncomingBranches() ];
+    collections = new Collection[ getNumDeclaredIncomingBranches() ];
     collections[ 0 ] = streamedCollection;
 
     if( nullsAreNotEqual )
@@ -75,7 +75,7 @@ public class MemoryHashJoinGate extends MemorySpliceGate
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    int pos = posMap.get( previous );
+    int pos = ordinalMap.get( previous );
 
     Tuple incomingTuple = pos != 0 ? incomingEntry.getTupleCopy() : incomingEntry.getTuple();
     Tuple keyTuple = keyBuilder[ pos ].makeResult( incomingTuple, null ); // view in incomingTuple

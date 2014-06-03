@@ -20,8 +20,6 @@
 
 package cascading.flow.hadoop.stream;
 
-import java.util.Map;
-
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopCoGroupClosure;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -38,8 +36,6 @@ import org.apache.hadoop.mapred.OutputCollector;
  */
 public class HadoopCoGroupGate extends HadoopGroupGate
   {
-  private Map<Duct, Integer> ordinalMap;
-
   public HadoopCoGroupGate( FlowProcess flowProcess, CoGroup coGroup, SpliceGate.Role role )
     {
     super( flowProcess, coGroup, role );
@@ -49,9 +45,6 @@ public class HadoopCoGroupGate extends HadoopGroupGate
   public void bind( StreamGraph streamGraph )
     {
     super.bind( streamGraph );
-
-    if( role != Role.source )
-      ordinalMap = streamGraph.getOrdinalMap( this );
     }
 
   @Override

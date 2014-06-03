@@ -56,7 +56,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
   @Override
   public void receive( Duct previous, TupleEntry incomingEntry )
     {
-    int pos = posMap.get( previous );
+    int pos = ordinalMap.get( previous );
 
     Tuple valuesTuple = incomingEntry.getTupleCopy();
     Tuple groupTuple = keyBuilder[ pos ].makeResult( valuesTuple, null ); // view on valuesTuple
@@ -75,7 +75,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
 
     next.start( this );
 
-    Collection<Tuple>[] collections = new Collection[ orderedPrevious.length ];
+    Collection<Tuple>[] collections = new Collection[ keyValues.length ];
     Iterator<Tuple> keyIterator = keys.iterator();
 
     Set<Tuple> seenNulls = new HashSet<Tuple>();
@@ -102,7 +102,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
             continue;
 
           for( int j = 0; j < keyValues.length; j++ )
-            collections[ j ] = Collections.EMPTY_LIST;
+            collections[ j ] = Collections.emptyList();
 
           collections[ i ] = values;
 
@@ -117,7 +117,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
           collections[ i ] = keyValues[ i ].remove( keysTuple );
 
           if( collections[ i ] == null )
-            collections[ i ] = Collections.EMPTY_LIST;
+            collections[ i ] = Collections.emptyList();
           }
 
         push( collections, keysTuple );
@@ -127,7 +127,7 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     keys = createKeySet();
     keyValues = createKeyValuesArray();
 
-    count.set( numIncomingPaths );
+    count.set( numIncomingEventingPaths );
 
     next.complete( this );
     }

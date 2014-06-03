@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,14 +42,12 @@ import static cascading.tuple.util.TupleViews.createNarrow;
  */
 public abstract class MemorySpliceGate extends SpliceGate
   {
-  protected final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
-
   protected Set<Tuple> keys;
   protected Map<Tuple, Collection<Tuple>>[] keyValues;
 
   protected MemoryCoGroupClosure closure;
 
-  protected int numIncomingPaths;
+  protected int numIncomingEventingPaths;
 
   protected final AtomicInteger count = new AtomicInteger( 0 );
 
@@ -64,9 +61,7 @@ public abstract class MemorySpliceGate extends SpliceGate
     {
     super.bind( streamGraph );
 
-    numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
-
-    orderDucts( streamGraph );
+    numIncomingEventingPaths = streamGraph.countAllEventingPathsTo( this );
     }
 
   // we must make a new Tuple instance to wrap the incoming copy
@@ -93,7 +88,7 @@ public abstract class MemorySpliceGate extends SpliceGate
 
     keys = createKeySet();
 
-    count.set( numIncomingPaths ); // the number of paths incoming
+    count.set( numIncomingEventingPaths ); // the number of paths incoming
     }
 
   @Override
@@ -102,8 +97,6 @@ public abstract class MemorySpliceGate extends SpliceGate
     super.prepare();
 
     keyValues = createKeyValuesArray();
-
-    makePosMap( posMap );
 
     closure = new MemoryCoGroupClosure( flowProcess, splice.getNumSelfJoins(), keyFields, valuesFields );
 
@@ -124,16 +117,11 @@ public abstract class MemorySpliceGate extends SpliceGate
   protected Map<Tuple, Collection<Tuple>>[] createKeyValuesArray()
     {
     // Ducts use identity for equality
-    Map<Tuple, Collection<Tuple>>[] valueMap = new Map[ getNumIncomingBranches() ];
+    Map<Tuple, Collection<Tuple>>[] valueMap = new Map[ getNumDeclaredIncomingBranches() ];
 
     int start = isBlockingStreamed() ? 0 : 1;
-    for( int i = start; i < getNumIncomingBranches(); i++ )
-      {
-//      if( orderedPrevious[ i ] == null ) // only true for local mode
-//        continue;
-
+    for( int i = start; i < getNumDeclaredIncomingBranches(); i++ )
       valueMap[ i ] = createTupleMap();
-      }
 
     return valueMap;
     }

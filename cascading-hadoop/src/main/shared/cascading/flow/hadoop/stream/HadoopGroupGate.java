@@ -20,9 +20,7 @@
 
 package cascading.flow.hadoop.stream;
 
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
@@ -45,8 +43,6 @@ import org.apache.hadoop.mapred.OutputCollector;
  */
 public abstract class HadoopGroupGate extends SpliceGate
   {
-  private final Map<Duct, Integer> posMap = new IdentityHashMap<Duct, Integer>();
-
   protected HadoopGroupByClosure closure;
   protected OutputCollector collector;
 
@@ -62,7 +58,7 @@ public abstract class HadoopGroupGate extends SpliceGate
       next = getNextFor( streamGraph );
 
     if( role == Role.sink )
-      orderDucts( streamGraph );
+      setOrdinalMap( streamGraph );
     }
 
   @Override
@@ -73,8 +69,6 @@ public abstract class HadoopGroupGate extends SpliceGate
 
     if( role != Role.sink )
       closure = createClosure();
-    else
-      makePosMap( posMap );
 
     if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() )
       grouping.joinerClosure = closure;
@@ -91,7 +85,7 @@ public abstract class HadoopGroupGate extends SpliceGate
 
   public void receive( Duct previous, TupleEntry incomingEntry ) // todo: receive should receive the edge or ordinal so no lookup
   {
-  Integer pos = posMap.get( previous ); // todo: when posMap size == 1, pos is always zero -- optimize #get() out
+  Integer pos = ordinalMap.get( previous ); // todo: when posMap size == 1, pos is always zero -- optimize #get() out
 
   Tuple groupTuple = keyBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
   Tuple sortTuple = sortFields == null ? null : sortBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );

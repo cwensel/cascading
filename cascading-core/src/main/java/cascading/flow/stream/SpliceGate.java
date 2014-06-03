@@ -53,7 +53,7 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
   {
   private static final Logger LOG = LoggerFactory.getLogger( SpliceGate.class );
 
-  protected Duct[] orderedPrevious; // used to create posMap
+  protected Map<Duct, Integer> ordinalMap;
 
   public enum Role
     {
@@ -108,6 +108,19 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     this.splice = splice;
     this.flowProcess = flowProcess;
     this.role = role;
+    }
+
+  @Override
+  public void bind( StreamGraph streamGraph )
+    {
+    super.bind( streamGraph );
+
+    setOrdinalMap( streamGraph );
+    }
+
+  protected synchronized void setOrdinalMap( StreamGraph streamGraph )
+    {
+    ordinalMap = streamGraph.getOrdinalMap( this );
     }
 
   public void setBranchNames( Set<String> branchNames )
@@ -249,7 +262,12 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     if( outgoingScopes.size() == 0 )
       throw new IllegalStateException( "outgoing scope may not be empty" );
 
-    int size = splice.isGroupBy() ? 1 : incomingScopes.size(); // actual incoming paths
+    int size = getNumDeclaredIncomingBranches(); // is the maximum ordinal value
+
+    // this is a merge, all fields have the same declaration
+    // filling out full array has implications on joiner/closure which should be resolved independently
+    if( role == Role.source && splice.isGroupBy() )
+      size = 1;
 
     keyFields = new Fields[ size ];
     valuesFields = new Fields[ size ];
@@ -265,11 +283,13 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
 
     Scope outgoingScope = outgoingScopes.get( 0 );
 
-    for( int i = 0; i < size; i++ )
+    int numScopes = Math.min( size, incomingScopes.size() );
+    for( int i = 0; i < numScopes; i++ )
       {
       Scope incomingScope = incomingScopes.get( i );
 
       // for GroupBy, incoming may have same name, but guaranteed to have same key/value/sort fields for merge
+      // arrays may be size 1, then ordinal should always be zero.
       int ordinal = size == 1 ? 0 : incomingScope.getOrdinal();
 
       keyFields[ ordinal ] = outgoingScope.getKeySelectors().get( incomingScope.getName() );
@@ -310,13 +330,13 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
     {
     Comparator defaultComparator = (Comparator) flowProcess.newInstance( (String) flowProcess.getProperty( FlowProps.DEFAULT_ELEMENT_COMPARATOR ) );
 
-    Fields[] compareFields = new Fields[ getNumIncomingBranches() ];
-    groupComparators = new Comparator[ getNumIncomingBranches() ];
+    Fields[] compareFields = new Fields[ getNumDeclaredIncomingBranches() ];
+    groupComparators = new Comparator[ getNumDeclaredIncomingBranches() ];
 
     if( splice.isSorted() )
-      valueComparators = new Comparator[ getNumIncomingBranches() ];
+      valueComparators = new Comparator[ getNumDeclaredIncomingBranches() ];
 
-    int size = splice.isGroupBy() ? 1 : getNumIncomingBranches();
+    int size = splice.isGroupBy() ? 1 : getNumDeclaredIncomingBranches();
 
     for( int i = 0; i < size; i++ )
       {
@@ -399,29 +419,6 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       TrapHandler.closeTraps();
     }
 
-  protected synchronized void orderDucts( StreamGraph streamGraph )
-    {
-    int incomingSize = incomingScopes.size();
-
-    // either the values are ordered by their ordinal, or there is a single value and ordinal isn't relevant
-    Duct[] allPrevious = streamGraph.findAllOrderedPreviousFor( this, splice.isCoGroup() ? incomingSize : -1 );
-
-    // if this node has a single incoming stream, don't rely on ordinality
-    if( incomingSize == 1 )
-      orderedPrevious = new Duct[]{allPrevious[ 0 ]};
-    else
-      orderedPrevious = allPrevious;
-    }
-
-  protected void makePosMap( Map<Duct, Integer> posMap )
-    {
-    for( int i = 0; i < orderedPrevious.length; i++ )
-      {
-      if( orderedPrevious[ i ] != null )
-        posMap.put( orderedPrevious[ i ], i );
-      }
-    }
-
   private boolean areNullsEqual()
     {
     try
@@ -436,9 +433,9 @@ public abstract class SpliceGate extends Gate<TupleEntry, Grouping<TupleEntry, T
       }
     }
 
-  protected int getNumIncomingBranches()
+  protected int getNumDeclaredIncomingBranches()
     {
-    return incomingScopes.size();
+    return splice.getPrevious().length;
     }
 
   /**

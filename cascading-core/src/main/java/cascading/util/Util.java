@@ -43,6 +43,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import cascading.CascadingException;
@@ -96,6 +97,16 @@ public class Util
       return null;
 
     return collection.iterator().next();
+    }
+
+  public static <N extends Number> N max( Collection<N> collection )
+    {
+    return new TreeSet<>( collection ).first();
+    }
+
+  public static <N extends Number> N min( Collection<N> collection )
+    {
+    return new TreeSet<>( collection ).last();
     }
 
   public static <T> Set<T> narrowSet( Class<T> type, Collection collection )
