@@ -42,6 +42,8 @@ import static cascading.stats.CascadingStats.STATS_STORE_INTERVAL;
  */
 public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   {
+  /** static field to capture errors in hadoop local mode */
+  private static Throwable localError;
   /** Field currentConf */
   private final JobConf currentConf;
   /** Field jobClient */
@@ -124,7 +126,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   @Override
   protected Throwable getThrowable()
     {
-    return null;
+    return localError;
     }
 
   protected String internalJobId()
@@ -174,5 +176,18 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       flowStep.logWarn( "unable to test for map progress", exception );
       return false;
       }
+    }
+
+  /**
+   * Internal method to report errors that happen on hadoop local mode. Hadoops local
+   * JobRunner does not give access to TaskReports, but we want to be able to capture
+   * the exception and not just print it to stderr. FlowMapper and FlowReducer use this method.
+   *
+   * @param throwable the throwable to be reported.
+   *
+   * */
+  public static void reportLocalError( Throwable throwable )
+    {
+    localError = throwable;
     }
   }

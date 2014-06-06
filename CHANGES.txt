@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Added custom error reporting for Hadoop standalone mode. The o.a.h.mapred.LocalJobRunner does not return
+  o.a.h.mapred.TaskReports which would cause the actual Exception to be lost. c.f.h.FlowMapper and c.f.h.FlowReducer
+  will now report the Exception directly to c.f.h.p.HadoopFlowStepJob. This has no influence on Jobs running on a
+  real cluster.
+
   Fixed issue where c.f.h.HadoopFlowStep would not set a o.a.h.mapred.Partitioner that supports custom c.t.Hasher
   implementations during partitioning. c.t.h.u.GroupingPartitioner has been renamed to
   c.t.h.u.GroupingSortingPartitioner and a new c.t.h.u.GroupingPartitioner has been introduced that uses the hashCode
