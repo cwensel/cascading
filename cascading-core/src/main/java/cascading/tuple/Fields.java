@@ -646,6 +646,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       if( this.fields.length != types.length )
         throw new IllegalArgumentException( "given types array must be same length as fields" );
 
+      if( Util.containsNull( types ) )
+        throw new IllegalArgumentException( "given types array contains null" );
+
       this.types = copyTypes( types, this.fields.length );
       }
     }

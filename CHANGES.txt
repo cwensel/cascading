@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Fixed issue where the ctor of c.t.Fields was not checking the given types for null values.
+
   Fixed issue where Hadoop credentials could be shared across job submissions and become corrupted
   causing j.i.EOFExceptions.
 
