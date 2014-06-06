@@ -21,17 +21,14 @@
 package cascading.tuple.hadoop.util;
 
 import cascading.tuple.Tuple;
+import cascading.tuple.io.TuplePair;
 import org.apache.hadoop.mapred.Partitioner;
 
-/**
- * GroupingPartitioner is a Partitioner based on the hashCode of the tuple. It honors custom Hasher implementations if
- * present.
- */
-public class GroupingPartitioner  extends HasherPartitioner implements Partitioner<Tuple, Tuple>
+/** Class GroupingPartitioner is an implementation of {@link Partitioner}. */
+public class GroupingSortingPartitioner extends HasherPartitioner implements Partitioner<TuplePair, Tuple>
   {
-  @Override
-  public int getPartition( Tuple key, Tuple value, int numReduceTasks )
+  public int getPartition( TuplePair key, Tuple value, int numReduceTasks )
     {
-    return ( hashCode( key ) & Integer.MAX_VALUE ) % numReduceTasks;
+    return ( hashCode( key.getLhs() ) & Integer.MAX_VALUE ) % numReduceTasks;
     }
   }

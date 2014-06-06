@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Fixed issue where c.f.h.HadoopFlowStep would not set a o.a.h.mapred.Partitioner that supports custom c.t.Hasher
+  implementations during partitioning. c.t.h.u.GroupingPartitioner has been renamed to
+  c.t.h.u.GroupingSortingPartitioner and a new c.t.h.u.GroupingPartitioner has been introduced that uses the hashCode
+  of the tuples while honoring custom hashers.
+
   Fixed issue where the ctor of c.t.Fields was not checking the given types for null values.
 
   Fixed issue where Hadoop credentials could be shared across job submissions and become corrupted
