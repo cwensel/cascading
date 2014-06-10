@@ -2,6 +2,10 @@ Cascading Change Log
 
 2.5.5 [unreleased]
 
+  Added new c.t.p.BasePartitionTap property to control to control the behaviour in case of an Exception while closing a
+  c.t.TupleEntryCollector. Setting "cascading.tap.partition.failonclose" to "true" will cause the Exception to be
+  rethrown as a c.t.TapException. When set to "false", the default, it will log the error and continue.
+
   Added custom error reporting for Hadoop standalone mode. The o.a.h.mapred.LocalJobRunner does not return
   o.a.h.mapred.TaskReports which would cause the actual Exception to be lost. c.f.h.FlowMapper and c.f.h.FlowReducer
   will now report the Exception directly to c.f.h.p.HadoopFlowStepJob. This has no influence on Jobs running on a
