@@ -93,7 +93,19 @@ public abstract class NodeStreamGraph extends StreamGraph
       if( rhsElement instanceof Extent )
         continue;
 
-      Duct newRhsDuct = createDuctFor( rhsElement );
+      boolean isSink = Graphs.successorListOf( elementGraph, rhsElement ).contains( Extent.tail );
+      boolean isSource = Graphs.predecessorListOf( elementGraph, rhsElement ).contains( Extent.head );
+
+      SpliceGate.Role role = SpliceGate.Role.pass;
+
+      if( isSource && !isSink )
+        role = SpliceGate.Role.source;
+      else if( !isSource && isSink )
+        role = SpliceGate.Role.sink;
+      else if( isSource && isSink )
+        role = SpliceGate.Role.both;
+
+      Duct newRhsDuct = createDuctFor( rhsElement, role );
       Duct rhsDuct = findExisting( newRhsDuct );
 
       int ordinal = findEdgeOrdinal( lhsDuct, rhsDuct );
@@ -109,7 +121,7 @@ public abstract class NodeStreamGraph extends StreamGraph
 
   private int findEdgeOrdinal( Duct lhsDuct, Duct rhsDuct )
     {
-    if( !( rhsDuct instanceof SpliceGate ) )
+    if( !( rhsDuct instanceof GroupingSpliceGate ) )
       return 0;
 
     FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
@@ -123,7 +135,7 @@ public abstract class NodeStreamGraph extends StreamGraph
     throw new IllegalStateException( "could not find ordinal, too many edges between elements" );
     }
 
-  private Duct createDuctFor( FlowElement element )
+  private Duct createDuctFor( FlowElement element, SpliceGate.Role role )
     {
     Duct rhsDuct;
 
@@ -158,11 +170,11 @@ public abstract class NodeStreamGraph extends StreamGraph
       Splice spliceElement = (Splice) element;
 
       if( spliceElement.isGroupBy() )
-        rhsDuct = createGroupByGate( (GroupBy) spliceElement, SpliceGate.Role.sink );
+        rhsDuct = createGroupByGate( (GroupBy) spliceElement, role );
       else if( spliceElement.isCoGroup() )
-        rhsDuct = createCoGroupGate( (CoGroup) spliceElement, SpliceGate.Role.sink );
+        rhsDuct = createCoGroupGate( (CoGroup) spliceElement, role );
       else if( spliceElement.isMerge() )
-        rhsDuct = createMergeStage( (Merge) element );
+        rhsDuct = createMergeStage( (Merge) element, role );
       else
         rhsDuct = createHashJoinGate( (HashJoin) element );
       }
@@ -185,7 +197,7 @@ public abstract class NodeStreamGraph extends StreamGraph
 
   protected abstract Gate createGroupByGate( GroupBy element, SpliceGate.Role role );
 
-  protected Duct createMergeStage( Merge merge )
+  protected Duct createMergeStage( Merge merge, SpliceGate.Role both )
     {
     return new MergeStage( flowProcess, merge );
     }
@@ -210,7 +222,7 @@ public abstract class NodeStreamGraph extends StreamGraph
     return ( (AnnotatedGraph) elementGraph ).getAnnotations().hadKey( annotation, flowElement );
     }
 
-  protected SpliceGate createNonBlockingJoinGate( HashJoin join )
+  protected GroupingSpliceGate createNonBlockingJoinGate( HashJoin join )
     {
     return new MemoryHashJoinGate( flowProcess, join );
     }

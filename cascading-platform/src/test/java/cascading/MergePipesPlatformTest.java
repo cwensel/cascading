@@ -519,7 +519,6 @@ public class MergePipesPlatformTest extends PlatformTestCase
   /**
    * This test will exercise the issue where a unconnected HashJoin could be accumulated against within
    * a node.
-   *
    */
   @Test
   public void testHashJoinMergeIntoHashJoinStreamedAccumulatedMerge() throws Exception

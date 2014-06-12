@@ -25,7 +25,7 @@ import java.util.LinkedList;
 /**
  *
  */
-public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing>
+public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing> implements Window
   {
   private final LinkedList<Incoming> list = new LinkedList<Incoming>();
 

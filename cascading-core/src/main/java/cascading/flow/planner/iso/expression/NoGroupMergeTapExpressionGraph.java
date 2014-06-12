@@ -18,19 +18,33 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
+package cascading.flow.planner.iso.expression;
 
-import cascading.flow.FlowProcess;
-import cascading.pipe.HashJoin;
-import cascading.tuple.TupleEntry;
+import cascading.flow.planner.Extent;
+import cascading.pipe.Group;
+import cascading.pipe.Merge;
+import cascading.tap.Tap;
+
+import static cascading.flow.planner.iso.expression.NotElementExpression.not;
+import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
 /**
  *
  */
-public class JoinStage extends ElementStage<TupleEntry, TupleEntry>
+public class NoGroupMergeTapExpressionGraph extends ExpressionGraph
   {
-  public JoinStage( FlowProcess flowProcess, HashJoin join )
+  public NoGroupMergeTapExpressionGraph()
     {
-    super( flowProcess, join );
+    super(
+      not(
+        or(
+          ElementExpression.Capture.Primary,
+          new FlowElementExpression( Extent.class ),
+          new FlowElementExpression( Group.class ),
+          new FlowElementExpression( Merge.class ),
+          new FlowElementExpression( Tap.class )
+        )
+      )
+    );
     }
   }

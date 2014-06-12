@@ -40,7 +40,7 @@ import static cascading.tuple.util.TupleViews.createNarrow;
 /**
  *
  */
-public abstract class MemorySpliceGate extends SpliceGate
+public abstract class MemorySpliceGate extends GroupingSpliceGate
   {
   protected Set<Tuple> keys;
   protected Map<Tuple, Collection<Tuple>>[] keyValues;

@@ -24,7 +24,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopCoGroupClosure;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.stream.Duct;
-import cascading.flow.stream.SpliceGate;
+import cascading.flow.stream.GroupingSpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.tuple.Tuple;
@@ -36,7 +36,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  */
 public class HadoopCoGroupGate extends HadoopGroupGate
   {
-  public HadoopCoGroupGate( FlowProcess flowProcess, CoGroup coGroup, SpliceGate.Role role )
+  public HadoopCoGroupGate( FlowProcess flowProcess, CoGroup coGroup, GroupingSpliceGate.Role role )
     {
     super( flowProcess, coGroup, role );
     }

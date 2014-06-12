@@ -29,6 +29,7 @@ import cascading.flow.local.LocalFlowStep;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
+import cascading.flow.stream.GroupingSpliceGate;
 import cascading.flow.stream.MemoryCoGroupGate;
 import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
@@ -73,18 +74,18 @@ public class LocalStepStreamGraph extends NodeStreamGraph
       }
     }
 
-  protected Gate createCoGroupGate( CoGroup element, SpliceGate.Role role )
+  protected Gate createCoGroupGate( CoGroup element, GroupingSpliceGate.Role role )
     {
     return new MemoryCoGroupGate( flowProcess, element );
     }
 
-  protected Gate createGroupByGate( GroupBy element, SpliceGate.Role source )
+  protected Gate createGroupByGate( GroupBy element, GroupingSpliceGate.Role source )
     {
     return new LocalGroupByGate( flowProcess, element );
     }
 
   @Override
-  protected Duct createMergeStage( Merge merge )
+  protected Duct createMergeStage( Merge merge, SpliceGate.Role both )
     {
     return new SyncMergeStage( flowProcess, merge );
     }

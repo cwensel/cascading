@@ -28,7 +28,7 @@ import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.HadoopGroupByClosure;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
-import cascading.flow.stream.SpliceGate;
+import cascading.flow.stream.GroupingSpliceGate;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Splice;
 import cascading.pipe.joiner.BufferJoin;
@@ -41,7 +41,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 /**
  *
  */
-public abstract class HadoopGroupGate extends SpliceGate
+public abstract class HadoopGroupGate extends GroupingSpliceGate
   {
   protected HadoopGroupByClosure closure;
   protected OutputCollector collector;

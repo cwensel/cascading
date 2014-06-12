@@ -252,6 +252,14 @@ public class StreamGraph
 
     if( current instanceof Gate )
       {
+      if( !( current instanceof Window ) ) // just collapse - Merge
+        {
+        if( edges.size() > 1 )
+          return createFork( findAllNextFor( current ) );
+
+        return next;
+        }
+
       if( next instanceof OpenWindow )
         return next;
 

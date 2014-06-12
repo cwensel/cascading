@@ -25,9 +25,9 @@ import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.Gate;
+import cascading.flow.stream.GroupingSpliceGate;
 import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
-import cascading.flow.stream.SpliceGate;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
@@ -61,9 +61,9 @@ public class HadoopReduceStreamGraph extends NodeStreamGraph
     Duct rhsDuct;
 
     if( group.isGroupBy() )
-      rhsDuct = new HadoopGroupByGate( flowProcess, (GroupBy) group, SpliceGate.Role.source );
+      rhsDuct = new HadoopGroupByGate( flowProcess, (GroupBy) group, GroupingSpliceGate.Role.source );
     else
-      rhsDuct = new HadoopCoGroupGate( flowProcess, (CoGroup) group, SpliceGate.Role.source );
+      rhsDuct = new HadoopCoGroupGate( flowProcess, (CoGroup) group, GroupingSpliceGate.Role.source );
 
     addHead( rhsDuct );
 
@@ -76,13 +76,13 @@ public class HadoopReduceStreamGraph extends NodeStreamGraph
     return new HadoopSinkStage( flowProcess, element );
     }
 
-  protected Gate createCoGroupGate( CoGroup element, SpliceGate.Role role )
+  protected Gate createCoGroupGate( CoGroup element, GroupingSpliceGate.Role role )
     {
     throw new IllegalStateException( "should not happen" );
     }
 
   @Override
-  protected Gate createGroupByGate( GroupBy element, SpliceGate.Role role )
+  protected Gate createGroupByGate( GroupBy element, GroupingSpliceGate.Role role )
     {
     throw new IllegalStateException( "should not happen" );
     }

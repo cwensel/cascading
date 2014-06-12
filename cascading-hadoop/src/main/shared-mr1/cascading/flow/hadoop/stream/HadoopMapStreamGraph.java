@@ -32,10 +32,10 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Gate;
+import cascading.flow.stream.GroupingSpliceGate;
 import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
-import cascading.flow.stream.SpliceGate;
 import cascading.pipe.CoGroup;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
@@ -129,19 +129,19 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     }
 
   @Override
-  protected Gate createCoGroupGate( CoGroup element, SpliceGate.Role role )
+  protected Gate createCoGroupGate( CoGroup element, GroupingSpliceGate.Role role )
     {
-    return new HadoopCoGroupGate( flowProcess, element, SpliceGate.Role.sink );
+    return new HadoopCoGroupGate( flowProcess, element, GroupingSpliceGate.Role.sink );
     }
 
   @Override
-  protected Gate createGroupByGate( GroupBy element, SpliceGate.Role role )
+  protected Gate createGroupByGate( GroupBy element, GroupingSpliceGate.Role role )
     {
     return new HadoopGroupByGate( flowProcess, element, role );
     }
 
   @Override
-  protected SpliceGate createNonBlockingJoinGate( HashJoin join )
+  protected GroupingSpliceGate createNonBlockingJoinGate( HashJoin join )
     {
     return new HadoopMemoryJoinGate( flowProcess, join ); // does not use a latch
     }
