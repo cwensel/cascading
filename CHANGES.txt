@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.5.5 [unreleased]
+2.5.5
 
   Added new c.t.p.BasePartitionTap property to control to control the behaviour in case of an Exception while closing a
   c.t.TupleEntryCollector. Setting "cascading.tap.partition.failonclose" to "true" will cause the Exception to be
