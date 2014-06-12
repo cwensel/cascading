@@ -42,7 +42,7 @@ public class TestText implements Comparable<TestText>
     if( value == null )
       return -1;
 
-    if( o == null )
+    if( o == null || o.value == null )
       return 1;
 
     return value.compareTo( o.value );

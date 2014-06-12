@@ -20,11 +20,14 @@
 
 package cascading.flow.planner.iso.finder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
@@ -34,14 +37,9 @@ import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.Expression;
 import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.util.Pair;
-import com.google.common.collect.ContiguousSet;
 import org.jgrapht.DirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.google.common.collect.Collections2.permutations;
-import static com.google.common.collect.DiscreteDomain.integers;
-import static com.google.common.collect.Range.closed;
 
 /**
  * This class and algorithm is based on the following research.
@@ -297,7 +295,7 @@ class State
     if( matchers.size() != scopes.size() )
       return false;
 
-    // build matrix of all match permutations
+    // build a square matrix of all match permutations
     boolean[][] compat = new boolean[ matchers.size() ][ scopes.size() ];
 
     for( int i = 0; i < matchers.size(); i++ )
@@ -313,12 +311,17 @@ class State
       }
 
     // all matchers must fire for a given permutation
-    // todo: remove guava dep
-    Collection<List<Integer>> permutations = permutations( ContiguousSet.create( closed( 0, compat.length - 1 ), integers() ) );
+    List<Integer> range = new ArrayList<>();
+    for( int i = 0; i < compat.length; i++ )
+      range.add( i );
 
+    PermutationIterator<Integer> iterator = new PermutationIterator<>( range );
     boolean[][] transformed = new boolean[ matchers.size() ][];
-    for( List<Integer> permutation : permutations )
+
+    while( iterator.hasNext() )
       {
+      List<Integer> permutation = iterator.next();
+
       for( int i = 0; i < permutation.size(); i++ )
         transformed[ i ] = compat[ permutation.get( i ) ];
 
@@ -570,7 +573,8 @@ class State
 
   public Map<Integer, Integer> getVertexMapping()
     {
-    Map<Integer, Integer> vertexMapping = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> vertexMapping = new HashMap<>();
+
     for( int i = 0; i < n1; ++i )
       {
       if( core1[ i ] != NULL_NODE )
@@ -648,5 +652,169 @@ class State
   public FlowElement getElementNode( int vertex )
     {
     return elementGraph.getVertex( vertex );
+    }
+
+  /**
+   * Code below sourced from google guava in order to prevent version issues
+   * <p/>
+   * Copyright (C) 2007 The Guava Authors
+   * Licensed under the Apache License, Version 2.0
+   */
+  private static class PermutationIterator<E> extends AbstractIterator<List<E>>
+    {
+    final List<E> list;
+    final int[] c;
+    final int[] o;
+    int j;
+
+    PermutationIterator( List<E> list )
+      {
+      this.list = new ArrayList<E>( list );
+      int n = list.size();
+      c = new int[ n ];
+      o = new int[ n ];
+
+      for( int i = 0; i < n; i++ )
+        {
+        c[ i ] = 0;
+        o[ i ] = 1;
+        }
+
+      j = Integer.MAX_VALUE;
+      }
+
+    @Override
+    protected List<E> computeNext()
+      {
+      if( j <= 0 )
+        return endOfData();
+
+      List<E> next = Collections.unmodifiableList( new ArrayList<>( list ) );
+      calculateNextPermutation();
+
+      return next;
+      }
+
+    void calculateNextPermutation()
+      {
+      j = list.size() - 1;
+      int s = 0;
+
+      // Handle the special case of an empty list. Skip the calculation of the
+      // next permutation.
+      if( j == -1 )
+        return;
+
+      while( true )
+        {
+        int q = c[ j ] + o[ j ];
+
+        if( q < 0 )
+          {
+          switchDirection();
+          continue;
+          }
+
+        if( q == j + 1 )
+          {
+          if( j == 0 )
+            break;
+
+          s++;
+          switchDirection();
+          continue;
+          }
+
+        Collections.swap( list, j - c[ j ] + s, j - q + s );
+        c[ j ] = q;
+        break;
+        }
+      }
+
+    void switchDirection()
+      {
+      o[ j ] = -o[ j ];
+      j--;
+      }
+
+    @Override
+    public void remove()
+      {
+      throw new UnsupportedOperationException();
+      }
+    }
+
+  private static abstract class AbstractIterator<T> implements Iterator<T>
+    {
+    private StateEnum state = StateEnum.NOT_READY;
+
+    /** Constructor for use by subclasses. */
+    protected AbstractIterator()
+      {
+      }
+
+    private enum StateEnum
+      {
+        /** We have computed the next element and haven't returned it yet. */
+        READY,
+
+        /** We haven't yet computed or have already returned the element. */
+        NOT_READY,
+
+        /** We have reached the end of the data and are finished. */
+        DONE,
+
+        /** We've suffered an exception and are kaput. */
+        FAILED,
+      }
+
+    private T next;
+
+    protected abstract T computeNext();
+
+    protected final T endOfData()
+      {
+      state = StateEnum.DONE;
+      return null;
+      }
+
+    @Override
+    public final boolean hasNext()
+      {
+      if( state == StateEnum.FAILED )
+        throw new IllegalStateException();
+
+      switch( state )
+        {
+        case DONE:
+          return false;
+        case READY:
+          return true;
+        default:
+        }
+      return tryToComputeNext();
+      }
+
+    private boolean tryToComputeNext()
+      {
+      state = StateEnum.FAILED; // temporary pessimism
+      next = computeNext();
+      if( state != StateEnum.DONE )
+        {
+        state = StateEnum.READY;
+        return true;
+        }
+      return false;
+      }
+
+    @Override
+    public final T next()
+      {
+      if( !hasNext() )
+        throw new NoSuchElementException();
+
+      state = StateEnum.NOT_READY;
+      return next;
+      }
     }
   }

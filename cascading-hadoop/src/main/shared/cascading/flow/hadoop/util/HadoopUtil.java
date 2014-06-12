@@ -675,7 +675,7 @@ public class HadoopUtil
 
   public static void addInputPath( Configuration conf, Path path )
     {
-    Path workingDirectory = getWorkingDirectory( (JobConf) conf );
+    Path workingDirectory = getWorkingDirectory( conf );
     path = new Path( workingDirectory, path );
     String dirStr = StringUtils.escapeString( path.toString() );
     String dirs = conf.get( "mapred.input.dir" );
@@ -685,12 +685,12 @@ public class HadoopUtil
 
   public static void setOutputPath( Configuration conf, Path path )
     {
-    Path workingDirectory = getWorkingDirectory( (JobConf) conf );
+    Path workingDirectory = getWorkingDirectory( conf );
     path = new Path( workingDirectory, path );
     conf.set( "mapred.output.dir", path.toString() );
     }
 
-  private static Path getWorkingDirectory( JobConf conf )
+  private static Path getWorkingDirectory( Configuration conf )
     {
     String name = conf.get( "mapred.working.dir" );
     if( name != null )

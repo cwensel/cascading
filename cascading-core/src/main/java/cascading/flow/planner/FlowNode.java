@@ -51,7 +51,7 @@ public class FlowNode implements ProcessModel, Serializable
   private final String name;
 
   protected ElementGraph nodeSubGraph;
-  protected List<ElementGraph> pipelineGraphs;
+  protected List<ElementGraph> pipelineGraphs = Collections.emptyList();
 
   private Set<FlowElement> sourceElements;
   private Set<FlowElement> sinkElements;
@@ -69,7 +69,9 @@ public class FlowNode implements ProcessModel, Serializable
     this.ordinal = ordinal;
     this.name = name;
     this.nodeSubGraph = nodeSubGraph;
-    this.pipelineGraphs = pipelineGraphs;
+
+    if( pipelineGraphs != null )
+      this.pipelineGraphs = pipelineGraphs;
 
     verifyPipelines();
     createPipelineMap();
@@ -358,7 +360,7 @@ public class FlowNode implements ProcessModel, Serializable
     return id != null ? id.hashCode() : 0;
     }
 
-  public Collection<FlowElement> getFlowElementsFor( Enum annotation )
+  public Set<FlowElement> getFlowElementsFor( Enum annotation )
     {
     if( pipelineGraphs.isEmpty() )
       return ( (AnnotatedGraph) getElementGraph() ).getAnnotations().getValues( annotation );

@@ -39,7 +39,6 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
 import data.InputData;
-import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,25 +75,24 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
       if( isUNDEFINED( properties, name ) )
         {
         LOG.debug( "skipping: {}", name );
+        continue;
         }
-      else
-        {
+
 //        TestPlatform testPlatform = makeInstance( getPlatformClass( type.getClassLoader() ) );
 
-        // test platform dependencies not installed, so skip
+      // test platform dependencies not installed, so skip
 //        if( testPlatform == null )
 //          continue;
 
-        String platformName = testPlatform.getName();
+      String platformName = testPlatform.getName();
 
-        String displayName = String.format( "%s[%s]", name, platformName );
+      String displayName = String.format( "%s[%s]", name, platformName );
 
-        PlatformTestCase platformTest = (PlatformTestCase) type.getConstructors()[ 0 ].newInstance( properties, displayName, name, pipes.get( name ) );
+      PlatformTestCase platformTest = (PlatformTestCase) type.getConstructors()[ 0 ].newInstance( properties, displayName, name, pipes.get( name ) );
 
-        platformTest.installPlatform( testPlatform );
+      platformTest.installPlatform( testPlatform );
 
-        suite.addTest( (Test) platformTest );
-        }
+      suite.addTest( platformTest );
       }
     }
 
@@ -138,18 +136,12 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
 
           String name;
           if( prefix != null )
-            {
             name = prefix + "." + Util.join( Fields.fields( argFields, declFields, selectFields ), "_" );
-            }
           else
-            {
             name = Util.join( Fields.fields( argFields, declFields, selectFields ), "_" );
-            }
 
           if( runOnly != null && !runOnly.equalsIgnoreCase( name ) )
-            {
             continue;
-            }
 
           pipes.put( name, assemblyFactory.createAssembly( pipe, argFields, declFields, functionValue, selectFields ) );
           }
@@ -200,6 +192,7 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
   @org.junit.Test
   public void runTest() throws Exception
     {
+    copyFromLocal( InputData.inputFileNums20 );
     Tap source = getPlatform().getTextFile( InputData.inputFileNums20 );
     Tap sink = getPlatform().getTextFile( getOutputPath( key ), SinkMode.REPLACE );
 
@@ -210,44 +203,30 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
       flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
       if( isWriteDOT() )
-        {
         flow.writeDOT( getName() + ".dot" ); // use display name
-        }
 
       flow.complete();
 
       if( isError() )
-        {
         fail( "did not throw asserted error" );
-        }
       }
     catch( Exception exception )
       {
       if( isError() )
-        {
         return;
-        }
       else
-        {
         throw exception;
-        }
       }
 
     if( resultLength != -1 )
-      {
       validateLength( flow, resultLength );
-      }
 
     TupleEntryIterator iterator = flow.openSink();
     Object result = iterator.next().getObject( 1 );
 
     if( resultTuple != null )
-      {
       assertEquals( "not equal: ", resultTuple.toString(), result );
-      }
     else if( resultTuple == null )
-      {
       fail( "no result assertion made for:" + getName() + " with result: " + result );
-      }
     }
   }

@@ -61,7 +61,7 @@ public class PathScopeExpression extends ScopeExpression
 
   public PathScopeExpression( Applies applies, Mode mode )
     {
-    super(applies);
+    super( applies );
     this.mode = mode;
     }
 
