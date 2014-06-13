@@ -48,6 +48,7 @@ import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
+import cascading.property.ConfigDef;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
@@ -642,9 +643,15 @@ public abstract class FlowPlanner<F extends Flow, Config>
       {
       // only restart from a checkpoint pipe or checkpoint tap below
       if( pipe instanceof Checkpoint )
+        {
         checkpointTap = makeTempTap( checkpointRootPath, pipe.getName() );
+        // mark as an anonymous checkpoint
+        checkpointTap.getConfigDef().setProperty( ConfigDef.Mode.DEFAULT, "cascading.checkpoint", "true" );
+        }
       else
+        {
         checkpointTap = makeTempTap( pipe.getName() );
+        }
       }
 
     graph.insertFlowElementAfter( pipe, checkpointTap );
@@ -818,6 +825,31 @@ public abstract class FlowPlanner<F extends Flow, Config>
           }
         else if( flowElement instanceof Tap || flowElement instanceof Group )
           {
+          // added for JoinFieldedPipesPlatformTest.testJoinMergeGroupBy where Merge hides streamed nature of path
+          if( flowElement instanceof Group && !joins.isEmpty() )
+            {
+            List<Splice> splices = new ArrayList<Splice>();
+
+            splices.addAll( merges );
+            splices.add( (Splice) flowElement );
+
+            Collections.reverse( splices );
+
+            for( Splice splice : splices )
+              {
+              Map<Integer, Integer> pathCounts = countOrderedDirectPathsBetween( elementGraph, lastSourceElement, splice, true );
+
+              if( isBothAccumulatedAndStreamedPath( pathCounts ) )
+                {
+                tapInsertions.add( (Pipe) flowElements.get( flowElements.indexOf( splice ) - 1 ) );
+                break;
+                }
+              }
+
+            if( !tapInsertions.isEmpty() )
+              break;
+            }
+
           for( int j = 0; j < joins.size(); j++ )
             {
             HashJoin join = joins.get( j );

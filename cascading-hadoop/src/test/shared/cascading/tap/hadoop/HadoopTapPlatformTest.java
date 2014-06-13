@@ -56,6 +56,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import data.InputData;
 import org.apache.hadoop.fs.Path;
@@ -246,20 +247,20 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     flow.complete();
 
     List<Tuple> tuples = asList( flow, sink );
-    List<Object> values = new ArrayList<Object>(  );
-    for (Tuple tuple: tuples)
-        values.add( tuple.getObject( 1 ) );
+    List<Object> values = new ArrayList<Object>();
+    for( Tuple tuple : tuples )
+      values.add( tuple.getObject( 1 ) );
 
-    assertTrue( values.contains( "1\ta") );
-    assertTrue( values.contains( "2\tb") );
-    assertTrue( values.contains( "3\tc") );
-    assertTrue( values.contains( "4\td") );
-    assertTrue( values.contains( "5\te") );
+    assertTrue( values.contains( "1\ta" ) );
+    assertTrue( values.contains( "2\tb" ) );
+    assertTrue( values.contains( "3\tc" ) );
+    assertTrue( values.contains( "4\td" ) );
+    assertTrue( values.contains( "5\te" ) );
 
     assertEquals( 5, tuples.size() );
 
     // confirm the tuple iterator can handle nulls from the source
-    assertEquals(5, asList( flow, source ).size() );
+    assertEquals( 5, asList( flow, source ).size() );
     }
 
   @Test
@@ -600,5 +601,88 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       {
       // ignore
       }
+    }
+
+  @Test
+  public void testChildIdentifiers() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    JobConf jobConf = ( (BaseHadoopPlatform) getPlatform() ).getJobConf();
+
+    Hfs tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), getOutputPath( "multifiles" ) );
+
+    tap.deleteResource( getPlatform().getFlowProcess() );
+
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf ) );
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf, 2, true ) );
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf, 2, false ) );
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf, 1, true ) );
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf, 1, false ) );
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf, 0, true ) );
+    assertEqualsSize( "missing", 0, tap.getChildIdentifiers( jobConf, 0, false ) );
+
+    tap.createResource( getPlatform().getFlowProcess() );
+
+    assertEqualsSize( "no children", 0, tap.getChildIdentifiers( jobConf ) );
+    assertEqualsSize( "no children", 0, tap.getChildIdentifiers( jobConf, 2, true ) );
+    assertEqualsSize( "no children", 0, tap.getChildIdentifiers( jobConf, 2, false ) );
+    assertEqualsSize( "no children", 0, tap.getChildIdentifiers( jobConf, 1, true ) );
+    assertEqualsSize( "no children", 0, tap.getChildIdentifiers( jobConf, 1, false ) );
+    assertEqualsSize( "no children", 1, tap.getChildIdentifiers( jobConf, 0, true ) );
+    assertEqualsSize( "no children", 1, tap.getChildIdentifiers( jobConf, 0, false ) );
+
+    writeFileTo( "multifiles/A" );
+    writeFileTo( "multifiles/B" );
+
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 2, true ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 2, false ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 1, true ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 1, false ) );
+    assertEqualsSize( "children", 1, tap.getChildIdentifiers( jobConf, 0, true ) );
+    assertEqualsSize( "children", 1, tap.getChildIdentifiers( jobConf, 0, false ) );
+
+    tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "/" );
+
+    assertEqualsSize( "root", -1, tap.getChildIdentifiers( jobConf ) );
+    assertEqualsSize( "root", -1, tap.getChildIdentifiers( jobConf, 2, true ) );
+    assertEqualsSize( "root", -1, tap.getChildIdentifiers( jobConf, 2, false ) );
+    assertEqualsSize( "root", -1, tap.getChildIdentifiers( jobConf, 1, true ) );
+    assertEqualsSize( "root", -1, tap.getChildIdentifiers( jobConf, 1, false ) );
+    assertEqualsSize( "root", 1, tap.getChildIdentifiers( jobConf, 0, true ) );
+    assertEqualsSize( "root", 1, tap.getChildIdentifiers( jobConf, 0, false ) );
+
+    tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "./" );
+
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf ) );
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 2, true ) );
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 2, false ) );
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 1, true ) );
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 1, false ) );
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 0, true ) );
+    assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 0, false ) );
+    }
+
+  public void assertEqualsSize( String message, int expected, String[] actual )
+    {
+//    System.out.println( message + ": " + Arrays.toString( actual ) );
+
+    if( expected == -1 )
+      return;
+
+    assertEquals( expected, actual.length );
+    }
+
+  private void writeFileTo( String path ) throws IOException
+    {
+    Hfs tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), getOutputPath( path ) );
+
+    TupleEntryCollector collector = tap.openForWrite( getPlatform().getFlowProcess() );
+
+    collector.add( new Tuple( 1, "1" ) );
+
+    collector.close();
     }
   }
