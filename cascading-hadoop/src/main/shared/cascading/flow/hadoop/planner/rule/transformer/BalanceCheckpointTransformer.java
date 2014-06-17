@@ -21,20 +21,22 @@
 package cascading.flow.hadoop.planner.rule.transformer;
 
 import cascading.flow.hadoop.planner.rule.expression.BalanceCheckpointExpression;
-import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 
 import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  *
  */
-public class BalanceCheckpointTransformer extends RuleTempTapInsertionTransformer
+public class BalanceCheckpointTransformer extends RuleInsertionTransformer
   {
   public BalanceCheckpointTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceCheckpointExpression()
+      new BalanceCheckpointExpression(),
+      TapElementFactory.TEMP_TAP
     );
     }
   }

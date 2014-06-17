@@ -21,20 +21,22 @@
 package cascading.flow.hadoop.planner.rule.transformer;
 
 import cascading.flow.hadoop.planner.rule.expression.BalanceGroupNonBlockingHashJoinExpression;
-import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 
 import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  *
  */
-public class BalanceGroupNonBlockingHashJoinTransformer extends RuleTempTapInsertionTransformer
+public class BalanceGroupNonBlockingHashJoinTransformer extends RuleInsertionTransformer
   {
   public BalanceGroupNonBlockingHashJoinTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceGroupNonBlockingHashJoinExpression()
+      new BalanceGroupNonBlockingHashJoinExpression(),
+      TapElementFactory.TEMP_TAP
     );
     }
   }

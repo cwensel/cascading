@@ -21,20 +21,22 @@
 package cascading.flow.hadoop.planner.rule.transformer;
 
 import cascading.flow.hadoop.planner.rule.expression.BalanceSameSourceStreamedAccumulatedExpression;
-import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 
 import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  *
  */
-public class BalanceSameSourceStreamedAccumulatedTransformer extends RuleTempTapInsertionTransformer
+public class BalanceSameSourceStreamedAccumulatedTransformer extends RuleInsertionTransformer
   {
   public BalanceSameSourceStreamedAccumulatedTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceSameSourceStreamedAccumulatedExpression()
+      new BalanceSameSourceStreamedAccumulatedExpression(),
+      TapElementFactory.TEMP_TAP
     );
     }
   }

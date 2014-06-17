@@ -36,7 +36,7 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.rule.RuleRegistry;
-import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 import cascading.property.AppProps;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
@@ -175,7 +175,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     {
     super.configRuleRegistry( ruleRegistry );
 
-    ruleRegistry.addElementFactory( RuleTempTapInsertionTransformer.TEMP_TAP, new TempTapElementFactory() );
+    ruleRegistry.addElementFactory( TapElementFactory.TEMP_TAP, new TempTapElementFactory() );
     }
 
   @Override

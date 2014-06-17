@@ -20,18 +20,12 @@
 
 package cascading.flow.planner.rule.transformer;
 
-import cascading.flow.planner.rule.PlanPhase;
-import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.iso.transformer.ElementFactory;
 
 /**
  *
  */
-public class RuleTempTapInsertionTransformer extends RuleInsertionTransformer
+public abstract class TapElementFactory implements ElementFactory
   {
   public static final String TEMP_TAP = "cascading.registry.temporary_tap";
-
-  public RuleTempTapInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression )
-    {
-    super( phase, ruleExpression, TEMP_TAP );
-    }
   }

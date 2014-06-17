@@ -21,20 +21,22 @@
 package cascading.flow.hadoop.planner.rule.transformer;
 
 import cascading.flow.hadoop.planner.rule.expression.BalanceGroupSplitMergeGroupExpression;
-import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 
 import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  *
  */
-public class BalanceGroupSplitMergeGroupTransformer extends RuleTempTapInsertionTransformer
+public class BalanceGroupSplitMergeGroupTransformer extends RuleInsertionTransformer
   {
   public BalanceGroupSplitMergeGroupTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceGroupSplitMergeGroupExpression()
+      new BalanceGroupSplitMergeGroupExpression(),
+      TapElementFactory.TEMP_TAP
     );
     }
   }

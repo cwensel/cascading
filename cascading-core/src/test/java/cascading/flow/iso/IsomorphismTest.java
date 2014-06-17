@@ -47,7 +47,6 @@ import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
 import cascading.flow.planner.iso.expression.TapGroupTapExpressionGraph;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
-import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.iso.transformer.RemoveBranchGraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.flow.planner.rule.PlanPhase;
@@ -59,7 +58,8 @@ import cascading.flow.planner.rule.RuleResult;
 import cascading.flow.planner.rule.expression.BufferAfterEveryExpression;
 import cascading.flow.planner.rule.expression.LoneGroupExpression;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
-import cascading.flow.planner.rule.transformer.RuleTempTapInsertionTransformer;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 import cascading.pipe.Pipe;
 import org.junit.Test;
 
@@ -135,11 +135,11 @@ public class IsomorphismTest extends CascadingTestCase
     {
     RuleRegistry ruleRegistry = new RuleRegistry();
 
-    ruleRegistry.addElementFactory( RuleTempTapInsertionTransformer.TEMP_TAP, new NonTapFactory() );
+    ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
-    ruleRegistry.addRule( new RuleTempTapInsertionTransformer( PlanPhase.PreResolveAssembly, new TestCheckpointExpression() ) );
+    ruleRegistry.addRule( new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, new TestCheckpointExpression(), TapElementFactory.TEMP_TAP ) );
 //    ruleRegistry.addRule( new RuleContractedTransform( PlanPhase.PreResolve, new NoOpPipeExpression() ) );
 
     FlowElementGraph flowElementGraph = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), new StandardElementGraph() );
@@ -255,12 +255,12 @@ public class IsomorphismTest extends CascadingTestCase
     {
     RuleRegistry ruleRegistry = new RuleRegistry();
 
-    ruleRegistry.addElementFactory( RuleTempTapInsertionTransformer.TEMP_TAP, new NonTapFactory() );
+    ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
     ruleRegistry.addRule( new RuleAssert( PlanPhase.PreResolveAssembly, new LoneGroupExpression(), "lone group assertion" ) );
-    ruleRegistry.addRule( new RuleTempTapInsertionTransformer( PlanPhase.PreResolveAssembly, new TestGroupGroupExpression() ) );
+    ruleRegistry.addRule( new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, new TestGroupGroupExpression(), TapElementFactory.TEMP_TAP ) );
 
     try
       {
@@ -321,7 +321,7 @@ public class IsomorphismTest extends CascadingTestCase
     {
     RuleRegistry ruleRegistry = new RuleRegistry();
 
-    ruleRegistry.addElementFactory( RuleTempTapInsertionTransformer.TEMP_TAP, new NonTapFactory() );
+    ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
@@ -336,11 +336,11 @@ public class IsomorphismTest extends CascadingTestCase
     {
     RuleRegistry ruleRegistry = new RuleRegistry();
 
-    ruleRegistry.addElementFactory( RuleTempTapInsertionTransformer.TEMP_TAP, new NonTapFactory() );
+    ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
     PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
 
-    RuleTempTapInsertionTransformer ruleTempTapInsertionTransformer = new RuleTempTapInsertionTransformer( PlanPhase.PreResolveAssembly, ruleExpression );
+    RuleInsertionTransformer ruleTempTapInsertionTransformer = new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, ruleExpression, TapElementFactory.TEMP_TAP );
     Transformed<ElementGraph> insertionTransformed = ruleTempTapInsertionTransformer.transform( plannerContext, flowElementGraph );
 
     insertionTransformed.writeDOTs( getPlanPath() );
@@ -348,7 +348,7 @@ public class IsomorphismTest extends CascadingTestCase
     return insertionTransformed.getEndGraph();
     }
 
-  private static class NonTapFactory implements ElementFactory
+  private static class NonTapFactory extends TapElementFactory
     {
     @Override
     public FlowElement create( ElementGraph graph, FlowElement flowElement )

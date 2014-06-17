@@ -41,11 +41,11 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Checkpoint;
@@ -538,7 +538,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     }
 
-  public class TempTapElementFactory implements ElementFactory
+  public class TempTapElementFactory extends TapElementFactory
     {
     @Override
     public FlowElement create( ElementGraph graph, FlowElement flowElement )
