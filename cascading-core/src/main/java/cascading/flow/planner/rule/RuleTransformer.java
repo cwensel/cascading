@@ -86,7 +86,7 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
 
     result.addChildTransform( transformed );
 
-    if( rootGraph != transformed.getEndGraph() )
+    if( transformed.getEndGraph() != null && !rootGraph.equals( transformed.getEndGraph() ) )
       result.setEndGraph( transformed.getEndGraph() );
 
     return result;

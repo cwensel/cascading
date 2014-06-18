@@ -85,6 +85,16 @@ public class Partitions extends GraphResult
     return annotatedSubGraphs;
     }
 
+  public boolean hasSubGraphs()
+    {
+    return !annotatedSubGraphs.isEmpty();
+    }
+
+  public boolean hasContractedMatches()
+    {
+    return subGraphIterator != null && !subGraphIterator.getContractedMatches().isEmpty();
+    }
+
   public List<ElementGraph> getSubGraphs()
     {
     return new ArrayList<>( annotatedSubGraphs.keySet() );

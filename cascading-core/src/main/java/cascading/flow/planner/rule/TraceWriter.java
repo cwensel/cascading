@@ -20,7 +20,10 @@
 
 package cascading.flow.planner.rule;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +34,16 @@ import cascading.flow.planner.iso.transformer.Transformed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.join;
+
 public class TraceWriter
   {
   private static final Logger LOG = LoggerFactory.getLogger( TraceWriter.class );
+  private static final boolean IS_OSX = System.getProperty( "os.name" ).toLowerCase().contains( "Mac OS X".toLowerCase() );
+
+  public static final String GREEN = "0000000000000000000400000000000000000000000000000000000000000000";
+  public static final String ORANGE = "0000000000000000000E00000000000000000000000000000000000000000000";
+  public static final String RED = "0000000000000000000C00000000000000000000000000000000000000000000";
 
   String transformTracePath;
 
@@ -50,7 +60,10 @@ public class TraceWriter
 
     ruleName = String.format( "%02d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
 
-    transformed.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    String path = new File( transformTracePath, ruleName ).toString();
+    transformed.writeDOTs( path );
+
+    markTransformed( transformed, path );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, Partitions partition )
@@ -62,7 +75,10 @@ public class TraceWriter
 
     ruleName = String.format( "%02d-%s-%04d-%s", phase.ordinal(), phase, ruleOrdinal, ruleName );
 
-    partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    String path = new File( transformTracePath, ruleName ).toString();
+    partition.writeDOTs( path );
+
+    markPartitioned( partition, path );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, Partitions partition )
@@ -74,7 +90,10 @@ public class TraceWriter
 
     ruleName = String.format( "%02d-%s-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, ruleName );
 
-    partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    String path = new File( transformTracePath, ruleName ).toString();
+    partition.writeDOTs( path );
+
+    markPartitioned( partition, path );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, Partitions partition )
@@ -86,7 +105,23 @@ public class TraceWriter
 
     ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, ruleName );
 
-    partition.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    String path = new File( transformTracePath, ruleName ).toString();
+    partition.writeDOTs( path );
+
+    markPartitioned( partition, path );
+    }
+
+  private void markPartitioned( Partitions partition, String path )
+    {
+    String color = null;
+
+    if( partition.hasContractedMatches() )
+      color = ORANGE;
+
+    if( partition.hasSubGraphs() )
+      color = GREEN;
+
+    markFolder( path, color );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Transformed transformed )
@@ -98,7 +133,16 @@ public class TraceWriter
 
     ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, pipelineOrdinal, ruleName );
 
-    transformed.writeDOTs( new File( transformTracePath, ruleName ).toString() );
+    String path = new File( transformTracePath, ruleName ).toString();
+    transformed.writeDOTs( path );
+
+    markTransformed( transformed, path );
+    }
+
+  private void markTransformed( Transformed transformed, String path )
+    {
+    if( transformed.getEndGraph() != null && !transformed.getBeginGraph().equals( transformed.getEndGraph() ) )
+      markFolder( path, GREEN );
     }
 
   void writePlan( FlowElementGraph flowElementGraph, String name )
@@ -189,6 +233,69 @@ public class TraceWriter
         }
 
       stepCount++;
+      }
+    }
+
+  private void markFolder( String path, String color )
+    {
+    if( !IS_OSX )
+      return;
+
+    if( color == null )
+      return;
+
+    // xattr -wx com.apple.FinderInfo 0000000000000000000400000000000000000000000000000000000000000000 child-0-ContractedGraphTransformer
+
+    File file = new File( path );
+
+    File parentFile = file.getParentFile();
+    String name = file.getName();
+
+    try
+      {
+      String[] command = {
+        "xattr",
+        "-wx",
+        "com.apple.FinderInfo",
+        color,
+        name
+      };
+
+      String commandLine = join( command, " " );
+
+      LOG.debug( "command: {}", commandLine );
+
+      Process process = Runtime.getRuntime().exec( commandLine, null, parentFile );
+
+      process.waitFor();
+
+      BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+
+      String line = reader.readLine();
+
+      while( line != null )
+        {
+        LOG.warn( "xattr stdout returned: {}", line );
+        line = reader.readLine();
+        }
+
+      reader = new BufferedReader( new InputStreamReader( process.getErrorStream() ) );
+
+      line = reader.readLine();
+
+      while( line != null )
+        {
+        LOG.warn( "xattr stderr returned: {}", line );
+        line = reader.readLine();
+        }
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to exec xattr", exception );
+      }
+    catch( InterruptedException exception )
+      {
+      LOG.warn( "exec xattr interrupted", exception );
       }
     }
   }

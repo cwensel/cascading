@@ -22,7 +22,6 @@ package cascading.flow.planner.rule;
 
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.assertion.GraphAssert;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.SubGraphTransformer;
@@ -77,18 +76,15 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
   @Override
   protected ElementGraph prepareForMatch( PlannerContext plannerContext, ElementGraph graph )
     {
+    Transformed transformed = null;
+
     if( contractedTransformer != null )
-      {
-      Transformed<ElementGraph> transformed = contractedTransformer.transform( plannerContext, graph );
-
-      graph = transformed.getEndGraph();
-      }
+      transformed = contractedTransformer.transform( plannerContext, graph );
     else if( subGraphTransformer != null )
-      {
-      Transformed<ElementSubGraph> transformed = subGraphTransformer.transform( plannerContext, graph );
+      transformed = subGraphTransformer.transform( plannerContext, graph );
 
-      graph = transformed.getEndGraph();
-      }
+    if( transformed != null && transformed.getEndGraph() != null )
+      transformed.getEndGraph();
 
     return graph;
     }

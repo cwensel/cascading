@@ -44,7 +44,6 @@ import cascading.flow.planner.iso.assertion.GraphAssert;
 import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
-import cascading.pipe.Pipe;
 import cascading.util.EnumMultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,7 +317,7 @@ public class RuleExec
     if( primary == null )
       return;
 
-    throw new PlannerException( (Pipe) asserted.getFirstAnchor(), asserted.getMessage() );
+    throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
     }
 
   private void performAssemblyTransform( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, GraphTransformer transformer )
