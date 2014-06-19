@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Updated Apache Hadoop to 2.4.1 in cascading-hadoop2-mr1.
+
 2.5.5
 
   Added new c.t.p.BasePartitionTap property to control to control the behaviour in case of an Exception while closing a
