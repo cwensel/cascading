@@ -22,27 +22,33 @@ package cascading.flow.planner.iso.expression;
 
 import cascading.flow.planner.Extent;
 import cascading.pipe.Boundary;
-import cascading.pipe.Checkpoint;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
+import cascading.pipe.Merge;
 import cascading.tap.Tap;
 
 import static cascading.flow.planner.iso.expression.NotElementExpression.not;
+import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
 /**
  *
  */
-public class SyncPipeExpressionGraph extends ExpressionGraph
+public class NoGroupJoinMergeBoundaryTapExpressionGraph extends ExpressionGraph
   {
-  public SyncPipeExpressionGraph()
+  public NoGroupJoinMergeBoundaryTapExpressionGraph()
     {
-    super( new AndElementExpression(
-      ElementExpression.Capture.Primary,
-      not( new FlowElementExpression( Extent.class ) ),
-      not( new FlowElementExpression( Tap.class ) ),
-      not( new FlowElementExpression( Boundary.class ) ),
-      not( new FlowElementExpression( Checkpoint.class ) ),
-      not( new FlowElementExpression( Group.class ) ),
-      not( new FlowElementExpression( HashJoin.class ) ) ) );
+    super(
+      not(
+        or(
+          ElementExpression.Capture.Primary,
+          new FlowElementExpression( Extent.class ),
+          new FlowElementExpression( Group.class ),
+          new FlowElementExpression( HashJoin.class ),
+          new FlowElementExpression( Merge.class ),
+          new FlowElementExpression( Boundary.class ),
+          new FlowElementExpression( Tap.class )
+        )
+      )
+    );
     }
   }

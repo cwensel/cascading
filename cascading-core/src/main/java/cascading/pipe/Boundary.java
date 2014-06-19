@@ -18,25 +18,14 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.transformer;
-
-import cascading.flow.hadoop.planner.rule.expression.BalanceGroupMergeGroupExpression;
-import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
-import cascading.flow.planner.rule.transformer.TapElementFactory;
-
-import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
+package cascading.pipe;
 
 /**
  *
  */
-public class BalanceGroupMergeGroupTransformer extends RuleInsertionTransformer
+public class Boundary extends Pipe
   {
-  public BalanceGroupMergeGroupTransformer()
+  public Boundary()
     {
-    super(
-      BalanceAssembly,
-      new BalanceGroupMergeGroupExpression(),
-      TapElementFactory.TEMP_TAP
-    );
     }
   }

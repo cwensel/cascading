@@ -69,9 +69,9 @@ public class FindSubGraphTest extends TestCase
     result.addVertex( "b" );
     result.addVertex( "c" );
     result.addEdge( "a", "b", full.getEdge( "a", "b" ) );
-    result.addEdge( "b", "c",full.getEdge( "b", "c" ) );
+    result.addEdge( "b", "c", full.getEdge( "b", "c" ) );
     result.addEdge( "1", "0", full.getEdge( "1", "0" ) );
-    result.addEdge( "0", "c",full.getEdge( "0", "c" ) );
+    result.addEdge( "0", "c", full.getEdge( "0", "c" ) );
 
     assertGraphs( full, contracted, result );
     }
@@ -107,7 +107,7 @@ public class FindSubGraphTest extends TestCase
     result.addVertex( "b" );
     result.addVertex( "c" );
     result.addEdge( "a", "b", full.getEdge( "a", "b" ) );
-    result.addEdge( "b", "c",full.getEdge( "b", "c" ) );
+    result.addEdge( "b", "c", full.getEdge( "b", "c" ) );
 
     assertGraphs( full, contracted, result );
     }
@@ -152,7 +152,7 @@ public class FindSubGraphTest extends TestCase
     result.addEdge( "A", "1", full.getEdge( "A", "1" ) );
     result.addEdge( "A", "a", full.getEdge( "A", "a" ) );
     result.addEdge( "a", "b", full.getEdge( "a", "b" ) );
-    result.addEdge( "b", "c",full.getEdge( "b", "c" ) );
+    result.addEdge( "b", "c", full.getEdge( "b", "c" ) );
 
     assertGraphs( full, contracted, result );
     }
@@ -205,7 +205,7 @@ public class FindSubGraphTest extends TestCase
     result.addEdge( "0", "c", full.getEdge( "0", "c" ) );
     result.addEdge( "A", "a", full.getEdge( "A", "a" ) );
     result.addEdge( "a", "b", full.getEdge( "a", "b" ) );
-    result.addEdge( "b", "c",full.getEdge( "b", "c" ) );
+    result.addEdge( "b", "c", full.getEdge( "b", "c" ) );
 
     assertGraphs( full, contracted, result );
     }
@@ -213,7 +213,7 @@ public class FindSubGraphTest extends TestCase
   private void assertGraphs( SimpleDirectedGraph<String, Object> full, SimpleDirectedGraph<String, Object> contracted, SimpleDirectedGraph<String, Object> result )
     {
 //    Set<String> vertices = ElementGraphs.findClosureViaBiConnected( full, contracted );
-    Set<String> vertices = ElementGraphs.findClosureViaFloydWarshall( full, contracted );
+    Set<String> vertices = ElementGraphs.findClosureViaFloydWarshall( full, contracted ).getLhs();
 //    Set<String> vertices = ElementGraphs.findClosureViaKShortest( full, contracted );
 
     DirectedSubgraph<String, Object> subgraph = new DirectedSubgraph<>( full, vertices, null );

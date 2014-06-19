@@ -20,29 +20,31 @@
 
 package cascading.flow.planner.iso.expression;
 
-import cascading.flow.planner.Extent;
-import cascading.pipe.Boundary;
-import cascading.pipe.Checkpoint;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
-import cascading.tap.Tap;
-
-import static cascading.flow.planner.iso.expression.NotElementExpression.not;
+import cascading.pipe.Merge;
 
 /**
  *
  */
-public class SyncPipeExpressionGraph extends ExpressionGraph
+public class GroupOrMergeElementExpression extends OrElementExpression
   {
-  public SyncPipeExpressionGraph()
+  public GroupOrMergeElementExpression()
     {
-    super( new AndElementExpression(
-      ElementExpression.Capture.Primary,
-      not( new FlowElementExpression( Extent.class ) ),
-      not( new FlowElementExpression( Tap.class ) ),
-      not( new FlowElementExpression( Boundary.class ) ),
-      not( new FlowElementExpression( Checkpoint.class ) ),
-      not( new FlowElementExpression( Group.class ) ),
-      not( new FlowElementExpression( HashJoin.class ) ) ) );
+    super( new FlowElementExpression( Group.class ), new FlowElementExpression( Merge.class ) );
+    }
+
+  public GroupOrMergeElementExpression( TypeExpression.Topo topo )
+    {
+    super( new FlowElementExpression( Group.class, topo ), new FlowElementExpression( Merge.class, topo ) );
+    }
+
+  public GroupOrMergeElementExpression( Capture capture )
+    {
+    super( capture, new FlowElementExpression( Group.class ), new FlowElementExpression( Merge.class ) );
+    }
+
+  public GroupOrMergeElementExpression( Capture capture, TypeExpression.Topo topo )
+    {
+    super( capture, new FlowElementExpression( Group.class, topo ), new FlowElementExpression( Merge.class, topo ) );
     }
   }

@@ -168,5 +168,4 @@ public class Transformed<E extends ElementGraph> extends GraphResult
 
     writeEndGraph( path, count );
     }
-
   }

@@ -18,33 +18,25 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.iso.expression;
+package cascading.flow.hadoop.planner.rule.transformer;
 
-import cascading.flow.planner.Extent;
-import cascading.pipe.Group;
-import cascading.pipe.Merge;
-import cascading.tap.Tap;
+import cascading.flow.hadoop.planner.rule.expression.BalanceGroupSplitMergeGroupExpression;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.transformer.TapElementFactory;
 
-import static cascading.flow.planner.iso.expression.NotElementExpression.not;
-import static cascading.flow.planner.iso.expression.OrElementExpression.or;
+import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  *
  */
-public class NoGroupMergeTapExpressionGraph extends ExpressionGraph
+public class TapBalanceGroupSplitMergeGroupTransformer extends RuleInsertionTransformer
   {
-  public NoGroupMergeTapExpressionGraph()
+  public TapBalanceGroupSplitMergeGroupTransformer()
     {
     super(
-      not(
-        or(
-          ElementExpression.Capture.Primary,
-          new FlowElementExpression( Extent.class ),
-          new FlowElementExpression( Group.class ),
-          new FlowElementExpression( Merge.class ),
-          new FlowElementExpression( Tap.class )
-        )
-      )
+      BalanceAssembly,
+      new BalanceGroupSplitMergeGroupExpression(),
+      TapElementFactory.TEMP_TAP
     );
     }
   }

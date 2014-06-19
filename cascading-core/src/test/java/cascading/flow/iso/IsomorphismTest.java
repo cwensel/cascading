@@ -200,7 +200,6 @@ public class IsomorphismTest extends CascadingTestCase
 
       count++;
       }
-
     }
 
   @Test

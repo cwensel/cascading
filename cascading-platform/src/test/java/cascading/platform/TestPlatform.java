@@ -89,6 +89,11 @@ public abstract class TestPlatform
     return false;
     }
 
+  public boolean isDAG()
+    {
+    return false;
+    }
+
   public int getNumMappers()
     {
     return numMappers;

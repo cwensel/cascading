@@ -18,25 +18,29 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.transformer;
+package cascading.flow.planner.iso.expression;
 
-import cascading.flow.hadoop.planner.rule.expression.BalanceGroupBlockingHashJoinExpression;
-import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
-import cascading.flow.planner.rule.transformer.TapElementFactory;
+import cascading.flow.planner.Extent;
+import cascading.tap.Tap;
 
-import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
+import static cascading.flow.planner.iso.expression.NotElementExpression.not;
+import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
 /**
  *
  */
-public class BalanceGroupBlockingHashJoinTransformer extends RuleInsertionTransformer
+public class NoTapExpressionGraph extends ExpressionGraph
   {
-  public BalanceGroupBlockingHashJoinTransformer()
+  public NoTapExpressionGraph()
     {
     super(
-      BalanceAssembly,
-      new BalanceGroupBlockingHashJoinExpression(),
-      TapElementFactory.TEMP_TAP
+      not(
+        or(
+          ElementExpression.Capture.Primary,
+          new FlowElementExpression( Extent.class ),
+          new FlowElementExpression( Tap.class )
+        )
+      )
     );
     }
   }

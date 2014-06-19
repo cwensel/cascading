@@ -25,6 +25,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
+import cascading.flow.planner.iso.transformer.Transformed;
 
 /**
  * TODO: add level for warning or error, and fail on errors
@@ -40,14 +41,22 @@ public abstract class GraphAssert<E extends ElementGraph>
     this.message = message;
     }
 
-  protected abstract E prepareForMatch( PlannerContext plannerContext, E graph );
+  protected abstract Transformed transform( PlannerContext plannerContext, E graph );
 
   public Asserted assertion( PlannerContext plannerContext, E graph )
     {
-    graph = prepareForMatch( plannerContext, graph );
+    Transformed<E> transform = transform( plannerContext, graph );
+
+    if( transform != null && transform.getEndGraph() != null )
+      graph = transform.getEndGraph();
 
     Match match = finder.findFirstMatch( plannerContext, graph );
 
-    return new Asserted( graph, message, match );
+    Asserted asserted = new Asserted( plannerContext, this, graph, message, match );
+
+    if( transform != null )
+      asserted.addChildTransform( transform );
+
+    return asserted;
     }
   }

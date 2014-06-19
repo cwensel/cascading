@@ -74,7 +74,7 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
     }
 
   @Override
-  protected ElementGraph prepareForMatch( PlannerContext plannerContext, ElementGraph graph )
+  protected Transformed<ElementGraph> transform( PlannerContext plannerContext, ElementGraph graph )
     {
     Transformed transformed = null;
 
@@ -83,9 +83,6 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
     else if( subGraphTransformer != null )
       transformed = subGraphTransformer.transform( plannerContext, graph );
 
-    if( transformed != null && transformed.getEndGraph() != null )
-      transformed.getEndGraph();
-
-    return graph;
+    return transformed;
     }
   }

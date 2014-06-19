@@ -233,7 +233,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
   /**
    * Specifically tests GroupBy will return the correct grouping fields to the following Every
-   *
+   * <p/>
    * additionally tests secondary sorting during merging
    *
    * @throws Exception
@@ -255,7 +255,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     sources.put( "upper", sourceUpper );
     sources.put( "offset", sourceLowerOffset );
 
-    Tap sink = getPlatform().getDelimitedFile(Fields.ALL, "\t", getOutputPath( "simplemergethree" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, "\t", getOutputPath( "simplemergethree" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -538,6 +538,11 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
   //
 
+  /*
+   *
+   * TODO: create (optional) Tez rule to consolidate into a single DAG. currently renders to two DAGs, one for each side
+   *
+   */
   @Test
   public void testSplit() throws Exception
     {

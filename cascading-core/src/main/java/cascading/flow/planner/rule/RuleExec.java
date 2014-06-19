@@ -291,7 +291,7 @@ public class RuleExec
         if( rule instanceof GraphTransformer )
           performNodePipelineTransform( phase, context, plannerContext, (GraphTransformer) rule );
         else if( rule instanceof GraphAssert )
-          performNodePipelineAssertion( plannerContext, context, (GraphAssert) rule );
+          performNodePipelineAssertion( phase, context, plannerContext, (GraphAssert) rule );
 
         break;
 
@@ -447,6 +447,7 @@ public class RuleExec
         Map<ElementGraph, EnumMultiMap> resultPipelines = new LinkedHashMap<>( pipelineGraphs.size() );
 
         int pipelineCount = 0;
+
         for( ElementGraph pipelineGraph : pipelineGraphs )
           {
           Transformed transformed = transformer.transform( plannerContext, pipelineGraph );
@@ -469,24 +470,35 @@ public class RuleExec
     context.ruleResult.setNodePipelineGraphResults( results );
     }
 
-  private void performNodePipelineAssertion( PlannerContext plannerContext, PhaseContext context, GraphAssert rule )
+  private void performNodePipelineAssertion( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphAssert rule )
     {
     LOG.debug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
+
+    int ruleOrdinal = context.addRule( (Rule) rule );
 
     Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = context.ruleResult.getNodeSubGraphResults();
     Map<ElementGraph, List<ElementGraph>> nodePipelineGraphs = context.ruleResult.getNodePipelineGraphResults();
 
+    int stepCount = 0;
+
     for( Map.Entry<ElementGraph, List<ElementGraph>> stepEntry : nodeSubGraphs.entrySet() )
       {
+      int nodeCount = 0;
+
       List<ElementGraph> nodeGraphs = stepEntry.getValue();
 
       for( ElementGraph nodeGraph : nodeGraphs )
         {
+
+        int pipelineCount = 0;
+
         List<ElementGraph> pipelineGraphs = nodePipelineGraphs.get( nodeGraph );
 
         for( ElementGraph pipelineGraph : pipelineGraphs )
           {
           Asserted asserted = rule.assertion( plannerContext, pipelineGraph );
+
+          traceWriter.writePlan( phase, ruleOrdinal, stepCount, nodeCount, pipelineCount++, asserted );
 
           FlowElement primary = asserted.getFirstAnchor();
 

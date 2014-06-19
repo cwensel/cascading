@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.transformer;
 
-import cascading.flow.hadoop.planner.rule.expression.BalanceNonSafeSplitExpression;
+import cascading.flow.hadoop.planner.rule.expression.BalanceGroupGroupExpression;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.flow.planner.rule.transformer.TapElementFactory;
 
@@ -29,13 +29,13 @@ import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 /**
  *
  */
-public class BalanceNonSafeSplitTransformer extends RuleInsertionTransformer
+public class TapBalanceGroupGroupTransformer extends RuleInsertionTransformer
   {
-  public BalanceNonSafeSplitTransformer()
+  public TapBalanceGroupGroupTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceNonSafeSplitExpression(),
+      new BalanceGroupGroupExpression(),
       TapElementFactory.TEMP_TAP
     );
     }

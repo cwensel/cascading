@@ -1880,7 +1880,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       .addSource( lhs, lhsTap )
       .addTailSink( counted, sink );
 
-    boolean failOnMR = getPlatform().isMapReduce();
+    boolean failOnMR = getPlatform().isMapReduce() || getPlatform().isDAG();
 
     Flow flow = null;
 
@@ -1889,7 +1889,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       flow = getPlatform().getFlowConnector().connect( flowDef );
 
       if( failOnMR )
-        fail( "planner should throw errro on plan" );
+        fail( "planner should throw error on plan" );
       }
     catch( Exception exception )
       {

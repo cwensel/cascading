@@ -29,6 +29,7 @@ import java.util.Map;
 
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.Transformed;
 import org.slf4j.Logger;
@@ -122,6 +123,27 @@ public class TraceWriter
       color = GREEN;
 
     markFolder( path, color );
+    }
+
+  void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Asserted asserted )
+    {
+    if( transformTracePath == null )
+      return;
+
+    String ruleName = asserted.getRuleName();
+
+    ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, pipelineOrdinal, ruleName );
+
+    String path = new File( transformTracePath, ruleName ).toString();
+    asserted.writeDOTs( path );
+
+    markAsserted( asserted, path );
+    }
+
+  private void markAsserted( Asserted asserted, String path )
+    {
+    if( asserted.getFirstAnchor() != null )
+      markFolder( path, RED );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Transformed transformed )

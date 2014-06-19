@@ -53,6 +53,7 @@ import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
+import cascading.util.Pair;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.DirectedGraph;
@@ -266,31 +267,38 @@ public class ElementGraphs
 
   public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph )
     {
-    return new ElementSubGraph( elementGraph, findClosureViaFloydWarshall( elementGraph, contractedGraph ) );
+    Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( elementGraph, contractedGraph );
+    Set<FlowElement> vertices = pair.getLhs();
+    Set<Scope> excludeEdges = pair.getRhs();
+
+    Set<Scope> scopes = new HashSet<>( elementGraph.edgeSet() );
+    scopes.removeAll( excludeEdges );
+
+    return new ElementSubGraph( elementGraph, vertices, scopes );
     }
 
-  public static <V, E> Set<V> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
+  public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
     {
     Set<V> vertices = new HashSet<>( contracted.vertexSet() );
     LinkedList<V> allVertices = new LinkedList<>( full.vertexSet() );
 
     allVertices.removeAll( vertices );
 
-    Set<E> edges = new HashSet<>();
+    Set<E> excludeEdges = new HashSet<>();
 
     for( V v : contracted.vertexSet() )
       {
       if( contracted.inDegreeOf( v ) == 0 )
-        edges.addAll( full.incomingEdgesOf( v ) );
+        excludeEdges.addAll( full.incomingEdgesOf( v ) );
       }
 
     for( V v : contracted.vertexSet() )
       {
       if( contracted.outDegreeOf( v ) == 0 )
-        edges.addAll( full.outgoingEdgesOf( v ) );
+        excludeEdges.addAll( full.outgoingEdgesOf( v ) );
       }
 
-    DirectedGraph<V, E> disconnected = disconnectExtents( full, edges );
+    DirectedGraph<V, E> disconnected = disconnectExtents( full, excludeEdges );
 
     FloydWarshallShortestPaths<V, E> paths = new FloydWarshallShortestPaths<>( disconnected );
 
@@ -312,7 +320,7 @@ public class ElementGraphs
         }
       }
 
-    return vertices;
+    return new Pair<>( vertices, excludeEdges );
     }
 
   private static <V, E> DirectedGraph<V, E> disconnectExtents( DirectedGraph<V, E> full, Set<E> withoutEdges )

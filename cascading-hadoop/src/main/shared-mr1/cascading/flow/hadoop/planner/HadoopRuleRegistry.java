@@ -29,20 +29,20 @@ import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsPip
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedSelfJoinSourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceCheckpointTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupBlockingHashJoinTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupGroupTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupMergeGroupTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupNonBlockingHashJoinTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupSplitMergeGroupTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceGroupSplitTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceHashJoinBlockingHashJoinTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceHashJoinSameSourceTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceNonSafePipeSplitTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceNonSafeSplitTransformer;
-import cascading.flow.hadoop.planner.rule.transformer.BalanceSameSourceStreamedAccumulatedTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.CombineAdjacentTapTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.RemoveMalformedHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceCheckpointTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupMergeGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupNonBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitMergeGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceHashJoinBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceHashJoinSameSourceTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceNonSafePipeSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceNonSafeSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceSameSourceStreamedAccumulatedTransformer;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.assertion.BufferAfterEveryAssert;
 import cascading.flow.planner.rule.assertion.EveryAfterBufferAssert;
@@ -69,19 +69,19 @@ public class HadoopRuleRegistry extends RuleRegistry
     addRule( new EveryAfterBufferAssert() );
     addRule( new SplitBeforeEveryAssert() );
 
-    // Balance
-    addRule( new BalanceGroupSplitTransformer() );
-    addRule( new BalanceGroupSplitMergeGroupTransformer() );
-    addRule( new BalanceGroupMergeGroupTransformer() );
-    addRule( new BalanceGroupGroupTransformer() );
-    addRule( new BalanceCheckpointTransformer() );
-    addRule( new BalanceHashJoinSameSourceTransformer() );
-    addRule( new BalanceHashJoinBlockingHashJoinTransformer() );
-    addRule( new BalanceGroupBlockingHashJoinTransformer() );
-    addRule( new BalanceGroupNonBlockingHashJoinTransformer() );
-    addRule( new BalanceSameSourceStreamedAccumulatedTransformer() );
-    addRule( new BalanceNonSafeSplitTransformer() );
-    addRule( new BalanceNonSafePipeSplitTransformer() );
+    // Balance with temporary Taps
+    addRule( new TapBalanceGroupSplitTransformer() );
+    addRule( new TapBalanceGroupSplitMergeGroupTransformer() );
+    addRule( new TapBalanceGroupMergeGroupTransformer() );
+    addRule( new TapBalanceGroupGroupTransformer() );
+    addRule( new TapBalanceCheckpointTransformer() );
+    addRule( new TapBalanceHashJoinSameSourceTransformer() );
+    addRule( new TapBalanceHashJoinBlockingHashJoinTransformer() );
+    addRule( new TapBalanceGroupBlockingHashJoinTransformer() );
+    addRule( new TapBalanceGroupNonBlockingHashJoinTransformer() );
+    addRule( new TapBalanceSameSourceStreamedAccumulatedTransformer() );
+    addRule( new TapBalanceNonSafeSplitTransformer() );
+    addRule( new TapBalanceNonSafePipeSplitTransformer() );
 
     // PreResolve
     addRule( new RemoveNoOpPipeTransformer() );

@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.transformer;
 
-import cascading.flow.hadoop.planner.rule.expression.BalanceNonSafePipeSplitExpression;
+import cascading.flow.hadoop.planner.rule.expression.BalanceSameSourceStreamedAccumulatedExpression;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.flow.planner.rule.transformer.TapElementFactory;
 
@@ -29,13 +29,13 @@ import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 /**
  *
  */
-public class BalanceNonSafePipeSplitTransformer extends RuleInsertionTransformer
+public class TapBalanceSameSourceStreamedAccumulatedTransformer extends RuleInsertionTransformer
   {
-  public BalanceNonSafePipeSplitTransformer()
+  public TapBalanceSameSourceStreamedAccumulatedTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceNonSafePipeSplitExpression(),
+      new BalanceSameSourceStreamedAccumulatedExpression(),
       TapElementFactory.TEMP_TAP
     );
     }
