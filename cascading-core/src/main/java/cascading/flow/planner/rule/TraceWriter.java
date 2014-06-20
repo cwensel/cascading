@@ -20,10 +20,7 @@
 
 package cascading.flow.planner.rule;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -32,15 +29,13 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.Transformed;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static cascading.util.Util.join;
 
 public class TraceWriter
   {
   private static final Logger LOG = LoggerFactory.getLogger( TraceWriter.class );
-  private static final boolean IS_OSX = System.getProperty( "os.name" ).toLowerCase().contains( "Mac OS X".toLowerCase() );
 
   public static final String GREEN = "0000000000000000000400000000000000000000000000000000000000000000";
   public static final String ORANGE = "0000000000000000000E00000000000000000000000000000000000000000000";
@@ -260,7 +255,7 @@ public class TraceWriter
 
   private void markFolder( String path, String color )
     {
-    if( !IS_OSX )
+    if( !Util.IS_OSX )
       return;
 
     if( color == null )
@@ -273,51 +268,14 @@ public class TraceWriter
     File parentFile = file.getParentFile();
     String name = file.getName();
 
-    try
-      {
-      String[] command = {
-        "xattr",
-        "-wx",
-        "com.apple.FinderInfo",
-        color,
-        name
-      };
+    String[] command = {
+      "xattr",
+      "-wx",
+      "com.apple.FinderInfo",
+      color,
+      name
+    };
 
-      String commandLine = join( command, " " );
-
-      LOG.debug( "command: {}", commandLine );
-
-      Process process = Runtime.getRuntime().exec( commandLine, null, parentFile );
-
-      process.waitFor();
-
-      BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
-
-      String line = reader.readLine();
-
-      while( line != null )
-        {
-        LOG.warn( "xattr stdout returned: {}", line );
-        line = reader.readLine();
-        }
-
-      reader = new BufferedReader( new InputStreamReader( process.getErrorStream() ) );
-
-      line = reader.readLine();
-
-      while( line != null )
-        {
-        LOG.warn( "xattr stderr returned: {}", line );
-        line = reader.readLine();
-        }
-      }
-    catch( IOException exception )
-      {
-      LOG.warn( "unable to exec xattr", exception );
-      }
-    catch( InterruptedException exception )
-      {
-      LOG.warn( "exec xattr interrupted", exception );
-      }
+    Util.execProcess( parentFile, command );
     }
   }

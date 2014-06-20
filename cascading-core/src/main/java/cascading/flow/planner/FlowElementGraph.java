@@ -456,7 +456,10 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
   @Override
   public void writeDOT( String filename )
     {
-    ElementGraphs.printElementGraph( filename, this.copyWithTraps(), platformInfo );
+    boolean success = ElementGraphs.printElementGraph( filename, this.copyWithTraps(), platformInfo );
+
+    if( success )
+      Util.writePDF( filename );
     }
 
   /** Method resolveFields performs a breadth first traversal and resolves the tuple fields between each Pipe instance. */

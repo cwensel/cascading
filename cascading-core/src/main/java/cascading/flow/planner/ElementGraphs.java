@@ -435,7 +435,7 @@ public class ElementGraphs
     elementGraph.removeVertex( flowElement );
     }
 
-  public static void printElementGraph( String filename, final DirectedGraph<FlowElement, Scope> graph, final PlatformInfo platformInfo )
+  public static boolean printElementGraph( String filename, final DirectedGraph<FlowElement, Scope> graph, final PlatformInfo platformInfo )
     {
     try
       {
@@ -453,11 +453,14 @@ public class ElementGraphs
         new VertexAttributeProvider(), new EdgeAttributeProvider() );
 
       writer.close();
+      return true;
       }
     catch( IOException exception )
       {
       LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
+
+    return false;
     }
 
   public static void insertFlowElementAfter( ElementGraph elementGraph, FlowElement previousElement, FlowElement flowElement )

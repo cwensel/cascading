@@ -28,6 +28,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
+import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DirectedMaskSubgraph;
 import org.jgrapht.graph.MaskFunctor;
@@ -95,6 +96,9 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
   @Override
   public void writeDOT( String filename )
     {
-    ElementGraphs.printElementGraph( filename, this, null );
+    boolean success = ElementGraphs.printElementGraph( filename, this, null );
+
+    if( success )
+      Util.writePDF( filename );
     }
   }

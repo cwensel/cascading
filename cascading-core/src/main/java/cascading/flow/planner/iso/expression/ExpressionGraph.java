@@ -183,6 +183,8 @@ public class ExpressionGraph
       new DOTExporter( new IntegerNameProvider(), new StringNameProvider(), new StringEdgeNameProvider() ).export( writer, getDelegate() );
 
       writer.close();
+
+      Util.writePDF( filename );
       }
     catch( IOException exception )
       {

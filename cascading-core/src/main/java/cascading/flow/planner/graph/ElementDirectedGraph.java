@@ -24,6 +24,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
+import cascading.util.Util;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -68,7 +69,10 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
   @Override
   public void writeDOT( String filename )
     {
-    ElementGraphs.printElementGraph( filename, this, null );
+    boolean success = ElementGraphs.printElementGraph( filename, this, null );
+
+    if( success )
+      Util.writePDF( filename );
     }
 
   @Override

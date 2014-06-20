@@ -20,8 +20,11 @@
 
 package cascading.util;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -71,10 +74,18 @@ import org.slf4j.LoggerFactory;
 /** Class Util provides reusable operations. */
 public class Util
   {
+  /**
+   * On OS X only, and if the graphviz dot binary is installed, when true, dot will be invoked to convert the dot file
+   * to a pdf document.
+   */
+  public static final String CONVERT_DOT_TO_PDF = "util.dot.to.pdf.enabled";
   public static int ID_LENGTH = 32;
 
   private static final Logger LOG = LoggerFactory.getLogger( Util.class );
   private static final String HEXES = "0123456789ABCDEF";
+
+  public static final boolean IS_OSX = System.getProperty( "os.name" ).toLowerCase().contains( "Mac OS X".toLowerCase() );
+  public static final boolean HAS_DOT_EXEC = IS_OSX && Boolean.getBoolean( CONVERT_DOT_TO_PDF ) && hasDOT();
 
   public static <K, V> HashMap<K, V> createHashMap()
     {
@@ -834,6 +845,67 @@ public class Util
       {
       // do nothing
       }
+    }
+
+  public static void writePDF( String path )
+    {
+    if( !HAS_DOT_EXEC )
+      return;
+
+    // dot *.dot -Tpdf -O -Nshape=box
+    File file = new File( path );
+    execProcess( file.getParentFile(), "dot", file.getName(), "-Tpdf", "-O" );
+    }
+
+  static boolean hasDOT()
+    {
+    return execProcess( null, "which", "dot" ) == 0;
+    }
+
+  public static int execProcess( File parentFile, String... command )
+    {
+    try
+      {
+      String commandLine = join( command, " " );
+
+      LOG.debug( "command: {}", commandLine );
+
+      Process process = Runtime.getRuntime().exec( commandLine, null, parentFile );
+
+      int result = process.waitFor();
+
+      BufferedReader reader = new BufferedReader( new InputStreamReader( process.getInputStream() ) );
+
+      String line = reader.readLine();
+
+      while( line != null )
+        {
+        LOG.warn( "{} stdout returned: {}", command[ 0 ], line );
+        line = reader.readLine();
+        }
+
+      reader = new BufferedReader( new InputStreamReader( process.getErrorStream() ) );
+
+      line = reader.readLine();
+
+      while( line != null )
+        {
+        LOG.warn( "{} stderr returned: {}", command[ 0 ], line );
+        line = reader.readLine();
+        }
+
+      return result;
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to exec " + command[ 0 ], exception );
+      }
+    catch( InterruptedException exception )
+      {
+      LOG.warn( "interrupted exec " + command[ 0 ], exception );
+      }
+
+    return Integer.MIN_VALUE;
     }
 
   public interface RetryOperator<T>
