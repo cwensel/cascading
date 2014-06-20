@@ -29,7 +29,6 @@ import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsPip
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedSelfJoinSourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
-import cascading.flow.hadoop.planner.rule.transformer.CombineAdjacentTapTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.RemoveMalformedHashJoinTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceCheckpointTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupBlockingHashJoinTransformer;
@@ -89,7 +88,7 @@ public class HadoopRuleRegistry extends RuleRegistry
     addRule( new ApplyDebugLevelTransformer() );
 
     // PostResolve
-    addRule( new CombineAdjacentTapTransformer() );
+//    addRule( new CombineAdjacentTapTransformer() );
 
     // PartitionSteps
     addRule( new ConsecutiveTapsStepPartitioner() );
