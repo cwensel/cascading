@@ -192,4 +192,27 @@ public abstract class MultiMap<C extends Collection<V>, K, V> implements Seriali
     sb.append( '}' );
     return sb.toString();
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+
+    if( !( object instanceof MultiMap ) )
+      return false;
+
+    MultiMap multiMap = (MultiMap) object;
+
+    if( map != null ? !map.equals( multiMap.map ) : multiMap.map != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    return map != null ? map.hashCode() : 0;
+    }
   }
