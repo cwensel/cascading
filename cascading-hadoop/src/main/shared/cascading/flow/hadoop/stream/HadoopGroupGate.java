@@ -29,6 +29,7 @@ import cascading.flow.hadoop.HadoopGroupByClosure;
 import cascading.flow.stream.Duct;
 import cascading.flow.stream.DuctException;
 import cascading.flow.stream.GroupingSpliceGate;
+import cascading.flow.stream.IORole;
 import cascading.flow.stream.StreamGraph;
 import cascading.pipe.Splice;
 import cascading.pipe.joiner.BufferJoin;
@@ -46,7 +47,7 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
   protected HadoopGroupByClosure closure;
   protected OutputCollector collector;
 
-  public HadoopGroupGate( FlowProcess flowProcess, Splice splice, Role role )
+  public HadoopGroupGate( FlowProcess flowProcess, Splice splice, IORole role )
     {
     super( flowProcess, splice, role );
     }
@@ -54,20 +55,20 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
   @Override
   public void bind( StreamGraph streamGraph )
     {
-    if( role != Role.sink )
+    if( role != IORole.sink )
       next = getNextFor( streamGraph );
 
-    if( role == Role.sink )
+    if( role == IORole.sink )
       setOrdinalMap( streamGraph );
     }
 
   @Override
   public void prepare()
     {
-    if( role != Role.source )
+    if( role != IORole.source )
       collector = new MeasuredOutputCollector( flowProcess, SliceCounters.Write_Duration, createOutputCollector() );
 
-    if( role != Role.sink )
+    if( role != IORole.sink )
       closure = createClosure();
 
     if( grouping != null && splice.getJoinDeclaredFields() != null && splice.getJoinDeclaredFields().isNone() )

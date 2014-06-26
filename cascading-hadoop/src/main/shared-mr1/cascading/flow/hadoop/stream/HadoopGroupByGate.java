@@ -24,6 +24,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.HadoopGroupByClosure;
 import cascading.flow.stream.Duct;
+import cascading.flow.stream.IORole;
 import cascading.pipe.GroupBy;
 import cascading.tuple.Tuple;
 import cascading.tuple.io.TuplePair;
@@ -34,7 +35,7 @@ import org.apache.hadoop.mapred.OutputCollector;
  */
 public class HadoopGroupByGate extends HadoopGroupGate
   {
-  public HadoopGroupByGate( FlowProcess flowProcess, GroupBy groupBy, Role role )
+  public HadoopGroupByGate( FlowProcess flowProcess, GroupBy groupBy, IORole role )
     {
     super( flowProcess, groupBy, role );
     }

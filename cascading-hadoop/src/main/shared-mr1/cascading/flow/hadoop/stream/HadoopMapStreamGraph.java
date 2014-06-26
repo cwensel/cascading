@@ -33,6 +33,7 @@ import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowNode;
 import cascading.flow.stream.Gate;
 import cascading.flow.stream.GroupingSpliceGate;
+import cascading.flow.stream.IORole;
 import cascading.flow.stream.NodeStreamGraph;
 import cascading.flow.stream.SinkStage;
 import cascading.flow.stream.SourceStage;
@@ -129,13 +130,13 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     }
 
   @Override
-  protected Gate createCoGroupGate( CoGroup element, GroupingSpliceGate.Role role )
+  protected Gate createCoGroupGate( CoGroup element, IORole role )
     {
-    return new HadoopCoGroupGate( flowProcess, element, GroupingSpliceGate.Role.sink );
+    return new HadoopCoGroupGate( flowProcess, element, IORole.sink );
     }
 
   @Override
-  protected Gate createGroupByGate( GroupBy element, GroupingSpliceGate.Role role )
+  protected Gate createGroupByGate( GroupBy element, IORole role )
     {
     return new HadoopGroupByGate( flowProcess, element, role );
     }
