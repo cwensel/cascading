@@ -140,6 +140,12 @@ public class RuleExec
 
   private void resolveElements( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult, FlowElementGraph elementGraph )
     {
+    if( !registry.enabledResolveElements() )
+      {
+      ruleResult.setAssemblyResults( phase, elementGraph );
+      return;
+      }
+
     elementGraph.resolveFields();
     ( (BaseFlow) plannerContext.getFlow() ).updateSchemes( elementGraph );
 
@@ -182,7 +188,7 @@ public class RuleExec
 
     }
 
-  public FlowElementGraph executePhase( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult, FlowElementGraph flowElementGraph )
+  public RuleResult executePhase( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult, FlowElementGraph flowElementGraph )
     {
     LOG.debug( "executing plan phase: {}", phase );
 
@@ -235,7 +241,7 @@ public class RuleExec
         ruleResult.setRuleDuration( phase, rule, begin, end );
         }
 
-      return flowElementGraph;
+      return context.ruleResult;
       }
     finally
       {

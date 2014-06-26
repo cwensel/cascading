@@ -28,12 +28,19 @@ import cascading.flow.planner.Scope;
  */
 public abstract class ScopeExpression implements Expression<Scope>
   {
+  /**
+   * Where this expression applies between ANY edge between two nodes.
+   */
   public static final PathScopeExpression ANY = new PathScopeExpression( Applies.Any );
+  /**
+   * Where this expression applies between ALL edges between two nodes.
+   */
   public static final PathScopeExpression ALL = new PathScopeExpression( Applies.All );
+  public static final PathScopeExpression EACH = new PathScopeExpression( Applies.Each ); // unsupported
 
   public enum Applies
     {
-      Any, All
+      Any, All, Each
     }
 
   protected Applies applies = Applies.Any;
@@ -52,9 +59,14 @@ public abstract class ScopeExpression implements Expression<Scope>
     return applies == Applies.All;
     }
 
-  public boolean appliesToAnyPaths()
+  public boolean appliesToAnyPath()
     {
     return applies == Applies.Any;
+    }
+
+  public boolean appliesToEachPath()
+    {
+    return applies == Applies.Each;
     }
 
   public boolean acceptsAll()

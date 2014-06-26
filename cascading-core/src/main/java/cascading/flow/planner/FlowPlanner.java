@@ -178,7 +178,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       ruleExec.enableTransformTracing( transformPath );
 
-      PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, transformPath );
+      PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, transformPath != null );
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 

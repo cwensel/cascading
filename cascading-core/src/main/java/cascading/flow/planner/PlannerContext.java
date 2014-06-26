@@ -40,7 +40,7 @@ public class PlannerContext
   FlowPlanner flowPlanner;
   FlowDef flowDef;
   Flow flow;
-  String tracePath;
+  private boolean isTracingEnabled = false;
 
   public PlannerContext()
     {
@@ -51,13 +51,13 @@ public class PlannerContext
     this.ruleRegistry = ruleRegistry;
     }
 
-  public PlannerContext( RuleRegistry ruleRegistry, FlowPlanner flowPlanner, FlowDef flowDef, Flow flow, String tracePath )
+  public PlannerContext( RuleRegistry ruleRegistry, FlowPlanner flowPlanner, FlowDef flowDef, Flow flow, boolean isTracingEnabled )
     {
     this.ruleRegistry = ruleRegistry;
     this.flowPlanner = flowPlanner;
     this.flowDef = flowDef;
     this.flow = flow;
-    this.tracePath = tracePath;
+    this.isTracingEnabled = isTracingEnabled;
     }
 
   public RuleRegistry getRuleRegistry()
@@ -80,14 +80,9 @@ public class PlannerContext
     return flow;
     }
 
-  public String getTracePath()
-    {
-    return tracePath;
-    }
-
   public boolean isTracingEnabled()
     {
-    return tracePath != null;
+    return isTracingEnabled;
     }
 
   public PlannerLevel getPlannerLevelFor( Class<? extends PlannerLevel> plannerLevelClass )

@@ -50,4 +50,24 @@ public class BoundariesElementExpression extends OrElementExpression
       new FlowElementExpression( Tap.class )
     );
     }
+
+  public BoundariesElementExpression( TypeExpression.Topo topo )
+    {
+    super(
+      new FlowElementExpression( Group.class, topo ),
+      new FlowElementExpression( Merge.class, topo ),
+      new FlowElementExpression( Boundary.class, topo ),
+      new FlowElementExpression( Tap.class, topo )
+    );
+    }
+
+  public BoundariesElementExpression( Capture capture, TypeExpression.Topo topo )
+    {
+    super( capture,
+      new FlowElementExpression( Group.class, topo ),
+      new FlowElementExpression( Merge.class, topo ),
+      new FlowElementExpression( Boundary.class, topo ),
+      new FlowElementExpression( Tap.class, topo )
+    );
+    }
   }

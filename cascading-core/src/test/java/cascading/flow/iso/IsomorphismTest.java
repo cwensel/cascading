@@ -22,6 +22,7 @@ package cascading.flow.iso;
 
 import cascading.CascadingTestCase;
 import cascading.flow.FlowElement;
+import cascading.flow.iso.expression.TestBoundarySelJoinCoGroupExpressionGraph;
 import cascading.flow.iso.expression.TestCheckpointExpression;
 import cascading.flow.iso.expression.TestConsecutiveTapsExpressionGraph;
 import cascading.flow.iso.expression.TestGroupGroupExpression;
@@ -35,6 +36,7 @@ import cascading.flow.iso.graph.HashJoinsIntoMerge;
 import cascading.flow.iso.graph.JoinAroundJoinRightMostGraph;
 import cascading.flow.iso.graph.JoinAroundJoinRightMostGraphSwapped;
 import cascading.flow.iso.graph.LoneGroupAssertionGraph;
+import cascading.flow.iso.graph.SelfCoGroupGraph;
 import cascading.flow.iso.graph.StandardElementGraph;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.FlowElementGraph;
@@ -43,6 +45,7 @@ import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.assertion.Asserted;
+import cascading.flow.planner.iso.expression.MultiTapGroupExpressionGraph;
 import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
 import cascading.flow.planner.iso.expression.TapGroupTapExpressionGraph;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
@@ -53,10 +56,12 @@ import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.RulePartitioner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
 import cascading.flow.planner.rule.expression.BufferAfterEveryExpression;
 import cascading.flow.planner.rule.expression.LoneGroupExpression;
+import cascading.flow.planner.rule.partitioner.WholeGraphStepPartitioner;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
 import cascading.flow.planner.rule.transformer.TapElementFactory;
@@ -137,12 +142,13 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
-    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
+    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, true );
 
     ruleRegistry.addRule( new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, new TestCheckpointExpression(), TapElementFactory.TEMP_TAP ) );
 //    ruleRegistry.addRule( new RuleContractedTransform( PlanPhase.PreResolve, new NoOpPipeExpression() ) );
 
-    FlowElementGraph flowElementGraph = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), new StandardElementGraph() );
+    RuleResult ruleResult = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), new StandardElementGraph() );
+    FlowElementGraph flowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PreResolveAssembly );
 
     SubGraphIterator iterator = new SubGraphIterator(
       new PlannerContext(),
@@ -167,7 +173,8 @@ public class IsomorphismTest extends CascadingTestCase
 
     FlowElementGraph elementGraph = new HashJoinMergeIntoHashJoinStreamedStreamedMergeGraph();
 //    FlowElementGraph elementGraph = new HashJoinAroundHashJoinLeftMostGraph();
-    FlowElementGraph flowElementGraph = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), elementGraph );
+    RuleResult ruleResult = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), elementGraph );
+    FlowElementGraph flowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PreResolveAssembly );
 
     flowElementGraph.writeDOT( getPlanPath() + "/mergejoin.dot" );
 
@@ -202,6 +209,55 @@ public class IsomorphismTest extends CascadingTestCase
       }
     }
 
+  /**
+   * Attempts to test the same tap into CoGroup 'self join' case.
+   * <p/>
+   * that is, split on the tap, then by ordinal, emit to the CoGroup so the
+   * join can be affected.
+   * <p/>
+   * In Tez, you cannot have a DAG multigraph, two edges between the same vertices.
+   * <p/>
+   * see https://issues.apache.org/jira/browse/TEZ-1190
+   */
+  @Test
+  public void testSubGraphIteratorSelfCoGroup()
+    {
+    RuleRegistry ruleRegistry = new RuleRegistry();
+
+    ruleRegistry.setResolveElementsEnabled( false );
+
+    ruleRegistry.addRule( new RemoveNoOpPipeTransformer() );
+
+    ruleRegistry.addRule( new WholeGraphStepPartitioner() );
+
+    ruleRegistry.addRule(
+      new RulePartitioner( PlanPhase.PartitionNodes,
+        new RuleExpression(
+          new TestNoGroupTapExpressionGraph(),
+          new MultiTapGroupExpressionGraph()
+        )
+      )
+    );
+
+    ruleRegistry.addRule(
+      new RulePartitioner( PlanPhase.PartitionPipelines,
+        new RuleExpression(
+          new TestNoGroupTapExpressionGraph(),
+          new TestBoundarySelJoinCoGroupExpressionGraph()
+        )
+      )
+    );
+
+    FlowElementGraph elementGraph = new SelfCoGroupGraph();
+    RuleExec ruleExec = new RuleExec( ruleRegistry );
+
+    ruleExec.enableTransformTracing( getPlanPath() );
+
+    PlannerContext plannerContext = new PlannerContext( ruleRegistry );
+
+    RuleResult ruleResult = ruleExec.exec( plannerContext, elementGraph );
+    }
+
   @Test
   public void testSubGraphIteratorHashJoinsIntoMerge()
     {
@@ -222,7 +278,8 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addRule( new RemoveNoOpPipeTransformer() );
 
-    FlowElementGraph flowElementGraph = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), elementGraph );
+    RuleResult ruleResult = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), elementGraph );
+    FlowElementGraph flowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PreResolveAssembly );
 
     flowElementGraph.writeDOT( getPlanPath() + "/node.dot" );
 
@@ -256,7 +313,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
-    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
+    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, true );
 
     ruleRegistry.addRule( new RuleAssert( PlanPhase.PreResolveAssembly, new LoneGroupExpression(), "lone group assertion" ) );
     ruleRegistry.addRule( new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, new TestGroupGroupExpression(), TapElementFactory.TEMP_TAP ) );
@@ -322,7 +379,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
-    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
+    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, true );
 
     Asserted asserted = new RuleAssert( PlanPhase.PreResolveAssembly, ruleExpression, "message" ).assertion( plannerContext, flowElementGraph );
 
@@ -337,7 +394,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addElementFactory( NonTapFactory.TEMP_TAP, new NonTapFactory() );
 
-    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, null );
+    PlannerContext plannerContext = new PlannerContext( ruleRegistry, null, null, null, true );
 
     RuleInsertionTransformer ruleTempTapInsertionTransformer = new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, ruleExpression, TapElementFactory.TEMP_TAP );
     Transformed<ElementGraph> insertionTransformed = ruleTempTapInsertionTransformer.transform( plannerContext, flowElementGraph );

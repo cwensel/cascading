@@ -27,16 +27,16 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
+import cascading.pipe.Boundary;
 import cascading.pipe.Pipe;
-import cascading.pipe.Splice;
 import cascading.tuple.TupleEntry;
 
 /**
  *
  */
-public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing> implements ElementDuct, Collapsing
+public abstract class BoundaryStage<Incoming, Outgoing> extends Stage<Incoming, Outgoing> implements ElementDuct
   {
-  protected Splice splice;
+  protected Boundary boundary;
   protected final FlowProcess flowProcess;
   protected IORole role = IORole.both;
 
@@ -46,11 +46,11 @@ public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outg
   private TrapHandler trapHandler;
   private Set<String> branchNames;
 
-  public SpliceGate( FlowProcess flowProcess, Splice splice )
+  public BoundaryStage( FlowProcess flowProcess, Boundary boundary )
     {
-    this.splice = splice;
+    this.boundary = boundary;
 
-    FlowElement element = splice;
+    FlowElement element = boundary;
 
     while( element != null )
       {
@@ -63,9 +63,9 @@ public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outg
     this.flowProcess = flowProcess;
     }
 
-  public SpliceGate( FlowProcess flowProcess, Splice splice, IORole role )
+  public BoundaryStage( FlowProcess flowProcess, Boundary boundary, IORole role )
     {
-    this.splice = splice;
+    this.boundary = boundary;
     this.flowProcess = flowProcess;
     this.role = role;
     }
@@ -117,7 +117,7 @@ public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outg
   @Override
   public FlowElement getFlowElement()
     {
-    return splice;
+    return boundary;
     }
 
   @Override

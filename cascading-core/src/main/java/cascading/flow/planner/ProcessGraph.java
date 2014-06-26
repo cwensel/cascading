@@ -227,7 +227,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
     Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
 
-    public ProcessEdge(Process sourceProcess , FlowElement flowElement, Process sinkProcess )
+    public ProcessEdge( Process sourceProcess, FlowElement flowElement, Process sinkProcess )
       {
       this.flowElement = flowElement;
       this.incomingOrdinals = createOrdinals( sinkProcess.getElementGraph().incomingEdgesOf( flowElement ) );

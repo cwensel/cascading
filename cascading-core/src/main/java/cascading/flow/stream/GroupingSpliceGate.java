@@ -72,7 +72,7 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
     super( flowProcess, splice );
     }
 
-  protected GroupingSpliceGate( FlowProcess flowProcess, Splice splice, Role role )
+  protected GroupingSpliceGate( FlowProcess flowProcess, Splice splice, IORole role )
     {
     super( flowProcess, splice, role );
     }
@@ -195,7 +195,7 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
 
     // this is a merge, all fields have the same declaration
     // filling out full array has implications on joiner/closure which should be resolved independently
-    if( role == Role.source && splice.isGroupBy() )
+    if( role == IORole.source && splice.isGroupBy() )
       size = 1;
 
     keyFields = new Fields[ size ];
@@ -244,7 +244,7 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
         }
       }
 
-    if( role == Role.sink )
+    if( role == IORole.sink )
       return;
 
     keyEntry = new TupleEntry( outgoingScope.getOutGroupingFields(), true );

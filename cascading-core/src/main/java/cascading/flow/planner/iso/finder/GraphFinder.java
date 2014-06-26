@@ -81,7 +81,7 @@ public class GraphFinder
     {
     Map<ElementExpression, FlowElement> mapping = findMapping( finderContext, plannerContext, elementGraph );
 
-    return new Match( matchExpression, elementGraph, mapping, mapping.values(), getAllEdges( elementGraph, mapping ) );
+    return new Match( matchExpression, elementGraph, mapping, mapping.values(), getAllEdges( plannerContext, elementGraph, mapping ) );
     }
 
   public Match findAllMatches( ElementGraph elementGraph )
@@ -182,7 +182,7 @@ public class GraphFinder
       Map<ElementExpression, FlowElement> vertexMapping = current.getVertexMapping();
 
       finderContext.getMatchedElements().addAll( vertexMapping.values() );
-      finderContext.getMatchedScopes().addAll( getAllEdges( elementGraph, vertexMapping ) );
+      finderContext.getMatchedScopes().addAll( getAllEdges( plannerContext, elementGraph, vertexMapping ) );
 
       if( firstOnly ) // we are not rotating around the primary capture
         break;
@@ -204,7 +204,7 @@ public class GraphFinder
     return new Match( matchExpression, elementGraph, mapping, finderContext.getMatchedElements(), finderContext.getMatchedScopes(), captureMap );
     }
 
-  public Map<ScopeExpression, Set<Scope>> getEdgeMapping( ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
+  public Map<ScopeExpression, Set<Scope>> getEdgeMapping( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
     {
     Map<ScopeExpression, Set<Scope>> edgeMapping = new HashMap<>();
 
@@ -226,11 +226,11 @@ public class GraphFinder
     return edgeMapping;
     }
 
-  public Set<Scope> getAllEdges( ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
+  public Set<Scope> getAllEdges( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
     {
     Set<Scope> scopes = new HashSet<>();
 
-    for( Set<Scope> set : getEdgeMapping( elementGraph, vertexMapping ).values() )
+    for( Set<Scope> set : getEdgeMapping( plannerContext, elementGraph, vertexMapping ).values() )
       scopes.addAll( set );
 
     return scopes;

@@ -40,6 +40,8 @@ public class RuleRegistry
     rules.put( phase, new LinkedList<Rule>() );
   }
 
+  private boolean resolveElementsEnabled = true;
+
   protected void enableDebugLogging()
     {
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.transformer", "DEBUG" );
@@ -68,5 +70,15 @@ public class RuleRegistry
       throw new IllegalArgumentException( "rule must have a rule phase: " + rule.getRuleName() );
 
     return rules.get( rule.getRulePhase() ).add( rule );
+    }
+
+  public void setResolveElementsEnabled( boolean resolveElementsEnabled )
+    {
+    this.resolveElementsEnabled = resolveElementsEnabled;
+    }
+
+  public boolean enabledResolveElements()
+    {
+    return resolveElementsEnabled;
     }
   }

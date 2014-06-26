@@ -18,31 +18,12 @@
  * limitations under the License.
  */
 
-package cascading.pipe;
-
-import cascading.flow.planner.Scope;
-import cascading.tuple.Fields;
+package cascading.flow.stream;
 
 /**
- * The Boundary class is only used internally by the planner to mark the boundaries between partitions within
- * the element graph.
- * <p/>
- * In MapReduce, Taps are used. But in DAG models, Boundary would specify where a system dependent interface should
- * be used.
+ * Enum IORole specifies how a FlowElement will be used during streaming.
  */
-public class Boundary extends Pipe
+public enum IORole
   {
-  /**
-   * Intentionally does not provide a chaining constructor, as Boundary should not be inserted into an assembly
-   * by a user.
-   */
-  public Boundary()
-    {
-    }
-
-  @Override
-  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
-    {
-    return incomingScope.getOutValuesFields();
-    }
+    sink, source, both, pass
   }

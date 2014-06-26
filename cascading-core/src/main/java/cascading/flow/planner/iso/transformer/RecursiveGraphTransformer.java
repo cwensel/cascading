@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends GraphTransformer<E, E>
   {
   private static final Logger LOG = LoggerFactory.getLogger( RecursiveGraphTransformer.class );
+  public static final int TRANSFORM_RECURSION_DEPTH_MAX = 100;
 
   private final GraphFinder finder;
   private final ExpressionGraph expressionGraph;
@@ -56,15 +57,21 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     {
     Transformed<E> transformed = new Transformed<>( plannerContext, this, expressionGraph, rootGraph );
 
-    E result = transform( transformed, rootGraph );
+    E result = transform( transformed, rootGraph, 0 );
 
     transformed.setEndGraph( result );
 
     return transformed;
     }
 
-  protected E transform( Transformed<E> transformed, E graph )
+  protected E transform( Transformed<E> transformed, E graph, int depth )
     {
+    if( depth == TRANSFORM_RECURSION_DEPTH_MAX )
+      {
+      LOG.info( "transform recursion ending, reached depth: {}", depth );
+      return graph;
+      }
+
     if( LOG.isDebugEnabled() )
       LOG.debug( "preparing match within: {}", this.getClass().getSimpleName() );
 
@@ -97,7 +104,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     if( findAllPrimaries )
       return graph;
 
-    return transform( transformed, graph );
+    return transform( transformed, graph, ++depth );
     }
 
   protected Set<FlowElement> addExclusions( E graph )

@@ -34,6 +34,7 @@ import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.stream.annotations.BlockingMode;
+import cascading.pipe.Boundary;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -96,14 +97,14 @@ public abstract class NodeStreamGraph extends StreamGraph
       boolean isSink = Graphs.successorListOf( elementGraph, rhsElement ).contains( Extent.tail );
       boolean isSource = Graphs.predecessorListOf( elementGraph, rhsElement ).contains( Extent.head );
 
-      SpliceGate.Role role = SpliceGate.Role.pass;
+      IORole role = IORole.pass;
 
       if( isSource && !isSink )
-        role = SpliceGate.Role.source;
+        role = IORole.source;
       else if( !isSource && isSink )
-        role = SpliceGate.Role.sink;
+        role = IORole.sink;
       else if( isSource && isSink )
-        role = SpliceGate.Role.both;
+        role = IORole.both;
 
       Duct newRhsDuct = createDuctFor( rhsElement, role );
       Duct rhsDuct = findExisting( newRhsDuct );
@@ -135,7 +136,7 @@ public abstract class NodeStreamGraph extends StreamGraph
     throw new IllegalStateException( "could not find ordinal, too many edges between elements" );
     }
 
-  private Duct createDuctFor( FlowElement element, SpliceGate.Role role )
+  private Duct createDuctFor( FlowElement element, IORole role )
     {
     Duct rhsDuct;
 
@@ -165,6 +166,10 @@ public abstract class NodeStreamGraph extends StreamGraph
       else
         throw new IllegalStateException( "unknown operation: " + everyElement.getOperation().getClass().getCanonicalName() );
       }
+    else if( element instanceof Boundary )
+      {
+      rhsDuct = createBoundaryStage( (Boundary) element, role );
+      }
     else if( element instanceof Splice )
       {
       Splice spliceElement = (Splice) element;
@@ -188,16 +193,22 @@ public abstract class NodeStreamGraph extends StreamGraph
     return rhsDuct;
     }
 
+  protected Duct createBoundaryStage( Boundary element, IORole role )
+    {
+    // could return MergeStage at this point as they are roughly equivalent
+    throw new UnsupportedOperationException( "boundary not supported by planner" );
+    }
+
   protected SinkStage createSinkStage( Tap element )
     {
     return new SinkStage( flowProcess, element );
     }
 
-  protected abstract Gate createCoGroupGate( CoGroup element, SpliceGate.Role role );
+  protected abstract Gate createCoGroupGate( CoGroup element, IORole role );
 
-  protected abstract Gate createGroupByGate( GroupBy element, SpliceGate.Role role );
+  protected abstract Gate createGroupByGate( GroupBy element, IORole role );
 
-  protected Duct createMergeStage( Merge merge, SpliceGate.Role both )
+  protected Duct createMergeStage( Merge merge, IORole both )
     {
     return new MergeStage( flowProcess, merge );
     }

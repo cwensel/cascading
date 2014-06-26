@@ -51,7 +51,7 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
   private ContractedTransformer contractedTransformer;
   private GraphFinder graphFinder;
 
-  private Set<FlowElement> excludes = new HashSet<>();
+  private Set<FlowElement> elementExcludes = new HashSet<>();
   private ElementGraph contractedGraph;
   private Transformed<ElementGraph> contractedTransformed;
 
@@ -77,9 +77,9 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     this( plannerContext, contractionExpression, matchExpression, false, elementGraph );
     }
 
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, ElementGraph elementGraph, Collection<FlowElement> excludes )
+  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, ElementGraph elementGraph, Collection<FlowElement> elementExcludes )
     {
-    this( plannerContext, contractionExpression, matchExpression, false, elementGraph, excludes );
+    this( plannerContext, contractionExpression, matchExpression, false, elementGraph, elementExcludes );
     }
 
   public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph )
@@ -87,14 +87,14 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     this( plannerContext, contractionExpression, matchExpression, firstOnly, elementGraph, null );
     }
 
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph, Collection<FlowElement> excludes )
+  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph, Collection<FlowElement> elementExcludes )
     {
     this.plannerContext = plannerContext;
     this.firstOnly = firstOnly;
     this.flowElementGraph = elementGraph;
 
-    if( excludes != null )
-      this.excludes.addAll( excludes );
+    if( elementExcludes != null )
+      this.elementExcludes.addAll( elementExcludes );
 
     if( contractionExpression != null )
       contractedTransformer = new ContractedTransformer( contractionExpression );
@@ -125,12 +125,12 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
     {
     if( match == null )
       {
-      match = graphFinder.findMatchesOnPrimary( plannerContext, getContractedGraph(), firstOnly, excludes );
+      match = graphFinder.findMatchesOnPrimary( plannerContext, getContractedGraph(), firstOnly, elementExcludes );
 
       if( match.foundMatch() )
         {
         matches.add( match );
-        excludes.addAll( match.getCapturedElements( ElementExpression.Capture.Primary ) ); // idempotent
+        elementExcludes.addAll( match.getCapturedElements( ElementExpression.Capture.Primary ) ); // idempotent
         count++;
         }
       }

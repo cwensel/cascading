@@ -70,6 +70,24 @@ public class ExpressionGraph
       }
 
     @Override
+    public boolean appliesToAllPaths()
+      {
+      return delegate.appliesToAllPaths();
+      }
+
+    @Override
+    public boolean appliesToAnyPath()
+      {
+      return delegate.appliesToAnyPath();
+      }
+
+    @Override
+    public boolean appliesToEachPath()
+      {
+      return delegate.appliesToEachPath();
+      }
+
+    @Override
     public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, Scope scope )
       {
       return delegate.applies( plannerContext, elementGraph, scope );

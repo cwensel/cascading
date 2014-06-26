@@ -35,7 +35,6 @@ public class RulePartitioner extends GraphPartitioner implements Rule
   PlanPhase phase;
   Enum[] annotationExcludes = new Enum[ 0 ];
 
-
   public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression )
     {
     this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
@@ -44,6 +43,14 @@ public class RulePartitioner extends GraphPartitioner implements Rule
   public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation... annotations )
     {
     this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
+    }
+
+  public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression, Enum... annotationExcludes )
+    {
+    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+
+    if( annotationExcludes != null )
+      this.annotationExcludes = annotationExcludes;
     }
 
   protected RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )

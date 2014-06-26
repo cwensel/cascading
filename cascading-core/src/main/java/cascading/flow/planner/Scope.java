@@ -44,8 +44,8 @@ public class Scope implements Serializable
   private LinkedList<String> priorNames = new LinkedList<>();
 
   /** Field ordinal */
-  private int ordinal = 0; // do not copy
-  /** Field isStreamed is not accumulated. currently only relevant to HashJoin **/
+  private Integer ordinal = 0; // do not copy
+  /** Field isStreamed is not accumulated. currently only relevant to HashJoin * */
   private boolean isNonBlocking = true; // do not copy
 
   // copied
@@ -209,12 +209,12 @@ public class Scope implements Serializable
     return priorNames.getFirst();
     }
 
-  public int getOrdinal()
+  public Integer getOrdinal()
     {
     return ordinal;
     }
 
-  public void setOrdinal( int ordinal )
+  public void setOrdinal( Integer ordinal )
     {
     this.ordinal = ordinal;
     }
@@ -524,10 +524,20 @@ public class Scope implements Serializable
   @Override
   public String toString()
     {
-    if( getOutValuesFields() == null )
-      return ""; // endpipes
+    return print();
+    }
 
+  public String print()
+    {
     StringBuffer buffer = new StringBuffer();
+
+    if( ordinal != null )
+      buffer.append( "[" ).append( ordinal ).append( "]" );
+
+    if( getOutValuesFields() == null )
+      return buffer.toString(); // endpipes
+
+    buffer.append( "\n" );
 
     if( keySelectors != null && !keySelectors.isEmpty() )
       {

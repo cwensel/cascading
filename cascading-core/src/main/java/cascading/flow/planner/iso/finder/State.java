@@ -22,10 +22,13 @@ package cascading.flow.planner.iso.finder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -49,9 +52,9 @@ import org.slf4j.LoggerFactory;
  * IEEE Transactions on Pattern Analysis and Machine Intelligence, 26(10), 1367–1372.
  * doi:10.1109/TPAMI.2004.75
  * <p/>
- * Some modifications and bug fixes have been applied.
+ * Implementation in Java, modifications, and bug fixes have been applied.
  * <p/>
- * Variable/field naming schemes mirror the above paper to improve/retain readability.
+ * Keep variable/field naming schemes mirroring the above paper to improve/retain readability.
  * <p/>
  * Notes:
  * <p/>
@@ -59,6 +62,9 @@ import org.slf4j.LoggerFactory;
  * in any given node pair.
  * <p/>
  * It also accounts for a wild card stating any edge between the nodes is relevant.
+ * <p/>
+ * Future versions need the ability to specifically match and capture an edge, or all edges that apply to
+ * an expression.
  */
 class State
   {
@@ -262,6 +268,11 @@ class State
 
     List<Scope> scopes = elementGraph.getAllEdgesList( v3, v4 );
 
+    return areCompatibleEdges( plannerContext, elementGraph.getDelegate(), matchers, scopes ) != null;
+    }
+
+  public static Collection<Scope> areCompatibleEdges( PlannerContext plannerContext, ElementGraph elementGraph, List<ScopeExpression> matchers, List<Scope> scopes )
+    {
     // if more than one matcher edge, ignore ANY/ALL path modifier
     if( matchers.size() == 1 )
       {
@@ -272,28 +283,43 @@ class State
         {
         for( Scope scope : scopes )
           {
-          if( !matcher.applies( plannerContext, elementGraph.getDelegate(), scope ) )
-            return false;
+          if( !matcher.applies( plannerContext, elementGraph, scope ) )
+            return null;
           }
 
-        return true;
+        return scopes;
         }
 
-      if( matcher.appliesToAnyPaths() )
+      if( matcher.appliesToAnyPath() )
         {
         for( Scope scope : scopes )
           {
-          if( matcher.applies( plannerContext, elementGraph.getDelegate(), scope ) )
-            return true;
+          if( matcher.applies( plannerContext, elementGraph, scope ) )
+            return Collections.singleton( scope );
           }
 
-        return false;
+        return null;
+        }
+
+      if( matcher.appliesToEachPath() )
+        {
+        scopes = new LinkedList<>( scopes );
+
+        ListIterator<Scope> iterator = scopes.listIterator();
+
+        while( iterator.hasNext() )
+          {
+          if( !matcher.applies( plannerContext, elementGraph, iterator.next() ) )
+            iterator.remove();
+          }
+
+        return scopes.isEmpty() ? null : scopes;
         }
       }
 
     // must have the same number of edges
     if( matchers.size() != scopes.size() )
-      return false;
+      return null;
 
     // build a square matrix of all match permutations
     boolean[][] compat = new boolean[ matchers.size() ][ scopes.size() ];
@@ -306,7 +332,7 @@ class State
         {
         Scope scope = scopes.get( j );
 
-        compat[ i ][ j ] = matcher.applies( plannerContext, elementGraph.getDelegate(), scope );
+        compat[ i ][ j ] = matcher.applies( plannerContext, elementGraph, scope );
         }
       }
 
@@ -332,10 +358,10 @@ class State
         result &= transformed[ i ][ i ];
 
       if( result )
-        return true;
+        return scopes;
       }
 
-    return false;
+    return null;
     }
 
   private boolean areCompatibleNodes( int node1, int node2 )
