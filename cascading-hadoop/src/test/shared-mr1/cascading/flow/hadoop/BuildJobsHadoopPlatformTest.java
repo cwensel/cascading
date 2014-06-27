@@ -1538,7 +1538,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ) , "input/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path" ) );
     sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
@@ -1568,7 +1568,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ) , "input/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path" ) );
     sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
@@ -1594,7 +1594,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sources = new HashMap();
     Map sinks = new HashMap();
 
-    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ) , "input/path" ) );
+    sources.put( "count", new Hfs( new TextLine( new Fields( "first", "second" ) ), "input/path" ) );
     sinks.put( "count", new Hfs( new TextLine( new Fields( 0, 1 ) ), "output/path" ) );
 
     Pipe pipe = new Pipe( "count" );
@@ -1733,9 +1733,15 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     if( !before )
       right = new Pipe( "right", right );
 
-    Flow flow = getPlatform().getFlowConnector().connect( "splitmiddle", sources, sinks, left, right );
+    FlowConnector flowConnector = getPlatform().getFlowConnector();
+
+    Flow flow = flowConnector.connect( "splitmiddle", sources, sinks, left, right );
 
     List<FlowStep> steps = flow.getFlowSteps();
+
+    // if the optimization isn't in place, don't test for it
+    if( testTempReplaced && !flowConnector.getRuleRegistry().hasRule( "CombineAdjacentTapTransformer" ) )
+      testTempReplaced = false;
 
     assertEquals( "not equal: steps.size()", testTempReplaced ? 2 : 3, steps.size() );
 
