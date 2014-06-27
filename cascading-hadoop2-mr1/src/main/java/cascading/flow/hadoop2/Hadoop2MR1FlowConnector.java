@@ -24,7 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.hadoop.planner.HadoopRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.rule.RuleRegistry;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 
@@ -61,13 +63,48 @@ public class Hadoop2MR1FlowConnector extends FlowConnector
     super( properties );
     }
 
+  /**
+   * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance.
+   * <p/>
+   * All properties passed to Hadoop are retrieved from a default instantiation of the Hadoop
+   * {@link org.apache.hadoop.mapred.JobConf} which pulls all properties from the local CLASSPATH.
+   *
+   * @param ruleRegistry of type RuleRegistry
+   */
+  @ConstructorProperties({"ruleRegistry"})
+  public Hadoop2MR1FlowConnector( RuleRegistry ruleRegistry )
+    {
+    super( ruleRegistry );
+    }
+
+  /**
+   * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance using the given {@link java.util.Properties} instance as
+   * default value for the underlying jobs. All properties are copied to a new native configuration instance.
+   *
+   * @param properties   of type Map
+   * @param ruleRegistry of type RuleRegistry
+   */
+  @ConstructorProperties({"properties", "ruleRegistry"})
+  public Hadoop2MR1FlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+    {
+    super( properties, ruleRegistry );
+    }
+
+  @Override
   protected Class<? extends Scheme> getDefaultIntermediateSchemeClass()
     {
     return SequenceFile.class;
     }
 
+  @Override
   protected FlowPlanner createFlowPlanner()
     {
     return new Hadoop2MR1Planner();
+    }
+
+  @Override
+  protected RuleRegistry createDefaultRuleRegistry()
+    {
+    return new HadoopRuleRegistry();
     }
   }

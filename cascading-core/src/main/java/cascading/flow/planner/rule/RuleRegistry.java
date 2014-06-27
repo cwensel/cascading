@@ -49,6 +49,23 @@ public class RuleRegistry
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.subgraph", "DEBUG" );
     }
 
+  /**
+   * Adds the named elementFactory if it does not already exist.
+   *
+   * @param name
+   * @param elementFactory
+   * @return true if the factory was added
+   */
+  public boolean addDefaultElementFactory( String name, ElementFactory elementFactory )
+    {
+    if( hasElementFactory( name ) )
+      return false;
+
+    factories.put( name, elementFactory );
+
+    return true;
+    }
+
   public ElementFactory addElementFactory( String name, ElementFactory elementFactory )
     {
     return factories.put( name, elementFactory );
@@ -57,6 +74,11 @@ public class RuleRegistry
   public ElementFactory getElementFactory( String factoryName )
     {
     return factories.get( factoryName );
+    }
+
+  public boolean hasElementFactory( String factoryName )
+    {
+    return factories.containsKey( factoryName );
     }
 
   public LinkedList<Rule> getRulesFor( PlanPhase phase )
@@ -72,6 +94,20 @@ public class RuleRegistry
     return rules.get( rule.getRulePhase() ).add( rule );
     }
 
+  public boolean hasRule( String ruleName )
+    {
+    for( Map.Entry<PlanPhase, LinkedList<Rule>> entry : rules.entrySet() )
+      {
+      for( Rule rule : entry.getValue() )
+        {
+        if( rule.getRuleName().equals( ruleName ) )
+          return true;
+        }
+      }
+
+    return false;
+    }
+
   public void setResolveElementsEnabled( boolean resolveElementsEnabled )
     {
     this.resolveElementsEnabled = resolveElementsEnabled;
@@ -81,4 +117,5 @@ public class RuleRegistry
     {
     return resolveElementsEnabled;
     }
+
   }

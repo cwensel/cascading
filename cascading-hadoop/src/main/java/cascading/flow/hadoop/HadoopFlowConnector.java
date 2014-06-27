@@ -26,7 +26,9 @@ import java.util.Properties;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.hadoop.planner.HadoopPlanner;
+import cascading.flow.hadoop.planner.HadoopRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.rule.RuleRegistry;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
@@ -44,7 +46,7 @@ import cascading.tap.Tap;
 public class HadoopFlowConnector extends FlowConnector
   {
   /**
-   * Constructor FlowConnector creates a new FlowConnector instance.
+   * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance.
    * <p/>
    * All properties passed to Hadoop are retrieved from a default instantiation of the Hadoop
    * {@link org.apache.hadoop.mapred.JobConf} which pulls all properties from the local CLASSPATH.
@@ -54,10 +56,10 @@ public class HadoopFlowConnector extends FlowConnector
     }
 
   /**
-   * Constructor FlowConnector creates a new FlowConnector instance using the given {@link Properties} instance as
+   * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance using the given {@link Properties} instance as
    * default value for the underlying jobs. All properties are copied to a new native configuration instance.
    *
-   * @param properties of type Properties
+   * @param properties of type Map
    */
   @ConstructorProperties({"properties"})
   public HadoopFlowConnector( Map<Object, Object> properties )
@@ -65,13 +67,48 @@ public class HadoopFlowConnector extends FlowConnector
     super( properties );
     }
 
+  /**
+   * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance.
+   * <p/>
+   * All properties passed to Hadoop are retrieved from a default instantiation of the Hadoop
+   * {@link org.apache.hadoop.mapred.JobConf} which pulls all properties from the local CLASSPATH.
+   *
+   * @param ruleRegistry of type RuleRegistry
+   */
+  @ConstructorProperties({"ruleRegistry"})
+  public HadoopFlowConnector( RuleRegistry ruleRegistry )
+    {
+    super( ruleRegistry );
+    }
+
+  /**
+   * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance using the given {@link Properties} instance as
+   * default value for the underlying jobs. All properties are copied to a new native configuration instance.
+   *
+   * @param properties   of type Map
+   * @param ruleRegistry of type RuleRegistry
+   */
+  @ConstructorProperties({"properties", "ruleRegistry"})
+  public HadoopFlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+    {
+    super( properties, ruleRegistry );
+    }
+
+  @Override
   protected Class<? extends Scheme> getDefaultIntermediateSchemeClass()
     {
     return SequenceFile.class;
     }
 
+  @Override
   protected FlowPlanner createFlowPlanner()
     {
     return new HadoopPlanner();
+    }
+
+  @Override
+  protected RuleRegistry createDefaultRuleRegistry()
+    {
+    return new HadoopRuleRegistry();
     }
   }

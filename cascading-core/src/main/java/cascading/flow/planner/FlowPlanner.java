@@ -104,6 +104,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   protected AssertionLevel defaultAssertionLevel;
   /** Field debugLevel */
   protected DebugLevel defaultDebugLevel;
+  private RuleRegistry ruleRegistry;
 
   /**
    * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
@@ -147,7 +148,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     this.defaultDebugLevel = getDebugLevel( properties );
     }
 
-  public F buildFlow( FlowDef flowDef )
+  public F buildFlow( FlowDef flowDef, RuleRegistry ruleRegistry )
     {
     FlowElementGraph flowElementGraph = null;
 
@@ -166,9 +167,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       verifyAssembly( flowDef, tails );
 
-      RuleRegistry ruleRegistry = getRuleRegistry( flowDef );
-
-      configRuleRegistry( ruleRegistry );
+      configRuleRegistryDefaults( ruleRegistry );
 
       RuleExec ruleExec = new RuleExec( ruleRegistry );
 
@@ -210,16 +209,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return flow.getID().substring( 0, 6 );
     }
 
-  protected void configRuleRegistry( RuleRegistry ruleRegistry )
-    {
-
-    }
+  protected abstract F createFlow( FlowDef flowDef );
 
   protected abstract FlowStep<Config> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
 
-  protected abstract RuleRegistry getRuleRegistry( FlowDef flowDef );
+  protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
+    {
 
-  protected abstract F createFlow( FlowDef flowDef );
+    }
 
   protected Pipe[] resolveTails( FlowDef flowDef, F flow )
     {

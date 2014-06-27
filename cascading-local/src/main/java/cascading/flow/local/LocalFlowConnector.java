@@ -20,11 +20,14 @@
 
 package cascading.flow.local;
 
+import java.beans.ConstructorProperties;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.local.planner.LocalPlanner;
+import cascading.flow.local.planner.LocalRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.rule.RuleRegistry;
 import cascading.scheme.Scheme;
 
 /**
@@ -43,15 +46,33 @@ public class LocalFlowConnector extends FlowConnector
     }
 
   /**
-   * Constructor LocalFlowConnector creates an instance using any of the given properites.
+   * Constructor LocalFlowConnector creates an instance using any of the given properties.
    *
    * @param properties of type Map
    */
+  @ConstructorProperties({"properties"})
   public LocalFlowConnector( Map<Object, Object> properties )
     {
     super( properties );
     }
 
+  /** Constructor LocalFlowConnector creates a default instance. */
+  @ConstructorProperties({"ruleRegistry"})
+  public LocalFlowConnector( RuleRegistry ruleRegistry )
+    {
+    super( ruleRegistry );
+    }
+
+  /**
+   * Constructor LocalFlowConnector creates an instance using any of the given properties.
+   *
+   * @param properties of type Map
+   */
+  @ConstructorProperties({"properties","ruleRegistry"})
+  public LocalFlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+    {
+    super( properties, ruleRegistry );
+    }
 
   @Override
   protected Class<? extends Scheme> getDefaultIntermediateSchemeClass()
@@ -63,5 +84,11 @@ public class LocalFlowConnector extends FlowConnector
   protected FlowPlanner createFlowPlanner()
     {
     return new LocalPlanner();
+    }
+
+  @Override
+  protected RuleRegistry createDefaultRuleRegistry()
+    {
+    return new LocalRuleRegistry();
     }
   }

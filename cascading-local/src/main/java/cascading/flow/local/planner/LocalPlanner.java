@@ -30,7 +30,6 @@ import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.rule.RuleRegistry;
 import cascading.tap.Tap;
 import cascading.util.Version;
 
@@ -53,12 +52,6 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
   public PlatformInfo getPlatformInfo()
     {
     return new PlatformInfo( "local", "Concurrent, Inc.", Version.getRelease() );
-    }
-
-  @Override
-  protected RuleRegistry getRuleRegistry( FlowDef flowDef )
-    {
-    return new LocalRuleRegistry();
     }
 
   protected LocalFlow createFlow( FlowDef flowDef )

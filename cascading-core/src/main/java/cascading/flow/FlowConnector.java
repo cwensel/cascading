@@ -31,6 +31,7 @@ import java.util.Set;
 import cascading.CascadingException;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
+import cascading.flow.planner.rule.RuleRegistry;
 import cascading.pipe.Pipe;
 import cascading.property.AppProps;
 import cascading.property.PropertyUtil;
@@ -106,6 +107,8 @@ public abstract class FlowConnector
   /** Field properties */
   protected Map<Object, Object> properties; // may be a Map or Properties instance. see PropertyUtil
 
+  private RuleRegistry ruleRegistry;
+
   /**
    * Method getIntermediateSchemeClass is used for debugging.
    *
@@ -161,17 +164,29 @@ public abstract class FlowConnector
 
   protected FlowConnector()
     {
-    this.properties = new HashMap<Object, Object>();
+    this.properties = new HashMap<>();
+    }
+
+  protected FlowConnector( RuleRegistry ruleRegistry )
+    {
+    this();
+    this.ruleRegistry = ruleRegistry;
     }
 
   protected FlowConnector( Map<Object, Object> properties )
     {
     if( properties == null )
-      this.properties = new HashMap<Object, Object>();
+      this.properties = new HashMap<>();
     else if( properties instanceof Properties )
       this.properties = new Properties( (Properties) properties );
     else
-      this.properties = new HashMap<Object, Object>( properties );
+      this.properties = new HashMap<>( properties );
+    }
+
+  protected FlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+    {
+    this( properties );
+    this.ruleRegistry = ruleRegistry;
     }
 
   /**
@@ -456,10 +471,31 @@ public abstract class FlowConnector
 
     flowPlanner.initialize( this, properties );
 
-    return flowPlanner.buildFlow( flowDef );
+    RuleRegistry ruleRegistry = getRuleRegistry();
+
+    return flowPlanner.buildFlow( flowDef, ruleRegistry );
     }
 
   protected abstract FlowPlanner createFlowPlanner();
+
+  /**
+   * Returns the configured RuleRegistry, or the default for this platform.
+   *
+   * The registry is mutable, and will be applied to all subsequent planner operations via {@link #connect(FlowDef)}.
+   *
+   * @return the current RuleRegistry instance
+   */
+  public RuleRegistry getRuleRegistry()
+    {
+    if( ruleRegistry != null )
+      return ruleRegistry;
+
+    ruleRegistry = createDefaultRuleRegistry();
+
+    return ruleRegistry;
+    }
+
+  protected abstract RuleRegistry createDefaultRuleRegistry();
 
   /**
    * Method getPlatformInfo returns an instance of {@link PlatformInfo} for the underlying platform.

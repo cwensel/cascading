@@ -165,17 +165,11 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     }
 
   @Override
-  protected RuleRegistry getRuleRegistry( FlowDef flowDef )
+  protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
     {
-    return new HadoopRuleRegistry();
-    }
+    super.configRuleRegistryDefaults( ruleRegistry );
 
-  @Override
-  protected void configRuleRegistry( RuleRegistry ruleRegistry )
-    {
-    super.configRuleRegistry( ruleRegistry );
-
-    ruleRegistry.addElementFactory( TapElementFactory.TEMP_TAP, new TempTapElementFactory() );
+   ruleRegistry.addDefaultElementFactory( TapElementFactory.TEMP_TAP, new TempTapElementFactory() );
     }
 
   @Override
