@@ -40,7 +40,6 @@ public class BoundariesElementExpression extends OrElementExpression
     );
     }
 
-
   public BoundariesElementExpression( Capture capture )
     {
     super( capture,

@@ -37,7 +37,7 @@ public class RuleExpression
     verify();
     }
 
-  public RuleExpression( ExpressionGraph contractionExpression, ExpressionGraph matchExpression )
+  public  RuleExpression( ExpressionGraph contractionExpression, ExpressionGraph matchExpression )
     {
     this.contractionExpression = contractionExpression;
     this.contractedMatchExpression = null;

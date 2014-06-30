@@ -42,6 +42,7 @@ public enum PlanPhase
 
     // Flow node sub-graph partition rules
     PartitionNodes( Role.User, Stage.Nodes, Mode.Partition ),
+    PostNodes( Role.User, Stage.Nodes, Mode.Mutate ),
 
     // Flow node pipeline sub-graph partition rules
     PartitionPipelines( Role.User, Stage.Pipelines, Mode.Partition ),

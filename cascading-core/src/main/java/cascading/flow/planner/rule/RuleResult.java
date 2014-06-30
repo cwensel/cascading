@@ -105,6 +105,11 @@ public class RuleResult
     return nodeSubGraphResults;
     }
 
+  public void setNodeSubGraphResults( Map<ElementGraph, List<ElementGraph>> nodeSubGraphResults )
+    {
+    this.nodeSubGraphResults = nodeSubGraphResults;
+    }
+
   public void addNodePipelineGraphs( Map<ElementGraph, List<ElementGraph>> nodePipelineGraphs )
     {
     for( Map.Entry<ElementGraph, List<ElementGraph>> entry : nodePipelineGraphs.entrySet() )

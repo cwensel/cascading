@@ -120,6 +120,21 @@ public class TraceWriter
     markFolder( path, color );
     }
 
+  void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, Asserted asserted )
+    {
+    if( transformTracePath == null )
+      return;
+
+    String ruleName = asserted.getRuleName();
+
+    ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, ruleName );
+
+    String path = new File( transformTracePath, ruleName ).toString();
+    asserted.writeDOTs( path );
+
+    markAsserted( asserted, path );
+    }
+
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Asserted asserted )
     {
     if( transformTracePath == null )
@@ -139,6 +154,21 @@ public class TraceWriter
     {
     if( asserted.getFirstAnchor() != null )
       markFolder( path, RED );
+    }
+
+  void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, Transformed transformed )
+    {
+    if( transformTracePath == null )
+      return;
+
+    String ruleName = transformed.getRuleName();
+
+    ruleName = String.format( "%02d-%s-%04d-%04d-%04d-%s", phase.ordinal(), phase, ruleOrdinal, stepOrdinal, nodeOrdinal, ruleName );
+
+    String path = new File( transformTracePath, ruleName ).toString();
+    transformed.writeDOTs( path );
+
+    markTransformed( transformed, path );
     }
 
   void writePlan( PlanPhase phase, int ruleOrdinal, int stepOrdinal, int nodeOrdinal, int pipelineOrdinal, Transformed transformed )

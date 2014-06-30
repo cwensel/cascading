@@ -20,7 +20,9 @@
 
 package cascading.flow.hadoop.planner.rule.partitioner;
 
-import cascading.flow.hadoop.planner.rule.expression.MultiTapGroupPartitionExpression;
+import cascading.flow.planner.iso.expression.MultiTapGroupExpressionGraph;
+import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
+import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RulePartitioner;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
@@ -34,7 +36,10 @@ public class MultiTapGroupNodePartitioner extends RulePartitioner
     {
     super(
       PartitionNodes,
-      new MultiTapGroupPartitionExpression()
+      new RuleExpression(
+        new NoGroupTapExpressionGraph(),
+        new MultiTapGroupExpressionGraph()
+      )
     );
     }
   }

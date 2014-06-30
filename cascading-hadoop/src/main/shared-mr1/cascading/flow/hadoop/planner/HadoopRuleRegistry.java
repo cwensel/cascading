@@ -29,7 +29,7 @@ import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsPip
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedSelfJoinSourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
-import cascading.flow.hadoop.planner.rule.transformer.RemoveMalformedHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.RemoveMalformedHashJoinPipelineTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceCheckpointTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupBlockingHashJoinTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupGroupTransformer;
@@ -105,7 +105,7 @@ public class HadoopRuleRegistry extends RuleRegistry
     addRule( new StreamedOnlySourcesPipelinePartitioner() );
 
     // PostPipelines
-    addRule( new RemoveMalformedHashJoinTransformer() );
+    addRule( new RemoveMalformedHashJoinPipelineTransformer() );
     addRule( new DualStreamedAccumulatedMergeAssert() );
 
     // enable when GraphFinder supports captured edges

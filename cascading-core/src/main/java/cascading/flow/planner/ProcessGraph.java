@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,8 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowElements;
+import cascading.flow.planner.graph.AnnotatedGraph;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -226,12 +229,24 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     FlowElement flowElement;
     Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
     Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
+    Set<Enum> sinkAnnotations = Collections.emptySet();
+    Set<Enum> sourceAnnotations = Collections.emptySet();
 
     public ProcessEdge( Process sourceProcess, FlowElement flowElement, Process sinkProcess )
       {
       this.flowElement = flowElement;
-      this.incomingOrdinals = createOrdinals( sinkProcess.getElementGraph().incomingEdgesOf( flowElement ) );
-      this.outgoingOrdinals = createOrdinals( sourceProcess.getElementGraph().outgoingEdgesOf( flowElement ) );
+
+      ElementGraph sinkElementGraph = sinkProcess.getElementGraph();
+      ElementGraph sourceElementGraph = sourceProcess.getElementGraph();
+
+      this.incomingOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
+      this.outgoingOrdinals = createOrdinals( sourceElementGraph.outgoingEdgesOf( flowElement ) );
+
+      if( sinkElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sinkElementGraph ).hasAnnotations() )
+        this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
+
+      if( sourceElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sourceElementGraph ).hasAnnotations() )
+        this.sourceAnnotations = ( (AnnotatedGraph) sourceElementGraph ).getAnnotations().getKeysFor( flowElement );
       }
 
     private Set<Integer> createOrdinals( Set<Scope> scopes )
@@ -262,6 +277,16 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     public Set<Integer> getOutgoingOrdinals()
       {
       return outgoingOrdinals;
+      }
+
+    public Set<Enum> getSinkAnnotations()
+      {
+      return sinkAnnotations;
+      }
+
+    public Set<Enum> getSourceAnnotations()
+      {
+      return sourceAnnotations;
       }
     }
   }

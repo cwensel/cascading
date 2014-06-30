@@ -20,7 +20,8 @@
 
 package cascading.flow.hadoop.planner.rule.transformer;
 
-import cascading.flow.hadoop.planner.rule.expression.MalformedJoinExpression;
+import cascading.flow.hadoop.planner.rule.expression.MalformedJoinExpressionGraph;
+import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.transformer.RuleRemoveBranchTransformer;
 
 import static cascading.flow.planner.rule.PlanPhase.PostPipelines;
@@ -28,13 +29,13 @@ import static cascading.flow.planner.rule.PlanPhase.PostPipelines;
 /**
  *
  */
-public class RemoveMalformedHashJoinTransformer extends RuleRemoveBranchTransformer
+public class RemoveMalformedHashJoinPipelineTransformer extends RuleRemoveBranchTransformer
   {
-  public RemoveMalformedHashJoinTransformer()
+  public RemoveMalformedHashJoinPipelineTransformer()
     {
     super(
       PostPipelines,
-      new MalformedJoinExpression()
+      new RuleExpression( new MalformedJoinExpressionGraph() )
     );
     }
   }

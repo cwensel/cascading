@@ -41,6 +41,12 @@ public class Boundary extends Pipe
     }
 
   @Override
+  public String getName()
+    {
+    return Pipe.id( this );
+    }
+
+  @Override
   public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
     return incomingScope.getOutValuesFields();

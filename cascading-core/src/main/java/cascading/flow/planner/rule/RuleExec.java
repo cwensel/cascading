@@ -113,6 +113,7 @@ public class RuleExec
 
         case PartitionSteps:
         case PartitionNodes:
+        case PostNodes:
         case PartitionPipelines:
         case PostPipelines:
           executePhase( phase, plannerContext, ruleResult, elementGraph );
@@ -269,13 +270,29 @@ public class RuleExec
 
   private void handleNodesPhase( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, Rule rule )
     {
-    testRulePartitioner( rule );
+    switch( phase )
+      {
+      case PartitionNodes:
+        testRulePartitioner( rule );
 
-    List<ElementGraph> stepSubGraphs = context.ruleResult.getStepSubGraphResults();
-    Map<ElementGraph, List<ElementGraph>> priorResults = context.ruleResult.getNodeSubGraphResults();
-    Map<ElementGraph, List<ElementGraph>> stepNodeSubGraphs = performNodePartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, stepSubGraphs, priorResults, (RulePartitioner) rule );
+        List<ElementGraph> stepSubGraphs = context.ruleResult.getStepSubGraphResults();
+        Map<ElementGraph, List<ElementGraph>> priorResults = context.ruleResult.getNodeSubGraphResults();
+        Map<ElementGraph, List<ElementGraph>> stepNodeSubGraphs = performNodePartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, stepSubGraphs, priorResults, (RulePartitioner) rule );
 
-    context.ruleResult.addNodeSubGraphs( stepNodeSubGraphs );
+        context.ruleResult.addNodeSubGraphs( stepNodeSubGraphs );
+        break;
+
+      case PostNodes:
+
+        if( rule instanceof GraphTransformer )
+          performNodeTransform( phase, context, plannerContext, (GraphTransformer) rule );
+        else if( rule instanceof GraphAssert )
+          performNodeAssertion( phase, context, plannerContext, (GraphAssert) rule );
+        break;
+
+      default:
+        throw new IllegalStateException( "unknown phase: " + phase );
+      }
     }
 
   private void handlePipelinesPhase( PlannerContext plannerContext, PhaseContext context, PlanPhase phase, Rule rule )
@@ -298,7 +315,6 @@ public class RuleExec
           performNodePipelineTransform( phase, context, plannerContext, (GraphTransformer) rule );
         else if( rule instanceof GraphAssert )
           performNodePipelineAssertion( phase, context, plannerContext, (GraphAssert) rule );
-
         break;
 
       default:
@@ -428,6 +444,80 @@ public class RuleExec
     return exclusions;
     }
 
+  private void performNodeTransform( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphTransformer transformer )
+    {
+    LOG.debug( "applying node transform: {}", ( (Rule) transformer ).getRuleName() );
+
+    int ruleOrdinal = context.addRule( (Rule) transformer );
+
+    Map<ElementGraph, List<ElementGraph>> results = new LinkedHashMap<>();
+    Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = context.ruleResult.getNodeSubGraphResults();
+
+    int stepCount = 0;
+
+    for( Map.Entry<ElementGraph, List<ElementGraph>> stepEntry : nodeSubGraphs.entrySet() )
+      {
+      Map<ElementGraph, EnumMultiMap> resultNodes = new LinkedHashMap<>( nodeSubGraphs.size() );
+
+      int nodeCount = 0;
+
+      List<ElementGraph> nodeGraphs = stepEntry.getValue();
+
+      for( ElementGraph nodeGraph : nodeGraphs )
+        {
+        Transformed transformed = transformer.transform( plannerContext, nodeGraph );
+
+        traceWriter.writePlan( phase, ruleOrdinal, stepCount, nodeCount++, transformed );
+
+        ElementGraph endGraph = transformed.getEndGraph();
+
+        if( endGraph != null )
+          resultNodes.put( endGraph, ( (AnnotatedGraph) nodeGraph ).getAnnotations() );
+        else
+          resultNodes.put( nodeGraph, null );
+        }
+
+      results.put( stepEntry.getKey(), makeBoundedOn( context.currentElementGraph, resultNodes ) );
+      stepCount++;
+      }
+
+    context.ruleResult.setNodeSubGraphResults( results );
+    }
+
+  private void performNodeAssertion( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphAssert rule )
+    {
+    LOG.debug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
+
+    int ruleOrdinal = context.addRule( (Rule) rule );
+
+    Map<ElementGraph, List<ElementGraph>> nodeSubGraphs = context.ruleResult.getNodeSubGraphResults();
+
+    int stepCount = 0;
+
+    for( Map.Entry<ElementGraph, List<ElementGraph>> stepEntry : nodeSubGraphs.entrySet() )
+      {
+      int nodeCount = 0;
+
+      List<ElementGraph> nodeGraphs = stepEntry.getValue();
+
+      for( ElementGraph nodeGraph : nodeGraphs )
+        {
+        Asserted asserted = rule.assertion( plannerContext, nodeGraph );
+
+        traceWriter.writePlan( phase, ruleOrdinal, stepCount, nodeCount++, asserted );
+
+        FlowElement primary = asserted.getFirstAnchor();
+
+        if( primary == null )
+          continue;
+
+        throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
+        }
+
+      stepCount++;
+      }
+    }
+
   private void performNodePipelineTransform( PlanPhase phase, PhaseContext context, PlannerContext plannerContext, GraphTransformer transformer )
     {
     LOG.debug( "applying pipeline transform: {}", ( (Rule) transformer ).getRuleName() );
@@ -471,6 +561,8 @@ public class RuleExec
         results.put( nodeGraph, makeBoundedOn( context.currentElementGraph, resultPipelines ) );
         nodeCount++;
         }
+
+      stepCount++;
       }
 
     context.ruleResult.setNodePipelineGraphResults( results );
@@ -495,7 +587,6 @@ public class RuleExec
 
       for( ElementGraph nodeGraph : nodeGraphs )
         {
-
         int pipelineCount = 0;
 
         List<ElementGraph> pipelineGraphs = nodePipelineGraphs.get( nodeGraph );
@@ -513,10 +604,13 @@ public class RuleExec
 
           throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
           }
+
+        nodeCount++;
         }
+
+      stepCount++;
       }
     }
-
 
   // use the final assembly graph so we can get Scopes for heads and tails
   private List<ElementGraph> makeBoundedOn( ElementGraph currentElementGraph, Map<ElementGraph, EnumMultiMap> subGraphs )
