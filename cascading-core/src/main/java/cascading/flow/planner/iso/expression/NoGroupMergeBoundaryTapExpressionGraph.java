@@ -39,7 +39,7 @@ public class NoGroupMergeBoundaryTapExpressionGraph extends ExpressionGraph
     super(
       not(
         or(
-          ElementExpression.Capture.Primary,
+          ElementCapture.Primary,
           new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Group.class ),
           new FlowElementExpression( Merge.class ),

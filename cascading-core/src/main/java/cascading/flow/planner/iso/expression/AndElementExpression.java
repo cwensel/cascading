@@ -36,7 +36,7 @@ public class AndElementExpression extends ElementExpression
     return new AndElementExpression( elementMatchers );
     }
 
-  public static ElementExpression and( Capture capture, ElementExpression... elementMatchers )
+  public static ElementExpression and( ElementCapture capture, ElementExpression... elementMatchers )
     {
     return new AndElementExpression( capture, elementMatchers );
     }
@@ -48,7 +48,7 @@ public class AndElementExpression extends ElementExpression
     this.matchers = matchers;
     }
 
-  public AndElementExpression( Capture capture, ElementExpression... matchers )
+  public AndElementExpression( ElementCapture capture, ElementExpression... matchers )
     {
     super( capture );
     this.matchers = matchers;

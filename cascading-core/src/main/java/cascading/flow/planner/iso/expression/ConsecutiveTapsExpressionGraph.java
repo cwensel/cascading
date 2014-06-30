@@ -35,7 +35,7 @@ public class ConsecutiveTapsExpressionGraph extends ExpressionGraph
     this.arc(
       new FlowElementExpression( Tap.class ),
       ScopeExpression.ALL,
-      new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class )
+      new FlowElementExpression( ElementCapture.Primary, Tap.class )
     );
     }
   }

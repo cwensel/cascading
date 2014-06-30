@@ -30,7 +30,7 @@ import cascading.pipe.Operator;
  */
 public class NonSafeOperationExpression extends TypeExpression<Operator>
   {
-  public NonSafeOperationExpression( Capture capture )
+  public NonSafeOperationExpression( ElementCapture capture )
     {
     super( capture, Operator.class );
     }

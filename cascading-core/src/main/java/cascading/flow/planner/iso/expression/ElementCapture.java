@@ -18,27 +18,22 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.rule.annotator;
-
-import cascading.flow.planner.iso.ElementAnnotation;
-import cascading.flow.planner.iso.expression.ElementCapture;
-import cascading.flow.planner.rule.PlanPhase;
-import cascading.flow.planner.rule.expression.NonBlockedBlockedJoinAnnotatorExpression;
-import cascading.flow.planner.rule.transformer.RuleAnnotationTransformer;
-import cascading.flow.stream.annotations.BlockingMode;
+package cascading.flow.planner.iso.expression;
 
 /**
  *
  */
-public class BlockingHashJoinAnnotator extends RuleAnnotationTransformer
+public enum ElementCapture
   {
-  public BlockingHashJoinAnnotator()
-    {
-    super(
-      PlanPhase.PostResolveAssembly,
-      new NonBlockedBlockedJoinAnnotatorExpression(),
-      new ElementAnnotation( ElementCapture.Secondary, BlockingMode.Blocked )
-    );
-    }
+    Include,
 
+    /**
+     * Becomes the anchor at which a match will rotate during partitioning.
+     */
+    Primary,
+
+    /**
+     * Will be re-captured during partitioning where the Primary acts as an anchor at which the matching rotates
+     */
+    Secondary
   }

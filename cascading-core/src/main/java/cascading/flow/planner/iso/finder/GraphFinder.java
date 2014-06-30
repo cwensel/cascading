@@ -34,6 +34,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.ScopeExpression;
@@ -49,7 +50,7 @@ public class GraphFinder
   {
   ExpressionGraph matchExpression;
 
-  public GraphFinder( ExpressionGraph matchExpression, ElementExpression.Capture... captures )
+  public GraphFinder( ExpressionGraph matchExpression, ElementCapture... captures )
     {
     if( matchExpression == null )
       throw new IllegalArgumentException( "expressionGraph may not be null" );
@@ -103,7 +104,7 @@ public class GraphFinder
 
     ElementExpression expression = Util.getFirst( elementExpressions );
 
-    if( expression.getCapture() != ElementExpression.Capture.Primary )
+    if( expression.getCapture() != ElementCapture.Primary )
       throw new IllegalStateException( "capture on expression must be Primary: " + expression );
 
     Set<FlowElement> foundElements = new LinkedHashSet<>();
@@ -126,9 +127,9 @@ public class GraphFinder
     return new Match( matchExpression, elementGraph, null, foundElements, Collections.<Scope>emptySet() )
     {
     @Override
-    public Set<FlowElement> getCapturedElements( ElementExpression.Capture... captures )
+    public Set<FlowElement> getCapturedElements( ElementCapture... captures )
       {
-      if( !Arrays.asList( captures ).contains( ElementExpression.Capture.Primary ) )
+      if( !Arrays.asList( captures ).contains( ElementCapture.Primary ) )
         return Collections.emptySet();
 
       return (Set<FlowElement>) this.foundElements;
@@ -171,7 +172,7 @@ public class GraphFinder
 
       captureMap.addAll( current.getCaptureMap() );
 
-      Set<FlowElement> anchoredElements = current.getCapturedElements( ElementExpression.Capture.Primary );
+      Set<FlowElement> anchoredElements = current.getCapturedElements( ElementCapture.Primary );
 
       // should never capture new primary elements in subsequent searches
       if( finderContext.getRequiredElements().isEmpty() )

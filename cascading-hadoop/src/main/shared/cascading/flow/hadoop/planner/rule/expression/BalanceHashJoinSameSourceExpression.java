@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
@@ -50,9 +50,9 @@ public class BalanceHashJoinSameSourceExpression extends RuleExpression
 
       new ExpressionGraph()
         .arc(
-          new FlowElementExpression( ElementExpression.Capture.Primary, Pipe.class ),
+          new FlowElementExpression( ElementCapture.Secondary, Pipe.class ),
           PathScopeExpression.BLOCKING,
-          new FlowElementExpression( ElementExpression.Capture.Secondary, HashJoin.class )
+          new FlowElementExpression( ElementCapture.Primary, HashJoin.class )
         )
     );
     }

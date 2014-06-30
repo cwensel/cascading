@@ -20,7 +20,7 @@
 
 package cascading.flow.iso.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
@@ -38,7 +38,7 @@ public class TestMalformedJoinExpressionGraph extends ExpressionGraph
   public TestMalformedJoinExpressionGraph()
     {
     super( SearchOrder.ReverseDepth,
-      and( ElementExpression.Capture.Primary,
+      and( ElementCapture.Primary,
         new FlowElementExpression( HashJoin.class ),
         not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.Splice ) )
       )

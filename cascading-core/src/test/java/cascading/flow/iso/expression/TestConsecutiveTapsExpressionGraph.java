@@ -20,6 +20,7 @@
 
 package cascading.flow.iso.expression;
 
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
@@ -36,7 +37,7 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 public class TestConsecutiveTapsExpressionGraph extends ExpressionGraph
   {
   ElementExpression shared = or(
-    ElementExpression.Capture.Secondary,
+    ElementCapture.Secondary,
     new FlowElementExpression( Tap.class ),
     new FlowElementExpression( Group.class )
   );
@@ -46,7 +47,7 @@ public class TestConsecutiveTapsExpressionGraph extends ExpressionGraph
     super( SearchOrder.Depth );
 
     this.arc(
-      new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class ),
+      new FlowElementExpression( ElementCapture.Primary, Tap.class ),
       PathScopeExpression.ALL_NON_BLOCKING,
       shared
     );

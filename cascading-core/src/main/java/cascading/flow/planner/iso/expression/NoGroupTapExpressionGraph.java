@@ -37,7 +37,7 @@ public class NoGroupTapExpressionGraph extends ExpressionGraph
     super(
       not(
         or(
-          ElementExpression.Capture.Primary,
+          ElementCapture.Primary,
           new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Group.class ),
           new FlowElementExpression( Tap.class )

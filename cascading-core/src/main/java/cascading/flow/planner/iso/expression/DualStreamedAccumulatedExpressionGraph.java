@@ -33,9 +33,9 @@ public class DualStreamedAccumulatedExpressionGraph extends ExpressionGraph
     {
     super( SearchOrder.Depth );
 
-    FlowElementExpression source = new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class );
+    FlowElementExpression source = new FlowElementExpression( ElementCapture.Primary, Tap.class );
 
-    FlowElementExpression sink = new FlowElementExpression( ElementExpression.Capture.Secondary, Merge.class );
+    FlowElementExpression sink = new FlowElementExpression( ElementCapture.Secondary, Merge.class );
 
     this.arc(
       source,

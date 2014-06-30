@@ -42,7 +42,7 @@ import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
@@ -267,6 +267,9 @@ public class ElementGraphs
 
   public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph )
     {
+    if( elementGraph.containsVertex( Extent.head ) )
+      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+
     Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( elementGraph, contractedGraph );
     Set<FlowElement> vertices = pair.getLhs();
     Set<Scope> excludeEdges = pair.getRhs();
@@ -298,7 +301,7 @@ public class ElementGraphs
         excludeEdges.addAll( full.outgoingEdgesOf( v ) );
       }
 
-    DirectedGraph<V, E> disconnected = disconnectExtents( full, excludeEdges );
+    DirectedGraph<V, E> disconnected = disconnectExtentsAndExclude( full, excludeEdges );
 
     FloydWarshallShortestPaths<V, E> paths = new FloydWarshallShortestPaths<>( disconnected );
 
@@ -323,11 +326,14 @@ public class ElementGraphs
     return new Pair<>( vertices, excludeEdges );
     }
 
-  private static <V, E> DirectedGraph<V, E> disconnectExtents( DirectedGraph<V, E> full, Set<E> withoutEdges )
+  private static <V, E> DirectedGraph<V, E> disconnectExtentsAndExclude( DirectedGraph<V, E> full, Set<E> withoutEdges )
     {
     DirectedGraph<V, E> copy = (DirectedGraph<V, E>) new SimpleDirectedGraph<>( Object.class );
 
     Graphs.addAllVertices( copy, full.vertexSet() );
+
+    copy.removeVertex( (V) Extent.head );
+    copy.removeVertex( (V) Extent.tail );
 
     Set<E> edges = full.edgeSet();
 
@@ -505,10 +511,10 @@ public class ElementGraphs
   public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
     {
     if( elementGraph.containsVertex( Extent.head ) )
-      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail ); // TODO: just return the successors
+      return narrowSet( type, Graphs.successorListOf( elementGraph, Extent.head ) );
 
     SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Head ) ),
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Head ) ),
       elementGraph
     );
 
@@ -518,10 +524,10 @@ public class ElementGraphs
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
     {
     if( elementGraph.containsVertex( Extent.tail ) )
-      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail ); // TODO: just return the predecessors
+      return narrowSet( type, Graphs.predecessorListOf( elementGraph, Extent.tail ) );
 
     SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementExpression.Capture.Primary, type, TypeExpression.Topo.Tail ) ),
+      new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Tail ) ),
       elementGraph
     );
 
@@ -545,7 +551,7 @@ public class ElementGraphs
   public static Set<Group> findAllGroups( ElementGraph elementGraph )
     {
     SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, Group.class ) ),
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, Group.class ) ),
       elementGraph
     );
 
@@ -555,7 +561,7 @@ public class ElementGraphs
   public static Set<HashJoin> findAllHashJoins( ElementGraph elementGraph )
     {
     SubGraphIterator iterator = new SubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementExpression.Capture.Primary, HashJoin.class ) ),
+      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, HashJoin.class ) ),
       elementGraph
     );
 

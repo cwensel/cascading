@@ -21,7 +21,7 @@
 package cascading.flow.iso.expression;
 
 import cascading.flow.planner.iso.expression.BoundariesElementExpression;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.ScopeExpression;
@@ -40,7 +40,7 @@ public class TestBoundarySelJoinCoGroupExpressionGraph extends ExpressionGraph
 
     this
       .arc(
-        new BoundariesElementExpression( ElementExpression.Capture.Primary, TypeExpression.Topo.Split ),
+        new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Split ),
         ScopeExpression.EACH,
         new FlowElementExpression( CoGroup.class, TypeExpression.Topo.Splice )
       );

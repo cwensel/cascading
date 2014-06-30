@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
@@ -40,7 +40,7 @@ public class StreamedOnlySourcesExpression extends ExpressionGraph
     super( SearchOrder.Depth, true );
 
     this.arc(
-      or( ElementExpression.Capture.Primary,
+      or( ElementCapture.Primary,
         new FlowElementExpression( Tap.class ),
         new FlowElementExpression( Group.class )
       ),

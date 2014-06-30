@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
@@ -40,13 +41,13 @@ public class StreamedAccumulatedTapsExpression extends ExpressionGraph
     super( SearchOrder.Depth );
 
     ElementExpression sink = or(
-      ElementExpression.Capture.Secondary,
+      ElementCapture.Secondary,
       new FlowElementExpression( Tap.class ),
       new FlowElementExpression( Group.class )
     );
 
     this.arc(
-      new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class ),
+      new FlowElementExpression( ElementCapture.Primary, Tap.class ),
       PathScopeExpression.ALL_NON_BLOCKING,
       sink
     );

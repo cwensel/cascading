@@ -23,7 +23,7 @@ package cascading.flow.hadoop.planner.rule.expression;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
@@ -41,8 +41,9 @@ public class MalformedJoinExpressionGraph extends ExpressionGraph
   {
   public MalformedJoinExpressionGraph()
     {
-    super( SearchOrder.ReverseDepth,
-      and( ElementExpression.Capture.Primary,
+    super(
+      SearchOrder.ReverseDepth,
+      and( ElementCapture.Primary,
         new FlowElementExpression( HashJoin.class )
         {
         @Override

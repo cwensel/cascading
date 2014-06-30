@@ -38,12 +38,12 @@ public class GroupOrMergeElementExpression extends OrElementExpression
     super( new FlowElementExpression( Group.class, topo ), new FlowElementExpression( Merge.class, topo ) );
     }
 
-  public GroupOrMergeElementExpression( Capture capture )
+  public GroupOrMergeElementExpression( ElementCapture capture )
     {
     super( capture, new FlowElementExpression( Group.class ), new FlowElementExpression( Merge.class ) );
     }
 
-  public GroupOrMergeElementExpression( Capture capture, TypeExpression.Topo topo )
+  public GroupOrMergeElementExpression( ElementCapture capture, TypeExpression.Topo topo )
     {
     super( capture, new FlowElementExpression( Group.class, topo ), new FlowElementExpression( Merge.class, topo ) );
     }

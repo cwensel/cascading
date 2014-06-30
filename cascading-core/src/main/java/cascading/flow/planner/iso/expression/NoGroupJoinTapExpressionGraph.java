@@ -39,7 +39,7 @@ public class NoGroupJoinTapExpressionGraph extends ExpressionGraph
     super( SearchOrder.ReverseDepth,
       not(
         or(
-          ElementExpression.Capture.Primary,
+          ElementCapture.Primary,
           new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Group.class ),
           new FlowElementExpression( HashJoin.class ),

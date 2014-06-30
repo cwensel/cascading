@@ -29,6 +29,6 @@ public class OnlyPipeExpressionGraph extends ExpressionGraph
   {
   public OnlyPipeExpressionGraph()
     {
-    super( new FlowElementExpression( ElementExpression.Capture.Primary, true, Pipe.class ) );
+    super( new FlowElementExpression( ElementCapture.Primary, true, Pipe.class ) );
     }
   }

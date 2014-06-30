@@ -48,7 +48,7 @@ public class NotElementExpression extends ElementExpression
     }
 
   @Override
-  public Capture getCapture()
+  public ElementCapture getCapture()
     {
     return delegate.getCapture();
     }

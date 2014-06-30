@@ -20,7 +20,7 @@
 
 package cascading.flow.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.OnlyPipeExpressionGraph;
@@ -41,8 +41,8 @@ public class EveryAfterBufferExpression extends RuleExpression
 
       new ExpressionGraph()
         .arcs(
-          new OperationExpression( ElementExpression.Capture.Secondary, Buffer.class ),
-          new FlowElementExpression( ElementExpression.Capture.Primary, Every.class )
+          new OperationExpression( ElementCapture.Secondary, Buffer.class ),
+          new FlowElementExpression( ElementCapture.Primary, Every.class )
         )
     );
     }

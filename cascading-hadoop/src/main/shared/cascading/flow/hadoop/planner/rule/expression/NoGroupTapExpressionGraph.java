@@ -21,7 +21,7 @@
 package cascading.flow.hadoop.planner.rule.expression;
 
 import cascading.flow.planner.Extent;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
@@ -41,7 +41,7 @@ public class NoGroupTapExpressionGraph extends ExpressionGraph
     super( SearchOrder.ReverseDepth,
       not(
         or(
-          ElementExpression.Capture.Primary,
+          ElementCapture.Primary,
           new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Group.class ),
           new FlowElementExpression( Tap.class )

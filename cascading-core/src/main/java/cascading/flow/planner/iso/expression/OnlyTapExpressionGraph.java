@@ -29,6 +29,6 @@ public class OnlyTapExpressionGraph extends ExpressionGraph
   {
   public OnlyTapExpressionGraph()
     {
-    super( new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class ) );
+    super( new FlowElementExpression( ElementCapture.Primary, Tap.class ) );
     }
   }

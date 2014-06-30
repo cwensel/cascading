@@ -36,8 +36,8 @@ public class NonBlockedBlockedJoinExpression extends ExpressionGraph
     {
     super( SearchOrder.ReverseDepth );
 
-    ElementExpression source = or( ElementExpression.Capture.Primary, new FlowElementExpression( Tap.class ), new FlowElementExpression( Group.class ) );
-    ElementExpression sink = new FlowElementExpression( ElementExpression.Capture.Secondary, HashJoin.class );
+    ElementExpression source = or( ElementCapture.Primary, new FlowElementExpression( Tap.class ), new FlowElementExpression( Group.class ) );
+    ElementExpression sink = new FlowElementExpression( ElementCapture.Secondary, HashJoin.class );
 
     this.arc(
       source,

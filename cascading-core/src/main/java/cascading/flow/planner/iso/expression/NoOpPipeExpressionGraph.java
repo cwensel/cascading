@@ -34,7 +34,7 @@ public class NoOpPipeExpressionGraph extends ExpressionGraph
   public NoOpPipeExpressionGraph()
     {
     super( or(
-      ElementExpression.Capture.Primary,
+      ElementCapture.Primary,
       new FlowElementExpression( true, Pipe.class ),
       new FlowElementExpression( true, Checkpoint.class ),
       new FlowElementExpression( false, SubAssembly.class ) ) );

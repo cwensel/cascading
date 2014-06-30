@@ -25,7 +25,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
 
@@ -35,10 +35,20 @@ import cascading.flow.planner.iso.finder.Match;
 public class InsertionGraphTransformer extends MutateGraphTransformer
   {
   private final String factoryName;
+  private ElementCapture capture = ElementCapture.Primary;
 
   public InsertionGraphTransformer( ExpressionGraph expressionGraph, String factoryName )
     {
+    this( expressionGraph, ElementCapture.Primary, factoryName );
+    }
+
+  public InsertionGraphTransformer( ExpressionGraph expressionGraph, ElementCapture capture, String factoryName )
+    {
     super( expressionGraph );
+
+    if( capture != null )
+      this.capture = capture;
+
     this.factoryName = factoryName;
 
     if( factoryName == null )
@@ -47,7 +57,16 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
 
   public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, String factoryName )
     {
+    this( graphTransformer, filter, ElementCapture.Primary, factoryName );
+    }
+
+  public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, ElementCapture capture, String factoryName )
+    {
     super( graphTransformer, filter );
+
+    if( capture != null )
+      this.capture = capture;
+
     this.factoryName = factoryName;
 
     if( factoryName == null )
@@ -57,7 +76,7 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
   @Override
   protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
-    Set<FlowElement> insertions = match.getCapturedElements( ElementExpression.Capture.Primary );
+    Set<FlowElement> insertions = match.getCapturedElements( capture );
 
     if( insertions.isEmpty() )
       return false;

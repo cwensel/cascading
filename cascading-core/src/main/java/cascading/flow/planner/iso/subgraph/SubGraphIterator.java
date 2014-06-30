@@ -33,7 +33,7 @@ import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
@@ -130,7 +130,7 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
       if( match.foundMatch() )
         {
         matches.add( match );
-        elementExcludes.addAll( match.getCapturedElements( ElementExpression.Capture.Primary ) ); // idempotent
+        elementExcludes.addAll( match.getCapturedElements( ElementCapture.Primary ) ); // idempotent
         count++;
         }
       }

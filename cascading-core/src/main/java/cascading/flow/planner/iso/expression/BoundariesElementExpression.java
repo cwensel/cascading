@@ -40,7 +40,7 @@ public class BoundariesElementExpression extends OrElementExpression
     );
     }
 
-  public BoundariesElementExpression( Capture capture )
+  public BoundariesElementExpression( ElementCapture capture )
     {
     super( capture,
       new FlowElementExpression( Group.class ),
@@ -60,7 +60,7 @@ public class BoundariesElementExpression extends OrElementExpression
     );
     }
 
-  public BoundariesElementExpression( Capture capture, TypeExpression.Topo topo )
+  public BoundariesElementExpression( ElementCapture capture, TypeExpression.Topo topo )
     {
     super( capture,
       new FlowElementExpression( Group.class, topo ),

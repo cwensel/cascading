@@ -20,7 +20,7 @@
 
 package cascading.flow.iso.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.rule.RuleExpression;
@@ -39,7 +39,7 @@ public class TestCheckpointExpression extends RuleExpression
     super(
       new ExpressionGraph()
         .arcs(
-          new FlowElementExpression( ElementExpression.Capture.Primary, true, Checkpoint.class ),
+          new FlowElementExpression( ElementCapture.Primary, true, Checkpoint.class ),
           not( new FlowElementExpression( Tap.class ) )
         )
     );

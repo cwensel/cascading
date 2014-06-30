@@ -36,6 +36,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.Expression;
 import cascading.flow.planner.iso.expression.ScopeExpression;
@@ -370,7 +371,7 @@ class State
     FlowElement flowElement = elementGraph.getVertex( node2 );
 
     if(
-      ( (ElementExpression) expression ).getCapture() == ElementExpression.Capture.Primary &&
+      ( (ElementExpression) expression ).getCapture() == ElementCapture.Primary &&
         !finderContext.getRequiredElements().isEmpty()
       )
       return finderContext.isRequired( flowElement );

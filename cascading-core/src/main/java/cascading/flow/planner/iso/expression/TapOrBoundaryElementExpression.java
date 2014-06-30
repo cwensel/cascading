@@ -38,12 +38,12 @@ public class TapOrBoundaryElementExpression extends OrElementExpression
     super( new FlowElementExpression( Tap.class, topo ), new FlowElementExpression( Boundary.class, topo ) );
     }
 
-  public TapOrBoundaryElementExpression( Capture capture )
+  public TapOrBoundaryElementExpression( ElementCapture capture )
     {
     super( capture, new FlowElementExpression( Tap.class ), new FlowElementExpression( Boundary.class ) );
     }
 
-  public TapOrBoundaryElementExpression( Capture capture, TypeExpression.Topo topo )
+  public TapOrBoundaryElementExpression( ElementCapture capture, TypeExpression.Topo topo )
     {
     super( capture, new FlowElementExpression( Tap.class, topo ), new FlowElementExpression( Boundary.class, topo ) );
     }

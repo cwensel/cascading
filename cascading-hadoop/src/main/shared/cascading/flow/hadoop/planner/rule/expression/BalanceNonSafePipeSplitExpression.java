@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.NonSafeAndSplitAndSyncPipeExpressionGraph;
@@ -53,7 +53,7 @@ public class BalanceNonSafePipeSplitExpression extends RuleExpression
 
       new ExpressionGraph()
         .arcs(
-          new FlowElementExpression( ElementExpression.Capture.Primary, Pipe.class, TypeExpression.Topo.Tail )
+          new FlowElementExpression( ElementCapture.Primary, Pipe.class, TypeExpression.Topo.Tail )
         )
     );
     }

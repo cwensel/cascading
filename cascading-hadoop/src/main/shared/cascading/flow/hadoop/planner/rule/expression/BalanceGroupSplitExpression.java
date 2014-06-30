@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.SyncPipeExpressionGraph;
@@ -53,7 +53,7 @@ public class BalanceGroupSplitExpression extends RuleExpression
       // sub-graph to match has out degree captured above
       new ExpressionGraph()
         .arcs(
-          new FlowElementExpression( ElementExpression.Capture.Primary, Pipe.class, TypeExpression.Topo.Split )
+          new FlowElementExpression( ElementCapture.Primary, Pipe.class, TypeExpression.Topo.Split )
         )
     );
     }

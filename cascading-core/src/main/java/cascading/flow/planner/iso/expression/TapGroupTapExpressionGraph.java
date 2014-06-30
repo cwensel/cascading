@@ -33,11 +33,11 @@ public class TapGroupTapExpressionGraph extends ExpressionGraph
     {
     super( SearchOrder.ReverseTopological );
 
-    FlowElementExpression shared = new FlowElementExpression( ElementExpression.Capture.Primary, Group.class );
+    FlowElementExpression shared = new FlowElementExpression( ElementCapture.Primary, Group.class );
 
     this
       .arc( new FlowElementExpression( Tap.class ), ScopeExpression.ALL, shared )
-      .arc( shared, ScopeExpression.ALL, new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class )
+      .arc( shared, ScopeExpression.ALL, new FlowElementExpression( ElementCapture.Primary, Tap.class )
       );
     }
   }

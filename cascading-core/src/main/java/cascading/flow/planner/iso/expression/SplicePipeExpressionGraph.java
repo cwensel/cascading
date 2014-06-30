@@ -35,7 +35,7 @@ public class SplicePipeExpressionGraph extends ExpressionGraph
   public SplicePipeExpressionGraph()
     {
     super( new AndElementExpression(
-      ElementExpression.Capture.Primary,
+      ElementCapture.Primary,
       not( new FlowElementExpression( Extent.class ) ),
       not( new FlowElementExpression( Tap.class ) ),
       not( new FlowElementExpression( Checkpoint.class ) ),

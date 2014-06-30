@@ -46,7 +46,7 @@ public class TypeExpression<Type> extends ElementExpression
   Class<? extends Type> type;
   Topo topo = Topo.Ignore;
 
-  public TypeExpression( Capture capture, boolean exact, Class<? extends Type> type, Topo topo )
+  public TypeExpression( ElementCapture capture, boolean exact, Class<? extends Type> type, Topo topo )
     {
     super( capture );
     this.exact = exact;
@@ -54,21 +54,21 @@ public class TypeExpression<Type> extends ElementExpression
     this.topo = topo;
     }
 
-  public TypeExpression( Capture capture, boolean exact, Class<? extends Type> type )
+  public TypeExpression( ElementCapture capture, boolean exact, Class<? extends Type> type )
     {
     super( capture );
     this.exact = exact;
     this.type = type;
     }
 
-  public TypeExpression( Capture capture, Class<? extends Type> type, Topo topo )
+  public TypeExpression( ElementCapture capture, Class<? extends Type> type, Topo topo )
     {
     super( capture );
     this.type = type;
     this.topo = topo;
     }
 
-  public TypeExpression( Capture capture, Class<? extends Type> type )
+  public TypeExpression( ElementCapture capture, Class<? extends Type> type )
     {
     super( capture );
     this.type = type;

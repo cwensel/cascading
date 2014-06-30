@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.rule.RuleExpression;
@@ -37,9 +37,9 @@ public class AdjacentTempToTapExpression extends RuleExpression
     super(
       new ExpressionGraph()
         .arc(
-          new FlowElementExpression( ElementExpression.Capture.Primary, TempHfs.class ),
+          new FlowElementExpression( ElementCapture.Primary, TempHfs.class ),
           new EquivalentTapsScopeExpression(),
-          new FlowElementExpression( ElementExpression.Capture.Secondary, Hfs.class )
+          new FlowElementExpression( ElementCapture.Secondary, Hfs.class )
         )
     );
     }

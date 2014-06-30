@@ -20,6 +20,7 @@
 
 package cascading.flow.planner.rule.expression;
 
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
@@ -36,7 +37,7 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 public class SplitBeforeEveryExpression extends RuleExpression
   {
   public static final ElementExpression SHARED = or(
-    ElementExpression.Capture.Primary,
+    ElementCapture.Primary,
     new FlowElementExpression( Group.class ), new FlowElementExpression( Every.class )
   );
 
@@ -48,7 +49,7 @@ public class SplitBeforeEveryExpression extends RuleExpression
       new ExpressionGraph()
         .arcs(
           SHARED,
-          new FlowElementExpression( ElementExpression.Capture.Secondary, Every.class )
+          new FlowElementExpression( ElementCapture.Secondary, Every.class )
         )
         .arcs(
           SHARED,

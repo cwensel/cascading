@@ -34,7 +34,7 @@ public class PlannerLevelElementExpression extends ElementExpression
   {
   private final Class<? extends PlannerLevel> plannerLevelClass;
 
-  protected PlannerLevelElementExpression( Capture capture, Class<? extends PlannerLevel> plannerLevelClass )
+  protected PlannerLevelElementExpression( ElementCapture capture, Class<? extends PlannerLevel> plannerLevelClass )
     {
     super( capture );
     this.plannerLevelClass = plannerLevelClass;

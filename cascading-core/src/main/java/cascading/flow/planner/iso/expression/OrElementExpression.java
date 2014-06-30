@@ -36,7 +36,7 @@ public class OrElementExpression extends ElementExpression
     return new OrElementExpression( elementMatchers );
     }
 
-  public static ElementExpression or( Capture capture, ElementExpression... elementMatchers )
+  public static ElementExpression or( ElementCapture capture, ElementExpression... elementMatchers )
     {
     return new OrElementExpression( capture, elementMatchers );
     }
@@ -48,7 +48,7 @@ public class OrElementExpression extends ElementExpression
     this.matchers = matchers;
     }
 
-  public OrElementExpression( Capture capture, ElementExpression... matchers )
+  public OrElementExpression( ElementCapture capture, ElementExpression... matchers )
     {
     super( capture );
     this.matchers = matchers;

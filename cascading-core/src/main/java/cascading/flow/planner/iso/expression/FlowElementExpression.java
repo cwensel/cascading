@@ -27,12 +27,12 @@ import cascading.flow.FlowElement;
  */
 public class FlowElementExpression extends TypeExpression<FlowElement>
   {
-  public FlowElementExpression( Capture capture, boolean exact, Class<? extends FlowElement> type, Topo topo )
+  public FlowElementExpression( ElementCapture capture, boolean exact, Class<? extends FlowElement> type, Topo topo )
     {
     super( capture, exact, type, topo );
     }
 
-  public FlowElementExpression( Capture capture, Class<? extends FlowElement> type, Topo topo )
+  public FlowElementExpression( ElementCapture capture, Class<? extends FlowElement> type, Topo topo )
     {
     super( capture, type, topo );
     }
@@ -47,12 +47,12 @@ public class FlowElementExpression extends TypeExpression<FlowElement>
     super( type, topo );
     }
 
-  public FlowElementExpression( Capture capture, boolean exact, Class<? extends FlowElement> type )
+  public FlowElementExpression( ElementCapture capture, boolean exact, Class<? extends FlowElement> type )
     {
     super( capture, exact, type );
     }
 
-  public FlowElementExpression( Capture capture, Class<? extends FlowElement> type )
+  public FlowElementExpression( ElementCapture capture, Class<? extends FlowElement> type )
     {
     super( capture, type );
     }

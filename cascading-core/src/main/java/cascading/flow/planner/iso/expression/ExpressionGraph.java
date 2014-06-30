@@ -156,7 +156,7 @@ public class ExpressionGraph
     {
     return allowNonRecursiveMatching && !searchOrder.isReversed() && // if reversed is requested, the transform must be recursive
       getDelegate().vertexSet().size() == 1 &&
-      Util.getFirst( getDelegate().vertexSet() ).getCapture() == ElementExpression.Capture.Primary;
+      Util.getFirst( getDelegate().vertexSet() ).getCapture() == ElementCapture.Primary;
     }
 
   public ExpressionGraph arcs( ElementExpression... matchers )

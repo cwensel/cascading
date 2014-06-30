@@ -20,28 +20,28 @@
 
 package cascading.flow.planner.iso;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 
 /**
  *
  */
 public class ElementAnnotation
   {
-  private ElementExpression.Capture capture;
+  private ElementCapture capture;
   private Enum annotation;
 
-  public ElementAnnotation( ElementExpression.Capture capture, Enum annotation )
+  public ElementAnnotation( ElementCapture capture, Enum annotation )
     {
     this.capture = capture;
     this.annotation = annotation;
     }
 
-  public ElementExpression.Capture getCapture()
+  public ElementCapture getCapture()
     {
     return capture;
     }
 
-  public void setCapture( ElementExpression.Capture capture )
+  public void setCapture( ElementCapture capture )
     {
     this.capture = capture;
     }

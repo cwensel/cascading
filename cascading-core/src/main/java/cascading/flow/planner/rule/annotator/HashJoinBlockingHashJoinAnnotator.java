@@ -21,7 +21,7 @@
 package cascading.flow.planner.rule.annotator;
 
 import cascading.flow.planner.iso.ElementAnnotation;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.expression.NonBlockedBlockedJoinJoinAnnotatorExpression;
 import cascading.flow.planner.rule.transformer.RuleAnnotationTransformer;
@@ -37,7 +37,7 @@ public class HashJoinBlockingHashJoinAnnotator extends RuleAnnotationTransformer
     super(
       PlanPhase.PostResolveAssembly,
       new NonBlockedBlockedJoinJoinAnnotatorExpression(),
-      new ElementAnnotation( ElementExpression.Capture.Secondary, BlockingMode.Blocked )
+      new ElementAnnotation( ElementCapture.Secondary, BlockingMode.Blocked )
     );
     }
 

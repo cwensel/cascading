@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
@@ -44,7 +44,7 @@ public class StreamedSelfJoinSourcesExpression extends ExpressionGraph
     FlowElementExpression intermediate = new FlowElementExpression( HashJoin.class, TypeExpression.Topo.Linear );
 
     this.arc(
-      or( ElementExpression.Capture.Primary,
+      or( ElementCapture.Primary,
         new FlowElementExpression( Tap.class, TypeExpression.Topo.LinearOut ),
         new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut )
       ),

@@ -30,7 +30,7 @@ import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.GraphResult;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.flow.planner.rule.Rule;
@@ -73,7 +73,7 @@ public class Asserted extends GraphResult
     {
     String result = message;
 
-    for( ElementExpression.Capture capture : ElementExpression.Capture.values() )
+    for( ElementCapture capture : ElementCapture.values() )
       {
       Iterator<FlowElement> iterator = match.getCapturedElements( capture ).iterator();
 
@@ -99,7 +99,7 @@ public class Asserted extends GraphResult
 
   public Set<FlowElement> getAnchors()
     {
-    return match.getCapturedElements( ElementExpression.Capture.Primary );
+    return match.getCapturedElements( ElementCapture.Primary );
     }
 
   public FlowElement getFirstAnchor()

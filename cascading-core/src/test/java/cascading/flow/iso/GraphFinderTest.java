@@ -24,7 +24,7 @@ import cascading.CascadingTestCase;
 import cascading.flow.iso.graph.HashJoinSameSourceGraph;
 import cascading.flow.iso.graph.JoinAroundJoinRightMostGraph;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
@@ -100,7 +100,7 @@ public class GraphFinderTest extends CascadingTestCase
       .arc(
         new FlowElementExpression( Tap.class ),
         ScopeExpression.ALL,
-        new FlowElementExpression( ElementExpression.Capture.Primary, HashJoin.class )
+        new FlowElementExpression( ElementCapture.Primary, HashJoin.class )
       );
 
     GraphFinder graphFinder = new GraphFinder( expressionGraph );
@@ -122,7 +122,7 @@ public class GraphFinderTest extends CascadingTestCase
 
     graph.writeDOT( getPlanPath() + "/contracted.dot" );
 
-    ExpressionGraph expressionGraph = new ExpressionGraph( new FlowElementExpression( ElementExpression.Capture.Primary, Tap.class ) );
+    ExpressionGraph expressionGraph = new ExpressionGraph( new FlowElementExpression( ElementCapture.Primary, Tap.class ) );
 
     GraphFinder graphFinder = new GraphFinder( expressionGraph );
 

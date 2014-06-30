@@ -53,8 +53,8 @@ public class FlowNode implements ProcessModel, Serializable
   protected ElementGraph nodeSubGraph;
   protected List<ElementGraph> pipelineGraphs = Collections.emptyList();
 
-  private Set<FlowElement> sourceElements;
-  private Set<FlowElement> sinkElements;
+  private transient Set<FlowElement> sourceElements;
+  private transient Set<FlowElement> sinkElements;
   private Map<String, Tap> trapMap;
   private Set<Tap> sourceTaps;
   private Set<Tap> sinkTaps;
@@ -121,17 +121,49 @@ public class FlowNode implements ProcessModel, Serializable
   public Set<FlowElement> getSourceElements()
     {
     if( sourceElements == null )
-      sourceElements = ElementGraphs.findSources( nodeSubGraph, FlowElement.class );
+      sourceElements = Collections.unmodifiableSet( ElementGraphs.findSources( nodeSubGraph, FlowElement.class ) );
 
     return sourceElements;
+    }
+
+  public Set<FlowElement> getSourceElements( Enum annotation )
+    {
+    Set<FlowElement> annotated = getFlowElementsFor( annotation );
+    Set<FlowElement> sourceElements = getSourceElements();
+
+    Set<FlowElement> results = new HashSet<>();
+
+    for( FlowElement sourceElement : sourceElements )
+      {
+      if( annotated.contains( sourceElement ) )
+        results.add( sourceElement );
+      }
+
+    return results;
     }
 
   public Set<FlowElement> getSinkElements()
     {
     if( sinkElements == null )
-      sinkElements = ElementGraphs.findSinks( nodeSubGraph, FlowElement.class );
+      sinkElements = Collections.unmodifiableSet( ElementGraphs.findSinks( nodeSubGraph, FlowElement.class ) );
 
     return sinkElements;
+    }
+
+  public Set<FlowElement> getSinkElements( Enum annotation )
+    {
+    Set<FlowElement> annotated = getFlowElementsFor( annotation );
+    Set<FlowElement> sinkElements = getSinkElements();
+
+    Set<FlowElement> results = new HashSet<>();
+
+    for( FlowElement sinkElement : sinkElements )
+      {
+      if( annotated.contains( sinkElement ) )
+        results.add( sinkElement );
+      }
+
+    return results;
     }
 
   public ElementGraph getPipelineGraphFor( FlowElement streamedSource )

@@ -37,7 +37,7 @@ public class MultiTapGroupExpressionGraph extends ExpressionGraph
       .arc(
         new FlowElementExpression( Tap.class ),
         ScopeExpression.ALL,
-        new FlowElementExpression( ElementExpression.Capture.Primary, Group.class )
+        new FlowElementExpression( ElementCapture.Primary, Group.class )
       );
     }
   }

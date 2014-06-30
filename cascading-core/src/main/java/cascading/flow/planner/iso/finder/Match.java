@@ -31,6 +31,7 @@ import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.util.EnumMultiMap;
@@ -101,10 +102,10 @@ public class Match
 
   public Set<FlowElement> getIncludedElements()
     {
-    return getCapturedElements( ElementExpression.Capture.Include );
+    return getCapturedElements( ElementCapture.Include );
     }
 
-  public Set<FlowElement> getCapturedElements( ElementExpression.Capture... captures )
+  public Set<FlowElement> getCapturedElements( ElementCapture... captures )
     {
     return getCaptureMap().getAllValues( captures );
     }

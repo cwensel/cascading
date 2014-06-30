@@ -20,6 +20,7 @@
 
 package cascading.flow.planner.rule.transformer;
 
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.transformer.InsertionGraphTransformer;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
@@ -32,13 +33,18 @@ public class RuleInsertionTransformer extends RuleTransformer
   {
   public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, String factoryName )
     {
+    this( phase, ruleExpression, null, factoryName );
+    }
+
+  public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, ElementCapture capture, String factoryName )
+    {
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      graphTransformer = new InsertionGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), factoryName );
+      graphTransformer = new InsertionGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), capture, factoryName );
     else if( contractedTransformer != null )
-      graphTransformer = new InsertionGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), factoryName );
+      graphTransformer = new InsertionGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), capture, factoryName );
     else
-      graphTransformer = new InsertionGraphTransformer( ruleExpression.getMatchExpression(), factoryName );
+      graphTransformer = new InsertionGraphTransformer( ruleExpression.getMatchExpression(), capture, factoryName );
     }
   }

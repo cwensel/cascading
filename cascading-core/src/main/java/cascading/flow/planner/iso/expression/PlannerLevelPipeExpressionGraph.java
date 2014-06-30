@@ -29,6 +29,6 @@ public class PlannerLevelPipeExpressionGraph extends ExpressionGraph
   {
   public PlannerLevelPipeExpressionGraph( Class<? extends PlannerLevel> plannerLevelClass )
     {
-    super( new PlannerLevelElementExpression( ElementExpression.Capture.Primary, plannerLevelClass ) );
+    super( new PlannerLevelElementExpression( ElementCapture.Primary, plannerLevelClass ) );
     }
   }

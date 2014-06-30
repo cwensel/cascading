@@ -27,33 +27,19 @@ import cascading.flow.FlowElement;
  */
 public abstract class ElementExpression implements Expression<FlowElement>
   {
-  public enum Capture
-    {
-      Include,
 
-      /**
-       * Becomes the anchor at which a match will rotate during partitioning.
-       */
-      Primary,
-
-      /**
-       * Will be re-captured during partitioning where the Primary acts as an anchor at which the matching rotates
-       */
-      Secondary
-    }
-
-  private Capture capture = Capture.Include;
+  private ElementCapture capture = ElementCapture.Include;
 
   protected ElementExpression()
     {
     }
 
-  protected ElementExpression( Capture capture )
+  protected ElementExpression( ElementCapture capture )
     {
     this.capture = capture;
     }
 
-  public Capture getCapture()
+  public ElementCapture getCapture()
     {
     return capture;
     }

@@ -29,12 +29,12 @@ import cascading.pipe.Operator;
  */
 public class OperationExpression extends TypeExpression<Operation>
   {
-  public OperationExpression( Capture capture, boolean exact, Class<? extends Operation> type )
+  public OperationExpression( ElementCapture capture, boolean exact, Class<? extends Operation> type )
     {
     super( capture, exact, type );
     }
 
-  public OperationExpression( Capture capture, Class<? extends Operation> type )
+  public OperationExpression( ElementCapture capture, Class<? extends Operation> type )
     {
     super( capture, type );
     }

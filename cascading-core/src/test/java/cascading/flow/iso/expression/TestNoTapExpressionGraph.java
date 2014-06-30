@@ -21,7 +21,7 @@
 package cascading.flow.iso.expression;
 
 import cascading.flow.planner.Extent;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
@@ -40,7 +40,7 @@ public class TestNoTapExpressionGraph extends ExpressionGraph
     super( SearchOrder.ReverseDepth,
       not(
         or(
-          ElementExpression.Capture.Primary,
+          ElementCapture.Primary,
           new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Tap.class )
         )

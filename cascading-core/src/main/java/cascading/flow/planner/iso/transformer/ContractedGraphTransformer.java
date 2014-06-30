@@ -25,7 +25,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.iso.expression.ElementExpression;
+import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
 
@@ -47,7 +47,7 @@ public class ContractedGraphTransformer extends MutateGraphTransformer
   @Override
   protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
-    Set<FlowElement> remove = match.getCapturedElements( ElementExpression.Capture.Primary );
+    Set<FlowElement> remove = match.getCapturedElements( ElementCapture.Primary );
 
     if( remove.isEmpty() )
       return false;
