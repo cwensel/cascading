@@ -21,7 +21,6 @@
 package cascading.flow.planner.rule;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -38,6 +37,7 @@ import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.BoundedElementMultiGraph;
+import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.assertion.GraphAssert;
@@ -186,7 +186,6 @@ public class RuleExec
 
       return rules.size() - 1;
       }
-
     }
 
   public RuleResult executePhase( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult, FlowElementGraph flowElementGraph )
@@ -206,6 +205,8 @@ public class RuleExec
       {
       for( Rule rule : rules )
         {
+        LOG.debug( "executing rule: {}", rule );
+
         long begin = System.currentTimeMillis();
 
         try
@@ -240,6 +241,8 @@ public class RuleExec
         long end = System.currentTimeMillis();
 
         ruleResult.setRuleDuration( phase, rule, begin, end );
+
+        LOG.debug( "completed rule: {}", rule );
         }
 
       return context.ruleResult;
@@ -263,7 +266,8 @@ public class RuleExec
     {
     testRulePartitioner( rule );
 
-    List<ElementGraph> stepSubGraphs = performStepPartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, (RulePartitioner) rule );
+    List<ElementGraph> priorResults = context.ruleResult.getStepSubGraphResults();
+    List<ElementGraph> stepSubGraphs = performStepPartitions( phase, context.addRule( rule ), plannerContext, context.currentElementGraph, priorResults, (RulePartitioner) rule );
 
     context.ruleResult.addStepSubGraphs( stepSubGraphs );
     }
@@ -358,15 +362,17 @@ public class RuleExec
     context.ruleResult.setAssemblyResults( phase, context.currentElementGraph );
     }
 
-  private List<ElementGraph> performStepPartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, RulePartitioner partitioner )
+  private List<ElementGraph> performStepPartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, List<ElementGraph> priorResults, RulePartitioner partitioner )
     {
-    Set<FlowElement> exclusions = getExclusions( Collections.<ElementGraph>singletonList( elementGraph ), partitioner.getAnnotationExcludes() );
+    Set<FlowElement> exclusions = getExclusions( priorResults, partitioner.getAnnotationExcludes() );
 
-    Partitions partition = partitioner.partition( plannerContext, elementGraph, exclusions );
+    ElementGraph priorAnnotated = annotateWithPriors( elementGraph, priorResults );
 
-    traceWriter.writePlan( phase, partitionRuleNum, partition );
+    Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
-    return makeBoundedOn( elementGraph, partition.getAnnotatedSubGraphs() );
+    traceWriter.writePlan( phase, partitionRuleNum, partitions );
+
+    return makeBoundedOn( elementGraph, partitions.getAnnotatedSubGraphs() );
     }
 
   private Map<ElementGraph, List<ElementGraph>> performNodePartitions( PlanPhase phase, int partitionRuleNum, PlannerContext plannerContext, FlowElementGraph elementGraph, List<ElementGraph> stepSubGraphs, Map<ElementGraph, List<ElementGraph>> priorResults, RulePartitioner partitioner )
@@ -377,13 +383,16 @@ public class RuleExec
 
     for( ElementGraph stepSubGraph : stepSubGraphs )
       {
-      Set<FlowElement> exclusions = getExclusions( priorResults.get( stepSubGraph ), partitioner.getAnnotationExcludes() );
+      List<ElementGraph> priorResultElementGraphs = priorResults.get( stepSubGraph );
+      Set<FlowElement> exclusions = getExclusions( priorResultElementGraphs, partitioner.getAnnotationExcludes() );
 
-      Partitions partition = partitioner.partition( plannerContext, stepSubGraph, exclusions );
+      ElementGraph priorAnnotated = annotateWithPriors( stepSubGraph, priorResultElementGraphs );
 
-      traceWriter.writePlan( phase, partitionRuleNum, stepCount++, partition );
+      Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
-      List<ElementGraph> results = makeBoundedOn( elementGraph, partition.getAnnotatedSubGraphs() );
+      traceWriter.writePlan( phase, partitionRuleNum, stepCount++, partitions );
+
+      List<ElementGraph> results = makeBoundedOn( elementGraph, partitions.getAnnotatedSubGraphs() );
 
       nodeSubGraphs.put( stepSubGraph, results );
       }
@@ -403,9 +412,12 @@ public class RuleExec
 
       for( ElementGraph nodeSubGraph : entry.getValue() )
         {
-        Set<FlowElement> exclusions = getExclusions( priorResults.get( nodeSubGraph ), partitioner.getAnnotationExcludes() );
+        List<ElementGraph> priorResultElementGraphs = priorResults.get( nodeSubGraph );
+        Set<FlowElement> exclusions = getExclusions( priorResultElementGraphs, partitioner.getAnnotationExcludes() );
 
-        Partitions partitions = partitioner.partition( plannerContext, nodeSubGraph, exclusions );
+        ElementGraph priorAnnotated = annotateWithPriors( nodeSubGraph, priorResultElementGraphs );
+
+        Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
         traceWriter.writePlan( phase, pipelineRuleNum, stepCount, nodeCount++, partitions );
 
@@ -418,6 +430,28 @@ public class RuleExec
       }
 
     return nodePipeLines;
+    }
+
+  private ElementGraph annotateWithPriors( ElementGraph elementGraph, List<ElementGraph> priorResults )
+    {
+    if( priorResults == null )
+      return elementGraph;
+
+    // the results are sub-graphs of the elementGraph, so guaranteed to exist in graph
+
+    AnnotatedGraph resultGraph = new ElementDirectedGraph( elementGraph );
+
+    for( ElementGraph result : priorResults )
+      {
+      if( !( result instanceof AnnotatedGraph ) || !( (AnnotatedGraph) result ).hasAnnotations() )
+        continue;
+
+      EnumMultiMap<FlowElement> annotations = ( (AnnotatedGraph) result ).getAnnotations();
+
+      resultGraph.getAnnotations().addAll( annotations );
+      }
+
+    return (ElementGraph) resultGraph;
     }
 
   private Set<FlowElement> getExclusions( List<ElementGraph> elementGraphs, Enum[] annotationExcludes )

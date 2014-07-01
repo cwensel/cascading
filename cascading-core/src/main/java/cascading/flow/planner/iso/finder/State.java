@@ -251,7 +251,7 @@ class State
         prevN2++;
       }
 
-    LOG.debug( "prevN1: {}, prevN2: {}", prevN1, prevN2 );
+    LOG.trace( "prevN1: {}, prevN2: {}", prevN1, prevN2 );
 
     if( prevN1 < n1 && prevN2 < n2 )
       return new Pair<>( prevN1, prevN2 );
@@ -269,7 +269,19 @@ class State
 
     List<Scope> scopes = elementGraph.getAllEdgesList( v3, v4 );
 
-    return areCompatibleEdges( plannerContext, elementGraph.getDelegate(), matchers, scopes ) != null;
+    Collection<Scope> results = areCompatibleEdges( plannerContext, elementGraph.getDelegate(), matchers, scopes );
+
+    if( LOG.isDebugEnabled() && results != null )
+      {
+      for( Scope result : results )
+        {
+        FlowElement lhs = elementGraph.getDelegate().getEdgeSource( result );
+        FlowElement rhs = elementGraph.getDelegate().getEdgeTarget( result );
+        LOG.debug( "compatible edge: {} - {}", lhs, rhs );
+        }
+      }
+
+    return results != null;
     }
 
   public static Collection<Scope> areCompatibleEdges( PlannerContext plannerContext, ElementGraph elementGraph, List<ScopeExpression> matchers, List<Scope> scopes )
@@ -370,16 +382,20 @@ class State
     Expression expression = matchGraph.getVertex( node1 );
     FlowElement flowElement = elementGraph.getVertex( node2 );
 
-    if(
-      ( (ElementExpression) expression ).getCapture() == ElementCapture.Primary &&
-        !finderContext.getRequiredElements().isEmpty()
-      )
-      return finderContext.isRequired( flowElement );
+    boolean result;
 
-    if( finderContext.isExcluded( flowElement ) || finderContext.isIgnored( flowElement ) )
-      return false;
+    if( ( (ElementExpression) expression ).getCapture() == ElementCapture.Primary &&
+      !finderContext.getRequiredElements().isEmpty() )
+      result = finderContext.isRequired( flowElement );
+    else if( finderContext.isExcluded( flowElement ) || finderContext.isIgnored( flowElement ) )
+      result = false;
+    else
+      result = expression.applies( plannerContext, elementGraph.getDelegate(), flowElement );
 
-    return expression.applies( plannerContext, elementGraph.getDelegate(), flowElement );
+    if( LOG.isDebugEnabled() && result )
+      LOG.debug( "compatible nodes: {} with {}", flowElement, expression );
+
+    return result;
     }
 
   public boolean isFeasiblePair( int node1, int node2 )

@@ -166,6 +166,11 @@ public class FlowNode implements ProcessModel, Serializable
     return results;
     }
 
+  public List<ElementGraph> getPipelineGraphs()
+    {
+    return pipelineGraphs;
+    }
+
   public ElementGraph getPipelineGraphFor( FlowElement streamedSource )
     {
     return streamPipelineMap.get( streamedSource );
@@ -404,19 +409,4 @@ public class FlowNode implements ProcessModel, Serializable
 
     return results;
     }
-
-//
-//  protected abstract Map<String, Config> initFromSources( FlowProcess<? extends Config> flowProcess, Config config );
-//
-//  protected abstract Map<String, Config> initFromSinks( FlowProcess<? extends Config> flowProcess, Config config );
-//
-//  protected abstract void initFromProcessConfigDef( Config config );
-//
-//  protected abstract void initFromTraps( FlowProcess<? extends Config> flowProcess, Config config );
-//
-//  protected FlowProcess getFlowProcess()
-//    {
-//    return flowStep.getFlow().getFlowProcess();
-//    }
-//
   }

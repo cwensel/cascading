@@ -68,7 +68,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     {
     if( depth == TRANSFORM_RECURSION_DEPTH_MAX )
       {
-      LOG.info( "transform recursion ending, reached depth: {}", depth );
+      LOG.info( "!!! transform recursion ending, reached depth: {}", depth );
       return graph;
       }
 
@@ -76,6 +76,9 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
       LOG.debug( "preparing match within: {}", this.getClass().getSimpleName() );
 
     ElementGraph prepared = prepareForMatch( transformed, graph );
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "completed match within: {}, with result: {}", this.getClass().getSimpleName(), prepared != null );
 
     if( prepared == null )
       return graph;
@@ -94,9 +97,17 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
       match = finder.findFirstMatch( transformed.getPlannerContext(), prepared, exclusions );
 
     if( LOG.isDebugEnabled() )
-      LOG.debug( "transforming in place within: {}", this.getClass().getSimpleName() );
+      LOG.debug( "completed match within: {}", this.getClass().getSimpleName() );
 
-    if( !transformGraphInPlaceUsing( transformed, graph, match ) )
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "performing transform in place within: {}", this.getClass().getSimpleName() );
+
+    boolean transformResult = transformGraphInPlaceUsing( transformed, graph, match );
+
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "completed transform in place within: {}, with result: {}", this.getClass().getSimpleName(), transformResult );
+
+    if( !transformResult )
       return graph;
 
     transformed.addRecursionTransform( graph );

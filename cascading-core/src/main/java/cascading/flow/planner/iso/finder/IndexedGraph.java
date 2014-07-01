@@ -167,13 +167,19 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
 
   public Edge getEdge( int lhsVertex, int rhsVertex )
     {
-    return getDelegate().getEdge( getVertex( lhsVertex ), getVertex( rhsVertex ) );
+    Node lhsNode = getVertex( lhsVertex );
+    Node rhsNode = getVertex( rhsVertex );
+
+    return getDelegate().getEdge( lhsNode, rhsNode );
     }
 
   @Override
   public Set<Edge> getAllEdges( Object sourceVertex, Object targetVertex )
     {
-    return getDelegate().getAllEdges( getVertex( (int) sourceVertex ), getVertex( ( (int) targetVertex ) ) );
+    Node lhsNode = getVertex( (int) sourceVertex );
+    Node rhsNode = getVertex( ( (int) targetVertex ) );
+
+    return getDelegate().getAllEdges( lhsNode, rhsNode );
     }
 
   public List<Edge> getAllEdgesList( Object sourceVertex, Object targetVertex )

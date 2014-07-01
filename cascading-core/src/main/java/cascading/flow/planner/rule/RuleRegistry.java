@@ -44,9 +44,11 @@ public class RuleRegistry
 
   protected void enableDebugLogging()
     {
+    LogUtil.setLog4jLevel( "cascading.flow.planner.rule", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.transformer", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.assertion", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.subgraph", "DEBUG" );
+    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.finder", "DEBUG" );
     }
 
   /**

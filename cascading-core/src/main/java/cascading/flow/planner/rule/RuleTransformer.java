@@ -91,4 +91,10 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
 
     return result;
     }
+
+  @Override
+  public String toString()
+    {
+    return getRuleName();
+    }
   }

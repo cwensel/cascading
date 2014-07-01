@@ -85,4 +85,10 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
 
     return transformed;
     }
+
+  @Override
+  public String toString()
+    {
+    return getRuleName();
+    }
   }

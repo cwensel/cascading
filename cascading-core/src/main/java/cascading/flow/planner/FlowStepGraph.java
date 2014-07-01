@@ -51,13 +51,19 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
 
       writePlan( stepCount, stepSubGraph, nodeSubGraphs, pipelineSubGraphsMap );
 
-      FlowNodeGraph flowNodeGraph = new FlowNodeGraph( flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
+      FlowNodeGraph flowNodeGraph = createFlowNodeGraph( flowElementGraph, pipelineSubGraphsMap, nodeSubGraphs );
+
       FlowStep flowStep = flowPlanner.createFlowStep( totalSteps, stepCount++, stepSubGraph, flowNodeGraph );
 
       addVertex( flowStep );
       }
 
     bindEdges();
+    }
+
+  protected FlowNodeGraph createFlowNodeGraph( FlowElementGraph flowElementGraph, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap, List<ElementGraph> nodeSubGraphs )
+    {
+    return new FlowNodeGraph( flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
     }
 
   private void writePlan( int stepCount, ElementGraph stepSubGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )

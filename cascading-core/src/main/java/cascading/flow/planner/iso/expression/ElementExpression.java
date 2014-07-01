@@ -27,7 +27,6 @@ import cascading.flow.FlowElement;
  */
 public abstract class ElementExpression implements Expression<FlowElement>
   {
-
   private ElementCapture capture = ElementCapture.Include;
 
   protected ElementExpression()

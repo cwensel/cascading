@@ -113,6 +113,12 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     return this;
     }
 
+  public void setAnnotationExcludes( Enum... annotationExcludes )
+    {
+    if( annotationExcludes != null )
+      this.annotationExcludes = annotationExcludes;
+    }
+
   public RulePartitioner addAnnotationExclude( Enum exclude )
     {
     ArrayList<Enum> exclusions = new ArrayList<>( Arrays.asList( this.annotationExcludes ) );
@@ -133,5 +139,11 @@ public class RulePartitioner extends GraphPartitioner implements Rule
   public String getRuleName()
     {
     return getClass().getSimpleName().replaceAll( "^(.*)[]A-Z][a-z]*Rule$", "$1" );
+    }
+
+  @Override
+  public String toString()
+    {
+    return getRuleName();
     }
   }

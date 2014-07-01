@@ -20,7 +20,10 @@
 
 package cascading.flow.planner;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,9 +36,17 @@ import cascading.flow.planner.graph.ElementGraph;
  */
 public class FlowNodeGraph extends ProcessGraph<FlowNode>
   {
-  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraph, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+  private FlowElementGraph flowElementGraph;
+
+  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs )
     {
-    buildGraph( flowElementGraph, nodeSubGraph, pipelineSubGraphsMap );
+    this( flowElementGraph, nodeSubGraphs, Collections.<ElementGraph, List<ElementGraph>>emptyMap() );
+    }
+
+  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+    {
+    this.flowElementGraph = flowElementGraph;
+    buildGraph( flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
     }
 
   protected void buildGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
@@ -60,5 +71,25 @@ public class FlowNodeGraph extends ProcessGraph<FlowNode>
       results.addAll( flowNode.getFlowElementsFor( annotation ) );
 
     return results;
+    }
+
+  public FlowNodeGraph promotePipelines()
+    {
+    List<ElementGraph> nodeSubGraphs = new ArrayList<>();
+    Iterator<FlowNode> iterator = getTopologicalIterator();
+
+    while( iterator.hasNext() )
+      {
+      FlowNode flowNode = iterator.next();
+
+      List<ElementGraph> pipelineGraphs = flowNode.getPipelineGraphs();
+
+      if( pipelineGraphs == null )
+        nodeSubGraphs.add( flowNode.getElementGraph() );
+      else
+        nodeSubGraphs.addAll( pipelineGraphs );
+      }
+
+    return new FlowNodeGraph( flowElementGraph, nodeSubGraphs );
     }
   }
