@@ -188,13 +188,7 @@ public class FlowNode implements ProcessModel, Serializable
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = new HashSet<>();
-
-    for( FlowElement sourceElement : getSourceElements() )
-      {
-      if( sourceElement instanceof Tap )
-        sourceTaps.add( (Tap) sourceElement );
-      }
+    sourceTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSourceElements() ) );
 
     return sourceTaps;
     }
@@ -205,13 +199,7 @@ public class FlowNode implements ProcessModel, Serializable
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = new HashSet<>();
-
-    for( FlowElement sinkElement : getSinkElements() )
-      {
-      if( sinkElement instanceof Tap )
-        sinkTaps.add( (Tap) sinkElement );
-      }
+    sinkTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSinkElements() ) );
 
     return sinkTaps;
     }
