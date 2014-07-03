@@ -37,11 +37,11 @@ buildscript {
     maven { url 'http://repo.spring.io/plugins-release' }
   }
   dependencies {
-    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.6'
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.5'
   }
 }
 
-configure( allprojects ) {
+configure( subprojects ) {
   apply plugin: 'propdeps'
   apply plugin: 'propdeps-maven'
   apply plugin: 'propdeps-idea'
