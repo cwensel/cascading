@@ -147,8 +147,8 @@ public class IsomorphismTest extends CascadingTestCase
     ruleRegistry.addRule( new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, new TestCheckpointExpression(), TapElementFactory.TEMP_TAP ) );
 //    ruleRegistry.addRule( new RuleContractedTransform( PlanPhase.PreResolve, new NoOpPipeExpression() ) );
 
-    RuleResult ruleResult = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), new StandardElementGraph() );
-    FlowElementGraph flowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PreResolveAssembly );
+    RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new StandardElementGraph() ) );
+    FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
     SubGraphIterator iterator = new SubGraphIterator(
       new PlannerContext(),
@@ -173,8 +173,8 @@ public class IsomorphismTest extends CascadingTestCase
 
     FlowElementGraph elementGraph = new HashJoinMergeIntoHashJoinStreamedStreamedMergeGraph();
 //    FlowElementGraph elementGraph = new HashJoinAroundHashJoinLeftMostGraph();
-    RuleResult ruleResult = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), elementGraph );
-    FlowElementGraph flowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PreResolveAssembly );
+    RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( elementGraph ) );
+    FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
     flowElementGraph.writeDOT( getPlanPath() + "/mergejoin.dot" );
 
@@ -278,8 +278,8 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addRule( new RemoveNoOpPipeTransformer() );
 
-    RuleResult ruleResult = new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), elementGraph );
-    FlowElementGraph flowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PreResolveAssembly );
+    RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( elementGraph ) );
+    FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
     flowElementGraph.writeDOT( getPlanPath() + "/node.dot" );
 
@@ -320,7 +320,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     try
       {
-      new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), new LoneGroupAssertionGraph() );
+      new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new LoneGroupAssertionGraph() ) );
       fail();
       }
     catch( PlannerException exception )
@@ -328,7 +328,7 @@ public class IsomorphismTest extends CascadingTestCase
       // do nothing
       }
 
-    new RuleExec( ruleRegistry ).executePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult(), new HashJoinSameSourceGraph() );
+    new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new HashJoinSameSourceGraph() ) );
     }
 
   @Test

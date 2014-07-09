@@ -31,6 +31,8 @@ public abstract class GraphResult<R extends ElementGraph>
   {
   public abstract ElementGraph getBeginGraph();
 
+  public abstract String getRuleName();
+
   public abstract R getEndGraph();
 
   public abstract void writeDOTs( String path );

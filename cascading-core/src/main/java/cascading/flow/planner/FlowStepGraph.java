@@ -34,20 +34,20 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
     {
     }
 
-  public FlowStepGraph( String tracePath, FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+  public FlowStepGraph( String tracePath, FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     this.tracePath = tracePath;
     buildGraph( flowPlanner, flowElementGraph, nodeSubGraphsMap, pipelineSubGraphsMap );
     }
 
-  protected void buildGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+  protected void buildGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     int totalSteps = nodeSubGraphsMap.size();
     int stepCount = 0;
 
     for( ElementGraph stepSubGraph : nodeSubGraphsMap.keySet() )
       {
-      List<ElementGraph> nodeSubGraphs = nodeSubGraphsMap.get( stepSubGraph );
+      List<? extends ElementGraph> nodeSubGraphs = nodeSubGraphsMap.get( stepSubGraph );
 
       writePlan( stepCount, stepSubGraph, nodeSubGraphs, pipelineSubGraphsMap );
 
@@ -61,12 +61,12 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
     bindEdges();
     }
 
-  protected FlowNodeGraph createFlowNodeGraph( FlowElementGraph flowElementGraph, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap, List<ElementGraph> nodeSubGraphs )
+  protected FlowNodeGraph createFlowNodeGraph( FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap, List<? extends ElementGraph> nodeSubGraphs )
     {
     return new FlowNodeGraph( flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
     }
 
-  private void writePlan( int stepCount, ElementGraph stepSubGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+  private void writePlan( int stepCount, ElementGraph stepSubGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     if( getTracePath() == null )
       return;
@@ -83,7 +83,7 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
 
       nodeGraph.writeDOT( nodeGraphName );
 
-      List<ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeGraph );
+      List<? extends ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeGraph );
 
       if( pipelineGraphs == null )
         continue;

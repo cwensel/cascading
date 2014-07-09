@@ -51,7 +51,7 @@ public class FlowNode implements ProcessModel, Serializable
   private final String name;
 
   protected ElementGraph nodeSubGraph;
-  protected List<ElementGraph> pipelineGraphs = Collections.emptyList();
+  protected List<? extends ElementGraph> pipelineGraphs = Collections.emptyList();
 
   private transient Set<FlowElement> sourceElements;
   private transient Set<FlowElement> sinkElements;
@@ -63,7 +63,7 @@ public class FlowNode implements ProcessModel, Serializable
   private Map<Tap, Set<String>> reverseSinkTaps;
   private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
 
-  public FlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<ElementGraph> pipelineGraphs )
+  public FlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
     {
     this.id = Util.createUniqueID();
     this.ordinal = ordinal;
@@ -166,7 +166,7 @@ public class FlowNode implements ProcessModel, Serializable
     return results;
     }
 
-  public List<ElementGraph> getPipelineGraphs()
+  public List<? extends ElementGraph> getPipelineGraphs()
     {
     return pipelineGraphs;
     }

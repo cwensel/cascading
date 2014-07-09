@@ -41,7 +41,6 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
@@ -104,7 +103,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   protected AssertionLevel defaultAssertionLevel;
   /** Field debugLevel */
   protected DebugLevel defaultDebugLevel;
-  private RuleRegistry ruleRegistry;
 
   /**
    * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
@@ -181,13 +179,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 
-      writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getAssemblyResult( PlanPhase.PostResolveAssembly ) );
+      writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getAssemblyGraph() );
 
       writeStats( plannerContext, nameOrID, ruleResult );
 
-      FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyResult( PlanPhase.PostResolveAssembly );
+      FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
 
-      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, ruleResult.getNodeSubGraphResults(), ruleResult.getNodePipelineGraphResults() );
+      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, ruleResult.getNodeGraphs(), ruleResult.getPipelineGraphs() );
 
       writeTracePlan( nameOrID, "2-completed-flow-step-graph", flowStepGraph );
 
@@ -595,7 +593,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return System.getProperty( FlowPlanner.TRACE_STATS_PATH );
     }
 
-  protected void writeTracePlan( String flowName, String fileName, FlowElementGraph flowElementGraph )
+  protected void writeTracePlan( String flowName, String fileName, ElementGraph flowElementGraph )
     {
     String path = getPlanTracePath();
 

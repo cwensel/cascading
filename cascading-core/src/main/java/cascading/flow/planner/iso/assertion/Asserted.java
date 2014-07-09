@@ -84,6 +84,7 @@ public class Asserted extends GraphResult
     return result;
     }
 
+  @Override
   public String getRuleName()
     {
     if( getGraphAssert() instanceof Rule )

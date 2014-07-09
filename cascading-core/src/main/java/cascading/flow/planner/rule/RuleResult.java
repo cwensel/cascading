@@ -21,114 +21,137 @@
 package cascading.flow.planner.rule;
 
 import java.io.PrintWriter;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.util.Util;
 
 /**
  *
  */
 public class RuleResult
   {
-  private Map<PlanPhase, FlowElementGraph> assemblyResults = new HashMap<>();
-  private List<ElementGraph> stepSubGraphResults = new LinkedList<>();
-  private Map<ElementGraph, List<ElementGraph>> nodeSubGraphResults = new LinkedHashMap<>();
-  private Map<ElementGraph, List<ElementGraph>> nodePipelineGraphResults = new LinkedHashMap<>();
+  private Map<ProcessLevel, Set<ElementGraph>> levelParents = new HashMap<>();
+  ResultTree resultTree = new ResultTree();
 
   private long duration = 0;
   private Map<PlanPhase, Long> phaseDurations = new LinkedHashMap<>();
   private Map<PlanPhase, Map<String, Long>> ruleDurations = new LinkedHashMap<>();
 
-  public void setAssemblyResults( PlanPhase phase, FlowElementGraph elementGraph )
-    {
-    if( elementGraph == null )
-      throw new IllegalArgumentException( "element graph may not be null" );
+  protected FlowElementGraph initialAssembly;
 
-    assemblyResults.put( phase, elementGraph );
+  public RuleResult()
+    {
+    for( ProcessLevel level : ProcessLevel.values() )
+      levelParents.put( level, new LinkedHashSet<ElementGraph>() );
     }
 
-  public FlowElementGraph getPreviousAssemblyResults( PlanPhase phase )
+  public RuleResult( FlowElementGraph initialAssembly )
     {
-    if( phase == PlanPhase.Start )
-      return null;
+    this();
 
-    return getAssemblyResult( PlanPhase.prior( phase ) );
+    initResult( initialAssembly );
     }
 
-  public FlowElementGraph getAssemblyResult( PlanPhase phase )
+  public void initResult( FlowElementGraph initialAssembly )
     {
-    FlowElementGraph result = null;
-    PlanPhase prior = phase;
+    this.initialAssembly = initialAssembly;
 
-    while( result == null && prior != null )
+    setLevelResults( ProcessLevel.Assembly, initialAssembly, initialAssembly.copyGraph() );
+    }
+
+  public void setLevelResults( ProcessLevel level, Map<ElementGraph, List<? extends ElementGraph>> results )
+    {
+    for( Map.Entry<ElementGraph, List<? extends ElementGraph>> entry : results.entrySet() )
+      setLevelResults( level, entry.getKey(), entry.getValue() );
+    }
+
+  public void setLevelResults( ProcessLevel level, ElementGraph parent, ElementGraph child )
+    {
+    setLevelResults( level, parent, Collections.singletonList( child ) );
+    }
+
+  public void setLevelResults( ProcessLevel level, ElementGraph parent, List<? extends ElementGraph> elementGraphs )
+    {
+    levelParents.get( level ).add( parent );
+    resultTree.setChildren( parent, elementGraphs );
+    }
+
+  public Map<ElementGraph, List<? extends ElementGraph>> getLevelResults( ProcessLevel level )
+    {
+    Map<ElementGraph, List<? extends ElementGraph>> result = new HashMap<>();
+    Set<? extends ElementGraph> parents = levelParents.get( level );
+
+    if( !parents.isEmpty() )
       {
-      result = assemblyResults.get( prior );
+      for( ElementGraph parent : parents )
+        result.put( parent, resultTree.getChildren( parent ) );
 
-      prior = PlanPhase.prior( prior );
-      }
-
-    if( result != null )
       return result;
-
-    throw new IllegalStateException( "unable to find prior plan results starting with phase: " + phase );
-    }
-
-  public void addStepSubGraphs( Collection<ElementGraph> stepSubGraphs )
-    {
-    this.stepSubGraphResults.addAll( stepSubGraphs );
-    }
-
-  public List<ElementGraph> getStepSubGraphResults()
-    {
-    return stepSubGraphResults;
-    }
-
-  public void addNodeSubGraphs( Map<ElementGraph, List<ElementGraph>> nodeSubGraphs )
-    {
-    for( Map.Entry<ElementGraph, List<ElementGraph>> entry : nodeSubGraphs.entrySet() )
-      {
-      if( !this.nodeSubGraphResults.containsKey( entry.getKey() ) )
-        this.nodeSubGraphResults.put( entry.getKey(), entry.getValue() );
-      else
-        this.nodeSubGraphResults.get( entry.getKey() ).addAll( entry.getValue() );
       }
-    }
 
-  public Map<ElementGraph, List<ElementGraph>> getNodeSubGraphResults()
-    {
-    return nodeSubGraphResults;
-    }
+    // initialize the level
+    Set<ElementGraph> top = levelParents.get( ProcessLevel.parent( level ) );
 
-  public void setNodeSubGraphResults( Map<ElementGraph, List<ElementGraph>> nodeSubGraphResults )
-    {
-    this.nodeSubGraphResults = nodeSubGraphResults;
-    }
-
-  public void addNodePipelineGraphs( Map<ElementGraph, List<ElementGraph>> nodePipelineGraphs )
-    {
-    for( Map.Entry<ElementGraph, List<ElementGraph>> entry : nodePipelineGraphs.entrySet() )
+    for( ElementGraph parent : top )
       {
-      if( !this.nodePipelineGraphResults.containsKey( entry.getKey() ) )
-        this.nodePipelineGraphResults.put( entry.getKey(), entry.getValue() );
-      else
-        this.nodePipelineGraphResults.get( entry.getKey() ).addAll( entry.getValue() );
+      List<? extends ElementGraph> children = resultTree.getChildren( parent );
+
+      for( ElementGraph child : children )
+        result.put( child, new ArrayList<ElementGraph>() );
       }
+
+    return result;
     }
 
-  public Map<ElementGraph, List<ElementGraph>> getNodePipelineGraphResults()
+  public int[] getPathFor( ElementGraph parent, ElementGraph child )
     {
-    return nodePipelineGraphResults;
+    return resultTree.getEdge( parent, child ).getOrdinals();
     }
 
-  public void setNodePipelineGraphResults( Map<ElementGraph, List<ElementGraph>> nodePipelineGraphResults )
+  public int[] getPathFor( ElementGraph parent )
     {
-    this.nodePipelineGraphResults = nodePipelineGraphResults;
+    ResultTree.Path incomingEdge = resultTree.getIncomingEdge( parent );
+
+    if( incomingEdge == null )
+      return new int[ 0 ];
+
+    return incomingEdge.getOrdinals();
+    }
+
+  public FlowElementGraph getInitialAssembly()
+    {
+    return initialAssembly;
+    }
+
+  public FlowElementGraph getAssemblyGraph()
+    {
+    Map<ElementGraph, List<? extends ElementGraph>> results = getLevelResults( ProcessLevel.Assembly );
+
+    return (FlowElementGraph) Util.getFirst( results.get( getInitialAssembly() ) );
+    }
+
+  public Map<ElementGraph, List<? extends ElementGraph>> getStepGraphs()
+    {
+    return getLevelResults( ProcessLevel.Step );
+    }
+
+  public Map<ElementGraph, List<? extends ElementGraph>> getNodeGraphs()
+    {
+    return getLevelResults( ProcessLevel.Node );
+    }
+
+  public Map<ElementGraph, List<? extends ElementGraph>> getPipelineGraphs()
+    {
+    return getLevelResults( ProcessLevel.Pipeline );
     }
 
   public void setDuration( long begin, long end )
@@ -141,14 +164,14 @@ public class RuleResult
     phaseDurations.put( phase, end - begin );
     }
 
-  public void setRuleDuration( PlanPhase phase, Rule rule, long begin, long end )
+  public void setRuleDuration( Rule rule, long begin, long end )
     {
-    Map<String, Long> durations = ruleDurations.get( phase );
+    Map<String, Long> durations = ruleDurations.get( rule.getRulePhase() );
 
     if( durations == null )
       {
       durations = new LinkedHashMap<>();
-      ruleDurations.put( phase, durations );
+      ruleDurations.put( rule.getRulePhase(), durations );
       }
 
     if( durations.containsKey( rule.getRuleName() ) )
@@ -167,10 +190,7 @@ public class RuleResult
       {
       long phaseDuration = phaseDurations.get( phase );
 
-      if( phase.isTerminal() )
-        writer.format( "%s\n", phase );
-      else
-        writer.format( "%s\t%.03f\n", phase, ( phaseDuration / 1000f ) );
+      writer.format( "%s\t%.03f\n", phase, ( phaseDuration / 1000f ) );
 
       Map<String, Long> rules = ruleDurations.get( phase );
 

@@ -38,23 +38,23 @@ public class FlowNodeGraph extends ProcessGraph<FlowNode>
   {
   private FlowElementGraph flowElementGraph;
 
-  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs )
+  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs )
     {
-    this( flowElementGraph, nodeSubGraphs, Collections.<ElementGraph, List<ElementGraph>>emptyMap() );
+    this( flowElementGraph, nodeSubGraphs, Collections.<ElementGraph, List<? extends ElementGraph>>emptyMap() );
     }
 
-  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     this.flowElementGraph = flowElementGraph;
     buildGraph( flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
     }
 
-  protected void buildGraph( FlowElementGraph flowElementGraph, List<ElementGraph> nodeSubGraphs, Map<ElementGraph, List<ElementGraph>> pipelineSubGraphsMap )
+  protected void buildGraph( FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     int count = 0;
     for( ElementGraph nodeSubGraph : nodeSubGraphs )
       {
-      List<ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeSubGraph );
+      List<? extends ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeSubGraph );
       FlowNode flowNode = new FlowNode( count++, "node", flowElementGraph, nodeSubGraph, pipelineGraphs );
 
       addVertex( flowNode );
@@ -82,7 +82,7 @@ public class FlowNodeGraph extends ProcessGraph<FlowNode>
       {
       FlowNode flowNode = iterator.next();
 
-      List<ElementGraph> pipelineGraphs = flowNode.getPipelineGraphs();
+      List<? extends ElementGraph> pipelineGraphs = flowNode.getPipelineGraphs();
 
       if( pipelineGraphs == null )
         nodeSubGraphs.add( flowNode.getElementGraph() );
