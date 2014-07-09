@@ -18,8 +18,6 @@
  * limitations under the License.
  */
 
-
-
 apply from: "${rootDir}/etc/hadoop-shared-config.gradle"
 apply from: "${rootDir}/etc/hadoop-shared-mr1-config.gradle"
 

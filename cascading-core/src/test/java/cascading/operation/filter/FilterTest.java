@@ -29,8 +29,8 @@ import cascading.operation.expression.ExpressionFilter;
 import cascading.pipe.assembly.Unique;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.junit.Test;
 import cascading.tuple.TupleEntry;
+import org.junit.Test;
 
 /**
  *
