@@ -1880,7 +1880,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       .addSource( lhs, lhsTap )
       .addTailSink( counted, sink );
 
-    boolean failOnMR = getPlatform().isMapReduce() || getPlatform().isDAG();
+    boolean failOnMR = getPlatform().isMapReduce(); // plan seems reasonable in tez
 
     Flow flow = null;
 

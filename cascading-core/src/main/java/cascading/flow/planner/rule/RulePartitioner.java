@@ -32,7 +32,14 @@ import cascading.flow.planner.iso.subgraph.GraphPartitioner;
  */
 public class RulePartitioner extends GraphPartitioner implements Rule
   {
+  public enum Partition
+    {
+      SplitParent,
+      SplitCurrent
+    }
+
   PlanPhase phase;
+  Partition partition = Partition.SplitParent;
   Enum[] annotationExcludes = new Enum[ 0 ];
 
   public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression )
@@ -48,6 +55,24 @@ public class RulePartitioner extends GraphPartitioner implements Rule
   public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression, Enum... annotationExcludes )
     {
     this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+
+    if( annotationExcludes != null )
+      this.annotationExcludes = annotationExcludes;
+    }
+
+  public RulePartitioner( PlanPhase phase, Partition partition, RuleExpression ruleExpression )
+    {
+    this( phase, partition, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    }
+
+  public RulePartitioner( PlanPhase phase, Partition partition, RuleExpression ruleExpression, ElementAnnotation... annotations )
+    {
+    this( phase, partition, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
+    }
+
+  public RulePartitioner( PlanPhase phase, Partition partition, RuleExpression ruleExpression, Enum... annotationExcludes )
+    {
+    this( phase, partition, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
 
     if( annotationExcludes != null )
       this.annotationExcludes = annotationExcludes;
@@ -70,6 +95,26 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     this.phase = phase;
     }
 
+  protected RulePartitioner( PlanPhase phase, Partition partition, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
+    {
+    super( contractionGraph, expressionGraph, annotations );
+    this.phase = phase;
+    this.partition = partition;
+    }
+
+  protected RulePartitioner( PlanPhase phase, Partition partition, ExpressionGraph expressionGraph )
+    {
+    super( null, expressionGraph );
+    this.phase = phase;
+    this.partition = partition;
+    }
+
+  protected RulePartitioner( PlanPhase phase, Partition partition )
+    {
+    this.phase = phase;
+    this.partition = partition;
+    }
+
   public RulePartitioner()
     {
     }
@@ -85,6 +130,11 @@ public class RulePartitioner extends GraphPartitioner implements Rule
   public PlanPhase getRulePhase()
     {
     return phase;
+    }
+
+  public Partition getPartition()
+    {
+    return partition;
     }
 
   public RulePartitioner setRuleExpression( RuleExpression ruleExpression )

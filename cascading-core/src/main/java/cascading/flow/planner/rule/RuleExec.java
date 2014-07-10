@@ -202,7 +202,19 @@ public class RuleExec
     if( !( rule instanceof RulePartitioner ) )
       throw new PlannerException( "unexpected rule: " + rule.getRuleName() );
 
-    ElementGraph assemblyResult = ruleResult.getAssemblyGraph();
+    RulePartitioner partitioner = (RulePartitioner) rule;
+
+    if( partitioner.getPartition() == RulePartitioner.Partition.SplitParent )
+      handleParentPartitioning( plannerContext, ruleResult, phase, rule, partitioner );
+    else if( partitioner.getPartition() == RulePartitioner.Partition.SplitCurrent )
+      handleCurrentPartitioning( plannerContext, ruleResult, phase, rule, partitioner );
+    else
+      throw new IllegalStateException( "unknown partitioning type: " + partitioner.getPartition() );
+
+    }
+
+  private void handleCurrentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, Rule rule, RulePartitioner partitioner )
+    {
     Map<ElementGraph, List<? extends ElementGraph>> priorResults = ruleResult.getLevelResults( phase.getLevel() );
 
     Map<ElementGraph, List<? extends ElementGraph>> subGraphs = new LinkedHashMap<>();
@@ -212,15 +224,53 @@ public class RuleExec
       ElementGraph parent = entry.getKey();
       List<? extends ElementGraph> children = entry.getValue();
 
-      Set<FlowElement> exclusions = getExclusions( children, ( (RulePartitioner) rule ).getAnnotationExcludes() );
+      List<ElementGraph> resultChildren = new ArrayList<>( children );
+
+      Set<FlowElement> exclusions = getExclusions( children, partitioner.getAnnotationExcludes() );
+
+      for( ElementGraph child : children )
+        {
+        ElementGraph priorAnnotated = annotateWithPriors( child, children );
+
+        Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+
+        writeTrace( ruleResult, phase, rule, parent, child, partitions );
+
+        List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
+
+        if( results.isEmpty() )
+          continue;
+
+        // replace child with partitioned results
+        resultChildren.remove( child );
+        resultChildren.addAll( results );
+        }
+
+      subGraphs.put( parent, resultChildren );
+      }
+
+    ruleResult.setLevelResults( phase.getLevel(), subGraphs );
+    }
+
+  private void handleParentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, Rule rule, RulePartitioner partitioner )
+    {
+    Map<ElementGraph, List<? extends ElementGraph>> priorResults = ruleResult.getLevelResults( phase.getLevel() );
+
+    Map<ElementGraph, List<? extends ElementGraph>> subGraphs = new LinkedHashMap<>();
+
+    for( Map.Entry<ElementGraph, List<? extends ElementGraph>> entry : priorResults.entrySet() )
+      {
+      ElementGraph parent = entry.getKey();
+      List<? extends ElementGraph> children = entry.getValue();
+
+      Set<FlowElement> exclusions = getExclusions( children, partitioner.getAnnotationExcludes() );
       ElementGraph priorAnnotated = annotateWithPriors( parent, children );
 
-      Partitions partitions = ( (RulePartitioner) rule ).partition( plannerContext, priorAnnotated, exclusions );
+      Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
-      if( traceWriter.isEnabled() )
-        writeTrace( ruleResult, phase, rule, parent, null, partitions );
+      writeTrace( ruleResult, phase, rule, parent, null, partitions );
 
-      List<ElementGraph> results = makeBoundedOn( assemblyResult, partitions.getAnnotatedSubGraphs() );
+      List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
       results.addAll( children ); // pass prior results forward
 
@@ -245,8 +295,7 @@ public class RuleExec
         {
         Asserted asserted = rule.assertion( plannerContext, child );
 
-        if( traceWriter.isEnabled() )
-          writeTrace( ruleResult, phase, (Rule) rule, parent, child, asserted );
+        writeTrace( ruleResult, phase, (Rule) rule, parent, child, asserted );
 
         FlowElement primary = asserted.getFirstAnchor();
 
@@ -256,13 +305,6 @@ public class RuleExec
         throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
         }
       }
-    }
-
-  private void writeTrace( RuleResult ruleResult, PlanPhase phase, Rule rule, ElementGraph parent, ElementGraph child, GraphResult result )
-    {
-    int[] path = child != null ? ruleResult.getPathFor( parent, child ) : ruleResult.getPathFor( parent );
-
-    traceWriter.writePlan( phase, rule, path, result );
     }
 
   private void performTransform( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, GraphTransformer transformer )
@@ -282,8 +324,7 @@ public class RuleExec
         {
         Transformed transformed = transformer.transform( plannerContext, child );
 
-        if( traceWriter.isEnabled() )
-          writeTrace( ruleResult, phase, (Rule) transformer, parent, child, transformed );
+        writeTrace( ruleResult, phase, (Rule) transformer, parent, child, transformed );
 
         ElementGraph endGraph = transformed.getEndGraph();
 
@@ -395,5 +436,15 @@ public class RuleExec
       LOG.info( message, items );
     else
       LOG.debug( message, items );
+    }
+
+  private void writeTrace( RuleResult ruleResult, PlanPhase phase, Rule rule, ElementGraph parent, ElementGraph child, GraphResult result )
+    {
+    if( traceWriter.isDisabled() )
+      return;
+
+    int[] path = child != null ? ruleResult.getPathFor( parent, child ) : ruleResult.getPathFor( parent );
+
+    traceWriter.writePlan( phase, rule, path, result );
     }
   }
