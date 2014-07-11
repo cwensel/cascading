@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
+import cascading.flow.hadoop.planner.rule.expressiongraph.MalformedJoinExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
 
 /**

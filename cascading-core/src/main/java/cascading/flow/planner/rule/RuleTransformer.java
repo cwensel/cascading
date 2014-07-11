@@ -29,7 +29,7 @@ import cascading.flow.planner.iso.transformer.SubGraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 
 /**
- *
+ * The RuleTransformer class is responsible for transforming an element graph into a new graph.
  */
 public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph> implements Rule
   {

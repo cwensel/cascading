@@ -20,9 +20,9 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.MultiTapGroupExpressionGraph;
-import cascading.flow.planner.iso.expression.NoGroupTapExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.MultiTapGroupExpressionGraph;
+import cascading.flow.planner.rule.expressiongraph.NoGroupTapExpressionGraph;
 
 /**
  *

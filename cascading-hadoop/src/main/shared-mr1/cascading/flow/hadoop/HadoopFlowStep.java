@@ -26,15 +26,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.util.HadoopMRUtil;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowNode;
-import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.io.MultiInputFormat;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;

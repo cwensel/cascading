@@ -22,7 +22,7 @@ package cascading.flow.planner.iso.finder;
 
 import java.util.Iterator;
 
-import cascading.flow.planner.Extent;
+import cascading.flow.planner.graph.Extent;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;

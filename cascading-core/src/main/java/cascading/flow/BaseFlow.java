@@ -42,10 +42,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowElementGraph;
-import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.PlatformInfo;
+import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.flow.planner.process.FlowStepGraph;
 import cascading.management.CascadingServices;
 import cascading.management.UnitOfWorkExecutorStrategy;
 import cascading.management.UnitOfWorkSpawnStrategy;
@@ -98,13 +98,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   /** Field flowStats */
   protected FlowStats flowStats; // don't use a listener to set values
   /** Field sources */
-  protected Map<String, Tap> sources = Collections.EMPTY_MAP;
+  protected Map<String, Tap> sources = Collections.emptyMap();
   /** Field sinks */
-  protected Map<String, Tap> sinks = Collections.EMPTY_MAP;
+  protected Map<String, Tap> sinks = Collections.emptyMap();
   /** Field traps */
-  private Map<String, Tap> traps = Collections.EMPTY_MAP;
+  private Map<String, Tap> traps = Collections.emptyMap();
   /** Field checkpoints */
-  private Map<String, Tap> checkpoints = Collections.EMPTY_MAP;
+  private Map<String, Tap> checkpoints = Collections.emptyMap();
   /** Field stopJobsOnExit */
   protected boolean stopJobsOnExit = true;
   /** Field submitPriority */
@@ -451,7 +451,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     if( properties == null )
       return config;
 
-    Set<Object> keys = new HashSet<Object>( properties.keySet() );
+    Set<Object> keys = new HashSet<>( properties.keySet() );
 
     // keys will only be grabbed if both key/value are String, so keep orig keys
     if( properties instanceof Properties )

@@ -28,7 +28,26 @@ import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.util.LogUtil;
 
 /**
- *
+ * RuleRegistry contains all planner rules for a given platform. Where a rule is of type
+ * {@link cascading.flow.planner.rule.Rule} and allows for either asserts, transforms, and partitioning
+ * of pipe assembly process graphs.
+ * <p/>
+ * Process graphs are initially a standard Pipe assembly and connected Taps. And depending on the underlying platform
+ * are partitioned into units of execution along the process hierarchy of
+ * {@link cascading.flow.planner.rule.ProcessLevel#Assembly}, {@link cascading.flow.planner.rule.ProcessLevel#Step},
+ * {@link cascading.flow.planner.rule.ProcessLevel#Node}, and {@link cascading.flow.planner.rule.ProcessLevel#Pipeline}.
+ * <p/>
+ * Where the Assembly is the user created pipe assembly and taps. The Steps are physical jobs executed by a platform.
+ * Nodes are internal elements of work within a job (a Mapper or Reducer in the case of MapReduce). And Pipelines,
+ * which are non-blocking streamed paths within a node. These can be optional.
+ * <p/>
+ * Rules rely on a 'language' for sub-graph pattern matching and can be applied against a given process type
+ * (Assembly, or Step, etc), to test its correctness, or make changes to the graph. Or they can be used to partition a
+ * large graph into a smaller graph, converting an Assembly into Steps.
+ * <p/>
+ * Debugging rule sets can be done by enabling system properties, see {@link cascading.flow.planner.FlowPlanner}.
+ * <p/>
+ * The {@link cascading.flow.planner.rule.RuleExec} class is responsible for executing on a given rule set.
  */
 public class RuleRegistry
   {
@@ -42,6 +61,9 @@ public class RuleRegistry
 
   private boolean resolveElementsEnabled = true;
 
+  /**
+   * Method enableDebugLogging forces log4j to emit DEBUG level stats for the planner classes.
+   */
   protected void enableDebugLogging()
     {
     LogUtil.setLog4jLevel( "cascading.flow.planner.rule", "DEBUG" );
@@ -119,5 +141,4 @@ public class RuleRegistry
     {
     return resolveElementsEnabled;
     }
-
   }

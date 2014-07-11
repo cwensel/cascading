@@ -20,7 +20,7 @@
 
 package cascading.flow.iso.expression;
 
-import cascading.flow.planner.Extent;
+import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;

@@ -20,8 +20,8 @@
 
 package cascading.flow.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.NoOpPipeExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.NoOpPipeExpressionGraph;
 
 /**
  *

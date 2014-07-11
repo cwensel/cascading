@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.subgraph.Partitions;

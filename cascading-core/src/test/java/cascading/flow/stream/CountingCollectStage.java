@@ -20,6 +20,11 @@
 
 package cascading.flow.stream;
 
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.duct.Grouping;
+import cascading.flow.stream.duct.Reducing;
+import cascading.flow.stream.duct.Stage;
+
 /**
  *
  */

@@ -98,6 +98,9 @@ import static cascading.flow.FlowDef.flowDef;
  * Also by default, all {@link cascading.operation.Debug}s are planned into the resulting Flow instance. This can be
  * changed for a given flow by calling {@link FlowDef#setDebugLevel(cascading.operation.DebugLevel)} or globally via
  * {@link FlowConnectorProps#setDebugLevel(cascading.operation.DebugLevel)}.
+ * <p/>
+ * As of version 3.0, custom {@link cascading.flow.planner.rule.RuleRegistry} instances can be provided to customize
+ * a given planner.
  *
  * @see cascading.flow.local.LocalFlowConnector
  * @see cascading.flow.hadoop.HadoopFlowConnector
@@ -480,7 +483,7 @@ public abstract class FlowConnector
 
   /**
    * Returns the configured RuleRegistry, or the default for this platform.
-   *
+   * <p/>
    * The registry is mutable, and will be applied to all subsequent planner operations via {@link #connect(FlowDef)}.
    *
    * @return the current RuleRegistry instance

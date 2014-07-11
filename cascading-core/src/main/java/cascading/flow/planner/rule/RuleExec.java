@@ -30,13 +30,13 @@ import java.util.Set;
 
 import cascading.flow.BaseFlow;
 import cascading.flow.FlowElement;
-import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.BoundedElementMultiGraph;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.assertion.GraphAssert;

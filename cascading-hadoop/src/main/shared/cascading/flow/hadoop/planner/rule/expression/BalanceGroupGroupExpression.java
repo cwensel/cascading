@@ -24,8 +24,8 @@ import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.ScopeExpression;
-import cascading.flow.planner.iso.expression.SyncPipeExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.SyncPipeExpressionGraph;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 

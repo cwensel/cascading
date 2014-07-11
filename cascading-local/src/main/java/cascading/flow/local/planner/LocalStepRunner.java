@@ -31,9 +31,9 @@ import java.util.concurrent.Future;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.local.LocalFlowStep;
-import cascading.flow.local.stream.LocalStepStreamGraph;
-import cascading.flow.stream.Duct;
-import cascading.flow.stream.StreamGraph;
+import cascading.flow.local.stream.graph.LocalStepStreamGraph;
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.graph.StreamGraph;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -25,17 +25,18 @@ import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.FlowException;
+import cascading.flow.FlowNode;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
-import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
+import cascading.flow.hadoop.stream.graph.HadoopReduceStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.hadoop.util.TimedIterator;
-import cascading.flow.planner.FlowNode;
-import cascading.flow.stream.Duct;
-import cascading.flow.stream.ElementDuct;
+import cascading.flow.planner.BaseFlowNode;
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.element.ElementDuct;
 import cascading.tap.Tap;
 import cascading.tuple.Tuple;
 import cascading.util.Util;
@@ -89,7 +90,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
       if( reduceNodeState == null )
         reduceNodeState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ), "reduce" );
 
-      FlowNode node = deserializeBase64( reduceNodeState, jobConf, FlowNode.class );
+      FlowNode node = deserializeBase64( reduceNodeState, jobConf, BaseFlowNode.class );
 
       streamGraph = new HadoopReduceStreamGraph( currentProcess, node, Util.getFirst( node.getSourceElements() ) );
 

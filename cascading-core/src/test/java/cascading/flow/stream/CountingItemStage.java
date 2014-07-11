@@ -20,10 +20,13 @@
 
 package cascading.flow.stream;
 
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.duct.Stage;
+
 /**
  *
  */
-public class CountingItemStage<Incoming, Outgoing> extends Stage<Incoming, Outgoing> implements Mapping
+public class CountingItemStage<Incoming, Outgoing> extends Stage<Incoming, Outgoing>
   {
   int prepareCount = 0;
   int receiveCount = 0;

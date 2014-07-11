@@ -22,8 +22,8 @@ package cascading.flow;
 
 import java.util.Set;
 
-import cascading.flow.planner.FlowNodeGraph;
-import cascading.flow.planner.ProcessModel;
+import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.ProcessModel;
 import cascading.pipe.Group;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;

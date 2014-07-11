@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
 import cascading.util.Util;
 import org.jgrapht.graph.DirectedSubgraph;

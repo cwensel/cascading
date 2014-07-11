@@ -28,9 +28,9 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.flow.local.planner.LocalFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 

@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
+import cascading.flow.hadoop.planner.rule.scopeexpression.EquivalentTapsScopeExpression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;

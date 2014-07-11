@@ -25,12 +25,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.Extent;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;

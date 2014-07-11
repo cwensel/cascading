@@ -20,9 +20,9 @@
 
 package cascading.flow.planner.iso.transformer;
 
-import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;

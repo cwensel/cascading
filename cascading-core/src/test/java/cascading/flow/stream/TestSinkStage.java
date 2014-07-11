@@ -23,6 +23,10 @@ package cascading.flow.stream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.duct.Stage;
+import cascading.flow.stream.graph.StreamGraph;
+
 /**
  *
  */

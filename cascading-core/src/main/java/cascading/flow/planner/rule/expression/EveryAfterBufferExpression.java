@@ -23,9 +23,9 @@ package cascading.flow.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.OnlyPipeExpressionGraph;
 import cascading.flow.planner.iso.expression.OperationExpression;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.OnlyPipeExpressionGraph;
 import cascading.operation.Buffer;
 import cascading.pipe.Every;
 

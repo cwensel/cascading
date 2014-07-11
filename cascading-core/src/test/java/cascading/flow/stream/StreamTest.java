@@ -23,6 +23,8 @@ package cascading.flow.stream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cascading.flow.stream.duct.Gate;
+import cascading.flow.stream.graph.StreamGraph;
 import junit.framework.TestCase;
 
 /**

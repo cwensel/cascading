@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.iso.NonTap;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;

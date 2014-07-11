@@ -27,7 +27,7 @@ import java.util.Properties;
 
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.FlowStepGraph;
+import cascading.flow.planner.process.FlowStepGraph;
 import cascading.scheme.NullScheme;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;

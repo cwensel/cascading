@@ -23,8 +23,8 @@ package cascading.flow.planner.iso.transformer;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;

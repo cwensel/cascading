@@ -23,10 +23,10 @@ package cascading.flow.hadoop.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.NonSafeAndSplitAndSyncPipeExpressionGraph;
 import cascading.flow.planner.iso.expression.NonSafeOperationExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.NonSafeAndSplitAndSyncPipeExpressionGraph;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 

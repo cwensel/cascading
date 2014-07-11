@@ -22,7 +22,7 @@ package cascading.flow.iso;
 
 import java.util.Set;
 
-import cascading.flow.planner.ElementGraphs;
+import cascading.flow.planner.graph.ElementGraphs;
 import junit.framework.TestCase;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DirectedSubgraph;

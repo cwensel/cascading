@@ -20,9 +20,9 @@
 
 package cascading.flow.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.NoGroupJoinTapExpressionGraph;
-import cascading.flow.planner.iso.expression.NonBlockedBlockedJoinExpression;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.NoGroupJoinTapExpressionGraph;
+import cascading.flow.planner.rule.expressiongraph.NonBlockedBlockedJoinExpressionGraph;
 
 /**
  *
@@ -33,7 +33,7 @@ public class NonBlockedBlockedJoinAnnotatorExpression extends RuleExpression
     {
     super(
       new NoGroupJoinTapExpressionGraph(),
-      new NonBlockedBlockedJoinExpression()
+      new NonBlockedBlockedJoinExpressionGraph()
     );
     }
   }

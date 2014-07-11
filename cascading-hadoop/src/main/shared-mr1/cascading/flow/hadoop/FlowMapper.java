@@ -25,17 +25,18 @@ import java.util.Iterator;
 
 import cascading.CascadingException;
 import cascading.flow.FlowException;
+import cascading.flow.FlowNode;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
-import cascading.flow.hadoop.stream.HadoopMapStreamGraph;
+import cascading.flow.hadoop.stream.graph.HadoopMapStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.BaseFlowNode;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowNode;
-import cascading.flow.stream.Duct;
-import cascading.flow.stream.ElementDuct;
-import cascading.flow.stream.SourceStage;
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.element.ElementDuct;
+import cascading.flow.stream.element.SourceStage;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapRunnable;
@@ -80,7 +81,7 @@ public class FlowMapper implements MapRunnable
       if( mapNodeState == null )
         mapNodeState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ), "map" );
 
-      FlowNode node = deserializeBase64( mapNodeState, jobConf, FlowNode.class );
+      FlowNode node = deserializeBase64( mapNodeState, jobConf, BaseFlowNode.class );
 
       Tap source = BaseFlowStep.getTapForID( node.getSourceTaps(), jobConf.get( "cascading.step.source" ) );
 

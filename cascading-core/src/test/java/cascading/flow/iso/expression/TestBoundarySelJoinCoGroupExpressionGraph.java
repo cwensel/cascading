@@ -20,13 +20,13 @@
 
 package cascading.flow.iso.expression;
 
-import cascading.flow.planner.iso.expression.BoundariesElementExpression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression;
 import cascading.pipe.CoGroup;
 
 /**

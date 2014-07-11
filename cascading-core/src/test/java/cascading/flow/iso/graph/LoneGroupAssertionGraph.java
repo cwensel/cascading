@@ -23,7 +23,7 @@ package cascading.flow.iso.graph;
 import java.util.Map;
 
 import cascading.flow.iso.NonTap;
-import cascading.flow.planner.FlowElementGraph;
+import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.operation.AssertionLevel;
 import cascading.operation.assertion.AssertGroupSizeEquals;
 import cascading.operation.assertion.AssertMatches;

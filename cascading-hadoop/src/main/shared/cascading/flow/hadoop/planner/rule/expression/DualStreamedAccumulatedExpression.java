@@ -20,9 +20,9 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.DualStreamedAccumulatedExpressionGraph;
-import cascading.flow.planner.iso.expression.NoMergeTapExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.DualStreamedAccumulatedExpressionGraph;
+import cascading.flow.planner.rule.expressiongraph.NoMergeTapExpressionGraph;
 
 /**
  *

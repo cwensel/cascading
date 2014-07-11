@@ -22,9 +22,9 @@ package cascading.flow;
 
 import java.util.Map;
 
-import cascading.flow.planner.FlowElementGraph;
-import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
+import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.flow.planner.process.FlowStepGraph;
 
 /** Flows is a utility helper class. */
 public class Flows

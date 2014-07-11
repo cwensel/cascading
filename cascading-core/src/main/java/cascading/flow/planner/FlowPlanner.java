@@ -39,8 +39,12 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
+import cascading.flow.FlowNode;
 import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
@@ -210,7 +214,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   protected abstract F createFlow( FlowDef flowDef );
 
-  protected abstract FlowStep<Config> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
+  public abstract FlowStep<Config> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
+
+  public FlowNode createFlowNode( int numNodes, int ordinal, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
+    {
+    String name = String.format( "node (%d/%d)", numNodes, ordinal );
+    return new BaseFlowNode( ordinal, name, flowElementGraph, nodeSubGraph, pipelineGraphs );
+    }
 
   protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
     {

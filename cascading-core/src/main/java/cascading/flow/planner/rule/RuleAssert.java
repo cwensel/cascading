@@ -28,7 +28,7 @@ import cascading.flow.planner.iso.transformer.SubGraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 
 /**
- *
+ * The RuleAssert class is responsible for asserting the structure of a element graph.
  */
 public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
   {

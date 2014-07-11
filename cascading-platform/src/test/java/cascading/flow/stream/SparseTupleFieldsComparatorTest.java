@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import cascading.PlatformTestCase;
+import cascading.flow.stream.util.SparseTupleComparator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import org.junit.Test;

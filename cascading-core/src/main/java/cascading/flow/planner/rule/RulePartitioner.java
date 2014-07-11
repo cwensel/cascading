@@ -28,13 +28,22 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 
 /**
- *
+ * The RulePartitioner class is responsible for partitioning an element graph into smaller sub-graphs.
+ * <p/>
+ * It may also re-partition a given graph, in place replacing it with its children, if any.
  */
 public class RulePartitioner extends GraphPartitioner implements Rule
   {
   public enum Partition
     {
+      /**
+       * Partition the parent into children.
+       */
       SplitParent,
+
+      /**
+       * Partition a given child into more children, removing the original child.
+       */
       SplitCurrent
     }
 

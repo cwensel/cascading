@@ -23,12 +23,11 @@ package cascading.flow.planner.graph;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
 
-import static cascading.flow.planner.Extent.head;
-import static cascading.flow.planner.Extent.tail;
+import static cascading.flow.planner.graph.Extent.head;
+import static cascading.flow.planner.graph.Extent.tail;
 
 /**
  *

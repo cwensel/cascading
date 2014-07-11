@@ -21,7 +21,6 @@
 package cascading.flow.planner.graph;
 
 import cascading.flow.FlowElement;
-import cascading.flow.planner.ElementGraphs;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
 import cascading.util.Util;

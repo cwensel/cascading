@@ -22,6 +22,12 @@ package cascading.flow.stream;
 
 import java.util.LinkedList;
 
+import cascading.flow.stream.duct.Duct;
+import cascading.flow.stream.duct.Gate;
+import cascading.flow.stream.duct.Grouping;
+import cascading.flow.stream.duct.Window;
+import cascading.flow.stream.graph.StreamGraph;
+
 /**
  *
  */

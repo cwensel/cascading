@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
-import cascading.flow.stream.MemoryHashJoinGate;
+import cascading.flow.stream.element.MemoryHashJoinGate;
 import cascading.pipe.HashJoin;
 import cascading.provider.FactoryLoader;
 import cascading.tuple.Tuple;

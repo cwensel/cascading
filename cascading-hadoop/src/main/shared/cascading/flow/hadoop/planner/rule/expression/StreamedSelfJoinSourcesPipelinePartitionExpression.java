@@ -20,8 +20,9 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.planner.iso.expression.NoGroupJoinTapExpressionGraph;
+import cascading.flow.hadoop.planner.rule.expressiongraph.StreamedSelfJoinSourcesExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.NoGroupJoinTapExpressionGraph;
 
 /**
  *
@@ -32,7 +33,7 @@ public class StreamedSelfJoinSourcesPipelinePartitionExpression extends RuleExpr
     {
     super(
       new NoGroupJoinTapExpressionGraph(),
-      new StreamedSelfJoinSourcesExpression()
+      new StreamedSelfJoinSourcesExpressionGraph()
     );
     }
   }

@@ -43,6 +43,8 @@ import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
+import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.management.CascadingServices;
 import cascading.management.state.ClientState;
@@ -59,7 +61,7 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.planner.ElementGraphs.findAllGroups;
+import static cascading.flow.planner.graph.ElementGraphs.findAllGroups;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During

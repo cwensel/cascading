@@ -31,10 +31,10 @@ import cascading.flow.FlowStep;
 import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.transformer.TapElementFactory;
 import cascading.property.AppProps;
@@ -169,7 +169,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     {
     super.configRuleRegistryDefaults( ruleRegistry );
 
-   ruleRegistry.addDefaultElementFactory( TapElementFactory.TEMP_TAP, new TempTapElementFactory() );
+    ruleRegistry.addDefaultElementFactory( TapElementFactory.TEMP_TAP, new TempTapElementFactory() );
     }
 
   @Override
@@ -178,7 +178,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     return new HadoopFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
-  protected FlowStep<JobConf> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  public FlowStep<JobConf> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
     {
     String name = makeStepName( getFirst( flowNodeGraph.getSinkTaps() ), numSteps, ordinal );
 

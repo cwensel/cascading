@@ -21,7 +21,8 @@
 package cascading.flow.planner.rule;
 
 /**
- *
+ * Rule instances are the unit of work applied by a {@link cascading.flow.planner.rule.RuleExec} instance and managed
+ * by a {@link cascading.flow.planner.rule.RuleRegistry}.
  */
 public interface Rule
   {

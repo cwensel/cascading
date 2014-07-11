@@ -30,8 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.planner.FlowElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.flow.planner.rule.util.ResultTree;
 import cascading.util.Util;
 
 /**

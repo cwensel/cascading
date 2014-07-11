@@ -26,10 +26,10 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
 import cascading.flow.local.LocalFlow;
 import cascading.flow.local.LocalFlowStep;
-import cascading.flow.planner.FlowNodeGraph;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.tap.Tap;
 import cascading.util.Version;
 
@@ -60,7 +60,7 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
     }
 
   @Override
-  protected FlowStep<Properties> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  public FlowStep<Properties> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
     {
     return new LocalFlowStep( "local", ordinal, stepElementGraph, flowNodeGraph );
     }

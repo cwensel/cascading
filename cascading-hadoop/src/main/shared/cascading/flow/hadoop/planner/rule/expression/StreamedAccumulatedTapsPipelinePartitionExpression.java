@@ -20,6 +20,7 @@
 
 package cascading.flow.hadoop.planner.rule.expression;
 
+import cascading.flow.hadoop.planner.rule.expressiongraph.NoGroupTapExpressionGraph;
 import cascading.flow.planner.rule.RuleExpression;
 
 /**
@@ -31,7 +32,7 @@ public class StreamedAccumulatedTapsPipelinePartitionExpression extends RuleExpr
     {
     super(
       new NoGroupTapExpressionGraph(),
-      new StreamedAccumulatedTapsExpression()
+      new StreamedAccumulatedTapsExpressionGraph()
     );
     }
   }
