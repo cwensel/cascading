@@ -115,7 +115,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     if( parentConfig == null ) // this is ok, getJobConf will pass a default parent in
       return;
 
-    jobConf = new JobConf( parentConfig ); // prevent local values from being shared
+    jobConf = HadoopUtil.copyJobConf( parentConfig ); // prevent local values from being shared
     jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
     jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
 
@@ -135,7 +135,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
   @Override
   protected JobConf newConfig( JobConf defaultConfig )
     {
-    return defaultConfig == null ? new JobConf() : new JobConf( defaultConfig );
+    return defaultConfig == null ? new JobConf() : HadoopUtil.copyJobConf( defaultConfig );
     }
 
   @Override
@@ -150,7 +150,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
   @Override
   public JobConf getConfigCopy()
     {
-    return new JobConf( getConfig() );
+    return HadoopUtil.copyJobConf( getConfig() );
     }
 
   @Override

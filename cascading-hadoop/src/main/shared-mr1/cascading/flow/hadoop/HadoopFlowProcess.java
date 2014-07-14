@@ -127,7 +127,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   @Override
   public JobConf getConfigCopy()
     {
-    return new JobConf( jobConf );
+    return HadoopUtil.copyJobConf( jobConf );
     }
 
   /**
@@ -280,7 +280,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   @Override
   public TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException
     {
-    JobConf jobConf = new JobConf( getJobConf() );
+    JobConf jobConf = HadoopUtil.copyJobConf( getJobConf() );
 
     int stepNum = jobConf.getInt( "cascading.flow.step.num", 0 );
     String partname;
@@ -318,7 +318,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   @Override
   public JobConf copyConfig( JobConf config )
     {
-    return new JobConf( config );
+    return HadoopUtil.copyJobConf( jobConf );
     }
 
   @Override

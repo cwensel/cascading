@@ -52,6 +52,7 @@ import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.property.AppProps;
+import cascading.property.ConfigDef;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
@@ -553,9 +554,15 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       {
       // only restart from a checkpoint pipe or checkpoint tap below
       if( pipe instanceof Checkpoint )
+        {
         checkpointTap = makeTempTap( checkpointTapRootPath, pipe.getName() );
+        // mark as an anonymous checkpoint
+        checkpointTap.getConfigDef().setProperty( ConfigDef.Mode.DEFAULT, "cascading.checkpoint", "true" );
+        }
       else
+        {
         checkpointTap = makeTempTap( pipe.getName() );
+        }
       }
 
     return checkpointTap;

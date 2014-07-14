@@ -388,8 +388,6 @@ public class AggregateBy extends SubAssembly
 
       CompositeFunction that = (CompositeFunction) object;
 
-      if( threshold != that.threshold )
-        return false;
       if( !Arrays.equals( argumentFields, that.argumentFields ) )
         return false;
       if( !Arrays.equals( functorFields, that.functorFields ) )
@@ -406,7 +404,6 @@ public class AggregateBy extends SubAssembly
     public int hashCode()
       {
       int result = super.hashCode();
-      result = 31 * result + threshold;
       result = 31 * result + ( groupingFields != null ? groupingFields.hashCode() : 0 );
       result = 31 * result + ( argumentFields != null ? Arrays.hashCode( argumentFields ) : 0 );
       result = 31 * result + ( functorFields != null ? Arrays.hashCode( functorFields ) : 0 );

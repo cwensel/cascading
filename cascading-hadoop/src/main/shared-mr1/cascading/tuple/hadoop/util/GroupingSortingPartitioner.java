@@ -25,7 +25,7 @@ import cascading.tuple.io.TuplePair;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 
-/** Class GroupingPartitioner is an implementation of {@link Partitioner}. */
+/** Class GroupingSortingPartitioner is an implementation of {@link Partitioner}. */
 public class GroupingSortingPartitioner extends HasherPartitioner implements Partitioner<TuplePair, Tuple>
   {
   public int getPartition( TuplePair key, Tuple value, int numReduceTasks )

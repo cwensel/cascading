@@ -91,7 +91,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       }
     }
 
-  private class PartitionCollector extends TupleEntryCollector
+  public class PartitionCollector extends TupleEntryCollector
     {
     private final FlowProcess<? extends Config> flowProcess;
     private final Config conf;
@@ -116,7 +116,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       this.partitionEntry.setTuple( partitionTuple );
       }
 
-    private TupleEntryCollector getCollector( String path )
+    TupleEntryCollector getCollector( String path )
       {
       TupleEntryCollector collector = collectors.get( path );
 
@@ -167,7 +167,10 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
 
       for( String removeKey : removeKeys )
-        closeCollector( collectors.remove( removeKey ) );
+        {
+        closeCollector( removeKey );
+        collectors.remove( removeKey );
+        }
 
       flowProcess.increment( Counters.Path_Purges, 1 );
       }
@@ -179,8 +182,8 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
       try
         {
-        for( TupleEntryCollector collector : collectors.values() )
-          closeCollector( collector );
+        for( String path : new ArrayList<String>( collectors.keySet() ) )
+          closeCollector( path );
         }
       finally
         {
@@ -188,11 +191,11 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
       }
 
-    private void closeCollector( TupleEntryCollector collector )
+    public void closeCollector( String path )
       {
+      TupleEntryCollector collector = collectors.get( path );
       if( collector == null )
         return;
-
       try
         {
         collector.close();
@@ -201,7 +204,16 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
       catch( Exception exception )
         {
-        // do nothing
+        LOG.error( "exception while closing TupleEntryCollector {}", path, exception );
+
+        boolean failOnError = false;
+        Object failProperty = flowProcess.getProperty( PartitionTapProps.FAIL_ON_CLOSE );
+
+        if( failProperty != null )
+          failOnError = Boolean.parseBoolean( failProperty.toString() );
+
+        if( failOnError )
+          throw new TapException( exception );
         }
       }
 

@@ -1100,4 +1100,68 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( long.class, merged.getTypes()[ 1 ] );
     assertEquals( long.class, merged.getTypes()[ 11 ] );
     }
+
+  public void testResolveWithTypes()
+    {
+    Fields selector = new Fields( "ip" );
+    Fields fields[] = new Fields[]{new Fields( "ip" ).applyTypes( String.class ),
+                                   new Fields( "offset", "line" ).applyTypes( String.class, String.class )};
+
+    Fields resolved = Fields.resolve( selector, fields );
+    assertTrue( resolved.hasTypes() );
+    }
+
+  public void testConstructorWithNullComparableInArray()
+    {
+    try
+      {
+      new Fields( new Comparable[]{"a", null, "c"} );
+      fail( "Fields constructor should have thrown an Exception" );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      //expected
+      }
+    }
+
+  public void testConstructorWithNullComparable()
+    {
+    try
+      {
+      Comparable comparable = null;
+      new Fields( comparable );
+      fail( "Fields constructor should have thrown an Exception" );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      //expected
+      }
+    }
+
+  public void testConstructorWithNullTypes()
+    {
+    try
+      {
+      new Fields( new Comparable[]{"a", "b", "c"}, new Type[]{int.class, null, String.class} );
+      fail( "Fields constructor should have thrown an Exception" );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      //expected
+      }
+    }
+
+  public void testConstructorWithNullType()
+    {
+    try
+      {
+      Type type = null;
+      new Fields( "a", type );
+      fail( "Fields constructor should have thrown an Exception" );
+      }
+    catch( IllegalArgumentException exception )
+      {
+      //expected
+      }
+    }
   }

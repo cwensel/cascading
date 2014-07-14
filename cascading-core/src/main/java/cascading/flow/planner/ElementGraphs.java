@@ -129,7 +129,7 @@ public class ElementGraphs
       {
       List<FlowElement> pathVertexList = Graphs.getPathVertexList( path );
 
-      for( int i = 1; i < pathVertexList.size(); i++ ) // skip the from, its a Tap or Group
+      for( int i = 1; i < pathVertexList.size() - 1; i++ ) // skip the from and to, its a Tap or Group
         {
         FlowElement flowElement = pathVertexList.get( i );
 

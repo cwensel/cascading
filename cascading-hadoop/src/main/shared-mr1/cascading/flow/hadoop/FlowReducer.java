@@ -28,6 +28,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
+import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.HadoopReduceStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -105,6 +106,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
       }
     catch( Throwable throwable )
       {
+      reportIfLocal( throwable );
+
       if( throwable instanceof CascadingException )
         throw (CascadingException) throwable;
 
@@ -140,12 +143,15 @@ public class FlowReducer extends MapReduceBase implements Reducer
       }
     catch( Throwable throwable )
       {
+      reportIfLocal( throwable );
+
       if( throwable instanceof CascadingException )
         throw (CascadingException) throwable;
 
       throw new FlowException( "internal error during reducer execution", throwable );
       }
     }
+
 
   @Override
   public void close() throws IOException
@@ -166,5 +172,16 @@ public class FlowReducer extends MapReduceBase implements Reducer
       if( currentProcess != null )
         currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
       }
+    }
+
+  /**
+   * Report the error to HadoopFlowStepJob if we are running in Hadoops local mode.
+   *
+   * @param throwable The throwable that was thrown.
+   */
+  private void reportIfLocal( Throwable throwable )
+    {
+    if( HadoopUtil.isLocal( currentProcess.getJobConf() ) )
+      HadoopFlowStepJob.reportLocalError( throwable );
     }
   }

@@ -486,7 +486,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     Type[] types = null;
 
     if( size != -1 )
-      types = new Type[ size ];
+      types = new Type[ result.size() ];
 
     int offset = 0;
     for( Fields current : fields )
@@ -645,6 +645,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       {
       if( this.fields.length != types.length )
         throw new IllegalArgumentException( "given types array must be same length as fields" );
+
+      if( Util.containsNull( types ) )
+        throw new IllegalArgumentException( "given types array contains null" );
 
       this.types = copyTypes( types, this.fields.length );
       }

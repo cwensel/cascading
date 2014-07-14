@@ -231,7 +231,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     this.uriScheme = uriScheme;
     }
 
-  public URI getURIScheme( Configuration  jobConf )
+  public URI getURIScheme( Configuration jobConf )
     {
     if( uriScheme != null )
       return uriScheme;
@@ -610,6 +610,9 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( !resourceExists( conf ) )
       return new String[ 0 ];
 
+    if( depth == 0 && !fullyQualified )
+      return new String[]{getIdentifier()};
+
     String fullIdentifier = getFullIdentifier( conf );
 
     int trim = fullyQualified ? 0 : fullIdentifier.length() + 1;
@@ -626,7 +629,13 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( depth == 0 )
       {
       String substring = path.toString().substring( trim );
-      results.add( new Path( getIdentifier(), substring ).toString() );
+      String identifier = getIdentifier();
+
+      if( identifier == null || identifier.isEmpty() )
+        results.add( new Path( substring ).toString() );
+      else
+        results.add( new Path( identifier, substring ).toString() );
+
       return;
       }
 

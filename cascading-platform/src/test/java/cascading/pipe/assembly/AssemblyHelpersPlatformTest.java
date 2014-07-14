@@ -659,16 +659,16 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
   @Test
   public void testFirstBy() throws IOException
     {
-    getPlatform().copyFromLocal( inputFileLhs );
+    getPlatform().copyFromLocal( inputFileCross );
 
-    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
-    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "char" ), "\t",
-      new Class[]{Integer.TYPE, String.class}, getOutputPath( "firstn" ), SinkMode.REPLACE );
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ), " ", inputFileCross );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ), "\t",
+      new Class[]{Integer.TYPE, String.class, String.class}, getOutputPath( "firstnfields" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "first" );
 
-    Fields charFields = new Fields( "char" );
-    charFields.setComparator( "char", Collections.reverseOrder() );
+    Fields charFields = new Fields( "lower", "upper" );
+    charFields.setComparator( "lower", Collections.reverseOrder() );
 
     pipe = new FirstBy( pipe, new Fields( "num" ), charFields, 2 );
 
@@ -677,11 +677,11 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     flow.complete();
 
     Tuple[] results = new Tuple[]{
-      new Tuple( 1, "c" ),
-      new Tuple( 2, "d" ),
-      new Tuple( 3, "c" ),
-      new Tuple( 4, "d" ),
-      new Tuple( 5, "e" )
+      new Tuple( 1, "c", "A" ),
+      new Tuple( 2, "d", "B" ),
+      new Tuple( 3, "c", "C" ),
+      new Tuple( 4, "d", "B" ),
+      new Tuple( 5, "e", "A" )
     };
 
     TupleEntryIterator iterator = flow.openSink();

@@ -44,6 +44,7 @@ import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.hadoop.util.CoGroupingComparator;
 import cascading.tuple.hadoop.util.CoGroupingPartitioner;
 import cascading.tuple.hadoop.util.GroupingComparator;
+import cascading.tuple.hadoop.util.GroupingPartitioner;
 import cascading.tuple.hadoop.util.GroupingSortingComparator;
 import cascading.tuple.hadoop.util.GroupingSortingPartitioner;
 import cascading.tuple.hadoop.util.IndexTupleCoGroupingComparator;
@@ -73,7 +74,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   public JobConf createInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
-    JobConf conf = parentConfig == null ? new JobConf() : new JobConf( parentConfig );
+    JobConf conf = parentConfig == null ? new JobConf() : HadoopUtil.copyJobConf( parentConfig );
 
     // disable warning
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
@@ -117,6 +118,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       // must set map output defaults when performing a reduce
       conf.setMapOutputKeyClass( Tuple.class );
       conf.setMapOutputValueClass( Tuple.class );
+      conf.setPartitionerClass( GroupingPartitioner.class );
 
       // handles the case the groupby sort should be reversed
       if( getGroup().isSortReversed() )
@@ -270,7 +272,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     {
     if( !traps.isEmpty() )
       {
-      JobConf trapConf = new JobConf( conf );
+      JobConf trapConf = HadoopUtil.copyJobConf( conf );
 
       for( Tap tap : traps.values() )
         tap.sinkConfInit( flowProcess, trapConf );
