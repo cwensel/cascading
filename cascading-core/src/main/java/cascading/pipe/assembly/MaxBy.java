@@ -83,7 +83,7 @@ public class MaxBy extends AggregateBy
       Comparable lhs = (Comparable) context.getObject( 0 );
       Comparable rhs = (Comparable) args.getObject( 0 );
 
-      if( lhs != null && rhs != null && lhs.compareTo( rhs ) < 0 )
+      if( lhs.compareTo( rhs ) < 0 )
         context.set( 0, rhs );
 
       return context;
