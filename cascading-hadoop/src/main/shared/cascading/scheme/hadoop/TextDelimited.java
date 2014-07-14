@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.util.DelimitedParser;
@@ -911,6 +914,8 @@ public class TextDelimited extends TextLine
    *
    * @return a String
    */
+  @Property(name = "delimiter", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "The delimiter used to separate fields.")
   public String getDelimiter()
     {
     return delimitedParser.getDelimiter();
@@ -921,6 +926,8 @@ public class TextDelimited extends TextLine
    *
    * @return a String
    */
+  @Property(name = "quote", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "The string used for quoting.")
   public String getQuote()
     {
     return delimitedParser.getQuote();

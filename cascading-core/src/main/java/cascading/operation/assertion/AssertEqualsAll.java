@@ -23,6 +23,9 @@ package cascading.operation.assertion;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.tuple.TupleEntry;
@@ -52,6 +55,8 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
     this.value = value;
     }
 
+  @Property(name = "value", visibility = Visibility.PRIVATE)
+  @PropertyDescription(description = "The expected value.")
   public Object getValue()
     {
     return value;

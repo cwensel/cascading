@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyConfigured;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.Aggregator;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -628,5 +632,13 @@ public class AggregateBy extends SubAssembly
   public GroupBy getGroupBy()
     {
     return groupBy;
+    }
+
+  @Property(name = "threshold", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "Threshold of the aggregation.")
+  @PropertyConfigured(property = AGGREGATE_BY_THRESHOLD, defaultValue = "10000")
+  public int getThreshold()
+    {
+    return threshold;
     }
   }

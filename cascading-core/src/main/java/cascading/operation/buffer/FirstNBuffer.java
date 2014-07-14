@@ -24,6 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.Iterator;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
 import cascading.operation.BufferCall;
@@ -94,6 +97,8 @@ public class FirstNBuffer extends BaseOperation implements Buffer
     this.firstN = firstN;
     }
 
+  @Property(name = "firstN", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "The number of tuples to return.")
   public int getFirstN()
     {
     return firstN;

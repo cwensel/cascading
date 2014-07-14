@@ -26,8 +26,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * PropertyConfigured is an annotation to document the configuration key and the default value of a given Property
- * annotation on the same {@link java.lang.reflect.AnnotatedElement }.
+ * PropertyConfigured is an annotation to document the configuration key and the default value of a given @Property
+ * annotation on the same {@link java.lang.reflect.AnnotatedElement}.
+ * <p/>
+ * See {@link cascading.pipe.assembly.AggregateBy#getThreshold()} for an example.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.METHOD, ElementType.FIELD})

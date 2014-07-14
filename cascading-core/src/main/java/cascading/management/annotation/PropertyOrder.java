@@ -26,14 +26,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * PropertyOrder is an annotation on the class level that controls the sort order of the Property annotations present
+ * PropertyOrder is an annotation at the class level that controls the sort order of the Property annotations present
  * on that class.
- * <p>
- * The default sort order is Order.DECLARED, meaning the way they are returned by the reflection API of the JVM. This
- * can be implementation specific and is not guaranteed to be stable. Using Order.ALPHABETICAL will cause
- * the properties to be sorted alphabetically and using Order.GIVEN and an array of Strings containing <em>all</em>
- * properties of that class, will result in a custom order.
  * </p>
+ * Order.DECLARED is the default sort order in which the properties are returned in the order they are returned by the
+ * reflection API of the JVM. This can be implementation specific and is not guaranteed to be stable.
+ * <p/>
+ * Using Order.ALPHABETICAL will cause the properties to be sorted alphabetically.
+ * <p/>
+ * Order.GIVEN and an array of Strings containing <em>all</em> properties of that class, will result in a custom order.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

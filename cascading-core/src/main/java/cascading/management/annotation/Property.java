@@ -27,15 +27,16 @@ import java.lang.annotation.Target;
 
 /**
  * Property annotations can be used to send additional information about certain aspects of Cascading classes
- * to a see {@link cascading.management.DocumentService}. The properties are present at runtime and a DocumentService
- * can choose to inspect, process or persist them at will.
- * <br>
- * Property annotations can be put on {@link cascading.tap.Tap}s,
+ * to the {@link cascading.management.DocumentService}.  The properties are present at runtime and allow a
+ * DocumentService to inspect, process or persist them.
+ * <p/>
+ * Property annotations can be applied to {@link cascading.tap.Tap}s, {@link cascading.scheme.Scheme}s,
  * {@link cascading.flow.Flow}s, {@link cascading.operation.Function}s and {@link cascading.operation.Filter}s.
- * <br>
- * You can use @Property annotations on Methods and Fields, but they must be public in order to process them via
- * java.lang.Class#getMethods() and java.lang.Class.getFields() respectively. Putting them on any non-public method or
- * field will have no effect.
+ * <p/>
+ *
+ * @Property annotations can be applied to public methods and public fields, so that they can be accessed via
+ * java.lang.Class#getMethods() and java.lang.Class.getFields() respectively. Adding @Property annotations on any
+ * non-public method or field will have no effect.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})

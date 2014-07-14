@@ -26,8 +26,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * PropertyDescription in an annotation that can be used to describe @Property annotation present on the
- * same see {@link java.lang.reflect.AnnotatedElement}.
+ * PropertyDescription is an annotation that can be used to describe the @Property annotation present on the
+ * same {@link java.lang.reflect.AnnotatedElement}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})

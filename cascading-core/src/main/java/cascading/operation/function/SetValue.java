@@ -25,6 +25,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -86,11 +89,13 @@ public class SetValue extends BaseOperation implements Function
     verify();
     }
 
+  @Property(name = "firstValue", visibility = Visibility.PRIVATE)
   public Serializable getFirstValue()
     {
     return (Serializable) values[ 0 ].getObject( 0 );
     }
 
+  @Property(name = "secondValue", visibility = Visibility.PRIVATE)
   public Serializable getSecondValue()
     {
     return (Serializable) values[ 1 ].getObject( 0 );

@@ -22,8 +22,12 @@ package cascading.management.annotation;
 
 /**
  * Visibility controls whether a certain {@link cascading.management.annotation.Property} is visible to a certain
- * audience The implementation of the {@link cascading.management.DocumentService } can choose what the different values
- * mean it's own context.
+ * audience.
+ * <p/>
+ * It is up to the implementation of a {@link cascading.management.DocumentService} to interpret and use these
+ * values.
+ * <p/>
+ * Cascading does not enforce any restrictions related to the values, they are considered informative.
  */
 public enum Visibility
   {

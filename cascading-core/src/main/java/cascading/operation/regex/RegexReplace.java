@@ -24,6 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.regex.Matcher;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
@@ -73,11 +76,15 @@ public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implement
     this.replacement = replacement;
     }
 
+  @Property(name = "replacement", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "The string replacement value.")
   public String getReplacement()
     {
     return replacement;
     }
 
+  @Property(name = "replaceAll", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "Will replace all occurrences of pattern.")
   public boolean isReplaceAll()
     {
     return replaceAll;

@@ -26,9 +26,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * PropertySanitize is an annotation to be used in conjunction with a Property annotation to sanitize values for a certain
- * visibility. This can be useful if a Property contains usernames, password, API keys etc. One can either supply a regex
- * or a custom class implementing the {@link Sanitize} interface.
+ * PropertySanitize is an annotation to be used in conjunction with a Property annotation to sanitize values containing
+ * sensitive information.
+ * <p/>
+ * For example, if a Property contains an URL, user names, password, API keys etc, one can either supply a regex
+ * or a custom class implementing the {@link Sanitize} interface to remove or replace any sensitive data.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})

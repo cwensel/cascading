@@ -23,6 +23,9 @@ package cascading.operation.aggregator;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.Aggregator;
 import cascading.operation.AggregatorCall;
 import cascading.tuple.Fields;
@@ -106,6 +109,8 @@ public class First extends ExtentBase
     this.firstN = 1;
     }
 
+  @Property(name = "firstN", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "The number of tuples to return.")
   public int getFirstN()
     {
     return firstN;

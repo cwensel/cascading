@@ -24,6 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -149,11 +152,15 @@ public class UnGroup extends BaseOperation implements Function
     this.size = numValues;
     }
 
+  @Property(name = "ungroupFieldSelector", visibility = Visibility.PRIVATE)
+  @PropertyDescription(description = "The fields to un-group.")
   public Fields getGroupFieldSelector()
     {
     return groupFieldSelector;
     }
 
+  @Property(name = "resultFieldSelectors", visibility = Visibility.PRIVATE)
+  @PropertyDescription(description = "The result field selectors.")
   public Fields[] getResultFieldSelectors()
     {
     return Util.copy( resultFieldSelectors );

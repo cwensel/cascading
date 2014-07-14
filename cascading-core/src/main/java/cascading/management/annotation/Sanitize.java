@@ -22,9 +22,8 @@ package cascading.management.annotation;
 
 /**
  * Sanitize is an interface to be used in conjunction with {@link cascading.management.annotation.PropertySanitze}.
- * Value sanitization is applied to a value for a given visibility.
- * <br>
- * Implementations of this interfaces must provide a default no-args Constructor.
+ * <p/>
+ * Implementations of this interface must provide a default no-args Constructor.
  */
 public interface Sanitize
   {

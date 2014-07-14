@@ -33,6 +33,9 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -148,6 +151,13 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
       this.charsetName = charsetName;
 
     Charset.forName( this.charsetName );
+    }
+
+  @Property(name = "charset", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "character set used.")
+  public String getCharsetName()
+    {
+    return charsetName;
     }
 
   protected void verify( Fields sourceFields )

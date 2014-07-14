@@ -23,6 +23,9 @@ package cascading.operation.regex;
 import java.beans.ConstructorProperties;
 import java.util.regex.Pattern;
 
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 
@@ -114,6 +117,8 @@ public class RegexOperation<C> extends BaseOperation<C>
    *
    * @return the patternString (type String) of this RegexOperation object.
    */
+  @Property(name = "patternString", visibility = Visibility.PRIVATE)
+  @PropertyDescription(description = "The regular expression pattern string.")
   public final String getPatternString()
     {
     return patternString;

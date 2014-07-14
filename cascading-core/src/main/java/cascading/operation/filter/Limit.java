@@ -23,6 +23,9 @@ package cascading.operation.filter;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -71,6 +74,8 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
     this.limit = limit;
     }
 
+  @Property(name = "limit", visibility = Visibility.PUBLIC)
+  @PropertyDescription(description = "The upper limit.")
   public long getLimit()
     {
     return limit;

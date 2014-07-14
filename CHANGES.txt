@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Added Java Annotations to c.m.annotation for marking and granting access of custom properties to c.m.DocumentService
+  implementations like the Driven plug-in. Instrumented core Operations, SubAssemblies, Taps, and Schemes.
+
   Updated Apache Hadoop to 2.4.1 in cascading-hadoop2-mr1.
 
 2.5.5
