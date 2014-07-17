@@ -28,11 +28,15 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.FlowProcess;
 import cascading.operation.AssertionLevel;
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
 import cascading.operation.assertion.AssertExpression;
 import cascading.operation.expression.ExpressionFunction;
+import cascading.operation.expression.ScriptFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -42,6 +46,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import org.junit.Test;
 
@@ -1011,6 +1016,68 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     iterator.close();
     }
 
+  /**
+   * inserts null values into the tuple stream.
+   * */
+  class NullInsert extends BaseOperation implements Function
+    {
+    public NullInsert( Fields fieldDeclaration )
+      {
+      super( 2, fieldDeclaration );
+      }
+    @Override
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+      {
+      TupleEntry argument = functionCall.getArguments();
+      int num = argument.getInteger( 0 );
+      String chr = argument.getString( 1 );
+      Tuple result;
+      if ( num == 1 )
+        result = new Tuple( null, chr );
+      else
+        result = new Tuple( num, chr );
+      functionCall.getOutputCollector().add( result );
+      }
+    }
+
+  @Test
+  public void testMinByNullSafety() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "min" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "minbynullsafety" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "min" );
+
+    pipe = new Each( pipe, new NullInsert( new Fields( "num", "char" ) ), Fields.RESULTS );
+
+    pipe = new MinBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "min" ), 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 1 ),
+      new Tuple( "b", 1 ),
+      new Tuple( "c", 1 ),
+      new Tuple( "d", 2 ),
+      new Tuple( "e", 5 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
   @Test
   public void testMinByString() throws IOException
     {
@@ -1057,6 +1124,44 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Class[]{String.class, Integer.TYPE}, getOutputPath( "maxby" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "max" );
+
+    pipe = new MaxBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "max" ), 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( "a", 5 ),
+      new Tuple( "b", 5 ),
+      new Tuple( "c", 4 ),
+      new Tuple( "d", 4 ),
+      new Tuple( "e", 5 ),
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testMaxByNullSafety() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "max" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "maxbynullsafety" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "max" );
+
+    pipe = new Each( pipe, new NullInsert( new Fields( "num", "char" ) ), Fields.RESULTS );
 
     pipe = new MaxBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "max" ), 2 );
 
