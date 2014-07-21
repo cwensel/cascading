@@ -1021,9 +1021,12 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
    * */
   class NullInsert extends BaseOperation implements Function
     {
-    public NullInsert( Fields fieldDeclaration )
+    private final int number;
+
+    public NullInsert( int numberToFilter, Fields fieldDeclaration )
       {
       super( 2, fieldDeclaration );
+      this.number = numberToFilter;
       }
     @Override
     public void operate( FlowProcess flowProcess, FunctionCall functionCall )
@@ -1032,10 +1035,11 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       int num = argument.getInteger( 0 );
       String chr = argument.getString( 1 );
       Tuple result;
-      if ( num == 1 )
+      if ( num == number )
         result = new Tuple( null, chr );
       else
         result = new Tuple( num, chr );
+
       functionCall.getOutputCollector().add( result );
       }
     }
@@ -1051,7 +1055,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "min" );
 
-    pipe = new Each( pipe, new NullInsert( new Fields( "num", "char" ) ), Fields.RESULTS );
+    pipe = new Each( pipe, new NullInsert( 3, new Fields( "num", "char" ) ), Fields.RESULTS );
 
     pipe = new MinBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "min" ), 2 );
 
@@ -1161,7 +1165,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "max" );
 
-    pipe = new Each( pipe, new NullInsert( new Fields( "num", "char" ) ), Fields.RESULTS );
+    pipe = new Each( pipe, new NullInsert( 1, new Fields( "num", "char" ) ), Fields.RESULTS );
 
     pipe = new MaxBy( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "max" ), 2 );
 
