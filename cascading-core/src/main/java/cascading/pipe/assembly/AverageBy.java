@@ -333,7 +333,7 @@ public class AverageBy extends AggregateBy
    * @param valueField     of type Fields
    * @param averageField   of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField )
     {
     this( null, pipes, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
@@ -348,7 +348,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "threshold"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField", "threshold"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, int threshold )
     {
     this( null, pipes, groupingFields, valueField, averageField, threshold );
@@ -458,7 +458,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param include        of type boolean
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "include"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
     this( null, pipes, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
@@ -474,7 +474,7 @@ public class AverageBy extends AggregateBy
    * @param include        of type boolean
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "include", "threshold"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField", "include", "threshold"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include, int threshold )
     {
     this( null, pipes, groupingFields, valueField, averageField, include, threshold );

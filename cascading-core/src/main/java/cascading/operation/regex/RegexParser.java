@@ -82,7 +82,7 @@ public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements
    * @param fieldDeclaration of type Fields
    * @param patternString    of type String
    */
-  @ConstructorProperties({"fieldDeclaration", "pattenString"})
+  @ConstructorProperties({"fieldDeclaration", "patternString"})
   public RegexParser( Fields fieldDeclaration, String patternString )
     {
     super( 1, fieldDeclaration, patternString );

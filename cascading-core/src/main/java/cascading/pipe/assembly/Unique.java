@@ -336,7 +336,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties({"pipes", "uniqueFields", "threshold"})
+  @ConstructorProperties({"pipes", "uniqueFields", "include", "threshold"})
   public Unique( Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
     this( null, pipes, uniqueFields, include, threshold );
@@ -395,6 +395,9 @@ public class Unique extends SubAssembly
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
     super( pipes );
+
+    if( uniqueFields == null )
+      throw new IllegalArgumentException( "uniqueFields may not be null" );
 
     Pipe[] filters = new Pipe[ pipes.length ];
     FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold );

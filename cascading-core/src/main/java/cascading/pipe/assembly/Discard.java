@@ -42,6 +42,9 @@ public class Discard extends SubAssembly
     {
     super( previous );
 
+    if( discardFields == null )
+      throw new IllegalArgumentException( "discardFields may not be null" );
+
     setTails( new Each( previous, discardFields, new NoOp(), Fields.SWAP ) );
     }
   }
