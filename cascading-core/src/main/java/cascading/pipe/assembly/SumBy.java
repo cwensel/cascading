@@ -214,7 +214,7 @@ public class SumBy extends AggregateBy
    * @param valueField     of type Fields
    * @param sumField       of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "sumField"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField )
     {
     this( null, pipes, groupingFields, valueField, sumField, USE_DEFAULT_THRESHOLD );
@@ -229,7 +229,7 @@ public class SumBy extends AggregateBy
    * @param sumField       of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "threshold"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "sumField", "threshold"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, int threshold )
     {
     this( null, pipes, groupingFields, valueField, sumField, threshold );
@@ -357,7 +357,7 @@ public class SumBy extends AggregateBy
    * @param sumField       of type Fields
    * @param sumType        of type Class
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "sumField", "sumType"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType )
     {
     this( null, pipes, groupingFields, valueField, sumField, sumType, USE_DEFAULT_THRESHOLD );
@@ -373,7 +373,7 @@ public class SumBy extends AggregateBy
    * @param sumType        of type Class
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "sumField", "sumType", "threshold"})
   public SumBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields sumField, Class sumType, int threshold )
     {
     this( null, pipes, groupingFields, valueField, sumField, sumType, threshold );

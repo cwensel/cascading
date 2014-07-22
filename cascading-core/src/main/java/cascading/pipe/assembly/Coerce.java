@@ -53,6 +53,9 @@ public class Coerce extends SubAssembly
     {
     super( previous );
 
+    if( types.length > 0 )
+      throw new IllegalArgumentException( "given types array may not be zero length" );
+
     setTails( new Each( previous, new Identity( types ) ) );
     }
 
@@ -69,6 +72,9 @@ public class Coerce extends SubAssembly
   public Coerce( Pipe previous, Fields coerceFields, Class... types )
     {
     super( previous );
+
+    if( coerceFields == null )
+      throw new IllegalArgumentException( "coerceFields may not be null" );
 
     setTails( new Each( previous, coerceFields, new Identity( types ), Fields.REPLACE ) );
     }
@@ -88,6 +94,12 @@ public class Coerce extends SubAssembly
   public Coerce( Pipe previous, Fields coerceFields )
     {
     super( previous );
+
+    if( coerceFields == null )
+      throw new IllegalArgumentException( "coerceFields may not be null" );
+
+    if( !coerceFields.hasTypes() )
+      throw new IllegalArgumentException( "coerceFields must have field types declared" );
 
     setTails( new Each( previous, coerceFields, new Identity( coerceFields ), Fields.REPLACE ) );
 
