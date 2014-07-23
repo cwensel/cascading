@@ -179,7 +179,7 @@ public class MaxBy extends AggregateBy
    * @param valueField     of type Fields
    * @param maxField       of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "maxField"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "maxField"})
   public MaxBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields maxField )
     {
     this( null, pipes, groupingFields, valueField, maxField, USE_DEFAULT_THRESHOLD );
@@ -194,7 +194,7 @@ public class MaxBy extends AggregateBy
    * @param maxField       of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "maxField", "threshold"})
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "maxField", "threshold"})
   public MaxBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields maxField, int threshold )
     {
     this( null, pipes, groupingFields, valueField, maxField, threshold );

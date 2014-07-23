@@ -396,6 +396,9 @@ public class Unique extends SubAssembly
     {
     super( pipes );
 
+    if( uniqueFields == null )
+      throw new IllegalArgumentException( "uniqueFields may not be null" );
+
     Pipe[] filters = new Pipe[ pipes.length ];
     FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold );
 

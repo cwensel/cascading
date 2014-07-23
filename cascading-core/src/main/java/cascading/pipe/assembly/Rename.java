@@ -51,6 +51,12 @@ public class Rename extends SubAssembly
     {
     super( previous );
 
+    if( fromFields == null )
+      throw new IllegalArgumentException( "fromFields may not be null" );
+
+    if( toFields == null )
+      throw new IllegalArgumentException( "toFields may not be null" );
+
     if( fromFields.isDefined() && fromFields.size() != toFields.size() )
       throw new IllegalArgumentException( "fields arguments must be same size, from: " + fromFields.printVerbose() + " to: " + toFields.printVerbose() );
 
