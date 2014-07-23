@@ -94,6 +94,8 @@ subprojects {
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
 
+    failOnError = false
+
     configure( options ) {
       linkSource = true
       encoding = "UTF8"
