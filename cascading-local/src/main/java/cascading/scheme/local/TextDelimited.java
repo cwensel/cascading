@@ -535,7 +535,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     }
 
   @Property(name = "charset", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "character set used.")
+  @PropertyDescription("character set used.")
   public String getCharsetName()
     {
     return charsetName;
@@ -547,7 +547,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @return a String
    */
   @Property(name = "delimiter", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The delimiter used to separate fields.")
+  @PropertyDescription("The delimiter used to separate fields.")
   public String getDelimiter()
     {
     return delimitedParser.getDelimiter();
@@ -559,7 +559,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @return a String
    */
   @Property(name = "quote", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The string used for quoting.")
+  @PropertyDescription("The string used for quoting.")
   public String getQuote()
     {
     return delimitedParser.getQuote();

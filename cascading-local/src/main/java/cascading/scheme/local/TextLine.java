@@ -154,7 +154,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     }
 
   @Property(name = "charset", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "character set used.")
+  @PropertyDescription("character set used.")
   public String getCharsetName()
     {
     return charsetName;

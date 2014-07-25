@@ -98,7 +98,7 @@ public class FirstNBuffer extends BaseOperation implements Buffer
     }
 
   @Property(name = "firstN", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The number of tuples to return.")
+  @PropertyDescription("The number of tuples to return.")
   public int getFirstN()
     {
     return firstN;

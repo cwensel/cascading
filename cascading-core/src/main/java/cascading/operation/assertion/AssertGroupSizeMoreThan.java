@@ -60,7 +60,7 @@ public class AssertGroupSizeMoreThan extends AssertGroupBase
     }
 
   @Property(name = "size", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The minimum group size.")
+  @PropertyDescription("The minimum group size.")
   @Override
   public long getSize()
     {

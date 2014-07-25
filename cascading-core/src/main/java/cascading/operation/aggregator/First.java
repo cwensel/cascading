@@ -110,7 +110,7 @@ public class First extends ExtentBase
     }
 
   @Property(name = "firstN", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The number of tuples to return.")
+  @PropertyDescription("The number of tuples to return.")
   public int getFirstN()
     {
     return firstN;

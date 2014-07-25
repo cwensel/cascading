@@ -635,8 +635,8 @@ public class AggregateBy extends SubAssembly
     }
 
   @Property(name = "threshold", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "Threshold of the aggregation.")
-  @PropertyConfigured(property = AGGREGATE_BY_THRESHOLD, defaultValue = "10000")
+  @PropertyDescription("Threshold of the aggregation.")
+  @PropertyConfigured(value = AGGREGATE_BY_THRESHOLD, defaultValue = "10000")
   public int getThreshold()
     {
     return threshold;

@@ -82,14 +82,14 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
     }
 
   @Property(name = "seed", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The randomization seed.")
+  @PropertyDescription("The randomization seed.")
   public long getSeed()
     {
     return seed;
     }
 
   @Property(name = "fraction", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The fraction of tuples to be returned.")
+  @PropertyDescription("The fraction of tuples to be returned.")
   public double getFraction()
     {
     return fraction;

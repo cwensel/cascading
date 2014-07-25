@@ -60,7 +60,7 @@ public class AssertGroupSizeEquals extends AssertGroupBase
     }
 
   @Property(name = "size", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The expected group size.")
+  @PropertyDescription("The expected group size.")
   @Override
   public long getSize()
     {

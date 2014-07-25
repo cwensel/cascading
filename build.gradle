@@ -48,7 +48,6 @@ configure( subprojects ) {
   apply plugin: 'propdeps-eclipse'
 }
 
-
 apply from: 'etc/version.gradle'
 apply from: "etc/s3Upload.gradle"
 
@@ -71,7 +70,6 @@ allprojects {
     maven { url 'https://repository.apache.org/content/repositories/releases/' }
   }
 }
-
 
 subprojects {
 

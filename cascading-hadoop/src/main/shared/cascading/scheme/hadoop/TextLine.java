@@ -312,8 +312,8 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
     Charset.forName( this.charsetName );
     }
 
-  @Property( name="charset", visibility = Visibility.PUBLIC )
-  @PropertyDescription( description = "character set used in this scheme." )
+  @Property(name = "charset", visibility = Visibility.PUBLIC)
+  @PropertyDescription(value = "character set used in this scheme.")
   public String getCharsetName()
     {
     return charsetName;
@@ -330,8 +330,8 @@ public class TextLine extends Scheme<JobConf, RecordReader, OutputCollector, Obj
    *
    * @return the sinkCompression (type Compress) of this TextLine object.
    */
-  @Property( name ="sinkCompression", visibility = Visibility.PUBLIC )
-  @PropertyDescription( description = "The compression of the scheme when used in a sink.")
+  @Property(name = "sinkCompression", visibility = Visibility.PUBLIC)
+  @PropertyDescription(value = "The compression of the scheme when used in a sink.")
   public Compress getSinkCompression()
     {
     return sinkCompression;

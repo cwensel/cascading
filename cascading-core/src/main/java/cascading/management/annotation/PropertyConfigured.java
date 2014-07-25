@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 @Target(value = {ElementType.METHOD, ElementType.FIELD})
 public @interface PropertyConfigured
   {
-  String property();
+  String value();
 
   String defaultValue() default "";
   }

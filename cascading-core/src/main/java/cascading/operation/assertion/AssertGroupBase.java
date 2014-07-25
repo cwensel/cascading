@@ -92,7 +92,7 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     }
 
   @Property(name = "patternString", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The regular expression pattern string.")
+  @PropertyDescription("The regular expression pattern string.")
   public String getPatternString()
     {
     return patternString;

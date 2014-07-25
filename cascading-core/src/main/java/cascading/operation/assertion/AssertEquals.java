@@ -62,7 +62,7 @@ public class AssertEquals extends BaseAssertion implements ValueAssertion
     }
 
   @Property(name = "values", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The expected values.")
+  @PropertyDescription("The expected values.")
   public Collection getValues()
     {
     return Tuples.asCollection( values );

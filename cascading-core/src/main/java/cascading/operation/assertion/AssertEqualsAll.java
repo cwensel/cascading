@@ -56,7 +56,7 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
     }
 
   @Property(name = "value", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The expected value.")
+  @PropertyDescription("The expected value.")
   public Object getValue()
     {
     return value;

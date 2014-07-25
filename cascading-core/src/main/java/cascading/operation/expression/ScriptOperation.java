@@ -126,7 +126,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     }
 
   @Property(name = "source", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The Java source to execute.")
+  @PropertyDescription("The Java source to execute.")
   public String getBlock()
     {
     return block;
@@ -138,7 +138,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     }
 
   @Property(name = "parameterNames", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The declared parameter names.")
+  @PropertyDescription("The declared parameter names.")
   public String[] getParameterNames()
     {
     return Util.copy( parameterNames );
@@ -181,7 +181,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     }
 
   @Property(name = "parameterTypes", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The declared parameter types.")
+  @PropertyDescription("The declared parameter types.")
   public Class[] getParameterTypes()
     {
     return Util.copy( parameterTypes );

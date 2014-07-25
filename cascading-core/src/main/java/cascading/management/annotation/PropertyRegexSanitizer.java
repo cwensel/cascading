@@ -26,12 +26,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * PropertyDescription is an annotation that can be used to describe the @Property annotation present on the
- * same {@link java.lang.reflect.AnnotatedElement}.
+ * PropertyRegexSanitizer is an annotation to be used in conjunction with a Property annotation to sanitize values containing
+ * sensitive information with a given regular expression.
+ * <p/>
+ * For example, if a Property contains an URL, user names, password, API keys etc, one can supply a regular expression
+ * (regex) to remove the sensitive parts.
+ * <p/>
+ * Unlike the {@link cascading.management.annotation.PropertySanitizer} annotation, the regular expression is applied
+ * once and the result is stored as the value for the declared {@link cascading.management.annotation.Visibility}
+ * for the property. See PropertySanitizer if different values should be returned for each Visibility type.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})
-public @interface PropertyDescription
+public @interface PropertyRegexSanitizer
   {
   String value();
   }

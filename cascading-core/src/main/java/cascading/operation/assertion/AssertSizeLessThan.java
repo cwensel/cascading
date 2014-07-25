@@ -53,7 +53,7 @@ public class AssertSizeLessThan extends BaseAssertion implements ValueAssertion
     }
 
   @Property(name = "size", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The maximum tuple size.")
+  @PropertyDescription("The maximum tuple size.")
   public int getSize()
     {
     return size;

@@ -21,11 +21,20 @@
 package cascading.management.annotation;
 
 /**
- * Sanitize is an interface to be used in conjunction with {@link cascading.management.annotation.PropertySanitze}.
+ * Sanitizer is an interface to be used in conjunction with {@link PropertySanitizer}.
+ * <p/>
+ * The Sanitizer implementation has the option to provide a different value for each level of
+ * {@link cascading.management.annotation.Visibility}.
+ * <p/>
+ * For example, if the raw value is an URL, the {@code PUBLIC} sanitized value may just include the URL path. The
+ * {@code PROTECTED} value may retain the query string, and the {@code PRIVATE} value may retain the scheme and
+ * domain name of the server.
+ * <p/>
+ * If a Sanitizer returns {@code null}, no value will be available for that requested visibility.
  * <p/>
  * Implementations of this interface must provide a default no-args Constructor.
  */
-public interface Sanitize
+public interface Sanitizer
   {
   /**
    * Applies the custom sanitization to the given value for the given visibility.
@@ -34,5 +43,5 @@ public interface Sanitize
    * @param value      The value to sanitize.
    * @return A sanitized version of the value.
    */
-  String apply( Visibility visibility, String value );
+  String apply( Visibility visibility, Object value );
   }

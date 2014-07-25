@@ -153,14 +153,14 @@ public class UnGroup extends BaseOperation implements Function
     }
 
   @Property(name = "ungroupFieldSelector", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The fields to un-group.")
+  @PropertyDescription("The fields to un-group.")
   public Fields getGroupFieldSelector()
     {
     return groupFieldSelector;
     }
 
   @Property(name = "resultFieldSelectors", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The result field selectors.")
+  @PropertyDescription("The result field selectors.")
   public Fields[] getResultFieldSelectors()
     {
     return Util.copy( resultFieldSelectors );

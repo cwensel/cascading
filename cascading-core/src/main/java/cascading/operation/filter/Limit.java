@@ -75,7 +75,7 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
     }
 
   @Property(name = "limit", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The upper limit.")
+  @PropertyDescription("The upper limit.")
   public long getLimit()
     {
     return limit;

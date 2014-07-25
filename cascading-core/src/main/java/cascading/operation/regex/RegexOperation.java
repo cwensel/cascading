@@ -118,7 +118,7 @@ public class RegexOperation<C> extends BaseOperation<C>
    * @return the patternString (type String) of this RegexOperation object.
    */
   @Property(name = "patternString", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The regular expression pattern string.")
+  @PropertyDescription("The regular expression pattern string.")
   public final String getPatternString()
     {
     return patternString;

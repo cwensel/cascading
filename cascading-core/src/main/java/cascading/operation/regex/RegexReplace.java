@@ -77,14 +77,14 @@ public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implement
     }
 
   @Property(name = "replacement", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "The string replacement value.")
+  @PropertyDescription("The string replacement value.")
   public String getReplacement()
     {
     return replacement;
     }
 
   @Property(name = "replaceAll", visibility = Visibility.PUBLIC)
-  @PropertyDescription(description = "Will replace all occurrences of pattern.")
+  @PropertyDescription("Will replace all occurrences of pattern.")
   public boolean isReplaceAll()
     {
     return replaceAll;

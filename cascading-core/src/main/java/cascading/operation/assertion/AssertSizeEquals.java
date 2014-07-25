@@ -53,7 +53,7 @@ public class AssertSizeEquals extends BaseAssertion implements ValueAssertion
     }
 
   @Property(name = "size", visibility = Visibility.PRIVATE)
-  @PropertyDescription(description = "The expected tuple size.")
+  @PropertyDescription("The expected tuple size.")
   public int getSize()
     {
     return size;
