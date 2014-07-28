@@ -23,6 +23,9 @@ package cascading.operation;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
@@ -48,6 +51,8 @@ public class Insert extends BaseOperation implements Function
       throw new IllegalArgumentException( "fieldDeclaration must be the same size as the given values" );
     }
 
+  @Property(name = "values", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The values to insert.")
   public Tuple getValues()
     {
     return new Tuple( values );
