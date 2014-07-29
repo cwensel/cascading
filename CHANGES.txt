@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Updated Janino to 2.7.5.
+
   Added ability to add more meta information about a c.f.Flow, which can be read and used by a c.m.DocumentService.
 
   Fixed null handling problem in c.p.a.MaxBy and c.p.a.MinBy.

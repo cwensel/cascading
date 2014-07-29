@@ -509,7 +509,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "pipeline" );
 
-    Function function = new ExpressionFunction( new Fields( "count" ), "line.split( \"\\s\").length", String.class );
+    Function function = new ExpressionFunction( new Fields( "count" ), "line.split( \"\\\\s\").length", String.class );
     pipe = new Each( pipe, new Fields( "line" ), function, Fields.ALL );
 
     int depth = 50;
