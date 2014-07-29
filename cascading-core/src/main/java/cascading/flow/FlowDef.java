@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import cascading.pipe.Checkpoint;
 import cascading.pipe.Pipe;
 import cascading.property.UnitOfWorkDef;
 import cascading.tap.Tap;
+import cascading.util.Util;
 
 /**
  * Class FlowDef is a fluent interface for defining a {@link Flow}.
@@ -52,6 +54,8 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   protected List<String> classPath = new ArrayList<String>();
   protected List<Pipe> tails = new ArrayList<Pipe>();
   protected List<AssemblyPlanner> assemblyPlanners = new ArrayList<AssemblyPlanner>();
+
+  protected HashMap<String, String> flowDescriptor = new LinkedHashMap<String, String>();
 
   protected AssertionLevel assertionLevel;
   protected DebugLevel debugLevel;
@@ -92,6 +96,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   public FlowDef addAssemblyPlanner( AssemblyPlanner assemblyPlanner )
     {
     assemblyPlanners.add( assemblyPlanner );
+    addDescriptions( assemblyPlanner.getFlowDescriptor() );
 
     return this;
     }
@@ -114,6 +119,16 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   public Map<String, Tap> getSourcesCopy()
     {
     return new HashMap<String, Tap>( sources );
+    }
+
+  /**
+   * Method getFlowDescriptor returns the  flowDescriptor of this FlowDef.
+   *
+   * @return the flowDescriptor of this FlowDef object.
+   */
+  public HashMap<String, String> getFlowDescriptor()
+    {
+    return flowDescriptor;
     }
 
   /**
@@ -169,6 +184,67 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
       for( Map.Entry<String, Tap> entry : sources.entrySet() )
         addSource( entry.getKey(), entry.getValue() );
       }
+
+    return this;
+    }
+
+  /**
+   * Method addDescription adds a user readable description to the flowDescriptor.
+   * <p/>
+   * This uses the {@link cascading.flow.FLowDescriptors#DESCRIPTION} key.
+   */
+  public FlowDef addDescription( String description )
+    {
+    addDescription( FLowDescriptors.DESCRIPTION, description );
+
+    return this;
+    }
+
+  /**
+   * Method addDescription adds a description to the flowDescriptor.
+   * <p/>
+   * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
+   * For known description types, see {@link cascading.flow.FLowDescriptors}.
+   * <p/>
+   * If an existing key exists, it will be appended to the original value using
+   * {@link cascading.flow.FLowDescriptors#VALUE_SEPARATOR}.
+   *
+   * @param key   The key as a String.
+   * @param value The value as a String.
+   * @return FlowDef
+   */
+  public FlowDef addDescription( String key, String value )
+    {
+    if( Util.isEmpty( value ) ) // do nothing
+      return this;
+
+    if( flowDescriptor.containsKey( key ) )
+      {
+      String original = flowDescriptor.get( key );
+
+      if( !Util.isEmpty( original ) )
+        value = original + FLowDescriptors.VALUE_SEPARATOR + value;
+      }
+
+    flowDescriptor.put( key, value );
+
+    return this;
+    }
+
+  /**
+   * Method addProperties adds all properties in the given map in order to the flowDescriptor. If the given Map has
+   * an explicit order, it will be preserved.
+   * <p/>
+   * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
+   * For known description types, see {@link cascading.flow.FLowDescriptors}.
+   *
+   * @param descriptions The properties to be added to the map.
+   * @return FlowDef
+   */
+  public FlowDef addDescriptions( Map<String, String> descriptions )
+    {
+    for( Map.Entry<String, String> entry : descriptions.entrySet() )
+      addDescription( entry.getKey(), entry.getValue() );
 
     return this;
     }

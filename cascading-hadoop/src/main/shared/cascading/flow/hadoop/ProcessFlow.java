@@ -83,7 +83,21 @@ public class ProcessFlow<P> extends HadoopFlow
   @ConstructorProperties({"properties", "name", "process"})
   public ProcessFlow( Map<Object, Object> properties, String name, P process )
     {
-    super( HadoopUtil.getPlatformInfo(), properties, null, name );
+    this( properties, name, process, null );
+    }
+
+  /**
+   * Constructor ProcessFlow creates a new ProcessFlow instance.
+   *
+   * @param properties     of type Map<Object, Object>
+   * @param name           of type String
+   * @param process        of type P
+   * @param flowDescriptor pf type LinkedHashMap<String, String>
+   */
+  @ConstructorProperties({"properties", "name", "process", "flowDescriptor"})
+  public ProcessFlow( Map<Object, Object> properties, String name, P process, Map<String, String> flowDescriptor )
+    {
+    super( HadoopUtil.getPlatformInfo(), properties, null, name, flowDescriptor );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
 

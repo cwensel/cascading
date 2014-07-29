@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -134,6 +135,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   private transient ReentrantLock stopLock = new ReentrantLock( true );
   protected ShutdownUtil.Hook shutdownHook;
 
+  private HashMap<String, String> flowDescriptor;
+
   /**
    * Returns property stopJobsOnExit.
    *
@@ -154,8 +157,17 @@ public abstract class BaseFlow<Config> implements Flow<Config>
 
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name )
     {
+    this( platformInfo, properties, defaultConfig, name, new LinkedHashMap<String, String>() );
+    }
+
+  protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name, Map<String, String> flowDescriptor )
+    {
     this.platformInfo = platformInfo;
     this.name = name;
+
+    if( flowDescriptor != null )
+      this.flowDescriptor = new LinkedHashMap<String, String>( flowDescriptor );
+
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
 
@@ -169,6 +181,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.tags = flowDef.getTags();
     this.runID = flowDef.getRunID();
     this.classPath = flowDef.getClassPath();
+
+    if( !flowDef.getFlowDescriptor().isEmpty() )
+      this.flowDescriptor = new LinkedHashMap<String, String>( flowDef.getFlowDescriptor() );
 
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
@@ -486,6 +501,15 @@ public abstract class BaseFlow<Config> implements Flow<Config>
   public FlowStats getFlowStats()
     {
     return flowStats;
+    }
+
+  @Override
+  public Map<String, String> getFlowDescriptor()
+    {
+    if( flowDescriptor == null )
+      return Collections.emptyMap();
+
+    return Collections.unmodifiableMap( flowDescriptor );
     }
 
   @Override

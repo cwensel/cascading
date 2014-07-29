@@ -21,7 +21,9 @@
 package cascading.flow;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import cascading.PlatformTestCase;
 import cascading.operation.aggregator.Count;
@@ -36,7 +38,6 @@ import cascading.tuple.Fields;
 import org.junit.Test;
 
 import static data.InputData.inputFileApache;
-
 
 public class AssemblyPlannerPlatformTest extends PlatformTestCase
   {
@@ -54,6 +55,12 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
 
     AssemblyPlanner planner = new AssemblyPlanner()
     {
+    @Override
+    public Map<String, String> getFlowDescriptor()
+      {
+      return Collections.emptyMap();
+      }
+
     @Override
     public List<Pipe> resolveTails( Context context )
       {
@@ -101,6 +108,12 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
 
       return Arrays.asList( pipe );
       }
+
+    @Override
+    public Map<String, String> getFlowDescriptor()
+      {
+      return Collections.EMPTY_MAP;
+      }
     };
 
     AssemblyPlanner lazyCount = new AssemblyPlanner()
@@ -114,6 +127,13 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
 
       return Arrays.asList( pipe );
       }
+
+    @Override
+    public Map<String, String> getFlowDescriptor()
+      {
+      return Collections.EMPTY_MAP;
+      }
+
     };
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "composite" ), SinkMode.REPLACE );
