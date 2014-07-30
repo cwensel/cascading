@@ -47,7 +47,7 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
   /** Field numArgs */
   protected int numArgs = ANY;
   /** Field trace */
-  protected final String trace = Util.captureDebugTrace( getClass() );
+  protected String trace = Util.captureDebugTrace( getClass() );
 
   // initialize this operation based on its subclass
 
