@@ -76,7 +76,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /** Field id */
   private String id = null;
   /** Field trace */
-  private final String trace = Util.captureDebugTrace( getClass() );
+  private String trace = Util.captureDebugTrace( getClass() );
 
   /**
    * Convenience function to make an array of Tap instances.

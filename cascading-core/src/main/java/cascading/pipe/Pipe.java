@@ -74,7 +74,7 @@ public class Pipe implements FlowElement, Serializable
   /** Field id */
   private String id;
   /** Field trace */
-  private final String trace = Util.captureDebugTrace( getClass() );
+  private String trace = Util.captureDebugTrace( getClass() );
 
   public static synchronized String id( Pipe pipe )
     {

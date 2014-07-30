@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.5.6 [unreleased]
 
+  Updated for Cascading Fluid compatibility.
+
 2.5.5
 
   Added new c.t.p.BasePartitionTap property to control to control the behaviour in case of an Exception while closing a
