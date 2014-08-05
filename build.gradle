@@ -207,7 +207,7 @@ task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-
   def analytics = System.getProperty( 'publish.docs.analytics', '' )
 
   from "${distDir}/javadoc/"
-  into "${s3UploadDocs.source}"
+  into "${s3UploadDocs.source}/javadoc"
 
   filter { line ->
     line.replaceAll( "</BODY>", "${analytics}\n</BODY>" )
