@@ -191,11 +191,11 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addDescription adds a user readable description to the flowDescriptor.
    * <p/>
-   * This uses the {@link cascading.flow.FLowDescriptors#DESCRIPTION} key.
+   * This uses the {@link FlowDescriptors#DESCRIPTION} key.
    */
   public FlowDef addDescription( String description )
     {
-    addDescription( FLowDescriptors.DESCRIPTION, description );
+    addDescription( FlowDescriptors.DESCRIPTION, description );
 
     return this;
     }
@@ -204,10 +204,10 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
    * Method addDescription adds a description to the flowDescriptor.
    * <p/>
    * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
-   * For known description types, see {@link cascading.flow.FLowDescriptors}.
+   * For known description types, see {@link FlowDescriptors}.
    * <p/>
    * If an existing key exists, it will be appended to the original value using
-   * {@link cascading.flow.FLowDescriptors#VALUE_SEPARATOR}.
+   * {@link FlowDescriptors#VALUE_SEPARATOR}.
    *
    * @param key   The key as a String.
    * @param value The value as a String.
@@ -223,7 +223,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
       String original = flowDescriptor.get( key );
 
       if( !Util.isEmpty( original ) )
-        value = original + FLowDescriptors.VALUE_SEPARATOR + value;
+        value = original + FlowDescriptors.VALUE_SEPARATOR + value;
       }
 
     flowDescriptor.put( key, value );
@@ -236,7 +236,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
    * an explicit order, it will be preserved.
    * <p/>
    * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
-   * For known description types, see {@link cascading.flow.FLowDescriptors}.
+   * For known description types, see {@link FlowDescriptors}.
    *
    * @param descriptions The properties to be added to the map.
    * @return FlowDef

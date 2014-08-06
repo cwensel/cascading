@@ -23,7 +23,7 @@ package cascading.flow;
 /**
  * Constants to be used as key in Flow#getFlowDescriptor.
  */
-public interface FLowDescriptors
+public interface FlowDescriptors
   {
   /** String that can be used as a record separator. */
   public final static String VALUE_SEPARATOR = "\u001E";

@@ -22,7 +22,6 @@ package cascading.flow;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -147,7 +146,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * See {@link cascading.flow.FlowDef#addDescription(String, String)} to set values on a given Flow.
    * <p/>
    * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
-   * For known description types, see {@link cascading.flow.FLowDescriptors}.
+   * For known description types, see {@link FlowDescriptors}.
    *
    * @return Map<String,String>
    */
