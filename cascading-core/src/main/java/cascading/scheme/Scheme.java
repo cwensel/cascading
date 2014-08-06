@@ -67,7 +67,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /** Field numSinkParts */
   int numSinkParts;
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private String trace = Util.captureDebugTrace( getClass() ); // see Util.setTrace() to override
 
   /** Constructor Scheme creates a new Scheme instance. */
   protected Scheme()

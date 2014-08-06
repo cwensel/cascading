@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.security.MessageDigest;
@@ -485,6 +486,17 @@ public class Util
       ;
     }
 
+  /**
+   * Allows for custom trace fields on Pipe, Tap, and Scheme types
+   *
+   * @param object
+   * @param trace
+   */
+  public static void setTrace( Object object, String trace )
+    {
+    setInstanceFieldIfExists( object, "trace", trace );
+    }
+
   public static String formatTrace( Scheme scheme, String message )
     {
     if( scheme == null )
@@ -497,7 +509,6 @@ public class Util
 
     return "[" + truncate( scheme.toString(), 25 ) + "][" + trace + "] " + message;
     }
-
 
   /**
    * Method formatRawTrace does not include the pipe name
@@ -865,6 +876,43 @@ public class Util
     catch( Exception exception )
       {
       throw new CascadingException( "unable to invoke instance method: " + target.getClass().getName() + "." + methodName, exception );
+      }
+    }
+
+  public static <R> void setInstanceFieldIfExists( Object target, String fieldName, R value )
+    {
+    try
+      {
+      Class<?> type = target.getClass();
+      Field field = getDeclaredField( fieldName, type );
+
+      field.setAccessible( true );
+
+      field.set( target, value );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to set instance field: " + target.getClass().getName() + "." + fieldName, exception );
+      }
+    }
+
+  private static Field getDeclaredField( String fieldName, Class<?> type )
+    {
+    if( type == Object.class )
+      {
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "did not find {} field on {}", fieldName, type.getName() );
+
+      return null;
+      }
+
+    try
+      {
+      return type.getDeclaredField( fieldName );
+      }
+    catch( NoSuchFieldException exception )
+      {
+      return getDeclaredField( fieldName, type.getSuperclass() );
       }
     }
 
