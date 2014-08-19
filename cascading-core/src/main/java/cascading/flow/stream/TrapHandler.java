@@ -20,139 +20,132 @@
 
 package cascading.flow.stream;
 
+import java.io.EOFException;
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import cascading.flow.FlowProcess;
-import cascading.flow.StepCounters;
-import cascading.tap.Tap;
-import cascading.tap.TapException;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
-import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cascading.flow.FlowProcess;
+import cascading.flow.StepCounters;
+
+import cascading.tap.Tap;
+import cascading.tap.TapException;
+
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+
+import cascading.util.Util;
+
 /**
- *
  */
-public class TrapHandler
-  {
-  private static final Logger LOG = LoggerFactory.getLogger( TrapHandler.class );
+public class TrapHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(TrapHandler.class);
 
-  static final Map<Tap, TupleEntryCollector> trapCollectors = new HashMap<Tap, TupleEntryCollector>();
+    static final Map<Tap, TupleEntryCollector> trapCollectors = new HashMap<Tap, TupleEntryCollector>();
 
-  final FlowProcess flowProcess;
-  final Tap trap;
-  final String trapName;
+    final FlowProcess flowProcess;
+    final Tap trap;
+    final String trapName;
 
-  static TupleEntryCollector getTrapCollector( Tap trap, FlowProcess flowProcess )
-    {
-    TupleEntryCollector trapCollector = trapCollectors.get( trap );
+    static TupleEntryCollector getTrapCollector(final Tap trap, final FlowProcess flowProcess) {
+        TupleEntryCollector trapCollector = trapCollectors.get(trap);
 
-    if( trapCollector == null )
-      {
-      try
-        {
-        trapCollector = flowProcess.openTrapForWrite( trap );
-        trapCollectors.put( trap, trapCollector );
+        if (trapCollector == null) {
+            try {
+                trapCollector = flowProcess.openTrapForWrite(trap);
+                trapCollectors.put(trap, trapCollector);
+            } catch (IOException exception) {
+                throw new DuctException(exception);
+            }
         }
-      catch( IOException exception )
-        {
-        throw new DuctException( exception );
+
+        return trapCollector;
+    }
+
+    static synchronized void closeTraps() {
+        for (TupleEntryCollector trapCollector : trapCollectors.values()) {
+            try {
+                trapCollector.close();
+            } catch (Exception exception) {
+
+                // do nothing
+            }
         }
-      }
 
-    return trapCollector;
+        trapCollectors.clear();
     }
 
-  static synchronized void closeTraps()
-    {
-    for( TupleEntryCollector trapCollector : trapCollectors.values() )
-      {
-      try
-        {
-        trapCollector.close();
+    public TrapHandler(final FlowProcess flowProcess) {
+        this.flowProcess = flowProcess;
+        this.trap = null;
+        this.trapName = null;
+    }
+
+    public TrapHandler(final FlowProcess flowProcess, final Tap trap, final String trapName) {
+        this.flowProcess = flowProcess;
+        this.trap = trap;
+        this.trapName = trapName;
+    }
+
+    protected void handleReThrowableException(final String message, final Throwable throwable) {
+        LOG.error(message, throwable);
+
+        if (throwable instanceof Error) {
+            throw (Error) throwable;
+        } else if (throwable instanceof RuntimeException) {
+            throw (RuntimeException) throwable;
+        } else {
+            throw new DuctException(message, throwable);
         }
-      catch( Exception exception )
-        {
-        // do nothing
+    }
+
+    protected void handleException(final Throwable exception, final TupleEntry tupleEntry) {
+        handleException(trapName, trap, exception, tupleEntry);
+    }
+
+    protected void handleException(final String trapName, final Tap trap, final Throwable throwable,
+            final TupleEntry tupleEntry) {
+        Throwable cause = throwable.getCause();
+
+        if (cause instanceof OutOfMemoryError) {
+            handleReThrowableException("caught OutOfMemoryException, will not trap, rethrowing", cause);
         }
-      }
 
-    trapCollectors.clear();
+        if (trap == null) {
+            handleReThrowableException("caught Throwable, no trap available, rethrowing", throwable);
+        }
+
+        if (throwable.getCause() instanceof EOFException) {
+            LOG.warn("exception trap on branch: '" + trapName + ", unexpected end of file", throwable);
+            return;
+        }
+
+        if (cause instanceof TapException && ((TapException) cause).getPayload() != null) {
+            getTrapCollector(trap, flowProcess).add(((TapException) cause).getPayload());
+        } else if (tupleEntry != null) {
+            getTrapCollector(trap, flowProcess).add(tupleEntry);
+        } else {
+            LOG.error("failure resolving tuple entry", throwable);
+            throw new DuctException("failure resolving tuple entry", throwable);
+        }
+
+        flowProcess.increment(StepCounters.Tuples_Trapped, 1);
+
+        LOG.warn("exception trap on branch: '" + trapName + "', for " + Util.truncate(print(tupleEntry), 75),
+            throwable);
     }
 
-  public TrapHandler( FlowProcess flowProcess )
-    {
-    this.flowProcess = flowProcess;
-    this.trap = null;
-    this.trapName = null;
+    private String print(final TupleEntry tupleEntry) {
+        if (tupleEntry == null || tupleEntry.getFields() == null) {
+            return "[uninitialized]";
+        } else if (tupleEntry.getTuple() == null) {
+            return "fields: " + tupleEntry.getFields().printVerbose();
+        } else {
+            return "fields: " + tupleEntry.getFields().printVerbose() + " tuple: " + tupleEntry.getTuple().print();
+        }
     }
-
-  public TrapHandler( FlowProcess flowProcess, Tap trap, String trapName )
-    {
-    this.flowProcess = flowProcess;
-    this.trap = trap;
-    this.trapName = trapName;
-    }
-
-  protected void handleReThrowableException( String message, Throwable throwable )
-    {
-    LOG.error( message, throwable );
-
-    if( throwable instanceof Error )
-      throw (Error) throwable;
-    else if( throwable instanceof RuntimeException )
-      throw (RuntimeException) throwable;
-    else
-      throw new DuctException( message, throwable );
-    }
-
-  protected void handleException( Throwable exception, TupleEntry tupleEntry )
-    {
-    handleException( trapName, trap, exception, tupleEntry );
-    }
-
-  protected void handleException( String trapName, Tap trap, Throwable throwable, TupleEntry tupleEntry )
-    {
-    Throwable cause = throwable.getCause();
-
-    if( cause instanceof OutOfMemoryError )
-      handleReThrowableException( "caught OutOfMemoryException, will not trap, rethrowing", cause );
-
-    if( trap == null )
-      handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
-
-    if( cause instanceof TapException && ( (TapException) cause ).getPayload() != null )
-      {
-      getTrapCollector( trap, flowProcess ).add( ( (TapException) cause ).getPayload() );
-      }
-    else if( tupleEntry != null )
-      {
-      getTrapCollector( trap, flowProcess ).add( tupleEntry );
-      }
-    else
-      {
-      LOG.error( "failure resolving tuple entry", throwable );
-      throw new DuctException( "failure resolving tuple entry", throwable );
-      }
-
-    flowProcess.increment( StepCounters.Tuples_Trapped, 1 );
-
-    LOG.warn( "exception trap on branch: '" + trapName + "', for " + Util.truncate( print( tupleEntry ), 75 ), throwable );
-    }
-
-  private String print( TupleEntry tupleEntry )
-    {
-    if( tupleEntry == null || tupleEntry.getFields() == null )
-      return "[uninitialized]";
-    else if( tupleEntry.getTuple() == null )
-      return "fields: " + tupleEntry.getFields().printVerbose();
-    else
-      return "fields: " + tupleEntry.getFields().printVerbose() + " tuple: " + tupleEntry.getTuple().print();
-    }
-  }
-
-
+}
