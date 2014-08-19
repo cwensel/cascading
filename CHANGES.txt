@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Fixed issue in c.f.h.ProcessFlow where the flowStats object would try to mark a flow as "STOPPED" even if it was
+  already "FINISHED" causing an IllegalStateException.
+
   Added a new c.t.TupleEntrySchemeIterator property to set certain exceptions to be caught, ignored, and logged during
   read. Commonly java.io.EOFException is thrown and can be safely ignored. By default no exception will be ignored.
 

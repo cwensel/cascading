@@ -169,7 +169,9 @@ public class ProcessFlow<P> extends HadoopFlow
       {
       fireOnStopping();
       processWrapper.stop();
-      flowStats.markStopped();
+
+      if( !flowStats.isFinished() )
+        flowStats.markStopped();
       }
     catch( ProcessException exception )
       {
