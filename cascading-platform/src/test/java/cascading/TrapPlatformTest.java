@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.operation.AssertionLevel;
 import cascading.operation.aggregator.Count;
 import cascading.operation.assertion.AssertNotEquals;
@@ -39,9 +40,11 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import data.InputData;
 import org.junit.Test;
 
 import static data.InputData.inputFileApache;
+import static data.InputData.testDelimitedProblematic;
 
 /**
  *
@@ -270,7 +273,6 @@ public class TrapPlatformTest extends PlatformTestCase
     validateLength( flow.openTrap(), 4 );
     }
 
-
   /**
    * This test verifies traps can cross m/r and step boundaries.
    *
@@ -365,5 +367,28 @@ public class TrapPlatformTest extends PlatformTestCase
 
     validateLength( flow.openTapForRead( getPlatform().getTextFile( sink.getIdentifier() ) ), 7 );
     validateLength( flow.openTrap(), 2, Pattern.compile( "bad data" ) ); // confirm the payload is written
+    }
+
+  @Test
+  public void testTrapNoOperation() throws Exception
+    {
+    getPlatform().copyFromLocal( testDelimitedProblematic );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "id", "name" ).applyTypes( int.class, String.class ), ",", testDelimitedProblematic );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "id", "name" ).applyTypes( int.class, String.class ), ",", getOutputPath( getTestName() ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTextFile( getOutputPath( getTestName() + "_trap" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "copy" );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( pipe, source )
+      .addTailSink( pipe, sink )
+      .addTrap( pipe, trap );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow.openTrap(), 1 );
     }
   }

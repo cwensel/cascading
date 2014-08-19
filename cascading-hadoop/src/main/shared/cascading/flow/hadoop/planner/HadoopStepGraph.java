@@ -178,6 +178,13 @@ public class HadoopStepGraph extends FlowStepGraph<JobConf>
               step.getReducerTraps().put( name, traps.get( name ) );
             }
           }
+        else if ( rhs instanceof Tap )
+          {
+          if( onMapSide )
+            step.getMapperTraps().putAll( traps );
+          else
+            step.getReducerTraps().putAll( traps );
+          }
 
         lhs = rhs;
         }
