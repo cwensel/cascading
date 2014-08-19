@@ -22,26 +22,35 @@ package cascading.tuple;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
 import cascading.util.CloseableIterator;
 import cascading.util.SingleCloseableInputIterator;
+import cascading.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class TupleEntrySchemeIterator is a helper class for wrapping a {@link Scheme} instance, calling
  * {@link Scheme#source(cascading.flow.FlowProcess, cascading.scheme.SourceCall)} on every call to
- * {@link #next()}.
+ * {@link #next()}. The behavior can be controlled via properties defined in {@link TupleEntrySchemeIteratorProps}.
  * <p/>
  * Use this class inside a custom {@link cascading.tap.Tap} when overriding the
  * {@link cascading.tap.Tap#openForRead(cascading.flow.FlowProcess)} method.
  */
 public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   {
+  /** Field LOG */
+  private static final Logger LOG = LoggerFactory.getLogger( TupleEntrySchemeIterator.class );
+
   private final FlowProcess<Config> flowProcess;
   private final Scheme scheme;
   private final CloseableIterator<Input> inputIterator;
+  private final Set<Class<? extends Exception>> permittedExceptions;
   private ConcreteCall sourceCall;
 
   private String identifier;
@@ -71,6 +80,13 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
     this.scheme = scheme;
     this.inputIterator = inputIterator;
     this.identifier = identifier;
+
+    Object permittedExceptions = flowProcess.getProperty( TupleEntrySchemeIteratorProps.PERMITTED_EXCEPTIONS );
+
+    if( permittedExceptions != null )
+      this.permittedExceptions = Util.asClasses( permittedExceptions.toString(), "unable to load permitted exception class" );
+    else
+      this.permittedExceptions = Collections.emptySet();
 
     if( this.identifier == null || this.identifier.isEmpty() )
       this.identifier = "'unknown'";
@@ -124,7 +140,14 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       if( identifier == null || identifier.isEmpty() )
         identifier = "'unknown'";
 
+      if( permittedExceptions.contains( exception.getClass() ) )
+        {
+        LOG.warn( "Caught permitted exception while reading {}", identifier, exception );
+        return false;
+        }
+
       currentException = new TupleException( "unable to read from input identifier: " + identifier, exception );
+
       return true;
       }
 

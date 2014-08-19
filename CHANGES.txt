@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Added a new c.t.TupleEntrySchemeIterator property to set certain exceptions to be caught, ignored, and logged during
+  read. Commonly java.io.EOFException is thrown and can be safely ignored. By default no exception will be ignored.
+
   Fixed issue in c.f.h.p.HadoopStepGraph where Traps would be ignored if the Flow had no operation ("copy flows").
 
   Updated Janino to 2.7.5.

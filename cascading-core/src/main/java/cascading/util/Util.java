@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -498,7 +499,6 @@ public class Util
     return "[" + truncate( scheme.toString(), 25 ) + "][" + trace + "] " + message;
     }
 
-
   /**
    * Method formatRawTrace does not include the pipe name
    *
@@ -742,6 +742,45 @@ public class Util
       {
       // do nothing
       }
+    }
+
+  /**
+   * Converts a given comma separated String of Exception names into a List of classes.
+   * ClassNotFound exceptions are ignored if no warningMessage is given, otherwise logged as a warning.
+   *
+   * @param classNames A comma separated String of Exception names.
+   * @return List of Exception classes.
+   */
+  public static Set<Class<? extends Exception>> asClasses( String classNames, String warningMessage )
+    {
+    Set<Class<? extends Exception>> exceptionClasses = new HashSet<Class<? extends Exception>>();
+    String[] split = classNames.split( "," );
+
+    // possibly user provided type, load from context
+    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+    for( String className : split )
+      {
+      if( className != null )
+        className = className.trim();
+
+      if( isEmpty( className ) )
+        continue;
+
+      try
+        {
+        Class<? extends Exception> exceptionClass = contextClassLoader.loadClass( className ).asSubclass( Exception.class );
+
+        exceptionClasses.add( exceptionClass );
+        }
+      catch( ClassNotFoundException exception )
+        {
+        if( !Util.isEmpty( warningMessage ) )
+          LOG.warn( "{}: {}", warningMessage, className );
+        }
+      }
+
+    return exceptionClasses;
     }
 
   public interface RetryOperator<T>
