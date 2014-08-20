@@ -679,6 +679,12 @@ public class HadoopUtil
     if( frameworkName != null )
       return frameworkName.equals( "local" );
 
+    // for Tez
+    String tezLocal = conf.get( "tez.local.mode" );
+
+    if( tezLocal != null )
+      return tezLocal.equals( "true" );
+
     // hadoop 1.0: use the old property to determine the local mode
     return conf.get( "mapred.job.tracker" ).equals( "local" );
     }
