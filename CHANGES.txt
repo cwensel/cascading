@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.5.6 [unreleased]
+2.5.6
 
   Updated for Cascading Fluid compatibility.
 
