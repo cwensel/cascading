@@ -29,6 +29,10 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.PropertySanitizer;
+import cascading.management.annotation.Visibility;
 import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
 import cascading.scheme.Scheme;
@@ -214,6 +218,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    *
    * @return String
    */
+  @Property( name = "identifier", visibility = Visibility.PUBLIC )
+  @PropertyDescription( "The resource this Tap instance represents" )
+  @PropertySanitizer( "cascading.management.annotation.URISanitizer" )
   public abstract String getIdentifier();
 
   /**

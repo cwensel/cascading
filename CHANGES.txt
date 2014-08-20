@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Added c.m.a.URISanitizer, an implementation of the c.m.a.Sanitizer interface, for sanitizing URIs of different
+  resources (file, HTTP, HDFS, JDBC etc.). c.t.Tap and all subclasses use it for the identifier.
+
   Fixed issue in c.f.h.ProcessFlow where the flowStats object would try to mark a flow as "STOPPED" even if it was
   already "FINISHED" causing an IllegalStateException.
 
@@ -9,7 +12,6 @@ Cascading Change Log
   read. Commonly java.io.EOFException is thrown and can be safely ignored. By default no exception will be ignored.
 
   Fixed issue in c.f.h.p.HadoopStepGraph where Traps would be ignored if the Flow had no operation ("copy flows").
-
   Updated Janino to 2.7.5.
 
   Added ability to add more meta information about a c.f.Flow, which can be read and used by a c.m.DocumentService.
