@@ -107,9 +107,18 @@ public class URISanitizerTest
     }
 
   @Test
-  public void testURIPublicSanitizationWithURI() throws URISyntaxException
+  public void testURIPrivateSanitizationNoScheme()
     {
-    URI uri = new URI( "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do" );
+    String uri = "data/stuff";
+    URISanitizer sanitizer = new URISanitizer();
+    String result = sanitizer.apply( Visibility.PRIVATE, uri );
+    assertEquals( uri, result );
+    }
+
+  @Test
+  public void testURIPublicSanitizationWithURI() throws IllegalArgumentException
+    {
+    URI uri = URI.create( "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do" );
     URISanitizer sanitizer = new URISanitizer();
     String result = sanitizer.apply( Visibility.PUBLIC, uri );
     assertEquals( "/docs/resource1.html", result );
@@ -119,7 +128,7 @@ public class URISanitizerTest
   public void testURIProtectedSanitizationWithURI() throws URISyntaxException
     {
     System.setProperty( URISanitizer.PARAMETER_FILTER_PROPERTY, "user,password" );
-    URI uri = new URI( "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do" );
+    URI uri = URI.create( "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do" );
     URISanitizer sanitizer = new URISanitizer();
     String result = sanitizer.apply( Visibility.PROTECTED, uri );
     assertEquals( "/docs/resource1.html?action=do&", result );
@@ -129,7 +138,7 @@ public class URISanitizerTest
   public void testURIPrivateSanitizationWithURI() throws URISyntaxException
     {
     System.setProperty( URISanitizer.PARAMETER_FILTER_PROPERTY, "user,password" );
-    URI uri = new URI( "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do" );
+    URI uri = URI.create( "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do" );
     URISanitizer sanitizer = new URISanitizer();
     String result = sanitizer.apply( Visibility.PRIVATE, uri );
     assertEquals( "http://www.example.com:8080/docs/resource1.html?action=do&", result );

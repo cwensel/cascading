@@ -22,7 +22,6 @@ package cascading.management.annotation;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -128,7 +127,10 @@ public class URISanitizer implements Sanitizer
         }
       }
 
-    StringBuilder buffer = new StringBuilder( uri.getPath() );
+    StringBuilder buffer = new StringBuilder();
+
+    if( uri.getPath() != null ) // can happen according to the javadoc
+      buffer.append( uri.getPath() );
 
     if( ( visibility == Visibility.PROTECTED || visibility == Visibility.PRIVATE ) && uri.getQuery() != null )
       buffer.append( "?" ).append( sanitizeQuery( uri.getQuery() ) );
@@ -136,7 +138,15 @@ public class URISanitizer implements Sanitizer
     if( visibility == Visibility.PRIVATE )
       {
       String currentString = buffer.toString(); // preserve before creating a new instance
-      buffer = new StringBuilder( uri.getScheme() ).append( "://" ).append( uri.getAuthority() ).append( currentString );
+      buffer = new StringBuilder();
+
+      if( uri.getScheme() != null )
+        buffer.append( uri.getScheme() ).append( "://" );
+
+      if( uri.getAuthority() != null )
+        buffer.append( uri.getAuthority() );
+
+      buffer.append( currentString );
       }
 
     return buffer.toString();
