@@ -72,15 +72,12 @@ public class Pipe implements FlowElement, Serializable
   protected ConfigDef stepConfigDef;
 
   /** Field id */
-  private String id;
+  private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private String trace = Util.captureDebugTrace( getClass() ); // see Util.setTrace() to override
 
   public static synchronized String id( Pipe pipe )
     {
-    if( pipe.id == null )
-      pipe.id = Util.createUniqueID();
-
     return pipe.id;
     }
 

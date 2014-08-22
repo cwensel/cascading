@@ -78,9 +78,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   private ConfigDef processConfigDef;
 
   /** Field id */
-  private String id = null;
+  private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private String trace = Util.captureDebugTrace( getClass() ); // see Util.setTrace() to override
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -104,9 +104,6 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public static synchronized String id( Tap tap )
     {
-    if( tap.id == null )
-      tap.id = Util.createUniqueID();
-
     return tap.id;
     }
 

@@ -222,7 +222,7 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
       if( flowElement instanceof Pipe )
         {
         if( incomingEdgesOf( flowElement ).size() == 0 )
-          throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to head Pipe: " + flowElement + ", possible ambiguous branching, try explicitly naming tails" );
+          throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to head Pipe: " + flowElement + ", possible ambiguous branching, try explicitly naming heads" );
         else
           throw new ElementGraphException( (Pipe) flowElement, "no Tap connected to tail Pipe: " + flowElement + ", possible ambiguous branching, try explicitly naming tails" );
         }
