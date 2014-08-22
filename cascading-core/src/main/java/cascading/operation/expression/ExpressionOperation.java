@@ -39,10 +39,16 @@ import static cascading.tuple.coerce.Coercions.asClass;
  */
 public class ExpressionOperation extends ScriptOperation
   {
+  @ConstructorProperties( {"expression"} )
+  protected ExpressionOperation( String expression )
+    {
+    super( ANY, expression, Boolean.class );
+    }
+
   @ConstructorProperties({"fieldDeclaration", "expression"})
   protected ExpressionOperation( Fields fieldDeclaration, String expression )
     {
-    this( fieldDeclaration, expression, new String[ 0 ], new Class[ 0 ] );
+    super( ANY, fieldDeclaration, expression, asClass( fieldDeclaration.getType( 0 ) ) );
     }
 
   @ConstructorProperties({"fieldDeclaration", "expression", "parameterType"})

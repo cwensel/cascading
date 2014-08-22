@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Fixed issues around c.o.e.ExpressionFunction and c.o.e.ExpressionFilter either accepting Fields.NONE as incoming
+  arguments, or inheriting incoming type information from the resolved arguments.
+
   Added c.m.a.URISanitizer, an implementation of the c.m.a.Sanitizer interface, for sanitizing URIs of different
   resources (file, HTTP, HDFS, JDBC etc.). c.t.Tap and all subclasses use it for the identifier.
 

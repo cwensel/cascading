@@ -276,8 +276,11 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
       context.parameterFields = argumentFields;
       context.parameterTypes = argumentFields.getTypesClasses();
 
+      if( argumentFields.isNone() )
+        context.parameterTypes = new Class[ 0 ]; // to match names
+
       if( context.parameterTypes == null )
-        throw new IllegalArgumentException( "field types may not be empty" );
+        throw new IllegalArgumentException( "field types may not be empty, incoming tuple stream should declare field types" );
       }
 
     context.parameterCoercions = Coercions.coercibleArray( context.parameterFields );
