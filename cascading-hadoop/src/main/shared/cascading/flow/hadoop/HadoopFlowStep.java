@@ -37,6 +37,7 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.fs.DistributedCacheFileSystem;
 import cascading.tap.hadoop.io.MultiInputFormat;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.hadoop.util.TempHfs;
@@ -340,6 +341,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       {
       JobConf accumulatedJob = flowProcess.copyConfig( conf );
       tap.sourceConfInit( flowProcess, accumulatedJob );
+
+      if(    accumulatedJob.getBoolean("cascading.distcache.hashjoin", true)
+          && !HadoopUtil.isLocal( accumulatedJob ) )
+        DistributedCacheFileSystem.distCacheTap( tap, accumulatedJob, conf );
+
       Map<String, String> map = flowProcess.diffConfigIntoMap( conf, accumulatedJob );
       conf.set( "cascading.step.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
       }
