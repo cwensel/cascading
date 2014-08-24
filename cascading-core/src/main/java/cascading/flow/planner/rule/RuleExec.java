@@ -23,6 +23,7 @@ package cascading.flow.planner.rule;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -222,15 +223,15 @@ public class RuleExec
     for( Map.Entry<ElementGraph, List<? extends ElementGraph>> entry : priorResults.entrySet() )
       {
       ElementGraph parent = entry.getKey();
-      List<? extends ElementGraph> children = entry.getValue();
+      List<? extends ElementGraph> priors = entry.getValue();
 
-      List<ElementGraph> resultChildren = new ArrayList<>( children );
+      List<ElementGraph> resultChildren = new ArrayList<>( priors );
 
-      Set<FlowElement> exclusions = getExclusions( children, partitioner.getAnnotationExcludes() );
+      Set<FlowElement> exclusions = getExclusions( priors, partitioner.getAnnotationExcludes() );
 
-      for( ElementGraph child : children )
+      for( ElementGraph child : priors )
         {
-        ElementGraph priorAnnotated = annotateWithPriors( child, children );
+        ElementGraph priorAnnotated = annotateWithPriors( child, priors );
 
         Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
@@ -261,10 +262,10 @@ public class RuleExec
     for( Map.Entry<ElementGraph, List<? extends ElementGraph>> entry : priorResults.entrySet() )
       {
       ElementGraph parent = entry.getKey();
-      List<? extends ElementGraph> children = entry.getValue();
+      List<? extends ElementGraph> priors = entry.getValue();
 
-      Set<FlowElement> exclusions = getExclusions( children, partitioner.getAnnotationExcludes() );
-      ElementGraph priorAnnotated = annotateWithPriors( parent, children );
+      Set<FlowElement> exclusions = getExclusions( priors, partitioner.getAnnotationExcludes() );
+      ElementGraph priorAnnotated = annotateWithPriors( parent, priors );
 
       Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
@@ -272,9 +273,18 @@ public class RuleExec
 
       List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
-      results.addAll( children ); // pass prior results forward
+      Set<ElementGraph> uniques = new LinkedHashSet<>( results );
 
-      subGraphs.put( parent, results );
+      if( uniques.size() != results.size() )
+        throw new PlannerException( "rule created duplicate element graphs" );
+
+      for( ElementGraph prior : priors )
+        {
+        if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
+          LOG.info( "rule created duplicate element graph to prior partitioner, ignoring: {}", partitioner.getRuleName() );
+        }
+
+      subGraphs.put( parent, new ArrayList<>( uniques ) );
       }
 
     ruleResult.setLevelResults( phase.getLevel(), subGraphs );

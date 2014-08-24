@@ -73,6 +73,6 @@ public class SubGraphTransformer extends GraphTransformer<ElementGraph, ElementS
 
   protected ElementSubGraph asSubGraphOf( ElementGraph rootGraph, ElementGraph contractedSubGraph )
     {
-    return ElementGraphs.asSubGraph( rootGraph, contractedSubGraph );
+    return ElementGraphs.asSubGraph( rootGraph, contractedSubGraph, null );
     }
   }

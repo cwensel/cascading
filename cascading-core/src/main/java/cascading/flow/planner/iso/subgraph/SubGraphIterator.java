@@ -148,7 +148,11 @@ public class SubGraphIterator implements Iterator<ElementSubGraph>
 
       ElementSubGraph contractedMatchedGraph = match.getMatchedGraph();
 
-      return ElementGraphs.asSubGraph( flowElementGraph, contractedMatchedGraph );
+      Set<FlowElement> excludes = new HashSet<>( getContractedGraph().vertexSet() );
+
+      excludes.removeAll( contractedMatchedGraph.vertexSet() );
+
+      return ElementGraphs.asSubGraph( flowElementGraph, contractedMatchedGraph, excludes );
       }
     finally
       {

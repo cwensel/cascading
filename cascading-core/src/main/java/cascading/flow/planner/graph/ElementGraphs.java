@@ -264,12 +264,12 @@ public class ElementGraphs
     return vertices;
     }
 
-  public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph )
+  public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph, Set<FlowElement> excludes )
     {
     if( elementGraph.containsVertex( Extent.head ) )
       elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-    Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( elementGraph, contractedGraph );
+    Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( elementGraph, contractedGraph, excludes );
     Set<FlowElement> vertices = pair.getLhs();
     Set<Scope> excludeEdges = pair.getRhs();
 
@@ -281,12 +281,30 @@ public class ElementGraphs
 
   public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
     {
+    return findClosureViaFloydWarshall( full, contracted, null );
+    }
+
+  public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted, Set<V> excludes )
+    {
     Set<V> vertices = new HashSet<>( contracted.vertexSet() );
     LinkedList<V> allVertices = new LinkedList<>( full.vertexSet() );
 
     allVertices.removeAll( vertices );
 
     Set<E> excludeEdges = new HashSet<>();
+
+    // prevent distinguished elements from being included inside the sub-graph
+    if( excludes != null )
+      {
+      for( V v : excludes )
+        {
+        if( !full.containsVertex( v ) )
+          continue;
+
+        excludeEdges.addAll( full.incomingEdgesOf( v ) );
+        excludeEdges.addAll( full.outgoingEdgesOf( v ) );
+        }
+      }
 
     for( V v : contracted.vertexSet() )
       {
