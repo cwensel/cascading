@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Added c.t.DecoratorTap class to simplify wrapping a given c.t.Tap instance with additional meta-data.
+
+  Updated c.f.p.FlowPlanner to allow both intermediate temporary c.t.Tap or any c.p.Checkpoint tap to be decorated
+  by a configured c.t.DecoratorTap class via new c.f.FlowConnectorProps properties.
+
   Fixed issue where c.p.a.AggregateBy was not honoring the c.t.Hasher interface.
 
   Fixed issues around c.o.e.ExpressionFunction and c.o.e.ExpressionFilter either accepting Fields.NONE as incoming

@@ -20,6 +20,7 @@
 
 package cascading.util;
 
+import java.beans.Expression;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -873,6 +874,36 @@ public class Util
       }
     }
 
+  public static <T> T newInstance( String className, Object... parameters)
+    {
+    try
+      {
+      Class<T> type = (Class<T>) Util.class.getClassLoader().loadClass( className );
+
+      return newInstance( type, parameters );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + className, exception );
+      }
+    }
+
+  public static <T> T newInstance( Class<T> target, Object... parameters)
+    {
+    // using Expression makes sure that constructors using sub-types properly work, otherwise we get a
+    // NoSuchMethodException.
+    Expression expr = new Expression( target, "new", parameters );
+
+    try
+      {
+      return (T) expr.getValue();
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to create new instance: " + target.getName() + "(" + Arrays.toString( parameters ) + ")", exception );
+      }
+    }
+
   public static Object invokeStaticMethod( String typeString, String methodName, Object[] parameters, Class[] parameterTypes )
     {
     try
@@ -916,6 +947,36 @@ public class Util
     catch( Exception exception )
       {
       throw new CascadingException( "unable to invoke instance method: " + target.getClass().getName() + "." + methodName, exception );
+      }
+    }
+
+  public static Object invokeConstructor( String className, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Class type = Util.class.getClassLoader().loadClass( className );
+
+      return invokeConstructor( type, parameters, parameterTypes );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + className, exception );
+      }
+    }
+
+  public static <T> T invokeConstructor( Class<T> target, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Constructor<T> constructor = target.getConstructor( parameterTypes );
+
+      constructor.setAccessible( true );
+
+      return constructor.newInstance( parameters );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to create new instance: " + target.getName() + "(" + Arrays.toString( parameters ) + ")", exception );
       }
     }
 

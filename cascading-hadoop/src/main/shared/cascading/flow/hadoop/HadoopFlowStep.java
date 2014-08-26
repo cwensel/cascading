@@ -241,7 +241,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         }
       }
 
-    if( getSink() instanceof TempHfs &&
+    if( getSink().isTemporary() &&
       ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
       {
       try

@@ -32,6 +32,7 @@ import java.util.Set;
 import cascading.flow.AssemblyPlanner;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.operation.AssertionLevel;
@@ -51,6 +52,7 @@ import cascading.pipe.SubAssembly;
 import cascading.property.ConfigDef;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
+import cascading.tap.DecoratorTap;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
@@ -207,7 +209,6 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
     return flowName + "/" + runID;
     }
-
 
   protected void verifySourceNotSinks( Map<String, Tap> sources, Map<String, Tap> sinks )
     {
@@ -637,7 +638,10 @@ public abstract class FlowPlanner<F extends Flow, Config>
     Tap checkpointTap = graph.getCheckpointsMap().get( pipe.getName() );
 
     if( checkpointTap != null )
+      {
       LOG.info( "found checkpoint: {}, using tap: {}", pipe.getName(), checkpointTap );
+      checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.CHECKPOINT_TAP_DECORATOR_CLASS );
+      }
 
     if( checkpointTap == null )
       {
@@ -645,6 +649,7 @@ public abstract class FlowPlanner<F extends Flow, Config>
       if( pipe instanceof Checkpoint )
         {
         checkpointTap = makeTempTap( checkpointRootPath, pipe.getName() );
+        checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.CHECKPOINT_TAP_DECORATOR_CLASS );
         // mark as an anonymous checkpoint
         checkpointTap.getConfigDef().setProperty( ConfigDef.Mode.DEFAULT, "cascading.checkpoint", "true" );
         }
@@ -654,7 +659,23 @@ public abstract class FlowPlanner<F extends Flow, Config>
         }
       }
 
+    checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.TEMPORARY_TAP_DECORATOR_CLASS );
+
     graph.insertFlowElementAfter( pipe, checkpointTap );
+    }
+
+  private Tap decorateTap( Pipe pipe, Tap tempTap, String decoratorClass )
+    {
+    String decoratorClassName = PropertyUtil.getProperty( properties, pipe, decoratorClass );
+
+    if( Util.isEmpty( decoratorClassName ) )
+      return tempTap;
+
+    LOG.info( "found decorator: {}, wrapping tap: {}", decoratorClass, tempTap );
+
+    tempTap = Util.newInstance( decoratorClassName, tempTap );
+
+    return tempTap;
     }
 
   protected Tap makeTempTap( String name )

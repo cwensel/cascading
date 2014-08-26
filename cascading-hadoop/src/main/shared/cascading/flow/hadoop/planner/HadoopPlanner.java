@@ -470,7 +470,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
 
     for( Tap tap : taps )
       {
-      if( !( tap instanceof TempHfs ) )
+      if( !( tap.isTemporary() ) )
         continue;
 
       for( FlowElement successor : elementGraph.getAllSuccessors( tap ) )
@@ -576,7 +576,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
 
       for( Tap tap : taps )
         {
-        if( tap instanceof TempHfs || getSchemeClass( tap ).equals( intermediateSchemeClass ) ) // we normalize to TempHfs
+        if( tap.isTemporary() || getSchemeClass( tap ).equals( intermediateSchemeClass ) ) // we normalize to TempHfs
           continue;
 
         // handle case where there is a split on a pipe between the tap and group
@@ -587,7 +587,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
 
           FlowElement flowElement = flowElements.get( 1 );
 
-          if( flowElement instanceof TempHfs )
+          if( flowElement instanceof Tap && ( (Tap) flowElement ).isTemporary() )
             continue;
 
           LOG.warn( "inserting step to normalize incompatible sources: {}", tap );
@@ -611,7 +611,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
 
   private Class getSchemeClass( Tap tap )
     {
-    if( tap instanceof TempHfs )
+    if( tap.isTemporary() )
       return ( (TempHfs) tap ).getSchemeClass();
     else
       return tap.getScheme().getClass();

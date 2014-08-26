@@ -25,8 +25,10 @@ import java.util.List;
 import cascading.PlatformTestCase;
 import cascading.TestFunction;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
+import cascading.flow.planner.PlannerException;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.Count;
 import cascading.operation.regex.RegexParser;
@@ -35,6 +37,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.tap.DecoratorTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -108,6 +111,10 @@ public class CheckpointPlatformTest extends PlatformTestCase
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     pipe = new Checkpoint( pipe );
+
+    new FlowConnectorProps()
+      .setCheckpointTapDecoratorClassName( DecoratorTap.class )
+      .setProperties( pipe.getConfigDef() );
     }
 
     { // job 3
@@ -130,6 +137,15 @@ public class CheckpointPlatformTest extends PlatformTestCase
     List<FlowStep> steps = flow.getFlowSteps();
 
     assertEquals( "wrong size", 3, steps.size() );
+
+    int count = 0;
+    for( FlowStep step : steps )
+      {
+      if( step.getSink() instanceof DecoratorTap )
+        count++;
+      }
+
+    assertEquals( 1, count );
     }
 
   @Test

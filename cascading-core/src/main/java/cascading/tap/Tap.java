@@ -104,6 +104,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public static synchronized String id( Tap tap )
     {
+    if( tap instanceof DecoratorTap )
+      return id( ( (DecoratorTap) tap ).getOriginal() );
+
     return tap.id;
     }
 
@@ -215,9 +218,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    *
    * @return String
    */
-  @Property( name = "identifier", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The resource this Tap instance represents" )
-  @PropertySanitizer( "cascading.management.annotation.URISanitizer" )
+  @Property(name = "identifier", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The resource this Tap instance represents")
+  @PropertySanitizer("cascading.management.annotation.URISanitizer")
   public abstract String getIdentifier();
 
   /**

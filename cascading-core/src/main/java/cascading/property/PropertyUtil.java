@@ -26,16 +26,21 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import cascading.flow.FlowElement;
+
 /** Class PropertyUtil is a static helper class for handling properties. */
 public class PropertyUtil
   {
-  public static String getProperty( Map<Object, Object> properties, String key )
+  public static String getProperty( Map<Object, Object> properties, String property )
     {
-    return getProperty( properties, key, (String) null );
+    return getProperty( properties, property, (String) null );
     }
 
   public static String getStringProperty( Properties defaultProperties, Map<Object, Object> properties, String property )
     {
+    if( defaultProperties == null )
+      return getProperty( properties, property );
+
     return getProperty( properties, property, defaultProperties.getProperty( property ) );
     }
 
@@ -52,6 +57,32 @@ public class PropertyUtil
       value = (A) properties.get( key );
 
     return value == null ? defaultValue : value;
+    }
+
+  public static String getProperty( final Map<Object, Object> properties, FlowElement flowElement, String property )
+    {
+    if( flowElement.hasConfigDef() )
+      return PropertyUtil.getProperty( properties, flowElement.getConfigDef(), property );
+
+    return PropertyUtil.getProperty( properties, property );
+    }
+
+  public static String getProperty( final Map<Object, Object> properties, ConfigDef configDef, String property )
+    {
+    return configDef.apply( property, new ConfigDef.Getter()
+    {
+    @Override
+    public String update( String key, String value )
+      {
+      return value;
+      }
+
+    @Override
+    public String get( String key )
+      {
+      return getProperty( properties, key );
+      }
+    } );
     }
 
   public static void setProperty( Map<Object, Object> properties, String key, String value )
