@@ -48,6 +48,7 @@ public class RuleResult
   private Map<PlanPhase, Map<String, Long>> ruleDurations = new LinkedHashMap<>();
 
   protected FlowElementGraph initialAssembly;
+  private RuleRegistry registry;
 
   public RuleResult()
     {
@@ -55,11 +56,23 @@ public class RuleResult
       levelParents.put( level, new LinkedHashSet<ElementGraph>() );
     }
 
+  public RuleResult( RuleRegistry registry )
+    {
+    this();
+
+    this.registry = registry;
+    }
+
   public RuleResult( FlowElementGraph initialAssembly )
     {
     this();
 
     initResult( initialAssembly );
+    }
+
+  public RuleRegistry getRegistry()
+    {
+    return registry;
     }
 
   public void initResult( FlowElementGraph initialAssembly )
@@ -140,17 +153,17 @@ public class RuleResult
     return (FlowElementGraph) Util.getFirst( results.get( getInitialAssembly() ) );
     }
 
-  public Map<ElementGraph, List<? extends ElementGraph>> getStepGraphs()
+  public Map<ElementGraph, List<? extends ElementGraph>> getAssemblyToStepGraphMap()
     {
     return getLevelResults( ProcessLevel.Step );
     }
 
-  public Map<ElementGraph, List<? extends ElementGraph>> getNodeGraphs()
+  public Map<ElementGraph, List<? extends ElementGraph>> getStepToNodeGraphMap()
     {
     return getLevelResults( ProcessLevel.Node );
     }
 
-  public Map<ElementGraph, List<? extends ElementGraph>> getPipelineGraphs()
+  public Map<ElementGraph, List<? extends ElementGraph>> getNodeToPipelineGraphMap()
     {
     return getLevelResults( ProcessLevel.Pipeline );
     }

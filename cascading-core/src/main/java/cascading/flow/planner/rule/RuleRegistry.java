@@ -23,6 +23,9 @@ package cascading.flow.planner.rule;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.util.LogUtil;
@@ -140,5 +143,24 @@ public class RuleRegistry
   public boolean enabledResolveElements()
     {
     return resolveElementsEnabled;
+    }
+
+  public Set<ProcessLevel> getProcessLevels()
+    {
+    Set<ProcessLevel> processLevels = new TreeSet<>();
+
+    for( PlanPhase planPhase : rules.keySet() )
+      {
+      // only phases that rules were registered for
+      if( !rules.get( planPhase ).isEmpty() )
+        processLevels.add( planPhase.getLevel() );
+      }
+
+    return processLevels;
+    }
+
+  public String getName()
+    {
+    return getClass().getSimpleName();
     }
   }

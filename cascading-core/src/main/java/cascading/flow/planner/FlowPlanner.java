@@ -45,6 +45,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.planner.process.FlowStepGraph;
+import cascading.flow.planner.rule.ProcessLevel;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
@@ -188,9 +189,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       writeStats( plannerContext, nameOrID, ruleResult );
 
-      FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
+      verifyResult( ruleResult );
 
-      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, ruleResult.getNodeGraphs(), ruleResult.getPipelineGraphs() );
+      FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
+      Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
+      Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
+
+      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, stepToNodes, nodeToPipeline );
 
       writeTracePlan( nameOrID, "2-completed-flow-step-graph", flowStepGraph );
 
@@ -201,6 +206,81 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     catch( Exception exception )
       {
       throw handleExceptionDuringPlanning( exception, flowElementGraph );
+      }
+    }
+
+  /**
+   * If there are rules for a given {@link cascading.flow.planner.rule.ProcessLevel} on the current platform
+   * there must be sub-graphs partitioned at that level.
+   */
+  private void verifyResult( RuleResult ruleResult )
+    {
+    Set<ProcessLevel> processLevels = ruleResult.getRegistry().getProcessLevels();
+
+    for( ProcessLevel processLevel : processLevels )
+      {
+      switch( processLevel )
+        {
+        case Assembly:
+
+          FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
+
+          if( finalFlowElementGraph.vertexSet().isEmpty() )
+            throw new PlannerException( "final assembly graph is empty: " + ruleResult.getRegistry().getName() );
+
+          break;
+
+        case Step:
+
+          Map<ElementGraph, List<? extends ElementGraph>> assemblyToSteps = ruleResult.getAssemblyToStepGraphMap();
+
+          if( assemblyToSteps.isEmpty() )
+            throw new PlannerException( "no steps partitioned: " + ruleResult.getRegistry().getName() );
+
+          for( ElementGraph assembly : assemblyToSteps.keySet() )
+            {
+            List<? extends ElementGraph> steps = assemblyToSteps.get( assembly );
+
+            if( steps.isEmpty() )
+              throw new PlannerException( "no steps partitioned from assembly: " + ruleResult.getRegistry().getName(), assembly );
+            }
+
+          break;
+
+        case Node:
+
+          Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
+
+          if( stepToNodes.isEmpty() )
+            throw new PlannerException( "no nodes partitioned: " + ruleResult.getRegistry().getName() );
+
+          for( ElementGraph step : stepToNodes.keySet() )
+            {
+            List<? extends ElementGraph> nodes = stepToNodes.get( step );
+
+            if( nodes.isEmpty() )
+              throw new PlannerException( "no nodes partitioned from step: " + ruleResult.getRegistry().getName(), step );
+            }
+
+          break;
+
+        case Pipeline:
+
+          Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
+
+          if( nodeToPipeline.isEmpty() )
+            throw new PlannerException( "no pipelines partitioned: " + ruleResult.getRegistry().getName() );
+
+          for( ElementGraph node : nodeToPipeline.keySet() )
+            {
+            List<? extends ElementGraph> pipelines = nodeToPipeline.get( node );
+
+            if( pipelines.isEmpty() )
+              throw new PlannerException( "no pipelines partitioned from node: " + ruleResult.getRegistry().getName(), node );
+            }
+
+          break;
+        }
       }
     }
 
@@ -654,7 +734,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
     file.getParentFile().mkdirs();
 
-    try (PrintWriter writer = new PrintWriter( file ))
+    try( PrintWriter writer = new PrintWriter( file ) )
       {
       Flow flow = plannerContext.getFlow();
 

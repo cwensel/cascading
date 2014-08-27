@@ -83,7 +83,7 @@ public class RuleExec
 
     long beginExec = System.currentTimeMillis();
 
-    RuleResult ruleResult = new RuleResult();
+    RuleResult ruleResult = new RuleResult( registry );
 
     ruleResult.initResult( flowElementGraph );
 
@@ -429,13 +429,13 @@ public class RuleExec
         traceWriter.writePlan( ruleResult.getAssemblyGraph(), format( "%02d-%s-result.dot", phase.ordinal(), phase ) );
         break;
       case Step:
-        traceWriter.writePlan( ruleResult.getStepGraphs().get( ruleResult.getAssemblyGraph() ), phase, "result" );
+        traceWriter.writePlan( ruleResult.getAssemblyToStepGraphMap().get( ruleResult.getAssemblyGraph() ), phase, "result" );
         break;
       case Node:
-        traceWriter.writePlan( ruleResult.getNodeGraphs(), phase, "result" );
+        traceWriter.writePlan( ruleResult.getStepToNodeGraphMap(), phase, "result" );
         break;
       case Pipeline:
-        traceWriter.writePlan( ruleResult.getNodeGraphs(), ruleResult.getPipelineGraphs(), phase, "result" );
+        traceWriter.writePlan( ruleResult.getStepToNodeGraphMap(), ruleResult.getNodeToPipelineGraphMap(), phase, "result" );
         break;
       }
     }

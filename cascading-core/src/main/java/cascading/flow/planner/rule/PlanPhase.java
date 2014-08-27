@@ -36,6 +36,7 @@ public enum PlanPhase
 
     // Flow step sub-graph partition rules
     PartitionSteps( ProcessLevel.Step, RuleMode.Partition, ExecAction.Rule ),
+    PostSteps( ProcessLevel.Step, RuleMode.Mutate, ExecAction.Rule ),
 
     // Flow node sub-graph partition rules
     PartitionNodes( ProcessLevel.Node, RuleMode.Partition, ExecAction.Rule ),

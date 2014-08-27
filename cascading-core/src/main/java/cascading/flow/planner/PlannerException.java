@@ -77,7 +77,7 @@ public class PlannerException extends FlowException
    * @param throwable    of type Throwable
    * @param elementGraph of type ElementGraph
    */
-  public PlannerException( FlowElement flowElement, String message, Throwable throwable, FlowElementGraph elementGraph )
+  public PlannerException( FlowElement flowElement, String message, Throwable throwable, ElementGraph elementGraph )
     {
     super( Util.formatTrace( flowElement, message ), throwable );
     this.elementGraph = elementGraph;
@@ -118,10 +118,22 @@ public class PlannerException extends FlowException
    * Constructor PlannerException creates a new PlannerException instance.
    *
    * @param string       of type String
+   * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   */
+  public PlannerException( String string, ElementGraph elementGraph )
+    {
+    super( string );
+    this.elementGraph = elementGraph;
+    }
+
+  /**
+   * Constructor PlannerException creates a new PlannerException instance.
+   *
+   * @param string       of type String
    * @param throwable    of type Throwable
    * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
    */
-  public PlannerException( String string, Throwable throwable, FlowElementGraph elementGraph )
+  public PlannerException( String string, Throwable throwable, ElementGraph elementGraph )
     {
     super( string, throwable );
     this.elementGraph = elementGraph;
@@ -155,11 +167,18 @@ public class PlannerException extends FlowException
     elementGraph.writeDOT( filename );
     }
 
+  /**
+   * Method writeCauseDOT writes the underlying {@link cascading.flow.planner.iso.finder.GraphFinderException}
+   * intermediate graph as a DOT file.
+   * <p/>
+   * If the cause is not a GraphFinderException, and the underlying graph doesn't provide a 'writeDOT' method,
+   * the method does nothing.
+   *
+   * @param filename of type String
+   */
   public void writeCauseDOT( String filename )
     {
     if( getCause() instanceof GraphFinderException )
       ( (GraphFinderException) getCause() ).writeDOT( filename );
     }
-
-
   }
