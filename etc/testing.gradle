@@ -59,6 +59,12 @@ task platformTest( type: Test ) {
   }
 }
 
+project( ':cascading-platform' ) {
+  test {
+    dependsOn << platformTest
+  }
+}
+
 check {
   dependsOn << platformTest
 }
