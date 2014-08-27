@@ -183,6 +183,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       conf.set( "cascading.flow.step.node.reduce.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
       }
 
+    HadoopUtil.setIsInflow( conf );
+
     return conf;
     }
 

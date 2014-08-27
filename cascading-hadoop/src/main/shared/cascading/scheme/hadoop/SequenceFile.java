@@ -65,12 +65,14 @@ public class SequenceFile extends Scheme<Configuration, RecordReader, OutputColl
   @Override
   public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
+    conf.setBoolean( "mapred.mapper.new-api", false );
     conf.setClass( "mapred.input.format.class", SequenceFileInputFormat.class, InputFormat.class );
     }
 
   @Override
   public void sinkConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
+    conf.setBoolean( "mapred.mapper.new-api", false );
     conf.setClass( "mapred.output.key.class", Tuple.class, Object.class );
     conf.setClass( "mapred.output.value.class", Tuple.class, Object.class );
     conf.setClass( "mapred.output.format.class", SequenceFileOutputFormat.class, OutputFormat.class );

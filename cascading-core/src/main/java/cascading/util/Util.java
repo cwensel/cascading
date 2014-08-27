@@ -587,7 +587,6 @@ public class Util
     return "[" + truncate( scheme.toString(), 25 ) + "][" + trace + "] " + message;
     }
 
-
   /**
    * Method formatRawTrace does not include the pipe name
    *
@@ -988,11 +987,16 @@ public class Util
 
   public static Object invokeStaticMethod( String typeString, String methodName, Object[] parameters, Class[] parameterTypes )
     {
+    Class type = loadClass( typeString );
+
+    return invokeStaticMethod( type, methodName, parameters, parameterTypes );
+    }
+
+  public static Class<?> loadClass( String typeString )
+    {
     try
       {
-      Class type = Util.class.getClassLoader().loadClass( typeString );
-
-      return invokeStaticMethod( type, methodName, parameters, parameterTypes );
+      return Thread.currentThread().getContextClassLoader().loadClass( typeString );
       }
     catch( ClassNotFoundException exception )
       {
@@ -1013,6 +1017,30 @@ public class Util
     catch( Exception exception )
       {
       throw new CascadingException( "unable to invoke static method: " + type.getName() + "." + methodName, exception );
+      }
+    }
+
+  public static boolean hasInstanceMethod( Object target, String methodName, Class[] parameterTypes )
+    {
+    try
+      {
+      return target.getClass().getMethod( methodName, parameterTypes ) != null;
+      }
+    catch( NoSuchMethodException exception )
+      {
+      return false;
+      }
+    }
+
+  public static Object invokeInstanceMethodSafe( Object target, String methodName, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      return invokeInstanceMethod( target, methodName, parameters, parameterTypes );
+      }
+    catch( Exception exception )
+      {
+      return null;
       }
     }
 

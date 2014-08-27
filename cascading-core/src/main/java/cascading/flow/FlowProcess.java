@@ -367,9 +367,9 @@ public abstract class FlowProcess<Config>
 
   public abstract Config getConfigCopy();
 
-  public abstract Config copyConfig( Config config );
+  public abstract <C> C copyConfig( C config );
 
-  public abstract Map<String, String> diffConfigIntoMap( Config defaultConfig, Config updatedConfig );
+  public abstract <C> Map<String, String> diffConfigIntoMap( C defaultConfig, C updatedConfig );
 
   public abstract Config mergeMapIntoConfig( Config defaultConfig, Map<String, String> map );
   }

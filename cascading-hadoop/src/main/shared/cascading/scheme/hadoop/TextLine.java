@@ -346,6 +346,7 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
     if( hasZippedFiles( FileInputFormat.getInputPaths( asJobConfInstance( conf ) ) ) )
       throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( asJobConfInstance( conf ) ) ) );
 
+    conf.setBoolean( "mapred.mapper.new-api", false );
     conf.setClass( "mapred.input.format.class", TextInputFormat.class, InputFormat.class );
     }
 
@@ -382,6 +383,8 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
     {
     if( tap.getFullIdentifier( conf ).endsWith( ".zip" ) )
       throw new IllegalStateException( "cannot write zip files: " + HadoopUtil.getOutputPath( conf ) );
+
+    conf.setBoolean( "mapred.mapper.new-api", false );
 
     if( getSinkCompression() == Compress.DISABLE )
       conf.setBoolean( "mapred.output.compress", false );

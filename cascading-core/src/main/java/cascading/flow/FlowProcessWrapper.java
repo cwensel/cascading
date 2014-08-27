@@ -168,13 +168,13 @@ public class FlowProcessWrapper<Config> extends FlowProcess<Config>
     }
 
   @Override
-  public Config copyConfig( Config jobConf )
+  public <C> C copyConfig( C jobConf )
     {
     return delegate.copyConfig( jobConf );
     }
 
   @Override
-  public Map<String, String> diffConfigIntoMap( Config defaultConfig, Config updatedConfig )
+  public <C> Map<String, String> diffConfigIntoMap( C defaultConfig, C updatedConfig )
     {
     return delegate.diffConfigIntoMap( defaultConfig, updatedConfig );
     }

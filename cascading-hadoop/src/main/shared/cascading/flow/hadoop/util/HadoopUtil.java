@@ -22,7 +22,9 @@ package cascading.flow.hadoop.util;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
@@ -57,15 +60,30 @@ import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.invokeInstanceMethod;
+
 /**
  *
  */
 public class HadoopUtil
   {
+  public static final String CASCADING_FLOW_EXECUTING = "cascading.flow.executing";
+
   private static final Logger LOG = LoggerFactory.getLogger( HadoopUtil.class );
   private static final String ENCODING = "US-ASCII";
   private static final Class<?> DEFAULT_OBJECT_SERIALIZER = JavaObjectSerializer.class;
+
   private static PlatformInfo platformInfo;
+
+  public static void setIsInflow( Configuration conf )
+    {
+    conf.setBoolean( CASCADING_FLOW_EXECUTING, true );
+    }
+
+  public static boolean isInflow( Configuration conf )
+      {
+      return conf.getBoolean( CASCADING_FLOW_EXECUTING, false );
+      }
 
   public static void initLog4j( JobConf configuration )
     {
@@ -100,10 +118,15 @@ public class HadoopUtil
     return new JobConf( configuration );
     }
 
+  public static <C> C copyJobConf( C parentJobConf )
+    {
+    return copyConfiguration( parentJobConf );
+    }
+
   public static JobConf copyJobConf( JobConf parentJobConf )
     {
     if( parentJobConf == null )
-      throw new NullPointerException( "parentJobConf" );
+      throw new IllegalArgumentException( "parent may not be null" );
 
     // see https://github.com/Cascading/cascading/pull/21
     // The JobConf(JobConf) constructor causes derived JobConfs to share Credentials. We want to avoid this, in
@@ -125,6 +148,49 @@ public class HadoopUtil
       return jobConf;
 
     return copyConfiguration( properties, jobConf );
+    }
+
+  public static <C> C copyConfiguration( C parent )
+    {
+    if( parent == null )
+      throw new IllegalArgumentException( "parent may not be null" );
+
+    if( !( parent instanceof Configuration ) )
+      throw new IllegalArgumentException( "parent must be of type Configuration" );
+
+    Configuration conf = (Configuration) parent;
+
+    // see https://github.com/Cascading/cascading/pull/21
+    // The JobConf(JobConf) constructor causes derived JobConfs to share Credentials. We want to avoid this, in
+    // case those Credentials are mutated later on down the road (which they will be, during job submission, in
+    // separate threads!). Using the JobConf(Configuration) constructor avoids Credentials-sharing.
+    Configuration configurationCopy = new Configuration( conf );
+
+    Configuration copiedConf = callCopyConstructor( parent.getClass(), configurationCopy );
+
+    if( Util.hasInstanceMethod( parent, "getCredentials", null ) )
+      {
+      Object result = invokeInstanceMethod( parent, "getCredentials", null, null );
+      Object credentials = invokeInstanceMethod( copiedConf, "getCredentials", null, null );
+
+      invokeInstanceMethod( credentials, "addAll", new Object[]{result}, new Class[]{credentials.getClass()} );
+      }
+
+    return (C) copiedConf;
+    }
+
+  protected static <C extends Configuration> C callCopyConstructor( Class type, Configuration parent )
+    {
+    try
+      {
+      Constructor<C> constructor = type.getConstructor( parent.getClass() );
+
+      return constructor.newInstance( parent );
+      }
+    catch( NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException exception )
+      {
+      throw new CascadingException( "unable to create copy of: " + type );
+      }
     }
 
   public static <C extends Configuration> C copyConfiguration( Map<Object, Object> srcProperties, C dstConfiguration )

@@ -340,8 +340,6 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   @Override
   public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
     {
-    conf.setBoolean( "mapred.mapper.new-api", false );
-
     String fullIdentifier = getFullIdentifier( conf );
 
     applySourceConfInitIdentifiers( process, conf, fullIdentifier );
@@ -430,8 +428,6 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   @Override
   public void sinkConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
     {
-    conf.setBoolean( "mapred.mapper.new-api", false );
-
     Path qualifiedPath = new Path( getFullIdentifier( conf ) );
 
     HadoopUtil.setOutputPath( conf, qualifiedPath );

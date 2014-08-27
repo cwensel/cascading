@@ -184,13 +184,13 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     }
 
   @Override
-  public Properties copyConfig( Properties config )
+  public <C> C copyConfig( C config )
     {
-    return new Properties( config );
+    return (C) new Properties( (Properties) config );
     }
 
   @Override
-  public Map<String, String> diffConfigIntoMap( Properties defaultConfig, Properties updatedConfig )
+  public <C> Map<String, String> diffConfigIntoMap( C defaultConfig, C updatedConfig )
     {
     return null;
     }

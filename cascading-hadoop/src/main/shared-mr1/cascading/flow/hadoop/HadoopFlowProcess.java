@@ -316,15 +316,15 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
     }
 
   @Override
-  public JobConf copyConfig( JobConf config )
+  public <C> C copyConfig( C config )
     {
-    return HadoopUtil.copyJobConf( jobConf );
+    return HadoopUtil.copyJobConf( config );
     }
 
   @Override
-  public Map<String, String> diffConfigIntoMap( JobConf defaultConfig, JobConf updatedConfig )
+  public <C> Map<String, String> diffConfigIntoMap( C defaultConfig, C updatedConfig )
     {
-    return HadoopUtil.getConfig( defaultConfig, updatedConfig );
+    return HadoopUtil.getConfig( (Configuration) defaultConfig, (Configuration) updatedConfig );
     }
 
   @Override

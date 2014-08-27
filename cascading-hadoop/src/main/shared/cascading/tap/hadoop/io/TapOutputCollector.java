@@ -98,6 +98,8 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
     OutputFormat outputFormat = asJobConfInstance( conf ).getOutputFormat();
 
+    // todo: use OutputCommitter class
+
     isFileOutputFormat = outputFormat instanceof FileOutputFormat;
 
     if( isFileOutputFormat )
@@ -159,5 +161,4 @@ public class TapOutputCollector implements OutputCollector, Closeable
       throw new TapException( "exception closing: " + filename, exception );
       }
     }
-
   }
