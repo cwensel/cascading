@@ -24,7 +24,7 @@ import java.beans.ConstructorProperties;
 import java.util.Map;
 
 import cascading.flow.FlowConnector;
-import cascading.flow.hadoop.planner.HadoopRuleRegistry;
+import cascading.flow.hadoop.planner.MapReduceHadoopRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.scheme.Scheme;
@@ -105,6 +105,6 @@ public class Hadoop2MR1FlowConnector extends FlowConnector
   @Override
   protected RuleRegistry createDefaultRuleRegistry()
     {
-    return new HadoopRuleRegistry();
+    return new MapReduceHadoopRuleRegistry();
     }
   }

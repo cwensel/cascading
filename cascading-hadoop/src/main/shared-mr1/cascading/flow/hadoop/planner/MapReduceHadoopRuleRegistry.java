@@ -55,9 +55,9 @@ import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
 /**
  *
  */
-public class HadoopRuleRegistry extends RuleRegistry
+public class MapReduceHadoopRuleRegistry extends RuleRegistry
   {
-  public HadoopRuleRegistry()
+  public MapReduceHadoopRuleRegistry()
     {
 //    enableDebugLogging();
 
