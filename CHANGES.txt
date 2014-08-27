@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Fixed issue where c.p.a.AggregateBy was not honoring the c.t.Hasher interface.
+
   Fixed issues around c.o.e.ExpressionFunction and c.o.e.ExpressionFilter either accepting Fields.NONE as incoming
   arguments, or inheriting incoming type information from the resolved arguments.
 

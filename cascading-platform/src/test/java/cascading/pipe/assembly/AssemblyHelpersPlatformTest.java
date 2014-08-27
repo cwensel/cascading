@@ -21,7 +21,9 @@
 package cascading.pipe.assembly;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -36,7 +38,6 @@ import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
 import cascading.operation.assertion.AssertExpression;
 import cascading.operation.expression.ExpressionFunction;
-import cascading.operation.expression.ScriptFunction;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -45,6 +46,7 @@ import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
@@ -782,20 +784,53 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     rhsPipe = new Each( rhsPipe, new Fields( "char" ), new ExpressionFunction( Fields.ARGS, "$0.toLowerCase()", String.class ), Fields.REPLACE );
 
-    SumBy sumPipe = new SumBy( new Fields( "num" ), new Fields( "sum" ), long.class );
-    CountBy countPipe = new CountBy( new Fields( "count" ) );
-    AverageBy averagePipe = new AverageBy( new Fields( "num" ), new Fields( "average" ) );
+    class CustomHasher implements Hasher<Object>, Comparator<Comparable>, Serializable
+      {
+      @Override
+      public int hashCode( Object value )
+        {
+        // using a fabricated hashCode
+        long offset = 2166136261L;
+        long prime = 16777619L;
+        long hash = offset;
+        for ( byte b : value.toString().getBytes() )
+          hash = ( hash ^ b ) * prime;
+        return (int) hash;
+        }
+
+      @Override
+      public int compare( Comparable o1, Comparable o2 )
+        {
+        return o1.compareTo( o2 );
+        }
+      }
+
+    Fields sumFields = new Fields( "sum" );
+    sumFields.setComparator( "sum", new CustomHasher() );
+    SumBy sumPipe = new SumBy( new Fields( "num" ), sumFields , long.class );
+
+    Fields countFields = new Fields( "count" );
+    countFields.setComparator( "count", new CustomHasher() );
+    CountBy countPipe = new CountBy( countFields );
+
+    Fields averageFields = new Fields( "average" );
+    averageFields.setComparator( "average", new CustomHasher() );
+    AverageBy averagePipe = new AverageBy( new Fields( "num" ), averageFields );
 
     Pipe pipe;
+
+    Fields charFields = new Fields( "char" );
+    charFields.setComparator( "char", new CustomHasher() );
+
     if( priorMerge )
       {
       Merge merge = new Merge( Pipe.pipes( lhsPipe, rhsPipe ) );
 
-      pipe = new AggregateBy( "name", merge, new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
+      pipe = new AggregateBy( "name", merge, charFields, 2, sumPipe, countPipe, averagePipe );
       }
     else
       {
-      pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), new Fields( "char" ), 2, sumPipe, countPipe, averagePipe );
+      pipe = new AggregateBy( "name", Pipe.pipes( lhsPipe, rhsPipe ), charFields, 2, sumPipe, countPipe, averagePipe );
       }
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );

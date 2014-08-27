@@ -20,6 +20,7 @@
 
 package cascading.tuple.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class TupleHasher
+public class TupleHasher implements Serializable
   {
   private static final Logger LOG = LoggerFactory.getLogger( MemorySpliceGate.class );
 
@@ -134,5 +135,38 @@ public class TupleHasher
       {
       return value.hashCode();
       }
+    }
+
+  static class WrappedTuple extends Tuple
+    {
+    private final TupleHasher tupleHasher;
+
+    public WrappedTuple( TupleHasher tupleHasher, Tuple input )
+      {
+      super( Tuple.elements( input ) );
+      this.tupleHasher = tupleHasher;
+      }
+
+    @Override
+    public int hashCode()
+      {
+      return tupleHasher.hashCode( this );
+      }
+    }
+
+  /**
+   * Wraps the given Tuple in a subtype, that uses the provided Hasher for hashCode calculations. If the given Hahser
+   * is <code>null</code> the input Tuple will be returned.
+   *
+   * @param tupleHasher A TupleHasher instance.
+   * @param input       A Tuple instance.
+   * @return A tuple using the provided TupleHasher for hashCode calculations if the TupleHasher is not null.
+   */
+  public static Tuple wrapTuple( TupleHasher tupleHasher, Tuple input )
+    {
+    if( tupleHasher == null )
+      return input;
+
+    return new WrappedTuple( tupleHasher, input );
     }
   }
