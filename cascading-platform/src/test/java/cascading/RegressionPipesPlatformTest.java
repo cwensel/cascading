@@ -535,6 +535,8 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
     flow.complete();
+
+    validateLength( flow, 200 );
     }
 
   @Test

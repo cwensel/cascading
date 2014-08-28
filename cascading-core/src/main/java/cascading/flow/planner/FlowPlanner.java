@@ -243,6 +243,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( steps.isEmpty() )
               throw new PlannerException( "no steps partitioned from assembly: " + ruleResult.getRegistry().getName(), assembly );
+
+            Set<FlowElement> elements = new HashSet<>();
+
+            for( ElementGraph step : steps )
+              elements.addAll( step.vertexSet() );
+
+            if( elements.size() < assembly.vertexSet().size() )
+              throw new PlannerException( "union of steps have fewer elements than parent assembly: " + ruleResult.getRegistry().getName(), assembly );
             }
 
           break;
@@ -260,12 +268,21 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( nodes.isEmpty() )
               throw new PlannerException( "no nodes partitioned from step: " + ruleResult.getRegistry().getName(), step );
+
+            Set<FlowElement> elements = new HashSet<>();
+
+            for( ElementGraph node : nodes )
+              elements.addAll( node.vertexSet() );
+
+            if( elements.size() < step.vertexSet().size() )
+              throw new PlannerException( "union of nodes have fewer elements than parent step: " + ruleResult.getRegistry().getName(), step );
             }
 
           break;
 
         case Pipeline:
 
+          // all nodes are partitioned into pipelines, but if partitioned all elements should be represented
           Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
 
           if( nodeToPipeline.isEmpty() )
@@ -277,6 +294,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( pipelines.isEmpty() )
               throw new PlannerException( "no pipelines partitioned from node: " + ruleResult.getRegistry().getName(), node );
+
+            Set<FlowElement> elements = new HashSet<>();
+
+            for( ElementGraph pipeline : pipelines )
+              elements.addAll( pipeline.vertexSet() );
+
+            if( elements.size() < node.vertexSet().size() )
+              throw new PlannerException( "union of pipelines have fewer elements than parent node: " + ruleResult.getRegistry().getName(), node );
             }
 
           break;

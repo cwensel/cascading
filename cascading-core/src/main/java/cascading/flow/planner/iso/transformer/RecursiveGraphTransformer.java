@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends GraphTransformer<E, E>
   {
   private static final Logger LOG = LoggerFactory.getLogger( RecursiveGraphTransformer.class );
-  public static final int TRANSFORM_RECURSION_DEPTH_MAX = 100;
+  public static final int TRANSFORM_RECURSION_DEPTH_MAX = 1000;
 
   private final GraphFinder finder;
   private final ExpressionGraph expressionGraph;
