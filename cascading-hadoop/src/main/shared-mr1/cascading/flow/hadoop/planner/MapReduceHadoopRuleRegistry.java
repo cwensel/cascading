@@ -20,7 +20,7 @@
 
 package cascading.flow.hadoop.planner;
 
-import cascading.flow.hadoop.planner.rule.assertion.DualStreamedAccumulatedMergeAssert;
+import cascading.flow.hadoop.planner.rule.assertion.DualStreamedAccumulatedMergePipelineAssert;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsStepPartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.GroupTapNodePartitioner;
@@ -106,7 +106,9 @@ public class MapReduceHadoopRuleRegistry extends RuleRegistry
 
     // PostPipelines
     addRule( new RemoveMalformedHashJoinPipelineTransformer() );
-    addRule( new DualStreamedAccumulatedMergeAssert() );
+
+    // remove when GraphFinder supports captured edges
+    addRule( new DualStreamedAccumulatedMergePipelineAssert() );
 
     // enable when GraphFinder supports captured edges
 //    addRule( new RemoveStreamedBranchTransformer() );

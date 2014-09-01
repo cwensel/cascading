@@ -32,9 +32,9 @@ import static cascading.flow.planner.rule.PlanPhase.PostPipelines;
  * The optimization is to remove the streamed edge between tap and merge, but GraphFinder needs to support marking
  * edges.
  */
-public class DualStreamedAccumulatedMergeAssert extends RuleAssert
+public class DualStreamedAccumulatedMergePipelineAssert extends RuleAssert
   {
-  public DualStreamedAccumulatedMergeAssert()
+  public DualStreamedAccumulatedMergePipelineAssert()
     {
     super(
       PostPipelines,

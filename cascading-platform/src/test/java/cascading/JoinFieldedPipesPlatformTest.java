@@ -1880,7 +1880,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       .addSource( lhs, lhsTap )
       .addTailSink( counted, sink );
 
-    boolean failOnMR = getPlatform().isMapReduce(); // plan seems reasonable in tez
+    boolean failOnPlanner = getPlatform().isMapReduce() || getPlatform().isDAG();
 
     Flow flow = null;
 
@@ -1888,15 +1888,15 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       {
       flow = getPlatform().getFlowConnector().connect( flowDef );
 
-      if( failOnMR )
+      if( failOnPlanner )
         fail( "planner should throw error on plan" );
       }
     catch( Exception exception )
       {
-      if( !failOnMR )
+      if( !failOnPlanner )
         throw exception;
-      else
-        return;
+
+      return;
       }
 
 //    flow.writeDOT( "joinmerge.dot" );
