@@ -27,6 +27,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,6 +57,7 @@ import cascading.util.Pair;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.BiconnectivityInspector;
@@ -69,6 +71,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import org.jgrapht.util.TypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +85,90 @@ import static java.lang.Double.POSITIVE_INFINITY;
 public class ElementGraphs
   {
   private static final Logger LOG = LoggerFactory.getLogger( ElementGraphs.class );
+
+  public static <V, E> int hashCodeIgnoreAnnotations( Graph<V, E> graph )
+    {
+    int hash = graph.vertexSet().hashCode();
+
+    for( E e : graph.edgeSet() )
+      {
+      int part = e.hashCode();
+
+      int source = graph.getEdgeSource( e ).hashCode();
+      int target = graph.getEdgeTarget( e ).hashCode();
+
+      // see http://en.wikipedia.org/wiki/Pairing_function (VK);
+      int pairing =
+        ( ( source + target )
+          * ( source + target + 1 ) / 2 ) + target;
+
+      part = ( 27 * part ) + pairing;
+
+      long weight = (long) graph.getEdgeWeight( e );
+      part = ( 27 * part ) + (int) ( weight ^ ( weight >>> 32 ) );
+
+      hash += part;
+      }
+
+    return hash;
+    }
+
+  public static <V, E> boolean equalsIgnoreAnnotations( Graph<V, E> lhs, Graph<V, E> rhs )
+    {
+    if( lhs == rhs )
+      return true;
+
+    TypeUtil<Graph<V, E>> typeDecl = null;
+    Graph<V, E> lhsGraph = TypeUtil.uncheckedCast( lhs, typeDecl );
+    Graph<V, E> rhsGraph = TypeUtil.uncheckedCast( rhs, typeDecl );
+
+    if( !lhsGraph.vertexSet().equals( rhsGraph.vertexSet() ) )
+      return false;
+
+    if( lhsGraph.edgeSet().size() != rhsGraph.edgeSet().size() )
+      return false;
+
+    for( E e : lhsGraph.edgeSet() )
+      {
+      V source = lhsGraph.getEdgeSource( e );
+      V target = lhsGraph.getEdgeTarget( e );
+
+      if( !rhsGraph.containsEdge( e ) )
+        return false;
+
+      if( !rhsGraph.getEdgeSource( e ).equals( source )
+        || !rhsGraph.getEdgeTarget( e ).equals( target ) )
+        return false;
+
+      if( Math.abs( lhsGraph.getEdgeWeight( e ) - rhsGraph.getEdgeWeight( e ) ) > 10e-7 )
+        return false;
+      }
+
+    return true;
+    }
+
+  public static <V, E> boolean equals( Graph<V, E> lhs, Graph<V, E> rhs )
+    {
+    if( !equalsIgnoreAnnotations( lhs, rhs ) )
+      return false;
+
+    if( !( lhs instanceof AnnotatedGraph ) && !( rhs instanceof AnnotatedGraph ) )
+      return true;
+
+    if( !( lhs instanceof AnnotatedGraph ) || !( rhs instanceof AnnotatedGraph ) )
+      return false;
+
+    AnnotatedGraph lhsAnnotated = (AnnotatedGraph) lhs;
+    AnnotatedGraph rhsAnnotated = (AnnotatedGraph) rhs;
+
+    if( lhsAnnotated.hasAnnotations() != rhsAnnotated.hasAnnotations() )
+      return false;
+
+    if( !lhsAnnotated.hasAnnotations() )
+      return true;
+
+    return lhsAnnotated.getAnnotations().equals( rhsAnnotated.getAnnotations() );
+    }
 
   public static TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator( ElementGraph graph )
     {
@@ -488,7 +575,7 @@ public class ElementGraphs
 
   public static void insertFlowElementAfter( ElementGraph elementGraph, FlowElement previousElement, FlowElement flowElement )
     {
-    Set<Scope> outgoing = new HashSet<Scope>( elementGraph.outgoingEdgesOf( previousElement ) );
+    Set<Scope> outgoing = new HashSet<>( elementGraph.outgoingEdgesOf( previousElement ) );
 
     elementGraph.addVertex( flowElement );
 
@@ -502,12 +589,37 @@ public class ElementGraphs
     for( Scope scope : outgoing )
       {
       FlowElement target = elementGraph.getEdgeTarget( scope );
-      Scope foundScope = elementGraph.removeEdge( previousElement, target );// remove scope
+      Scope foundScope = elementGraph.removeEdge( previousElement, target ); // remove scope
 
       if( foundScope != scope )
         throw new IllegalStateException( "did not remove proper scope" );
 
       elementGraph.addEdge( flowElement, target, scope ); // add scope back
+      }
+    }
+
+  public static void insertFlowElementBefore( ElementGraph graph, FlowElement nextElement, FlowElement flowElement )
+    {
+    Set<Scope> incoming = new HashSet<>( graph.incomingEdgesOf( nextElement ) );
+
+    graph.addVertex( flowElement );
+
+    String name = nextElement.toString();
+
+    if( nextElement instanceof Pipe )
+      name = ( (Pipe) nextElement ).getName();
+
+    graph.addEdge( flowElement, nextElement, new Scope( name ) );
+
+    for( Scope scope : incoming )
+      {
+      FlowElement target = graph.getEdgeSource( scope );
+      Scope foundScope = graph.removeEdge( target, nextElement ); // remove scope
+
+      if( foundScope != scope )
+        throw new IllegalStateException( "did not remove proper scope" );
+
+      graph.addEdge( target, flowElement, scope ); // add scope back
       }
     }
 

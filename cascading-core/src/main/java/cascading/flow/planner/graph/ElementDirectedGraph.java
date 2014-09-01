@@ -24,6 +24,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
 import cascading.util.Util;
+import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -92,18 +93,7 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
   @Override
   public boolean equals( Object object )
     {
-    if( this == object )
-      return true;
-
-    if( !super.equals( object ) )
-      return false;
-
-    AnnotatedGraph that = (AnnotatedGraph) object;
-
-    if( annotations != null ? !annotations.equals( that.getAnnotations() ) : that.getAnnotations() != null )
-      return false;
-
-    return true;
+    return ElementGraphs.equals( this, (Graph) object );
     }
 
   @Override

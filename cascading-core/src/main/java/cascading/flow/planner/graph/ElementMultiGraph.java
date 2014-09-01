@@ -25,6 +25,7 @@ import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMultigraph;
 
 /**
@@ -97,5 +98,19 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
       annotations = new EnumMultiMap();
 
     return annotations;
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    return ElementGraphs.equals( this, (Graph) object );
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result + ( annotations != null ? annotations.hashCode() : 0 );
+    return result;
     }
   }

@@ -18,28 +18,36 @@
  * limitations under the License.
  */
 
-package cascading.util;
+package cascading.flow.planner.graph;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  *
  */
-public class EnumMultiMap<V> extends SetMultiMap<Enum, V>
+public class IgnoreAnnotationsHashSet extends HashSet<ElementGraph>
   {
-  public EnumMultiMap()
+  public IgnoreAnnotationsHashSet( Collection<? extends ElementGraph> collection )
     {
+    super( collection );
     }
 
-  public EnumMultiMap( EnumMultiMap map )
+  @Override
+  public boolean add( ElementGraph elementGraph )
     {
-    addAll( map );
+    return super.add( new IgnoresAnnotationsElementGraph( elementGraph ) );
     }
 
-  protected Map<Enum, Set<V>> createMap()
+  public List<ElementGraph> asList()
     {
-    return new HashMap<>();
+    List<ElementGraph> list = new ArrayList<>( size() );
+
+    for( ElementGraph elementGraph : this )
+      list.add( ( (DecoratedElementGraph) elementGraph ).getDecorated() );
+
+    return list;
     }
   }

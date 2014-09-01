@@ -29,6 +29,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMaskSubgraph;
 import org.jgrapht.graph.MaskFunctor;
 
@@ -99,5 +100,19 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
 
     if( success )
       Util.writePDF( filename );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    return ElementGraphs.equals( this, (Graph) object );
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result; // parity with AnnotatedGraph types
+    return result;
     }
   }

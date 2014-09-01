@@ -26,6 +26,7 @@ import java.util.HashSet;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.Util;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedSubgraph;
 
 /**
@@ -73,5 +74,19 @@ public class ElementSubGraph extends DirectedSubgraph<FlowElement, Scope> implem
 
     if( success )
       Util.writePDF( filename );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    return ElementGraphs.equals( this, (Graph) object );
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = super.hashCode();
+    result = 31 * result; // parity with AnnotatedGraph types
+    return result;
     }
   }
