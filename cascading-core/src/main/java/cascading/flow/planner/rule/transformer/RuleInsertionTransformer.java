@@ -36,15 +36,25 @@ public class RuleInsertionTransformer extends RuleTransformer
     this( phase, ruleExpression, null, factoryName );
     }
 
+  public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, String factoryName, InsertionGraphTransformer.Insertion insertAfter )
+    {
+    this( phase, ruleExpression, null, factoryName, insertAfter );
+    }
+
   public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, ElementCapture capture, String factoryName )
+    {
+    this( phase, ruleExpression, capture, factoryName, InsertionGraphTransformer.Insertion.After );
+    }
+
+  public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, ElementCapture capture, String factoryName, InsertionGraphTransformer.Insertion insertAfter )
     {
     super( phase, ruleExpression );
 
     if( subGraphTransformer != null )
-      graphTransformer = new InsertionGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), capture, factoryName );
+      graphTransformer = new InsertionGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression(), capture, factoryName, insertAfter );
     else if( contractedTransformer != null )
-      graphTransformer = new InsertionGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), capture, factoryName );
+      graphTransformer = new InsertionGraphTransformer( contractedTransformer, ruleExpression.getMatchExpression(), capture, factoryName, insertAfter );
     else
-      graphTransformer = new InsertionGraphTransformer( ruleExpression.getMatchExpression(), capture, factoryName );
+      graphTransformer = new InsertionGraphTransformer( ruleExpression.getMatchExpression(), capture, factoryName, insertAfter );
     }
   }

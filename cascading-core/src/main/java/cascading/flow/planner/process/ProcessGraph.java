@@ -165,6 +165,18 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     return sources;
     }
 
+  public List<Process> getElementSinkProcesses( FlowElement flowElement )
+    {
+    List<Process> sinks = new ArrayList<>();
+    for( Process process : vertexSet() )
+      {
+      if( process.getSourceElements().contains( flowElement ) )
+        sinks.add( process );
+      }
+
+    return sinks;
+    }
+
   /**
    * Method writeDOT writes this element graph to a DOT file for easy visualization and debugging.
    *

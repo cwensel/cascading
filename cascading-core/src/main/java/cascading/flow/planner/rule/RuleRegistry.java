@@ -74,6 +74,7 @@ public class RuleRegistry
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.assertion", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.subgraph", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.finder", "DEBUG" );
+//    LogUtil.setLog4jLevel( "org.apache", "DEBUG" );
     }
 
   /**

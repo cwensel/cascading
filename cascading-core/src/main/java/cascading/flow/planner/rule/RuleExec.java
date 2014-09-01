@@ -23,7 +23,6 @@ package cascading.flow.planner.rule;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +37,7 @@ import cascading.flow.planner.graph.BoundedElementMultiGraph;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.flow.planner.graph.IgnoreAnnotationsHashSet;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.assertion.GraphAssert;
@@ -242,9 +242,23 @@ public class RuleExec
         if( results.isEmpty() )
           continue;
 
+        // ignore annotations on equality, but replace an newer graph with prior
+        IgnoreAnnotationsHashSet uniques = new IgnoreAnnotationsHashSet( results );
+
+        if( uniques.size() != results.size() )
+          throw new PlannerException( "rule created duplicate element graphs" );
+
         // replace child with partitioned results
         resultChildren.remove( child );
-        resultChildren.addAll( results );
+
+        for( ElementGraph prior : resultChildren )
+          {
+          if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
+            LOG.info( "re-partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
+          }
+
+        // order no longer preserved
+        resultChildren = uniques.asList();
         }
 
       subGraphs.put( parent, resultChildren );
@@ -273,7 +287,8 @@ public class RuleExec
 
       List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
-      Set<ElementGraph> uniques = new LinkedHashSet<>( results );
+      // ignore annotations on equality, but replace an newer graph with prior
+      IgnoreAnnotationsHashSet uniques = new IgnoreAnnotationsHashSet( results );
 
       if( uniques.size() != results.size() )
         throw new PlannerException( "rule created duplicate element graphs" );
@@ -281,10 +296,11 @@ public class RuleExec
       for( ElementGraph prior : priors )
         {
         if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
-          LOG.info( "rule created duplicate element graph to prior partitioner, ignoring: {}", partitioner.getRuleName() );
+          LOG.info( "partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
         }
 
-      subGraphs.put( parent, new ArrayList<>( uniques ) );
+      // order no longer preserved
+      subGraphs.put( parent, uniques.asList() );
       }
 
     ruleResult.setLevelResults( phase.getLevel(), subGraphs );

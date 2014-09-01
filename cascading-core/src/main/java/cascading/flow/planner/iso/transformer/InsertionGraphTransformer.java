@@ -20,6 +20,7 @@
 
 package cascading.flow.planner.iso.transformer;
 
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
@@ -28,12 +29,22 @@ import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
+import org.jgrapht.Graphs;
 
 /**
  *
  */
 public class InsertionGraphTransformer extends MutateGraphTransformer
   {
+  public enum Insertion
+    {
+      Before,
+      After,
+      BeforeEachEdge,
+      AfterEachEdge
+    }
+
+  private Insertion insert = Insertion.After;
   private final String factoryName;
   private ElementCapture capture = ElementCapture.Primary;
 
@@ -42,9 +53,21 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
     this( expressionGraph, ElementCapture.Primary, factoryName );
     }
 
+  public InsertionGraphTransformer( ExpressionGraph expressionGraph, String factoryName, Insertion insert )
+    {
+    this( expressionGraph, ElementCapture.Primary, factoryName, insert );
+    }
+
   public InsertionGraphTransformer( ExpressionGraph expressionGraph, ElementCapture capture, String factoryName )
     {
+    this( expressionGraph, capture, factoryName, Insertion.After );
+    }
+
+  public InsertionGraphTransformer( ExpressionGraph expressionGraph, ElementCapture capture, String factoryName, Insertion insert )
+    {
     super( expressionGraph );
+
+    this.insert = insert;
 
     if( capture != null )
       this.capture = capture;
@@ -62,7 +85,14 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
 
   public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, ElementCapture capture, String factoryName )
     {
+    this( graphTransformer, filter, capture, factoryName, Insertion.After );
+    }
+
+  public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, ElementCapture capture, String factoryName, Insertion insert )
+    {
     super( graphTransformer, filter );
+
+    this.insert = insert;
 
     if( capture != null )
       this.capture = capture;
@@ -84,7 +114,37 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
     ElementFactory elementFactory = transformed.getPlannerContext().getElementFactoryFor( factoryName );
 
     for( FlowElement flowElement : insertions )
-      ElementGraphs.insertFlowElementAfter( graph, flowElement, elementFactory.create( graph, flowElement ) );
+      {
+      switch( insert )
+        {
+        case Before:
+
+          ElementGraphs.insertFlowElementBefore( graph, flowElement, elementFactory.create( graph, flowElement ) );
+          break;
+
+        case After:
+
+          ElementGraphs.insertFlowElementAfter( graph, flowElement, elementFactory.create( graph, flowElement ) );
+          break;
+
+        case BeforeEachEdge:
+          List<FlowElement> predecessors = Graphs.predecessorListOf( graph, flowElement );
+
+          for( FlowElement predecessor : predecessors )
+            ElementGraphs.insertFlowElementAfter( graph, predecessor, elementFactory.create( graph, predecessor ) );
+
+          break;
+
+        case AfterEachEdge:
+
+          List<FlowElement> successors = Graphs.successorListOf( graph, flowElement );
+
+          for( FlowElement successor : successors )
+            ElementGraphs.insertFlowElementBefore( graph, successor, elementFactory.create( graph, successor ) );
+
+          break;
+        }
+      }
 
     return true;
     }
