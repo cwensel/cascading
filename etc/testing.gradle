@@ -34,7 +34,7 @@ project.ext.setTestingProperties = {
 }
 
 test {
-  maxHeapSize '756m'
+  maxHeapSize '1000m'
 
   systemProperties = setTestingProperties()
 }
@@ -50,7 +50,7 @@ task platformTest( type: Test ) {
 
   systemProperties = setTestingProperties()
 
-  maxHeapSize '756m'
+  maxHeapSize '1000m'
 
   doFirst() {
     rootProject.ext.testRoots << systemProperties[ 'test.output.root' ]
