@@ -50,7 +50,7 @@ public class GraphFinderTest extends CascadingTestCase
 
     graph = new ContractedTransformer( new SyncPipeExpressionGraph() ).transform( graph ).getEndGraph();
 
-    FlowElementExpression SHARED_TAP = new FlowElementExpression( Tap.class, TypeExpression.Topo.Split );
+    FlowElementExpression SHARED_TAP = new FlowElementExpression( Tap.class, TypeExpression.Topo.SplitOnly );
     FlowElementExpression SHARED_HASHJOIN = new FlowElementExpression( HashJoin.class );
 
     ExpressionGraph expressionGraph = new ExpressionGraph()
@@ -71,7 +71,7 @@ public class GraphFinderTest extends CascadingTestCase
 
     graph = new ContractedTransformer( new SyncPipeExpressionGraph() ).transform( graph ).getEndGraph();
 
-    FlowElementExpression sharedTap = new FlowElementExpression( Tap.class, TypeExpression.Topo.Split );
+    FlowElementExpression sharedTap = new FlowElementExpression( Tap.class, TypeExpression.Topo.SplitOnly );
     FlowElementExpression sharedHashJoin = new FlowElementExpression( HashJoin.class );
 
     ExpressionGraph expressionGraph = new ExpressionGraph()

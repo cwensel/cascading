@@ -36,7 +36,7 @@ import cascading.tap.Tap;
  */
 public class BalanceHashJoinSameSourceExpression extends RuleExpression
   {
-  private static final FlowElementExpression SHARED_TAP = new FlowElementExpression( Tap.class, TypeExpression.Topo.Split );
+  private static final FlowElementExpression SHARED_TAP = new FlowElementExpression( Tap.class, TypeExpression.Topo.SplitOnly );
   public static final FlowElementExpression SHARED_HASHJOIN = new FlowElementExpression( HashJoin.class );
 
   public BalanceHashJoinSameSourceExpression()

@@ -52,7 +52,7 @@ public class MalformedJoinExpressionGraph extends ExpressionGraph
           return super.applies( plannerContext, elementGraph, flowElement ) && !( (Splice) flowElement ).isSelfJoin();
           }
         },
-        not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.Splice ) )
+        not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.SpliceOnly ) )
       )
     );
     }

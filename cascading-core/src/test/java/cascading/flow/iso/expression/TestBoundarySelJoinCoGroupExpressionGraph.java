@@ -40,9 +40,9 @@ public class TestBoundarySelJoinCoGroupExpressionGraph extends ExpressionGraph
 
     this
       .arc(
-        new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Split ),
+        new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.SplitOnly ),
         ScopeExpression.EACH,
-        new FlowElementExpression( CoGroup.class, TypeExpression.Topo.Splice )
+        new FlowElementExpression( CoGroup.class, TypeExpression.Topo.SpliceOnly )
       );
     }
   }

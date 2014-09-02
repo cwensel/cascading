@@ -45,7 +45,7 @@ public class PartitionEverySplitExpression extends RuleExpression
       // sub-graph to match has out degree captured above
       new ExpressionGraph()
         .arcs(
-          new FlowElementExpression( ElementCapture.Primary, Every.class, TypeExpression.Topo.Split )
+          new FlowElementExpression( ElementCapture.Primary, Every.class, TypeExpression.Topo.SplitOnly )
         )
     );
     }

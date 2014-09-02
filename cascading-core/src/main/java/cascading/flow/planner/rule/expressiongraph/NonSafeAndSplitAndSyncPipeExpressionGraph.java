@@ -47,7 +47,7 @@ public class NonSafeAndSplitAndSyncPipeExpressionGraph extends ExpressionGraph
       not( new FlowElementExpression( Tap.class ) ),
       not( new FlowElementExpression( Checkpoint.class ) ),
       not( new FlowElementExpression( Splice.class ) ),
-      not( new FlowElementExpression( Pipe.class, TypeExpression.Topo.Split ) ),
+      not( new FlowElementExpression( Pipe.class, TypeExpression.Topo.SplitOnly ) ),
       not( new NonSafeOperationExpression() ) ) );
     }
   }

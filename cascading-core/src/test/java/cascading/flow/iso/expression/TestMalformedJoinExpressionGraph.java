@@ -40,7 +40,7 @@ public class TestMalformedJoinExpressionGraph extends ExpressionGraph
     super( SearchOrder.ReverseDepth,
       and( ElementCapture.Primary,
         new FlowElementExpression( HashJoin.class ),
-        not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.Splice ) )
+        not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.SpliceOnly ) )
       )
     );
     }

@@ -44,7 +44,7 @@ public class BalanceNonSafeSplitExpression extends RuleExpression
       new ExpressionGraph()
         .arcs(
           new FlowElementExpression( Tap.class ),
-          new NonSafeOperationExpression( TypeExpression.Topo.Split )
+          new NonSafeOperationExpression( TypeExpression.Topo.SplitOnly )
         ),
 
       new ExpressionGraph()

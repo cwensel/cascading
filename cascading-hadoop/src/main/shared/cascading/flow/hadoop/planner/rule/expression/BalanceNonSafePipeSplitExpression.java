@@ -48,7 +48,7 @@ public class BalanceNonSafePipeSplitExpression extends RuleExpression
         .arcs(
           new FlowElementExpression( Tap.class ),
           new NonSafeOperationExpression(),
-          new FlowElementExpression( Pipe.class, TypeExpression.Topo.Split )
+          new FlowElementExpression( Pipe.class, TypeExpression.Topo.SplitOnly )
         ),
 
       new ExpressionGraph()

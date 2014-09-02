@@ -53,7 +53,7 @@ public class BalanceGroupSplitExpression extends RuleExpression
       // sub-graph to match has out degree captured above
       new ExpressionGraph()
         .arcs(
-          new FlowElementExpression( ElementCapture.Primary, Pipe.class, TypeExpression.Topo.Split )
+          new FlowElementExpression( ElementCapture.Primary, Pipe.class, TypeExpression.Topo.SplitOnly )
         )
     );
     }

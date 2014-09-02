@@ -39,6 +39,8 @@ public class TypeExpression<Type> extends ElementExpression
       LinearOut,
       Splice,
       Split,
+      SpliceOnly,
+      SplitOnly,
       SpliceSplit
     }
 
@@ -133,8 +135,12 @@ public class TypeExpression<Type> extends ElementExpression
       case LinearOut:
         return !isSplit;
       case Splice:
-        return isSplice && !isSplit;
+        return isSplice;
       case Split:
+        return isSplit;
+      case SpliceOnly:
+        return isSplice && !isSplit;
+      case SplitOnly:
         return !isSplice && isSplit;
       case SpliceSplit:
         return isSplice && isSplit;
@@ -142,7 +148,6 @@ public class TypeExpression<Type> extends ElementExpression
 
     throw new IllegalStateException( "unknown switch, got: " + topo );
     }
-
 
   private boolean typeApplies( FlowElement flowElement )
     {
