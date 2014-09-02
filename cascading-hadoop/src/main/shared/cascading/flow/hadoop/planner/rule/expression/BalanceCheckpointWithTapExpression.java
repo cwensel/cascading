@@ -32,9 +32,9 @@ import static cascading.flow.planner.iso.expression.NotElementExpression.not;
 /**
  *
  */
-public class BalanceCheckpointExpression extends RuleExpression
+public class BalanceCheckpointWithTapExpression extends RuleExpression
   {
-  public BalanceCheckpointExpression()
+  public BalanceCheckpointWithTapExpression()
     {
     super(
       new ExpressionGraph()
