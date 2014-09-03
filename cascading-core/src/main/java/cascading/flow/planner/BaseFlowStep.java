@@ -85,7 +85,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   /** Field flowID */
   private String flowID;
 
-  private transient Config conf;
+  private transient Config flowStepConf;
 
   /** Field submitPriority */
   private int submitPriority = 5;
@@ -212,12 +212,17 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   @Override
   public Config getConfig()
     {
-    return conf;
+    return flowStepConf;
     }
 
-  protected void setConf( Config conf )
+  /**
+   * Set the initialized flowStepConf Config instance
+   *
+   * @param flowStepConf of type Config
+   */
+  protected void setFlowStepConf( Config flowStepConf )
     {
-    this.conf = conf;
+    this.flowStepConf = flowStepConf;
     }
 
   @Override
@@ -679,7 +684,6 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       {
       if( LOG.isDebugEnabled() )
         logDebug( "firing onThrowable event: " + getListeners().size() );
-
 
       for( Object flowStepListener : getListeners() )
         ( (FlowStepListener) flowStepListener ).onStepThrowable( this, throwable );

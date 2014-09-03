@@ -1420,7 +1420,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     return runID;
     }
 
-  protected List<String> getClassPath()
+  public List<String> getClassPath()
     {
     return classPath;
     }

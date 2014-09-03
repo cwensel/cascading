@@ -82,9 +82,9 @@ public class HadoopUtil
     }
 
   public static boolean isInflow( Configuration conf )
-      {
-      return conf.getBoolean( CASCADING_FLOW_EXECUTING, false );
-      }
+    {
+    return conf.getBoolean( CASCADING_FLOW_EXECUTING, false );
+    }
 
   public static void initLog4j( JobConf configuration )
     {
@@ -537,7 +537,7 @@ public class HadoopUtil
     Map<String, Path> localPaths = new HashMap<String, Path>();
     Map<String, Path> remotePaths = new HashMap<String, Path>();
 
-    resolvePaths( config, classpath, localPaths, remotePaths );
+    resolvePaths( config, classpath, null, localPaths, remotePaths );
 
     try
       {
@@ -577,7 +577,7 @@ public class HadoopUtil
     if( commonPaths == null )
       return;
 
-    Map<Path, Path> copyPaths = getCopyPaths( config, commonPaths );
+    Map<Path, Path> copyPaths = getCopyPaths( config, commonPaths ); // tests remote file existence or if stale
 
     LocalFileSystem localFS = getLocalFS( config );
     FileSystem remoteFS = getDefaultFS( config );
@@ -594,8 +594,8 @@ public class HadoopUtil
 
         // sync the modified times so we can lazily upload jars to hdfs after job is started
         // otherwise modified time will be local to hdfs
-        FileStatus fileStatus = localFS.getFileStatus( localPath );
-        remoteFS.setTimes( remotePath, fileStatus.getModificationTime(), fileStatus.getAccessTime() );
+        FileStatus localFileStatus = localFS.getFileStatus( localPath );
+        remoteFS.setTimes( remotePath, localFileStatus.getModificationTime(), localFileStatus.getAccessTime() );
         }
       catch( IOException exception )
         {
@@ -656,10 +656,14 @@ public class HadoopUtil
     return copyPaths;
     }
 
-  public static void resolvePaths( Configuration config, List<String> classpath, Map<String, Path> localPaths, Map<String, Path> remotePaths )
+  public static void resolvePaths( Configuration config, List<String> classpath, String remoteRoot, Map<String, Path> localPaths, Map<String, Path> remotePaths )
     {
     FileSystem defaultFS = getDefaultFS( config );
     FileSystem localFS = getLocalFS( config );
+
+    Path remoteRootPath = new Path( remoteRoot == null ? "./.staging" : remoteRoot );
+
+    remoteRootPath = defaultFS.makeQualified( remoteRootPath );
 
     boolean defaultIsLocal = defaultFS.equals( localFS );
 
@@ -675,8 +679,8 @@ public class HadoopUtil
         if( !exists( localFS, localPath ) )
           throw new FlowException( "path not found: " + localPath );
 
-        localPaths.put( stringPath, localPath );
-        remotePaths.put( stringPath, defaultFS.makeQualified( path ) );
+        localPaths.put( localPath.getName(), localPath );
+        remotePaths.put( localPath.getName(), defaultFS.makeQualified( new Path( remoteRootPath, path.getName() ) ) );
         }
       else if( localFS.equals( getFileSystem( config, path ) ) )
         {
@@ -685,7 +689,7 @@ public class HadoopUtil
 
         Path localPath = localFS.makeQualified( path );
 
-        localPaths.put( stringPath, localPath );
+        localPaths.put( localPath.getName(), localPath );
         }
       else
         {
@@ -694,7 +698,7 @@ public class HadoopUtil
 
         Path defaultPath = defaultFS.makeQualified( path );
 
-        remotePaths.put( stringPath, defaultPath );
+        remotePaths.put( defaultPath.getName(), defaultPath );
         }
       }
     }

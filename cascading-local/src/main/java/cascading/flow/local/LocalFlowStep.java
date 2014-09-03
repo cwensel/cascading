@@ -129,7 +129,7 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   @Override
   protected FlowStepJob<Properties> createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
-    setConf( createInitializedConfig( flowProcess, parentConfig ) );
+    setFlowStepConf( createInitializedConfig( flowProcess, parentConfig ) );
 
     flowProcess = new LocalFlowProcess( flowProcess.getCurrentSession(), getConfig() );
 
