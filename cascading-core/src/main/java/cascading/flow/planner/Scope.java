@@ -529,7 +529,7 @@ public class Scope implements Serializable
 
   public String print()
     {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     if( ordinal != null )
       buffer.append( "[" ).append( ordinal ).append( "]" );
@@ -543,8 +543,9 @@ public class Scope implements Serializable
       {
       for( String name : keySelectors.keySet() )
         {
-        if( buffer.length() != 0 )
-          buffer.append( "," );
+        if( buffer.length() != 0 && buffer.charAt( buffer.length() - 1 ) != '\n' )
+          buffer.append( " | " );
+
         buffer.append( name ).append( keySelectors.get( name ).printVerbose() );
         }
 
