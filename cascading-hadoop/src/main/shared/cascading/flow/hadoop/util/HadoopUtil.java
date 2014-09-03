@@ -52,6 +52,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
@@ -578,6 +579,7 @@ public class HadoopUtil
 
     Map<Path, Path> copyPaths = getCopyPaths( config, commonPaths );
 
+    LocalFileSystem localFS = getLocalFS( config );
     FileSystem remoteFS = getDefaultFS( config );
 
     for( Map.Entry<Path, Path> entry : copyPaths.entrySet() )
@@ -589,6 +591,11 @@ public class HadoopUtil
         {
         LOG.info( "copying from: {}, to: {}", localPath, remotePath );
         remoteFS.copyFromLocalFile( localPath, remotePath );
+
+        // sync the modified times so we can lazily upload jars to hdfs after job is started
+        // otherwise modified time will be local to hdfs
+        FileStatus fileStatus = localFS.getFileStatus( localPath );
+        remoteFS.setTimes( remotePath, fileStatus.getModificationTime(), fileStatus.getAccessTime() );
         }
       catch( IOException exception )
         {
@@ -597,7 +604,7 @@ public class HadoopUtil
       }
     }
 
-  private static Map<Path, Path> getCommonPaths( Map<String, Path> localPaths, Map<String, Path> remotePaths )
+  public static Map<Path, Path> getCommonPaths( Map<String, Path> localPaths, Map<String, Path> remotePaths )
     {
     Map<Path, Path> commonPaths = new HashMap<Path, Path>();
 
@@ -606,6 +613,7 @@ public class HadoopUtil
       if( remotePaths.containsKey( entry.getKey() ) )
         commonPaths.put( entry.getValue(), remotePaths.get( entry.getKey() ) );
       }
+
     return commonPaths;
     }
 
@@ -648,7 +656,7 @@ public class HadoopUtil
     return copyPaths;
     }
 
-  private static void resolvePaths( Configuration config, List<String> classpath, Map<String, Path> localPaths, Map<String, Path> remotePaths )
+  public static void resolvePaths( Configuration config, List<String> classpath, Map<String, Path> localPaths, Map<String, Path> remotePaths )
     {
     FileSystem defaultFS = getDefaultFS( config );
     FileSystem localFS = getLocalFS( config );
@@ -662,27 +670,31 @@ public class HadoopUtil
 
       if( uri.getScheme() == null && !defaultIsLocal ) // we want to sync
         {
-        Path localPath = path.makeQualified( localFS );
+        Path localPath = localFS.makeQualified( path );
 
         if( !exists( localFS, localPath ) )
           throw new FlowException( "path not found: " + localPath );
 
         localPaths.put( stringPath, localPath );
-        remotePaths.put( stringPath, path.makeQualified( defaultFS ) );
+        remotePaths.put( stringPath, defaultFS.makeQualified( path ) );
         }
       else if( localFS.equals( getFileSystem( config, path ) ) )
         {
         if( !exists( localFS, path ) )
           throw new FlowException( "path not found: " + path );
 
-        localPaths.put( stringPath, path );
+        Path localPath = localFS.makeQualified( path );
+
+        localPaths.put( stringPath, localPath );
         }
       else
         {
         if( !exists( defaultFS, path ) )
           throw new FlowException( "path not found: " + path );
 
-        remotePaths.put( stringPath, path );
+        Path defaultPath = defaultFS.makeQualified( path );
+
+        remotePaths.put( stringPath, defaultPath );
         }
       }
     }
@@ -711,7 +723,7 @@ public class HadoopUtil
       }
     }
 
-  private static LocalFileSystem getLocalFS( Configuration config )
+  public static LocalFileSystem getLocalFS( Configuration config )
     {
     try
       {
@@ -723,7 +735,7 @@ public class HadoopUtil
       }
     }
 
-  private static FileSystem getDefaultFS( Configuration config )
+  public static FileSystem getDefaultFS( Configuration config )
     {
     try
       {
