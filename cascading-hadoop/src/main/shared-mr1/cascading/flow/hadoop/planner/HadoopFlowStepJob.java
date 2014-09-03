@@ -162,7 +162,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       }
     }
 
-  protected boolean internalIsStarted()
+  protected boolean internalIsStartedRunning()
     {
     if( runningJob == null )
       return false;

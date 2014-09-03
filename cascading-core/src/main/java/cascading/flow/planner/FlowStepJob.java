@@ -270,7 +270,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
     while( true )
       {
-      if( flowStepStats.isSubmitted() && isStarted() )
+      // test stop last, internalIsStartedRunning may block causing a race condition
+      if( flowStepStats.isSubmitted() && internalIsStartedRunning() && !stop )
         {
         markRunning();
         flowStep.fireOnRunning();
@@ -393,16 +394,16 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     }
 
   /**
-   * Method wasStarted returns true if this job was started
+   * Method isStarted returns true if this underlying job has started running
    *
    * @return boolean
    */
   public boolean isStarted()
     {
-    return internalIsStarted();
+    return internalIsStartedRunning();
     }
 
-  protected abstract boolean internalIsStarted();
+  protected abstract boolean internalIsStartedRunning();
 
   /**
    * Method getStepStats returns the stepStats of this FlowStepJob object.

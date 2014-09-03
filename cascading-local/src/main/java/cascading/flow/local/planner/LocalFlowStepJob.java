@@ -87,7 +87,7 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
     }
 
   @Override
-  protected boolean internalIsStarted()
+  protected boolean internalIsStartedRunning()
     {
     return future != null;
     }
