@@ -58,7 +58,6 @@ import org.junit.Test;
 
 import static data.InputData.*;
 
-
 public class SerializedPipesPlatformTest extends PlatformTestCase
   {
   public static class InsertBytes extends BaseOperation implements Function

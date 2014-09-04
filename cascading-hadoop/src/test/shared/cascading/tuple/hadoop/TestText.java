@@ -39,10 +39,16 @@ public class TestText implements Comparable<TestText>
   @Override
   public int compareTo( TestText o )
     {
+    if( o == null )
+      return 1;
+
+    if( value == null && o.value == null )
+      return 0;
+
     if( value == null )
       return -1;
 
-    if( o == null || o.value == null )
+    if( o.value == null )
       return 1;
 
     return value.compareTo( o.value );
