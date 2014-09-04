@@ -60,6 +60,8 @@ test {
 
 platformTest {
 
+  delete( "target" ) // hardcoded path in hadoop2
+
   forkEvery = 1 // static fields on the platform test get munged otherwise
 
   systemProperties[ 'hadoop.log.dir' ] = new String( "${buildDir}/test/log" )
