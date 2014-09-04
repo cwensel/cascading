@@ -308,7 +308,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       JobConf accumulatedJob = flowProcess.copyConfig( conf );
       tap.sourceConfInit( flowProcess, accumulatedJob );
       Map<String, String> map = flowProcess.diffConfigIntoMap( conf, accumulatedJob );
-      conf.set( "cascading.step.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
+      conf.set( "cascading.node.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
       }
 
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last

@@ -86,7 +86,7 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
   private void initialize() throws IOException
     {
     // prevent collisions of configuration properties set client side if now cluster side
-    String property = flowProcess.getStringProperty( "cascading.step.accumulated.source.conf." + Tap.id( tap ) );
+    String property = flowProcess.getStringProperty( "cascading.node.accumulated.source.conf." + Tap.id( tap ) );
 
     if( property == null )
       {

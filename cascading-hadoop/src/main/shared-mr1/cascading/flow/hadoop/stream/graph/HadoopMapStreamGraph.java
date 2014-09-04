@@ -89,7 +89,7 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
       JobConf conf = hadoopProcess.getJobConf();
 
       // allows client side config to be used cluster side
-      String property = conf.getRaw( "cascading.step.accumulated.source.conf." + Tap.id( (Tap) source ) );
+      String property = conf.getRaw( "cascading.node.accumulated.source.conf." + Tap.id( (Tap) source ) );
 
       if( property == null )
         throw new IllegalStateException( "accumulated source conf property missing for: " + ( (Tap) source ).getIdentifier() );

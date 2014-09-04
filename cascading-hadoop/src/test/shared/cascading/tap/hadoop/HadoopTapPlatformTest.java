@@ -572,6 +572,9 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
   @Test
   public void testChildIdentifiers() throws Exception
     {
+    if( !getPlatform().isUseCluster() )
+      return;
+
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
