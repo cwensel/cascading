@@ -33,6 +33,11 @@ public class LazyCollection implements Collection<Tuple>, ResettableCollection<I
   Iterator<Tuple> iterator;
   Collection<Tuple> parent;
 
+  public static Collection<Tuple> getParent( LazyCollection collection )
+    {
+    return collection.parent;
+    }
+
   public LazyCollection( Collection<Tuple> parent )
     {
     this.parent = parent;
