@@ -60,7 +60,6 @@ import org.junit.Test;
 
 import static data.InputData.*;
 
-
 public class RegressionPipesPlatformTest extends PlatformTestCase
   {
   public RegressionPipesPlatformTest()
@@ -359,9 +358,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
 
     rhs = new Each( rhs, new Fields( "num" ), new Identity( new Fields( "num2" ) ), new Fields( "num", "char" ) );
 
-
     Pipe groupBy = new GroupBy( Pipe.pipes( lhs, rhs ), new Fields( "num" ) );
-
 
     Flow flow = getPlatform().getFlowConnector().connect( splitTap, sink, groupBy );
 
@@ -600,7 +597,9 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
       {
       System.out.println( "exception = " + exception );
       exception.printStackTrace();
-      if( !getPlatform().isMapReduce() )
+
+      // test local mode passes the OOME on, other its squashed, but the flow should fail
+      if( !getPlatform().isMapReduce() && !getPlatform().isDAG() )
         assertTrue( exception instanceof OutOfMemoryError );
       }
     }
@@ -648,7 +647,9 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
       {
       System.out.println( "exception = " + exception );
       exception.printStackTrace();
-      if( !getPlatform().isMapReduce() )
+
+      // test local mode passes the OOME on, other its squashed, but the flow should fail
+      if( !getPlatform().isMapReduce() && !getPlatform().isDAG() )
         assertTrue( exception instanceof OutOfMemoryError );
       }
     }
