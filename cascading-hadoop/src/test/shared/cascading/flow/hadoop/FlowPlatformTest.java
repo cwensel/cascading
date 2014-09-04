@@ -97,7 +97,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( (Configuration) ( (BaseFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), ( (BaseHadoopPlatform) getPlatform() ).getConfiguration() ) );
+    boolean isLocal = HadoopUtil.isLocal( (Configuration) step.getConfig() );
 
     assertTrue( "is not local", isLocal );
     }
@@ -120,7 +120,7 @@ public class FlowPlatformTest extends PlatformTestCase
 
     FlowStep step = steps.get( 0 );
 
-    boolean isLocal = HadoopUtil.isLocal( (Configuration) ( (BaseFlowStep) step ).createInitializedConfig( flow.getFlowProcess(), ( (BaseHadoopPlatform) getPlatform() ).getConfiguration() ) );
+    boolean isLocal = HadoopUtil.isLocal( (Configuration) step.getConfig() );
 
     assertTrue( "is not local", isLocal );
     }

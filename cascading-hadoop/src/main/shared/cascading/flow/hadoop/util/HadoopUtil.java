@@ -776,6 +776,7 @@ public class HadoopUtil
     // set both properties to local
     conf.set( "mapred.job.tracker", "local" );
     conf.set( "mapreduce.framework.name", "local" );
+    conf.set( "tez.local.mode", "true" );
     }
 
   public static void addInputPath( Configuration conf, Path path )
