@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Added c.t.h.DistCacheTap a decorator for a c.t.h.Hfs instance that uses o.a.h.f.DistributedCache to read files
+  transparently from local disk. This is useful for c.p.HashJoins.
+
   Added c.t.DecoratorTap class to simplify wrapping a given c.t.Tap instance with additional meta-data.
 
   Updated c.f.p.FlowPlanner to allow both intermediate temporary c.t.Tap or any c.p.Checkpoint tap to be decorated
