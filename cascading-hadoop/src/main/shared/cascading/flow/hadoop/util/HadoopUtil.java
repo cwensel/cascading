@@ -385,28 +385,7 @@ public class HadoopUtil
 
   public static Class findMainClass( Class defaultType )
     {
-    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-
-    for( StackTraceElement stackTraceElement : stackTrace )
-      {
-      if( stackTraceElement.getMethodName().equals( "main" ) && !stackTraceElement.getClassName().startsWith( "org.apache.hadoop" ) )
-        {
-        try
-          {
-          LOG.info( "resolving application jar from found main method on: {}", stackTraceElement.getClassName() );
-
-          return Thread.currentThread().getContextClassLoader().loadClass( stackTraceElement.getClassName() );
-          }
-        catch( ClassNotFoundException exception )
-          {
-          LOG.warn( "unable to load class while discovering application jar: {}", stackTraceElement.getClassName(), exception );
-          }
-        }
-      }
-
-    LOG.info( "using default application jar, may cause class not found exceptions on the cluster" );
-
-    return defaultType;
+    return Util.findMainClass( defaultType, "org.apache.hadoop" );
     }
 
   public static Map<String, String> getConfig( Configuration defaultConf, Configuration updatedConf )
@@ -669,8 +648,9 @@ public class HadoopUtil
 
     for( String stringPath : classpath )
       {
-      URI uri = URI.create( stringPath ); // fails if invalid uri
-      Path path = new Path( uri.toString() );
+      Path path = new Path( stringPath );
+
+      URI uri = path.toUri();
 
       if( uri.getScheme() == null && !defaultIsLocal ) // we want to sync
         {
@@ -775,8 +755,13 @@ public class HadoopUtil
     {
     // set both properties to local
     conf.set( "mapred.job.tracker", "local" );
+
+    // yarn
     conf.set( "mapreduce.framework.name", "local" );
+
+    // tez
     conf.set( "tez.local.mode", "true" );
+    conf.set( "tez.runtime.optimize.local.fetch", "true" );
     }
 
   public static void addInputPath( Configuration conf, Path path )

@@ -170,6 +170,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       latch.countDown();
       flowStepStats.cleanup();
       }
+
+    internalCleanup();
     }
 
   private void applyFlowStepConfStrategy()
@@ -404,6 +406,11 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     }
 
   protected abstract boolean internalIsStartedRunning();
+
+  protected void internalCleanup()
+    {
+    // optional, safe to override
+    }
 
   /**
    * Method getStepStats returns the stepStats of this FlowStepJob object.

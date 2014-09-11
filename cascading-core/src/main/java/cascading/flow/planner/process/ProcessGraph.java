@@ -237,7 +237,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
       }
     }
 
-  static public class ProcessEdge<Process extends ProcessModel>
+  public static class ProcessEdge<Process extends ProcessModel>
     {
     FlowElement flowElement;
     Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process

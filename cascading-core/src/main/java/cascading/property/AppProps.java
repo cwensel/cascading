@@ -39,7 +39,7 @@ import static cascading.util.Util.join;
  * In prior releases, the FlowConnector was responsible for setting the "application jar" class or path. Those
  * methods have been deprecated and moved to AppProps.
  * <p/>
- * New property settings that may be set in Cascading 2 are application name, version, and any tags.
+ * New property settings that may be set since Cascading 2 are application name, version, and any tags.
  */
 public class AppProps extends Props
   {

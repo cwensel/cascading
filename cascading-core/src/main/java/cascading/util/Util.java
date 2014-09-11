@@ -33,12 +33,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -674,9 +677,7 @@ public class Util
       else
         {
         if( packageName != null && stackTraceElement.getClassName().equals( typeName ) )
-          {
           continue;
-          }
         }
 
       return stackTraceElement.toString();
@@ -1137,5 +1138,64 @@ public class Util
   public static String cleansePathName( String name )
     {
     return name.replaceAll( "\\s+|\\*|\\+|/+", "_" );
+    }
+
+  public static Class findMainClass( Class defaultType, String packageExclude )
+    {
+    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+    for( StackTraceElement stackTraceElement : stackTrace )
+      {
+      if( stackTraceElement.getMethodName().equals( "main" ) && !stackTraceElement.getClassName().startsWith( packageExclude ) )
+        {
+        try
+          {
+          LOG.info( "resolving application jar from found main method on: {}", stackTraceElement.getClassName() );
+
+          return Thread.currentThread().getContextClassLoader().loadClass( stackTraceElement.getClassName() );
+          }
+        catch( ClassNotFoundException exception )
+          {
+          LOG.warn( "unable to load class while discovering application jar: {}", stackTraceElement.getClassName(), exception );
+          }
+        }
+      }
+
+    LOG.info( "using default application jar, may cause class not found exceptions on the cluster" );
+
+    return defaultType;
+    }
+
+  public static String findContainingJar( Class<?> type )
+    {
+    ClassLoader classLoader = type.getClassLoader();
+
+    String classFile = type.getName().replaceAll( "\\.", "/" ) + ".class";
+
+    try
+      {
+      for( Enumeration<URL> iterator = classLoader.getResources( classFile ); iterator.hasMoreElements(); )
+        {
+        URL url = iterator.nextElement();
+
+        if( !"jar".equals( url.getProtocol() ) )
+          continue;
+
+        String path = url.getPath();
+
+        if( path.startsWith( "file:" ) )
+          path = path.substring( "file:".length() );
+
+        path = URLDecoder.decode( path, "UTF-8" );
+
+        return path.replaceAll( "!.*$", "" );
+        }
+      }
+    catch( IOException exception )
+      {
+      throw new CascadingException( exception );
+      }
+
+    return null;
     }
   }
