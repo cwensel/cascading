@@ -21,6 +21,7 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
+import cascading.tuple.util.TupleHasher;
 
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
@@ -81,6 +83,7 @@ public class Unique extends SubAssembly
     {
     private int threshold = 10000;
     private Include include = Include.ALL;
+    private TupleHasher tupleHasher;
 
     /** Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance. */
     public FilterPartialDuplicates()
@@ -92,7 +95,7 @@ public class Unique extends SubAssembly
      *
      * @param threshold of type int
      */
-    @ConstructorProperties({"threshold"})
+    @ConstructorProperties( {"threshold"} )
     public FilterPartialDuplicates( int threshold )
       {
       this.threshold = threshold;
@@ -101,13 +104,28 @@ public class Unique extends SubAssembly
     /**
      * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
      *
+     * @param include   of type Include
      * @param threshold of type int
      */
-    @ConstructorProperties({"include", "threshold"})
+    @ConstructorProperties( {"include", "threshold"} )
     public FilterPartialDuplicates( Include include, int threshold )
+      {
+      this( include, threshold, null );
+      }
+
+    /**
+     * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
+     *
+     * @param threshold   of type int
+     * @param include     of type Include
+     * @param tupleHasher of type TupleHasher
+     */
+    @ConstructorProperties( {"include", "threshold", "tupleHasher"} )
+    public FilterPartialDuplicates( Include include, int threshold, TupleHasher tupleHasher )
       {
       this.threshold = threshold;
       this.include = include == null ? this.include : include;
+      this.tupleHasher = tupleHasher;
       }
 
     @Override
@@ -127,7 +145,7 @@ public class Unique extends SubAssembly
     public boolean isRemove( FlowProcess flowProcess, FilterCall<LinkedHashMap<Tuple, Object>> filterCall )
       {
       // we assume its more painful to create lots of tuple copies vs comparisons
-      Tuple args = filterCall.getArguments().getTuple();
+      Tuple args = TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTuple() );
 
       switch( include )
         {
@@ -144,7 +162,8 @@ public class Unique extends SubAssembly
       if( filterCall.getContext().containsKey( args ) )
         return true;
 
-      filterCall.getContext().put( filterCall.getArguments().getTupleCopy(), null );
+      // only do the copy here
+      filterCall.getContext().put( TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTupleCopy() ), null );
 
       return false;
       }
@@ -188,7 +207,7 @@ public class Unique extends SubAssembly
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"pipe", "uniqueFields"})
+  @ConstructorProperties( {"pipe", "uniqueFields"} )
   public Unique( Pipe pipe, Fields uniqueFields )
     {
     this( null, pipe, uniqueFields );
@@ -201,7 +220,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties({"pipe", "uniqueFields", "include"})
+  @ConstructorProperties( {"pipe", "uniqueFields", "include"} )
   public Unique( Pipe pipe, Fields uniqueFields, Include include )
     {
     this( null, pipe, uniqueFields, include );
@@ -214,7 +233,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties({"pipe", "uniqueFields", "threshold"})
+  @ConstructorProperties( {"pipe", "uniqueFields", "threshold"} )
   public Unique( Pipe pipe, Fields uniqueFields, int threshold )
     {
     this( null, pipe, uniqueFields, threshold );
@@ -228,7 +247,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties({"pipe", "uniqueFields", "include", "threshold"})
+  @ConstructorProperties( {"pipe", "uniqueFields", "include", "threshold"} )
   public Unique( Pipe pipe, Fields uniqueFields, Include include, int threshold )
     {
     this( null, pipe, uniqueFields, include, threshold );
@@ -241,7 +260,7 @@ public class Unique extends SubAssembly
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"name", "pipe", "uniqueFields"})
+  @ConstructorProperties( {"name", "pipe", "uniqueFields"} )
   public Unique( String name, Pipe pipe, Fields uniqueFields )
     {
     this( name, pipe, uniqueFields, 10000 );
@@ -255,7 +274,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties({"name", "pipe", "uniqueFields", "include"})
+  @ConstructorProperties( {"name", "pipe", "uniqueFields", "include"} )
   public Unique( String name, Pipe pipe, Fields uniqueFields, Include include )
     {
     this( name, pipe, uniqueFields, include, 10000 );
@@ -269,7 +288,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties({"name", "pipe", "uniqueFields", "threshold"})
+  @ConstructorProperties( {"name", "pipe", "uniqueFields", "threshold"} )
   public Unique( String name, Pipe pipe, Fields uniqueFields, int threshold )
     {
     this( name, Pipe.pipes( pipe ), uniqueFields, threshold );
@@ -284,7 +303,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties({"name", "pipe", "uniqueFields", "include", "threshold"})
+  @ConstructorProperties( {"name", "pipe", "uniqueFields", "include", "threshold"} )
   public Unique( String name, Pipe pipe, Fields uniqueFields, Include include, int threshold )
     {
     this( name, Pipe.pipes( pipe ), uniqueFields, include, threshold );
@@ -296,7 +315,7 @@ public class Unique extends SubAssembly
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"pipes", "uniqueFields"})
+  @ConstructorProperties( {"pipes", "uniqueFields"} )
   public Unique( Pipe[] pipes, Fields uniqueFields )
     {
     this( null, pipes, uniqueFields, 10000 );
@@ -309,7 +328,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties({"pipes", "uniqueFields", "include"})
+  @ConstructorProperties( {"pipes", "uniqueFields", "include"} )
   public Unique( Pipe[] pipes, Fields uniqueFields, Include include )
     {
     this( null, pipes, uniqueFields, include, 10000 );
@@ -322,7 +341,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties({"pipes", "uniqueFields", "threshold"})
+  @ConstructorProperties( {"pipes", "uniqueFields", "threshold"} )
   public Unique( Pipe[] pipes, Fields uniqueFields, int threshold )
     {
     this( null, pipes, uniqueFields, threshold );
@@ -336,7 +355,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties({"pipes", "uniqueFields", "include", "threshold"})
+  @ConstructorProperties( {"pipes", "uniqueFields", "include", "threshold"} )
   public Unique( Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
     this( null, pipes, uniqueFields, include, threshold );
@@ -349,7 +368,7 @@ public class Unique extends SubAssembly
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "uniqueFields"})
+  @ConstructorProperties( {"name", "pipes", "uniqueFields"} )
   public Unique( String name, Pipe[] pipes, Fields uniqueFields )
     {
     this( name, pipes, uniqueFields, 10000 );
@@ -363,7 +382,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties({"name", "pipes", "uniqueFields", "include"})
+  @ConstructorProperties( {"name", "pipes", "uniqueFields", "include"} )
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include )
     {
     this( name, pipes, uniqueFields, include, 10000 );
@@ -377,7 +396,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties({"name", "pipes", "uniqueFields", "threshold"})
+  @ConstructorProperties( {"name", "pipes", "uniqueFields", "threshold"} )
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, int threshold )
     {
     this( name, pipes, uniqueFields, null, threshold );
@@ -391,7 +410,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties({"name", "pipes", "uniqueFields", "include", "threshold"})
+  @ConstructorProperties( {"name", "pipes", "uniqueFields", "include", "threshold"} )
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
     super( pipes );
@@ -400,7 +419,14 @@ public class Unique extends SubAssembly
       throw new IllegalArgumentException( "uniqueFields may not be null" );
 
     Pipe[] filters = new Pipe[ pipes.length ];
-    FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold );
+
+    TupleHasher tupleHasher = null;
+    Comparator[] comparators = uniqueFields.getComparators();
+
+    if( !TupleHasher.isNull( comparators ) )
+      tupleHasher = new TupleHasher( null, comparators );
+
+    FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold, tupleHasher );
 
     for( int i = 0; i < filters.length; i++ )
       filters[ i ] = new Each( pipes[ i ], uniqueFields, partialDuplicates );
