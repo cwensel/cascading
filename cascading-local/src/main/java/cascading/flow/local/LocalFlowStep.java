@@ -31,6 +31,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.management.state.ClientState;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
 
@@ -127,18 +128,16 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     }
 
   @Override
-  protected FlowStepJob<Properties> createFlowStepJob( FlowProcess<Properties> flowProcess, Properties parentConfig )
+  protected FlowStepJob<Properties> createFlowStepJob( ClientState clientState, FlowProcess<Properties> flowProcess, Properties initializedStepConfig )
     {
-    setFlowStepConf( createInitializedConfig( flowProcess, parentConfig ) );
+    // localize a flow process
+    flowProcess = new LocalFlowProcess( flowProcess.getCurrentSession(), initializedStepConfig );
 
-    flowProcess = new LocalFlowProcess( flowProcess.getCurrentSession(), getConfig() );
-
-    return new LocalFlowStepJob( createClientState( flowProcess ), (LocalFlowProcess) flowProcess, this );
+    return new LocalFlowStepJob( clientState, (LocalFlowProcess) flowProcess, this );
     }
 
   public Map<Tap, Properties> getPropertiesMap()
     {
     return tapProperties;
     }
-
   }

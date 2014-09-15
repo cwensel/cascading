@@ -38,6 +38,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowElements;
 import cascading.flow.FlowException;
+import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
@@ -220,7 +221,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
    *
    * @param flowStepConf of type Config
    */
-  protected void setFlowStepConf( Config flowStepConf )
+  protected void setConfig( Config flowStepConf )
     {
     this.flowStepConf = flowStepConf;
     }
@@ -240,6 +241,18 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     String stepID = getID().substring( 0, idLength );
 
     return String.format( "[%s/%s] %s/%s", flowID, stepID, getFlowName(), getName() );
+    }
+
+  protected String getNodeDisplayName( FlowNode flowNode, int idLength )
+    {
+    if( idLength > Util.ID_LENGTH )
+      idLength = Util.ID_LENGTH;
+
+    String flowID = getFlowID().substring( 0, idLength );
+    String stepID = getID().substring( 0, idLength );
+    String nodeID = flowNode.getID().substring( 0, idLength );
+
+    return String.format( "[%s/%s/%s] %s/%s", flowID, stepID, nodeID, getFlowName(), getName() );
     }
 
   @Override
@@ -729,6 +742,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   protected ClientState createClientState( FlowProcess flowProcess )
     {
     CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
+
     return services.createClientState( getID() );
     }
 
@@ -740,12 +754,18 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     if( flowProcess == null )
       return null;
 
-    flowStepJob = createFlowStepJob( flowProcess, parentConfig );
+    Config initializedConfig = createInitializedConfig( flowProcess, parentConfig );
+
+    setConfig( initializedConfig );
+
+    ClientState clientState = createClientState( flowProcess );
+
+    flowStepJob = createFlowStepJob( clientState, flowProcess, initializedConfig );
 
     return flowStepJob;
     }
 
-  protected abstract FlowStepJob createFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig );
+  protected abstract FlowStepJob createFlowStepJob( ClientState clientState, FlowProcess<Config> flowProcess, Config initializedStepConfig );
 
   protected void initConfFromProcessConfigDef( ElementGraph elementGraph, ConfigDef.Setter setter )
     {

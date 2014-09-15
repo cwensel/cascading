@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class FlowStepJob<Config> implements Callable<Throwable>
   {
+  // most logs messages should be delegated to the FlowStep.log* methods
+  // non job related issues can use this logger
   private static final Logger LOG = LoggerFactory.getLogger( FlowStepJob.class );
 
   /** Field stepName */

@@ -92,6 +92,11 @@ public class FlowConnectorProps extends Props
     properties.put( INTERMEDIATE_SCHEME_CLASS, intermediateSchemeClass );
     }
 
+  public static FlowConnectorProps flowConnectorProps()
+    {
+    return new FlowConnectorProps();
+    }
+
   public FlowConnectorProps()
     {
     }
@@ -147,5 +152,4 @@ public class FlowConnectorProps extends Props
     setDebugLevel( properties, debugLevel );
     setIntermediateSchemeClass( properties, intermediateSchemeClassName );
     }
-
   }

@@ -26,11 +26,24 @@ import java.util.Set;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.ProcessModel;
-import cascading.flow.stream.annotations.StreamMode;
 import cascading.tap.Tap;
 
 /**
- *
+ * Class FlowNode represents the smallest parallelizable unit of work. It is a child to a
+ * {@link cascading.flow.FlowStep} and may have many siblings within the FlowStep.
+ * <p/>
+ * A FlowNode is commonly executed as one or more slices, where a slice is a JVM executing against a portion
+ * of data.
+ * <p/>
+ * Most slices within a FlowNode are identical, except for the sub-set of data they will be processing against.
+ * <p/>
+ * But on some platforms, like MapReduce, a slice is executing a single flow pipeline. Thus a FlowNode may consist of
+ * some set of pipelines (or pipeline graph). One pipeline per 'streamed' input source Tap.
+ * <p/>
+ * In a MapReduce model (like Apache Hadoop MapReduce) a FlowNode can by the Map or Reduce side of a job (where a job
+ * is a FlowStep).
+ * <p/>
+ * In a DAG model (like Apache Tez), a FlowNode is a 'vertex', and the 'DAG' is a FlowStep.
  */
 public interface FlowNode extends ProcessModel
   {
@@ -38,23 +51,27 @@ public interface FlowNode extends ProcessModel
 
   String getID();
 
+  Collection<? extends FlowElement> getFlowElementsFor( Enum annotation );
+
+  Set<? extends FlowElement> getSourceElements( Enum annotation );
+
+  Set<? extends FlowElement> getSinkElements( Enum annotation );
+
+  Set<String> getSourceElementNames();
+
+  Set<String> getSinkElementNames();
+
   Set<String> getSourceTapNames( Tap flowElement );
 
   Set<String> getSinkTapNames( Tap flowElement );
 
   Tap getTrap( String branchName );
 
-  Collection<Tap> getTraps();
+  Collection<? extends Tap> getTraps();
 
   Collection<? extends Scope> getPreviousScopes( FlowElement flowElement );
 
   Collection<? extends Scope> getNextScopes( FlowElement flowElement );
 
   ElementGraph getPipelineGraphFor( FlowElement streamedSource );
-
-  Collection<? extends FlowElement> getFlowElementsFor( Enum annotation );
-
-  Set<FlowElement> getSourceElements( Enum<StreamMode> annotation );
-
-  Set<String> getSourceElementNames();
   }

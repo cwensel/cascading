@@ -37,7 +37,7 @@ import cascading.tap.Tap;
 /**
  * Class FlowDef is a fluent interface for defining a {@link Flow}.
  * <p/>
- * This allows for ad-hoc building of Flow data and meta-data like tags.
+ * This allows for ad-hoc building of Flow data and meta-data, like tags.
  * <p/>
  * Instead of calling one of the {@link FlowConnector} connect methods, {@link FlowConnector#connect(FlowDef)}
  * can be called.

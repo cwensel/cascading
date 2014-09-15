@@ -26,8 +26,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowRuntimeProps;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.util.HadoopMRUtil;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -35,6 +37,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.management.state.ClientState;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.io.MultiInputFormat;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
@@ -98,13 +101,27 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     initFromProcessConfigDef( conf );
 
-    if( getSink().getScheme().getNumSinkParts() != 0 )
+    int numSinkParts = getSink().getScheme().getNumSinkParts();
+
+    if( numSinkParts != 0 )
       {
       // if no reducer, set num map tasks to control parts
       if( getGroup() != null )
-        conf.setNumReduceTasks( getSink().getScheme().getNumSinkParts() );
+        conf.setNumReduceTasks( numSinkParts );
       else
-        conf.setNumMapTasks( getSink().getScheme().getNumSinkParts() );
+        conf.setNumMapTasks( numSinkParts );
+      }
+    else if( getGroup() != null )
+      {
+      int gatherPartitions = conf.getNumReduceTasks();
+
+      if( gatherPartitions == 0 )
+        gatherPartitions = conf.getInt( FlowRuntimeProps.GATHER_PARTITIONS, 0 );
+
+      if( gatherPartitions == 0 )
+        throw new FlowException( getName(), "a default number of gather partitions must be set, see FlowRuntimeProps" );
+
+      conf.setNumReduceTasks( gatherPartitions );
       }
 
     conf.setOutputKeyComparatorClass( TupleComparator.class );
@@ -162,6 +179,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     conf.set( CASCADING_FLOW_STEP_ID, getID() );
     conf.set( "cascading.flow.step.num", Integer.toString( getOrdinal() ) );
 
+    HadoopUtil.setIsInflow( conf );
+
     Iterator<FlowNode> iterator = getFlowNodeGraph().getTopologicalIterator();
 
     String mapState = pack( iterator.next(), conf );
@@ -183,8 +202,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       conf.set( "cascading.flow.step.node.reduce.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
       }
 
-    HadoopUtil.setIsInflow( conf );
-
     return conf;
     }
 
@@ -193,13 +210,9 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     return HadoopUtil.isLocal( conf );
     }
 
-  protected FlowStepJob<JobConf> createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
+  protected FlowStepJob<JobConf> createFlowStepJob( ClientState clientState, FlowProcess<JobConf> flowProcess, JobConf initializedStepConfig )
     {
-    JobConf initializedConfig = createInitializedConfig( flowProcess, parentConfig );
-
-    setFlowStepConf( initializedConfig );
-
-    return new HadoopFlowStepJob( createClientState( flowProcess ), this, initializedConfig );
+    return new HadoopFlowStepJob( clientState, this, initializedStepConfig );
     }
 
   /**

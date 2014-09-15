@@ -129,9 +129,9 @@ public class BaseFlowNode implements Serializable, FlowNode
     }
 
   @Override
-  public Set<FlowElement> getSourceElements( Enum annotation )
+  public Set<? extends FlowElement> getSourceElements( Enum annotation )
     {
-    Set<FlowElement> annotated = getFlowElementsFor( annotation );
+    Set<? extends FlowElement> annotated = getFlowElementsFor( annotation );
     Set<FlowElement> sourceElements = getSourceElements();
 
     Set<FlowElement> results = new HashSet<>();
@@ -146,6 +146,22 @@ public class BaseFlowNode implements Serializable, FlowNode
     }
 
   @Override
+  public Set<String> getSinkElementNames()
+    {
+    Set<String> results = new HashSet<>();
+
+    for( FlowElement flowElement : getSinkElements() )
+      {
+      if( flowElement instanceof Tap )
+        results.addAll( getSinkTapNames( (Tap) flowElement ) );
+      else
+        results.add( ( (Pipe) flowElement ).getName() );
+      }
+
+    return results;
+    }
+
+  @Override
   public Set<FlowElement> getSinkElements()
     {
     if( sinkElements == null )
@@ -154,9 +170,9 @@ public class BaseFlowNode implements Serializable, FlowNode
     return sinkElements;
     }
 
-  public Set<FlowElement> getSinkElements( Enum annotation )
+  public Set<? extends FlowElement> getSinkElements( Enum annotation )
     {
-    Set<FlowElement> annotated = getFlowElementsFor( annotation );
+    Set<? extends FlowElement> annotated = getFlowElementsFor( annotation );
     Set<FlowElement> sinkElements = getSinkElements();
 
     Set<FlowElement> results = new HashSet<>();
@@ -288,7 +304,7 @@ public class BaseFlowNode implements Serializable, FlowNode
     }
 
   @Override
-  public Collection<Tap> getTraps()
+  public Collection<? extends Tap> getTraps()
     {
     return getTrapMap().values();
     }
@@ -397,7 +413,7 @@ public class BaseFlowNode implements Serializable, FlowNode
     }
 
   @Override
-  public Set<FlowElement> getFlowElementsFor( Enum annotation )
+  public Set<? extends FlowElement> getFlowElementsFor( Enum annotation )
     {
     if( pipelineGraphs.isEmpty() )
       return ( (AnnotatedGraph) getElementGraph() ).getAnnotations().getValues( annotation );

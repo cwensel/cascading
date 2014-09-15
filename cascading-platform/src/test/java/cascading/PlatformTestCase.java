@@ -77,18 +77,18 @@ public abstract class PlatformTestCase extends CascadingTestCase
 
   private transient boolean useCluster;
   private transient int numMapTasks;
-  private transient int numReduceTasks;
+  private transient int numGatherPartitions;
 
   protected PlatformTestCase( boolean useCluster )
     {
     this.useCluster = useCluster;
     }
 
-  protected PlatformTestCase( boolean useCluster, int numMapTasks, int numReduceTasks )
+  protected PlatformTestCase( boolean useCluster, int numMapTasks, int numGatherPartitions )
     {
     this( useCluster );
     this.numMapTasks = numMapTasks;
-    this.numReduceTasks = numReduceTasks;
+    this.numGatherPartitions = numGatherPartitions;
     }
 
   protected PlatformTestCase()
@@ -104,8 +104,11 @@ public abstract class PlatformTestCase extends CascadingTestCase
     if( this.platform.isMapReduce() )
       {
       platform.setNumMappers( numMapTasks );
-      platform.setNumReducers( numReduceTasks );
+      platform.setNumReducers( numGatherPartitions );
       }
+
+    if( this.platform.isDAG() )
+      platform.setNumGatherPartitions( numGatherPartitions );
     }
 
   public TestPlatform getPlatform()

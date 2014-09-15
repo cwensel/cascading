@@ -116,6 +116,10 @@ public class FlowProps extends Props
     properties.put( STOP_JOBS_ON_EXIT, Boolean.toString( stopJobsOnExit ) );
     }
 
+  public static FlowProps flowProps()
+    {
+    return new FlowProps();
+    }
 
   public FlowProps()
     {

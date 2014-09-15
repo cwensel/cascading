@@ -24,6 +24,7 @@ import java.util.Set;
 
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.management.state.ClientState;
 import cascading.tap.Tap;
 import junit.framework.TestCase;
 
@@ -53,7 +54,7 @@ public class FlowStepListenersTest extends TestCase
       }
 
     @Override
-    protected FlowStepJob createFlowStepJob( FlowProcess fp, Object config )
+    protected FlowStepJob createFlowStepJob( ClientState clientState, FlowProcess fp, Object initializedStepConfig )
       {
       return null;
       }

@@ -78,6 +78,18 @@ public class FlowException extends CascadingException
   /**
    * Constructor FlowException creates a new FlowException instance.
    *
+   * @param flowName of type String
+   * @param message  of type String
+   */
+  public FlowException( String flowName, String message )
+    {
+    super( createMessage( flowName, message ) );
+    this.flowName = flowName;
+    }
+
+  /**
+   * Constructor FlowException creates a new FlowException instance.
+   *
    * @param throwable of type Throwable
    */
   public FlowException( Throwable throwable )

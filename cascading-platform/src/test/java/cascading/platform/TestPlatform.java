@@ -49,6 +49,7 @@ public abstract class TestPlatform
   private boolean enableCluster = true;
   private int numMappers = 0;
   private int numReducers = 0;
+  private int numGatherPartitions = 0;
 
   /**
    * Method getGlobalProperties fetches all "platform." prefixed system properties.
@@ -114,6 +115,16 @@ public abstract class TestPlatform
     this.numReducers = numReducers;
     }
 
+  public int getNumGatherPartitions()
+    {
+    return numGatherPartitions;
+    }
+
+  public void setNumGatherPartitions( int numGatherPartitions )
+    {
+    this.numGatherPartitions = numGatherPartitions;
+    }
+
   public void setNumMapTasks( Map<Object, Object> properties, int numMapTasks )
     {
     // do nothing
@@ -124,12 +135,22 @@ public abstract class TestPlatform
     // do nothing
     }
 
+  public void setNumGatherPartitionTasks( Map<Object, Object> properties, int numReduceTasks )
+    {
+    // do nothing
+    }
+
   public Integer getNumMapTasks( Map<Object, Object> properties )
     {
     return null;
     }
 
   public Integer getNumReduceTasks( Map<Object, Object> properties )
+    {
+    return null;
+    }
+
+  public Integer getNumGatherPartitionTasks( Map<Object, Object> properties )
     {
     return null;
     }
