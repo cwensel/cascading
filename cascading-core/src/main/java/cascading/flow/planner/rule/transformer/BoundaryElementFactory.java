@@ -25,7 +25,7 @@ import cascading.flow.planner.iso.transformer.ElementFactory;
 /**
  *
  */
-public abstract class TapElementFactory implements ElementFactory
+public abstract class BoundaryElementFactory implements ElementFactory
   {
-  public static final String TEMP_TAP = "cascading.registry.temporary_tap";
+  public static final String BOUNDARY_PIPE = "cascading.registry.boundary_pipe";
   }

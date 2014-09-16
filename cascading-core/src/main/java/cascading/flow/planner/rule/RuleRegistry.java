@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import cascading.flow.planner.iso.transformer.ElementFactory;
@@ -66,8 +65,10 @@ public class RuleRegistry
 
   /**
    * Method enableDebugLogging forces log4j to emit DEBUG level stats for the planner classes.
+   *
+   * For planner tracing, see {@link cascading.flow.planner.FlowPlanner} properties.
    */
-  protected void enableDebugLogging()
+  public void enableDebugLogging()
     {
     LogUtil.setLog4jLevel( "cascading.flow.planner.rule", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.transformer", "DEBUG" );

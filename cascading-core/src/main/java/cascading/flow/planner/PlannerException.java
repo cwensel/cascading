@@ -23,7 +23,6 @@ package cascading.flow.planner;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.iso.finder.GraphFinderException;
 import cascading.flow.planner.rule.Rule;
 import cascading.util.Util;

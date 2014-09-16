@@ -65,6 +65,17 @@ And new languages:
 
 Cascading stable releases are always of the form `x.y.z`, where `z` is the current maintenance release.
 
+`x.y.z` releases are maintenance releases. No public incompatible API changes will be made, but in an effort to fix bugs, 
+remediation may entail throwing new Exceptions.
+
+`x.y` releases are minor releases. New features are added. No public incompatible API changes will be made on the
+core processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be 
+necessary. 
+
+It is important to note that *we do reserve to make breaking changes to the new query planner API through the 3.x 
+releases*. This allows us to respond to bugs and performance issues without issuing new major releases. Cascading
+4.0 will keep the public query planner APIs stable.
+
 The source and tags for all stable releases can be found here:
 [https://github.com/Cascading/cascading](https://github.com/Cascading/cascading)
 
@@ -82,6 +93,41 @@ Or downloaded from here:
 
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
 available as a stable release from the cascading.org download page.
+
+## Writing and Running Tests
+
+Comprehensive tests should be written against the `cascading.PlatformTestCase`.
+
+When running tests built against the PlatformTestCase, the local cluster can be disabled (if enabled by the test) 
+by setting:
+    
+    -Dtest.cluster.enabled=false 
+
+From Gradle, to run a single test case: 
+
+    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i 
+
+or a single test method:
+    
+    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i 
+
+## Debugging the 3.x Planner
+
+The new 3.0 planner has a much improved debugging framework.
+
+When running tests, set the following 
+
+    -Dtest.traceplan.enabled=true 
+
+If you are on Mac OS X and have installed GraphViz, dot files can be converted to pdf on the fly. To enable, set:    
+    
+    -Dutil.dot.to.pdf.enabled=true
+
+Optionally, for stand alone applications, statistics and tracing can be enabled selectively with the following properties:
+
+* `cascading.planner.stats.path` - outputs detailed statistics on time spent by the planner
+* `cascading.planner.plan.path` - basic planner information
+* `cascading.planner.plan.transforms.path` - detailed information for each rule
 
 ## Reporting issues
 
@@ -135,7 +181,7 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading requires Gradle and Java 1.7 to build.
+Cascading requires Gradle 1.12 and Java 1.7 to build.
 
 To use an IDE like IntelliJ, run the following to create IntelliJ project files:
 

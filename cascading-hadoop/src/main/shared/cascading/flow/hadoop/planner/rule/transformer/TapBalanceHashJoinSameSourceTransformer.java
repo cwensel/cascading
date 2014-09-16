@@ -22,8 +22,8 @@ package cascading.flow.hadoop.planner.rule.transformer;
 
 import cascading.flow.hadoop.planner.rule.expression.BalanceHashJoinSameSourceExpression;
 import cascading.flow.planner.iso.expression.ElementCapture;
+import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
-import cascading.flow.planner.rule.transformer.TapElementFactory;
 
 import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
@@ -38,7 +38,7 @@ public class TapBalanceHashJoinSameSourceTransformer extends RuleInsertionTransf
       BalanceAssembly,
       new BalanceHashJoinSameSourceExpression(),
       ElementCapture.Secondary,
-      TapElementFactory.TEMP_TAP
+      IntermediateTapElementFactory.TEMP_TAP
     );
     }
   }

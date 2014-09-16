@@ -26,7 +26,9 @@ import cascading.flow.planner.rule.transformer.RuleRemoveBranchTransformer;
 import static cascading.flow.planner.rule.PlanPhase.PostPipelines;
 
 /**
+ * RemoveStreamedBranchTransformer is disabled, enable when GraphFinder supports captured edges.
  *
+ * @see cascading.flow.hadoop.planner.rule.assertion.DualStreamedAccumulatedMergePipelineAssert
  */
 public class RemoveStreamedBranchTransformer extends RuleRemoveBranchTransformer
   {

@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.flow.FlowConnector;
-import cascading.flow.hadoop.planner.MapReduceHadoopRuleRegistry;
 import cascading.flow.hadoop.planner.HadoopPlanner;
+import cascading.flow.hadoop.planner.MapReduceHadoopRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.pipe.Pipe;

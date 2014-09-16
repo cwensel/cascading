@@ -18,20 +18,14 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.rule.expressiongraph;
+package cascading.flow.planner.rule.transformer;
 
-import cascading.flow.planner.iso.expression.ElementCapture;
-import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.tap.Tap;
+import cascading.flow.planner.iso.transformer.ElementFactory;
 
 /**
  *
  */
-public class OnlyTapExpressionGraph extends ExpressionGraph
+public abstract class IntermediateTapElementFactory implements ElementFactory
   {
-  public OnlyTapExpressionGraph()
-    {
-    super( new FlowElementExpression( ElementCapture.Primary, Tap.class ) );
-    }
+  public static final String TEMP_TAP = "cascading.registry.tap.intermediate";
   }

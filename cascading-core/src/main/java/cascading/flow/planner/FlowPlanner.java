@@ -49,7 +49,7 @@ import cascading.flow.planner.rule.ProcessLevel;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
-import cascading.flow.planner.rule.transformer.TapElementFactory;
+import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Checkpoint;
@@ -649,7 +649,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     }
 
-  public class TempTapElementFactory extends TapElementFactory
+  public class TempTapElementFactory extends IntermediateTapElementFactory
     {
     @Override
     public FlowElement create( ElementGraph graph, FlowElement flowElement )

@@ -26,7 +26,7 @@ import cascading.flow.planner.rule.transformer.RuleReplaceTransformer;
 import static cascading.flow.planner.rule.PlanPhase.PostResolveAssembly;
 
 /**
- *
+ * CombineAdjacentTapTransformer is currently unsupported but listed in the default rule registry.
  */
 public class CombineAdjacentTapTransformer extends RuleReplaceTransformer
   {

@@ -60,8 +60,8 @@ allprojects {
   repositories {
     mavenLocal()
     mavenCentral()
-    mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
-    mavenRepo name: 'apache', url: 'https://repository.apache.org/content/repositories/releases/'
+    maven { url = 'http://conjars.org/repo/' }
+    maven { url = 'https://repository.apache.org/content/repositories/releases/' }
   }
 }
 
@@ -180,7 +180,7 @@ subprojects {
 
   uploadArchives {
 
-    deployer = repositories.mavenDeployer {
+    def deployer = repositories.mavenDeployer {
       configuration = configurations.archives
 
       repository( url: repoUrl ) {
