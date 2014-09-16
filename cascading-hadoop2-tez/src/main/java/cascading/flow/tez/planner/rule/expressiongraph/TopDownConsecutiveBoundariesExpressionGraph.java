@@ -18,12 +18,27 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+package cascading.flow.tez.planner.rule.expressiongraph;
 
-rootProject.name = 'cascading'
+import cascading.flow.planner.iso.expression.ElementCapture;
+import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression;
+
+/**
+ *
+ */
+public class TopDownConsecutiveBoundariesExpressionGraph extends ExpressionGraph
+  {
+  public TopDownConsecutiveBoundariesExpressionGraph()
+    {
+    super( SearchOrder.Topological );
+
+    this.arc(
+      new BoundariesElementExpression( ElementCapture.Primary ),
+      PathScopeExpression.ANY,
+      new BoundariesElementExpression()
+    );
+    }
+  }

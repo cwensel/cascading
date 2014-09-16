@@ -18,12 +18,29 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+package cascading.flow.tez;
 
-rootProject.name = 'cascading'
+import java.util.Iterator;
+
+import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopGroupByClosure;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleChainIterator;
+
+/**
+ *
+ */
+public class TezGroupByClosure extends HadoopGroupByClosure
+  {
+  public TezGroupByClosure( FlowProcess flowProcess, Fields[] groupingFields, Fields[] valueFields )
+    {
+    super( flowProcess, groupingFields, valueFields );
+    }
+
+  @Override
+  protected Iterator<Tuple> getValueIterator( int pos )
+    {
+    return new TupleChainIterator( values );
+    }
+  }

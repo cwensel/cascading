@@ -6,11 +6,14 @@ Thanks for using Cascading.
 
 _This repo branch is an early release WIP for Cascading 3.0._
 
-3.0 will include a few major changes and additions. All of which will be centered around the complete re-write of the
-platform query planner and improvements to the planner API.
+3.0 includes a few major changes and additions: 
+
+* Complete re-write of the platform query planner and improvements to the planner API
+* Addition of Apache Tez as a runtime platform
+* Changes to the Tap/Scheme generic type signatures to support portability
 
 These changes hope to simplify the creation of new bindings to new platform implementations and to improve the
-performance of the current MapReduce planner and resulting applications.
+performance of resulting applications.
 
 On the last point, we ask that users please spend time running their existing applications against 3.0 WIP
 releases and to open issues along with tests via pull requests against
@@ -25,21 +28,25 @@ For project documentation and community support, visit: [cascading.org](http://c
 To download a pre-built distribution, visit [http://cascading.org/downloads/](http://cascading.org/downloads/),
 or use Maven (described below).
 
-The project includes five Cascading jar files:
+The project includes six Cascading jar files:
 
 * `cascading-core-x.y.z.jar`          - all Cascading Core class files
 * `cascading-xml-x.y.z.jar`           - all Cascading XML operations class files
 * `cascading-local-x.y.z.jar`         - all Cascading Local in-memory mode class files
 * `cascading-hadoop-x.y.z.jar`        - all Cascading Hadoop 1.x MapReduce mode class files
 * `cascading-hadoop2-mr1-x.y.z.jar`   - all Cascading Hadoop 2.x MapReduce mode class files
+* `cascading-hadoop2-tez-x.y.z.jar`   - all Cascading Hadoop 2.x Tez mode class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the
 [Conjars.org](http://conjars.org) Maven repository.
 
-Hadoop 1.x mode is where the Cascading application should run on a Hadoop cluster. Hadoop 2.x is the same
-but for Hadoop 2.x releases.
+Hadoop 1.x mode is where the Cascading application should run on a Hadoop *MapReduce* cluster. Hadoop 2.x MR1 is the 
+same but for Hadoop 2.x releases.
 
-Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies.
+Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster. 
+
+Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies or 
+cluster distribution. This implementation has minimal to no robustness in low memory situations, by design.
 
 As of Cascading 3.x, all above jar files are built against Java 1.7. Prior versions of Cascading are built
 against Java 1.6.

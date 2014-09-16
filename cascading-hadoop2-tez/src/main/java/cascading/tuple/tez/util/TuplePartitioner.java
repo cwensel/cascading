@@ -18,12 +18,22 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+package cascading.tuple.tez.util;
 
-rootProject.name = 'cascading'
+import cascading.tuple.Tuple;
+import cascading.tuple.hadoop.util.HasherPartitioner;
+import org.apache.hadoop.conf.Configuration;
+
+/** Class GroupingPartitioner is an implementation of {@link org.apache.hadoop.mapred.Partitioner}. */
+public class TuplePartitioner extends HasherPartitioner implements org.apache.tez.runtime.library.api.Partitioner
+  {
+  public TuplePartitioner( Configuration configuration )
+    {
+    setConf( configuration );
+    }
+
+  public int getPartition( Object key, Object value, int numReduceTasks )
+    {
+    return ( hashCode( (Tuple) key ) & Integer.MAX_VALUE ) % numReduceTasks;
+    }
+  }

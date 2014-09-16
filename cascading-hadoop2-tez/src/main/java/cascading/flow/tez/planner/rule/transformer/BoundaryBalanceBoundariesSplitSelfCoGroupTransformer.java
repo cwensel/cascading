@@ -18,12 +18,25 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+package cascading.flow.tez.planner.rule.transformer;
 
-rootProject.name = 'cascading'
+import cascading.flow.planner.rule.transformer.BoundaryElementFactory;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.tez.planner.rule.expression.BalanceBoundariesSplitSelfCoGroupExpression;
+
+import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
+
+/**
+ *
+ */
+public class BoundaryBalanceBoundariesSplitSelfCoGroupTransformer extends RuleInsertionTransformer
+  {
+  public BoundaryBalanceBoundariesSplitSelfCoGroupTransformer()
+    {
+    super(
+      BalanceAssembly,
+      new BalanceBoundariesSplitSelfCoGroupExpression(),
+      BoundaryElementFactory.BOUNDARY_PIPE
+    );
+    }
+  }

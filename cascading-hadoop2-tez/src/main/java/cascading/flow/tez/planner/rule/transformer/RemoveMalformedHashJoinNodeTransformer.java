@@ -18,12 +18,26 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+package cascading.flow.tez.planner.rule.transformer;
 
-rootProject.name = 'cascading'
+import cascading.flow.hadoop.planner.rule.expressiongraph.MalformedJoinExpressionGraph;
+import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.transformer.RuleRemoveBranchTransformer;
+
+import static cascading.flow.planner.rule.PlanPhase.PostNodes;
+
+/**
+ *
+ */
+public class RemoveMalformedHashJoinNodeTransformer extends RuleRemoveBranchTransformer
+  {
+  public RemoveMalformedHashJoinNodeTransformer()
+    {
+    super(
+      PostNodes,
+      new RuleExpression(
+        new MalformedJoinExpressionGraph()
+      )
+    );
+    }
+  }

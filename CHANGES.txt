@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Added support for Apache Tez. See README for details.
+
   Added c.f.FlowRuntimeProps to allow for setting cluster side specific properties per c.f.Flow instance in a platform
   independent manner.
 
