@@ -47,9 +47,9 @@ public abstract class TestPlatform
 
   private boolean useCluster = false;
   private boolean enableCluster = true;
-  private int numMappers = 0;
-  private int numReducers = 0;
-  private int numGatherPartitions = 0;
+  protected int numMappers = 0;
+  protected int numReducers = 0;
+  protected int numGatherPartitions = 0;
 
   /**
    * Method getGlobalProperties fetches all "platform." prefixed system properties.

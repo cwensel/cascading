@@ -183,8 +183,8 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform<JobConf>
       configuration.setBoolean( "mapreduce.reduce.speculative", false );
       }
 
-    configuration.setInt( "mapreduce.job.maps", numMapTasks );
-    configuration.setInt( "mapreduce.job.reduces", numReduceTasks );
+    configuration.setInt( "mapreduce.job.maps", numMappers );
+    configuration.setInt( "mapreduce.job.reduces", numReducers );
 
     Map<Object, Object> globalProperties = getGlobalProperties();
 

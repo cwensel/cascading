@@ -62,13 +62,13 @@ public abstract class BaseHadoopPlatform<Config extends Configuration> extends T
   public transient static Configuration configuration;
   public transient static Map<Object, Object> properties = new HashMap<Object, Object>();
 
-  public int numMapTasks = 4;
-  public int numReduceTasks = 1;
   protected String logger;
 
   public BaseHadoopPlatform()
     {
-    logger = System.getProperty( "log4j.logger" );
+    this.logger = System.getProperty( "log4j.logger" );
+    this.numMappers = 1;
+    this.numReducers = 4;
     }
 
   @Override
@@ -77,16 +77,25 @@ public abstract class BaseHadoopPlatform<Config extends Configuration> extends T
     return true;
     }
 
-  public void setNumMapTasks( int numMapTasks )
+  @Override
+  public void setNumMappers( int numMapTasks )
     {
     if( numMapTasks > 0 )
-      this.numMapTasks = numMapTasks;
+      this.numMappers = numMapTasks;
     }
 
-  public void setNumReduceTasks( int numReduceTasks )
+  @Override
+  public void setNumReducers( int numReduceTasks )
     {
     if( numReduceTasks > 0 )
-      this.numReduceTasks = numReduceTasks;
+      this.numReducers = numReduceTasks;
+    }
+
+  @Override
+  public void setNumGatherPartitions( int numGatherPartitions )
+    {
+    if( numGatherPartitions > 0 )
+      this.numGatherPartitions = numGatherPartitions;
     }
 
   @Override

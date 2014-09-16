@@ -523,6 +523,8 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
       }
 
     getPlatform().setNumMapTasks( properties, 1 );
+    getPlatform().setNumReduceTasks( properties, 1 );
+    getPlatform().setNumGatherPartitionTasks( properties, 1 );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 

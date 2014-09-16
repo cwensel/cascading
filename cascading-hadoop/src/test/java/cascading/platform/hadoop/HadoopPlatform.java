@@ -189,8 +189,8 @@ public class HadoopPlatform extends BaseHadoopPlatform<JobConf>
       ( (JobConf) configuration ).setReduceSpeculativeExecution( false );
       }
 
-    ( (JobConf) configuration ).setNumMapTasks( numMapTasks );
-    ( (JobConf) configuration ).setNumReduceTasks( numReduceTasks );
+    ( (JobConf) configuration ).setNumMapTasks( numMappers );
+    ( (JobConf) configuration ).setNumReduceTasks( numReducers );
 
     Map<Object, Object> globalProperties = getGlobalProperties();
 
