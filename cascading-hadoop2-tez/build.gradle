@@ -97,7 +97,8 @@ javadoc {
 
   configure( options ) {
     links << 'http://hadoop.apache.org/docs/r2.4.0/api/'
+    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString()
 
-    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+//    linksOffline( '../../../../../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
   }
 }

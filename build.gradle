@@ -102,7 +102,7 @@ subprojects {
   javadoc {
     classpath += configurations.providedCompile
 
-    def copyright = '<i>Copyright &#169; 2007-2013 Concurrent, Inc. All Rights Reserved.</i>'
+    def copyright = '<i>Copyright &#169; 2007-2014 Concurrent, Inc. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
@@ -112,7 +112,7 @@ subprojects {
       encoding = "UTF8"
       bottom = copyright
       links = [
-              'http://docs.oracle.com/javase/6/docs/api/',
+              'http://docs.oracle.com/javase/7/docs/api/',
               'http://dist.codehaus.org/janino/javadoc/',
               'http://junit.sourceforge.net/javadoc/'
       ]
@@ -212,7 +212,7 @@ subprojects {
   }
 }
 
-task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
+task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-hadoop2-tez:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
 
   s3UploadDocs.dependsOn << prepareRelease
   s3UploadArtifacts.dependsOn << prepareRelease
@@ -224,7 +224,7 @@ task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-
   into "${s3UploadDocs.source}/javadoc"
 
   filter { line ->
-    line.replaceAll( "</BODY>", "${analytics}\n</BODY>" )
+    line.replaceAll( "</body>", "${analytics}\n</body>" )
   }
 }
 

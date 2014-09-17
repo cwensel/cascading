@@ -57,7 +57,10 @@ javadoc {
   configure( options ) {
     links << 'http://hadoop.apache.org/docs/r1.1.2/api/'
 
-    linksOffline( '../../../cascading-hadoop', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-hadoop".toString() )
-    linksOffline( '../../../cascading-local', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-local".toString() )
+    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-hadoop".toString()
+    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-local".toString()
+
+//    linksOffline( '../../../cascading-hadoop', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-hadoop".toString() )
+//    linksOffline( '../../../cascading-local', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-local".toString() )
   }
 }

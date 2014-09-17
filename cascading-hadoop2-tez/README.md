@@ -5,6 +5,12 @@ Support for Cascading on Apache Tez is part of the Cascading 3.0 WIP (work in pr
 We are making this release available so interested parties can begin testing Tez deployments against existing 
 Cascading applications.
 
+WIP builds can be downloaded directly from http://www.cascading.org/wip/
+
+Alternately, all binaries are available through the [Conjars.org](http://conjars.org) Maven repository.
+
+## Using
+
 To use Tez as an alternative platform:
 
 * change your maven dependencies to `cascading-hadoop2-tez`
@@ -18,9 +24,14 @@ implementations may need to be updated to work against Cascading 3.0.
 
 This release has been tested and built against Tez 0.5.0. Currently all applicable tests pass against the Tez platform.
 
-All binaries on available through the [Conjars.org](http://conjars.org) Maven repository.
-
 See below for notes and issues against this release.
+
+## Sample Applications
+
+For a few sample applications, checkout the 
+[Cascading Samples](https://github.com/Cascading/cascading.samples/tree/wip-3.0) project.
+
+This project also has a sample Gradle build file to help bootstrap new projects. 
 
 ## Running Tests and Debugging
 
@@ -36,7 +47,7 @@ To enable a remote debugger,
     
     -Dtest.debug.node=[ordinal or source name]
 
-## Notes and Issues
+## Notes and Known Issues
 
 Some notes and issues with running Cascading on Apache Tez. JIRA issues will be noted when created.
 
@@ -50,8 +61,8 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 * Contrary to GroupVertex, there is no obvious API for binding multiple vertices as a single output. Subsequently, some
   splits are written twice.
     
-* Does not provide a plan supporting `JoinFieldedPipesPlatformTest#testJoinMergeGroupBy`. See `DualStreamedAccumulatedMergeNodeAssert`
-  rule.
+* Does not provide a plan supporting `JoinFieldedPipesPlatformTest#testJoinMergeGroupBy`. See 
+  `DualStreamedAccumulatedMergeNodeAssert` rule.
 
 * Restartable Checkpointed Flows are unsupported though the tests will pass
 
@@ -59,7 +70,8 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 
 * System.exit(0) must be called when running in Tez local mode, there are non-daemon threads not properly managed by Tez
 
-* There is no Vertex 'parallelization' default in Tez, FlowRuntimeProps must be called per application.
+* There is no Vertex 'parallelization' default in Tez, FlowRuntimeProps must be called per application (see sample 
+  applications above).
 
 * Currently no way to algorithmically set node parallelization. Look for FlowNodeStrategy in future wip releases.
 
