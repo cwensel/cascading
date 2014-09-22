@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Added CONTRIBUTING.md.
+
   Updated c.t.h.DistCacheTap to support simple file globing as provided by c.t.h.Hfs.
 
   Fixed issue where c.p.a.UniqueBy was not honoring the c.t.Hasher interface.
