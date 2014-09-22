@@ -27,7 +27,7 @@ import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
 import cascading.operation.PlannedOperation;
 import cascading.operation.PlannerLevel;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
 
 /**
  * Class BaseAssertion is a convenience class for {@link cascading.operation.Assertion} implementations. Subclassing
@@ -46,19 +46,19 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
     {
     }
 
-  @ConstructorProperties({"message"})
+  @ConstructorProperties( {"message"} )
   protected BaseAssertion( String message )
     {
     this.message = message;
     }
 
-  @ConstructorProperties({"numArgs"})
+  @ConstructorProperties( {"numArgs"} )
   protected BaseAssertion( int numArgs )
     {
     super( numArgs );
     }
 
-  @ConstructorProperties({"numArgs", "message"})
+  @ConstructorProperties( {"numArgs", "message"} )
   protected BaseAssertion( int numArgs, String message )
     {
     super( numArgs );
@@ -78,12 +78,12 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
 
   protected void fail()
     {
-    throwFail( Util.formatTrace( this, getMessage() ) );
+    throwFail( TraceUtil.formatTrace( this, getMessage() ) );
     }
 
   protected void fail( Object... args )
     {
-    throwFail( Util.formatTrace( this, getMessage() ), args );
+    throwFail( TraceUtil.formatTrace( this, getMessage() ), args );
     }
 
   /**

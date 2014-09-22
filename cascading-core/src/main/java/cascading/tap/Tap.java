@@ -41,6 +41,8 @@ import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.TraceUtil;
+import cascading.util.Traceable;
 import cascading.util.Util;
 
 /**
@@ -65,7 +67,7 @@ import cascading.util.Util;
  * {@link cascading.cascade.Cascade}. In that case the {@link #getFullIdentifier(Object)} value is used and the Scheme
  * is ignored.
  */
-public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable
+public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable, Traceable
   {
   /** Field scheme */
   private Scheme<Config, Input, Output, ?, ?> scheme;
@@ -80,7 +82,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   /** Field id */
   private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() ); // see Util.setTrace() to override
+  private String trace = TraceUtil.captureDebugTrace( this ); // see TraceUtil.setTrace() to override
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -140,11 +142,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     return scheme;
     }
 
-  /**
-   * Method getTrace return the trace of this object.
-   *
-   * @return String
-   */
+  @Override
   public String getTrace()
     {
     return trace;

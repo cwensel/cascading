@@ -40,6 +40,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.TraceUtil;
 import org.junit.Test;
 
 /**
@@ -154,6 +155,34 @@ public class TraceTest extends CascadingTestCase
     assertEqualsTrace( "cascading.TraceTest.testPipeAssemblyDeep(TraceTest.java", pipe.getTrace() );
     assertEqualsTrace( "cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.pipe.getTrace() );
     assertEqualsTrace( "cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.getTails()[ 0 ].getTrace() );
+    }
+
+  public static Pipe sampleApi()
+    {
+    return new Pipe( "foo" );
+    }
+
+  @Test
+  public void testApiBoundary()
+    {
+    final String regex = "cascading\\.TraceTest\\.sampleApi.*";
+
+    TraceUtil.registerApiBoundary( regex );
+
+    try
+      {
+      Pipe pipe1 = sampleApi();
+
+      assertEqualsTrace( "sampleApi() @ cascading.TraceTest.testApiBoundary(TraceTest.java", pipe1.getTrace() );
+      }
+    finally
+      {
+      TraceUtil.unregisterApiBoundary( regex );
+      }
+
+    Pipe pipe2 = sampleApi();
+
+    assertEqualsTrace( "new Pipe() @ cascading.TraceTest.sampleApi(TraceTest.java", pipe2.getTrace() );
     }
 
   @Test
