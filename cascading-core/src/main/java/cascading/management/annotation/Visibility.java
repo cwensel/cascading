@@ -24,10 +24,26 @@ package cascading.management.annotation;
  * Visibility controls whether a certain {@link cascading.management.annotation.Property} is visible to a certain
  * audience.
  * <p/>
+ * <lu>
+ * <li>{@link #PRIVATE} - recommended that only a developer or team/project member have access to the value</li>
+ * <li>{@link #PROTECTED} - recommended for interested and authorized parties</li>
+ * <li>{@link #PUBLIC} - recommended for use as general purpose information</li>
+ * </lu>
+ * <p/>
+ * All properties in Cascading using the {@link cascading.management.annotation.Property} annotation are marked as
+ * {@link #PRIVATE}.
+ * <p/>
+ * Except for {@link cascading.tap.Tap#getIdentifier()} which defines the {@link cascading.management.annotation.Sanitizer}
+ * implementation {@link cascading.management.annotation.URISanitizer} which attempts to cleanse the URI identifier
+ * for each of the above visibilities.
+ * <p/>
  * It is up to the implementation of a {@link cascading.management.DocumentService} to interpret and use these
  * values.
  * <p/>
  * Cascading does not enforce any restrictions related to the values, they are considered informative.
+ * <p/>
+ * To prevent serialization of any value via the registered {@link cascading.management.DocumentService}, do not
+ * mark a field with the Property annotation, or configure the service appropriately.
  */
 public enum Visibility
   {
