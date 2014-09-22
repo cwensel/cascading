@@ -40,6 +40,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.TraceUtil;
 import org.junit.Test;
 
 /**
@@ -53,6 +54,7 @@ public class TraceTest extends CascadingTestCase
     BaseOperation operation = new Identity();
 
     assertEqualsTrace( "cascading.TraceTest.testOperation(TraceTest.java", operation.getTrace() );
+    assertEqualsTrace( "cascading.operation.Identity.<init>(Identity.java", operation.getApiCall() );
     }
 
   @Test
@@ -61,6 +63,7 @@ public class TraceTest extends CascadingTestCase
     Pipe pipe = new Pipe( "foo" );
 
     assertEqualsTrace( "cascading.TraceTest.testPipe(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.Pipe.<init>(Pipe.java", pipe.getApiCall() );
     }
 
   @Test
@@ -71,6 +74,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new Each( pipe, new Fields( "a" ), new Identity() );
 
     assertEqualsTrace( "cascading.TraceTest.testPipeEach(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.Each.<init>(Each.java", pipe.getApiCall() );
     }
 
   @Test
@@ -83,6 +87,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new CoGroup( pipe, new Fields( "b" ), 4 );
 
     assertEqualsTrace( "cascading.TraceTest.testPipeCoGroup(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.CoGroup.<init>(CoGroup.java", pipe.getApiCall() );
     }
 
   @Test
@@ -94,6 +99,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new HashJoin( pipe, new Fields( "b" ), new Pipe( "bar" ), new Fields( "c" ) );
 
     assertEqualsTrace( "cascading.TraceTest.testPipeHashJoin(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.HashJoin.<init>(HashJoin.java", pipe.getApiCall() );
     }
 
   @Test
@@ -106,6 +112,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new GroupBy( pipe, new Fields( "b" ) );
 
     assertEqualsTrace( "cascading.TraceTest.testPipeGroupBy(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.GroupBy.<init>(GroupBy.java", pipe.getApiCall() );
     }
 
   @Test
@@ -118,6 +125,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new Merge( pipe, new Pipe( "bar" ) );
 
     assertEqualsTrace( "cascading.TraceTest.testPipeMerge(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.Merge.<init>(Merge.java", pipe.getApiCall() );
     }
 
   @Test
@@ -128,6 +136,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new Rename( pipe, new Fields( "a" ), new Fields( "b" ) );
 
     assertEqualsTrace( "cascading.TraceTest.testPipeAssembly(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "cascading.pipe.assembly.Rename.<init>(Rename.java", pipe.getApiCall() );
     }
 
   protected static class TestSubAssembly extends SubAssembly
@@ -154,6 +163,36 @@ public class TraceTest extends CascadingTestCase
     assertEqualsTrace( "cascading.TraceTest.testPipeAssemblyDeep(TraceTest.java", pipe.getTrace() );
     assertEqualsTrace( "cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.pipe.getTrace() );
     assertEqualsTrace( "cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.getTails()[ 0 ].getTrace() );
+    }
+
+  public static Pipe sampleApi()
+    {
+    return new Pipe( "foo" );
+    }
+
+  @Test
+  public void testApiBoundary()
+    {
+    final String regex = "cascading\\.TraceTest\\.sampleApi.*";
+
+    TraceUtil.registerApiBoundary( regex );
+
+    try
+      {
+      Pipe pipe1 = sampleApi();
+
+      assertEqualsTrace( "cascading.TraceTest.testApiBoundary(TraceTest.java", pipe1.getTrace() );
+      assertEqualsTrace( "cascading.TraceTest.sampleApi(TraceTest.java", pipe1.getApiCall() );
+      }
+    finally
+      {
+      TraceUtil.unregisterApiBoundary( regex );
+      }
+
+    Pipe pipe2 = sampleApi();
+
+    assertEqualsTrace( "cascading.TraceTest.sampleApi(TraceTest.java", pipe2.getTrace() );
+    assertEqualsTrace( "cascading.pipe.Pipe.<init>(Pipe.java", pipe2.getApiCall() );
     }
 
   @Test

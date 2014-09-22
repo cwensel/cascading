@@ -22,7 +22,7 @@ package cascading.pipe;
 
 import cascading.CascadingException;
 import cascading.tuple.Fields;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
 
 /** Class OperatorException is thrown during field name resolution during planning */
 public class OperatorException extends CascadingException
@@ -52,7 +52,7 @@ public class OperatorException extends CascadingException
    */
   public OperatorException( Pipe pipe, String string )
     {
-    super( Util.formatTrace( pipe, string ) );
+    super( TraceUtil.formatTrace( pipe, string ) );
     }
 
   /**
@@ -64,7 +64,7 @@ public class OperatorException extends CascadingException
    */
   public OperatorException( Pipe pipe, String string, Throwable throwable )
     {
-    super( Util.formatTrace( pipe, string ), throwable );
+    super( TraceUtil.formatTrace( pipe, string ), throwable );
     }
 
   /** @see cascading.CascadingException#CascadingException(String) */
@@ -191,7 +191,7 @@ public class OperatorException extends CascadingException
     String message = "unable to resolve output selector: " + outputSelector.printVerbose() +
       ", with incoming: " + incomingFields.printVerbose() + " and declared: " + declaredFields.printVerbose();
 
-    return Util.formatTrace( pipe, message );
+    return TraceUtil.formatTrace( pipe, message );
     }
 
   private static String createMessage( Pipe pipe, Kind kind, Fields incomingFields, Fields argumentSelector )
@@ -199,7 +199,7 @@ public class OperatorException extends CascadingException
     String message = "unable to resolve " + kind + " selector: " + argumentSelector.printVerbose() +
       ", with incoming: " + incomingFields.printVerbose();
 
-    return Util.formatTrace( pipe, message );
+    return TraceUtil.formatTrace( pipe, message );
     }
 
   }

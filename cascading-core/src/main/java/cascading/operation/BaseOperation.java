@@ -29,7 +29,8 @@ import cascading.pipe.Every;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
+import cascading.util.Traceable;
 
 /**
  * Class BaseOperation is the base class of predicate types that are applied to {@link Tuple} streams via
@@ -40,18 +41,21 @@ import cascading.util.Util;
  * <p/>
  * By default, {@link #isSafe()} returns {@code true}.
  */
-public abstract class BaseOperation<Context> implements Serializable, Operation<Context>
+public abstract class BaseOperation<Context> implements Serializable, Operation<Context>, Traceable
   {
   /** Field fieldDeclaration */
   protected Fields fieldDeclaration;
   /** Field numArgs */
   protected int numArgs = ANY;
   /** Field trace */
-  protected String trace = Util.captureDebugTrace( getClass() );
+  protected String trace;
+  /** Field apiCall */
+  protected transient String apiCall;
 
   // initialize this operation based on its subclass
-
   {
+  TraceUtil.captureDebugTraceAndApiCall( this ); // see Util.setTrace() and Util.setApiCall to override
+
   if( this instanceof Filter || this instanceof Assertion )
     fieldDeclaration = Fields.ALL;
   else
@@ -155,14 +159,16 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
     return true;
     }
 
-  /**
-   * Method getTrace returns the trace of this BaseOperation object.
-   *
-   * @return the trace (type String) of this BaseOperation object.
-   */
+  @Override
   public String getTrace()
     {
     return trace;
+    }
+
+  @Override
+  public String getApiCall()
+    {
+    return apiCall;
     }
 
   @Override
