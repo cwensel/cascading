@@ -25,21 +25,16 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.Scope;
-import cascading.property.ConfigDef;
-import cascading.scheme.Scheme;
 import cascading.tap.DecoratorTap;
 import cascading.tap.MultiSourceTap;
-import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
-import cascading.tuple.Fields;
-import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -80,8 +75,15 @@ public class DistCacheTap extends DecoratorTap<Void, JobConf, RecordReader, Outp
       super.sourceConfInit( process, conf );
       return;
       }
+    try
+      {
+      registerHfs( process, conf, getHfs() );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( exception );
+      }
 
-    registerHfs( process, conf, getHfs() );
     }
 
   @Override
@@ -99,40 +101,78 @@ public class DistCacheTap extends DecoratorTap<Void, JobConf, RecordReader, Outp
     if( cachedFiles == null || cachedFiles.length == 0 )
       return super.openForRead( flowProcess, input );
 
-    Hfs hfs = getHfs();
-    Tap localTap = null;
+    List<Path> paths = new ArrayList<Path>();
+    List<Tap> taps = new ArrayList<Tap>();
 
-    for( Path path : cachedFiles )
+    if( isSimpleGlob() )
       {
-      if( path.toString().endsWith( hfs.getPath().getName() ) )
+      FileSystem fs = FileSystem.get( flowProcess.getConfigCopy() );
+      FileStatus[] statuses = fs.globStatus( getHfs().getPath() );
+
+      for( FileStatus status : statuses )
+        paths.add( status.getPath() );
+      }
+    else
+      {
+      paths.add( getHfs().getPath() );
+      }
+
+    for( Path pathToFind : paths )
+      {
+      for( Path path : cachedFiles )
         {
-        LOG.info( "found {} in distributed cache", path );
-        localTap = new Lfs( getScheme(), path.toString() );
-        break;
+        if( path.toString().endsWith( pathToFind.getName() ) )
+          {
+          LOG.info( "found {} in distributed cache", path );
+          taps.add( new Lfs( getScheme(), path.toString() ) );
+          }
         }
       }
 
-    if( localTap == null ) // not in cache, read from HDFS
+    if( paths.isEmpty() ) // not in cache, read from HDFS
       {
       LOG.info( "could not find files in distributed cache. delegating to parent: {}", super.getIdentifier() );
       return super.openForRead( flowProcess, input );
       }
 
-    return localTap.openForRead( flowProcess, input );
+    return new MultiSourceTap( taps.toArray( new Tap[ taps.size() ] ) ).openForRead( flowProcess, input );
     }
 
-  private void registerHfs( FlowProcess<JobConf> process, JobConf conf, Hfs hfs )
+  private void registerHfs( FlowProcess<JobConf> process, JobConf conf, Hfs hfs ) throws IOException
     {
-    URI uri = hfs.getPath().toUri();
+    if( isSimpleGlob() )
+      {
+      FileSystem fs = FileSystem.get( conf );
+      FileStatus[] statuses = fs.globStatus( getHfs().getPath() );
 
-    LOG.info( "adding {} to distributed cache ", uri );
-    DistributedCache.addCacheFile( uri, conf );
+      if( statuses == null || statuses.length == 0 )
+        throw new TapException( String.format( "glob expression %s does not match any files on the filesystem", getHfs().getPath() ) );
+
+      for( FileStatus fileStatus : statuses )
+        registerURI( conf, fileStatus.getPath() );
+      }
+    else
+      {
+      registerURI( conf, hfs.getPath() );
+      }
 
     hfs.sourceConfInitComplete( process, conf );
+    }
+
+  private void registerURI( JobConf conf, Path path )
+    {
+    URI uri = path.toUri();
+    LOG.info( "adding {} to distributed cache ", uri );
+    DistributedCache.addCacheFile( uri, conf );
     }
 
   private Hfs getHfs()
     {
     return (Hfs) getOriginal();
+    }
+
+  private boolean isSimpleGlob()
+    {
+    return getHfs().getIdentifier().contains( "*" );
     }
   }

@@ -20,6 +20,8 @@
 
 package cascading.tap.hadoop;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import static data.InputData.inputFileLower;
@@ -67,7 +70,7 @@ public class DistCacheTapPlatformTest extends PlatformTestCase implements Serial
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ) , getOutputPath( getTestName() + "join" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( getTestName() + "join" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -107,7 +110,7 @@ public class DistCacheTapPlatformTest extends PlatformTestCase implements Serial
     sources.put( "lower", sourceLower );
     sources.put( "upper", sourceUpper );
 
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ) , getOutputPath( getTestName() + "join" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( getTestName() + "join" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
@@ -171,6 +174,126 @@ public class DistCacheTapPlatformTest extends PlatformTestCase implements Serial
 
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  @Test
+  public void testGlobSupport() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    File dir = File.createTempFile( "distcachetap", Long.toString( System.nanoTime() ) );
+    if( dir.exists() )
+      {
+      if( dir.isDirectory() )
+        FileUtils.deleteDirectory( dir );
+      else
+        dir.delete();
+      }
+    dir.mkdirs();
+    String[] data = new String[]{"1 A", "2 B", "3 C", "4 D", "5 E"};
+    for( int i = 0; i < 5; i++ )
+      {
+      FileWriter fw = new FileWriter( new File( dir.getAbsolutePath(), "upper_" + i + ".txt" ) );
+      fw.write( data[ i ] );
+      fw.close();
+      }
+    dir.deleteOnExit();
+
+    getPlatform().copyFromLocal( dir.getAbsolutePath() );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = new DistCacheTap( (Hfs)
+      getPlatform().getTextFile( new Fields( "offset", "line" ), dir.getAbsolutePath() + "/*" ) );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( getTestName() + "join" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Map<Object, Object> properties = getProperties();
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( "distcache test", sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    assertTrue( values.contains( new Tuple( "3\tc\t3\tC" ) ) );
+    assertTrue( values.contains( new Tuple( "4\td\t4\tD" ) ) );
+    assertTrue( values.contains( new Tuple( "5\te\t5\tE" ) ) );
+    }
+
+  @Test
+  public void testDirectory() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    File dir = File.createTempFile( "distcachetap", Long.toString( System.nanoTime() ) );
+    if( dir.exists() )
+      {
+      if( dir.isDirectory() )
+        FileUtils.deleteDirectory( dir );
+      else
+        dir.delete();
+      }
+    dir.mkdirs();
+    String[] data = new String[]{"1 A", "2 B", "3 C", "4 D", "5 E"};
+    FileWriter fw = new FileWriter( new File( dir.getAbsolutePath(), "upper.txt" ) );
+    for( int i = 0; i < 5; i++ )
+      fw.write( data[ i ] + System.getProperty( "line.separator" ) );
+
+    fw.close();
+
+    getPlatform().copyFromLocal( dir.getAbsolutePath() );
+
+    dir.deleteOnExit();
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = new DistCacheTap( (Hfs)
+      getPlatform().getTextFile( new Fields( "offset", "line" ), dir.getAbsolutePath() ) );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( getTestName() + "join" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Map<Object, Object> properties = getProperties();
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( "distcache test", sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    assertTrue( values.contains( new Tuple( "3\tc\t3\tC" ) ) );
+    assertTrue( values.contains( new Tuple( "4\td\t4\tD" ) ) );
+    assertTrue( values.contains( new Tuple( "5\te\t5\tE" ) ) );
     }
 
   }
