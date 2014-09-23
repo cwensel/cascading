@@ -28,6 +28,9 @@ import java.util.Properties;
  * <p/>
  * Use the sub-classes to either create a {@link Properties} instance with custom or default values to be passed
  * to any sub-system that requires a Map or Properties instance of properties and values.
+ * <p/>
+ * Note some Props sub-classes have static accessors. It is recommended the fluent instance methods be used instead
+ * of the static methods. All static accessors may be deprecated in future versions.
  */
 public abstract class Props
   {

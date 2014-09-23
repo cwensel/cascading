@@ -123,6 +123,16 @@ public class FlowConnectorProps extends Props
       properties.put( CHECKPOINT_TAP_DECORATOR_CLASS, checkpointTapDecoratorClassName );
     }
 
+  /**
+   * Creates a new FlowConnectorProps instance.
+   *
+   * @return FlowConnectorProps instance
+   */
+  public static FlowConnectorProps flowConnectorProps()
+    {
+    return new FlowConnectorProps();
+    }
+
   public FlowConnectorProps()
     {
     }

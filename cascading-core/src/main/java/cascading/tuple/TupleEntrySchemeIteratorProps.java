@@ -21,11 +21,9 @@
 package cascading.tuple;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import cascading.property.Props;
 import cascading.util.Util;
@@ -37,6 +35,8 @@ import cascading.util.Util;
 public class TupleEntrySchemeIteratorProps extends Props
   {
   public static final String PERMITTED_EXCEPTIONS = "cascading.tuple.tupleentryiterator.exceptions.permit";
+
+  private Class<? extends Exception>[] permittedExceptions = null;
 
   /**
    * Method setPermittedExceptions(  Map<Object, Object> properties, Class<? extends Exception>[] ... exceptions )
@@ -61,7 +61,15 @@ public class TupleEntrySchemeIteratorProps extends Props
       }
     }
 
-  private Class<? extends Exception>[] exceptions = null;
+  /**
+   * Creates a new TupleEntrySchemeIteratorProps instance.
+   *
+   * @return TupleEntrySchemeIteratorProps instance
+   */
+  public static TupleEntrySchemeIteratorProps tupleEntrySchemeIteratorProps()
+    {
+    return new TupleEntrySchemeIteratorProps();
+    }
 
   /**
    * Constructs a new TupleEntrySchemeIteratorProps instance.
@@ -70,25 +78,28 @@ public class TupleEntrySchemeIteratorProps extends Props
     {
     }
 
-  public static TupleEntrySchemeIteratorProps tupleEntrySchemeIteratorProps()
+  public Class<? extends Exception>[] getPermittedExceptions()
     {
-    return new TupleEntrySchemeIteratorProps();
+    return permittedExceptions;
+    }
+
+  /**
+   * Method setPermittedExceptions is used to set an array of exceptions which are allowed to be ignored in the
+   * TupleEntrySchemeIterator.
+   * <p/>
+   * If the array is null, it will be ignored.
+   *
+   * @param permittedExceptions an array of exception classes.
+   */
+  public TupleEntrySchemeIteratorProps setPermittedExceptions( Class<? extends Exception>[] permittedExceptions )
+    {
+    this.permittedExceptions = permittedExceptions;
+    return this;
     }
 
   @Override
   protected void addPropertiesTo( Properties properties )
     {
-    setPermittedExceptions( properties, exceptions );
-    }
-
-  public Class<? extends Exception>[] getExceptions()
-    {
-    return exceptions;
-    }
-
-  public TupleEntrySchemeIteratorProps setExceptions( Class<? extends Exception>[] exceptions )
-    {
-    this.exceptions = exceptions;
-    return this;
+    setPermittedExceptions( properties, permittedExceptions );
     }
   }
