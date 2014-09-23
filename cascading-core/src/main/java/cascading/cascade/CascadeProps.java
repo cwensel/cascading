@@ -51,6 +51,11 @@ public class CascadeProps extends Props
     properties.put( MAX_CONCURRENT_FLOWS, Integer.toString( numConcurrentFlows ) );
     }
 
+  /**
+   * Creates a new CascadeProps instance.
+   *
+   * @return CascadeProps instance
+   */
   public static CascadeProps cascadeProps()
     {
     return new CascadeProps();
@@ -65,6 +70,16 @@ public class CascadeProps extends Props
     return maxConcurrentFlows;
     }
 
+  /**
+   * Method setMaxConcurrentFlows sets the maximum number of Flows that a Cascade can run concurrently.
+   * <p/>
+   * A value of one (1) will run one Flow at a time. A value of zero (0), the default, disables the restriction.
+   * <p/>
+   * By default a Cascade will attempt to run all give Flow instances at the same time, if eligible. But there are
+   * occasions where limiting the number for flows helps manages resources.
+   *
+   * @param maxConcurrentFlows of type int
+   */
   public CascadeProps setMaxConcurrentFlows( int maxConcurrentFlows )
     {
     this.maxConcurrentFlows = maxConcurrentFlows;

@@ -33,6 +33,8 @@ public class PartitionTapProps extends Props
   {
   public static final String FAIL_ON_CLOSE = "cascading.tap.partition.failonclose";
 
+  private boolean failOnClose = false;
+
   /**
    * Method setFailOnClose(boolean b) controls if the PartitionTap is ignoring all Excpetions, when a TupleEntryCollector
    * is closed or if it should rethrow the Exception.
@@ -45,24 +47,21 @@ public class PartitionTapProps extends Props
     properties.put( FAIL_ON_CLOSE, Boolean.toString( failOnClose ) );
     }
 
-  private boolean failOnClose = false;
-
-  /***
-   * Constructs a new PartitionTapProps instance.
+  /**
+   * Creates a new PartitionTapProps instance.
+   *
+   * @return PartitionTapProps instance
    */
-  public PartitionTapProps()
-    {
-    }
-
   public static PartitionTapProps partitionTapProps()
     {
     return new PartitionTapProps();
     }
 
-  @Override
-  protected void addPropertiesTo( Properties properties )
+  /**
+   * Constructs a new PartitionTapProps instance.
+   */
+  public PartitionTapProps()
     {
-    setFailOnClose( properties, failOnClose );
     }
 
   public boolean isFailOnClose()
@@ -70,9 +69,21 @@ public class PartitionTapProps extends Props
     return failOnClose;
     }
 
+  /**
+   * Method setFailOnClose controls if the PartitionTap is ignoring all Exceptions, when a TupleEntryCollector
+   * is closed or if it should rethrow the Exception.
+   *
+   * @param failOnClose boolean controlling the close behaviour
+   */
   public PartitionTapProps setFailOnClose( boolean failOnClose )
     {
     this.failOnClose = failOnClose;
     return this;
+    }
+
+  @Override
+  protected void addPropertiesTo( Properties properties )
+    {
+    setFailOnClose( properties, failOnClose );
     }
   }

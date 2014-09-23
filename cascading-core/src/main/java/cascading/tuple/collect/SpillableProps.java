@@ -37,7 +37,7 @@ import cascading.util.Util;
 public class SpillableProps extends Props
   {
   /**
-   * Whether to enable compress of the spills or not, on by default.
+   * Whether to enable compression of the spills or not, on by default.
    *
    * @see Boolean#parseBoolean(String)
    */
@@ -81,6 +81,11 @@ public class SpillableProps extends Props
   int mapInitialCapacity = defaultMapInitialCapacity;
   float mapLoadFactor = defaultMapLoadFactor;
 
+  /**
+   * Creates a new SpillableProps instance.
+   *
+   * @return SpillableProps instance
+   */
   public static SpillableProps spillableProps()
     {
     return new SpillableProps();
@@ -95,6 +100,14 @@ public class SpillableProps extends Props
     return compressSpill;
     }
 
+  /**
+   * Method setCompressSpill either enables or disables spill compression. Enabled by default.
+   * <p/>
+   * Spill compression relies on properly configured and available codecs. See {@link #setCodecs(java.util.List)}.
+   *
+   * @param compressSpill type boolean
+   * @return this
+   */
   public SpillableProps setCompressSpill( boolean compressSpill )
     {
     this.compressSpill = compressSpill;
@@ -107,6 +120,14 @@ public class SpillableProps extends Props
     return codecs;
     }
 
+  /**
+   * Method setCodecs sets list of possible codec class names to use. They will be loaded in order, if available.
+   * <p/>
+   * This is platform dependent.
+   *
+   * @param codecs type list
+   * @return this
+   */
   public SpillableProps setCodecs( List<String> codecs )
     {
     this.codecs = codecs;
@@ -114,6 +135,13 @@ public class SpillableProps extends Props
     return this;
     }
 
+  /**
+   * Method addCodecs adds a list of possible codec class names to use. They will be loaded in order, if available.
+   * <p/>
+   * This is platform dependent.
+   *
+   * @param codecs type list
+   */
   public SpillableProps addCodecs( List<String> codecs )
     {
     this.codecs.addAll( codecs );
@@ -121,6 +149,13 @@ public class SpillableProps extends Props
     return this;
     }
 
+  /**
+   * Method addCodec adds a codec class names to use.
+   * <p/>
+   * This is platform dependent.
+   *
+   * @param codec type String
+   */
   public SpillableProps addCodec( String codec )
     {
     this.codecs.add( codec );
@@ -133,6 +168,12 @@ public class SpillableProps extends Props
     return listSpillThreshold;
     }
 
+  /**
+   * Method setListSpillThreshold sets the number of tuples to hold in memory before spilling them to disk.
+   *
+   * @param listSpillThreshold of type int
+   * @return this
+   */
   public SpillableProps setListSpillThreshold( int listSpillThreshold )
     {
     this.listSpillThreshold = listSpillThreshold;
@@ -145,6 +186,14 @@ public class SpillableProps extends Props
     return mapSpillThreshold;
     }
 
+  /**
+   * Method setMapSpillThreshold the total number of tuple values (not keys) to attempt to keep in memory.
+   * <p/>
+   * The default implementation cannot spill Map keys to disk.
+   *
+   * @param mapSpillThreshold of type int
+   * @return this
+   */
   public SpillableProps setMapSpillThreshold( int mapSpillThreshold )
     {
     this.mapSpillThreshold = mapSpillThreshold;
@@ -157,6 +206,12 @@ public class SpillableProps extends Props
     return mapInitialCapacity;
     }
 
+  /**
+   * Method setMapInitialCapacity sets the default capacity to be used by the backing Map implementation.
+   *
+   * @param mapInitialCapacity type int
+   * @return this
+   */
   public SpillableProps setMapInitialCapacity( int mapInitialCapacity )
     {
     this.mapInitialCapacity = mapInitialCapacity;
@@ -169,6 +224,12 @@ public class SpillableProps extends Props
     return mapLoadFactor;
     }
 
+  /**
+   * Method setMapLoadFactor sets the default load factor to be used by the backing Map implementation.
+   *
+   * @param mapLoadFactor type float
+   * @return this
+   */
   public SpillableProps setMapLoadFactor( float mapLoadFactor )
     {
     this.mapLoadFactor = mapLoadFactor;

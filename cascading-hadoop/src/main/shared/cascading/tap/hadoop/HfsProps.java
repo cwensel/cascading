@@ -107,7 +107,6 @@ public class HfsProps extends Props
       properties.put( COMBINE_INPUT_FILES_SAFE_MODE, Boolean.toString( safeMode ) );
     }
 
-
   /**
    * Method setCombinedInputMaxSize sets the maximum input split size to be used.
    * <p/>
@@ -120,6 +119,16 @@ public class HfsProps extends Props
     {
     if( size != null )
       properties.put( COMBINE_INPUT_FILES_SIZE_MAX, Long.toString( size ) );
+    }
+
+  /**
+   * Creates a new HfsProps instance.
+   *
+   * @return HfsProps instance
+   */
+  public static HfsProps hfsProps()
+    {
+    return new HfsProps();
     }
 
   public HfsProps()
@@ -225,7 +234,6 @@ public class HfsProps extends Props
 
     return this;
     }
-
 
   @Override
   protected void addPropertiesTo( Properties properties )
