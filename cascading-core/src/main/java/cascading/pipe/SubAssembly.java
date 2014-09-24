@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import cascading.util.TraceUtil;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,7 +173,7 @@ public abstract class SubAssembly extends Pipe
   public String[] getTailNames()
     {
     if( tails == null )
-      throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called in the constructor" ) );
+      throw new IllegalStateException( TraceUtil.formatRawTrace( this, "setTails must be called in the constructor" ) );
 
     if( names != null )
       return names;
@@ -200,7 +201,7 @@ public abstract class SubAssembly extends Pipe
     // returns the semantically equivalent to Pipe#previous to simplify logic in the planner
     // SubAssemblies are really aliases for their tails
     if( tails == null )
-      throw new IllegalStateException( Util.formatRawTrace( this, "setTails must be called after the sub-assembly is assembled" ) );
+      throw new IllegalStateException( TraceUtil.formatRawTrace( this, "setTails must be called after the sub-assembly is assembled" ) );
 
     return Arrays.copyOf( tails, tails.length );
     }

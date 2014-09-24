@@ -23,7 +23,7 @@ package cascading.flow.planner;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.pipe.Pipe;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
@@ -52,7 +52,7 @@ public class PlannerException extends FlowException
    */
   public PlannerException( Pipe pipe, String message )
     {
-    super( Util.formatTrace( pipe, message ) );
+    super( TraceUtil.formatTrace( pipe, message ) );
     }
 
   /**
@@ -64,7 +64,7 @@ public class PlannerException extends FlowException
    */
   public PlannerException( Pipe pipe, String message, Throwable throwable )
     {
-    super( Util.formatTrace( pipe, message ), throwable );
+    super( TraceUtil.formatTrace( pipe, message ), throwable );
     }
 
   /**
@@ -77,7 +77,7 @@ public class PlannerException extends FlowException
    */
   public PlannerException( Pipe pipe, String message, Throwable throwable, ElementGraph elementGraph )
     {
-    super( Util.formatTrace( pipe, message ), throwable );
+    super( TraceUtil.formatTrace( pipe, message ), throwable );
     this.elementGraph = elementGraph;
     }
 

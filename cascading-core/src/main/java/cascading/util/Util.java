@@ -48,10 +48,6 @@ import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.Scope;
-import cascading.operation.BaseOperation;
-import cascading.operation.Operation;
-import cascading.pipe.Pipe;
-import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import org.jgrapht.ext.DOTExporter;
@@ -444,7 +440,7 @@ public class Util
       }
     }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings( {"unchecked"} )
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
@@ -481,125 +477,11 @@ public class Util
    *
    * @param list
    */
-  @SuppressWarnings({"StatementWithEmptyBody"})
+  @SuppressWarnings( {"StatementWithEmptyBody"} )
   public static void removeAllNulls( List list )
     {
     while( list.remove( null ) )
       ;
-    }
-
-  /**
-   * Allows for custom trace fields on Pipe, Tap, and Scheme types
-   *
-   * @param object
-   * @param trace
-   */
-  public static void setTrace( Object object, String trace )
-    {
-    setInstanceFieldIfExists( object, "trace", trace );
-    }
-
-  public static String formatTrace( Scheme scheme, String message )
-    {
-    if( scheme == null )
-      return message;
-
-    String trace = scheme.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + truncate( scheme.toString(), 25 ) + "][" + trace + "] " + message;
-    }
-
-  /**
-   * Method formatRawTrace does not include the pipe name
-   *
-   * @param pipe    of type Pipe
-   * @param message of type String
-   * @return String
-   */
-  public static String formatRawTrace( Pipe pipe, String message )
-    {
-    if( pipe == null )
-      return message;
-
-    String trace = pipe.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + trace + "] " + message;
-    }
-
-  public static String formatTrace( Pipe pipe, String message )
-    {
-    if( pipe == null )
-      return message;
-
-    String trace = pipe.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + truncate( pipe.getName(), 25 ) + "][" + trace + "] " + message;
-    }
-
-  public static String formatTrace( Tap tap, String message )
-    {
-    if( tap == null )
-      return message;
-
-    String trace = tap.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + truncate( tap.toString(), 25 ) + "][" + trace + "] " + message;
-    }
-
-  public static String formatTrace( Operation operation, String message )
-    {
-    if( !( operation instanceof BaseOperation ) )
-      return message;
-
-    String trace = ( (BaseOperation) operation ).getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + trace + "] " + message;
-    }
-
-  public static String captureDebugTrace( Class type )
-    {
-    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-    Package packageName = type.getPackage();
-    String typeName = type.getName();
-
-    boolean skip = true;
-
-    for( StackTraceElement stackTraceElement : stackTrace )
-      {
-      String className = stackTraceElement.getClassName();
-
-      if( skip )
-        {
-        skip = !className.equals( typeName );
-        continue;
-        }
-      else
-        {
-        if( packageName != null && stackTraceElement.getClassName().equals( typeName ) )
-          {
-          continue;
-          }
-        }
-
-      return stackTraceElement.toString();
-      }
-
-    return null;
     }
 
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
@@ -874,7 +756,7 @@ public class Util
       }
     }
 
-  public static <T> T newInstance( String className, Object... parameters)
+  public static <T> T newInstance( String className, Object... parameters )
     {
     try
       {
@@ -888,7 +770,7 @@ public class Util
       }
     }
 
-  public static <T> T newInstance( Class<T> target, Object... parameters)
+  public static <T> T newInstance( Class<T> target, Object... parameters )
     {
     // using Expression makes sure that constructors using sub-types properly work, otherwise we get a
     // NoSuchMethodException.

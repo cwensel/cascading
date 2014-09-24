@@ -27,7 +27,8 @@ import cascading.flow.FlowProcess;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
+import cascading.util.Traceable;
 
 /**
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
@@ -58,7 +59,7 @@ import cascading.util.Util;
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
  * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
  */
-public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> implements Serializable
+public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> implements Serializable, Traceable
   {
   /** Field sinkFields */
   Fields sinkFields = Fields.ALL;
@@ -67,7 +68,11 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /** Field numSinkParts */
   int numSinkParts;
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() ); // see Util.setTrace() to override
+  private String trace;
+
+  {
+  TraceUtil.captureDebugTraceAndApiCall( this ); // see Util.setTrace() and Util.setApiCall to override
+  }
 
   /** Constructor Scheme creates a new Scheme instance. */
   protected Scheme()
@@ -188,11 +193,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
     this.numSinkParts = numSinkParts;
     }
 
-  /**
-   * Method getTrace returns a String that pinpoint where this instance was created for debugging.
-   *
-   * @return String
-   */
+  @Override
   public String getTrace()
     {
     return trace;
