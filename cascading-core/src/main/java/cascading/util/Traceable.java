@@ -31,11 +31,4 @@ public interface Traceable
    * @return String
    */
   String getTrace();
-
-  /**
-   * Method getTrace returns a String that pinpoints the api point that was responsible for creating this instance.
-   *
-   * @return String
-   */
-  String getApiCall();
   }

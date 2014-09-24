@@ -83,8 +83,6 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
   private String trace;
-  /** Field apiCall */
-  protected transient String apiCall;
 
   {
   TraceUtil.captureDebugTraceAndApiCall( this ); // see Util.setTrace() and Util.setApiCall to override
@@ -152,12 +150,6 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public String getTrace()
     {
     return trace;
-    }
-
-  @Override
-  public String getApiCall()
-    {
-    return apiCall;
     }
 
   /**

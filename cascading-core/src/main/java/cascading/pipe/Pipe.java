@@ -77,8 +77,6 @@ public class Pipe implements FlowElement, Serializable, Traceable
   private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
   private String trace;
-  /** Field apiCall */
-  protected transient String apiCall;
 
   {
   TraceUtil.captureDebugTraceAndApiCall( this ); // see Util.setTrace() and Util.setApiCall to override
@@ -387,12 +385,6 @@ public class Pipe implements FlowElement, Serializable, Traceable
   public String getTrace()
     {
     return trace;
-    }
-
-  @Override
-  public String getApiCall()
-    {
-    return apiCall;
     }
 
   @Override

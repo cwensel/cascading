@@ -69,8 +69,6 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   int numSinkParts;
   /** Field trace */
   private String trace;
-  /** Field apiCall */
-  protected transient String apiCall;
 
   {
   TraceUtil.captureDebugTraceAndApiCall( this ); // see Util.setTrace() and Util.setApiCall to override
@@ -199,12 +197,6 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   public String getTrace()
     {
     return trace;
-    }
-
-  @Override
-  public String getApiCall()
-    {
-    return apiCall;
     }
 
   /**

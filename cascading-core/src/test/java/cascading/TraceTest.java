@@ -53,8 +53,7 @@ public class TraceTest extends CascadingTestCase
     {
     BaseOperation operation = new Identity();
 
-    assertEqualsTrace( "cascading.TraceTest.testOperation(TraceTest.java", operation.getTrace() );
-    assertEqualsTrace( "cascading.operation.Identity.<init>(Identity.java", operation.getApiCall() );
+    assertEqualsTrace( "new Identity() @ cascading.TraceTest.testOperation(TraceTest.java", operation.getTrace() );
     }
 
   @Test
@@ -62,8 +61,7 @@ public class TraceTest extends CascadingTestCase
     {
     Pipe pipe = new Pipe( "foo" );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipe(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.Pipe.<init>(Pipe.java", pipe.getApiCall() );
+    assertEqualsTrace( "new Pipe() @ cascading.TraceTest.testPipe(TraceTest.java", pipe.getTrace() );
     }
 
   @Test
@@ -73,8 +71,7 @@ public class TraceTest extends CascadingTestCase
 
     pipe = new Each( pipe, new Fields( "a" ), new Identity() );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeEach(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.Each.<init>(Each.java", pipe.getApiCall() );
+    assertEqualsTrace( "new Each() @ cascading.TraceTest.testPipeEach(TraceTest.java", pipe.getTrace() );
     }
 
   @Test
@@ -86,8 +83,7 @@ public class TraceTest extends CascadingTestCase
 
     pipe = new CoGroup( pipe, new Fields( "b" ), 4 );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeCoGroup(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.CoGroup.<init>(CoGroup.java", pipe.getApiCall() );
+    assertEqualsTrace( "new CoGroup() @ cascading.TraceTest.testPipeCoGroup(TraceTest.java", pipe.getTrace() );
     }
 
   @Test
@@ -98,8 +94,7 @@ public class TraceTest extends CascadingTestCase
     pipe = new Each( pipe, new Fields( "a" ), new Identity() );
     pipe = new HashJoin( pipe, new Fields( "b" ), new Pipe( "bar" ), new Fields( "c" ) );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeHashJoin(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.HashJoin.<init>(HashJoin.java", pipe.getApiCall() );
+    assertEqualsTrace( "new HashJoin() @ cascading.TraceTest.testPipeHashJoin(TraceTest.java", pipe.getTrace() );
     }
 
   @Test
@@ -111,8 +106,7 @@ public class TraceTest extends CascadingTestCase
 
     pipe = new GroupBy( pipe, new Fields( "b" ) );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeGroupBy(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.GroupBy.<init>(GroupBy.java", pipe.getApiCall() );
+    assertEqualsTrace( "new GroupBy() @ cascading.TraceTest.testPipeGroupBy(TraceTest.java", pipe.getTrace() );
     }
 
   @Test
@@ -124,8 +118,7 @@ public class TraceTest extends CascadingTestCase
 
     pipe = new Merge( pipe, new Pipe( "bar" ) );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeMerge(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.Merge.<init>(Merge.java", pipe.getApiCall() );
+    assertEqualsTrace( "new Merge() @ cascading.TraceTest.testPipeMerge(TraceTest.java", pipe.getTrace() );
     }
 
   @Test
@@ -135,8 +128,7 @@ public class TraceTest extends CascadingTestCase
 
     pipe = new Rename( pipe, new Fields( "a" ), new Fields( "b" ) );
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeAssembly(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.pipe.assembly.Rename.<init>(Rename.java", pipe.getApiCall() );
+    assertEqualsTrace( "new Rename() @ cascading.TraceTest.testPipeAssembly(TraceTest.java", pipe.getTrace() );
     }
 
   protected static class TestSubAssembly extends SubAssembly
@@ -160,9 +152,9 @@ public class TraceTest extends CascadingTestCase
     {
     TestSubAssembly pipe = new TestSubAssembly();
 
-    assertEqualsTrace( "cascading.TraceTest.testPipeAssemblyDeep(TraceTest.java", pipe.getTrace() );
-    assertEqualsTrace( "cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.pipe.getTrace() );
-    assertEqualsTrace( "cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.getTails()[ 0 ].getTrace() );
+    assertEqualsTrace( "new TraceTest$TestSubAssembly() @ cascading.TraceTest.testPipeAssemblyDeep(TraceTest.java", pipe.getTrace() );
+    assertEqualsTrace( "new Rename() @ cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.pipe.getTrace() );
+    assertEqualsTrace( "new Rename() @ cascading.TraceTest$TestSubAssembly.<init>(TraceTest.java", pipe.getTails()[ 0 ].getTrace() );
     }
 
   public static Pipe sampleApi()
@@ -181,8 +173,7 @@ public class TraceTest extends CascadingTestCase
       {
       Pipe pipe1 = sampleApi();
 
-      assertEqualsTrace( "cascading.TraceTest.testApiBoundary(TraceTest.java", pipe1.getTrace() );
-      assertEqualsTrace( "cascading.TraceTest.sampleApi(TraceTest.java", pipe1.getApiCall() );
+      assertEqualsTrace( "sampleApi() @ cascading.TraceTest.testApiBoundary(TraceTest.java", pipe1.getTrace() );
       }
     finally
       {
@@ -191,8 +182,7 @@ public class TraceTest extends CascadingTestCase
 
     Pipe pipe2 = sampleApi();
 
-    assertEqualsTrace( "cascading.TraceTest.sampleApi(TraceTest.java", pipe2.getTrace() );
-    assertEqualsTrace( "cascading.pipe.Pipe.<init>(Pipe.java", pipe2.getApiCall() );
+    assertEqualsTrace( "new Pipe() @ cascading.TraceTest.sampleApi(TraceTest.java", pipe2.getTrace() );
     }
 
   @Test
@@ -243,7 +233,7 @@ public class TraceTest extends CascadingTestCase
       }
     };
 
-    assertEqualsTrace( "cascading.TraceTest.testTap(TraceTest.java", tap.getTrace() );
+    assertEqualsTrace( "new TraceTest$1() @ cascading.TraceTest.testTap(TraceTest.java", tap.getTrace() );
     }
 
   @Test
@@ -273,7 +263,7 @@ public class TraceTest extends CascadingTestCase
       }
     };
 
-    assertEqualsTrace( "cascading.TraceTest.testScheme(TraceTest.java", scheme.getTrace() );
+    assertEqualsTrace( "new TraceTest$2() @ cascading.TraceTest.testScheme(TraceTest.java", scheme.getTrace() );
     }
 
   public static void assertEqualsTrace( String expected, String trace )

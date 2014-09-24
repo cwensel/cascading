@@ -49,8 +49,6 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
   protected int numArgs = ANY;
   /** Field trace */
   protected String trace;
-  /** Field apiCall */
-  protected transient String apiCall;
 
   // initialize this operation based on its subclass
   {
@@ -163,12 +161,6 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
   public String getTrace()
     {
     return trace;
-    }
-
-  @Override
-  public String getApiCall()
-    {
-    return apiCall;
     }
 
   @Override

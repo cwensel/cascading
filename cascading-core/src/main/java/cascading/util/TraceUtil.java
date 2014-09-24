@@ -52,17 +52,6 @@ public class TraceUtil
     Util.setInstanceFieldIfExists( object, "trace", trace );
     }
 
-  /**
-   * Allows for custom api call field on Pipe, Tap, and Scheme types
-   *
-   * @param object
-   * @param apiCall
-   */
-  public static void setApiCall( Object object, String apiCall )
-    {
-    Util.setInstanceFieldIfExists( object, "apiCall", apiCall );
-    }
-
   private static String formatTrace( Traceable traceable, String message, TraceFormatter formatter )
     {
     if( traceable == null )
@@ -148,13 +137,13 @@ public class TraceUtil
     {
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-    StackTraceElement candidateTraceElement = null;
+    StackTraceElement candidateUserCodeElement = null;
     StackTraceElement apiCallElement = null;
     Class<?> tracingBoundary = target.getClass();
     String boundaryClassName = tracingBoundary.getName();
 
     // walk from the bottom of the stack(which is at the end of the array) upwards towards any boundary.
-    // The apiCall is the element at the boundary and the previous stack element is the trace
+    // The apiCall is the element at the boundary and the previous stack element is the user code
     for( int i = stackTrace.length - 1; i >= 0; i-- )
       {
       StackTraceElement stackTraceElement = stackTrace[ i ];
@@ -166,14 +155,33 @@ public class TraceUtil
         break;
         }
 
-      candidateTraceElement = stackTraceElement;
+      candidateUserCodeElement = stackTraceElement;
       }
 
-    String trace = candidateTraceElement == null ? "" : candidateTraceElement.toString();
-    String apiCall = apiCallElement == null ? "" : apiCallElement.toString();
+    String userCode = candidateUserCodeElement == null ? "" : candidateUserCodeElement.toString();
 
-    setTrace( target, trace );
-    setApiCall( target, apiCall );
+    String apiCall;
+    if( apiCallElement == null )
+      apiCall = "";
+    else
+      {
+      String method = apiCallElement.getMethodName();
+      if( method.equals( "<init>" ) )
+        apiCall = String.format( "new %s()", getSimpleClassName( apiCallElement.getClassName() ) );
+      else
+        apiCall = String.format( "%s()", method );
+      }
+    
+    String trace = userCode.isEmpty() ? apiCall : apiCall.isEmpty() ? userCode : String.format( "%s @ %s", apiCall, userCode);
+    setTrace( target, trace);
+    }
+
+  private static Object getSimpleClassName( String className )
+    {
+    if (className == null || className.isEmpty()) return "";
+    String parts[] = className.split( "\\." );
+    if (parts.length == 0) return "";
+    return parts[parts.length - 1];
     }
 
   private static boolean atApiBoundary( String stackTraceElement )
