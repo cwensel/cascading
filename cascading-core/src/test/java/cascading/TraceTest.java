@@ -182,7 +182,7 @@ public class TraceTest extends CascadingTestCase
 
     Pipe pipe2 = sampleApi();
 
-    assertEqualsTrace( "new Pipe() @ cascading.TraceTest.sampleApi(TraceTest.java", pipe2.getTrace() );
+    assertEqualsTrace( "cascading.TraceTest.sampleApi(TraceTest.java", pipe2.getTrace() );
     }
 
   @Test

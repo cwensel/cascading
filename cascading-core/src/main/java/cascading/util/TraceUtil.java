@@ -176,9 +176,15 @@ public class TraceUtil
       StackTraceElement stackTraceElement = stackTrace[ i ];
       String stackClassName = stackTraceElement.getClassName();
 
-      if( stackClassName != null && ( stackClassName.startsWith( boundaryClassName ) || atApiBoundary( stackTraceElement.toString() ) ) )
+      boolean atApiBoundary = atApiBoundary( stackTraceElement.toString() );
+      if( ( stackClassName != null && ( stackClassName.startsWith( boundaryClassName ) ) || atApiBoundary ) )
         {
-        apiCallElement = stackTraceElement;
+        // only record the apiCallElement if we're at an apiBoundary. That means
+        // Trace will only have "apiMethod() @ call_location" when a registered
+        // api boundary is found. The default for Cascading will just have
+        // call_location.
+        if (atApiBoundary)
+          apiCallElement = stackTraceElement;
         break;
         }
 
