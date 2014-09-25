@@ -35,8 +35,8 @@ dependencies {
   compile project( ':cascading-core' )
 
   // forces update of yarn slf4j dependencies
-  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
-  providedCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.2'
+  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  providedCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
