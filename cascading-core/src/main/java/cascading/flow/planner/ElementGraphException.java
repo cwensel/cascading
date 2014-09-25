@@ -24,7 +24,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
 
 /**
  * Class ElementGraphException is thrown during rendering of a pipe assembly to
@@ -42,12 +42,12 @@ public class ElementGraphException extends FlowException
 
   public ElementGraphException( Pipe pipe, String message )
     {
-    this( (FlowElement) pipe, Util.formatTrace( pipe, message ) );
+    this( (FlowElement) pipe, TraceUtil.formatTrace( pipe, message ) );
     }
 
   public ElementGraphException( Tap tap, String message )
     {
-    this( (FlowElement) tap, Util.formatTrace( tap, message ) );
+    this( (FlowElement) tap, TraceUtil.formatTrace( tap, message ) );
     }
 
   /**

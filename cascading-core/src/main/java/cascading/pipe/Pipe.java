@@ -30,6 +30,8 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
+import cascading.util.TraceUtil;
+import cascading.util.Traceable;
 import cascading.util.Util;
 
 import static java.util.Arrays.asList;
@@ -56,7 +58,7 @@ import static java.util.Arrays.asList;
  * @see HashJoin
  * @see SubAssembly
  */
-public class Pipe implements FlowElement, Serializable
+public class Pipe implements FlowElement, Serializable, Traceable
   {
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
@@ -74,7 +76,7 @@ public class Pipe implements FlowElement, Serializable
   /** Field id */
   private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() ); // see Util.setTrace() to override
+  private String trace = TraceUtil.captureDebugTrace( this ); // see TraceUtil.setTrace() to override
 
   public static synchronized String id( Pipe pipe )
     {
@@ -375,11 +377,7 @@ public class Pipe implements FlowElement, Serializable
     throw new IllegalStateException( "resolveIncomingOperationPassThroughFields should never be called" );
     }
 
-  /**
-   * Method getTrace returns a String that pinpoint where this instance was created for debugging.
-   *
-   * @return String
-   */
+  @Override
   public String getTrace()
     {
     return trace;
