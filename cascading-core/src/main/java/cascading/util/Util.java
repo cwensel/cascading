@@ -48,6 +48,9 @@ import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.Scope;
+import cascading.operation.Operation;
+import cascading.pipe.Pipe;
+import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import org.jgrapht.ext.DOTExporter;
@@ -502,6 +505,38 @@ public class Util
   public static String captureDebugTrace( Class type )
     {
     return TraceUtil.captureDebugTrace( type );
+    }
+
+  public static String formatTrace( final Pipe pipe, String message )
+    {
+    return TraceUtil.formatTrace( pipe, message );
+    }
+
+  /**
+   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.tap.Tap, String)}
+   */
+  @Deprecated
+  public static String formatTrace( final Tap tap, String message )
+    {
+    return TraceUtil.formatTrace( tap, message );
+    }
+
+  /**
+   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.scheme.Scheme, String)}
+   */
+  @Deprecated
+  public static String formatTrace( final Scheme scheme, String message )
+    {
+    return TraceUtil.formatTrace( scheme, message );
+    }
+
+  /**
+   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.operation.Operation, String)}
+   */
+  @Deprecated
+  public static String formatTrace( Operation operation, String message )
+    {
+    return TraceUtil.formatTrace( operation, message );
     }
 
   public static void writeDOT( Writer writer, SimpleDirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
