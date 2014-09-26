@@ -37,7 +37,6 @@ import cascading.flow.tez.planner.rule.partitioner.BottomUpJoinedBoundariesNodeP
 import cascading.flow.tez.planner.rule.partitioner.ConsecutiveGroupOrMergesNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.StreamedAccumulatedBoundariesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.StreamedOnlySourcesNodeRePartitioner;
-import cascading.flow.tez.planner.rule.partitioner.TapOverGroupMergeNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.TopDownSplitBoundariesNodePartitioner;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceBoundariesSplitSelfCoGroupTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceCheckpointTransformer;
@@ -102,7 +101,6 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     // PartitionNodes
 
     // no match with HashJoin inclusion
-    addRule( new TapOverGroupMergeNodePartitioner() );
     addRule( new TopDownSplitBoundariesNodePartitioner() ); // split from source to multiple sinks
     addRule( new ConsecutiveGroupOrMergesNodePartitioner() );
     addRule( new BottomUpBoundariesNodePartitioner() ); // streamed paths re-partitioned w/ StreamedOnly

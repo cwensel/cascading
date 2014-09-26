@@ -27,15 +27,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowProps;
+import cascading.operation.Debug;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
+import cascading.operation.filter.Sample;
 import cascading.operation.regex.RegexFilter;
+import cascading.operation.regex.RegexSplitGenerator;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -57,7 +61,6 @@ import cascading.util.NullNotEquivalentComparator;
 import org.junit.Test;
 
 import static data.InputData.*;
-
 
 public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
   {
@@ -1600,5 +1603,53 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "1\ta\t2\tB" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  @Test
+  public void testMultiJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileCrossX2 );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileCrossX2 );
+    Tap innerSink = getPlatform().getTextFile( getOutputPath( "inner" ), SinkMode.REPLACE );
+    Tap outerSink = getPlatform().getTextFile( getOutputPath( "outer" ), SinkMode.REPLACE );
+    Tap leftSink = getPlatform().getTextFile( getOutputPath( "left" ), SinkMode.REPLACE );
+    Tap rightSink = getPlatform().getTextFile( getOutputPath( "right" ), SinkMode.REPLACE );
+
+    Pipe uniques = new Pipe( "unique" );
+
+    uniques = new Each( uniques, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+
+    uniques = new GroupBy( uniques, new Fields( "word" ) );
+
+    uniques = new Every( uniques, new Fields( "word" ), new First( Fields.ARGS ), Fields.REPLACE );
+
+//    uniques = new Each( uniques, new Debug( true ) );
+
+    Pipe fielded = new Pipe( "fielded" );
+
+    fielded = new Each( fielded, new Fields( "line" ), new RegexSplitter( "\\s" ) );
+
+//    fielded = new Each( fielded, new Debug( true ) );
+
+    Pipe inner = new CoGroup( "inner", fielded, new Fields( 0 ), uniques, new Fields( "word" ), new InnerJoin() );
+    Pipe outer = new CoGroup( "outer", fielded, new Fields( 0 ), uniques, new Fields( "word" ), new OuterJoin() );
+    Pipe left = new CoGroup( "left", fielded, new Fields( 0 ), uniques, new Fields( "word" ), new LeftJoin() );
+    Pipe right = new CoGroup( "right", fielded, new Fields( 0 ), uniques, new Fields( "word" ), new RightJoin() );
+
+    Pipe[] heads = Pipe.pipes( uniques, fielded );
+    Map<String, Tap> sources = Cascades.tapsMap( heads, Tap.taps( source, source ) );
+
+    Pipe[] tails = Pipe.pipes( inner, outer, left, right );
+    Map<String, Tap> sinks = Cascades.tapsMap( tails, Tap.taps( innerSink, outerSink, leftSink, rightSink ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( "multi-joins", sources, sinks, tails );
+
+    flow.complete();
+
+    validateLength( flow.openTapForRead( innerSink ), 74 );
+    validateLength( flow.openTapForRead( outerSink ), 84 );
+    validateLength( flow.openTapForRead( leftSink ), 74 );
+    validateLength( flow.openTapForRead( rightSink ), 84 );
     }
   }

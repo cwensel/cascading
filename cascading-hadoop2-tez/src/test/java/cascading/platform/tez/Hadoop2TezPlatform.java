@@ -144,8 +144,8 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
 
       // hack to prevent deadlocks where downstream processors are scheduled before upstream
 //      configuration.setInt( "tez.am.inline.task.execution.max-tasks", 1 );
-      configuration.setInt( "tez.am.inline.task.execution.max-tasks", 2 );
-//      configuration.setInt( "tez.am.inline.task.execution.max-tasks", 3 );
+//      configuration.setInt( "tez.am.inline.task.execution.max-tasks", 2 );
+      configuration.setInt( "tez.am.inline.task.execution.max-tasks", 3 ); // testHashJoinMergeIntoHashJoinAccumulatedAccumulatedMerge fails if set to 2
 
       configuration.set( TezConfiguration.TEZ_IGNORE_LIB_URIS, "true" ); // in local mode, use local classpath
       configuration.setInt( YarnConfiguration.DEBUG_NM_DELETE_DELAY_SEC, -1 );
