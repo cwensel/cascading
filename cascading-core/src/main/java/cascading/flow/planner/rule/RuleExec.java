@@ -70,7 +70,7 @@ public class RuleExec
 
   public void enableTransformTracing( String dotPath )
     {
-    this.traceWriter.transformTracePath = dotPath;
+    this.traceWriter.setTracePath( dotPath );
     }
 
   public RuleResult exec( PlannerContext plannerContext, FlowElementGraph flowElementGraph )

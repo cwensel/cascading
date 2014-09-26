@@ -234,8 +234,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
   protected String getStepDisplayName( int idLength )
     {
-    if( idLength > Util.ID_LENGTH )
+    if( idLength < 0 || idLength > Util.ID_LENGTH )
       idLength = Util.ID_LENGTH;
+
+    if( idLength == 0 )
+      return String.format( "%s/%s", getFlowName(), getName() );
 
     String flowID = getFlowID().substring( 0, idLength );
     String stepID = getID().substring( 0, idLength );

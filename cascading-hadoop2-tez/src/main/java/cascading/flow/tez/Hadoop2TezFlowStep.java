@@ -197,7 +197,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     {
     FlowNodeGraph nodeGraph = getFlowNodeGraph();
     Map<FlowNode, Vertex> vertexMap = new HashMap<>();
-    DAG dag = DAG.create( getName() );
+    DAG dag = DAG.create( getStepDisplayName( initializedConfig.getInt( "cascading.step.display.id.truncate", Util.ID_LENGTH ) ) );
 
     dag.addTaskLocalFiles( localResources );
 
@@ -234,7 +234,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
         FlowNode edgeSourceFlowNode = nodeGraph.getEdgeSource( processEdge );
         Vertex sourceVertex = vertexMap.get( edgeSourceFlowNode );
 
-        LOG.info( "adding edge between: {} and {}", sourceVertex, targetVertex );
+        LOG.debug( "adding edge between: {} and {}", sourceVertex, targetVertex );
+
         dag.addEdge( Edge.create( sourceVertex, targetVertex, edgeProperty ) );
         }
       else if( flowElement instanceof GroupBy || flowElement instanceof Merge ) // merge - source nodes > 1
@@ -444,7 +445,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     initFromProcessConfigDef( flowNode, conf );
 
     // force step to local mode if any tap is local
-    setLocalMode( initializedConfig, conf );
+    setLocalMode( initializedConfig, conf, null );
 
     conf.set( "cascading.flow.node.num", Integer.toString( flowNode.getOrdinal() ) );
 
@@ -576,7 +577,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
         Map<String, String> map = flowProcess.diffConfigIntoMap( new TezConfiguration( conf ), new TezConfiguration( current ) );
         conf.set( "cascading.node.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
 
-        setLocalMode( conf, current );
+        setLocalMode( conf, current, tap );
         }
       }
 
@@ -602,7 +603,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
         tap.sourceConfInit( flowProcess, current );
 
-        setLocalMode( conf, current );
+        setLocalMode( conf, current, tap );
         }
 
       String id = FlowElements.id( element );
@@ -633,7 +634,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
         tap.sinkConfInit( flowProcess, current );
 
-        setLocalMode( conf, current );
+        setLocalMode( conf, current, tap );
         }
 
       String id = FlowElements.id( element );
@@ -660,9 +661,10 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       JobConf trapConf = new JobConf( conf );
 
       for( Tap tap : traps.values() )
+        {
         tap.sinkConfInit( flowProcess, trapConf );
-
-      setLocalMode( conf, trapConf );
+        setLocalMode( conf, trapConf, tap );
+        }
       }
     }
 
@@ -715,11 +717,16 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     }
 
-  private void setLocalMode( Configuration parent, JobConf current )
+  private void setLocalMode( Configuration parent, JobConf current, Tap tap )
     {
     // force step to local mode
-    if( HadoopUtil.isLocal( current ) )
-      HadoopUtil.setLocal( parent );
+    if( !HadoopUtil.isLocal( current ) )
+      return;
+
+    if( tap != null )
+      logInfo( "tap forcing step to tez local mode: " + tap.getIdentifier() );
+
+    HadoopUtil.setLocal( parent );
     }
 
   private void addRemoteDebug( FlowNode flowNode, Vertex vertex )

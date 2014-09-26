@@ -68,6 +68,7 @@ import cascading.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.property.PropertyUtil.getStringProperty;
 import static java.util.Arrays.asList;
 
 /**
@@ -323,7 +324,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   public FlowNode createFlowNode( int numNodes, int ordinal, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
     {
-    String name = String.format( "node (%d/%d)", numNodes, ordinal );
+    String name = String.format( "(%d/%d)", ordinal, numNodes );
+
     return new BaseFlowNode( ordinal, name, flowElementGraph, nodeSubGraph, pipelineGraphs );
     }
 
@@ -698,21 +700,34 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return flowDef.getAssertionLevel() == null ? this.defaultAssertionLevel : flowDef.getAssertionLevel();
     }
 
+  protected String makeStepName( Tap sink, int numSteps, int stepNum )
+    {
+    if( sink == null || sink.isTemporary() )
+      return String.format( "(%d/%d)", stepNum, numSteps );
+
+    String identifier = sink.getIdentifier();
+
+    if( identifier.length() > 25 )
+      identifier = String.format( "...%25s", identifier.substring( identifier.length() - 25 ) );
+
+    return String.format( "(%d/%d) %s", stepNum, numSteps, identifier );
+    }
+
   protected abstract Tap makeTempTap( String prefix, String name );
 
   protected String getPlanTracePath()
     {
-    return System.getProperty( FlowPlanner.TRACE_PLAN_PATH );
+    return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_PLAN_PATH );
     }
 
   protected String getPlanTransformTracePath()
     {
-    return System.getProperty( FlowPlanner.TRACE_PLAN_TRANSFORM_PATH );
+    return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_PLAN_TRANSFORM_PATH );
     }
 
   protected String getPlanStatsPath()
     {
-    return System.getProperty( FlowPlanner.TRACE_STATS_PATH );
+    return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_STATS_PATH );
     }
 
   protected void writeTracePlan( String flowName, String fileName, ElementGraph flowElementGraph )

@@ -164,19 +164,6 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
     return new Hadoop2TezFlowStep( name, ordinal, stepElementGraph, flowNodeGraph );
     }
 
-  protected String makeStepName( Tap sink, int numJobs, int stepNum )
-    {
-    if( sink == null || sink.isTemporary() )
-      return String.format( "(%d/%d)", stepNum, numJobs );
-
-    String identifier = sink.getIdentifier();
-
-    if( identifier.length() > 25 )
-      identifier = String.format( "...%25s", identifier.substring( identifier.length() - 25 ) );
-
-    return String.format( "(%d/%d) %s", stepNum, numJobs, identifier );
-    }
-
   public URI getDefaultURIScheme( Tap tap )
     {
     return ( (Hfs) tap ).getDefaultFileSystemURIScheme( defaultConfiguration );

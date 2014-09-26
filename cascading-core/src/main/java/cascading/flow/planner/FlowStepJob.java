@@ -231,7 +231,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         throw ( (OutOfMemoryError) getThrowable() );
 
       if( !isRemoteExecution() )
-        throwable = new FlowException( "local step failed", getThrowable() );
+        throwable = new FlowException( "local step failed: " + stepName, getThrowable() );
       else
         throwable = new FlowException( "step failed: " + stepName + ", with job id: " + internalJobId() + ", please see cluster logs for failure messages" );
       }

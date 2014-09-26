@@ -56,6 +56,19 @@ public class TraceWriter
     {
     }
 
+  public void setTracePath( String transformTracePath )
+    {
+    if( transformTracePath != null && transformTracePath.endsWith( File.separator ) )
+      transformTracePath = transformTracePath.substring( 0, transformTracePath.length() - 2 );
+
+    this.transformTracePath = transformTracePath;
+    }
+
+  protected String getTracePath()
+    {
+    return transformTracePath + File.separator;
+    }
+
   public boolean isEnabled()
     {
     return !isDisabled();
@@ -78,7 +91,7 @@ public class TraceWriter
 
     ruleName = String.format( "%s-%s", ruleName, graphResult.getRuleName() );
 
-    String path = new File( transformTracePath, ruleName ).toString();
+    String path = new File( getTracePath(), ruleName ).toString();
     graphResult.writeDOTs( path );
 
     markResult( graphResult, path );
@@ -89,7 +102,7 @@ public class TraceWriter
     if( isDisabled() )
       return;
 
-    File file = new File( transformTracePath, name );
+    File file = new File( getTracePath(), name );
 
     LOG.info( "writing phase assembly trace: {}, to: {}", name, file );
 
@@ -106,7 +119,7 @@ public class TraceWriter
       ElementGraph flowElementGraph = flowElementGraphs.get( i );
       String name = String.format( "%02d-%s-%s-%04d.dot", phase.ordinal(), phase, subName, i );
 
-      File file = new File( transformTracePath, name );
+      File file = new File( getTracePath(), name );
 
       LOG.info( "writing phase step trace: {}, to: {}", name, file );
 
@@ -135,7 +148,7 @@ public class TraceWriter
           ElementGraph flowElementGraph = pipelineGraphs.get( i );
           String name = String.format( "%02d-%s-%s-%04d-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, nodeCount, i );
 
-          File file = new File( transformTracePath, name );
+          File file = new File( getTracePath(), name );
 
           LOG.info( "writing phase node pipeline trace: {}, to: {}", name, file );
 
@@ -164,7 +177,7 @@ public class TraceWriter
         ElementGraph flowElementGraph = flowElementGraphs.get( i );
         String name = String.format( "%02d-%s-%s-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, i );
 
-        File file = new File( transformTracePath, name );
+        File file = new File( getTracePath(), name );
 
         LOG.info( "writing phase node trace: {}, to: {}", name, file );
 
