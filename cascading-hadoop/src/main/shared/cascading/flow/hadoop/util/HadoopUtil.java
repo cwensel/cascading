@@ -570,7 +570,14 @@ public class HadoopUtil
         {
         LOG.info( "copying from: {}, to: {}", localPath, remotePath );
         remoteFS.copyFromLocalFile( localPath, remotePath );
+        }
+      catch( IOException exception )
+        {
+        throw new FlowException( "unable to copy local: " + localPath + " to remote: " + remotePath, exception );
+        }
 
+      try
+        {
         // sync the modified times so we can lazily upload jars to hdfs after job is started
         // otherwise modified time will be local to hdfs
         FileStatus localFileStatus = localFS.getFileStatus( localPath );
@@ -578,7 +585,7 @@ public class HadoopUtil
         }
       catch( IOException exception )
         {
-        throw new FlowException( "unable to copy local: " + localPath + " to remote: " + remotePath );
+        LOG.info( "unable to set local access time on remote file to prevent duplicate copying: {}, 'dfs.namenode.accesstime.precision' may be set to 0 on HDFS.", remotePath );
         }
       }
     }
