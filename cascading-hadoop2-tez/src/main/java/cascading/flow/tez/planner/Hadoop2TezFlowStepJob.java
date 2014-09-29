@@ -272,7 +272,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   @Override
   protected boolean isRemoteExecution()
     {
-    return HadoopUtil.isLocal( currentConf );
+    return !HadoopUtil.isLocal( currentConf );
     }
 
   @Override
@@ -283,7 +283,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
   protected String internalJobId()
     {
-    return dagClient.getExecutionContext().toString();
+    return dagClient.getExecutionContext();
     }
 
   protected boolean internalNonBlockingIsComplete() throws IOException
