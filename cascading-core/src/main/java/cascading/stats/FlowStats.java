@@ -31,12 +31,11 @@ import cascading.flow.Flow;
 import cascading.management.state.ClientState;
 import cascading.property.AppProps;
 
-
 /** Class FlowStats collects {@link cascading.flow.Flow} specific statistics. */
-public class FlowStats extends CascadingStats
+public class FlowStats extends CascadingStats<FlowStepStats>
   {
   final Flow flow;
-  final List<FlowStepStats> flowStepStatsList = new ArrayList<FlowStepStats>();
+  final List<FlowStepStats> flowStepStatsList = new ArrayList<>();
 
   public FlowStats( Flow flow, ClientState clientState )
     {
@@ -159,7 +158,7 @@ public class FlowStats extends CascadingStats
     }
 
   @Override
-  public Collection getChildren()
+  public Collection<FlowStepStats> getChildren()
     {
     return getFlowStepStats();
     }

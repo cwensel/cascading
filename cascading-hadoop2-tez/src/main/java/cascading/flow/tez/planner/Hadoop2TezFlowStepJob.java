@@ -33,7 +33,7 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.flow.tez.Hadoop2TezFlow;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
-import cascading.stats.tez.Hadoop2TezStepStats;
+import cascading.stats.tez.TezStepStats;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -96,19 +96,19 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   @Override
   protected FlowStepStats createStepStats( ClientState clientState )
     {
-    return new Hadoop2TezStepStats( flowStep, clientState )
+    return new TezStepStats( flowStep, clientState )
     {
-//    @Override
-//    public JobClient getJobClient()
-//      {
-//      return jobClient;
-//      }
-//
-//    @Override
-//    public RunningJob getRunningJob()
-//      {
-//      return runningJob;
-//      }
+    @Override
+    public DAGStatus getJobStatusClient()
+      {
+      return getDagStatusWithCounters();
+      }
+
+    @Override
+    protected DAGClient getDAGClient()
+      {
+      return dagClient;
+      }
     };
     }
 

@@ -30,7 +30,7 @@ import cascading.cascade.Cascade;
 import cascading.management.state.ClientState;
 
 /** Class CascadeStats collects {@link Cascade} specific statistics. */
-public class CascadeStats extends CascadingStats
+public class CascadeStats extends CascadingStats<FlowStats>
   {
   private Cascade cascade;
   /** Field flowStatsList */
@@ -137,7 +137,7 @@ public class CascadeStats extends CascadingStats
     }
 
   @Override
-  public Collection getChildren()
+  public Collection<FlowStats> getChildren()
     {
     return flowStatsList;
     }

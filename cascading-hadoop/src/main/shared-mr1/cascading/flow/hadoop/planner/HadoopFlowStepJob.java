@@ -88,7 +88,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       }
 
     @Override
-    public RunningJob getRunningJob()
+    public RunningJob getJobStatusClient()
       {
       return runningJob;
       }

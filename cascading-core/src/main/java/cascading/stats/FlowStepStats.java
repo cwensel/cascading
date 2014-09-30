@@ -20,15 +20,21 @@
 
 package cascading.stats;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
 
-/** Class StepStats collects {@link cascading.flow.FlowStep} specific statistics. */
-public abstract class FlowStepStats extends CascadingStats
+/** Class FlowStepStats collects {@link cascading.flow.FlowStep} specific statistics. */
+public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
   {
   private final FlowStep flowStep;
+  private Map<String, FlowNodeStats> flowNodeStatsMap = new LinkedHashMap<>(); // topologically ordered
 
-  /** Constructor CascadingStats creates a new CascadingStats instance. */
   protected FlowStepStats( FlowStep flowStep, ClientState clientState )
     {
     super( flowStep.getName(), clientState );
@@ -44,6 +50,37 @@ public abstract class FlowStepStats extends CascadingStats
   protected FlowStep getFlowStep()
     {
     return flowStep;
+    }
+
+  public void addNodeStats( FlowNodeStats flowNodeStats )
+    {
+    flowNodeStatsMap.put( flowNodeStats.getID(), flowNodeStats );
+    }
+
+  protected Map<String, FlowNodeStats> getFlowNodeStatsMap()
+    {
+    return flowNodeStatsMap;
+    }
+
+  public List<FlowNodeStats> getFlowNodeStats()
+    {
+    return new ArrayList<>( flowNodeStatsMap.values() );
+    }
+
+  public int getNodesCount()
+    {
+    return flowNodeStatsMap.size();
+    }
+
+  protected Collection<String> getFlowNodeIDs()
+    {
+    return flowNodeStatsMap.keySet();
+    }
+
+  @Override
+  public Collection<FlowNodeStats> getChildren()
+    {
+    return flowNodeStatsMap.values();
     }
 
   @Override

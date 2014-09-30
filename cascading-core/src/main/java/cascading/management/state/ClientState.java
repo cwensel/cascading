@@ -22,6 +22,7 @@ package cascading.management.state;
 
 import cascading.cascade.Cascade;
 import cascading.flow.Flow;
+import cascading.flow.FlowNode;
 import cascading.flow.FlowStep;
 import cascading.stats.CascadingStats;
 
@@ -61,6 +62,11 @@ public abstract class ClientState extends BaseState
     }
 
   @Override
+  public void recordFlowNode( FlowNode flowNode )
+    {
+    }
+
+  @Override
   public void recordFlowStep( FlowStep flowStep )
     {
     }
@@ -92,6 +98,8 @@ public abstract class ClientState extends BaseState
     }
 
   public abstract void recordStats( CascadingStats stats );
+
+  public abstract void recordFlowNode( FlowNode flowNode );
 
   public abstract void recordFlowStep( FlowStep flowStep );
 

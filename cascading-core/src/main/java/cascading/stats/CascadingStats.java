@@ -58,7 +58,7 @@ import cascading.management.state.ClientState;
  * @see FlowStats
  * @see FlowStepStats
  */
-public abstract class CascadingStats implements Serializable
+public abstract class CascadingStats<Child> implements Serializable
   {
   public static final String STATS_STORE_INTERVAL = "cascading.stats.store.interval";
 
@@ -265,7 +265,7 @@ public abstract class CascadingStats implements Serializable
   /** Method recordStats forces recording of current status information. */
   public void recordStats()
     {
-    this.clientState.recordStats( this );
+    clientState.recordStats( this );
     }
 
   public abstract void recordInfo();
@@ -575,7 +575,7 @@ public abstract class CascadingStats implements Serializable
 
   /**
    * Method captureDetail will recursively capture details about nested systems. Use this method to persist
-   * statistics about a given Cascade, Flow, or FlowStep.
+   * statistics about a given Cascade, Flow, FlowStep, or FlowNode.
    * <p/>
    * Each CascadingStats object must be individually inspected for any system specific details.
    */
@@ -587,7 +587,7 @@ public abstract class CascadingStats implements Serializable
    *
    * @return a Collection of child statistics
    */
-  public abstract Collection getChildren();
+  public abstract Collection<Child> getChildren();
 
   protected String getStatsString()
     {

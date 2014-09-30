@@ -18,12 +18,13 @@
  * limitations under the License.
  */
 
-package cascading.stats.tez;
+package cascading.stats.hadoop;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import cascading.stats.CascadingStats;
+import cascading.stats.FlowSliceStats;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapred.TaskReport;
@@ -31,7 +32,7 @@ import org.apache.hadoop.mapred.TaskReport;
 import static cascading.stats.CascadingStats.Status.*;
 
 /** Class HadoopTaskStats tracks individual task stats. */
-public class Hadoop2TezSliceStats
+public class HadoopSliceStats implements FlowSliceStats
   {
   private final CascadingStats.Status parentStatus;
 
@@ -97,18 +98,16 @@ public class Hadoop2TezSliceStats
 
   private String id;
   private Kind kind;
-  private final boolean parentStepHasReducers;
   private TaskReport taskReport;
   private Map<String, Map<String, Long>> counters;
 
   private Map<Integer, HadoopAttempt> attempts = new HashMap<Integer, HadoopAttempt>();
 
-  Hadoop2TezSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, boolean parentStepHasReducers, TaskReport taskReport )
+  HadoopSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport )
     {
     this.parentStatus = parentStatus;
     this.id = id;
     this.kind = kind;
-    this.parentStepHasReducers = parentStepHasReducers;
     this.taskReport = taskReport;
     }
 
@@ -144,7 +143,7 @@ public class Hadoop2TezSliceStats
 
   public boolean parentStepHasReducers()
     {
-    return parentStepHasReducers;
+    return kind == Kind.REDUCER;
     }
 
   public float getProgress()
@@ -218,7 +217,7 @@ public class Hadoop2TezSliceStats
 
   private void setCounters( TaskReport taskReport )
     {
-    this.counters = new HashMap<String, Map<String, Long>>();
+    this.counters = new HashMap<>();
 
     Counters hadoopCounters = taskReport.getCounters();
 

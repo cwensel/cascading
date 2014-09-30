@@ -18,9 +18,8 @@
  * limitations under the License.
  */
 
-package cascading.stats.hadoop;
+package cascading.stats.tez;
 
-import java.util.Collection;
 import java.util.List;
 
 import cascading.PlatformTestCase;
@@ -34,7 +33,6 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.stats.CascadeStats;
 import cascading.stats.FlowNodeStats;
-import cascading.stats.FlowSliceStats;
 import cascading.stats.FlowStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -88,13 +86,6 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 
     assertNotNull( cascadeStats.getID() );
 
-    // unsure why this has changed
-//    if( getPlatform() instanceof HadoopPlatform )
-//      {
-//      Collection<String> counterGroups = cascadeStats.getCounterGroups();
-//      assertEquals( getPlatform().isUseCluster() ? 5 : 4, counterGroups.size() );
-//      }
-
     assertEquals( 1, cascadeStats.getCounterGroupsMatching( "cascading\\.stats\\..*" ).size() );
     assertEquals( 2, cascadeStats.getCountersFor( TestEnum.class.getName() ).size() );
     assertEquals( 2, cascadeStats.getCountersFor( TestEnum.class ).size() );
@@ -125,59 +116,40 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 
     cascadeStats.captureDetail();
 
-    if( getPlatform().isMapReduce() )
+    if( getPlatform().isDAG() )
       {
-      assertEquals( 2, flowStats1.getStepsCount() );
-      assertEquals( 2, flowStats2.getStepsCount() );
+      assertEquals( 1, flowStats1.getStepsCount() );
+      assertEquals( 1, flowStats2.getStepsCount() );
 
-      HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getFlowStepStats().get( 0 );
+      TezStepStats stats1 = (TezStepStats) flowStats1.getFlowStepStats().get( 0 );
 
       assertNotNull( stats1.getID() );
-      assertNotNull( stats1.getJobID() );
-
-//      assertEquals( 2, stats1.getNumMapTasks() );
-//      assertEquals( 1, stats1.getNumReducerTasks() );
+//      assertNotNull( stats1.getJobID() );
 
       if( getPlatform().isUseCluster() )
         {
         List<FlowNodeStats> flowNodeStats = stats1.getFlowNodeStats();
-        assertEquals( 2, flowNodeStats.size() );
+        assertEquals( 3, flowNodeStats.size() );
 
-        FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-        FlowNodeStats reducerNode = flowNodeStats.get( 1 );
-
-        assertEquals( 1, mapperNode.getChildren().size() );
-        assertEquals( 4, reducerNode.getChildren().size() );
-
-        Collection<FlowSliceStats> children = reducerNode.getChildren();
-        for( FlowSliceStats flowSliceStats : children )
-          {
-          HadoopSliceStats hadoopSliceStats = (HadoopSliceStats) flowSliceStats;
-
-          if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
-            assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
-          }
+//        assertEquals( 5, stats1.getTaskStats().size() );
+//
+//        for( FlowSliceStats flowSliceStats : stats1.getTaskStats().values() )
+//          {
+//          Hadoop2TezSliceStats hadoopSliceStats = (Hadoop2TezSliceStats) flowSliceStats;
+//
+//          if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
+//            assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
+//          }
         }
 
-      HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getFlowStepStats().get( 0 );
+      TezStepStats stats2 = (TezStepStats) flowStats2.getFlowStepStats().get( 0 );
 
       assertNotNull( stats2.getID() );
-      assertNotNull( stats2.getJobID() );
+//      assertNotNull( stats2.getJobID() );
 
-//      assertEquals( 2, stats2.getNumMapTasks() );
-//      assertEquals( 1, stats2.getNumReducerTasks() );
-
-      if( getPlatform().isUseCluster() )
-        {
-        List<FlowNodeStats> flowNodeStats = stats2.getFlowNodeStats();
-        assertEquals( 2, flowNodeStats.size() );
-
-        FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-        FlowNodeStats reducerNode = flowNodeStats.get( 1 );
-
-        assertEquals( 1, mapperNode.getChildren().size() );
-        assertEquals( 4, reducerNode.getChildren().size() );
-        }
+      // todo: enable when tasks are captured
+//      if( getPlatform().isUseCluster() )
+//        assertEquals( 5, stats2.getTaskStats().size() );
       }
     }
   }

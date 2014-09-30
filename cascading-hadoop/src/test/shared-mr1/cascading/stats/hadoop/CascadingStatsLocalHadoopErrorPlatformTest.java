@@ -47,7 +47,7 @@ import org.junit.Test;
 import static data.InputData.inputFileApache;
 
 /**
- * Testing error reporting in hadooop local mode.
+ * Testing error reporting in hadoop local mode.
  */
 public class CascadingStatsLocalHadoopErrorPlatformTest extends PlatformTestCase
   {
