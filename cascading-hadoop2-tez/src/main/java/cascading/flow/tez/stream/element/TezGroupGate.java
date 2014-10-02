@@ -25,18 +25,23 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.stream.element.InputSource;
 import cascading.flow.stream.graph.IORole;
+import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.util.SortedListMultiMap;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.tez.runtime.api.LogicalInput;
 import org.apache.tez.runtime.api.LogicalOutput;
 import org.apache.tez.runtime.library.output.OrderedPartitionedKVOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class TezGroupGate extends HadoopGroupGate implements InputSource
   {
+  private static final Logger LOG = LoggerFactory.getLogger( TezGroupGate.class );
+
   protected OrderedPartitionedKVOutput logicalOutput;
   protected SortedListMultiMap<Integer, LogicalInput> logicalInputs;
 
@@ -79,15 +84,23 @@ public abstract class TezGroupGate extends HadoopGroupGate implements InputSourc
       if( logicalInputs != null )
         {
         for( LogicalInput logicalInput : logicalInputs.getValues() )
+          {
+          LOG.info( "calling {}#start() on: {} {}, for {} inputs", logicalInput.getClass().getSimpleName(), getSplice(), Pipe.id( getSplice() ), logicalInputs.getValues().size() );
+
           logicalInput.start();
+          }
         }
 
       if( logicalOutput != null )
+        {
+        LOG.info( "calling {}#start() on: {} {}", logicalOutput.getClass().getSimpleName(), getSplice(), Pipe.id( getSplice() ) );
+
         logicalOutput.start();
+        }
       }
     catch( Exception exception )
       {
-      throw new CascadingException( "unable to start", exception );
+      throw new CascadingException( "unable to start input/output", exception );
       }
 
     super.prepare();

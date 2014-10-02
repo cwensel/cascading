@@ -72,6 +72,11 @@ public abstract class BoundaryStage<Incoming, Outgoing> extends Stage<Incoming, 
     this.role = role;
     }
 
+  public Boundary getBoundary()
+    {
+    return boundary;
+    }
+
   protected void handleReThrowableException( String message, Throwable throwable )
     {
     trapHandler.handleReThrowableException( message, throwable );

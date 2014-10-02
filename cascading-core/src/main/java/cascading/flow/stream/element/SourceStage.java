@@ -49,6 +49,11 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
     this.source = source;
     }
 
+  public Tap getSource()
+    {
+    return source;
+    }
+
   @Override
   public Throwable call() throws Exception
     {

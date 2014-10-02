@@ -48,7 +48,7 @@ import org.apache.hadoop.yarn.api.records.URL;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.mapreduce.input.MRInput;
-import org.apache.tez.mapreduce.input.MRInputLegacy;
+import org.apache.tez.mapreduce.lib.MRReader;
 import org.apache.tez.mapreduce.output.MROutput;
 import org.apache.tez.runtime.api.AbstractLogicalInput;
 import org.apache.tez.runtime.api.AbstractLogicalOutput;
@@ -187,25 +187,20 @@ public class TezUtil
     throw new IllegalStateException( "unknown input type: " + output.getClass().getName() );
     }
 
-  public static void setSourcePathForSplit( LogicalInput input, Configuration configuration )
+  public static void setSourcePathForSplit( MRInput input, MRReader reader, Configuration configuration )
     {
-    if( !( input instanceof MRInputLegacy ) )
-      return;
-
-    MRInputLegacy legacy = (MRInputLegacy) input;
-
     Path path = null;
 
-    if( legacy.isUsingNewApi() )
+    if( Util.returnInstanceFieldIfExistsSafe( input, "useNewApi" ) )
       {
-      org.apache.hadoop.mapreduce.InputSplit newInputSplit = legacy.getNewInputSplit();
+      org.apache.hadoop.mapreduce.InputSplit newInputSplit = (org.apache.hadoop.mapreduce.InputSplit) reader.getSplit();
 
       if( newInputSplit instanceof org.apache.hadoop.mapreduce.lib.input.FileSplit )
         path = ( (org.apache.hadoop.mapreduce.lib.input.FileSplit) newInputSplit ).getPath();
       }
     else
       {
-      org.apache.hadoop.mapred.InputSplit oldInputSplit = legacy.getOldInputSplit();
+      org.apache.hadoop.mapred.InputSplit oldInputSplit = (org.apache.hadoop.mapred.InputSplit) reader.getSplit();
 
       if( oldInputSplit instanceof org.apache.hadoop.mapred.FileSplit )
         path = ( (org.apache.hadoop.mapred.FileSplit) oldInputSplit ).getPath();

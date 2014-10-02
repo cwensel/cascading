@@ -26,7 +26,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.stream.element.SinkStage;
 import cascading.flow.tez.Hadoop2TezFlowProcess;
 import cascading.tap.Tap;
-import org.apache.tez.mapreduce.output.MROutputLegacy;
+import org.apache.tez.mapreduce.output.MROutput;
 import org.apache.tez.runtime.api.LogicalOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class TezSinkStage extends SinkStage
   {
   private static final Logger LOG = LoggerFactory.getLogger( TezSinkStage.class );
 
-  private final MROutputLegacy logicalOutput;
+  private final MROutput logicalOutput;
   private OldOutputCollector collector;
 
   public TezSinkStage( FlowProcess flowProcess, Tap sink, LogicalOutput logicalOutput )
@@ -48,12 +48,14 @@ public class TezSinkStage extends SinkStage
     if( logicalOutput == null )
       throw new IllegalArgumentException( "output must not be null" );
 
-    this.logicalOutput = (MROutputLegacy) logicalOutput;
+    this.logicalOutput = (MROutput) logicalOutput;
     }
 
   @Override
   public void prepare()
     {
+    LOG.info( "calling {}#start() on: {}", logicalOutput.getClass().getSimpleName(), getSink() );
+
     logicalOutput.start();
 
     collector = new OldOutputCollector( logicalOutput );
@@ -88,7 +90,7 @@ public class TezSinkStage extends SinkStage
     return collector;
     }
 
-  private void commit( MROutputLegacy output ) throws IOException
+  private void commit( MROutput output ) throws IOException
     {
     int retries = 3;
     while( true )
@@ -132,7 +134,7 @@ public class TezSinkStage extends SinkStage
       }
     }
 
-  private void discardOutput( MROutputLegacy output )
+  private void discardOutput( MROutput output )
     {
     try
       {

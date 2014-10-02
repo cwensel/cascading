@@ -91,12 +91,10 @@ import org.apache.tez.dag.api.Vertex;
 import org.apache.tez.dag.api.VertexGroup;
 import org.apache.tez.mapreduce.hadoop.MRJobConfig;
 import org.apache.tez.mapreduce.input.MRInput;
-import org.apache.tez.mapreduce.input.MRInputLegacy;
 import org.apache.tez.mapreduce.output.MROutput;
-import org.apache.tez.mapreduce.output.MROutputLegacy;
 import org.apache.tez.runtime.library.api.TezRuntimeConfiguration;
 import org.apache.tez.runtime.library.input.ConcatenatedMergedKeyValueInput;
-import org.apache.tez.runtime.library.input.OrderedGroupedInputLegacy;
+import org.apache.tez.runtime.library.input.OrderedGroupedKVInput;
 import org.apache.tez.runtime.library.input.OrderedGroupedMergedKVInput;
 import org.apache.tez.runtime.library.input.UnorderedKVInput;
 import org.apache.tez.runtime.library.output.OrderedPartitionedKVOutput;
@@ -333,7 +331,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     if( !group.isGroupBy() )
       {
       edgeValues.outputClassName = OrderedPartitionedKVOutput.class.getName();
-      edgeValues.inputClassName = OrderedGroupedInputLegacy.class.getName();
+      edgeValues.inputClassName = OrderedGroupedKVInput.class.getName();
 
       edgeValues.movementType = EdgeProperty.DataMovementType.SCATTER_GATHER;
       edgeValues.sourceType = EdgeProperty.DataSourceType.PERSISTED;
@@ -344,7 +342,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       addComparators( edgeValues.config, "cascading.sort.comparator", group.getSortingSelectors(), this, group );
 
       edgeValues.outputClassName = OrderedPartitionedKVOutput.class.getName();
-      edgeValues.inputClassName = OrderedGroupedInputLegacy.class.getName();
+      edgeValues.inputClassName = OrderedGroupedKVInput.class.getName();
 
       edgeValues.movementType = EdgeProperty.DataMovementType.SCATTER_GATHER;
       edgeValues.sourceType = EdgeProperty.DataSourceType.PERSISTED;
@@ -462,7 +460,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
         continue;
 
       Configuration sourceConf = sourceConfigs.get( flowElement );
-      MRInput.MRInputConfigBuilder configBuilder = MRInputLegacy.createConfigBuilder( sourceConf, null );
+      MRInput.MRInputConfigBuilder configBuilder = MRInput.createConfigBuilder( sourceConf, null );
 
       // grouping splits loses file name info, breaking partition tap default impl
       if( flowElement instanceof PartitionTap ) // todo: generify
@@ -501,7 +499,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       if( outputPath == null && sinkConf.get( "mapred.output.dir" ) == null )
         outputPath = Hfs.getTempPath( sinkConf ).toString(); // unused
 
-      MROutput.MROutputConfigBuilder configBuilder = MROutputLegacy.createConfigBuilder( sinkConf, outputFormatClass, outputPath );
+      MROutput.MROutputConfigBuilder configBuilder = MROutput.createConfigBuilder( sinkConf, outputFormatClass, outputPath );
 
       DataSinkDescriptor dataSinkDescriptor = configBuilder.build();
 

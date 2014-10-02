@@ -31,6 +31,7 @@ import cascading.flow.stream.element.InputSource;
 import cascading.flow.stream.graph.IORole;
 import cascading.flow.stream.graph.StreamGraph;
 import cascading.pipe.Boundary;
+import cascading.pipe.Pipe;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -98,16 +99,23 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
     try
       {
       if( logicalInput != null )
+        {
+        LOG.info( "calling {}#start() on: {} {}", logicalInput.getClass().getSimpleName(), getBoundary(), Pipe.id( getBoundary() ) );
+
         logicalInput.start();
+        }
 
       if( logicalOutput != null )
+        {
+        LOG.info( "calling {}#start() on: {}", logicalOutput.getClass().getSimpleName(), getBoundary(), Pipe.id( getBoundary() ) );
+
         logicalOutput.start();
+        }
       }
     catch( Exception exception )
       {
-      throw new CascadingException( "unable to start", exception );
+      throw new CascadingException( "unable to start input/output", exception );
       }
-
 
     if( role != IORole.source )
       collector = new MeasuredOutputCollector( flowProcess, SliceCounters.Write_Duration, createOutputCollector() );

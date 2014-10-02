@@ -22,7 +22,7 @@ package cascading.flow.tez.stream.element;
 
 import java.io.IOException;
 
-import cascading.CascadingException;
+import cascading.cascade.CascadeException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProcessWrapper;
 import cascading.flow.stream.element.SourceStage;
@@ -31,15 +31,21 @@ import cascading.flow.tez.util.TezUtil;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.tez.dag.api.TezConfiguration;
-import org.apache.tez.mapreduce.input.MRInputLegacy;
+import org.apache.tez.mapreduce.input.MRInput;
+import org.apache.tez.mapreduce.lib.MRReader;
 import org.apache.tez.runtime.api.LogicalInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class TezSourceStage extends SourceStage
   {
-  private final MRInputLegacy logicalInput;
+  private static final Logger LOG = LoggerFactory.getLogger( TezSourceStage.class );
+
+  private final MRInput logicalInput;
+  private MRReader reader;
 
   public TezSourceStage( FlowProcess flowProcess, Tap source, LogicalInput logicalInput )
     {
@@ -48,20 +54,13 @@ public class TezSourceStage extends SourceStage
     if( logicalInput == null )
       throw new IllegalArgumentException( "input must not be null" );
 
-    this.logicalInput = (MRInputLegacy) logicalInput;
+    this.logicalInput = (MRInput) logicalInput;
     }
 
   @Override
   public void prepare()
     {
-    try
-      {
-      logicalInput.init();
-      }
-    catch( IOException exception )
-      {
-      throw new CascadingException( "unable to init input", exception );
-      }
+    LOG.info( "calling {}#start() on: {}", logicalInput.getClass().getSimpleName(), getSource() );
 
     logicalInput.start();
 
@@ -74,15 +73,24 @@ public class TezSourceStage extends SourceStage
 
     TezConfiguration configuration = tezFlowProcess.getConfiguration();
 
+    try
+      {
+      reader = (MRReader) logicalInput.getReader();
+      }
+    catch( IOException exception )
+      {
+      throw new CascadeException( "unable to get reader", exception );
+      }
+
     // set the cascading.source.path property for the current split
     // if a TezGroupedSplit, currently won't set
-    TezUtil.setSourcePathForSplit( logicalInput, configuration );
+    TezUtil.setSourcePathForSplit( logicalInput, reader, configuration );
     }
 
   @Override
   public void run( Object input ) throws Throwable
     {
-    RecordReader oldRecordReader = logicalInput.getOldRecordReader();
+    RecordReader oldRecordReader = (RecordReader) ( reader ).getRecordReader();
 
     super.run( oldRecordReader );
     }

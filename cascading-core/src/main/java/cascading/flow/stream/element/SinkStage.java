@@ -48,6 +48,11 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
     this.sink = sink;
     }
 
+  public Tap getSink()
+    {
+    return sink;
+    }
+
   @Override
   public void bind( StreamGraph streamGraph )
     {

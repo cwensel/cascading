@@ -73,6 +73,11 @@ public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outg
     this.role = role;
     }
 
+  public Splice getSplice()
+    {
+    return splice;
+    }
+
   protected void handleReThrowableException( String message, Throwable throwable )
     {
     trapHandler.handleReThrowableException( message, throwable );

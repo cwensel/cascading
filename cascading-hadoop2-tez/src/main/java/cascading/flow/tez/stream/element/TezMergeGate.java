@@ -30,6 +30,7 @@ import cascading.flow.stream.element.InputSource;
 import cascading.flow.stream.element.SpliceGate;
 import cascading.flow.stream.graph.IORole;
 import cascading.flow.stream.graph.StreamGraph;
+import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
@@ -101,15 +102,23 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
       if( logicalInputs != null )
         {
         for( LogicalInput logicalInput : logicalInputs.getValues() )
+          {
+          LOG.info( "calling {}#start() on: {} {}, for {} inputs", logicalInput.getClass().getSimpleName(), getSplice(), Pipe.id( getSplice() ), logicalInputs.getValues().size() );
+
           logicalInput.start();
+          }
         }
 
       if( logicalOutput != null )
+        {
+        LOG.info( "calling {}#start() on: {} {}", logicalOutput.getClass().getSimpleName(), getSplice(), Pipe.id( getSplice() ) );
+
         logicalOutput.start();
+        }
       }
     catch( Exception exception )
       {
-      throw new CascadingException( "unable to start", exception );
+      throw new CascadingException( "unable to start input/output", exception );
       }
 
     if( role != IORole.source )
@@ -175,7 +184,6 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
       LogicalInput logicalInput = Util.getFirst( logicalInputs.getValues() );
 
       KeyValueReader reader = (KeyValueReader) logicalInput.getReader();
-
 
       while( reader.next() )
         {
