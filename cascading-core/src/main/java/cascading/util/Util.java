@@ -533,7 +533,7 @@ public class Util
       }
     }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings( {"unchecked"} )
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
@@ -570,7 +570,7 @@ public class Util
    *
    * @param list
    */
-  @SuppressWarnings({"StatementWithEmptyBody"})
+  @SuppressWarnings( {"StatementWithEmptyBody"} )
   public static void removeAllNulls( List list )
     {
     while( list.remove( null ) )
@@ -906,6 +906,16 @@ public class Util
       }
 
     return Integer.MIN_VALUE;
+    }
+
+  public static String formatDurationMSms( long duration )
+    {
+    return String.format( "%02d:%02d.%03d", ( duration / 1000 % 3600 ) / 60, ( duration / 1000 ) % 60, duration % 1000 );
+    }
+
+  public static String formatDurationHMSms( long duration )
+    {
+    return String.format( "%02d:%02d:%02d.%03d", duration / 1000 / 3600, ( duration / 1000 % 3600 ) / 60, ( duration / 1000 ) % 60, duration % 1000 );
     }
 
   public interface RetryOperator<T>

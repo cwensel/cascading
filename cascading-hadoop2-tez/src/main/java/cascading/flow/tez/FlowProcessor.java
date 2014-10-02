@@ -39,6 +39,7 @@ import cascading.flow.stream.element.ElementDuct;
 import cascading.flow.stream.element.InputSource;
 import cascading.flow.tez.stream.graph.Hadoop2TezStreamGraph;
 import cascading.tap.Tap;
+import cascading.util.Util;
 import org.apache.tez.common.TezUtils;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.runtime.api.AbstractLogicalIOProcessor;
@@ -125,11 +126,17 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
       throw new FlowException( "internal error during processor configuration", throwable );
       }
 
-    currentProcess.increment( SliceCounters.Process_Begin_Time, System.currentTimeMillis() );
-
+    // todo: may need to push this below waitForAllInputsReady, but will need to manually start inputs
     streamGraph.prepare(); // starts inputs
 
+    long begin = System.currentTimeMillis();
+
     getContext().waitForAllInputsReady( new HashSet<Input>( inputMap.values() ) );
+
+    LOG.info( "all inputs ready in: {}", Util.formatDurationHMSms( System.currentTimeMillis() - begin ) );
+
+    // user code begins executing from here
+    currentProcess.increment( SliceCounters.Process_Begin_Time, System.currentTimeMillis() );
 
     Iterator<Duct> iterator = allHeads.iterator();
 
