@@ -24,9 +24,9 @@ dependencies {
   compile group: 'org.codehaus.janino', name: 'janino', version: '2.7.5'
 
   // this prevents a transitive dependency until it is required downstream
-  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
-  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'
-  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.2'
+  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
   testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 

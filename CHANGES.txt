@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.0 [unreleased]
 
+  Updated slf4j to 1.7.5.
+
   Added ability to customize trace data captured for debugging purposes.
 
   Added CONTRIBUTING.md.
