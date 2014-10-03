@@ -20,149 +20,16 @@
 
 package cascading.flow.planner.iso.subgraph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
 
-import cascading.flow.FlowElement;
-import cascading.flow.planner.PlannerContext;
-import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.ElementSubGraph;
-import cascading.flow.planner.iso.expression.ElementCapture;
-import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.finder.GraphFinder;
-import cascading.flow.planner.iso.finder.Match;
-import cascading.flow.planner.iso.transformer.ContractedTransformer;
-import cascading.flow.planner.iso.transformer.Transformed;
+import cascading.flow.planner.iso.ElementAnnotation;
+import cascading.util.EnumMultiMap;
 
 /**
  *
  */
-public class SubGraphIterator implements Iterator<ElementSubGraph>
+public interface SubGraphIterator extends Iterator<ElementSubGraph>
   {
-  private final PlannerContext plannerContext;
-  private final ElementGraph flowElementGraph;
-
-  private ContractedTransformer contractedTransformer;
-  private GraphFinder graphFinder;
-
-  private Set<FlowElement> elementExcludes = new HashSet<>();
-  private ElementGraph contractedGraph;
-  private Transformed<ElementGraph> contractedTransformed;
-
-  private boolean firstOnly = false; // false will continue to accumulate around the primary
-  private Match match;
-
-  private List<Match> matches = new ArrayList<>();
-
-  int count = 0;
-
-  public SubGraphIterator( ExpressionGraph matchExpression, ElementGraph elementGraph )
-    {
-    this( new PlannerContext(), matchExpression, elementGraph );
-    }
-
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph matchExpression, ElementGraph elementGraph )
-    {
-    this( plannerContext, null, matchExpression, elementGraph );
-    }
-
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, ElementGraph elementGraph )
-    {
-    this( plannerContext, contractionExpression, matchExpression, false, elementGraph );
-    }
-
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, ElementGraph elementGraph, Collection<FlowElement> elementExcludes )
-    {
-    this( plannerContext, contractionExpression, matchExpression, false, elementGraph, elementExcludes );
-    }
-
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph )
-    {
-    this( plannerContext, contractionExpression, matchExpression, firstOnly, elementGraph, null );
-    }
-
-  public SubGraphIterator( PlannerContext plannerContext, ExpressionGraph contractionExpression, ExpressionGraph matchExpression, boolean firstOnly, ElementGraph elementGraph, Collection<FlowElement> elementExcludes )
-    {
-    this.plannerContext = plannerContext;
-    this.firstOnly = firstOnly;
-    this.flowElementGraph = elementGraph;
-
-    if( elementExcludes != null )
-      this.elementExcludes.addAll( elementExcludes );
-
-    if( contractionExpression != null )
-      contractedTransformer = new ContractedTransformer( contractionExpression );
-    else
-      contractedGraph = elementGraph;
-
-    graphFinder = new GraphFinder( matchExpression );
-    }
-
-  public List<Match> getContractedMatches()
-    {
-    return matches;
-    }
-
-  public ElementGraph getContractedGraph()
-    {
-    if( contractedGraph == null )
-      {
-      contractedTransformed = contractedTransformer.transform( plannerContext, flowElementGraph );
-      contractedGraph = contractedTransformed.getEndGraph();
-      }
-
-    return contractedGraph;
-    }
-
-  @Override
-  public boolean hasNext()
-    {
-    if( match == null )
-      {
-      match = graphFinder.findMatchesOnPrimary( plannerContext, getContractedGraph(), firstOnly, elementExcludes );
-
-      if( match.foundMatch() )
-        {
-        matches.add( match );
-        elementExcludes.addAll( match.getCapturedElements( ElementCapture.Primary ) ); // idempotent
-        count++;
-        }
-      }
-
-    return match.foundMatch();
-    }
-
-  @Override
-  public ElementSubGraph next()
-    {
-    try
-      {
-      if( !hasNext() )
-        throw new NoSuchElementException();
-
-      ElementSubGraph contractedMatchedGraph = match.getMatchedGraph();
-
-      Set<FlowElement> excludes = new HashSet<>( getContractedGraph().vertexSet() );
-
-      excludes.removeAll( contractedMatchedGraph.vertexSet() );
-
-      return ElementGraphs.asSubGraph( flowElementGraph, contractedMatchedGraph, excludes );
-      }
-    finally
-      {
-      match = null;
-      }
-    }
-
-  @Override
-  public void remove()
-    {
-    throw new UnsupportedOperationException();
-    }
+  EnumMultiMap getAnnotationMap( ElementAnnotation[] annotations );
   }

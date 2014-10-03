@@ -35,10 +35,10 @@ import cascading.flow.tez.planner.rule.assertion.DualStreamedAccumulatedMergeNod
 import cascading.flow.tez.planner.rule.partitioner.BottomUpBoundariesNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.BottomUpJoinedBoundariesNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.ConsecutiveGroupOrMergesNodePartitioner;
+import cascading.flow.tez.planner.rule.partitioner.SplitJoinBoundariesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.StreamedAccumulatedBoundariesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.StreamedOnlySourcesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.TopDownSplitBoundariesNodePartitioner;
-import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceBoundariesSplitSelfCoGroupTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceCheckpointTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupBlockingHashJoinTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitHashJoinTransformer;
@@ -48,13 +48,12 @@ import cascading.flow.tez.planner.rule.transformer.RemoveMalformedHashJoinNodeTr
 
 /**
  * The HashJoinHadoop2TezRuleRegistry provides support for assemblies using {@link cascading.pipe.HashJoin} pipes.
- *
+ * <p/>
  * Detecting and optimizing for HashJoin pipes adds further complexity and time to converge on a valid physical plan.
- *
+ * <p/>
  * If facing slowdowns, and no HashJoins are used, switch to the
  * {@link cascading.flow.tez.planner.NoHashJoinHadoop2TezRuleRegistry} via the appropriate
  * {@link cascading.flow.FlowConnector} constructor.
- *
  */
 public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
   {
@@ -68,13 +67,6 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new BufferAfterEveryAssert() );
     addRule( new EveryAfterBufferAssert() );
     addRule( new SplitBeforeEveryAssert() );
-
-    // Balance with Boundary Pipes
-    // goes away with TEZ-1190
-    // currently testCoGroupAroundCoGroupWith and testCoGroupAroundCoGroupWithout are less optimal when enabled
-    // causes testCoGroupSelf to fail
-    // could be replaced with a sub-graph-iteration over all edges
-    addRule( new BoundaryBalanceBoundariesSplitSelfCoGroupTransformer() );
 
 //    addRule( new BoundaryBalanceGroupSplitMergeGroupTransformer() ); // causes AssemblyHelpersPlatformTest#testSameSourceMerge to hang
     addRule( new BoundaryBalanceCheckpointTransformer() );
@@ -104,6 +96,7 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new TopDownSplitBoundariesNodePartitioner() ); // split from source to multiple sinks
     addRule( new ConsecutiveGroupOrMergesNodePartitioner() );
     addRule( new BottomUpBoundariesNodePartitioner() ); // streamed paths re-partitioned w/ StreamedOnly
+    addRule( new SplitJoinBoundariesNodeRePartitioner() ); // testCoGroupSelf - compensates for tez-1190
 
     // hash join inclusion
     addRule( new BottomUpJoinedBoundariesNodePartitioner() ); // will capture multiple inputs into sink for use with HashJoins

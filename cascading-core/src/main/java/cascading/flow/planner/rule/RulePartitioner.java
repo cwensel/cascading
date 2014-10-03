@@ -20,10 +20,18 @@
 
 package cascading.flow.planner.rule;
 
+import java.util.Collection;
+
+import cascading.flow.FlowElement;
+import cascading.flow.planner.PlannerContext;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
+import cascading.flow.planner.iso.subgraph.Partitions;
 
 /**
- *
+ * The RulePartitioner class is responsible for partitioning an element graph into smaller sub-graphs.
+ * <p/>
+ * It may also re-partition a given graph, in place replacing it with its children, if any.
  */
 public abstract class RulePartitioner implements Rule
   {
@@ -68,9 +76,24 @@ public abstract class RulePartitioner implements Rule
     return partitionSource;
     }
 
-  public GraphPartitioner getGraphPartitioner()
+  protected GraphPartitioner getGraphPartitioner()
     {
     return graphPartitioner;
+    }
+
+  public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph )
+    {
+    return partition( plannerContext, elementGraph, null );
+    }
+
+  public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
+    {
+    Partitions partition = getGraphPartitioner().partition( plannerContext, elementGraph, excludes );
+
+    if( partition != null )
+      partition.setRulePartitioner( this );
+
+    return partition;
     }
 
   @Override

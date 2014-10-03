@@ -25,16 +25,15 @@ import java.util.Arrays;
 
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.subgraph.ExpressionGraphPartitioner;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
+import cascading.flow.planner.iso.subgraph.partitioner.ExpressionGraphPartitioner;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RulePartitioner;
 
 /**
- * The RulePartitioner class is responsible for partitioning an element graph into smaller sub-graphs.
- * <p/>
- * It may also re-partition a given graph, in place replacing it with its children, if any.
+ * Class ExpressionRulePartitioner relies on a {@link cascading.flow.planner.rule.RuleExpression} to identify
+ * sub-graphs as partitions.
  */
 public class ExpressionRulePartitioner extends RulePartitioner
   {
@@ -79,14 +78,14 @@ public class ExpressionRulePartitioner extends RulePartitioner
   private ExpressionRulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
     this.phase = phase;
-    this.graphPartitioner = new ExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    this.graphPartitioner = createExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
     }
 
   private ExpressionRulePartitioner( PlanPhase phase, PartitionSource partitionSource, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
     this.phase = phase;
     this.partitionSource = partitionSource;
-    this.graphPartitioner = new ExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    this.graphPartitioner = createExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
     }
 
   protected ExpressionRulePartitioner( PlanPhase phase, GraphPartitioner graphPartitioner )
@@ -104,6 +103,11 @@ public class ExpressionRulePartitioner extends RulePartitioner
     {
     }
 
+  protected ExpressionGraphPartitioner createExpressionGraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation[] annotations )
+    {
+    return new ExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    }
+
   private ExpressionGraphPartitioner getExpressionGraphPartitioner()
     {
     return (ExpressionGraphPartitioner) graphPartitioner;
@@ -118,7 +122,7 @@ public class ExpressionRulePartitioner extends RulePartitioner
 
   public ExpressionRulePartitioner setRuleExpression( RuleExpression ruleExpression )
     {
-    this.graphPartitioner = new ExpressionGraphPartitioner( ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    this.graphPartitioner = createExpressionGraphPartitioner( ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), new ElementAnnotation[ 0 ] );
 
     return this;
     }

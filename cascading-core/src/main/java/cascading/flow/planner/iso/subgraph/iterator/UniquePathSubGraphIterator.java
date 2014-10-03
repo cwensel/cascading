@@ -18,16 +18,18 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.iso.subgraph;
+package cascading.flow.planner.iso.subgraph.iterator;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.iso.ElementAnnotation;
+import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.GraphPath;
 
@@ -36,15 +38,21 @@ import static org.jgrapht.Graphs.getPathVertexList;
 /**
  *
  */
-public class ByEdgeSubGraphIterator implements Iterator<ElementGraph>
+public class UniquePathSubGraphIterator implements SubGraphIterator
   {
-  Iterator<ElementSubGraph> parentIterator;
+  SubGraphIterator parentIterator;
   ElementSubGraph current = null;
   private Iterator<GraphPath<FlowElement, Scope>> pathsIterator;
 
-  public ByEdgeSubGraphIterator( Iterator<ElementSubGraph> parentIterator )
+  public UniquePathSubGraphIterator( SubGraphIterator parentIterator )
     {
     this.parentIterator = parentIterator;
+    }
+
+  @Override
+  public EnumMultiMap getAnnotationMap( ElementAnnotation[] annotations )
+    {
+    return parentIterator.getAnnotationMap( annotations ); // unsure we need to narrow results
     }
 
   @Override
@@ -83,7 +91,7 @@ public class ByEdgeSubGraphIterator implements Iterator<ElementGraph>
     }
 
   @Override
-  public ElementGraph next()
+  public ElementSubGraph next()
     {
     if( !pathsIterator.hasNext() )
       {

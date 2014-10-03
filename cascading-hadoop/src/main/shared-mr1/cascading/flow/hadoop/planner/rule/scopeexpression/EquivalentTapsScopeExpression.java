@@ -64,7 +64,6 @@ public class EquivalentTapsScopeExpression extends ScopeExpression
     if( !predecessor.getSourceFields().equals( successor.getSourceFields() ) )
       return true;
 
-
     return true;
     }
   }

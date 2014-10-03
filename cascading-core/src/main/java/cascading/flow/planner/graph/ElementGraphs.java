@@ -47,6 +47,7 @@ import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
@@ -641,7 +642,7 @@ public class ElementGraphs
     if( elementGraph.containsVertex( Extent.head ) )
       return narrowSet( type, Graphs.successorListOf( elementGraph, Extent.head ) );
 
-    SubGraphIterator iterator = new SubGraphIterator(
+    SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Head ) ),
       elementGraph
     );
@@ -654,7 +655,7 @@ public class ElementGraphs
     if( elementGraph.containsVertex( Extent.tail ) )
       return narrowSet( type, Graphs.predecessorListOf( elementGraph, Extent.tail ) );
 
-    SubGraphIterator iterator = new SubGraphIterator(
+    SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Tail ) ),
       elementGraph
     );
@@ -678,7 +679,7 @@ public class ElementGraphs
 
   public static Set<Group> findAllGroups( ElementGraph elementGraph )
     {
-    SubGraphIterator iterator = new SubGraphIterator(
+    SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, Group.class ) ),
       elementGraph
     );
@@ -688,7 +689,7 @@ public class ElementGraphs
 
   public static Set<HashJoin> findAllHashJoins( ElementGraph elementGraph )
     {
-    SubGraphIterator iterator = new SubGraphIterator(
+    SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, HashJoin.class ) ),
       elementGraph
     );

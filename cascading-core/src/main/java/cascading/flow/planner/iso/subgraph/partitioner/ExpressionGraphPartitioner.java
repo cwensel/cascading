@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.iso.subgraph;
+package cascading.flow.planner.iso.subgraph.partitioner;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -26,14 +26,14 @@ import java.util.Map;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
-import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
-import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.finder.Match;
+import cascading.flow.planner.iso.subgraph.GraphPartitioner;
+import cascading.flow.planner.iso.subgraph.Partitions;
+import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
 import cascading.util.EnumMultiMap;
 
 /**
@@ -77,39 +77,23 @@ public class ExpressionGraphPartitioner extends GraphPartitioner
     {
     Map<ElementGraph, EnumMultiMap> annotatedSubGraphs = new LinkedHashMap<>();
 
-    if( expressionGraph == null )
-      {
-      // need a safe copy
-      if( elementGraph.containsVertex( Extent.head ) )
-        elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+    ExpressionSubGraphIterator expressionIterator = new ExpressionSubGraphIterator( plannerContext, contractionGraph, expressionGraph, elementGraph, excludes );
 
-      annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new EnumMultiMap() );
+    SubGraphIterator stepIterator = wrapIterator( expressionIterator );
 
-      return new Partitions( this, elementGraph, annotatedSubGraphs );
-      }
-
-    SubGraphIterator stepIterator = new SubGraphIterator( plannerContext, contractionGraph, expressionGraph, elementGraph, excludes );
-
-    int count = 0;
     while( stepIterator.hasNext() )
       {
       ElementSubGraph next = stepIterator.next();
+      EnumMultiMap annotationMap = stepIterator.getAnnotationMap( annotations );
 
-      EnumMultiMap annotations = new EnumMultiMap();
-
-      if( this.annotations.length != 0 )
-        {
-        Match match = stepIterator.getContractedMatches().get( count );
-
-        for( ElementAnnotation annotation : this.annotations )
-          annotations.addAll( annotation.getAnnotation(), match.getCapturedElements( annotation.getCapture() ) );
-        }
-
-      annotatedSubGraphs.put( next, annotations );
-
-      count++;
+      annotatedSubGraphs.put( next, annotationMap );
       }
 
-    return new Partitions( this, stepIterator, elementGraph, annotatedSubGraphs );
+    return new Partitions( this, elementGraph, expressionIterator.getContractedGraph(), expressionIterator.getMatches(), annotatedSubGraphs );
+    }
+
+  protected SubGraphIterator wrapIterator( ExpressionSubGraphIterator expressionIterator )
+    {
+    return expressionIterator;
     }
   }

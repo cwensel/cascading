@@ -24,25 +24,28 @@ import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.expressiongraph.NoGroupJoinMergeBoundaryTapExpressionGraph;
-import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
+import cascading.flow.planner.rule.partitioner.UniquePathRulePartitioner;
 import cascading.flow.stream.graph.IORole;
-import cascading.flow.tez.planner.rule.expressiongraph.TapOverGroupMergeExpressionGraph;
+import cascading.flow.tez.planner.rule.expressiongraph.TopDownSplitJoinBoundariesExpressionGraph;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
+import static cascading.flow.planner.rule.RulePartitioner.PartitionSource.PartitionCurrent;
 
 /**
  *
  */
-public class TapOverGroupMergeNodePartitioner extends ExpressionRulePartitioner
+public class SplitJoinBoundariesNodeRePartitioner extends UniquePathRulePartitioner
   {
-  public TapOverGroupMergeNodePartitioner()
+  public SplitJoinBoundariesNodeRePartitioner()
     {
     super(
       PartitionNodes,
 
+      PartitionCurrent,
+
       new RuleExpression(
         new NoGroupJoinMergeBoundaryTapExpressionGraph(),
-        new TapOverGroupMergeExpressionGraph()
+        new TopDownSplitJoinBoundariesExpressionGraph()
       ),
 
       new ElementAnnotation( ElementCapture.Include, IORole.sink )

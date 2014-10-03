@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.planner.iso.subgraph;
+package cascading.flow.planner.iso.subgraph.partitioner;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -30,6 +30,8 @@ import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.Extent;
+import cascading.flow.planner.iso.subgraph.GraphPartitioner;
+import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.util.EnumMultiMap;
 
 /**

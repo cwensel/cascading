@@ -22,6 +22,7 @@ package cascading.flow.planner.iso.subgraph;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.finder.Match;
-import cascading.flow.planner.rule.Rule;
+import cascading.flow.planner.iso.subgraph.partitioner.ExpressionGraphPartitioner;
+import cascading.flow.planner.rule.RulePartitioner;
 import cascading.util.EnumMultiMap;
 
 /**
@@ -37,35 +39,43 @@ import cascading.util.EnumMultiMap;
  */
 public class Partitions extends GraphResult
   {
+  private RulePartitioner rulePartitioner;
   private final GraphPartitioner graphPartitioner;
-  private final SubGraphIterator subGraphIterator;
   private final ElementGraph beginGraph;
   private final Map<ElementGraph, EnumMultiMap> annotatedSubGraphs;
+  private ElementGraph contractedGraph;
+  private List<Match> contractedMatches = Collections.emptyList();
 
   public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, Map<ElementGraph, EnumMultiMap> annotatedSubGraphs )
     {
-    this( graphPartitioner, null, beginGraph, annotatedSubGraphs );
+    this( graphPartitioner, beginGraph, null, null, annotatedSubGraphs );
     }
 
-  public Partitions( GraphPartitioner graphPartitioner, SubGraphIterator subGraphIterator, ElementGraph beginGraph, Map<ElementGraph, EnumMultiMap> annotatedSubGraphs )
+  public Partitions( GraphPartitioner graphPartitioner, ElementGraph beginGraph, ElementGraph contractedGraph, List<Match> contractedMatches, Map<ElementGraph, EnumMultiMap> annotatedSubGraphs )
     {
     this.graphPartitioner = graphPartitioner;
-    this.subGraphIterator = subGraphIterator;
     this.beginGraph = beginGraph;
+
+    if( contractedGraph != null )
+      this.contractedGraph = contractedGraph;
+
+    if( contractedMatches != null )
+      this.contractedMatches = contractedMatches;
+
     this.annotatedSubGraphs = annotatedSubGraphs;
+    }
+
+  public void setRulePartitioner( RulePartitioner rulePartitioner )
+    {
+    this.rulePartitioner = rulePartitioner;
     }
 
   public String getRuleName()
     {
-    if( getGraphPartitioner() instanceof Rule )
-      return ( (Rule) getGraphPartitioner() ).getRuleName();
+    if( rulePartitioner != null )
+      return rulePartitioner.getRuleName();
 
     return "none";
-    }
-
-  public GraphPartitioner getGraphPartitioner()
-    {
-    return graphPartitioner;
     }
 
   @Override
@@ -92,7 +102,7 @@ public class Partitions extends GraphResult
 
   public boolean hasContractedMatches()
     {
-    return subGraphIterator != null && !subGraphIterator.getContractedMatches().isEmpty();
+    return !contractedMatches.isEmpty();
     }
 
   public List<ElementGraph> getSubGraphs()
@@ -117,10 +127,8 @@ public class Partitions extends GraphResult
         expressionGraphPartitioner.getExpressionGraph().writeDOT( new File( path, makeFileName( count++, "expression-graph" ) ).toString() );
       }
 
-    if( subGraphIterator != null )
-      subGraphIterator.getContractedGraph().writeDOT( new File( path, makeFileName( count++, "contracted-graph" ) ).toString() );
-
-    List<Match> matches = subGraphIterator == null ? null : subGraphIterator.getContractedMatches();
+    if( contractedGraph != null )
+      contractedGraph.writeDOT( new File( path, makeFileName( count++, "contracted-graph" ) ).toString() );
 
     List<ElementGraph> subGraphs = getSubGraphs();
 
@@ -131,8 +139,8 @@ public class Partitions extends GraphResult
       // want to write annotations with elements
       new ElementDirectedGraph( subGraph, annotatedSubGraphs.get( subGraph ) ).writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
 
-      if( matches != null )
-        matches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, i, "partition-contracted-graph" ) ).toString() );
+      if( contractedMatches.size() < i )
+        contractedMatches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, i, "partition-contracted-graph" ) ).toString() );
       }
     }
 

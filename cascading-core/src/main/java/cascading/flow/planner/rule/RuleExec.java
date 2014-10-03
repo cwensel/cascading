@@ -233,7 +233,7 @@ public class RuleExec
         {
         ElementGraph priorAnnotated = annotateWithPriors( child, priors );
 
-        Partitions partitions = partitioner.getGraphPartitioner().partition( plannerContext, priorAnnotated, exclusions );
+        Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
         writeTrace( ruleResult, phase, rule, parent, child, partitions );
 
@@ -281,7 +281,7 @@ public class RuleExec
       Set<FlowElement> exclusions = getExclusions( priors, partitioner.getAnnotationExcludes() );
       ElementGraph priorAnnotated = annotateWithPriors( parent, priors );
 
-      Partitions partitions = partitioner.getGraphPartitioner().partition( plannerContext, priorAnnotated, exclusions );
+      Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
       writeTrace( ruleResult, phase, rule, parent, null, partitions );
 

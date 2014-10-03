@@ -18,33 +18,27 @@
  * limitations under the License.
  */
 
-package cascading.flow.tez.planner.rule.expressiongraph;
+package cascading.flow.planner.iso.subgraph.partitioner;
 
-import cascading.flow.planner.iso.expression.ElementCapture;
+import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
-import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
-import cascading.flow.planner.iso.expression.TypeExpression;
-import cascading.flow.planner.iso.finder.SearchOrder;
-import cascading.flow.planner.rule.elementexpression.GroupOrMergeElementExpression;
-import cascading.tap.Tap;
+import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
+import cascading.flow.planner.iso.subgraph.iterator.UniquePathSubGraphIterator;
 
 /**
  *
  */
-public class TapOverGroupMergeExpressionGraph extends ExpressionGraph
+public class UniquePathGraphPartitioner extends ExpressionGraphPartitioner
   {
-  public TapOverGroupMergeExpressionGraph()
+  public UniquePathGraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
-    super( SearchOrder.Topological );
+    super( contractionGraph, expressionGraph, annotations );
+    }
 
-    this
-      .arc(
-        new FlowElementExpression( ElementCapture.Primary, Tap.class ),
-
-        PathScopeExpression.ANY,
-
-        new GroupOrMergeElementExpression( TypeExpression.Topo.Splice )
-      );
+  @Override
+  protected SubGraphIterator wrapIterator( ExpressionSubGraphIterator expressionIterator )
+    {
+    return new UniquePathSubGraphIterator( expressionIterator );
     }
   }

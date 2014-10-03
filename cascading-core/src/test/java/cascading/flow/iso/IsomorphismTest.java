@@ -46,6 +46,7 @@ import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
+import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
 import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.RemoveBranchGraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
@@ -53,6 +54,7 @@ import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.RulePartitioner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
 import cascading.flow.planner.rule.expression.BufferAfterEveryExpression;
@@ -61,6 +63,7 @@ import cascading.flow.planner.rule.expressiongraph.MultiTapGroupExpressionGraph;
 import cascading.flow.planner.rule.expressiongraph.NoGroupTapExpressionGraph;
 import cascading.flow.planner.rule.expressiongraph.TapGroupTapExpressionGraph;
 import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
+import cascading.flow.planner.rule.partitioner.UniquePathRulePartitioner;
 import cascading.flow.planner.rule.partitioner.WholeGraphStepPartitioner;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
@@ -150,7 +153,7 @@ public class IsomorphismTest extends CascadingTestCase
     RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new StandardElementGraph() ) );
     FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
-    SubGraphIterator iterator = new SubGraphIterator(
+    SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new PlannerContext(),
       new NoGroupTapExpressionGraph(),
       new TapGroupTapExpressionGraph(),
@@ -184,7 +187,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     transformed.writeDOTs( getPlanPath() + "/transform/" );
 
-    SubGraphIterator iterator = new SubGraphIterator(
+    SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new PlannerContext(),
       new TestNoGroupTapExpressionGraph(),
       new TestConsecutiveTapsExpressionGraph(),
@@ -240,7 +243,8 @@ public class IsomorphismTest extends CascadingTestCase
     );
 
     ruleRegistry.addRule(
-      new ExpressionRulePartitioner( PlanPhase.PartitionPipelines,
+      new UniquePathRulePartitioner( PlanPhase.PartitionNodes,
+        RulePartitioner.PartitionSource.PartitionCurrent,
         new RuleExpression(
           new TestNoGroupTapExpressionGraph(),
           new TestBoundarySelJoinCoGroupExpressionGraph()
@@ -283,7 +287,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     flowElementGraph.writeDOT( getPlanPath() + "/node.dot" );
 
-    SubGraphIterator iterator = new SubGraphIterator(
+    ExpressionSubGraphIterator iterator = new ExpressionSubGraphIterator(
       new PlannerContext(),
       new TestNoGroupTapExpressionGraph(),
       new TestConsecutiveTapsExpressionGraph(),

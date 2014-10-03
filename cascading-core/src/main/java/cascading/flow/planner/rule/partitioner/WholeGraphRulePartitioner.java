@@ -20,7 +20,7 @@
 
 package cascading.flow.planner.rule.partitioner;
 
-import cascading.flow.planner.iso.subgraph.WholeGraphPartitioner;
+import cascading.flow.planner.iso.subgraph.partitioner.WholeGraphPartitioner;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RulePartitioner;
 

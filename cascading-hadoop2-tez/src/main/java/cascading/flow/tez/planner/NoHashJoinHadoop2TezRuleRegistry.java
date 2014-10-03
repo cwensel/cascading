@@ -32,16 +32,15 @@ import cascading.flow.planner.rule.transformer.ApplyDebugLevelTransformer;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
 import cascading.flow.tez.planner.rule.assertion.NoHashJoinAssert;
 import cascading.flow.tez.planner.rule.partitioner.ConsecutiveGroupOrMergesNodePartitioner;
-import cascading.flow.tez.planner.rule.partitioner.TapOverGroupMergeNodePartitioner;
+import cascading.flow.tez.planner.rule.partitioner.SplitJoinBoundariesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.TopDownBoundariesNodePartitioner;
-import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceBoundariesSplitSelfCoGroupTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceCheckpointTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitMergeGroupTransformer;
 
 /**
  * The NoHashJoinHadoop2TezRuleRegistry assumes the plan has no {@link cascading.pipe.HashJoin} Pipes in the
  * assembly, otherwise an planner failure will be thrown.
- *
+ * <p/>
  * This rule registry can be used if the default registry is failing or producing less than optimal plans.
  *
  * @see cascading.flow.tez.planner.HashJoinHadoop2TezRuleRegistry
@@ -61,13 +60,6 @@ public class NoHashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new EveryAfterBufferAssert() );
     addRule( new SplitBeforeEveryAssert() );
 
-    // Balance with Boundary Pipes
-    // goes away with TEZ-1190
-    // currently testCoGroupAroundCoGroupWith and testCoGroupAroundCoGroupWithout are less optimal when enabled
-    // causes testCoGroupSelf to fail
-    // could be replaced with a sub-graph-iteration over all edges
-    addRule( new BoundaryBalanceBoundariesSplitSelfCoGroupTransformer() );
-
     addRule( new BoundaryBalanceGroupSplitMergeGroupTransformer() );
     addRule( new BoundaryBalanceCheckpointTransformer() );
 
@@ -84,9 +76,9 @@ public class NoHashJoinHadoop2TezRuleRegistry extends RuleRegistry
     // PostSteps
 
     // PartitionNodes
-    addRule( new TapOverGroupMergeNodePartitioner() );
     addRule( new TopDownBoundariesNodePartitioner() );
     addRule( new ConsecutiveGroupOrMergesNodePartitioner() );
+    addRule( new SplitJoinBoundariesNodeRePartitioner() ); // testCoGroupSelf - compensates for tez-1190
 
     // PostNodes
     }
