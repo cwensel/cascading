@@ -59,6 +59,7 @@ public class RuleExec
   private static final Logger LOG = LoggerFactory.getLogger( RuleExec.class );
 
   private static final int ELEMENT_THRESHOLD = 600;
+
   final TraceWriter traceWriter = new TraceWriter();
 
   RuleRegistry registry;
@@ -205,13 +206,12 @@ public class RuleExec
 
     RulePartitioner partitioner = (RulePartitioner) rule;
 
-    if( partitioner.getPartition() == RulePartitioner.Partition.SplitParent )
+    if( partitioner.getPartitionSource() == RulePartitioner.PartitionSource.PartitionParent )
       handleParentPartitioning( plannerContext, ruleResult, phase, rule, partitioner );
-    else if( partitioner.getPartition() == RulePartitioner.Partition.SplitCurrent )
+    else if( partitioner.getPartitionSource() == RulePartitioner.PartitionSource.PartitionCurrent )
       handleCurrentPartitioning( plannerContext, ruleResult, phase, rule, partitioner );
     else
-      throw new IllegalStateException( "unknown partitioning type: " + partitioner.getPartition() );
-
+      throw new IllegalStateException( "unknown partitioning type: " + partitioner.getPartitionSource() );
     }
 
   private void handleCurrentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, Rule rule, RulePartitioner partitioner )
@@ -233,7 +233,7 @@ public class RuleExec
         {
         ElementGraph priorAnnotated = annotateWithPriors( child, priors );
 
-        Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+        Partitions partitions = partitioner.getGraphPartitioner().partition( plannerContext, priorAnnotated, exclusions );
 
         writeTrace( ruleResult, phase, rule, parent, child, partitions );
 
@@ -281,7 +281,7 @@ public class RuleExec
       Set<FlowElement> exclusions = getExclusions( priors, partitioner.getAnnotationExcludes() );
       ElementGraph priorAnnotated = annotateWithPriors( parent, priors );
 
-      Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+      Partitions partitions = partitioner.getGraphPartitioner().partition( plannerContext, priorAnnotated, exclusions );
 
       writeTrace( ruleResult, phase, rule, parent, null, partitions );
 

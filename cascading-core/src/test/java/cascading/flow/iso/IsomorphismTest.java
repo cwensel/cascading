@@ -53,7 +53,6 @@ import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleAssert;
 import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.RulePartitioner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleResult;
 import cascading.flow.planner.rule.expression.BufferAfterEveryExpression;
@@ -61,6 +60,7 @@ import cascading.flow.planner.rule.expression.LoneGroupExpression;
 import cascading.flow.planner.rule.expressiongraph.MultiTapGroupExpressionGraph;
 import cascading.flow.planner.rule.expressiongraph.NoGroupTapExpressionGraph;
 import cascading.flow.planner.rule.expressiongraph.TapGroupTapExpressionGraph;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.planner.rule.partitioner.WholeGraphStepPartitioner;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
@@ -231,7 +231,7 @@ public class IsomorphismTest extends CascadingTestCase
     ruleRegistry.addRule( new WholeGraphStepPartitioner() );
 
     ruleRegistry.addRule(
-      new RulePartitioner( PlanPhase.PartitionNodes,
+      new ExpressionRulePartitioner( PlanPhase.PartitionNodes,
         new RuleExpression(
           new TestNoGroupTapExpressionGraph(),
           new MultiTapGroupExpressionGraph()
@@ -240,7 +240,7 @@ public class IsomorphismTest extends CascadingTestCase
     );
 
     ruleRegistry.addRule(
-      new RulePartitioner( PlanPhase.PartitionPipelines,
+      new ExpressionRulePartitioner( PlanPhase.PartitionPipelines,
         new RuleExpression(
           new TestNoGroupTapExpressionGraph(),
           new TestBoundarySelJoinCoGroupExpressionGraph()

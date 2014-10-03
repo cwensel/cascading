@@ -25,7 +25,7 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
 /**
  * A RuleExpression describes where a {@link cascading.flow.planner.rule.Rule} is applied in an element graph. Where
  * a Rule can be a {@link cascading.flow.planner.rule.RuleAssert}, {@link cascading.flow.planner.rule.RuleTransformer},
- * or {@link cascading.flow.planner.rule.RulePartitioner}.
+ * or {@link cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner}.
  * <p/>
  * To pin down how a Rule behaves and where, a RuleExpression relies on the
  * {@link cascading.flow.planner.iso.expression.ExpressionGraph} class, where an ExpressionGraph is an actual graph

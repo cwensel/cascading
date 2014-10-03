@@ -23,18 +23,17 @@ package cascading.flow.tez.planner.rule.partitioner;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.RulePartitioner;
 import cascading.flow.planner.rule.expressiongraph.NoGroupJoinMergeBoundaryTapExpressionGraph;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.stream.graph.IORole;
 import cascading.flow.tez.planner.rule.expressiongraph.TopDownConsecutiveBoundariesExpressionGraph;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 
-
 /**
  *
  */
-public class TopDownBoundariesNodePartitioner extends RulePartitioner
+public class TopDownBoundariesNodePartitioner extends ExpressionRulePartitioner
   {
   public TopDownBoundariesNodePartitioner()
     {

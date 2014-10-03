@@ -106,11 +106,16 @@ public class Partitions extends GraphResult
     int count = 0;
     beginGraph.writeDOT( new File( path, makeFileName( count++, "element-graph" ) ).toString() );
 
-    if( graphPartitioner.getContractionGraph() != null )
-      graphPartitioner.getContractionGraph().writeDOT( new File( path, makeFileName( count++, "contraction-graph" ) ).toString() );
+    if( graphPartitioner instanceof ExpressionGraphPartitioner )
+      {
+      ExpressionGraphPartitioner expressionGraphPartitioner = (ExpressionGraphPartitioner) graphPartitioner;
 
-    if( graphPartitioner.getExpressionGraph() != null )
-      graphPartitioner.getExpressionGraph().writeDOT( new File( path, makeFileName( count++, "expression-graph" ) ).toString() );
+      if( expressionGraphPartitioner.getContractionGraph() != null )
+        expressionGraphPartitioner.getContractionGraph().writeDOT( new File( path, makeFileName( count++, "contraction-graph" ) ).toString() );
+
+      if( expressionGraphPartitioner.getExpressionGraph() != null )
+        expressionGraphPartitioner.getExpressionGraph().writeDOT( new File( path, makeFileName( count++, "expression-graph" ) ).toString() );
+      }
 
     if( subGraphIterator != null )
       subGraphIterator.getContractedGraph().writeDOT( new File( path, makeFileName( count++, "contracted-graph" ) ).toString() );

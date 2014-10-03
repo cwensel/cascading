@@ -156,6 +156,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
   public List<Process> getElementSourceProcesses( FlowElement flowElement )
     {
     List<Process> sources = new ArrayList<>();
+
     for( Process process : vertexSet() )
       {
       if( process.getSinkElements().contains( flowElement ) )
@@ -168,6 +169,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
   public List<Process> getElementSinkProcesses( FlowElement flowElement )
     {
     List<Process> sinks = new ArrayList<>();
+
     for( Process process : vertexSet() )
       {
       if( process.getSourceElements().contains( flowElement ) )

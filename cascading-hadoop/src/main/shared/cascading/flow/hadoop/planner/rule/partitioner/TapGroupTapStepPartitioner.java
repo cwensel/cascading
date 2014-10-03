@@ -21,14 +21,14 @@
 package cascading.flow.hadoop.planner.rule.partitioner;
 
 import cascading.flow.hadoop.planner.rule.expression.TapGroupTapPartitionExpression;
-import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionSteps;
 
 /**
  *
  */
-public class TapGroupTapStepPartitioner extends RulePartitioner
+public class TapGroupTapStepPartitioner extends ExpressionRulePartitioner
   {
   public TapGroupTapStepPartitioner()
     {

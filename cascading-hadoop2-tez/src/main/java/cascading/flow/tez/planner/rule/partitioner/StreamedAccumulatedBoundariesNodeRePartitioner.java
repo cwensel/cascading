@@ -21,7 +21,7 @@
 package cascading.flow.tez.planner.rule.partitioner;
 
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.tez.planner.rule.expressiongraph.NoGroupMergeBoundaryTapExpressionGraph;
 import cascading.flow.tez.planner.rule.expressiongraph.StreamedAccumulatedBoundariesExpressionGraph;
 
@@ -30,13 +30,13 @@ import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 /**
  *
  */
-public class StreamedAccumulatedBoundariesNodeRePartitioner extends RulePartitioner
+public class StreamedAccumulatedBoundariesNodeRePartitioner extends ExpressionRulePartitioner
   {
   public StreamedAccumulatedBoundariesNodeRePartitioner()
     {
     super(
       PartitionNodes,
-      Partition.SplitCurrent, // force repartitioning
+      PartitionSource.PartitionCurrent, // force repartitioning
 
       new RuleExpression(
         new NoGroupMergeBoundaryTapExpressionGraph(),

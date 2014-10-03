@@ -18,26 +18,30 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.partitioner;
+package cascading.flow.tez.planner.rule.expressiongraph;
 
-import cascading.flow.hadoop.planner.rule.expression.StreamedOnlySourcesPipelinePartitionExpression;
-import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
-import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
-import cascading.flow.stream.annotations.StreamMode;
-
-import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
+import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.expression.TypeExpression;
+import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression;
 
 /**
  *
  */
-public class StreamedOnlySourcesPipelinePartitioner extends ExpressionRulePartitioner
+public class TopDownSplitJoinBoundariesExpressionGraph extends ExpressionGraph
   {
-  public StreamedOnlySourcesPipelinePartitioner()
+  public TopDownSplitJoinBoundariesExpressionGraph()
     {
-    setPhase( PartitionPipelines )
-      .setRuleExpression( new StreamedOnlySourcesPipelinePartitionExpression() )
-      .addAnnotation( new ElementAnnotation( ElementCapture.Primary, StreamMode.Streamed ) )
-      .addAnnotationExclude( StreamMode.Streamed );
+    super( SearchOrder.Topological );
+
+    this.arc(
+      new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Split ),
+
+      PathScopeExpression.ANY,
+
+      new BoundariesElementExpression( TypeExpression.Topo.Splice )
+    );
     }
   }

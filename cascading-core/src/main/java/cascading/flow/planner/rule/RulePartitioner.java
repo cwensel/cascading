@@ -20,119 +20,41 @@
 
 package cascading.flow.planner.rule;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import cascading.flow.planner.iso.ElementAnnotation;
-import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 
 /**
- * The RulePartitioner class is responsible for partitioning an element graph into smaller sub-graphs.
- * <p/>
- * It may also re-partition a given graph, in place replacing it with its children, if any.
+ *
  */
-public class RulePartitioner extends GraphPartitioner implements Rule
+public abstract class RulePartitioner implements Rule
   {
-  public enum Partition
+  public abstract Enum[] getAnnotationExcludes();
+
+  public enum PartitionSource
     {
       /**
        * Partition the parent into children.
        */
-      SplitParent,
+      PartitionParent,
 
       /**
        * Partition a given child into more children, removing the original child.
        */
-      SplitCurrent
+      PartitionCurrent
     }
 
-  PlanPhase phase;
-  Partition partition = Partition.SplitParent;
-  Enum[] annotationExcludes = new Enum[ 0 ];
+  protected PlanPhase phase;
+  protected PartitionSource partitionSource = PartitionSource.PartitionParent;
+  protected GraphPartitioner graphPartitioner;
 
-  public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression )
-    {
-    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
-    }
-
-  public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation... annotations )
-    {
-    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
-    }
-
-  public RulePartitioner( PlanPhase phase, RuleExpression ruleExpression, Enum... annotationExcludes )
-    {
-    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
-
-    if( annotationExcludes != null )
-      this.annotationExcludes = annotationExcludes;
-    }
-
-  public RulePartitioner( PlanPhase phase, Partition partition, RuleExpression ruleExpression )
-    {
-    this( phase, partition, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
-    }
-
-  public RulePartitioner( PlanPhase phase, Partition partition, RuleExpression ruleExpression, ElementAnnotation... annotations )
-    {
-    this( phase, partition, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
-    }
-
-  public RulePartitioner( PlanPhase phase, Partition partition, RuleExpression ruleExpression, Enum... annotationExcludes )
-    {
-    this( phase, partition, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
-
-    if( annotationExcludes != null )
-      this.annotationExcludes = annotationExcludes;
-    }
-
-  protected RulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
-    {
-    super( contractionGraph, expressionGraph, annotations );
-    this.phase = phase;
-    }
-
-  protected RulePartitioner( PlanPhase phase, ExpressionGraph expressionGraph )
-    {
-    super( null, expressionGraph );
-    this.phase = phase;
-    }
-
-  protected RulePartitioner( PlanPhase phase )
+  public RulePartitioner( PlanPhase phase, PartitionSource partitionSource, GraphPartitioner graphPartitioner )
     {
     this.phase = phase;
-    }
-
-  protected RulePartitioner( PlanPhase phase, Partition partition, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
-    {
-    super( contractionGraph, expressionGraph, annotations );
-    this.phase = phase;
-    this.partition = partition;
-    }
-
-  protected RulePartitioner( PlanPhase phase, Partition partition, ExpressionGraph expressionGraph )
-    {
-    super( null, expressionGraph );
-    this.phase = phase;
-    this.partition = partition;
-    }
-
-  protected RulePartitioner( PlanPhase phase, Partition partition )
-    {
-    this.phase = phase;
-    this.partition = partition;
+    this.partitionSource = partitionSource;
+    this.graphPartitioner = graphPartitioner;
     }
 
   public RulePartitioner()
     {
-    }
-
-  protected RulePartitioner setPhase( PlanPhase phase )
-    {
-    this.phase = phase;
-
-    return this;
     }
 
   @Override
@@ -141,57 +63,14 @@ public class RulePartitioner extends GraphPartitioner implements Rule
     return phase;
     }
 
-  public Partition getPartition()
+  public PartitionSource getPartitionSource()
     {
-    return partition;
+    return partitionSource;
     }
 
-  public RulePartitioner setRuleExpression( RuleExpression ruleExpression )
+  public GraphPartitioner getGraphPartitioner()
     {
-    this.contractionGraph = ruleExpression.getContractionExpression();
-    this.expressionGraph = ruleExpression.getMatchExpression();
-
-    return this;
-    }
-
-  public RulePartitioner addAnnotation( ElementAnnotation annotation )
-    {
-    ArrayList<ElementAnnotation> elementAnnotations = new ArrayList<>( Arrays.asList( this.annotations ) );
-
-    elementAnnotations.add( annotation );
-
-    this.annotations = elementAnnotations.toArray( new ElementAnnotation[ elementAnnotations.size() ] );
-
-    return this;
-    }
-
-  public RulePartitioner setAnnotations( ElementAnnotation... annotations )
-    {
-    this.annotations = annotations;
-
-    return this;
-    }
-
-  public void setAnnotationExcludes( Enum... annotationExcludes )
-    {
-    if( annotationExcludes != null )
-      this.annotationExcludes = annotationExcludes;
-    }
-
-  public RulePartitioner addAnnotationExclude( Enum exclude )
-    {
-    ArrayList<Enum> exclusions = new ArrayList<>( Arrays.asList( this.annotationExcludes ) );
-
-    exclusions.add( exclude );
-
-    this.annotationExcludes = exclusions.toArray( new Enum[ exclusions.size() ] );
-
-    return this;
-    }
-
-  public Enum[] getAnnotationExcludes()
-    {
-    return annotationExcludes;
+    return graphPartitioner;
     }
 
   @Override

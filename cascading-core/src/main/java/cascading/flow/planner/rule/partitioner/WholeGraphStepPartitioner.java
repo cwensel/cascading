@@ -20,14 +20,12 @@
 
 package cascading.flow.planner.rule.partitioner;
 
-import cascading.flow.planner.rule.RulePartitioner;
-
 import static cascading.flow.planner.rule.PlanPhase.PartitionSteps;
 
 /**
  *
  */
-public class WholeGraphStepPartitioner extends RulePartitioner
+public class WholeGraphStepPartitioner extends WholeGraphRulePartitioner
   {
   public WholeGraphStepPartitioner()
     {

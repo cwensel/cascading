@@ -21,20 +21,36 @@
 package cascading.flow.planner.iso.subgraph;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
+import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementMaskSubGraph;
+import cascading.flow.planner.graph.Extent;
+import cascading.util.EnumMultiMap;
 
 /**
  *
  */
-public abstract class GraphPartitioner
+public class WholeGraphPartitioner extends GraphPartitioner
   {
-  public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph )
+  public WholeGraphPartitioner()
     {
-    return partition( plannerContext, elementGraph, null );
     }
 
-  public abstract Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes );
+  public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
+    {
+    Map<ElementGraph, EnumMultiMap> annotatedSubGraphs = new LinkedHashMap<>();
+
+    // need a safe copy
+    if( elementGraph.containsVertex( Extent.head ) )
+      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+
+    annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new EnumMultiMap() );
+
+    return new Partitions( this, elementGraph, annotatedSubGraphs );
+    }
   }

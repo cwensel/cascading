@@ -23,7 +23,7 @@ package cascading.flow.hadoop.planner.rule.partitioner;
 import cascading.flow.hadoop.planner.rule.expression.StreamedAccumulatedTapsPipelinePartitionExpression;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
-import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.stream.annotations.StreamMode;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
@@ -31,7 +31,7 @@ import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
 /**
  *
  */
-public class StreamedAccumulatedTapsPipelinePartitioner extends RulePartitioner
+public class StreamedAccumulatedTapsPipelinePartitioner extends ExpressionRulePartitioner
   {
   public StreamedAccumulatedTapsPipelinePartitioner()
     {

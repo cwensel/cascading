@@ -23,7 +23,7 @@ package cascading.flow.hadoop.planner.rule.partitioner;
 import cascading.flow.hadoop.planner.rule.expression.StreamedSelfJoinSourcesPipelinePartitionExpression;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
-import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.stream.annotations.StreamMode;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
@@ -31,7 +31,7 @@ import static cascading.flow.planner.rule.PlanPhase.PartitionPipelines;
 /**
  *
  */
-public class StreamedSelfJoinSourcesPipelinePartitioner extends RulePartitioner
+public class StreamedSelfJoinSourcesPipelinePartitioner extends ExpressionRulePartitioner
   {
 
   public StreamedSelfJoinSourcesPipelinePartitioner()

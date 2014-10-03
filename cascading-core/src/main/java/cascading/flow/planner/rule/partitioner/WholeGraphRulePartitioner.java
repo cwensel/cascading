@@ -20,17 +20,23 @@
 
 package cascading.flow.planner.rule.partitioner;
 
-import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
+import cascading.flow.planner.iso.subgraph.WholeGraphPartitioner;
+import cascading.flow.planner.rule.PlanPhase;
+import cascading.flow.planner.rule.RulePartitioner;
 
 /**
  *
  */
-public class WholeGraphNodePartitioner extends WholeGraphRulePartitioner
+public class WholeGraphRulePartitioner extends RulePartitioner
   {
-  public WholeGraphNodePartitioner()
+  protected WholeGraphRulePartitioner( PlanPhase phase )
     {
-    super(
-      PartitionNodes
-    );
+    super( phase, PartitionSource.PartitionParent, new WholeGraphPartitioner() );
+    }
+
+  @Override
+  public Enum[] getAnnotationExcludes()
+    {
+    return new Enum[ 0 ];
     }
   }

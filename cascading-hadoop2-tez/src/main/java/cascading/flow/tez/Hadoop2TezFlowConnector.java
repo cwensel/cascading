@@ -27,6 +27,7 @@ import cascading.flow.FlowConnector;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.tez.planner.Hadoop2TezPlanner;
+import cascading.flow.tez.planner.HashJoin2Hadoop2TezRuleRegistry;
 import cascading.flow.tez.planner.HashJoinHadoop2TezRuleRegistry;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
@@ -73,6 +74,7 @@ public class Hadoop2TezFlowConnector extends FlowConnector
   protected RuleRegistry createDefaultRuleRegistry()
     {
 //    return new NoHashJoinHadoop2TezRuleRegistry();
-    return new HashJoinHadoop2TezRuleRegistry();
+//    return new HashJoinHadoop2TezRuleRegistry();
+    return new HashJoin2Hadoop2TezRuleRegistry();
     }
   }

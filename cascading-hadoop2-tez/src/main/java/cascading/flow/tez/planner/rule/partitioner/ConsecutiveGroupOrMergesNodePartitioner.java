@@ -21,8 +21,8 @@
 package cascading.flow.tez.planner.rule.partitioner;
 
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.RulePartitioner;
 import cascading.flow.planner.rule.expressiongraph.NoGroupJoinMergeBoundaryTapExpressionGraph;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.tez.planner.rule.expressiongraph.ConsecutiveGroupOrMergeExpressionGraph;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
@@ -30,7 +30,7 @@ import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 /**
  * Merge -> (Merge or GroupBy)
  */
-public class ConsecutiveGroupOrMergesNodePartitioner extends RulePartitioner
+public class ConsecutiveGroupOrMergesNodePartitioner extends ExpressionRulePartitioner
   {
   public ConsecutiveGroupOrMergesNodePartitioner()
     {

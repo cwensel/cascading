@@ -21,8 +21,8 @@
 package cascading.flow.tez.planner.rule.partitioner;
 
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.RulePartitioner;
 import cascading.flow.planner.rule.expressiongraph.NoGroupJoinMergeBoundaryTapExpressionGraph;
+import cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner;
 import cascading.flow.tez.planner.rule.expressiongraph.StreamedOnlySourcesExpressionGraph;
 
 import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
@@ -30,13 +30,13 @@ import static cascading.flow.planner.rule.PlanPhase.PartitionNodes;
 /**
  *
  */
-public class StreamedOnlySourcesNodeRePartitioner extends RulePartitioner
+public class StreamedOnlySourcesNodeRePartitioner extends ExpressionRulePartitioner
   {
   public StreamedOnlySourcesNodeRePartitioner()
     {
     super(
       PartitionNodes,
-      Partition.SplitCurrent, // force repartitioning
+      PartitionSource.PartitionCurrent, // force repartitioning
 
       new RuleExpression(
         new NoGroupJoinMergeBoundaryTapExpressionGraph(),
