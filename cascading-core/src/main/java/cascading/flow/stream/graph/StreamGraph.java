@@ -470,6 +470,8 @@ public class StreamGraph
     if( path == null )
       return;
 
+    classifier = Util.cleansePathName( classifier );
+
     path = String.format( "%s/streamgraph-%s-%s-%s.dot", path, id, classifier, discriminator );
 
     printGraph( path );

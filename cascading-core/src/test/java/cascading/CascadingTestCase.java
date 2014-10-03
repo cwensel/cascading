@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.stream.graph.StreamGraph;
 import cascading.operation.Aggregator;
 import cascading.operation.Buffer;
 import cascading.operation.ConcreteCall;
@@ -92,6 +93,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
       System.setProperty( FlowPlanner.TRACE_PLAN_TRANSFORM_PATH, Util.join( "/", getPlanPath(), "planner" ) );
       System.setProperty( FlowPlanner.TRACE_PLAN_PATH, getPlanPath() );
       System.setProperty( FlowPlanner.TRACE_STATS_PATH, getPlanPath() );
+      System.setProperty( "platform." + StreamGraph.DOT_FILE_PATH, Util.join( "/", getPlanPath(), "stream" ) ); // pass down
       }
     }
 
@@ -442,7 +444,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
 
   public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, Fields selector, C collection ) throws IOException
     {
-    try (TupleEntryIterator iterator = flow.openTapForRead( tap ))
+    try( TupleEntryIterator iterator = flow.openTapForRead( tap ) )
       {
       return asCollection( iterator, selector, collection );
       }

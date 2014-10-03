@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  * typically user tests don't need to have a cluster running to test their functionality so leaving the default is
  * reasonable.
  */
-@RunWith(PlatformRunner.class)
+@RunWith( PlatformRunner.class )
 public abstract class PlatformTestCase extends CascadingTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( PlatformTestCase.class );

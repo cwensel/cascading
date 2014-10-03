@@ -516,6 +516,7 @@ public class Util
     {
     try
       {
+      new File( filename ).getParentFile().mkdirs();
       Writer writer = new FileWriter( filename );
 
       try
