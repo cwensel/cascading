@@ -67,6 +67,13 @@ public class Unique extends SubAssembly
       NO_NULLS
     }
 
+  public enum Cache
+    {
+      Num_Keys_Flushed,
+      Num_Keys_Hit,
+      Num_Keys_Missed
+    }
+
   /**
    * Class FilterPartialDuplicates is a {@link cascading.operation.Filter} that is used to remove observed duplicates from the tuple stream.
    * <p/>
@@ -129,14 +136,19 @@ public class Unique extends SubAssembly
       }
 
     @Override
-    public void prepare( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
+    public void prepare( final FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
       {
       operationCall.setContext( new LinkedHashMap<Tuple, Object>( threshold, 0.75f, true )
       {
       @Override
       protected boolean removeEldestEntry( Map.Entry eldest )
         {
-        return size() > threshold;
+        boolean doFlush = size() > threshold;
+
+        if( doFlush )
+          flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
+
+        return doFlush;
         }
       } );
       }
@@ -160,10 +172,15 @@ public class Unique extends SubAssembly
         }
 
       if( filterCall.getContext().containsKey( args ) )
+        {
+        flowProcess.increment( Cache.Num_Keys_Hit, 1 );
         return true;
+        }
 
       // only do the copy here
       filterCall.getContext().put( TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTupleCopy() ), null );
+
+      flowProcess.increment( Cache.Num_Keys_Missed, 1 );
 
       return false;
       }
