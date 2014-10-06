@@ -26,7 +26,7 @@ idea {
 
 ext.hadoop2Version = '2.4.0'
 //ext.tezVersion = '0.5.0-SNAPSHOT'
-ext.tezVersion = '0.5.0'
+ext.tezVersion = '0.5.1'
 
 if( System.properties[ 'hadoop2tez.release.final' ] )
   tezVersion = System.properties[ 'hadoop2tez.release.final' ]
