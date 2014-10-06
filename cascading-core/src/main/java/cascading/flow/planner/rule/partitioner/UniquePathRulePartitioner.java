@@ -34,7 +34,10 @@ import cascading.flow.planner.rule.RuleExpression;
  * unique path between the head and tail of the graph.
  * <p/>
  * This partitioner currently requires the matched sub-graph (per the RuleExpression) to have a single head and single
- * tail.
+ * tail. All paths will between the matched head and tail.
+ *
+ * Any remaining elements from the original graph will be included in the final path sub-graph.
+ *
  */
 public class UniquePathRulePartitioner extends ExpressionRulePartitioner
   {
@@ -85,6 +88,7 @@ public class UniquePathRulePartitioner extends ExpressionRulePartitioner
   @Override
   protected ExpressionGraphPartitioner createExpressionGraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation[] annotations )
     {
-    return new UniquePathGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    // include remainders by default
+    return new UniquePathGraphPartitioner( contractionGraph, expressionGraph, true, annotations );
     }
   }

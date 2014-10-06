@@ -22,14 +22,16 @@ package cascading.flow.planner.iso.subgraph;
 
 import java.util.Iterator;
 
-import cascading.flow.planner.graph.ElementSubGraph;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.util.EnumMultiMap;
 
 /**
  *
  */
-public interface SubGraphIterator extends Iterator<ElementSubGraph>
+public interface SubGraphIterator extends Iterator<ElementGraph>
   {
+  ElementGraph getElementGraph();
+
   EnumMultiMap getAnnotationMap( ElementAnnotation[] annotations );
   }

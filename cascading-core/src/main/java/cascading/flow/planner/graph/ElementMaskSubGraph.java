@@ -43,35 +43,49 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
 
   private static class FlowElementMaskFunctor implements MaskFunctor<FlowElement, Scope>
     {
-    Set<FlowElement> masked = new HashSet<>();
+    Set<FlowElement> maskedElements = new HashSet<>();
+    Set<Scope> maskedScopes = new HashSet<>();
+
+    public FlowElementMaskFunctor( Collection<FlowElement> flowElements, Collection<Scope> scopes )
+      {
+      this( flowElements );
+
+      if( scopes != null )
+        maskedScopes.addAll( scopes );
+      }
 
     public FlowElementMaskFunctor( Collection<FlowElement> flowElements )
       {
       if( flowElements != null )
-        masked.addAll( flowElements );
+        maskedElements.addAll( flowElements );
       }
 
     @Override
     public boolean isEdgeMasked( Scope scope )
       {
-      return false;
+      return maskedScopes.contains( scope );
       }
 
     @Override
     public boolean isVertexMasked( FlowElement flowElement )
       {
-      return masked.contains( flowElement );
+      return maskedElements.contains( flowElement );
       }
     }
 
-  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElement... flowElements )
+  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElement... maskedFlowElements )
     {
-    this( elementGraph, new FlowElementMaskFunctor( Arrays.asList( flowElements ) ) );
+    this( elementGraph, new FlowElementMaskFunctor( Arrays.asList( maskedFlowElements ) ) );
     }
 
-  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, Collection<FlowElement> flowElements )
+  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, Collection<FlowElement> maskedFlowElements )
     {
-    this( elementGraph, new FlowElementMaskFunctor( flowElements ) );
+    this( elementGraph, new FlowElementMaskFunctor( maskedFlowElements ) );
+    }
+
+  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, Collection<FlowElement> maskedFlowElements, Collection<Scope> maskedScopes )
+    {
+    this( elementGraph, new FlowElementMaskFunctor( maskedFlowElements, maskedScopes ) );
     }
 
   public ElementMaskSubGraph( ElementMaskSubGraph graph )

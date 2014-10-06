@@ -21,18 +21,20 @@
 package cascading.flow.planner.iso.subgraph.iterator;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.flow.planner.graph.ElementGraphs;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.util.EnumMultiMap;
-import cascading.util.Util;
 import org.jgrapht.GraphPath;
 
+import static cascading.flow.planner.graph.ElementGraphs.*;
+import static cascading.util.Util.getFirst;
 import static org.jgrapht.Graphs.getPathVertexList;
 
 /**
@@ -41,12 +43,18 @@ import static org.jgrapht.Graphs.getPathVertexList;
 public class UniquePathSubGraphIterator implements SubGraphIterator
   {
   SubGraphIterator parentIterator;
-  ElementSubGraph current = null;
+  ElementGraph current = null;
   private Iterator<GraphPath<FlowElement, Scope>> pathsIterator;
 
   public UniquePathSubGraphIterator( SubGraphIterator parentIterator )
     {
     this.parentIterator = parentIterator;
+    }
+
+  @Override
+  public ElementGraph getElementGraph()
+    {
+    return parentIterator.getElementGraph();
     }
 
   @Override
@@ -80,18 +88,18 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
 
     if( pathsIterator == null )
       {
-      Set<FlowElement> sources = ElementGraphs.findSources( current, FlowElement.class );
-      Set<FlowElement> sinks = ElementGraphs.findSinks( current, FlowElement.class );
+      Set<FlowElement> sources = findSources( current, FlowElement.class );
+      Set<FlowElement> sinks = findSinks( current, FlowElement.class );
 
       if( sources.size() > 1 || sinks.size() > 1 )
         throw new IllegalArgumentException( "only supports single source and single sink graphs" );
 
-      pathsIterator = ElementGraphs.getAllShortestPathsBetween( current, Util.getFirst( sources ), Util.getFirst( sinks ) ).iterator();
+      pathsIterator = getAllShortestPathsBetween( current, getFirst( sources ), getFirst( sinks ) ).iterator();
       }
     }
 
   @Override
-  public ElementSubGraph next()
+  public ElementGraph next()
     {
     if( !pathsIterator.hasNext() )
       {
@@ -102,8 +110,10 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
       }
 
     GraphPath<FlowElement, Scope> path = pathsIterator.next();
+    List<FlowElement> vertexList = getPathVertexList( path );
+    List<Scope> edgeList = path.getEdgeList();
 
-    return new ElementSubGraph( current, getPathVertexList( path ), path.getEdgeList() );
+    return new ElementSubGraph( current, vertexList, edgeList );
     }
 
   @Override

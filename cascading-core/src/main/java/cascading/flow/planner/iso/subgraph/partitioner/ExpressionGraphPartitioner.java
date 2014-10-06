@@ -27,7 +27,6 @@ import java.util.Map;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
@@ -83,7 +82,7 @@ public class ExpressionGraphPartitioner extends GraphPartitioner
 
     while( stepIterator.hasNext() )
       {
-      ElementSubGraph next = stepIterator.next();
+      ElementGraph next = stepIterator.next();
       EnumMultiMap annotationMap = stepIterator.getAnnotationMap( annotations );
 
       annotatedSubGraphs.put( next, annotationMap );

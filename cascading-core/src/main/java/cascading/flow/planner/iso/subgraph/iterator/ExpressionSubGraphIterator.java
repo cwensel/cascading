@@ -30,8 +30,6 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementGraphs;
-import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
@@ -42,13 +40,15 @@ import cascading.flow.planner.iso.transformer.ContractedTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.util.EnumMultiMap;
 
+import static cascading.flow.planner.graph.ElementGraphs.asSubGraph;
+
 /**
  *
  */
 public class ExpressionSubGraphIterator implements SubGraphIterator
   {
   private final PlannerContext plannerContext;
-  private final ElementGraph flowElementGraph;
+  private final ElementGraph elementGraph;
 
   private ContractedTransformer contractedTransformer;
   private GraphFinder graphFinder;
@@ -93,7 +93,7 @@ public class ExpressionSubGraphIterator implements SubGraphIterator
     {
     this.plannerContext = plannerContext;
     this.firstOnly = firstOnly;
-    this.flowElementGraph = elementGraph;
+    this.elementGraph = elementGraph;
 
     if( elementExcludes != null )
       this.elementExcludes.addAll( elementExcludes );
@@ -106,6 +106,12 @@ public class ExpressionSubGraphIterator implements SubGraphIterator
     graphFinder = new GraphFinder( matchExpression );
     }
 
+  @Override
+  public ElementGraph getElementGraph()
+    {
+    return elementGraph;
+    }
+
   public List<Match> getMatches()
     {
     return matches;
@@ -115,7 +121,7 @@ public class ExpressionSubGraphIterator implements SubGraphIterator
     {
     if( contractedGraph == null )
       {
-      contractedTransformed = contractedTransformer.transform( plannerContext, flowElementGraph );
+      contractedTransformed = contractedTransformer.transform( plannerContext, elementGraph );
       contractedGraph = contractedTransformed.getEndGraph();
       }
 
@@ -165,20 +171,20 @@ public class ExpressionSubGraphIterator implements SubGraphIterator
     }
 
   @Override
-  public ElementSubGraph next()
+  public ElementGraph next()
     {
     try
       {
       if( !hasNext() )
         throw new NoSuchElementException();
 
-      ElementSubGraph contractedMatchedGraph = match.getMatchedGraph();
+      ElementGraph contractedMatchedGraph = match.getMatchedGraph();
 
       Set<FlowElement> excludes = new HashSet<>( getContractedGraph().vertexSet() );
 
       excludes.removeAll( contractedMatchedGraph.vertexSet() );
 
-      return ElementGraphs.asSubGraph( flowElementGraph, contractedMatchedGraph, excludes );
+      return asSubGraph( elementGraph, contractedMatchedGraph, excludes );
       }
     finally
       {

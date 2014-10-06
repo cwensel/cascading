@@ -24,6 +24,7 @@ import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
+import cascading.flow.planner.iso.subgraph.iterator.IncludeRemainderSubGraphIterator;
 import cascading.flow.planner.iso.subgraph.iterator.UniquePathSubGraphIterator;
 
 /**
@@ -31,14 +32,25 @@ import cascading.flow.planner.iso.subgraph.iterator.UniquePathSubGraphIterator;
  */
 public class UniquePathGraphPartitioner extends ExpressionGraphPartitioner
   {
+  boolean includeRemainders = false;
+
   public UniquePathGraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
     super( contractionGraph, expressionGraph, annotations );
     }
 
+  public UniquePathGraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, boolean includeRemainders, ElementAnnotation... annotations )
+    {
+    super( contractionGraph, expressionGraph, annotations );
+    this.includeRemainders = includeRemainders;
+    }
+
   @Override
   protected SubGraphIterator wrapIterator( ExpressionSubGraphIterator expressionIterator )
     {
-    return new UniquePathSubGraphIterator( expressionIterator );
+    if( !includeRemainders )
+      return new UniquePathSubGraphIterator( expressionIterator );
+
+    return new IncludeRemainderSubGraphIterator( new UniquePathSubGraphIterator( expressionIterator ) );
     }
   }

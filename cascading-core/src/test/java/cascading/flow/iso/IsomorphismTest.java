@@ -42,7 +42,6 @@ import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
-import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
@@ -200,7 +199,7 @@ public class IsomorphismTest extends CascadingTestCase
     int count = 0;
     while( iterator.hasNext() )
       {
-      ElementSubGraph next = iterator.next();
+      ElementGraph next = iterator.next();
       assertNotNull( next );
       next.writeDOT( getPlanPath() + "/pipeline/" + count + "-graph.dot" );
 
@@ -300,7 +299,7 @@ public class IsomorphismTest extends CascadingTestCase
     int count = 0;
     while( iterator.hasNext() && count < 10 )
       {
-      ElementSubGraph next = iterator.next();
+      ElementGraph next = iterator.next();
       assertNotNull( next );
       next.writeDOT( getPlanPath() + "/pipeline/" + count + "-graph.dot" );
 
