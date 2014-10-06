@@ -28,7 +28,6 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.tez.planner.Hadoop2TezPlanner;
 import cascading.flow.tez.planner.HashJoinHadoop2TezRuleRegistry;
-import cascading.flow.tez.planner.NoHashJoinHadoop2TezRuleRegistry;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 

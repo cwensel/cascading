@@ -20,6 +20,9 @@
 
 package cascading.flow.tez.stream.element;
 
+import java.io.IOException;
+import java.util.Collection;
+
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
@@ -40,7 +43,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.tez.runtime.api.LogicalInput;
 import org.apache.tez.runtime.api.LogicalOutput;
 import org.apache.tez.runtime.library.api.KeyValueReader;
-import org.apache.tez.runtime.library.output.UnorderedKVOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,20 +53,20 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
   {
   private static final Logger LOG = LoggerFactory.getLogger( TezBoundaryStage.class );
 
-  protected UnorderedKVOutput logicalOutput;
+  protected Collection<LogicalOutput> logicalOutputs;
   protected LogicalInput logicalInput;
 
   private MeasuredOutputCollector collector;
   private TupleEntry valueEntry;
 
-  public TezBoundaryStage( FlowProcess flowProcess, Boundary boundary, IORole role, LogicalOutput logicalOutput )
+  public TezBoundaryStage( FlowProcess flowProcess, Boundary boundary, IORole role, Collection<LogicalOutput> logicalOutputs )
     {
     super( flowProcess, boundary, role );
 
-    if( logicalOutput == null )
-      throw new IllegalArgumentException( "output must not be null" );
+    if( logicalOutputs == null || logicalOutputs.isEmpty() )
+      throw new IllegalArgumentException( "output must not be null or empty" );
 
-    this.logicalOutput = (UnorderedKVOutput) logicalOutput;
+    this.logicalOutputs = logicalOutputs;
     }
 
   public TezBoundaryStage( FlowProcess flowProcess, Boundary boundary, IORole role, LogicalInput logicalInput )
@@ -105,11 +107,14 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
         logicalInput.start();
         }
 
-      if( logicalOutput != null )
+      if( logicalOutputs != null )
         {
-        LOG.info( "calling {}#start() on: {}", logicalOutput.getClass().getSimpleName(), getBoundary(), Pipe.id( getBoundary() ) );
+        for( LogicalOutput logicalOutput : logicalOutputs )
+          {
+          LOG.info( "calling {}#start() on: {} {}", logicalOutput.getClass().getSimpleName(), getBoundary(), Pipe.id( getBoundary() ) );
 
-        logicalOutput.start();
+          logicalOutput.start();
+          }
         }
       }
     catch( Exception exception )
@@ -201,6 +206,23 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
 
   protected OutputCollector createOutputCollector()
     {
-    return new OldOutputCollector( logicalOutput );
+    if( logicalOutputs.size() == 1 )
+      return new OldOutputCollector( Util.getFirst( logicalOutputs ) );
+
+    final OutputCollector[] collectors = new OutputCollector[ logicalOutputs.size() ];
+
+    int count = 0;
+    for( LogicalOutput logicalOutput : logicalOutputs )
+      collectors[ count++ ] = new OldOutputCollector( logicalOutput );
+
+    return new OutputCollector()
+    {
+    @Override
+    public void collect( Object key, Object value ) throws IOException
+      {
+      for( OutputCollector outputCollector : collectors )
+        outputCollector.collect( key, value );
+      }
+    };
     }
   }

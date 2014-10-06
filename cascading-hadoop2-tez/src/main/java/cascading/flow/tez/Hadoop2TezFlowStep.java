@@ -99,6 +99,7 @@ import org.apache.tez.runtime.library.input.OrderedGroupedMergedKVInput;
 import org.apache.tez.runtime.library.input.UnorderedKVInput;
 import org.apache.tez.runtime.library.output.OrderedPartitionedKVOutput;
 import org.apache.tez.runtime.library.output.UnorderedKVOutput;
+import org.apache.tez.runtime.library.output.UnorderedPartitionedKVOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -254,7 +255,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
         InputDescriptor inputDescriptor = InputDescriptor.create( inputClassName ).setUserPayload( edgeProperty.getEdgeDestination().getUserPayload() );
 
-        LOG.info( "adding grouped edge between: {} and {}", Util.join( sourceVerticesIDs, "," ), targetVertex );
+        LOG.info( "adding grouped edge between: {} and {}", Util.join( sourceVerticesIDs, "," ), targetVertex.getName() );
         dag.addEdge( GroupInputEdge.create( vertexGroup, targetVertex, edgeProperty, inputDescriptor ) );
         }
       else
@@ -296,11 +297,11 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
   private EdgeValues applyBoundaryMerge( EdgeValues edgeValues )
     {
-    edgeValues.outputClassName = UnorderedKVOutput.class.getName();
+    // todo: support for one to one
+    edgeValues.outputClassName = UnorderedPartitionedKVOutput.class.getName();
     edgeValues.inputClassName = UnorderedKVInput.class.getName();
 
     edgeValues.movementType = EdgeProperty.DataMovementType.SCATTER_GATHER;
-//    edgeValues.movementType = EdgeProperty.DataMovementType.ONE_TO_ONE; // todo: sort out how to configure one to one
     edgeValues.sourceType = EdgeProperty.DataSourceType.PERSISTED;
     edgeValues.schedulingType = EdgeProperty.SchedulingType.SEQUENTIAL;
 
@@ -637,7 +638,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
       String id = FlowElements.id( element );
 
-      current.set( "cascading.step.sink", id );
+      current.set( "cascading.node.sink", id );
 
       configs.put( element, current );
       }

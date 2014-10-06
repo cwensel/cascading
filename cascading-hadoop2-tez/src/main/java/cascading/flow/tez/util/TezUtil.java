@@ -46,6 +46,7 @@ import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 import org.apache.hadoop.yarn.api.records.URL;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.apache.tez.common.TezUtils;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.mapreduce.input.MRInput;
 import org.apache.tez.mapreduce.lib.MRReader;
@@ -174,7 +175,7 @@ public class TezUtil
     try
       {
       if( output instanceof MROutput )
-        return createConfFromByteString( parseMRInputPayload( ( (MROutput) output ).getContext().getUserPayload() ).getConfigurationBytes() );
+        return TezUtils.createConfFromUserPayload( ( (MROutput) output ).getContext().getUserPayload() );
 
       if( output instanceof AbstractLogicalOutput )
         return createConfFromUserPayload( ( (AbstractLogicalOutput) output ).getContext().getUserPayload() );

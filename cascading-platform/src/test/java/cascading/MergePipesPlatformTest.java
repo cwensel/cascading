@@ -46,7 +46,6 @@ import org.junit.Test;
 
 import static data.InputData.*;
 
-
 public class MergePipesPlatformTest extends PlatformTestCase
   {
   public MergePipesPlatformTest()
@@ -331,14 +330,14 @@ public class MergePipesPlatformTest extends PlatformTestCase
     Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
     Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
 
-    Pipe merged = new Merge( "merged", left, right );
+    Pipe merged = new Merge( "merged-first", left, right );
 
     merged = new Each( merged, new Fields( "line" ), new Identity() );
 
     left = new Each( new Pipe( "left", merged ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
     right = new Each( new Pipe( "right", merged ), new Fields( "line" ), new RegexFilter( ".*102.*" ) );
 
-    merged = new Merge( "merged", left, right );
+    merged = new Merge( "merged-second", left, right );
 
     merged = new Each( merged, new Fields( "line" ), new Identity() );
 

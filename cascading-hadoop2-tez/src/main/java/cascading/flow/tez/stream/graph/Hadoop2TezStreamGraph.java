@@ -21,6 +21,7 @@
 package cascading.flow.tez.stream.graph;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +52,7 @@ import cascading.flow.tez.stream.element.TezGroupByGate;
 import cascading.flow.tez.stream.element.TezMergeGate;
 import cascading.flow.tez.stream.element.TezSinkStage;
 import cascading.flow.tez.stream.element.TezSourceStage;
+import cascading.flow.tez.util.TezUtil;
 import cascading.pipe.Boundary;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
@@ -69,8 +71,7 @@ import org.apache.tez.runtime.api.LogicalOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.tez.util.TezUtil.getEdgeSourceID;
-import static cascading.flow.tez.util.TezUtil.getInputConfiguration;
+import static cascading.flow.tez.util.TezUtil.*;
 
 /**
  *
@@ -121,7 +122,6 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
 
     outputMultiMap = new SetMultiMap<>();
 
-/*
     for( Map.Entry<String, LogicalOutput> entry : outputMap.entrySet() )
       {
       Configuration outputConfiguration = getOutputConfiguration( entry.getValue() );
@@ -129,14 +129,6 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
 
       outputMultiMap.addAll( TezUtil.getEdgeSinkID( entry.getValue(), outputConfiguration ), entry.getValue() );
       }
-
-    // if there is a split after a boundary, fail. the split should be before each boundary.
-    for( String key : outputMultiMap.getKeys() )
-      {
-      if( outputMultiMap.getValues( key ).size() != 1 )
-        throw new IllegalStateException( "multiple outputs per sink element unsupported, split into multiple paths" );
-      }
-*/
 
     // this made the assumption we can have a physical and logical input per vertex. seems we can't
     if( inputMultiMap.getKeys().size() == 1 )
@@ -281,7 +273,7 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
 
   private Duct createSinkMergeGate( Merge element )
     {
-    return new TezMergeGate( flowProcess, element, IORole.sink, findLogicalOutput( element ) );
+    return new TezMergeGate( flowProcess, element, IORole.sink, findLogicalOutputs( element ) );
     }
 
   @Override
@@ -304,7 +296,7 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
 
   private Duct createSinkBoundaryStage( Boundary element )
     {
-    return new TezBoundaryStage( flowProcess, element, IORole.sink, findLogicalOutput( element ) );
+    return new TezBoundaryStage( flowProcess, element, IORole.sink, findLogicalOutputs( element ) );
     }
 
   @Override
@@ -357,6 +349,13 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
       throw new IllegalStateException( "could not find output for: " + element );
 
     return logicalOutput;
+    }
+
+  private Collection<LogicalOutput> findLogicalOutputs( Pipe element )
+    {
+    String id = Pipe.id( element );
+
+    return outputMultiMap.getValues( id );
     }
 
   private LogicalInput findLogicalInput( Pipe element )
