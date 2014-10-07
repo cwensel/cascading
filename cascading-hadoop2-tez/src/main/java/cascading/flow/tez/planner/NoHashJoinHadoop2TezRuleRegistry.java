@@ -35,7 +35,7 @@ import cascading.flow.tez.planner.rule.partitioner.ConsecutiveGroupOrMergesNodeP
 import cascading.flow.tez.planner.rule.partitioner.SplitJoinBoundariesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.TopDownBoundariesNodePartitioner;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceCheckpointTransformer;
-import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitMergeGroupTransformer;
+import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitSpliceTransformer;
 
 /**
  * The NoHashJoinHadoop2TezRuleRegistry assumes the plan has no {@link cascading.pipe.HashJoin} Pipes in the
@@ -60,7 +60,7 @@ public class NoHashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new EveryAfterBufferAssert() );
     addRule( new SplitBeforeEveryAssert() );
 
-    addRule( new BoundaryBalanceGroupSplitMergeGroupTransformer() );
+    addRule( new BoundaryBalanceGroupSplitSpliceTransformer() ); // prevents AssemblyHelpersPlatformTest#testSameSourceMerge deadlock
     addRule( new BoundaryBalanceCheckpointTransformer() );
 
     // PreResolve

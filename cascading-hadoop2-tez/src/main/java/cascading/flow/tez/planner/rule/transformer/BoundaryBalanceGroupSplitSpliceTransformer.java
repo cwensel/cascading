@@ -20,22 +20,22 @@
 
 package cascading.flow.tez.planner.rule.transformer;
 
-import cascading.flow.hadoop.planner.rule.expression.BalanceGroupSplitMergeGroupExpression;
 import cascading.flow.planner.rule.transformer.BoundaryElementFactory;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.tez.planner.rule.expression.BalanceGroupSplitSpliceExpression;
 
 import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  *
  */
-public class BoundaryBalanceGroupSplitMergeGroupTransformer extends RuleInsertionTransformer
+public class BoundaryBalanceGroupSplitSpliceTransformer extends RuleInsertionTransformer
   {
-  public BoundaryBalanceGroupSplitMergeGroupTransformer()
+  public BoundaryBalanceGroupSplitSpliceTransformer()
     {
     super(
       BalanceAssembly,
-      new BalanceGroupSplitMergeGroupExpression(),
+      new BalanceGroupSplitSpliceExpression(),
       BoundaryElementFactory.BOUNDARY_PIPE
     );
     }

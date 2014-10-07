@@ -42,6 +42,7 @@ import cascading.flow.tez.planner.rule.partitioner.TopDownSplitBoundariesNodePar
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceCheckpointTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupBlockingHashJoinTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitHashJoinTransformer;
+import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitSpliceTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceHashJoinSameSourceTransformer;
 import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceHashJoinToHashJoinTransformer;
 import cascading.flow.tez.planner.rule.transformer.RemoveMalformedHashJoinNodeTransformer;
@@ -68,7 +69,7 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new EveryAfterBufferAssert() );
     addRule( new SplitBeforeEveryAssert() );
 
-//    addRule( new BoundaryBalanceGroupSplitMergeGroupTransformer() ); // causes AssemblyHelpersPlatformTest#testSameSourceMerge to hang
+    addRule( new BoundaryBalanceGroupSplitSpliceTransformer() ); // prevents AssemblyHelpersPlatformTest#testSameSourceMerge deadlock
     addRule( new BoundaryBalanceCheckpointTransformer() );
 
     // hash join
