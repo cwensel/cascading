@@ -241,9 +241,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
     return listeners != null && !listeners.isEmpty();
     }
 
-  public void addListener( CascadeListener flowListener )
+  public void addListener( CascadeListener cascadeListener )
     {
-    getListeners().add( new SafeCascadeListener( flowListener ) );
+    getListeners().add( new SafeCascadeListener( cascadeListener ) );
     }
 
   public boolean removeListener( CascadeListener flowListener )
