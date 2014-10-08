@@ -146,8 +146,8 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
         FlowNodeStats mapperNode = flowNodeStats.get( 0 );
         FlowNodeStats reducerNode = flowNodeStats.get( 1 );
 
-        assertEquals( 1, mapperNode.getChildren().size() );
-        assertEquals( 4, reducerNode.getChildren().size() );
+        assertEquals( 4, mapperNode.getChildren().size() );
+        assertEquals( 1, reducerNode.getChildren().size() );
 
         Collection<FlowSliceStats> children = reducerNode.getChildren();
         for( FlowSliceStats flowSliceStats : children )
@@ -175,8 +175,8 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
         FlowNodeStats mapperNode = flowNodeStats.get( 0 );
         FlowNodeStats reducerNode = flowNodeStats.get( 1 );
 
-        assertEquals( 1, mapperNode.getChildren().size() );
-        assertEquals( 4, reducerNode.getChildren().size() );
+        assertEquals( 4, mapperNode.getChildren().size() );
+        assertEquals( 1, reducerNode.getChildren().size() );
         }
       }
     }

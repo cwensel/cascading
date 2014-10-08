@@ -27,6 +27,7 @@ import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.property.Props;
 import cascading.scheme.Scheme;
+import cascading.tap.DecoratorTap;
 
 /**
  * The class FlowConnectorProps is a fluent helper class for setting {@link FlowConnector} specific
@@ -41,10 +42,14 @@ public class FlowConnectorProps extends Props
   public static final String ASSERTION_LEVEL = "cascading.flowconnector.assertionlevel";
   public static final String DEBUG_LEVEL = "cascading.flowconnector.debuglevel";
   public static final String INTERMEDIATE_SCHEME_CLASS = "cascading.flowconnector.intermediateschemeclass";
+  public static final String TEMPORARY_TAP_DECORATOR_CLASS = "cascading.flowconnector.temporary_tap.decorator.classname";
+  public static final String CHECKPOINT_TAP_DECORATOR_CLASS = "cascading.flowconnector.checkpoint_tap.decorator.classname";
 
   AssertionLevel assertionLevel;
   DebugLevel debugLevel;
   String intermediateSchemeClassName;
+  String temporaryTapDecoratorClassName;
+  String checkpointTapDecoratorClassName;
 
   /**
    * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
@@ -78,20 +83,51 @@ public class FlowConnectorProps extends Props
    */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, Class<? extends Scheme> intermediateSchemeClass )
     {
-    properties.put( INTERMEDIATE_SCHEME_CLASS, intermediateSchemeClass );
+    if( intermediateSchemeClass != null )
+      properties.put( INTERMEDIATE_SCHEME_CLASS, intermediateSchemeClass.getName() );
     }
 
   /**
    * Method setIntermediateSchemeClass is used for debugging.
    *
-   * @param properties              of type Map<Object, Object>
-   * @param intermediateSchemeClass of type String
+   * @param properties                  of type Map<Object, Object>
+   * @param intermediateSchemeClassName of type String
    */
-  public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClass )
+  public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClassName )
     {
-    properties.put( INTERMEDIATE_SCHEME_CLASS, intermediateSchemeClass );
+    if( intermediateSchemeClassName != null )
+      properties.put( INTERMEDIATE_SCHEME_CLASS, intermediateSchemeClassName );
     }
 
+  /**
+   * Method temporaryTapDecoratorClassName is used for wrapping a intermediate temporary Tap.
+   *
+   * @param properties                     of type Map<Object, Object>
+   * @param temporaryTapDecoratorClassName of type String
+   */
+  public static void setTemporaryTapDecoratorClass( Map<Object, Object> properties, String temporaryTapDecoratorClassName )
+    {
+    if( temporaryTapDecoratorClassName != null )
+      properties.put( TEMPORARY_TAP_DECORATOR_CLASS, temporaryTapDecoratorClassName );
+    }
+
+  /**
+   * Method checkpointTapDecoratorClassName is used for wrapping a checkpoint Tap.
+   *
+   * @param properties                      of type Map<Object, Object>
+   * @param checkpointTapDecoratorClassName of type String
+   */
+  public static void setCheckpointTapDecoratorClass( Map<Object, Object> properties, String checkpointTapDecoratorClassName )
+    {
+    if( checkpointTapDecoratorClassName != null )
+      properties.put( CHECKPOINT_TAP_DECORATOR_CLASS, checkpointTapDecoratorClassName );
+    }
+
+  /**
+   * Creates a new FlowConnectorProps instance.
+   *
+   * @return FlowConnectorProps instance
+   */
   public static FlowConnectorProps flowConnectorProps()
     {
     return new FlowConnectorProps();
@@ -106,6 +142,12 @@ public class FlowConnectorProps extends Props
     return assertionLevel;
     }
 
+  /**
+   * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
+   *
+   * @param assertionLevel of type AssertionLevel
+   * @return this instance
+   */
   public FlowConnectorProps setAssertionLevel( AssertionLevel assertionLevel )
     {
     this.assertionLevel = assertionLevel;
@@ -118,6 +160,12 @@ public class FlowConnectorProps extends Props
     return debugLevel;
     }
 
+  /**
+   * Method setDebugLevel sets the target planner {@link cascading.operation.DebugLevel}.
+   *
+   * @param debugLevel of type DebugLevel
+   * @return this instance
+   */
   public FlowConnectorProps setDebugLevel( DebugLevel debugLevel )
     {
     this.debugLevel = debugLevel;
@@ -130,6 +178,12 @@ public class FlowConnectorProps extends Props
     return intermediateSchemeClassName;
     }
 
+  /**
+   * Method setIntermediateSchemeClassName is used for debugging.
+   *
+   * @param intermediateSchemeClassName of type String
+   * @return this instance
+   */
   public FlowConnectorProps setIntermediateSchemeClassName( String intermediateSchemeClassName )
     {
     this.intermediateSchemeClassName = intermediateSchemeClassName;
@@ -137,10 +191,84 @@ public class FlowConnectorProps extends Props
     return this;
     }
 
+  /**
+   * Method setIntermediateSchemeClassName is used for debugging.
+   *
+   * @param intermediateSchemeClass of type Class
+   * @return this instance
+   */
   public FlowConnectorProps setIntermediateSchemeClassName( Class<Scheme> intermediateSchemeClass )
     {
     if( intermediateSchemeClass != null )
       this.intermediateSchemeClassName = intermediateSchemeClass.getName();
+
+    return this;
+    }
+
+  public String getTemporaryTapDecoratorClassName()
+    {
+    return temporaryTapDecoratorClassName;
+    }
+
+  /**
+   * Method setTemporaryTapDecoratorClassName sets the class of a {@link cascading.tap.DecoratorTap} to use to
+   * wrap an intermediate temporary Tap instance internal to the Flow.
+   *
+   * @param temporaryTapDecoratorClassName of type String
+   * @return this instance
+   */
+  public FlowConnectorProps setTemporaryTapDecoratorClassName( String temporaryTapDecoratorClassName )
+    {
+    this.temporaryTapDecoratorClassName = temporaryTapDecoratorClassName;
+
+    return this;
+    }
+
+  /**
+   * Method setTemporaryTapDecoratorClassName sets the class of a {@link cascading.tap.DecoratorTap} to use to
+   * wrap an intermediate temporary Tap instance internal to the Flow.
+   *
+   * @param temporaryTapDecoratorClass of type Class
+   * @return this instance
+   */
+  public FlowConnectorProps setTemporaryTapDecoratorClassName( Class<DecoratorTap> temporaryTapDecoratorClass )
+    {
+    if( temporaryTapDecoratorClass != null )
+      this.temporaryTapDecoratorClassName = temporaryTapDecoratorClass.getName();
+
+    return this;
+    }
+
+  public String getCheckpointTapDecoratorClassName()
+    {
+    return checkpointTapDecoratorClassName;
+    }
+
+  /**
+   * Method setCheckpointTapDecoratorClassName sets the class of a {@link cascading.tap.DecoratorTap} to use to
+   * wrap an Checkpoint Tap instance within the Flow.
+   *
+   * @param checkpointTapDecoratorClassName of type String
+   * @return this instance
+   */
+  public FlowConnectorProps setCheckpointTapDecoratorClassName( String checkpointTapDecoratorClassName )
+    {
+    this.checkpointTapDecoratorClassName = checkpointTapDecoratorClassName;
+
+    return this;
+    }
+
+  /**
+   * Method setCheckpointTapDecoratorClassName sets the class of a {@link cascading.tap.DecoratorTap} to use to
+   * wrap an Checkpoint Tap instance within the Flow.
+   *
+   * @param checkpointTapDecoratorClass of type Class
+   * @return this instance
+   */
+  public FlowConnectorProps setCheckpointTapDecoratorClassName( Class<DecoratorTap> checkpointTapDecoratorClass )
+    {
+    if( checkpointTapDecoratorClass != null )
+      this.checkpointTapDecoratorClassName = checkpointTapDecoratorClass.getName();
 
     return this;
     }
@@ -151,5 +279,7 @@ public class FlowConnectorProps extends Props
     setAssertionLevel( properties, assertionLevel );
     setDebugLevel( properties, debugLevel );
     setIntermediateSchemeClass( properties, intermediateSchemeClassName );
+    setTemporaryTapDecoratorClass( properties, temporaryTapDecoratorClassName );
+    setCheckpointTapDecoratorClass( properties, checkpointTapDecoratorClassName );
     }
   }

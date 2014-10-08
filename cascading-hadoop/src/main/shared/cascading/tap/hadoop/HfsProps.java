@@ -121,6 +121,11 @@ public class HfsProps extends Props
       properties.put( COMBINE_INPUT_FILES_SIZE_MAX, Long.toString( size ) );
     }
 
+  /**
+   * Creates a new HfsProps instance.
+   *
+   * @return HfsProps instance
+   */
   public static HfsProps hfsProps()
     {
     return new HfsProps();

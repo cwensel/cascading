@@ -769,9 +769,9 @@ public class Cascade implements UnitOfWork<CascadeStats>
 
       if( LOG.isInfoEnabled() )
         {
-        logInfo( " parallel execution is enabled: " + !runFlowsLocal );
-        logInfo( " starting flows: " + jobsMap.size() );
-        logInfo( " allocating threads: " + numThreads );
+        logInfo( " parallel execution of flows is enabled: " + ( numThreads != 1 ) );
+        logInfo( " executing total flows: " + jobsMap.size() );
+        logInfo( " allocating management threads: " + numThreads );
         }
 
       List<Future<Throwable>> futures = spawnStrategy.start( this, numThreads, jobsMap.values() );

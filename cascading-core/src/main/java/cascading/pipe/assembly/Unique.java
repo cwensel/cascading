@@ -21,6 +21,7 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import cascading.pipe.SubAssembly;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
+import cascading.tuple.util.TupleHasher;
 
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
@@ -65,6 +67,13 @@ public class Unique extends SubAssembly
       NO_NULLS
     }
 
+  public enum Cache
+    {
+      Num_Keys_Flushed,
+      Num_Keys_Hit,
+      Num_Keys_Missed
+    }
+
   /**
    * Class FilterPartialDuplicates is a {@link cascading.operation.Filter} that is used to remove observed duplicates from the tuple stream.
    * <p/>
@@ -81,6 +90,7 @@ public class Unique extends SubAssembly
     {
     private int threshold = 10000;
     private Include include = Include.ALL;
+    private TupleHasher tupleHasher;
 
     /** Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance. */
     public FilterPartialDuplicates()
@@ -101,24 +111,44 @@ public class Unique extends SubAssembly
     /**
      * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
      *
+     * @param include   of type Include
      * @param threshold of type int
      */
     @ConstructorProperties({"include", "threshold"})
     public FilterPartialDuplicates( Include include, int threshold )
       {
+      this( include, threshold, null );
+      }
+
+    /**
+     * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
+     *
+     * @param threshold   of type int
+     * @param include     of type Include
+     * @param tupleHasher of type TupleHasher
+     */
+    @ConstructorProperties({"include", "threshold", "tupleHasher"})
+    public FilterPartialDuplicates( Include include, int threshold, TupleHasher tupleHasher )
+      {
       this.threshold = threshold;
       this.include = include == null ? this.include : include;
+      this.tupleHasher = tupleHasher;
       }
 
     @Override
-    public void prepare( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
+    public void prepare( final FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
       {
       operationCall.setContext( new LinkedHashMap<Tuple, Object>( threshold, 0.75f, true )
       {
       @Override
       protected boolean removeEldestEntry( Map.Entry eldest )
         {
-        return size() > threshold;
+        boolean doFlush = size() > threshold;
+
+        if( doFlush )
+          flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
+
+        return doFlush;
         }
       } );
       }
@@ -127,7 +157,7 @@ public class Unique extends SubAssembly
     public boolean isRemove( FlowProcess flowProcess, FilterCall<LinkedHashMap<Tuple, Object>> filterCall )
       {
       // we assume its more painful to create lots of tuple copies vs comparisons
-      Tuple args = filterCall.getArguments().getTuple();
+      Tuple args = TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTuple() );
 
       switch( include )
         {
@@ -142,9 +172,15 @@ public class Unique extends SubAssembly
         }
 
       if( filterCall.getContext().containsKey( args ) )
+        {
+        flowProcess.increment( Cache.Num_Keys_Hit, 1 );
         return true;
+        }
 
-      filterCall.getContext().put( filterCall.getArguments().getTupleCopy(), null );
+      // only do the copy here
+      filterCall.getContext().put( TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTupleCopy() ), null );
+
+      flowProcess.increment( Cache.Num_Keys_Missed, 1 );
 
       return false;
       }
@@ -336,7 +372,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties({"pipes", "uniqueFields", "include", "threshold"})
+  @ConstructorProperties( {"pipes", "uniqueFields", "include", "threshold"} )
   public Unique( Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
     this( null, pipes, uniqueFields, include, threshold );
@@ -400,7 +436,14 @@ public class Unique extends SubAssembly
       throw new IllegalArgumentException( "uniqueFields may not be null" );
 
     Pipe[] filters = new Pipe[ pipes.length ];
-    FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold );
+
+    TupleHasher tupleHasher = null;
+    Comparator[] comparators = uniqueFields.getComparators();
+
+    if( !TupleHasher.isNull( comparators ) )
+      tupleHasher = new TupleHasher( null, comparators );
+
+    FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold, tupleHasher );
 
     for( int i = 0; i < filters.length; i++ )
       filters[ i ] = new Each( pipes[ i ], uniqueFields, partialDuplicates );

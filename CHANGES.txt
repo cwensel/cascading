@@ -12,6 +12,60 @@ Cascading Change Log
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
 
+2.6.0
+
+  Updated c.p.a.AggregateBy and c.p.a.Unique to count cache flushes, hits, and misses. Previously only AggregateBy
+  tracked cache flushes.
+
+  Updated slf4j to 1.7.5.
+
+  Added ability to customize trace data captured for debugging purposes.
+
+  Added CONTRIBUTING.md.
+
+  Updated c.t.h.DistCacheTap to support simple file globing as provided by c.t.h.Hfs.
+
+  Fixed issue where c.p.a.UniqueBy was not honoring the c.t.Hasher interface.
+
+  Added c.t.h.DistCacheTap a decorator for a c.t.h.Hfs instance that uses o.a.h.f.DistributedCache to read files
+  transparently from local disk. This is useful for c.p.HashJoins.
+
+  Added c.t.DecoratorTap class to simplify wrapping a given c.t.Tap instance with additional meta-data.
+
+  Updated c.f.p.FlowPlanner to allow both intermediate temporary c.t.Tap or any c.p.Checkpoint tap to be decorated
+  by a configured c.t.DecoratorTap class via new c.f.FlowConnectorProps properties.
+
+  Fixed issue where c.p.a.AggregateBy was not honoring the c.t.Hasher interface.
+
+  Fixed issues around c.o.e.ExpressionFunction and c.o.e.ExpressionFilter either accepting Fields.NONE as incoming
+  arguments, or inheriting incoming type information from the resolved arguments.
+
+  Added c.m.a.URISanitizer, an implementation of the c.m.a.Sanitizer interface, for sanitizing URIs of different
+  resources (file, HTTP, HDFS, JDBC etc.). c.t.Tap and all subclasses use it for the identifier.
+
+  Fixed issue in c.f.h.ProcessFlow where the flowStats object would try to mark a flow as "STOPPED" even if it was
+  already "FINISHED" causing an IllegalStateException.
+
+  Added a new c.t.TupleEntrySchemeIterator property to set certain exceptions to be caught, ignored, and logged during
+  read. Commonly java.io.EOFException is thrown and can be safely ignored. By default no exception will be ignored.
+
+  Fixed issue in c.f.h.p.HadoopStepGraph where Traps would be ignored if the Flow had no operation ("copy flows").
+
+  Updated Janino to 2.7.5.
+
+  Added ability to add more meta information about a c.f.Flow, which can be read and used by a c.m.DocumentService.
+
+  Fixed null handling problem in c.p.a.MaxBy and c.p.a.MinBy.
+
+  Added Java Annotations to c.m.annotation for marking and granting access of custom properties to c.m.DocumentService
+  implementations like the Driven plug-in. Instrumented core Operations, SubAssemblies, Taps, and Schemes.
+
+  Updated Apache Hadoop to 2.4.1 in cascading-hadoop2-mr1.
+
+2.5.6
+
+  Updated for Cascading Fluid compatibility.
+
 2.5.5
 
   Added new c.t.p.BasePartitionTap property to control to control the behaviour in case of an Exception while closing a

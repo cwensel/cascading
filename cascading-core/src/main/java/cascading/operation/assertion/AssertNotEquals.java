@@ -24,6 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.Collection;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.tuple.Tuple;
@@ -44,7 +47,7 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
    *
    * @param values of type Object...
    */
-  @ConstructorProperties({"values"})
+  @ConstructorProperties( {"values"} )
   public AssertNotEquals( Object... values )
     {
     // set to 1 if null, will fail immediately afterwards
@@ -59,6 +62,8 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
     this.values = new Tuple( values );
     }
 
+  @Property( name = "values", visibility = Visibility.PRIVATE )
+  @PropertyDescription( "The expected values." )
   public Collection getValues()
     {
     return Tuples.asCollection( values );

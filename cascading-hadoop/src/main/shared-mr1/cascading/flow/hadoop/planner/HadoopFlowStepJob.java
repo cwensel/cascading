@@ -160,7 +160,9 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       if( runningJob == null )
         return;
 
-      flowStep.logWarn( "hadoop job " + runningJob.getID() + " state at " + JobStatus.getJobRunState( runningJob.getJobState() ) );
+      int jobState = runningJob.getJobState(); // may throw an NPE internally
+
+      flowStep.logWarn( "hadoop job " + runningJob.getID() + " state at " + JobStatus.getJobRunState( jobState ) );
       flowStep.logWarn( "failure info: " + runningJob.getFailureInfo() );
 
       TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
@@ -170,9 +172,9 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       for( TaskCompletionEvent event : events )
         flowStep.logWarn( "event = " + event );
       }
-    catch( IOException exception )
+    catch( Throwable throwable )
       {
-      flowStep.logError( "failed reading task completion events", exception );
+      flowStep.logError( "failed reading task completion events", throwable );
       }
     }
 

@@ -67,8 +67,8 @@ public abstract class BaseHadoopPlatform<Config extends Configuration> extends T
   public BaseHadoopPlatform()
     {
     this.logger = System.getProperty( "log4j.logger" );
-    this.numMappers = 1;
-    this.numReducers = 4;
+    this.numMappers = 4;
+    this.numReducers = 1;
     }
 
   @Override

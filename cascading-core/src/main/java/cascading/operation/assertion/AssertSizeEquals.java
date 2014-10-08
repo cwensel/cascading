@@ -23,6 +23,9 @@ package cascading.operation.assertion;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.tuple.TupleEntry;
@@ -42,13 +45,15 @@ public class AssertSizeEquals extends BaseAssertion implements ValueAssertion
    *
    * @param size of type int
    */
-  @ConstructorProperties({"size"})
+  @ConstructorProperties( {"size"} )
   public AssertSizeEquals( int size )
     {
     super( "tuple size %s, is not equal to: %s, in tuple: %s" );
     this.size = size;
     }
 
+  @Property( name = "size", visibility = Visibility.PRIVATE )
+  @PropertyDescription( "The expected tuple size." )
   public int getSize()
     {
     return size;

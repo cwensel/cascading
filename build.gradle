@@ -39,6 +39,22 @@
 
 */
 
+buildscript {
+  repositories {
+    maven { url 'http://repo.spring.io/plugins-release' }
+  }
+  dependencies {
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.5'
+  }
+}
+
+configure( subprojects ) {
+  apply plugin: 'propdeps'
+  apply plugin: 'propdeps-maven'
+  apply plugin: 'propdeps-idea'
+  apply plugin: 'propdeps-eclipse'
+}
+
 apply from: 'etc/version.gradle'
 apply from: "etc/s3Upload.gradle"
 
@@ -74,38 +90,20 @@ subprojects {
   version = releaseVersion
 
   configurations {
-    providedCompile
 
     testArtifacts {
       extendsFrom testRuntime
     }
   }
 
-  sourceSets {
-    main.compileClasspath += configurations.providedCompile
-  }
-
-  task mappings {
-    conf2ScopeMappings.addMapping( 0, configurations.providedCompile, Conf2ScopeMappingContainer.PROVIDED )
-  }
-
-  idea {
-    module {
-      scopes.PROVIDED.plus += configurations.providedCompile
-    }
-  }
-
-  check {
-    dependsOn << platformTest
-  }
-
   javadoc {
-    classpath += configurations.providedCompile
 
     def copyright = '<i>Copyright &#169; 2007-2014 Concurrent, Inc. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
+
+    failOnError = false
 
     configure( options ) {
       linkSource = true

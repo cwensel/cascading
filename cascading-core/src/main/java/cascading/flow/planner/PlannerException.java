@@ -25,7 +25,7 @@ import cascading.flow.FlowException;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.finder.GraphFinderException;
 import cascading.flow.planner.rule.Rule;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
 
 /**
  * Class PlannerException is thrown when a job planner fails.
@@ -53,7 +53,7 @@ public class PlannerException extends FlowException
    */
   public PlannerException( FlowElement flowElement, String message )
     {
-    super( Util.formatTrace( flowElement, message ) );
+    super( TraceUtil.formatTrace( flowElement, message ) );
     }
 
   /**
@@ -65,7 +65,7 @@ public class PlannerException extends FlowException
    */
   public PlannerException( FlowElement flowElement, String message, Throwable throwable )
     {
-    super( Util.formatTrace( flowElement, message ), throwable );
+    super( TraceUtil.formatTrace( flowElement, message ), throwable );
     }
 
   /**
@@ -78,7 +78,7 @@ public class PlannerException extends FlowException
    */
   public PlannerException( FlowElement flowElement, String message, Throwable throwable, ElementGraph elementGraph )
     {
-    super( Util.formatTrace( flowElement, message ), throwable );
+    super( TraceUtil.formatTrace( flowElement, message ), throwable );
     this.elementGraph = elementGraph;
     }
 

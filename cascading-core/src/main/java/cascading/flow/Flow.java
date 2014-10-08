@@ -140,6 +140,18 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   @Override
   String getID();
 
+  /**
+   * Returns an immutable map of properties giving more details about the Flow object.
+   * <p/>
+   * See {@link cascading.flow.FlowDef#addDescription(String, String)} to set values on a given Flow.
+   * <p/>
+   * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
+   * For known description types, see {@link FlowDescriptors}.
+   *
+   * @return Map<String,String>
+   */
+  public Map<String, String> getFlowDescriptor();
+
   @Override
   String getTags();
 
@@ -289,7 +301,6 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * @return the trapsCollection (type Collection<Tap>) of this Flow object.
    */
   Collection<Tap> getCheckpointsCollection();
-
 
   /**
    * Method getFlowSkipStrategy returns the current {@link cascading.flow.FlowSkipStrategy} used by this Flow.

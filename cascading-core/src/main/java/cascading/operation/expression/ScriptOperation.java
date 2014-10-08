@@ -25,6 +25,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
@@ -122,7 +125,9 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
       throw new IllegalArgumentException( "parameterNames must be same length as parameterTypes" );
     }
 
-  protected String getBlock()
+  @Property(name = "source", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The Java source to execute.")
+  public String getBlock()
     {
     return block;
     }
@@ -132,6 +137,8 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return parameterNames != null;
     }
 
+  @Property(name = "parameterNames", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The declared parameter names.")
   public String[] getParameterNames()
     {
     return Util.copy( parameterNames );
@@ -173,6 +180,8 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return parameterTypes != null;
     }
 
+  @Property(name = "parameterTypes", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The declared parameter types.")
   public Class[] getParameterTypes()
     {
     return Util.copy( parameterTypes );
@@ -267,8 +276,11 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
       context.parameterFields = argumentFields;
       context.parameterTypes = argumentFields.getTypesClasses();
 
+      if( argumentFields.isNone() )
+        context.parameterTypes = new Class[ 0 ]; // to match names
+
       if( context.parameterTypes == null )
-        throw new IllegalArgumentException( "field types may not be empty" );
+        throw new IllegalArgumentException( "field types may not be empty, incoming tuple stream should declare field types" );
       }
 
     context.parameterCoercions = Coercions.coercibleArray( context.parameterFields );

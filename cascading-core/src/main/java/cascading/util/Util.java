@@ -20,6 +20,7 @@
 
 package cascading.util;
 
+import java.beans.Expression;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -56,7 +57,6 @@ import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.Scope;
-import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
@@ -578,113 +578,56 @@ public class Util
       ;
     }
 
-  public static String formatTrace( Scheme scheme, String message )
+  /**
+   * Allows for custom trace fields on Pipe, Tap, and Scheme types
+   *
+   * @deprecated see {@link cascading.util.TraceUtil#setTrace(Object, String)}
+   */
+  @Deprecated
+  public static void setTrace( Object object, String trace )
     {
-    if( scheme == null )
-      return message;
-
-    String trace = scheme.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + truncate( scheme.toString(), 25 ) + "][" + trace + "] " + message;
+    TraceUtil.setTrace( object, trace );
     }
 
   /**
-   * Method formatRawTrace does not include the pipe name
-   *
-   * @param pipe    of type Pipe
-   * @param message of type String
-   * @return String
+   * @deprecated see {@link cascading.util.TraceUtil#captureDebugTrace(Object)}
    */
-  public static String formatRawTrace( Pipe pipe, String message )
-    {
-    if( pipe == null )
-      return message;
-
-    String trace = pipe.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + trace + "] " + message;
-    }
-
-  public static String formatTrace( FlowElement flowElement, String message )
-    {
-    if( flowElement instanceof Pipe )
-      return formatTrace( (Pipe) flowElement, message );
-    else
-      return formatTrace( (Tap) flowElement, message );
-    }
-
-  public static String formatTrace( Pipe pipe, String message )
-    {
-    if( pipe == null )
-      return message;
-
-    String trace = pipe.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + truncate( pipe.getName(), 25 ) + "][" + trace + "] " + message;
-    }
-
-  public static String formatTrace( Tap tap, String message )
-    {
-    if( tap == null )
-      return message;
-
-    String trace = tap.getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + truncate( tap.toString(), 25 ) + "][" + trace + "] " + message;
-    }
-
-  public static String formatTrace( Operation operation, String message )
-    {
-    if( !( operation instanceof BaseOperation ) )
-      return message;
-
-    String trace = ( (BaseOperation) operation ).getTrace();
-
-    if( trace == null )
-      return message;
-
-    return "[" + trace + "] " + message;
-    }
-
+  @Deprecated
   public static String captureDebugTrace( Class type )
     {
-    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-    Package packageName = type.getPackage();
-    String typeName = type.getName();
+    return TraceUtil.captureDebugTrace( type );
+    }
 
-    boolean skip = true;
+  public static String formatTrace( final Pipe pipe, String message )
+    {
+    return TraceUtil.formatTrace( pipe, message );
+    }
 
-    for( StackTraceElement stackTraceElement : stackTrace )
-      {
-      String className = stackTraceElement.getClassName();
+  /**
+   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.tap.Tap, String)}
+   */
+  @Deprecated
+  public static String formatTrace( final Tap tap, String message )
+    {
+    return TraceUtil.formatTrace( tap, message );
+    }
 
-      if( skip )
-        {
-        skip = !className.equals( typeName );
-        continue;
-        }
-      else
-        {
-        if( packageName != null && stackTraceElement.getClassName().equals( typeName ) )
-          continue;
-        }
+  /**
+   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.scheme.Scheme, String)}
+   */
+  @Deprecated
+  public static String formatTrace( final Scheme scheme, String message )
+    {
+    return TraceUtil.formatTrace( scheme, message );
+    }
 
-      return stackTraceElement.toString();
-      }
-
-    return null;
+  /**
+   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.operation.Operation, String)}
+   */
+  @Deprecated
+  public static String formatTrace( Operation operation, String message )
+    {
+    return TraceUtil.formatTrace( operation, message );
     }
 
   public static void writeDOT( Writer writer, DirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
@@ -919,6 +862,45 @@ public class Util
     return String.format( "%02d:%02d:%02d.%03d", duration / 1000 / 3600, ( duration / 1000 % 3600 ) / 60, ( duration / 1000 ) % 60, duration % 1000 );
     }
 
+  /**
+   * Converts a given comma separated String of Exception names into a List of classes.
+   * ClassNotFound exceptions are ignored if no warningMessage is given, otherwise logged as a warning.
+   *
+   * @param classNames A comma separated String of Exception names.
+   * @return List of Exception classes.
+   */
+  public static Set<Class<? extends Exception>> asClasses( String classNames, String warningMessage )
+    {
+    Set<Class<? extends Exception>> exceptionClasses = new HashSet<Class<? extends Exception>>();
+    String[] split = classNames.split( "," );
+
+    // possibly user provided type, load from context
+    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+    for( String className : split )
+      {
+      if( className != null )
+        className = className.trim();
+
+      if( isEmpty( className ) )
+        continue;
+
+      try
+        {
+        Class<? extends Exception> exceptionClass = contextClassLoader.loadClass( className ).asSubclass( Exception.class );
+
+        exceptionClasses.add( exceptionClass );
+        }
+      catch( ClassNotFoundException exception )
+        {
+        if( !Util.isEmpty( warningMessage ) )
+          LOG.warn( "{}: {}", warningMessage, className );
+        }
+      }
+
+    return exceptionClasses;
+    }
+
   public interface RetryOperator<T>
     {
     T operate() throws Exception;
@@ -994,6 +976,36 @@ public class Util
     catch( ClassNotFoundException exception )
       {
       return false;
+      }
+    }
+
+  public static <T> T newInstance( String className, Object... parameters )
+    {
+    try
+      {
+      Class<T> type = (Class<T>) Util.class.getClassLoader().loadClass( className );
+
+      return newInstance( type, parameters );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + className, exception );
+      }
+    }
+
+  public static <T> T newInstance( Class<T> target, Object... parameters )
+    {
+    // using Expression makes sure that constructors using sub-types properly work, otherwise we get a
+    // NoSuchMethodException.
+    Expression expr = new Expression( target, "new", parameters );
+
+    try
+      {
+      return (T) expr.getValue();
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to create new instance: " + target.getName() + "(" + Arrays.toString( parameters ) + ")", exception );
       }
     }
 
@@ -1085,6 +1097,36 @@ public class Util
       }
     }
 
+  public static Object invokeConstructor( String className, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Class type = Util.class.getClassLoader().loadClass( className );
+
+      return invokeConstructor( type, parameters, parameterTypes );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      throw new CascadingException( "unable to load class: " + className, exception );
+      }
+    }
+
+  public static <T> T invokeConstructor( Class<T> target, Object[] parameters, Class[] parameterTypes )
+    {
+    try
+      {
+      Constructor<T> constructor = target.getConstructor( parameterTypes );
+
+      constructor.setAccessible( true );
+
+      return constructor.newInstance( parameters );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to create new instance: " + target.getName() + "(" + Arrays.toString( parameters ) + ")", exception );
+      }
+    }
+
   public static <R> R returnInstanceFieldIfExists( Object target, String fieldName )
     {
     try
@@ -1099,6 +1141,23 @@ public class Util
     catch( Exception exception )
       {
       throw new CascadingException( "unable to get instance field: " + target.getClass().getName() + "." + fieldName, exception );
+      }
+    }
+
+  public static <R> void setInstanceFieldIfExists( Object target, String fieldName, R value )
+    {
+    try
+      {
+      Class<?> type = target.getClass();
+      Field field = getDeclaredField( fieldName, type );
+
+      field.setAccessible( true );
+
+      field.set( target, value );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to set instance field: " + target.getClass().getName() + "." + fieldName, exception );
       }
     }
 

@@ -21,6 +21,7 @@
 package cascading.flow;
 
 import java.util.List;
+import java.util.Map;
 
 import cascading.pipe.Pipe;
 
@@ -63,4 +64,12 @@ public interface AssemblyPlanner
    * @return tail Pipe instances to replace the given tails
    */
   List<Pipe> resolveTails( Context context );
+
+  /**
+   * Returns a map of properties giving more details about the Flow object. This can be picked up by a Flow object and
+   * added to its internal FlowDescriptor.
+   *
+   * @return Map<String,String>
+   */
+  Map<String, String> getFlowDescriptor();
   }

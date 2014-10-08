@@ -36,10 +36,12 @@ import static cascading.util.Util.join;
  * {@link cascading.flow.Flow} may or may not be required to have set. These properties are typically passed to a Flow
  * via a {@link cascading.flow.FlowConnector}.
  * <p/>
+ * New property settings that may be set in Cascading 2 are application name, version, and any tags.
+ * <p/>
+ * See {@link #addTag(String)} for examples of using tags to help manage an application.
+ * <p/>
  * In prior releases, the FlowConnector was responsible for setting the "application jar" class or path. Those
  * methods have been deprecated and moved to AppProps.
- * <p/>
- * New property settings that may be set since Cascading 2 are application name, version, and any tags.
  */
 public class AppProps extends Props
   {
@@ -66,6 +68,11 @@ public class AppProps extends Props
   protected String jarPath;
   protected Set<String> frameworks = new TreeSet<String>();
 
+  /**
+   * Creates a new AppProps instance.
+   *
+   * @return AppProps instance
+   */
   public static AppProps appProps()
     {
     return new AppProps();
@@ -262,6 +269,15 @@ public class AppProps extends Props
     this.version = version;
     }
 
+  /**
+   * Method setName sets the application name.
+   * <p/>
+   * By default the application name is derived from the jar name (values before the version in most Maven
+   * compatible jars).
+   *
+   * @param name type String
+   * @return this
+   */
   public AppProps setName( String name )
     {
     this.name = name;
@@ -269,6 +285,15 @@ public class AppProps extends Props
     return this;
     }
 
+  /**
+   * Method setVersion sets the application version.
+   * <p/>
+   * By default the application version is derived from the jar name (values after the name in most Maven
+   * compatible jars).
+   *
+   * @param version type String
+   * @return this
+   */
   public AppProps setVersion( String version )
     {
     this.version = version;
@@ -281,6 +306,25 @@ public class AppProps extends Props
     return join( tags, "," );
     }
 
+  /**
+   * Method addTag will associate a "tag" with this application. Applications can have an unlimited number of tags.
+   * <p/>
+   * Tags allow applications to be searched and organized by management tools.
+   * <p/>
+   * Tag values are opaque, but adopting a simple convention of 'category:value' allows for complex use cases.
+   * <p/>
+   * Some recommendations for categories are:
+   * <p/>
+   * <ul>
+   * <lli>cluster: - the cluster name the application is or should be run against. A name could be logical, like QA or PROD.</lli>
+   * <lli>project: - the project name, possibly a JIRA project name this application is managed under.</lli>
+   * <lli>org: - the group, team or organization that is responsible for the application.</lli>
+   * <lli>support: - the email address of the user who should be notified of failures or issues.</lli>
+   * </ul>
+   *
+   * @param tag type String
+   * @return this
+   */
   public AppProps addTag( String tag )
     {
     if( !Util.isEmpty( tag ) )
@@ -289,6 +333,25 @@ public class AppProps extends Props
     return this;
     }
 
+  /**
+   * Method addTags will associate the given "tags" with this application. Applications can have an unlimited number of tags.
+   * <p/>
+   * Tags allow applications to be searched and organized by management tools.
+   * <p/>
+   * Tag values are opaque, but adopting a simple convention of 'category:value' allows for complex use cases.
+   * <p/>
+   * Some recommendations for categories are:
+   * <p/>
+   * <ul>
+   * <lli>cluster: - the cluster name the application is or should be run against. A name could be logical, like QA or PROD.</lli>
+   * <lli>project: - the project name, possibly a JIRA project name this application is managed under.</lli>
+   * <lli>org: - the group, team or organization that is responsible for the application.</lli>
+   * <lli>support: - the email address of the user who should be notified of failures or issues.</lli>
+   * </ul>
+   *
+   * @param tags type String
+   * @return this
+   */
   public AppProps addTags( String... tags )
     {
     for( String tag : tags )
@@ -298,7 +361,7 @@ public class AppProps extends Props
     }
 
   /**
-   * Returns a list of frameworks used to build this App.
+   * Method getFrameworks returns a list of frameworks used to build this App.
    *
    * @return Registered frameworks
    */
@@ -308,7 +371,7 @@ public class AppProps extends Props
     }
 
   /**
-   * Adds a new framework name to the list of frameworks used.
+   * Method addFramework adds a new framework name to the list of frameworks used.
    * <p/>
    * Higher level tools should register themselves, and preferably with their version,
    * for example {@code foo-flow-builder:1.2.3}.
@@ -327,7 +390,7 @@ public class AppProps extends Props
     }
 
   /**
-   * Adds a new framework name and its version to the list of frameworks used.
+   * Method addFramework adds a new framework name and its version to the list of frameworks used.
    * <p/>
    * Higher level tools should register themselves, and preferably with their version,
    * for example {@code foo-flow-builder:1.2.3}.
@@ -347,7 +410,7 @@ public class AppProps extends Props
     }
 
   /**
-   * Adds new framework names to the list of frameworks used.
+   * Method addFrameworks adds new framework names to the list of frameworks used.
    * <p/>
    * Higher level tools should register themselves, and preferably with their version,
    * for example {@code foo-flow-builder:1.2.3}.

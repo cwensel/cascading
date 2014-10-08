@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
@@ -58,6 +59,7 @@ import cascading.tuple.io.IndexTuple;
 import cascading.tuple.io.TuplePair;
 import cascading.util.Util;
 import cascading.util.Version;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -249,8 +251,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         }
       }
 
-    if( getSink() instanceof TempHfs &&
-      ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
+    if( getSink().isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
       {
       try
         {
@@ -309,8 +310,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         throw new IllegalStateException( "tap may not have null identifier: " + tap.toString() );
 
       streamedJobs[ i ] = flowProcess.copyConfig( conf );
-      tap.sourceConfInit( flowProcess, streamedJobs[ i ] );
+
       streamedJobs[ i ].set( "cascading.step.source", Tap.id( tap ) );
+
+      tap.sourceConfInit( flowProcess, streamedJobs[ i ] );
+
       i++;
       }
 
@@ -319,9 +323,21 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     for( Tap tap : accumulatedSources )
       {
       JobConf accumulatedJob = flowProcess.copyConfig( conf );
+
       tap.sourceConfInit( flowProcess, accumulatedJob );
+
       Map<String, String> map = flowProcess.diffConfigIntoMap( conf, accumulatedJob );
       conf.set( "cascading.node.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
+
+      try
+        {
+        if( DistributedCache.getCacheFiles( accumulatedJob ) != null )
+          DistributedCache.setCacheFiles( DistributedCache.getCacheFiles( accumulatedJob ), conf );
+        }
+      catch( IOException exception )
+        {
+        throw new CascadingException( exception );
+        }
       }
 
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last

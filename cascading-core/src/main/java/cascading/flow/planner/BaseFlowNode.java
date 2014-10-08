@@ -21,6 +21,7 @@
 package cascading.flow.planner;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -315,14 +316,30 @@ public class BaseFlowNode implements Serializable, FlowNode
 
     for( FlowElement flowElement : nodeSubGraph.vertexSet() )
       {
-      if( !( flowElement instanceof Pipe ) )
-        continue;
+      Set<String> names = new HashSet<>();
 
-      String name = ( (Pipe) flowElement ).getName();
+      if( flowElement instanceof Pipe )
+        {
+        names.add( ( (Pipe) flowElement ).getName() );
+        }
+      else
+        {
+        Set<String> sourceTapNames = getSourceTapNames( (Tap) flowElement );
 
-      // this is legacy, can probably now collapse into one collection safely
-      if( traps.containsKey( name ) )
-        trapMap.put( name, traps.get( name ) );
+        if( sourceTapNames != null )
+          names.addAll( sourceTapNames );
+
+        Set<String> sinkTapNames = getSinkTapNames( (Tap) flowElement );
+
+        if( sinkTapNames != null )
+          names.addAll( sinkTapNames );
+        }
+
+      for( String name : names )
+        {
+        if( traps.containsKey( name ) )
+          trapMap.put( name, traps.get( name ) );
+        }
       }
     }
 

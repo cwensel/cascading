@@ -22,12 +22,16 @@ package cascading.tap;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
 import cascading.TestBuffer;
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
+import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -38,6 +42,7 @@ import cascading.tap.partition.Partition;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleEntrySchemeIteratorProps;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -313,5 +318,52 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     test = getPlatform().getTextFile( new Fields( "line" ), sink.getIdentifier() );
     validateLength( secondFlow.openTapForRead( test ), 74, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
+    }
+
+  @Test
+  public void testTupleEntrySchemeIteratorExceptionHandling() throws IOException
+    {
+    if( getPlatformName().equals( "local" ) )
+      return;  // no gzip support
+
+    Tap source = getPlatform().getTextFile( inputFileUnexpectedEndOfFile );
+    Tap sink = getPlatform().getTextFile( getOutputPath( getTestName() ), SinkMode.REPLACE );
+
+    Map<Object, Object> props = new HashMap<Object, Object>();
+    TupleEntrySchemeIteratorProps.setPermittedExceptions( props, java.io.EOFException.class );
+
+    Pipe pipe = new Pipe( "data" );
+    pipe = new Each( pipe, new Identity() );
+
+    FlowDef flowDef = FlowDef.flowDef().addSource( pipe, source ).addTailSink( pipe, sink );
+    Flow flow = getPlatform().getFlowConnector( props ).connect( flowDef );
+    flow.complete();
+    validateLength( flow.openSink(), 307 );
+    }
+
+  @Test
+  public void testTupleEntrySchemeIteratorEOFException() throws IOException
+    {
+    if( getPlatformName().equals( "local" ) )
+      return;  // no gzip support
+
+    Tap source = getPlatform().getTextFile( inputFileUnexpectedEndOfFile );
+    Tap sink = getPlatform().getTextFile( getOutputPath( getTestName() ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "data" );
+    pipe = new Each( pipe, new Identity() );
+
+    FlowDef flowDef = FlowDef.flowDef().addSource( pipe, source ).addTailSink( pipe, sink );
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    try
+      {
+      flow.complete();
+      fail( "flow should have thrown an Exception" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
     }
   }

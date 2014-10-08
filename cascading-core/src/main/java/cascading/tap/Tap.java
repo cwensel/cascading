@@ -29,6 +29,10 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.PropertySanitizer;
+import cascading.management.annotation.Visibility;
 import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
 import cascading.scheme.Scheme;
@@ -37,6 +41,8 @@ import cascading.tuple.FieldsResolverException;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.TraceUtil;
+import cascading.util.Traceable;
 import cascading.util.Util;
 
 /**
@@ -61,7 +67,7 @@ import cascading.util.Util;
  * {@link cascading.cascade.Cascade}. In that case the {@link #getFullIdentifier(Object)} value is used and the Scheme
  * is ignored.
  */
-public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable
+public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable, Traceable
   {
   /** Field scheme */
   private Scheme<Config, Input, Output, ?, ?> scheme;
@@ -74,9 +80,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   private ConfigDef processConfigDef;
 
   /** Field id */
-  private String id = null;
+  private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
-  private String trace = Util.captureDebugTrace( getClass() );
+  private String trace = TraceUtil.captureDebugTrace( this ); // see TraceUtil.setTrace() to override
 
   /**
    * Convenience function to make an array of Tap instances.
@@ -100,8 +106,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public static synchronized String id( Tap tap )
     {
-    if( tap.id == null )
-      tap.id = Util.createUniqueID();
+    if( tap instanceof DecoratorTap )
+      return id( ( (DecoratorTap) tap ).getOriginal() );
 
     return tap.id;
     }
@@ -136,11 +142,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
     return scheme;
     }
 
-  /**
-   * Method getTrace return the trace of this object.
-   *
-   * @return String
-   */
+  @Override
   public String getTrace()
     {
     return trace;
@@ -172,7 +174,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
    * <p/>
    * Note that no resources or services should be modified by this method.
-   *  @param flowProcess of type FlowProcess
+   *
+   * @param flowProcess of type FlowProcess
    * @param conf        of type Config
    */
   public void sourceConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
@@ -194,7 +197,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * Note that no resources or services should be modified by this method. If this Tap instance returns true for
    * {@link #isReplace()}, then {@link #deleteResource(Object)} will be called by the parent Flow.
-   *  @param flowProcess of type FlowProcess
+   *
+   * @param flowProcess of type FlowProcess
    * @param conf        of type Config
    */
   public void sinkConfInit( FlowProcess<? extends Config> flowProcess, Config conf )
@@ -212,6 +216,9 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    *
    * @return String
    */
+  @Property(name = "identifier", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The resource this Tap instance represents")
+  @PropertySanitizer("cascading.management.annotation.URISanitizer")
   public abstract String getIdentifier();
 
   /**

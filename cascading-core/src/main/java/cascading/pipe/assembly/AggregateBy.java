@@ -25,11 +25,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyConfigured;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.Aggregator;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -44,6 +49,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.util.TupleHasher;
 import cascading.tuple.util.TupleViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,9 +100,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * Also note that {@link Unique} is not a CompositeAggregator and is slightly more optimized internally.
  * <p/>
- * Keep in mind the {@link cascading.tuple.Hasher} interface is not honored here (for storing keys in the cache). Thus
- * arrays of primitives and object, like {@code byte[]} will not be properly stored. This is a known issue and will
- * be resolved in a future release.
+ * As of Cascading 2.6 AggregateBy honors the {@link cascading.tuple.Hasher} interface for storing keys in the cache.
  *
  * @see SumBy
  * @see CountBy
@@ -118,6 +122,14 @@ public class AggregateBy extends SubAssembly
   private Aggregator[] aggregators;
   private transient GroupBy groupBy;
 
+  public enum Cache
+    {
+      Num_Keys_Flushed,
+      Num_Keys_Hit,
+      Num_Keys_Missed
+    }
+
+  @Deprecated
   public enum Flush
     {
       Num_Keys_Flushed
@@ -179,6 +191,7 @@ public class AggregateBy extends SubAssembly
     private final Fields[] argumentFields;
     private final Fields[] functorFields;
     private final Functor[] functors;
+    private final TupleHasher tupleHasher;
 
     public static class Context
       {
@@ -220,6 +233,12 @@ public class AggregateBy extends SubAssembly
 
       for( int i = 0; i < functors.length; i++ )
         this.functorFields[ i ] = functors[ i ].getDeclaredFields();
+
+      Comparator[] hashers = TupleHasher.merge( functorFields );
+      if( !TupleHasher.isNull( hashers ) )
+        this.tupleHasher = new TupleHasher( null, hashers );
+      else
+        this.tupleHasher = null;
       }
 
     private static Fields getFields( Fields groupingFields, Functor[] functors )
@@ -295,6 +314,7 @@ public class AggregateBy extends SubAssembly
         if( doRemove )
           {
           completeFunctors( flowProcess, ( (FunctionCall) operationCall ).getOutputCollector(), context.result, eldest );
+          flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
           flowProcess.increment( Flush.Num_Keys_Flushed, 1 );
 
           if( flushes % threshold == 0 ) // every multiple, write out data
@@ -327,7 +347,7 @@ public class AggregateBy extends SubAssembly
     public void operate( FlowProcess flowProcess, FunctionCall<CompositeFunction.Context> functionCall )
       {
       TupleEntry arguments = functionCall.getArguments();
-      Tuple key = arguments.selectTupleCopy( groupingFields );
+      Tuple key = TupleHasher.wrapTuple( this.tupleHasher, arguments.selectTupleCopy( groupingFields ) );
 
       Context context = functionCall.getContext();
       Tuple[] functorContext = context.lru.get( key );
@@ -336,6 +356,11 @@ public class AggregateBy extends SubAssembly
         {
         functorContext = new Tuple[ functors.length ];
         context.lru.put( key, functorContext );
+        flowProcess.increment( Cache.Num_Keys_Missed, 1 );
+        }
+      else
+        {
+        flowProcess.increment( Cache.Num_Keys_Hit, 1 );
         }
 
       for( int i = 0; i < functors.length; i++ )
@@ -628,5 +653,13 @@ public class AggregateBy extends SubAssembly
   public GroupBy getGroupBy()
     {
     return groupBy;
+    }
+
+  @Property(name = "threshold", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Threshold of the aggregation.")
+  @PropertyConfigured(value = AGGREGATE_BY_THRESHOLD, defaultValue = "10000")
+  public int getThreshold()
+    {
+    return threshold;
     }
   }

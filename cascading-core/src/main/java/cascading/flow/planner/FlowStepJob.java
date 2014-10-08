@@ -163,9 +163,9 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     catch( Throwable throwable )
       {
+      this.throwable = throwable; // store first, in case throwable leaks out of dumpDebugInfo
       dumpDebugInfo();
-      this.throwable = throwable;
-      flowStep.fireOnThrowable( throwable );
+      this.flowStep.fireOnThrowable( throwable );
       }
     finally
       {

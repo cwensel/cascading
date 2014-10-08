@@ -52,8 +52,14 @@ public class ExpressionFunction extends ExpressionOperation implements Function<
   /**
    * Constructor ExpressionFunction creates a new ExpressionFunction instance.
    * <p/>
-   * This constructor assumes the given expression expects no input parameters. This is useful when
-   * inserting random numbers for example, {@code (int) (Math.random() * Integer.MAX_VALUE) }.
+   * This constructor, when used with incoming arguments that have type information, the argument field
+   * names can be used directly in the the expression, for example {@code a + b }. The type of {@code a} and {@code b}
+   * will be inherited from the incoming argument fields.
+   * <p/>
+   * Or, if the incoming argument selector is {@link Fields#NONE}, an expression using only static method calls
+   * or constants can be used.
+   * <p/>
+   * This is useful when inserting random numbers for example, {@code (int) (Math.random() * Integer.MAX_VALUE) }.
    *
    * @param fieldDeclaration of type Fields
    * @param expression       of type String

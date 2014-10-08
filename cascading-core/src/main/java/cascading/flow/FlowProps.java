@@ -116,6 +116,11 @@ public class FlowProps extends Props
     properties.put( STOP_JOBS_ON_EXIT, Boolean.toString( stopJobsOnExit ) );
     }
 
+  /**
+   * Creates a new FlowProps instance.
+   *
+   * @return FlowProps instance
+   */
   public static FlowProps flowProps()
     {
     return new FlowProps();
@@ -130,6 +135,18 @@ public class FlowProps extends Props
     return defaultTupleElementComparator;
     }
 
+  /**
+   * Sets a default {@link java.util.Comparator} to be used if no Comparator can be found for the class via the
+   * {@link cascading.tuple.Comparison} interface.
+   * <p/>
+   * In the case of Hadoop, if the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
+   * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
+   * will be called.
+   * <p/>
+   * In local mode, only the default constructor will be called for the comparator.
+   *
+   * @param defaultTupleElementComparator
+   */
   public FlowProps setDefaultTupleElementComparator( String defaultTupleElementComparator )
     {
     this.defaultTupleElementComparator = defaultTupleElementComparator;
@@ -142,6 +159,12 @@ public class FlowProps extends Props
     return preserveTemporaryFiles;
     }
 
+  /**
+   * Property preserveTemporaryFiles forces the Flow instance to keep any temporary intermediate data sets. Useful
+   * for debugging. Defaults to {@code false}.
+   *
+   * @param preserveTemporaryFiles of type boolean
+   */
   public FlowProps setPreserveTemporaryFiles( boolean preserveTemporaryFiles )
     {
     this.preserveTemporaryFiles = preserveTemporaryFiles;
@@ -154,6 +177,12 @@ public class FlowProps extends Props
     return jobPollingInterval;
     }
 
+  /**
+   * Property jobPollingInterval will set the time to wait between polling the remote server for the status of a job.
+   * The default value is 5000 msec (5 seconds).
+   *
+   * @param jobPollingInterval of type long
+   */
   public FlowProps setJobPollingInterval( int jobPollingInterval )
     {
     this.jobPollingInterval = jobPollingInterval;
@@ -166,6 +195,14 @@ public class FlowProps extends Props
     return maxConcurrentSteps;
     }
 
+  /**
+   * Method setMaxConcurrentSteps sets the maximum number of steps that a Flow can run concurrently.
+   * <p/>
+   * By default a Flow will attempt to run all give steps at the same time. But there are occasions
+   * where limiting the number of steps helps manages resources.
+   *
+   * @param maxConcurrentSteps of type int
+   */
   public FlowProps setMaxConcurrentSteps( int maxConcurrentSteps )
     {
     this.maxConcurrentSteps = maxConcurrentSteps;
@@ -178,6 +215,12 @@ public class FlowProps extends Props
     return stopJobsOnExit;
     }
 
+  /**
+   * Property stopJobsOnExit will tell the Flow to add a JVM shutdown hook that will kill all running processes if the
+   * underlying computing system supports it. Defaults to {@code true}.
+   *
+   * @param stopJobsOnExit of type boolean
+   */
   public FlowProps setStopJobsOnExit( boolean stopJobsOnExit )
     {
     this.stopJobsOnExit = stopJobsOnExit;

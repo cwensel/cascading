@@ -25,6 +25,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.GroupAssertion;
 import cascading.operation.GroupAssertionCall;
 import cascading.operation.OperationCall;
@@ -88,6 +91,8 @@ public abstract class AssertGroupBase extends BaseAssertion<AssertGroupBase.Cont
     this.size = size;
     }
 
+  @Property(name = "patternString", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The regular expression pattern string.")
   public String getPatternString()
     {
     return patternString;

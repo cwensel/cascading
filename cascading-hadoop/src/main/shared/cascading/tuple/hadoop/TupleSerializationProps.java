@@ -84,6 +84,11 @@ public class TupleSerializationProps extends Props
     properties.put( HADOOP_IO_SERIALIZATIONS, Util.join( ",", Util.removeNulls( serializations, className ) ) );
     }
 
+  /**
+   * Creates a new TupleSerializationProps instance.
+   *
+   * @return TupleSerializationProps instance
+   */
   public static TupleSerializationProps tupleSerializationProps()
     {
     return new TupleSerializationProps();
@@ -98,6 +103,15 @@ public class TupleSerializationProps extends Props
     return serializationTokens;
     }
 
+  /**
+   * Method setSerializationTokens sets the given integer tokens and classNames Map as a serialization properties.
+   * <p/>
+   * During object serialization and deserialization, the given tokens will be used instead of the className when an
+   * instance of the className is encountered.
+   *
+   * @param serializationTokens Map of Integer tokens and String classnames
+   * @return this
+   */
   public TupleSerializationProps setSerializationTokens( Map<Integer, String> serializationTokens )
     {
     this.serializationTokens = serializationTokens;
@@ -105,6 +119,15 @@ public class TupleSerializationProps extends Props
     return this;
     }
 
+  /**
+   * Method addSerializationTokens adds the given integer tokens and classNames Map as a serialization properties.
+   * <p/>
+   * During object serialization and deserialization, the given tokens will be used instead of the className when an
+   * instance of the className is encountered.
+   *
+   * @param serializationTokens Map of Integer tokens and String classnames
+   * @return this
+   */
   public TupleSerializationProps addSerializationTokens( Map<Integer, String> serializationTokens )
     {
     this.serializationTokens.putAll( serializationTokens );
@@ -112,9 +135,19 @@ public class TupleSerializationProps extends Props
     return this;
     }
 
-  public TupleSerializationProps addSerializationToken( int token, String serialization )
+  /**
+   * Method addSerializationToken adds the given integer token and classNames as a serialization properties.
+   * <p/>
+   * During object serialization and deserialization, the given tokens will be used instead of the className when an
+   * instance of the className is encountered.
+   *
+   * @param token                  type int
+   * @param serializationClassName type String
+   * @return this
+   */
+  public TupleSerializationProps addSerializationToken( int token, String serializationClassName )
     {
-    this.serializationTokens.put( token, serialization );
+    this.serializationTokens.put( token, serializationClassName );
 
     return this;
     }
@@ -124,23 +157,41 @@ public class TupleSerializationProps extends Props
     return hadoopSerializations;
     }
 
-  public TupleSerializationProps setHadoopSerializations( List<String> hadoopSerializations )
+  /**
+   * Method setHadoopSerializations sets the Hadoop serialization classNames to be used as properties.
+   *
+   * @param hadoopSerializationClassNames List of classNames
+   * @return this
+   */
+  public TupleSerializationProps setHadoopSerializations( List<String> hadoopSerializationClassNames )
     {
-    this.hadoopSerializations = hadoopSerializations;
+    this.hadoopSerializations = hadoopSerializationClassNames;
 
     return this;
     }
 
-  public TupleSerializationProps addHadoopSerializations( List<String> hadoopSerializations )
+  /**
+   * Method addHadoopSerializations adds the Hadoop serialization classNames to be used as properties.
+   *
+   * @param hadoopSerializationClassNames List of classNames
+   * @return this
+   */
+  public TupleSerializationProps addHadoopSerializations( List<String> hadoopSerializationClassNames )
     {
-    this.hadoopSerializations.addAll( hadoopSerializations );
+    this.hadoopSerializations.addAll( hadoopSerializationClassNames );
 
     return this;
     }
 
-  public TupleSerializationProps addHadoopSerialization( String hadoopSerialization )
+  /**
+   * Method addHadoopSerialization adds a Hadoop serialization className to be used as properties.
+   *
+   * @param hadoopSerializationClassName List of classNames
+   * @return this
+   */
+  public TupleSerializationProps addHadoopSerialization( String hadoopSerializationClassName )
     {
-    this.hadoopSerializations.add( hadoopSerialization );
+    this.hadoopSerializations.add( hadoopSerializationClassName );
 
     return this;
     }

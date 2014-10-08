@@ -24,6 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -75,7 +78,7 @@ public class UnGroup extends BaseOperation implements Function
    * @param groupSelector  of type Fields
    * @param valueSelectors of type Fields[]
    */
-  @ConstructorProperties({"groupSelector", "valueSelectors"})
+  @ConstructorProperties( {"groupSelector", "valueSelectors"} )
   public UnGroup( Fields groupSelector, Fields[] valueSelectors )
     {
     if( valueSelectors == null || valueSelectors.length == 1 )
@@ -104,7 +107,7 @@ public class UnGroup extends BaseOperation implements Function
    * @param groupSelector    of type Fields
    * @param valueSelectors   of type Fields[]
    */
-  @ConstructorProperties({"fieldDeclaration", "groupSelector", "valueSelectors"})
+  @ConstructorProperties( {"fieldDeclaration", "groupSelector", "valueSelectors"} )
   public UnGroup( Fields fieldDeclaration, Fields groupSelector, Fields[] valueSelectors )
     {
     super( fieldDeclaration );
@@ -141,7 +144,7 @@ public class UnGroup extends BaseOperation implements Function
    * @param groupSelector    of type Fields
    * @param numValues        of type int
    */
-  @ConstructorProperties({"fieldDeclaration", "groupSelector", "numValues"})
+  @ConstructorProperties( {"fieldDeclaration", "groupSelector", "numValues"} )
   public UnGroup( Fields fieldDeclaration, Fields groupSelector, int numValues )
     {
     super( fieldDeclaration );
@@ -149,11 +152,15 @@ public class UnGroup extends BaseOperation implements Function
     this.size = numValues;
     }
 
+  @Property( name = "ungroupFieldSelector", visibility = Visibility.PRIVATE )
+  @PropertyDescription( "The fields to un-group." )
   public Fields getGroupFieldSelector()
     {
     return groupFieldSelector;
     }
 
+  @Property( name = "resultFieldSelectors", visibility = Visibility.PRIVATE )
+  @PropertyDescription( "The result field selectors." )
   public Fields[] getResultFieldSelectors()
     {
     return Util.copy( resultFieldSelectors );

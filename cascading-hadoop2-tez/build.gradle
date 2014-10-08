@@ -42,16 +42,16 @@ dependencies {
   compile project( ':cascading-core' )
 
   // forces update of yarn slf4j dependencies
-  providedCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-  providedCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  provided group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
 
-  providedCompile( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
-  providedCompile( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
-  providedCompile( group: 'org.apache.tez', name: 'tez-mapreduce', version: tezVersion )
+  provided( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
+  provided( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
+  provided( group: 'org.apache.tez', name: 'tez-mapreduce', version: tezVersion )
 
-  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
-  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
-  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop2Version )
+  provided( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
+  provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  provided( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop2Version )
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )

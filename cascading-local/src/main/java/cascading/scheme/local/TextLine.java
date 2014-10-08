@@ -33,6 +33,9 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -82,7 +85,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    *
    * @param sourceFields of Fields
    */
-  @ConstructorProperties({"sourceFields"})
+  @ConstructorProperties( {"sourceFields"} )
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
@@ -97,7 +100,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * @param sourceFields of Fields
    * @param charsetName  of type String
    */
-  @ConstructorProperties({"sourceFields", "charsetName"})
+  @ConstructorProperties( {"sourceFields", "charsetName"} )
   public TextLine( Fields sourceFields, String charsetName )
     {
     super( sourceFields );
@@ -115,7 +118,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * @param sourceFields of Fields
    * @param sinkFields   of Fields
    */
-  @ConstructorProperties({"sourceFields", "sinkFields"})
+  @ConstructorProperties( {"sourceFields", "sinkFields"} )
   public TextLine( Fields sourceFields, Fields sinkFields )
     {
     super( sourceFields, sinkFields );
@@ -131,7 +134,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * @param sinkFields   of Fields
    * @param charsetName  of type String
    */
-  @ConstructorProperties({"sourceFields", "sinkFields", "charsetName"})
+  @ConstructorProperties( {"sourceFields", "sinkFields", "charsetName"} )
   public TextLine( Fields sourceFields, Fields sinkFields, String charsetName )
     {
     super( sourceFields, sinkFields );
@@ -148,6 +151,13 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
       this.charsetName = charsetName;
 
     Charset.forName( this.charsetName );
+    }
+
+  @Property( name = "charset", visibility = Visibility.PUBLIC )
+  @PropertyDescription( "character set used." )
+  public String getCharsetName()
+    {
+    return charsetName;
     }
 
   protected void verify( Fields sourceFields )

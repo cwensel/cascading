@@ -24,6 +24,9 @@ import java.beans.ConstructorProperties;
 import java.util.Random;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
@@ -58,7 +61,7 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
    *
    * @param fraction of type double
    */
-  @ConstructorProperties({"fraction"})
+  @ConstructorProperties( {"fraction"} )
   public Sample( double fraction )
     {
     this.seed = makeSeed();
@@ -71,18 +74,22 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
    * @param seed     of type long
    * @param fraction of type double
    */
-  @ConstructorProperties({"seed", "fraction"})
+  @ConstructorProperties( {"seed", "fraction"} )
   public Sample( long seed, double fraction )
     {
     this.seed = seed;
     this.fraction = fraction;
     }
 
+  @Property( name = "seed", visibility = Visibility.PUBLIC )
+  @PropertyDescription( "The randomization seed." )
   public long getSeed()
     {
     return seed;
     }
 
+  @Property( name = "fraction", visibility = Visibility.PUBLIC )
+  @PropertyDescription( "The fraction of tuples to be returned." )
   public double getFraction()
     {
     return fraction;

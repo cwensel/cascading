@@ -323,6 +323,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
       results[ i ] = filter.isRemove( FlowProcess.NULL, operationCall );
       }
 
+    filter.flush( FlowProcess.NULL, operationCall );
     filter.cleanup( FlowProcess.NULL, operationCall );
 
     return results;

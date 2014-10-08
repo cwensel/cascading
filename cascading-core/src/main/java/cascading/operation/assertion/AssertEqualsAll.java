@@ -23,6 +23,9 @@ package cascading.operation.assertion;
 import java.beans.ConstructorProperties;
 
 import cascading.flow.FlowProcess;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.tuple.TupleEntry;
@@ -41,7 +44,7 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
    *
    * @param value of type Comparable
    */
-  @ConstructorProperties({"value"})
+  @ConstructorProperties( {"value"} )
   public AssertEqualsAll( Object value )
     {
     super( "argument '%s' value was: %s, not: %s, in tuple: %s" );
@@ -52,6 +55,8 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
     this.value = value;
     }
 
+  @Property( name = "value", visibility = Visibility.PRIVATE )
+  @PropertyDescription( "The expected value." )
   public Object getValue()
     {
     return value;

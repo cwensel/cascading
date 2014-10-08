@@ -22,6 +22,10 @@ package cascading.operation.assertion;
 
 import java.beans.ConstructorProperties;
 
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
+
 /**
  * Class AssertGroupSizeEquals is an {@link cascading.operation.GroupAssertion} that asserts the number of items in the current group
  * is equal the given size.
@@ -37,7 +41,7 @@ public class AssertGroupSizeEquals extends AssertGroupBase
    *
    * @param size of type long
    */
-  @ConstructorProperties({"size"})
+  @ConstructorProperties( {"size"} )
   public AssertGroupSizeEquals( long size )
     {
     super( "group size: %s, is not equal to: %s, in group %s: %s", size );
@@ -49,10 +53,18 @@ public class AssertGroupSizeEquals extends AssertGroupBase
    * @param patternString of type String
    * @param size          of type long
    */
-  @ConstructorProperties({"patternString", "size"})
+  @ConstructorProperties( {"patternString", "size"} )
   public AssertGroupSizeEquals( String patternString, long size )
     {
     super( "group matching '%s' with size: %s, is not equal to: %s, in group %s: %s", patternString, size );
+    }
+
+  @Property( name = "size", visibility = Visibility.PRIVATE )
+  @PropertyDescription( "The expected group size." )
+  @Override
+  public long getSize()
+    {
+    return super.getSize();
     }
 
   @Override

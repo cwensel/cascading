@@ -51,6 +51,24 @@ public class ExpressionFilter extends ExpressionOperation implements Filter<Scri
   {
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
+   * <p/>
+   * This constructor, when used with incoming arguments that have type information, the argument field
+   * names can be used directly in the the expression, for example {@code a + b }. The type of {@code a} and {@code b}
+   * will be inherited from the incoming argument fields.
+   * <p/>
+   * Or, if the incoming argument selector is {@link cascading.tuple.Fields#NONE}, an expression using only static method calls
+   * or constants can be used, for example {@code Math.random() < SomeClass.someValue() }.
+   *
+   * @param expression of type String
+   */
+  @ConstructorProperties({"expression"})
+  public ExpressionFilter( String expression )
+    {
+    super( expression );
+    }
+
+  /**
+   * Constructor ExpressionFilter creates a new ExpressionFilter instance.
    *
    * @param expression    of type String
    * @param parameterType of type Class

@@ -60,14 +60,14 @@ public abstract class ExtremaValueBase extends BaseOperation<ExtremaValueBase.Co
       }
     }
 
-  @ConstructorProperties({"fieldDeclaration"})
+  @ConstructorProperties( {"fieldDeclaration"} )
   public ExtremaValueBase( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
     ignoreValues = null;
     }
 
-  @ConstructorProperties({"numArgs", "fieldDeclaration"})
+  @ConstructorProperties( {"numArgs", "fieldDeclaration"} )
   public ExtremaValueBase( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
@@ -77,7 +77,7 @@ public abstract class ExtremaValueBase extends BaseOperation<ExtremaValueBase.Co
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
+  @ConstructorProperties( {"fieldDeclaration", "ignoreValues"} )
   protected ExtremaValueBase( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration );
@@ -116,7 +116,7 @@ public abstract class ExtremaValueBase extends BaseOperation<ExtremaValueBase.Co
     Comparable lhs = (Comparable) context.value.getObject( 0 );
     Comparable rhs = (Comparable) arg;
 
-    if( lhs == null || compare( lhs, rhs ) )
+    if( lhs == null || ( rhs != null && compare( lhs, rhs ) ) )
       context.value.set( 0, rhs );
     }
 

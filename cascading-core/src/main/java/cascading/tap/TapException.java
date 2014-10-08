@@ -23,7 +23,7 @@ package cascading.tap;
 import cascading.CascadingException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.util.Util;
+import cascading.util.TraceUtil;
 
 /**
  * Class TapException is thrown from {@link Tap} and {@link cascading.scheme.Scheme} subclasses.
@@ -120,6 +120,6 @@ public class TapException extends CascadingException
     String message = "unable to resolve scheme sink selector: " + selectorFields.printVerbose() +
       ", with incoming: " + incomingFields.printVerbose();
 
-    return Util.formatTrace( tap.getScheme(), message );
+    return TraceUtil.formatTrace( tap.getScheme(), message );
     }
   }

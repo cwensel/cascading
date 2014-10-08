@@ -27,6 +27,9 @@ import java.util.Arrays;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.management.annotation.Property;
+import cascading.management.annotation.PropertyDescription;
+import cascading.management.annotation.Visibility;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -313,6 +316,13 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
     Charset.forName( this.charsetName );
     }
 
+  @Property(name = "charset", visibility = Visibility.PUBLIC)
+  @PropertyDescription(value = "character set used in this scheme.")
+  public String getCharsetName()
+    {
+    return charsetName;
+    }
+
   protected void verify( Fields sourceFields )
     {
     if( sourceFields.size() < 1 || sourceFields.size() > 2 )
@@ -324,6 +334,8 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
    *
    * @return the sinkCompression (type Compress) of this TextLine object.
    */
+  @Property(name = "sinkCompression", visibility = Visibility.PUBLIC)
+  @PropertyDescription(value = "The compression of the scheme when used in a sink.")
   public Compress getSinkCompression()
     {
     return sinkCompression;
