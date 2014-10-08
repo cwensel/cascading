@@ -320,10 +320,12 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     // but unsure if the tasks are actually engaged
     // return getDagStatusState() == DAGStatus.State.RUNNING || isDagStatusComplete();
 
-    if( getDagStatus() == null )
+    DAGStatus dagStatus = getDagStatus();
+
+    if( dagStatus == null )
       return false;
 
-    Progress dagProgress = getDagStatus().getDAGProgress();
+    Progress dagProgress = dagStatus.getDAGProgress();
 
     // not strictly true
     if( dagProgress == null )
