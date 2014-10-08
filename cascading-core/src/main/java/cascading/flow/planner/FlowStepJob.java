@@ -391,10 +391,6 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
       return false;
       }
-    catch( NullPointerException exception )
-      {
-      throw new FlowException( "Hadoop is not keeping a large enough job history, please increase the \'mapred.jobtracker.completeuserjobs.maximum\' property", exception );
-      }
     }
 
   /**

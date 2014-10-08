@@ -22,6 +22,7 @@ package cascading.flow.hadoop.planner;
 
 import java.io.IOException;
 
+import cascading.flow.FlowException;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
@@ -110,6 +111,19 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
 
     if( runningJob.getTrackingURL() != null )
       flowStep.logInfo( "tracking url: " + runningJob.getTrackingURL() );
+    }
+
+  @Override
+  public boolean isSuccessful()
+    {
+    try
+      {
+      return super.isSuccessful();
+      }
+    catch( NullPointerException exception )
+      {
+      throw new FlowException( "Hadoop is not keeping a large enough job history, please increase the \'mapred.jobtracker.completeuserjobs.maximum\' property", exception );
+      }
     }
 
   protected boolean internalNonBlockingIsSuccessful() throws IOException
