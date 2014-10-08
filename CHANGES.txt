@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.7.0 [unreleased]
+
 2.6.1
 
   Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.
@@ -62,6 +64,7 @@ Cascading Change Log
   read. Commonly java.io.EOFException is thrown and can be safely ignored. By default no exception will be ignored.
 
   Fixed issue in c.f.h.p.HadoopStepGraph where Traps would be ignored if the Flow had no operation ("copy flows").
+
   Updated Janino to 2.7.5.
 
   Added ability to add more meta information about a c.f.Flow, which can be read and used by a c.m.DocumentService.
