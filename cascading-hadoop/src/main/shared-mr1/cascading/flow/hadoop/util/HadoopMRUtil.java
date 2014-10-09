@@ -33,6 +33,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Util;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -48,7 +49,7 @@ public class HadoopMRUtil
 
   public static String writeStateToDistCache( JobConf conf, String id, String kind, String stepState )
     {
-    if( stepState == null || stepState.isEmpty() )
+    if( Util.isEmpty( stepState ) )
       return null;
 
     LOG.info( "writing step state to dist cache, too large for job conf, size: {}", stepState.length() );

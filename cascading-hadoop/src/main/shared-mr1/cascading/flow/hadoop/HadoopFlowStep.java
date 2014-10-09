@@ -196,12 +196,16 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     if( isHadoopLocalMode( conf ) || length < maxSize ) // seems safe
       {
       conf.set( "cascading.flow.step.node.map", mapState );
-      conf.set( "cascading.flow.step.node.reduce", reduceState );
+
+      if( !Util.isEmpty( reduceState ) )
+        conf.set( "cascading.flow.step.node.reduce", reduceState );
       }
     else
       {
       conf.set( "cascading.flow.step.node.map.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "map", mapState ) );
-      conf.set( "cascading.flow.step.node.reduce.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
+
+      if( !Util.isEmpty( reduceState ) )
+        conf.set( "cascading.flow.step.node.reduce.path", HadoopMRUtil.writeStateToDistCache( conf, getID(), "reduce", reduceState ) );
       }
 
     return conf;
