@@ -22,7 +22,7 @@ dependencies {
   compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
   compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.0'
   compile group: 'riffle', name: 'riffle', version: '0.1-dev'
-  compile group: 'org.codehaus.janino', name: 'janino', version: '2.7.5'
+  compile group: 'org.codehaus.janino', name: 'janino', version: '2.7.6'
 
   // this prevents a transitive dependency until it is required downstream
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
