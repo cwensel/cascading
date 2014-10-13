@@ -578,6 +578,9 @@ public abstract class CascadingStats<Child> implements Serializable
    * statistics about a given Cascade, Flow, FlowStep, or FlowNode.
    * <p/>
    * Each CascadingStats object must be individually inspected for any system specific details.
+   * <p/>
+   * Each call to this method will refresh the internal cache unless the current Stats object is marked finished. One
+   * additional refresh will happen after this instance is marked finished.
    */
   public abstract void captureDetail();
 

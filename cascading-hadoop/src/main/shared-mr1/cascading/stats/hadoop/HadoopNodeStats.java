@@ -26,10 +26,10 @@ import java.util.Map;
 
 import cascading.flow.FlowNode;
 import cascading.management.state.ClientState;
+import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowSliceStats;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class HadoopNodeStats extends BaseHadoopNodeStats<RunningJob, Counters>
+public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<String, Map<String, Long>>>
   {
   private static final Logger LOG = LoggerFactory.getLogger( HadoopNodeStats.class );
 
@@ -65,14 +65,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<RunningJob, Counters>
     this.parentStepStats = parentStepStats;
     this.kind = kind;
 
-    this.counterCache = new HadoopCounterCache( this, configuration )
-    {
-    @Override
-    protected RunningJob getJobStatusClient()
-      {
-      return parentStepStats.getJobStatusClient();
-      }
-    };
+    this.counterCache = new HadoopNodeCounterCache( this, configuration );
     }
 
   private Status getParentStatus()
@@ -81,17 +74,17 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<RunningJob, Counters>
     }
 
   @Override
-  public void captureDetail()
+  protected boolean captureDetailInternal()
     {
     JobClient jobClient = parentStepStats.getJobClient();
     RunningJob runningJob = parentStepStats.getJobStatusClient();
 
     if( jobClient == null || runningJob == null )
-      return;
+      return false;
 
     try
       {
-      TaskReport[] taskReports;
+      TaskReport[] taskReports; // todo: use Job task reports
 
       if( kind == HadoopSliceStats.Kind.MAPPER )
         taskReports = jobClient.getMapTaskReports( runningJob.getID() );
@@ -99,11 +92,15 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<RunningJob, Counters>
         taskReports = jobClient.getReduceTaskReports( runningJob.getID() );
 
       addTaskStats( taskReports, false );
+
+      return true;
       }
     catch( IOException exception )
       {
       LOG.warn( "unable to get slice stats", exception );
       }
+
+    return false;
     }
 
   protected void addTaskStats( TaskReport[] taskReports, boolean skipLast )

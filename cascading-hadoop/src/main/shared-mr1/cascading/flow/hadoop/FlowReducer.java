@@ -64,6 +64,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
   private boolean calledPrepare = false;
   private HadoopGroupGate group;
+  private long processBeginTime;
 
   /** Constructor FlowReducer creates a new FlowReducer instance. */
   public FlowReducer()
@@ -125,11 +126,12 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     if( !calledPrepare )
       {
-      currentProcess.increment( SliceCounters.Process_Begin_Time, System.currentTimeMillis() );
-
       streamGraph.prepare();
 
       calledPrepare = true;
+
+      processBeginTime = System.currentTimeMillis();
+      currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
 
       group.start( group );
       }
@@ -153,7 +155,6 @@ public class FlowReducer extends MapReduceBase implements Reducer
       }
     }
 
-
   @Override
   public void close() throws IOException
     {
@@ -171,7 +172,11 @@ public class FlowReducer extends MapReduceBase implements Reducer
     finally
       {
       if( currentProcess != null )
-        currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
+        {
+        long processEndTime = System.currentTimeMillis();
+        currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+        }
       }
     }
 

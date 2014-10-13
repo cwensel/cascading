@@ -72,9 +72,9 @@ import static cascading.flow.hadoop.util.HadoopUtil.pack;
  */
 public class HadoopFlowStep extends BaseFlowStep<JobConf>
   {
-  public HadoopFlowStep( String name, int stepNum, ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
+  public HadoopFlowStep( ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
-    super( name, stepNum, elementGraph, flowNodeGraph );
+    super( elementGraph, flowNodeGraph );
     }
 
   public JobConf createInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )

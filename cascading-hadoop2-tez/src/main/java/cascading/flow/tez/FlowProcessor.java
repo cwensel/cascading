@@ -126,17 +126,15 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
       throw new FlowException( "internal error during processor configuration", throwable );
       }
 
-    // todo: may need to push this below waitForAllInputsReady, but will need to manually start inputs
     streamGraph.prepare(); // starts inputs
 
-    long begin = System.currentTimeMillis();
-
-    getContext().waitForAllInputsReady( new HashSet<Input>( inputMap.values() ) );
-
-    LOG.info( "all inputs ready in: {}", Util.formatDurationHMSms( System.currentTimeMillis() - begin ) );
+    // wait for shuffle
+    waitForInputsRead( inputMap );
 
     // user code begins executing from here
-    currentProcess.increment( SliceCounters.Process_Begin_Time, System.currentTimeMillis() );
+    long processBeginTime = System.currentTimeMillis();
+
+    currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
 
     Iterator<Duct> iterator = allHeads.iterator();
 
@@ -174,9 +172,20 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
         }
       finally
         {
-        currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
+        long processEndTime = System.currentTimeMillis();
+        currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
         }
       }
+    }
+
+  protected void waitForInputsRead( Map<String, LogicalInput> inputMap ) throws InterruptedException
+    {
+    long beginInputReady = System.currentTimeMillis();
+
+    getContext().waitForAllInputsReady( new HashSet<Input>( inputMap.values() ) );
+
+    LOG.info( "all inputs ready in: {}", Util.formatDurationHMSms( System.currentTimeMillis() - beginInputReady ) );
     }
 
   @Override

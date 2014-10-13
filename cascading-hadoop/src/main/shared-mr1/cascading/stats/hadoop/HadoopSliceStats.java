@@ -111,6 +111,7 @@ public class HadoopSliceStats implements FlowSliceStats
     this.taskReport = taskReport;
     }
 
+  @Override
   public String getID()
     {
     return id;
@@ -139,6 +140,11 @@ public class HadoopSliceStats implements FlowSliceStats
   public String getJobID()
     {
     return taskReport.getTaskID().getJobID().toString();
+    }
+
+  protected TaskReport getTaskReport()
+    {
+    return taskReport;
     }
 
   public boolean parentStepHasReducers()
@@ -171,6 +177,7 @@ public class HadoopSliceStats implements FlowSliceStats
     return parentStatus;
     }
 
+  @Override
   public CascadingStats.Status getStatus()
     {
     CascadingStats.Status status = null;
@@ -202,6 +209,7 @@ public class HadoopSliceStats implements FlowSliceStats
     return taskReport.getDiagnostics();
     }
 
+  @Override
   public Map<String, Map<String, Long>> getCounters()
     {
     if( counters == null )
@@ -232,24 +240,13 @@ public class HadoopSliceStats implements FlowSliceStats
       }
     }
 
-  /**
-   * Method getCounterValue returns the raw Hadoop counter value.
-   *
-   * @param counter of Enum
-   * @return long
-   */
+  @Override
   public long getCounterValue( Enum counter )
     {
     return getCounterValue( counter.getDeclaringClass().getName(), counter.name() );
     }
 
-  /**
-   * Method getCounterValue returns the raw Hadoop counter value.
-   *
-   * @param group of String
-   * @param name  of String
-   * @return long
-   */
+  @Override
   public long getCounterValue( String group, String name )
     {
     if( getCounters() == null || getCounters().get( group ) == null )
@@ -272,7 +269,7 @@ public class HadoopSliceStats implements FlowSliceStats
   public String toString()
     {
     final StringBuilder sb = new StringBuilder();
-    sb.append( "HadoopTaskStats" );
+    sb.append( "HadoopSliceStats" );
     sb.append( "{id='" ).append( id ).append( '\'' );
     sb.append( ", kind=" ).append( kind );
     sb.append( '}' );

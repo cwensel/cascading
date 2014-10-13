@@ -30,18 +30,15 @@ import cascading.flow.local.LocalFlowProcess;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.state.ClientState;
+import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
 import cascading.stats.local.LocalStepStats;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class LocalFlowStepJob extends FlowStepJob<Properties>
   {
-  private static final Logger LOG = LoggerFactory.getLogger( LocalFlowStepJob.class );
-
   private final LocalStepRunner stackRunner;
   private Future<Throwable> future;
 
@@ -84,6 +81,12 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
     future = executors.submit( stackRunner );
 
     executors.shutdown();
+    }
+
+  @Override
+  protected void markNodeRunningStatus( FlowNodeStats flowNodeStats )
+    {
+
     }
 
   @Override

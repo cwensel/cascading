@@ -21,7 +21,6 @@
 package cascading.flow.planner;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,8 +47,8 @@ import cascading.util.Util;
 public class BaseFlowNode implements Serializable, FlowNode
   {
   private final String id;
-  private final int ordinal;
-  private final String name;
+  private int ordinal;
+  private String name;
 
   protected ElementGraph nodeSubGraph;
   protected List<? extends ElementGraph> pipelineGraphs = Collections.emptyList();
@@ -64,11 +63,9 @@ public class BaseFlowNode implements Serializable, FlowNode
   private Map<Tap, Set<String>> reverseSinkTaps;
   private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
 
-  public BaseFlowNode( int ordinal, String name, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
+  public BaseFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
     {
     this.id = Util.createUniqueID();
-    this.ordinal = ordinal;
-    this.name = name;
     this.nodeSubGraph = nodeSubGraph;
 
     if( pipelineGraphs != null )
@@ -81,6 +78,11 @@ public class BaseFlowNode implements Serializable, FlowNode
     assignTraps( flowElementGraph.getTrapMap() );
     }
 
+  public void setOrdinal( int ordinal )
+    {
+    this.ordinal = ordinal;
+    }
+
   @Override
   public int getOrdinal()
     {
@@ -91,6 +93,11 @@ public class BaseFlowNode implements Serializable, FlowNode
   public String getID()
     {
     return id;
+    }
+
+  public void setName( String name )
+    {
+    this.name = name;
     }
 
   @Override

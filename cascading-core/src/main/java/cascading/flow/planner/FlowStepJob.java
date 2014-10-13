@@ -22,6 +22,7 @@ package cascading.flow.planner;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -31,6 +32,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepStrategy;
 import cascading.management.state.ClientState;
+import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStats;
 import cascading.stats.FlowStepStats;
 import cascading.util.Util;
@@ -221,19 +223,20 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         {
         flowStep.rollbackSinks();
         flowStepStats.markFailed( getThrowable() );
+        markNodesStatus();
         flowStep.fireOnThrowable( getThrowable() );
         }
-
-      dumpDebugInfo();
 
       // if available, rethrow the unrecoverable error
       if( getThrowable() instanceof OutOfMemoryError )
         throw ( (OutOfMemoryError) getThrowable() );
 
+      dumpDebugInfo();
+
       if( !isRemoteExecution() )
         throwable = new FlowException( "local step failed: " + stepName, getThrowable() );
       else
-        throwable = new FlowException( "step failed: " + stepName + ", with job id: " + internalJobId() + ", please see cluster logs for failure messages" );
+        throwable = new FlowException( "step failed: " + stepName + ", step id: " + getStepStats().getID() + ", job id: " + internalJobId() + ", please see cluster logs for failure messages" );
       }
     else
       {
@@ -244,11 +247,13 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         if( throwable != null )
           {
           flowStepStats.markFailed( throwable );
+          markNodesStatus();
           flowStep.fireOnThrowable( throwable );
           }
         else
           {
           flowStepStats.markSuccessful();
+          markNodesStatus();
           flowStep.fireOnCompleted();
           }
         }
@@ -281,6 +286,9 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         flowStep.fireOnRunning();
         }
 
+      if( flowStepStats.isRunning() )
+        markNodesStatus();
+
       if( stop || internalNonBlockingIsComplete() )
         break;
 
@@ -298,7 +306,14 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   private synchronized void markSubmitted()
     {
     if( flowStepStats.isStarted() )
+      {
       flowStepStats.markSubmitted();
+
+      Collection<FlowNodeStats> children = flowStepStats.getChildren();
+
+      for( FlowNodeStats flowNodeStats : children )
+        flowNodeStats.markStarted();
+      }
 
     Flow flow = flowStep.getFlow();
 
@@ -349,6 +364,22 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         flowStats.markRunning();
       }
     }
+
+  private void markNodesStatus()
+    {
+    Collection<FlowNodeStats> children = flowStepStats.getFlowNodeStats();
+
+    for( FlowNodeStats child : children )
+      {
+      if( child.isFinished() || child.isPending() )
+        continue;
+
+      // call if started or running
+      markNodeRunningStatus( child );
+      }
+    }
+
+  protected abstract void markNodeRunningStatus( FlowNodeStats flowNodeStats );
 
   protected abstract boolean internalNonBlockingIsComplete() throws IOException;
 

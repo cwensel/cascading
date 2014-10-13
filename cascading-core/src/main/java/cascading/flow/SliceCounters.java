@@ -22,5 +22,5 @@ package cascading.flow;
 
 public enum SliceCounters
   {
-    Tuples_Read, Tuples_Written, Process_Begin_Time, Process_End_Time, Read_Duration, Write_Duration
+    Tuples_Read, Tuples_Written, Process_Begin_Time, Process_End_Time, Process_Duration, Read_Duration, Write_Duration
   }

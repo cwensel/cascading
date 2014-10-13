@@ -22,7 +22,6 @@ package cascading.flow.tez;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -121,25 +120,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
   private Map<Path, Path> syncPaths;
   private Map<String, String> environment;
 
-  private static class FlowNodeComparator implements Comparator<FlowNode>
+  public Hadoop2TezFlowStep( ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
-    @Override
-    public int compare( FlowNode lhs, FlowNode rhs )
-      {
-      int lhsSize = lhs.getElementGraph().vertexSet().size();
-      int rhsSize = rhs.getElementGraph().vertexSet().size();
-      return ( lhsSize < rhsSize ) ? -1 : ( ( lhsSize == rhsSize ) ? 0 : 1 );
-      }
-    }
-
-  public Hadoop2TezFlowStep( String name, int stepNum, ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
-    {
-    super( name, stepNum, elementGraph, flowNodeGraph );
-    }
-
-  protected Hadoop2TezFlowStep( String name, int ordinal )
-    {
-    super( name, ordinal );
+    super( elementGraph, flowNodeGraph );
     }
 
   public Map<Path, Path> getSyncPaths()
@@ -200,7 +183,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     dag.addTaskLocalFiles( localResources );
 
-    Iterator<FlowNode> iterator = nodeGraph.getOrderedTopologicalIterator( new FlowNodeComparator() ); // ordering of nodes for consistent remote debugging
+    Iterator<FlowNode> iterator = nodeGraph.getOrderedTopologicalIterator(); // ordering of nodes for consistent remote debugging
 
     while( iterator.hasNext() )
       {

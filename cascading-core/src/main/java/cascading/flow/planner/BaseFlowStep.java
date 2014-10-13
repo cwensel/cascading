@@ -95,7 +95,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
   String name;
   /** Field id */
   private String id;
-  private final int ordinal;
+  private int ordinal;
 
   /** Field step listeners */
   private List<SafeFlowStepListener> listeners;
@@ -132,11 +132,9 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     this.flowNodeGraph = null;
     }
 
-  protected BaseFlowStep( String name, int ordinal, ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
+  protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
     {
     this.id = Util.createUniqueID();
-    setName( name );
-    this.ordinal = ordinal;
     this.graph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
@@ -160,6 +158,11 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return id;
     }
 
+  public void setOrdinal( int ordinal )
+    {
+    this.ordinal = ordinal;
+    }
+
   @Override
   public int getOrdinal()
     {
@@ -172,7 +175,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return name;
     }
 
-  void setName( String name )
+  public void setName( String name )
     {
     if( name == null || name.isEmpty() )
       throw new IllegalArgumentException( "step name may not be null or empty" );

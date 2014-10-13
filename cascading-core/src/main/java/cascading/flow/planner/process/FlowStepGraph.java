@@ -20,10 +20,12 @@
 
 package cascading.flow.planner.process;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import cascading.flow.FlowStep;
+import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
@@ -39,23 +41,36 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
   public FlowStepGraph( String tracePath, FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     this.tracePath = tracePath;
+
     buildGraph( flowPlanner, flowElementGraph, nodeSubGraphsMap, pipelineSubGraphsMap );
+
+    Iterator<FlowStep> iterator = getTopologicalIterator();
+
+    int ordinal = 0;
+    int size = vertexSet().size();
+
+    while( iterator.hasNext() )
+      {
+      BaseFlowStep flowStep = (BaseFlowStep) iterator.next();
+
+      flowStep.setOrdinal( ordinal );
+      flowStep.setName( flowPlanner.makeFlowStepName( flowStep, size, ordinal ) );
+
+      ElementGraph stepSubGraph = flowStep.getElementGraph();
+
+      writePlan( ordinal, stepSubGraph, nodeSubGraphsMap.get( stepSubGraph ), pipelineSubGraphsMap );
+
+      ordinal++;
+      }
     }
 
   protected void buildGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
-    int totalSteps = nodeSubGraphsMap.size();
-    int stepCount = 0;
-
     for( ElementGraph stepSubGraph : nodeSubGraphsMap.keySet() )
       {
       List<? extends ElementGraph> nodeSubGraphs = nodeSubGraphsMap.get( stepSubGraph );
-
-      writePlan( stepCount, stepSubGraph, nodeSubGraphs, pipelineSubGraphsMap );
-
       FlowNodeGraph flowNodeGraph = createFlowNodeGraph( flowPlanner, flowElementGraph, pipelineSubGraphsMap, nodeSubGraphs );
-
-      FlowStep flowStep = flowPlanner.createFlowStep( totalSteps, stepCount++, stepSubGraph, flowNodeGraph );
+      FlowStep flowStep = flowPlanner.createFlowStep( stepSubGraph, flowNodeGraph );
 
       addVertex( flowStep );
       }

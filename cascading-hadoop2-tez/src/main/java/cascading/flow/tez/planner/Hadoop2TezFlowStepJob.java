@@ -32,6 +32,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.tez.Hadoop2TezFlow;
 import cascading.management.state.ClientState;
+import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
 import cascading.stats.tez.TezStepStats;
 import org.apache.hadoop.conf.Configuration;
@@ -47,8 +48,8 @@ import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.dag.api.TezException;
 import org.apache.tez.dag.api.client.DAGClient;
 import org.apache.tez.dag.api.client.DAGStatus;
-import org.apache.tez.dag.api.client.Progress;
 import org.apache.tez.dag.api.client.StatusGetOpts;
+import org.apache.tez.dag.api.client.VertexStatus;
 
 import static cascading.flow.FlowProps.JOB_POLLING_INTERVAL;
 import static cascading.stats.CascadingStats.STATS_STORE_INTERVAL;
@@ -58,6 +59,8 @@ import static cascading.stats.CascadingStats.STATS_STORE_INTERVAL;
  */
 public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   {
+  private static final Set<StatusGetOpts> STATUS_GET_OPTS = EnumSet.of( StatusGetOpts.GET_COUNTERS );
+
   /** Field currentConf */
   private final TezConfiguration currentConf;
   private DAG dag;
@@ -125,7 +128,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
       tezClient.start(); // todo: need a reciprocal stop
 
-      dagClient = tezClient.submitDAG( dag ); // is not submitted
+      dagClient = tezClient.submitDAG( dag );
 
       flowStep.logInfo( "submitted tez dag: " + dagClient.getExecutionContext() );
 
@@ -135,6 +138,77 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     catch( TezException exception )
       {
       throw new CascadingException( exception );
+      }
+    }
+
+  @Override
+  protected void markNodeRunningStatus( FlowNodeStats flowNodeStats )
+    {
+    if( dagClient == null )
+      return;
+
+    try
+      {
+      VertexStatus vertexStatus = dagClient.getVertexStatus( flowNodeStats.getID(), null ); // no counters
+
+      if( vertexStatus == null )
+        return;
+
+      VertexStatus.State state = vertexStatus.getState();
+
+      if( state == null )
+        return;
+
+      switch( state )
+        {
+        case NEW:
+          break;
+
+        case INITIALIZING:
+          break;
+
+        case INITED:
+          break;
+
+        case RUNNING:
+          flowNodeStats.markRunning();
+          break;
+
+        case SUCCEEDED:
+          if( !flowNodeStats.isRunning() )
+            flowNodeStats.markRunning();
+
+          flowNodeStats.markSuccessful();
+          break;
+
+        case FAILED:
+          if( !flowNodeStats.isRunning() )
+            flowNodeStats.markRunning();
+
+          flowNodeStats.markFailed( null ); // todo: lookup failure
+          break;
+
+        case KILLED:
+          if( !flowNodeStats.isRunning() )
+            flowNodeStats.markRunning();
+
+          flowNodeStats.markStopped();
+          break;
+
+        case ERROR:
+          if( !flowNodeStats.isRunning() )
+            flowNodeStats.markRunning();
+
+          flowNodeStats.markFailed( null ); // todo: lookup failure
+          break;
+
+        case TERMINATING:
+          break;
+        }
+      }
+    catch( IOException | TezException exception )
+      {
+      flowStep.logError( "failed setting node status", throwable );
       }
     }
 
@@ -170,8 +244,6 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
     return result + flowStagingPath + Path.SEPARATOR + flowStep.getID();
     }
-
-  Set<StatusGetOpts> statusGetOpts = EnumSet.of( StatusGetOpts.GET_COUNTERS );
 
   private DAGStatus.State getDagStatusState()
     {
@@ -218,11 +290,11 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
     try
       {
-      return dagClient.getDAGStatus( statusGetOpts );
+      return dagClient.getDAGStatus( STATUS_GET_OPTS );
       }
     catch( IOException | TezException exception )
       {
-      throw new CascadingException( exception );
+      throw new CascadingException( "unable to get counters from dag client", exception );
       }
     }
 
@@ -318,8 +390,8 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     // this is an alternative, seems to be set in tests sooner
     // but unsure if the tasks are actually engaged
-    // return getDagStatusState() == DAGStatus.State.RUNNING || isDagStatusComplete();
-
+    return getDagStatusState() == DAGStatus.State.RUNNING || isDagStatusComplete();
+/*
     DAGStatus dagStatus = getDagStatus();
 
     if( dagStatus == null )
@@ -338,5 +410,6 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       + dagProgress.getSucceededTaskCount();
 
     return completed > 0;
+*/
     }
   }

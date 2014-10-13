@@ -321,13 +321,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   protected abstract F createFlow( FlowDef flowDef );
 
-  public abstract FlowStep<Config> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
+  public abstract FlowStep<Config> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
 
-  public FlowNode createFlowNode( int numNodes, int ordinal, FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
+  public FlowNode createFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
     {
-    String name = String.format( "(%d/%d)", ordinal, numNodes );
-
-    return new BaseFlowNode( ordinal, name, flowElementGraph, nodeSubGraph, pipelineGraphs );
+    return new BaseFlowNode( flowElementGraph, nodeSubGraph, pipelineGraphs );
     }
 
   protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
@@ -719,8 +717,17 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return flowDef.getAssertionLevel() == null ? this.defaultAssertionLevel : flowDef.getAssertionLevel();
     }
 
-  protected String makeStepName( Tap sink, int numSteps, int stepNum )
+  public String makeFlowNodeName( FlowNode flowNode, int size, int ordinal )
     {
+    return String.format( "(%d/%d)", ordinal + 1, size );
+    }
+
+  public String makeFlowStepName( FlowStep flowStep, int numSteps, int stepNum )
+    {
+    Tap sink = Util.getFirst( flowStep.getSinkTaps() );
+
+    stepNum++; // number more sensical (5/5)
+
     if( sink == null || sink.isTemporary() )
       return String.format( "(%d/%d)", stepNum, numSteps );
 

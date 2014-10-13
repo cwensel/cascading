@@ -66,6 +66,7 @@ public abstract class CounterCache<JobStatus, Counters>
   } );
 
   private CascadingStats stats;
+  private boolean hasCapturedFinalCounters;
   private Counters cachedCounters = null;
   private int numTimeouts;
   private int timeout;
@@ -155,7 +156,13 @@ public abstract class CounterCache<JobStatus, Counters>
 
   protected synchronized Counters cachedCounters( boolean force )
     {
-    if( !force && ( stats.isFinished() || numTimeouts >= TIMEOUT_MAX ) )
+    boolean isFinished = stats.isFinished();
+
+    // ignore force, no reason to refresh completed stats
+    if( isFinished && hasCapturedFinalCounters )
+      return cachedCounters;
+
+    if( cachedCounters != null && !force && numTimeouts >= TIMEOUT_MAX )
       return cachedCounters;
 
     JobStatus runningJob = getJobStatusClient();
@@ -165,11 +172,15 @@ public abstract class CounterCache<JobStatus, Counters>
 
     Future<Counters> future = runFuture( runningJob );
 
+    boolean success = false;
+
     try
       {
       Counters fetched = future.get( timeout, TimeUnit.SECONDS );
 
-      if( fetched != null )
+      success = fetched != null;
+
+      if( success )
         cachedCounters = fetched;
       }
     catch( InterruptedException exception )
@@ -201,6 +212,8 @@ public abstract class CounterCache<JobStatus, Counters>
       else
         LOG.warn( "fetching counters timed out after: {} seconds, attempts: {}", timeout, numTimeouts );
       }
+
+    hasCapturedFinalCounters = isFinished && success;
 
     return cachedCounters;
     }

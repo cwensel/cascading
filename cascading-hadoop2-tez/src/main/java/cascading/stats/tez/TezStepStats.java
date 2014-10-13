@@ -68,7 +68,7 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGStatus, TezCou
       }
     };
 
-    Iterator<FlowNode> iterator = flowStep.getFlowNodeGraph().getTopologicalIterator();
+    Iterator<FlowNode> iterator = flowStep.getFlowNodeGraph().getOrderedTopologicalIterator();
 
     while( iterator.hasNext() )
       addNodeStats( new TezNodeStats( this, iterator.next(), clientState, config ) );
@@ -79,11 +79,6 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGStatus, TezCou
   /** Method captureDetail captures statistics task details and completion events. */
   @Override
   public synchronized void captureDetail()
-    {
-    captureDetail( true );
-    }
-
-  public void captureDetail( boolean captureAttempts )
     {
     DAGClient dagClient = getDAGClient();
     DAGStatus jobStatus = getJobStatusClient();

@@ -180,6 +180,9 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
 
       defaultConf.setInt( YarnConfiguration.DEBUG_NM_DELETE_DELAY_SEC, -1 );
 
+      // stats won't work after completion unless ATS is used
+//      defaultConf.set( TezConfiguration.TEZ_HISTORY_LOGGING_SERVICE_CLASS, "org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService" );
+
 //      defaultConf.set( TezConfiguration.TEZ_AM_LOG_LEVEL, "DEBUG" );
 //      defaultConf.set( TezConfiguration.TEZ_TASK_LOG_LEVEL, "DEBUG" );
 

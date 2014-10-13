@@ -52,7 +52,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.flow.tez.util.TezUtil.asJobConf;
-import static cascading.util.Util.getFirst;
 
 /**
  */
@@ -157,11 +156,9 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
     return new Hadoop2TezFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
-  public FlowStep<TezConfiguration> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  public FlowStep<TezConfiguration> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
     {
-    String name = makeStepName( getFirst( flowNodeGraph.getSinkTaps() ), numSteps, ordinal );
-
-    return new Hadoop2TezFlowStep( name, ordinal, stepElementGraph, flowNodeGraph );
+    return new Hadoop2TezFlowStep( stepElementGraph, flowNodeGraph );
     }
 
   public URI getDefaultURIScheme( Tap tap )

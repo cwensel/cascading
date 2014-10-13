@@ -60,9 +60,9 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
     }
 
   @Override
-  public FlowStep<Properties> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  public FlowStep<Properties> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
     {
-    return new LocalFlowStep( "local", ordinal, stepElementGraph, flowNodeGraph );
+    return new LocalFlowStep( stepElementGraph, flowNodeGraph );
     }
 
   @Override

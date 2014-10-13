@@ -20,9 +20,33 @@
 
 package cascading.stats;
 
+import java.util.Map;
+
 /**
  *
  */
 public interface FlowSliceStats
   {
+  String getID();
+
+  CascadingStats.Status getStatus();
+
+  Map<String, Map<String, Long>> getCounters();
+
+  /**
+   * Method getCounterValue returns the raw Hadoop counter value.
+   *
+   * @param counter of Enum
+   * @return long
+   */
+  long getCounterValue( Enum counter );
+
+  /**
+   * Method getCounterValue returns the raw Hadoop counter value.
+   *
+   * @param group of String
+   * @param name  of String
+   * @return long
+   */
+  long getCounterValue( String group, String name );
   }

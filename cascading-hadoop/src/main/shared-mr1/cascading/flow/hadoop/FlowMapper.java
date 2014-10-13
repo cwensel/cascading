@@ -58,7 +58,6 @@ public class FlowMapper implements MapRunnable
   /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
 
-
   /** Constructor FlowMapper creates a new FlowMapper instance. */
   public FlowMapper()
     {
@@ -111,10 +110,13 @@ public class FlowMapper implements MapRunnable
   public void run( RecordReader input, OutputCollector output, Reporter reporter ) throws IOException
     {
     currentProcess.setReporter( reporter );
-    currentProcess.increment( SliceCounters.Process_Begin_Time, System.currentTimeMillis() );
     currentProcess.setOutputCollector( output );
 
     streamGraph.prepare();
+
+    long processBeginTime = System.currentTimeMillis();
+
+    currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
 
     SourceStage streamedHead = streamGraph.getStreamedHead();
     Iterator<Duct> iterator = streamGraph.getHeads().iterator();
@@ -160,7 +162,10 @@ public class FlowMapper implements MapRunnable
         }
       finally
         {
-        currentProcess.increment( SliceCounters.Process_End_Time, System.currentTimeMillis() );
+        long processEndTime = System.currentTimeMillis();
+
+        currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
         }
       }
     }

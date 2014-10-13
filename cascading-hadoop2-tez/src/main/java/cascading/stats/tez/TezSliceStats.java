@@ -20,6 +20,7 @@
 
 package cascading.stats.tez;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import cascading.stats.FlowSliceStats;
 public class TezSliceStats implements FlowSliceStats
   {
   private final CascadingStats.Status parentStatus;
+  private CascadingStats.Status status;
 
   public static class TezAttempt
     {
@@ -45,6 +47,7 @@ public class TezSliceStats implements FlowSliceStats
     this.id = id;
     }
 
+  @Override
   public String getID()
     {
     return id;
@@ -55,11 +58,23 @@ public class TezSliceStats implements FlowSliceStats
     return parentStatus;
     }
 
+  protected void setStatus( CascadingStats.Status status )
+    {
+    this.status = status;
+    }
+
+  @Override
+  public CascadingStats.Status getStatus()
+    {
+    return status;
+    }
+
   public String[] getDiagnostics()
     {
     return null;
     }
 
+  @Override
   public Map<String, Map<String, Long>> getCounters()
     {
     if( counters == null )
@@ -75,26 +90,16 @@ public class TezSliceStats implements FlowSliceStats
 
   private void setCounters( Object taskReport )
     {
+    counters = Collections.emptyMap();
     }
 
-  /**
-   * Method getCounterValue returns the raw Hadoop counter value.
-   *
-   * @param counter of Enum
-   * @return long
-   */
+  @Override
   public long getCounterValue( Enum counter )
     {
     return getCounterValue( counter.getDeclaringClass().getName(), counter.name() );
     }
 
-  /**
-   * Method getCounterValue returns the raw Hadoop counter value.
-   *
-   * @param group of String
-   * @param name  of String
-   * @return long
-   */
+  @Override
   public long getCounterValue( String group, String name )
     {
     if( getCounters() == null || getCounters().get( group ) == null )
@@ -117,7 +122,7 @@ public class TezSliceStats implements FlowSliceStats
   public String toString()
     {
     final StringBuilder sb = new StringBuilder();
-    sb.append( "TezTaskStats" );
+    sb.append( "TezSliceStats" );
     sb.append( "{id='" ).append( id ).append( '\'' );
     sb.append( '}' );
     return sb.toString();

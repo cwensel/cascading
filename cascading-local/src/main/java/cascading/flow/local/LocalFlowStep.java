@@ -41,9 +41,9 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   /** Map of Properties modified by each Tap's sourceConfInit/sinkConfInit */
   private final Map<Tap, Properties> tapProperties = new HashMap<Tap, Properties>();
 
-  public LocalFlowStep( String name, int id, ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
+  public LocalFlowStep( ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
-    super( name, id, elementGraph, flowNodeGraph );
+    super( elementGraph, flowNodeGraph );
     }
 
   @Override

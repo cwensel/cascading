@@ -14,7 +14,7 @@ Alternately, all binaries are available through the [Conjars.org](http://conjars
 To use Tez as an alternative platform:
 
 * change your maven dependencies to `cascading-hadoop2-tez`
-* add any necessary Apache Tez dependencies as `providedCompile`
+* add any necessary Apache Tez dependencies as `provided`
 * use the c.f.t.Hadoop2TezFlowConnector instead of the c.f.h.Hadoop2MR1Planner.
 
 You cannot have both `cascading-hadoop2-mr1` and `cascading-hadoop2-tez` in your project without dependency issues. 
@@ -22,7 +22,7 @@ You cannot have both `cascading-hadoop2-mr1` and `cascading-hadoop2-tez` in your
 Both c.t.Tap and c.s.Scheme implementations will work with both MapReduce and Tez platforms, though custom Tap/Scheme
 implementations may need to be updated to work against Cascading 3.0.
 
-This release has been tested and built against Tez 0.5.0. Currently all applicable tests pass against the Tez platform.
+This release has been tested and built against Tez 0.5.1. Currently all applicable tests pass against the Tez platform.
 
 See below for notes and issues against this release.
 
@@ -53,8 +53,7 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 
 * Kill hanging processes (before tests)
 
-    > jps | grep DAGApp | cut -f1 -d" " | xargs kill -9
-    > jps | grep TezChild | cut -f1 -d" " | xargs kill -9
+    > jps | grep DAGApp | cut -f1 -d" " | xargs kill -9; jps | grep TezChild | cut -f1 -d" " | xargs kill -9
     
 * To prevent deadlocks in local mode, "tez.am.inline.task.execution.max-tasks" is set to 2 contrary to comments.
 

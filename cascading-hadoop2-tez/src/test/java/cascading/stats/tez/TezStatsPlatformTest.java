@@ -44,14 +44,14 @@ import static data.InputData.inputFileApache;
 /**
  *
  */
-public class CascadingStatsPlatformTest extends PlatformTestCase
+public class TezStatsPlatformTest extends PlatformTestCase
   {
   enum TestEnum
     {
       FIRST, SECOND, THIRD
     }
 
-  public CascadingStatsPlatformTest()
+  public TezStatsPlatformTest()
     {
     super( true );
     }
@@ -116,20 +116,22 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 
     cascadeStats.captureDetail();
 
-    if( getPlatform().isDAG() )
-      {
-      assertEquals( 1, flowStats1.getStepsCount() );
-      assertEquals( 1, flowStats2.getStepsCount() );
+    assertEquals( 1, flowStats1.getStepsCount() );
+    assertEquals( 1, flowStats2.getStepsCount() );
 
-      TezStepStats stats1 = (TezStepStats) flowStats1.getFlowStepStats().get( 0 );
+    TezStepStats stats1 = (TezStepStats) flowStats1.getFlowStepStats().get( 0 );
 
-      assertNotNull( stats1.getID() );
+    assertNotNull( stats1.getID() );
 //      assertNotNull( stats1.getJobID() );
 
-      if( getPlatform().isUseCluster() )
-        {
-        List<FlowNodeStats> flowNodeStats = stats1.getFlowNodeStats();
-        assertEquals( 3, flowNodeStats.size() );
+    if( getPlatform().isUseCluster() )
+      {
+      List<FlowNodeStats> flowNodeStats = stats1.getFlowNodeStats();
+      assertEquals( 3, flowNodeStats.size() );
+
+      // disabled as we cannot get vertex counters in a mini cluster
+//      assertTrue( stats1.getCounterValue( SliceCounters.Process_Duration ) != 0L );
+//      assertTrue( flowNodeStats.get( 0 ).getCounterValue( SliceCounters.Process_Duration ) != 0L );
 
 //        assertEquals( 5, stats1.getTaskStats().size() );
 //
@@ -140,16 +142,15 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 //          if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
 //            assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
 //          }
-        }
+      }
 
-      TezStepStats stats2 = (TezStepStats) flowStats2.getFlowStepStats().get( 0 );
+    TezStepStats stats2 = (TezStepStats) flowStats2.getFlowStepStats().get( 0 );
 
-      assertNotNull( stats2.getID() );
+    assertNotNull( stats2.getID() );
 //      assertNotNull( stats2.getJobID() );
 
-      // todo: enable when tasks are captured
+    // todo: enable when tasks are captured
 //      if( getPlatform().isUseCluster() )
 //        assertEquals( 5, stats2.getTaskStats().size() );
-      }
     }
   }

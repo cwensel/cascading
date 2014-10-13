@@ -42,6 +42,8 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
   protected final Map<String, FlowSliceStats> sliceStatsMap = new LinkedHashMap<>();
   protected CounterCache<JobStatus, Counters> counterCache;
 
+  private boolean hasCapturedFinalDetail;
+
   /**
    * Constructor CascadingStats creates a new CascadingStats instance.
    *
@@ -119,13 +121,36 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     }
 
   @Override
-  public Collection getChildren()
+  public Collection<FlowSliceStats> getChildren()
     {
     synchronized( sliceStatsMap )
       {
       return Collections.unmodifiableCollection( sliceStatsMap.values() );
       }
     }
+
+  @Override
+  public final synchronized void captureDetail()
+    {
+    boolean finished = isFinished();
+
+    if( finished && hasCapturedFinalDetail )
+      return;
+
+    boolean success = captureDetailInternal();
+
+    if( success )
+      LOG.info( "captured remote node statistic details" );
+
+    hasCapturedFinalDetail = finished && success;
+    }
+
+  /**
+   * Returns true if was able to capture/refresh the internal child stats cache.
+   *
+   * @return true if successful
+   */
+  protected abstract boolean captureDetailInternal();
 
   /** Synchronized to prevent state changes mid record, #stop may be called out of band */
   @Override

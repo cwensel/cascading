@@ -33,9 +33,9 @@ import org.apache.hadoop.mapred.RunningJob;
 /**
  *
  */
-public abstract class HadoopCounterCache extends CounterCache<RunningJob, Counters>
+public abstract class HadoopStepCounterCache extends CounterCache<RunningJob, Counters>
   {
-  protected HadoopCounterCache( CascadingStats stats, Configuration configuration )
+  protected HadoopStepCounterCache( CascadingStats stats, Configuration configuration )
     {
     super( stats, configuration );
     }
@@ -67,7 +67,7 @@ public abstract class HadoopCounterCache extends CounterCache<RunningJob, Counte
     if( counterGroup == null )
       return 0;
 
-    // geCounter actually searches the display name, wtf
+    // getCounter actually searches the display name, wtf
     // in theory this is lazily created if does not exist, but don't rely on it
     Counters.Counter counterValue = counterGroup.getCounterForName( counterName );
 

@@ -45,6 +45,11 @@ public abstract class FlowNodeStats extends CascadingStats<FlowSliceStats>
     return flowNode;
     }
 
+  public int getOrdinal()
+    {
+    return flowNode.getOrdinal();
+    }
+
   @Override
   public synchronized void recordInfo()
     {

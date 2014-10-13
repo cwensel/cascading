@@ -27,6 +27,7 @@ import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
+import cascading.flow.SliceCounters;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.state.Counter;
 import cascading.pipe.Each;
@@ -46,14 +47,14 @@ import static data.InputData.inputFileApache;
 /**
  *
  */
-public class CascadingStatsPlatformTest extends PlatformTestCase
+public class HadoopStatsPlatformTest extends PlatformTestCase
   {
   enum TestEnum
     {
       FIRST, SECOND, THIRD
     }
 
-  public CascadingStatsPlatformTest()
+  public HadoopStatsPlatformTest()
     {
     super( true );
     }
@@ -112,6 +113,9 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
     assertEquals( 20, flowStats1.getCounterValue( TestEnum.FIRST ) );
     assertEquals( 10, flowStats1.getCounterValue( TestEnum.SECOND ) );
 
+    assertEquals( 10, flowStats1.getFlowStepStats().get( 0 ).getCounterValue( TestEnum.FIRST ) );
+    assertEquals( 10, flowStats1.getFlowStepStats().get( 1 ).getCounterValue( TestEnum.FIRST ) );
+
     // should not throw npe
     assertEquals( 0, flowStats1.getCounterValue( TestEnum.THIRD ) );
     assertEquals( 0, flowStats1.getCounterValue( "FOO", "BAR" ) );
@@ -125,59 +129,61 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 
     cascadeStats.captureDetail();
 
-    if( getPlatform().isMapReduce() )
-      {
-      assertEquals( 2, flowStats1.getStepsCount() );
-      assertEquals( 2, flowStats2.getStepsCount() );
+    assertEquals( 2, flowStats1.getStepsCount() );
+    assertEquals( 2, flowStats2.getStepsCount() );
 
-      HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getFlowStepStats().get( 0 );
+    HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getFlowStepStats().get( 0 );
 
-      assertNotNull( stats1.getID() );
-      assertNotNull( stats1.getJobID() );
+    assertNotNull( stats1.getID() );
+    assertNotNull( stats1.getJobID() );
 
 //      assertEquals( 2, stats1.getNumMapTasks() );
 //      assertEquals( 1, stats1.getNumReducerTasks() );
 
-      if( getPlatform().isUseCluster() )
+    if( getPlatform().isUseCluster() )
+      {
+      assertTrue( stats1.getCounterValue( SliceCounters.Process_Duration ) != 0L );
+
+      List<FlowNodeStats> flowNodeStats = stats1.getFlowNodeStats();
+
+      assertTrue( flowNodeStats.get( 0 ).getCounterValue( SliceCounters.Process_Duration ) != 0L );
+
+      assertEquals( 2, flowNodeStats.size() );
+
+      FlowNodeStats mapperNode = flowNodeStats.get( 0 );
+      FlowNodeStats reducerNode = flowNodeStats.get( 1 );
+
+      assertEquals( 4, mapperNode.getChildren().size() );
+      assertEquals( 1, reducerNode.getChildren().size() );
+
+      Collection<FlowSliceStats> children = reducerNode.getChildren();
+      for( FlowSliceStats flowSliceStats : children )
         {
-        List<FlowNodeStats> flowNodeStats = stats1.getFlowNodeStats();
-        assertEquals( 2, flowNodeStats.size() );
+        HadoopSliceStats hadoopSliceStats = (HadoopSliceStats) flowSliceStats;
 
-        FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-        FlowNodeStats reducerNode = flowNodeStats.get( 1 );
-
-        assertEquals( 4, mapperNode.getChildren().size() );
-        assertEquals( 1, reducerNode.getChildren().size() );
-
-        Collection<FlowSliceStats> children = reducerNode.getChildren();
-        for( FlowSliceStats flowSliceStats : children )
-          {
-          HadoopSliceStats hadoopSliceStats = (HadoopSliceStats) flowSliceStats;
-
-          if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
-            assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
-          }
+        if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
+          assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
         }
+      }
 
-      HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getFlowStepStats().get( 0 );
+    HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getFlowStepStats().get( 0 );
 
-      assertNotNull( stats2.getID() );
-      assertNotNull( stats2.getJobID() );
+    assertNotNull( stats2.getID() );
+    assertNotNull( stats2.getJobID() );
 
 //      assertEquals( 2, stats2.getNumMapTasks() );
 //      assertEquals( 1, stats2.getNumReducerTasks() );
 
-      if( getPlatform().isUseCluster() )
-        {
-        List<FlowNodeStats> flowNodeStats = stats2.getFlowNodeStats();
-        assertEquals( 2, flowNodeStats.size() );
+    if( getPlatform().isUseCluster() )
+      {
+      List<FlowNodeStats> flowNodeStats = stats2.getFlowNodeStats();
+      assertEquals( 2, flowNodeStats.size() );
 
-        FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-        FlowNodeStats reducerNode = flowNodeStats.get( 1 );
+      FlowNodeStats mapperNode = flowNodeStats.get( 0 );
+      FlowNodeStats reducerNode = flowNodeStats.get( 1 );
 
-        assertEquals( 4, mapperNode.getChildren().size() );
-        assertEquals( 1, reducerNode.getChildren().size() );
-        }
+      assertEquals( 4, mapperNode.getChildren().size() );
+      assertEquals( 1, reducerNode.getChildren().size() );
       }
     }
   }

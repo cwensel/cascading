@@ -63,7 +63,7 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
       addNodeStats( reducerNodeStats );
       }
 
-    counterCache = new HadoopCounterCache( this, (Configuration) getConfig() )
+    counterCache = new HadoopStepCounterCache( this, (Configuration) getConfig() )
     {
     @Override
     protected RunningJob getJobStatusClient()

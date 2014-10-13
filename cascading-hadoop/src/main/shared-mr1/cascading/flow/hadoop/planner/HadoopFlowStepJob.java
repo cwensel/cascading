@@ -27,6 +27,7 @@ import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.state.ClientState;
+import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
 import cascading.stats.hadoop.HadoopStepStats;
 import org.apache.hadoop.mapred.JobClient;
@@ -111,6 +112,54 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
 
     if( runningJob.getTrackingURL() != null )
       flowStep.logInfo( "tracking url: " + runningJob.getTrackingURL() );
+    }
+
+  @Override
+  protected void markNodeRunningStatus( FlowNodeStats flowNodeStats )
+    {
+    try
+      {
+      if( runningJob == null )
+        return;
+
+      float progress;
+
+      boolean isMapper = flowNodeStats.getOrdinal() == 0;
+
+      if( isMapper )
+        progress = runningJob.mapProgress();
+      else
+        progress = runningJob.reduceProgress();
+
+      if( progress == 0.0F ) // not yet running, is only started
+        return;
+
+      if( progress != 1.0F )
+        {
+        flowNodeStats.markRunning();
+        return;
+        }
+
+      if( !flowNodeStats.isRunning() )
+        flowNodeStats.markRunning();
+
+      if( isMapper && runningJob.reduceProgress() > 0.0F )
+        {
+        flowNodeStats.markSuccessful();
+        return;
+        }
+
+      int jobState = runningJob.getJobState();
+
+      if( JobStatus.SUCCEEDED == jobState )
+        flowNodeStats.markSuccessful();
+      else if( JobStatus.FAILED == jobState )
+        flowNodeStats.markFailed( null ); // todo: find failure
+      }
+    catch( IOException exception )
+      {
+      flowStep.logError( "failed setting node status", throwable );
+      }
     }
 
   @Override

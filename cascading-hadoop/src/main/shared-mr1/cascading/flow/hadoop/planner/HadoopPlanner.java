@@ -46,8 +46,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.util.Util.getFirst;
-
 /**
  * Class HadoopPlanner is the core Hadoop MapReduce planner used by default through the {@link cascading.flow.hadoop.HadoopFlowConnector}.
  * <p/>
@@ -178,11 +176,9 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     return new HadoopFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
-  public FlowStep<JobConf> createFlowStep( int numSteps, int ordinal, ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  public FlowStep<JobConf> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
     {
-    String name = makeStepName( getFirst( flowNodeGraph.getSinkTaps() ), numSteps, ordinal );
-
-    return new HadoopFlowStep( name, ordinal, stepElementGraph, flowNodeGraph );
+    return new HadoopFlowStep( stepElementGraph, flowNodeGraph );
     }
 
   public URI getDefaultURIScheme( Tap tap )
