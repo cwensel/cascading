@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
+  Fixed issue where c.t.h.Hfs would not properly ignore 'hidden' files starting with '.' or '_' when listing children
+  in a directory.
+
 2.6.0
 
   Updated c.p.a.AggregateBy and c.p.a.Unique to count cache flushes, hits, and misses. Previously only AggregateBy

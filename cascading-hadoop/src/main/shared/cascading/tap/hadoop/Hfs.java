@@ -50,6 +50,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
@@ -58,7 +59,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.mapred.lib.CombineFileInputFormat;
 import org.apache.hadoop.mapred.lib.CombineFileRecordReader;
 import org.apache.hadoop.mapred.lib.CombineFileSplit;
@@ -128,6 +128,21 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
   /** Field paths */
   private transient FileStatus[] statuses; // only used by getModifiedTime
 
+  private static final PathFilter HIDDEN_FILES_FILTER = new PathFilter()
+  {
+  public boolean accept( Path path )
+    {
+    String name = path.getName();
+
+    if( name.isEmpty() ) // should never happen
+      return true;
+
+    char first = name.charAt( 0 );
+
+    return first != '_' && first != '.';
+    }
+  };
+
   /**
    * Method setTemporaryDirectory sets the temporary directory on the given properties object.
    *
@@ -173,7 +188,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     {
     }
 
-  @ConstructorProperties({"scheme"})
+  @ConstructorProperties( {"scheme"} )
   protected Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme )
     {
     super( scheme );
@@ -186,7 +201,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param stringPath of type String
    */
   @Deprecated
-  @ConstructorProperties({"fields", "stringPath"})
+  @ConstructorProperties( {"fields", "stringPath"} )
   public Hfs( Fields fields, String stringPath )
     {
     super( new SequenceFile( fields ) );
@@ -201,7 +216,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param replace    of type boolean
    */
   @Deprecated
-  @ConstructorProperties({"fields", "stringPath", "replace"})
+  @ConstructorProperties( {"fields", "stringPath", "replace"} )
   public Hfs( Fields fields, String stringPath, boolean replace )
     {
     super( new SequenceFile( fields ), replace ? SinkMode.REPLACE : SinkMode.KEEP );
@@ -216,7 +231,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param sinkMode   of type SinkMode
    */
   @Deprecated
-  @ConstructorProperties({"fields", "stringPath", "sinkMode"})
+  @ConstructorProperties( {"fields", "stringPath", "sinkMode"} )
   public Hfs( Fields fields, String stringPath, SinkMode sinkMode )
     {
     super( new SequenceFile( fields ), sinkMode );
@@ -232,7 +247,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
-  @ConstructorProperties({"scheme", "stringPath"})
+  @ConstructorProperties( {"scheme", "stringPath"} )
   public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
@@ -247,7 +262,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param replace    of type boolean
    */
   @Deprecated
-  @ConstructorProperties({"scheme", "stringPath", "replace"})
+  @ConstructorProperties( {"scheme", "stringPath", "replace"} )
   public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
     {
     super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
@@ -261,7 +276,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
-  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
+  @ConstructorProperties( {"scheme", "stringPath", "sinkMode"} )
   public Hfs( Scheme<JobConf, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
@@ -565,7 +580,6 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
     return deleteFullIdentifier( conf, childPath.toString() );
     }
 
-
   @Override
   public boolean resourceExists( JobConf conf ) throws IOException
     {
@@ -681,7 +695,7 @@ public class Hfs extends Tap<JobConf, RecordReader, OutputCollector> implements 
       return;
       }
 
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( path, new Utils.OutputFileUtils.OutputFilesFilter() );
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( path, HIDDEN_FILES_FILTER );
 
     if( statuses == null )
       return;
