@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.6.1 [unreleased]
+
 2.6.0
 
   Updated c.p.a.AggregateBy and c.p.a.Unique to count cache flushes, hits, and misses. Previously only AggregateBy
