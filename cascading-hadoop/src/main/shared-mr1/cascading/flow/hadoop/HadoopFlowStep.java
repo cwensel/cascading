@@ -84,7 +84,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     // disable warning
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
 
-    conf.setJobName( getStepDisplayName( conf.getInt( "cascading.step.display.id.truncate", Util.ID_LENGTH ) ) );
+    conf.setJobName( getStepDisplayName( conf.getInt( "cascading.display.id.truncate", Util.ID_LENGTH ) ) );
 
     conf.setOutputKeyClass( Tuple.class );
     conf.setOutputValueClass( Tuple.class );

@@ -161,6 +161,11 @@ public class AppProps extends Props
     return PropertyUtil.getProperty( properties, APP_ID, getAppID() );
     }
 
+  public static String getApplicationID()
+    {
+    return getAppID();
+    }
+
   private static String getAppID()
     {
     if( appID == null )

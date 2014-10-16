@@ -106,6 +106,20 @@ public class BaseFlowNode implements Serializable, FlowNode
     return name;
     }
 
+/*
+  protected String getNodeDisplayName( int idLength )
+    {
+    if( idLength > Util.ID_LENGTH )
+      idLength = Util.ID_LENGTH;
+
+    String flowID = getFlowID().substring( 0, idLength );
+    String stepID = getID().substring( 0, idLength );
+    String nodeID = getID().substring( 0, idLength );
+
+    return String.format( "[%s/%s/%s] %s/%s", flowID, stepID, nodeID, getFlowName(), getName() );
+    }
+*/
+
   @Override
   public ElementGraph getElementGraph()
     {
