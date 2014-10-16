@@ -306,31 +306,40 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     try
       {
       if( dagClient != null )
-        dagClient.tryKillDAG();
-
-      if( tezClient != null )
-        tezClient.stop(); // will shutdown the session
+        dagClient.tryKillDAG(); // sometimes throws an NPE
       }
-    catch( TezException exception )
+    catch( Exception exception )
       {
       flowStep.logWarn( "exception during attempt to kill dag", exception );
       }
+
+    stopTezClient();
     }
 
   @Override
   protected void internalCleanup()
     {
-    flowStep.logInfo( "closing tez clients" );
-
     try
       {
       if( dagClient != null )
-        dagClient.close();
+        dagClient.close(); // may throw an NPE
+      }
+    catch( Exception exception )
+      {
+      flowStep.logWarn( "exception during attempt to cleanup client", exception );
+      }
 
+    stopTezClient();
+    }
+
+  private void stopTezClient()
+    {
+    try
+      {
       if( tezClient != null )
         tezClient.stop(); // will shutdown the session
       }
-    catch( TezException | IOException exception )
+    catch( Exception exception )
       {
       flowStep.logWarn( "exception during attempt to cleanup client", exception );
       }
