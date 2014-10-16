@@ -115,7 +115,7 @@ public class HadoopPlatform extends BaseHadoopPlatform
       // enforce the local file system in local mode
       jobConf.set( "fs.default.name", "file:///" );
       jobConf.set( "mapred.job.tracker", "local" );
-      jobConf.set( "mapreduce.jobtracker.staging.root.dir", "build/tmp/cascading/staging" );
+      jobConf.set( "mapreduce.jobtracker.staging.root.dir", System.getProperty( "user.dir" ) + "/build/tmp/cascading/staging" );
 
       fileSys = FileSystem.get( jobConf );
       }

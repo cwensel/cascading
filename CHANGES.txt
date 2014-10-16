@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
+  Updated c.p.h.HadoopPlatform to set 'mapreduce.jobtracker.staging.root.dir' to a fully qualified path for non-cluster tests.
+
   Fixed issue where c.u.Version was leaking file descriptors.
 
   Fixed issue where c.t.h.Hfs would not properly ignore 'hidden' files starting with '.' or '_' when listing children
