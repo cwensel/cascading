@@ -32,16 +32,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.tez.common.counters.TezCounters;
 import org.apache.tez.dag.api.client.DAGClient;
 import org.apache.tez.dag.api.client.DAGStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class TezStepStats extends BaseHadoopStepStats<DAGStatus, TezCounters>
   {
-  private static final Logger LOG = LoggerFactory.getLogger( TezStepStats.class );
-
   /**
    * Constructor CascadingStats creates a new CascadingStats instance.
    *

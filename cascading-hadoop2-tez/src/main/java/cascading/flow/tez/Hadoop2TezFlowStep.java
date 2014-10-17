@@ -179,7 +179,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     {
     FlowNodeGraph nodeGraph = getFlowNodeGraph();
     Map<FlowNode, Vertex> vertexMap = new HashMap<>();
-    DAG dag = DAG.create( getStepDisplayName( initializedConfig.getInt( "cascading.step.display.id.truncate", Util.ID_LENGTH ) ) );
+    DAG dag = DAG.create( getStepDisplayName( initializedConfig.getInt( "cascading.display.id.truncate", Util.ID_LENGTH ) ) );
 
     dag.addTaskLocalFiles( localResources );
 
@@ -434,7 +434,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     int parallelism = getParallelism( flowNode, conf );
 
     if( parallelism == 0 )
-      throw new FlowException( getName(), "a default number of gather partitions must be set, see FlowRuntimeProps" );
+      throw new FlowException( getName(), "the default number of gather partitions must be set, see cascading.flow.FlowRuntimeProps" );
 
     Vertex vertex = newVertex( flowNode, conf, parallelism );
 
@@ -515,7 +515,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
         continue;
 
       if( parallelism != Integer.MAX_VALUE )
-        LOG.info( "multiple sink taps in flow node declaring numSinkParts, choosing lowest value. see FlowRuntimeProps for broader control." );
+        LOG.info( "multiple sink taps in flow node declaring numSinkParts, choosing lowest value. see cascading.flow.FlowRuntimeProps for broader control." );
 
       parallelism = Math.min( parallelism, numSinkParts );
       }
@@ -657,9 +657,6 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     ProcessorDescriptor descriptor = ProcessorDescriptor.create( FlowProcessor.class.getName() );
 
     descriptor.setUserPayload( getPayload( conf ) );
-
-    // vertex name is not a display name, but a unique id, so we must use an ID
-//    String displayName = getNodeDisplayName( flowNode, conf.getInt( "cascading.step.display.id.truncate", Util.ID_LENGTH ) );
 
     Vertex vertex = Vertex.create( flowNode.getID(), descriptor, parallelism );
 

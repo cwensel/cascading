@@ -22,7 +22,6 @@ package cascading.flow.tez.planner;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -40,7 +39,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.security.TokenCache;
 import org.apache.hadoop.security.Credentials;
-import org.apache.hadoop.yarn.api.records.LocalResource;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.tez.client.TezClient;
 import org.apache.tez.client.TezClientUtils;
 import org.apache.tez.dag.api.DAG;
@@ -64,8 +63,6 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   /** Field currentConf */
   private final TezConfiguration currentConf;
   private DAG dag;
-
-  private Credentials credentials = new Credentials();
 
   private TezClient tezClient;
   private DAGClient dagClient;
@@ -119,21 +116,23 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     try
       {
-      // copy
       TezConfiguration workingConf = new TezConfiguration( currentConf );
+
+      if( !workingConf.getBoolean( YarnConfiguration.TIMELINE_SERVICE_ENABLED, YarnConfiguration.DEFAULT_TIMELINE_SERVICE_ENABLED ) )
+        flowStep.logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, please enable to capture detailed metrics of completed flows, this may require starting the YARN timeline server daemon." );
+
+      // this could be problematic
+      flowStep.logInfo( "tez session mode enabled: " + workingConf.getBoolean( TezConfiguration.TEZ_AM_SESSION_MODE, TezConfiguration.TEZ_AM_SESSION_MODE_DEFAULT ) );
 
       prepareEnsureStagingDir( workingConf );
 
-      tezClient = TezClient.create( flowStep.getName(), workingConf, Collections.<String, LocalResource>emptyMap(), credentials );
+      tezClient = TezClient.create( flowStep.getName(), workingConf, false );
 
-      tezClient.start(); // todo: need a reciprocal stop
+      tezClient.start();
 
       dagClient = tezClient.submitDAG( dag );
 
-      flowStep.logInfo( "submitted tez dag: " + dagClient.getExecutionContext() );
-
-//      if( dagClient.getApplicationReport() != null && dagClient.getApplicationReport().getTrackingUrl() != null )
-//        flowStep.logInfo( "tracking url: " + dagClient.getApplicationReport().getTrackingUrl() );
+      flowStep.logInfo( "submitted tez dag to app master: " + tezClient.getAppMasterApplicationId() );
       }
     catch( TezException exception )
       {
@@ -223,7 +222,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
     stagingDir = fileSystem.makeQualified( stagingDir );
 
-    TokenCache.obtainTokensForNamenodes( credentials, new Path[]{stagingDir}, workingConf );
+    TokenCache.obtainTokensForNamenodes( new Credentials(), new Path[]{stagingDir}, workingConf );
 
     TezClientUtils.ensureStagingDirExists( workingConf, stagingDir );
 
@@ -313,11 +312,18 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       flowStep.logWarn( "exception during attempt to kill dag", exception );
       }
 
+    stopDAGClient();
     stopTezClient();
     }
 
   @Override
   protected void internalCleanup()
+    {
+    stopDAGClient();
+    stopTezClient();
+    }
+
+  private void stopDAGClient()
     {
     try
       {
@@ -328,16 +334,16 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       {
       flowStep.logWarn( "exception during attempt to cleanup client", exception );
       }
-
-    stopTezClient();
     }
 
   private void stopTezClient()
     {
     try
       {
-      if( tezClient != null )
-        tezClient.stop(); // will shutdown the session
+      if( tezClient == null )
+        return;
+
+      tezClient.stop(); // will shutdown the session
       }
     catch( Exception exception )
       {
