@@ -162,6 +162,9 @@ public abstract class CounterCache<JobStatus, Counters>
     if( isFinished && hasCapturedFinalCounters )
       return cachedCounters;
 
+    if( !force && isFinished )
+      force = true;
+
     if( cachedCounters != null && !force && numTimeouts >= TIMEOUT_MAX )
       return cachedCounters;
 

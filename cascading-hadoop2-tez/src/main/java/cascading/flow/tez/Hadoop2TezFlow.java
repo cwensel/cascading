@@ -38,6 +38,7 @@ import cascading.util.ShutdownUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.tez.common.counters.TaskCounter;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -301,5 +302,16 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
   protected int getMaxNumParallelSteps()
     {
     return stepsAreLocal() ? 1 : getMaxConcurrentSteps( getConfig() );
+    }
+
+  @Override
+  protected long getTotalSliceCPUMilliSeconds()
+    {
+    long counterValue = flowStats.getCounterValue( TaskCounter.CPU_MILLISECONDS );
+
+    if( counterValue == 0 )
+      return -1;
+
+    return counterValue;
     }
   }

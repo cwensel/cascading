@@ -280,4 +280,16 @@ public class HadoopFlow extends BaseFlow<JobConf>
     {
     return stepsAreLocal() ? 1 : getMaxConcurrentSteps( getConfig() );
     }
+
+  @Override
+  protected long getTotalSliceCPUMilliSeconds()
+    {
+    // this is a hadoop2 MR specific counter/value
+    long counterValue = flowStats.getCounterValue( "org.apache.hadoop.mapreduce.TaskCounter", "CPU_MILLISECONDS" );
+
+    if( counterValue == 0 )
+      return -1;
+
+    return counterValue;
+    }
   }

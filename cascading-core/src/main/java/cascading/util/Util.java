@@ -534,7 +534,7 @@ public class Util
       }
     }
 
-  @SuppressWarnings( {"unchecked"} )
+  @SuppressWarnings({"unchecked"})
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
@@ -571,7 +571,7 @@ public class Util
    *
    * @param list
    */
-  @SuppressWarnings( {"StatementWithEmptyBody"} )
+  @SuppressWarnings({"StatementWithEmptyBody"})
   public static void removeAllNulls( List list )
     {
     while( list.remove( null ) )
@@ -852,14 +852,47 @@ public class Util
     return Integer.MIN_VALUE;
     }
 
+  public static String formatDurationFromMillis( long duration )
+    {
+    if( duration / 1000 / 60 / 60 / 24 > 0.0 )
+      return formatDurationDHMSms( duration );
+    if( duration / 1000 / 60 / 60 > 0.0 )
+      return formatDurationHMSms( duration );
+    else
+      return formatDurationMSms( duration );
+    }
+
   public static String formatDurationMSms( long duration )
     {
-    return String.format( "%02d:%02d.%03d", ( duration / 1000 % 3600 ) / 60, ( duration / 1000 ) % 60, duration % 1000 );
+    long ms = duration % 1000;
+    long durationSeconds = duration / 1000;
+    long seconds = durationSeconds % 60;
+    long minutes = durationSeconds / 60;
+
+    return String.format( "%02d:%02d.%03d", minutes, seconds, ms );
     }
 
   public static String formatDurationHMSms( long duration )
     {
-    return String.format( "%02d:%02d:%02d.%03d", duration / 1000 / 3600, ( duration / 1000 % 3600 ) / 60, ( duration / 1000 ) % 60, duration % 1000 );
+    long ms = duration % 1000;
+    long durationSeconds = duration / 1000;
+    long seconds = durationSeconds % 60;
+    long minutes = ( durationSeconds / 60 ) % 60;
+    long hours = durationSeconds / 60 / 60;
+
+    return String.format( "%02d:%02d:%02d.%03d", hours, minutes, seconds, ms );
+    }
+
+  public static String formatDurationDHMSms( long duration )
+    {
+    long ms = duration % 1000;
+    long durationSeconds = duration / 1000;
+    long seconds = durationSeconds % 60;
+    long minutes = ( durationSeconds / 60 ) % 60;
+    long hours = ( durationSeconds / 60 / 60 ) % 24;
+    long days = durationSeconds / 60 / 60 / 24;
+
+    return String.format( "%02d:%02d:%02d:%02d.%03d", days, hours, minutes, seconds, ms );
     }
 
   /**

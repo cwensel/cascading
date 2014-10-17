@@ -71,6 +71,7 @@ import riffle.process.ProcessPrepare;
 import riffle.process.ProcessStart;
 import riffle.process.ProcessStop;
 
+import static cascading.util.Util.formatDurationFromMillis;
 import static org.jgrapht.Graphs.predecessorListOf;
 
 @riffle.process.Process
@@ -1203,11 +1204,26 @@ public abstract class BaseFlow<Config> implements Flow<Config>
         }
       finally
         {
+        if( LOG.isInfoEnabled() )
+          {
+          long totalSliceCPUSeconds = getTotalSliceCPUMilliSeconds();
+
+          if( totalSliceCPUSeconds == -1 )
+            logInfo( " completed in: " + formatDurationFromMillis( flowStats.getDuration() ) );
+          else
+            logInfo( " completed in: " + formatDurationFromMillis( flowStats.getDuration() ) + ", using cpu time: " + formatDurationFromMillis( totalSliceCPUSeconds ) );
+          }
+
         flowStats.cleanup();
         internalShutdown();
         deregisterShutdownHook();
         }
       }
+    }
+
+  protected long getTotalSliceCPUMilliSeconds()
+    {
+    return -1;
     }
 
   protected abstract int getMaxNumParallelSteps();
