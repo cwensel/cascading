@@ -34,14 +34,22 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.rule.util.ResultTree;
 import cascading.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static cascading.util.Util.formatDurationFromMillis;
 
 /**
  *
  */
 public class RuleResult
   {
+  public static final int THRESHOLD_SECONDS = 10;
+
+  private static final Logger LOG = LoggerFactory.getLogger( RuleResult.class );
+
   private Map<ProcessLevel, Set<ElementGraph>> levelParents = new HashMap<>();
-  ResultTree resultTree = new ResultTree();
+  private ResultTree resultTree = new ResultTree();
 
   private long duration = 0;
   private Map<PlanPhase, Long> phaseDurations = new LinkedHashMap<>();
@@ -173,6 +181,11 @@ public class RuleResult
     duration = end - begin;
     }
 
+  public long getDuration()
+    {
+    return duration;
+    }
+
   public void setPhaseDuration( PlanPhase phase, long begin, long end )
     {
     phaseDurations.put( phase, end - begin );
@@ -191,7 +204,13 @@ public class RuleResult
     if( durations.containsKey( rule.getRuleName() ) )
       throw new IllegalStateException( "duplicate rule found: " + rule.getRuleName() );
 
-    durations.put( rule.getRuleName(), end - begin );
+    long duration = end - begin;
+
+    // print these as we go
+    if( duration > THRESHOLD_SECONDS * 1000 )
+      LOG.info( "rule: {}, took longer than {} seconds: {}", rule.getRuleName(), THRESHOLD_SECONDS, formatDurationFromMillis( duration ) );
+
+    durations.put( rule.getRuleName(), duration );
     }
 
   public void writeStats( PrintWriter writer )

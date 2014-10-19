@@ -70,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.property.PropertyUtil.getStringProperty;
+import static cascading.util.Util.formatDurationFromMillis;
 import static java.util.Arrays.asList;
 
 /**
@@ -186,6 +187,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, transformPath != null );
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
+
+      LOG.info( "executed rule registry: {}, completed in: {}", ruleRegistry.getName(), formatDurationFromMillis( ruleResult.getDuration() ) );
 
       writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getAssemblyGraph() );
 
@@ -804,12 +807,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       {
       Flow flow = plannerContext.getFlow();
 
+      Map<Object, Object> configAsProperties = flow.getConfigAsProperties();
+
       writer.format( "cascading version: %s, build: %s\n", emptyOrValue( Version.getReleaseFull() ), emptyOrValue( Version.getReleaseBuild() ) );
-      writer.format( "application id: %s\n", emptyOrValue( AppProps.getApplicationID( flow.getConfigAsProperties() ) ) );
-      writer.format( "application name: %s\n", emptyOrValue( AppProps.getApplicationName( flow.getConfigAsProperties() ) ) );
-      writer.format( "application version: %s\n", emptyOrValue( AppProps.getApplicationVersion( flow.getConfigAsProperties() ) ) );
+      writer.format( "application id: %s\n", emptyOrValue( AppProps.getApplicationID( configAsProperties ) ) );
+      writer.format( "application name: %s\n", emptyOrValue( AppProps.getApplicationName( configAsProperties ) ) );
+      writer.format( "application version: %s\n", emptyOrValue( AppProps.getApplicationVersion( configAsProperties ) ) );
       writer.format( "platform: %s\n", emptyOrValue( flow.getPlatformInfo() ) );
-      writer.format( "frameworks: %s\n", emptyOrValue( AppProps.getApplicationFrameworks( flow.getConfigAsProperties() ) ) );
+      writer.format( "frameworks: %s\n", emptyOrValue( AppProps.getApplicationFrameworks( configAsProperties ) ) );
 
       writer.println();
 
