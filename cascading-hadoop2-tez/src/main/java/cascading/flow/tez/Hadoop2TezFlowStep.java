@@ -491,6 +491,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       }
 
     addRemoteDebug( flowNode, vertex );
+    addRemoteProfiling( flowNode, vertex );
 
     return vertex;
     }
@@ -718,7 +719,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     if( !flowNode.getSourceElementNames().contains( value ) && asInt( value ) != flowNode.getOrdinal() )
       return;
 
-    LOG.warn( "enabling remote debugging on: {}, with id: {}", value, flowNode.getID() );
+    LOG.warn( "remote debugging enabled with property: {}, on node: {}, with node id: {}", "test.debug.node", value, flowNode.getID() );
 
     String opts = vertex.getTaskLaunchCmdOpts();
 
@@ -726,6 +727,35 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       opts = "";
 
     opts += " -agentlib:jdwp=transport=dt_socket,server=n,address=localhost:5005,suspend=y";
+
+    vertex.setTaskLaunchCmdOpts( opts );
+    }
+
+  private void addRemoteProfiling( FlowNode flowNode, Vertex vertex )
+    {
+    String value = System.getProperty( "test.profile.node", null );
+
+    if( Util.isEmpty( value ) )
+      return;
+
+    if( !flowNode.getSourceElementNames().contains( value ) && asInt( value ) != flowNode.getOrdinal() )
+      return;
+
+    LOG.warn( "remote profiling enabled with property: {}, on node: {}, with node id: {}", "test.profile.node", value, flowNode.getID() );
+
+    String opts = vertex.getTaskLaunchCmdOpts();
+
+    if( opts == null )
+      opts = "";
+
+    String path = System.getProperty( "test.profile.path", "/tmp/jfr/" );
+
+    if( !path.endsWith( "/" ) )
+      path += "/";
+
+    LOG.warn( "remote profiling property: {}, logging to path: {}", "test.profile.path", path );
+
+    opts += String.format( " -XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:FlightRecorderOptions=defaultrecording=true,dumponexit=true,dumponexitpath=%1$s%2$s,disk=true,repository=%1$s%2$s", path, flowNode.getID() );
 
     vertex.setTaskLaunchCmdOpts( opts );
     }
