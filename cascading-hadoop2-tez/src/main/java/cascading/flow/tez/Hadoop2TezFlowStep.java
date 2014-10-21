@@ -125,11 +125,6 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     super( elementGraph, flowNodeGraph );
     }
 
-  public Map<Path, Path> getSyncPaths()
-    {
-    return syncPaths;
-    }
-
   @Override
   public TezConfiguration createInitializedConfig( FlowProcess<TezConfiguration> flowProcess, TezConfiguration parentConfig )
     {
@@ -695,6 +690,21 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
   public void clean( TezConfiguration entries )
     {
 
+    }
+
+  public void syncArtifacts()
+    {
+    // this may not be strictly necessary, but there is a condition where setting the access time
+    // fails, so there may be one were setting the modification time fails. if so, we can compensate.
+    Map<String, Long> timestamps = HadoopUtil.syncPaths( getConfig(), syncPaths, true );
+
+    for( Map.Entry<String, Long> entry : timestamps.entrySet() )
+      {
+      LocalResource localResource = localResources.get( entry.getKey() );
+
+      if( localResource != null )
+        localResource.setTimestamp( entry.getValue() );
+      }
     }
 
   private void setLocalMode( Configuration parent, JobConf current, Tap tap )

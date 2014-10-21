@@ -206,7 +206,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
 
   private void copyToDistributedCache()
     {
-    HadoopUtil.syncPaths( jobConf, syncPaths );
+    HadoopUtil.syncPaths( jobConf, syncPaths, true );
     }
 
   @Override

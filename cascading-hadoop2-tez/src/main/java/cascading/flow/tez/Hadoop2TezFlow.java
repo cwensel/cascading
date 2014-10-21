@@ -229,7 +229,7 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
   private void copyArtifactsToRemote()
     {
     for( FlowStep<TezConfiguration> flowStep : getFlowSteps() )
-      HadoopUtil.syncPaths( flowStep.getConfig(), ( (Hadoop2TezFlowStep) flowStep ).getSyncPaths() );
+      ( (Hadoop2TezFlowStep) flowStep ).syncArtifacts();
     }
 
   @Override

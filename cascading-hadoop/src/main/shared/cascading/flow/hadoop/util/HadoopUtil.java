@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -551,10 +552,22 @@ public class HadoopUtil
     return getCommonPaths( localPaths, remotePaths );
     }
 
-  public static void syncPaths( Configuration config, Map<Path, Path> commonPaths )
+  /**
+   * Copies paths from one local path to a remote path. If syncTimes is true, both modification and access time are
+   * changed to match the local 'from' path.
+   * <p/>
+   * Returns a map of file-name to remote modification times if the remote time is different than the local time.
+   *
+   * @param config
+   * @param commonPaths
+   * @param syncTimes
+   */
+  public static Map<String, Long> syncPaths( Configuration config, Map<Path, Path> commonPaths, boolean syncTimes )
     {
     if( commonPaths == null )
-      return;
+      return Collections.emptyMap();
+
+    Map<String, Long> timestampMap = new HashMap<>();
 
     Map<Path, Path> copyPaths = getCopyPaths( config, commonPaths ); // tests remote file existence or if stale
 
@@ -570,24 +583,37 @@ public class HadoopUtil
         {
         LOG.info( "copying from: {}, to: {}", localPath, remotePath );
         remoteFS.copyFromLocalFile( localPath, remotePath );
+
+        if( !syncTimes )
+          {
+          timestampMap.put( remotePath.getName(), remoteFS.getFileStatus( remotePath ).getModificationTime() );
+          continue;
+          }
         }
       catch( IOException exception )
         {
         throw new FlowException( "unable to copy local: " + localPath + " to remote: " + remotePath, exception );
         }
 
+      FileStatus localFileStatus = null;
+
       try
         {
         // sync the modified times so we can lazily upload jars to hdfs after job is started
         // otherwise modified time will be local to hdfs
-        FileStatus localFileStatus = localFS.getFileStatus( localPath );
-        remoteFS.setTimes( remotePath, localFileStatus.getModificationTime(), localFileStatus.getAccessTime() );
+        localFileStatus = localFS.getFileStatus( localPath );
+        remoteFS.setTimes( remotePath, localFileStatus.getModificationTime(), -1 ); // don't set the access time
         }
       catch( IOException exception )
         {
-        LOG.info( "unable to set local access time on remote file to prevent duplicate copying: {}, 'dfs.namenode.accesstime.precision' may be set to 0 on HDFS.", remotePath );
+        LOG.info( "unable to set local modification time on remote file: {}, 'dfs.namenode.accesstime.precision' may be set to 0 on HDFS.", remotePath );
+
+        if( localFileStatus != null )
+          timestampMap.put( remotePath.getName(), localFileStatus.getModificationTime() );
         }
       }
+
+    return timestampMap;
     }
 
   public static Map<Path, Path> getCommonPaths( Map<String, Path> localPaths, Map<String, Path> remotePaths )
