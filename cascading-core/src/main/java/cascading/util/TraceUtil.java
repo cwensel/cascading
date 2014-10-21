@@ -107,6 +107,9 @@ public class TraceUtil
 
   public static String formatTrace( FlowElement flowElement, String message )
     {
+    if( flowElement == null )
+      return message;
+
     if( flowElement instanceof Pipe )
       return formatTrace( (Pipe) flowElement, message );
 

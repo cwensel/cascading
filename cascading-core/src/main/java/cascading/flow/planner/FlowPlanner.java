@@ -210,7 +210,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     catch( Exception exception )
       {
-      throw handleExceptionDuringPlanning( exception, flowElementGraph );
+      throw handleExceptionDuringPlanning( flowDef, exception, flowElementGraph );
       }
     }
 
@@ -616,7 +616,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     }
 
-  protected PlannerException handleExceptionDuringPlanning( Exception exception, FlowElementGraph flowElementGraph )
+  protected PlannerException handleExceptionDuringPlanning( FlowDef flowDef, Exception exception, FlowElementGraph flowElementGraph )
     {
     if( exception instanceof PlannerException )
       {
@@ -634,7 +634,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
-      String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );
+      String message = String.format( "[%s] could not build flow from assembly: [%s]", Util.truncate( flowDef.getName(), 25 ), cause.getMessage() );
 
       if( cause instanceof OperatorException )
         return new PlannerException( message, cause, flowElementGraph );
@@ -648,7 +648,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       {
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
-      String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
+      String message = String.format( "[%s] could not build flow from assembly: [%s]", Util.truncate( flowDef.getName(), 25 ), exception.getMessage() );
       return new PlannerException( message, exception, flowElementGraph );
       }
     }
