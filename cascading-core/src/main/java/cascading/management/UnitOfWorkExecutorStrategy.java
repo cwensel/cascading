@@ -20,6 +20,7 @@
 
 package cascading.management;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -42,7 +43,10 @@ public class UnitOfWorkExecutorStrategy implements UnitOfWorkSpawnStrategy
     {
     executor = Executors.newFixedThreadPool( maxConcurrentThreads );
 
-    List<Future<Throwable>> futures = executor.invokeAll( values ); // todo: consider submit()
+    List<Future<Throwable>> futures = new ArrayList<>();
+
+    for( Callable<Throwable> value : values )
+      futures.add( executor.submit( value ) );
 
     executor.shutdown(); // don't accept any more work
 

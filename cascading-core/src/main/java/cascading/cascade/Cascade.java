@@ -24,6 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,7 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
@@ -126,7 +130,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
   /** Field shutdownHook */
   private ShutdownUtil.Hook shutdownHook;
   /** Field jobsMap */
-  private final Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<String, Callable<Throwable>>();
+  private final Map<String, Callable<Throwable>> jobsMap = new LinkedHashMap<>();
   /** Field stop */
   private boolean stop;
   /** Field flowSkipStrategy */
@@ -784,7 +788,8 @@ public class Cascade implements UnitOfWork<CascadeStats>
           {
           if( !stop )
             {
-            cascadeStats.markFailed( throwable );
+            if( !cascadeStats.isFinished() )
+              cascadeStats.markFailed( throwable );
             internalStopAllFlows();
             fireOnThrowable();
             }
@@ -1035,7 +1040,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
             return null;
           }
 
-        if( stop )
+        if( stop || cascadeStats.isFinished() )
           return null;
 
         try
@@ -1061,9 +1066,15 @@ public class Cascade implements UnitOfWork<CascadeStats>
           }
         catch( Throwable exception )
           {
-          logWarn( "flow failed: " + flow.getName(), exception );
           failed = true;
-          return new CascadeException( "flow failed: " + flow.getName(), exception );
+          logWarn( "flow failed: " + flow.getName(), exception );
+
+          CascadeException cascadeException = new CascadeException( "flow failed: " + flow.getName(), exception );
+
+          if( !cascadeStats.isFinished() )
+            cascadeStats.markFailed( cascadeException );
+
+          return cascadeException;
           }
         finally
           {
@@ -1105,7 +1116,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
         {
         latch.await();
 
-        return flow != null && !failed;
+        return flow != null && !failed && !stop;
         }
       catch( InterruptedException exception )
         {
