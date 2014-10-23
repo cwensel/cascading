@@ -40,27 +40,22 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
-import cascading.util.Util;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TaskCompletionEvent;
-import org.apache.hadoop.mapred.TaskID;
-import org.apache.hadoop.mapred.TaskReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Class HadoopStepStats provides Hadoop specific statistics and methods to underlying Hadoop facilities. */
-public abstract class HadoopStepStats extends FlowStepStats
+/** Class BaseHadoopStepStats is a base class to Hadoop specific statistics and methods to underlying Hadoop facilities. */
+public abstract class BaseHadoopStepStats extends FlowStepStats
   {
   public static final String COUNTER_TIMEOUT_PROPERTY = "cascading.step.counter.timeout";
 
   /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
-  public static final int TIMEOUT_MAX = 3;
+  private static final Logger LOG = LoggerFactory.getLogger( BaseHadoopStepStats.class );
 
-  private Map<TaskID, String> idCache = new HashMap<TaskID, String>( 4999 ); // nearest prime, caching for ids
+  public static final int TIMEOUT_MAX = 3;
 
   /** Field numMapTasks */
   int numMapTasks;
@@ -76,7 +71,7 @@ public abstract class HadoopStepStats extends FlowStepStats
   /** Field taskStats */
   Map<String, HadoopSliceStats> taskStats = (Map<String, HadoopSliceStats>) Collections.EMPTY_MAP;
 
-  protected HadoopStepStats( FlowStep<JobConf> flowStep, ClientState clientState )
+  protected BaseHadoopStepStats( FlowStep<JobConf> flowStep, ClientState clientState )
     {
     super( flowStep, clientState );
     }
@@ -471,7 +466,7 @@ public abstract class HadoopStepStats extends FlowStepStats
 
   public void captureDetail( boolean captureAttempts )
     {
-    HashMap<String, HadoopSliceStats> newStats = new HashMap<String, HadoopSliceStats>();
+    Map<String, HadoopSliceStats> newStats = new HashMap<String, HadoopSliceStats>();
 
     JobClient jobClient = getJobClient();
     RunningJob runningJob = getRunningJob();
@@ -485,23 +480,12 @@ public abstract class HadoopStepStats extends FlowStepStats
     try
       {
       // cleanup/setup tasks have no useful info so far.
-//      addTaskStats( newStats, HadoopTaskStats.Kind.SETUP, jobClient.getSetupTaskReports( runningJob.getID() ), false );
-//      addTaskStats( newStats, HadoopTaskStats.Kind.CLEANUP, jobClient.getCleanupTaskReports( runningJob.getID() ), false );
-      addTaskStats( newStats, HadoopSliceStats.Kind.MAPPER, jobClient.getMapTaskReports( runningJob.getID() ), false );
-      addTaskStats( newStats, HadoopSliceStats.Kind.REDUCER, jobClient.getReduceTaskReports( runningJob.getID() ), false );
+//      addTaskStats( newStats, HadoopSliceStats.Kind.SETUP, false );
+//      addTaskStats( newStats, HadoopSliceStats.Kind.CLEANUP, false );
+      addTaskStats( newStats, HadoopSliceStats.Kind.MAPPER, false );
+      addTaskStats( newStats, HadoopSliceStats.Kind.REDUCER, false );
 
-      int count = 0;
-
-      while( captureAttempts )
-        {
-        TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( count );
-
-        if( events.length == 0 )
-          break;
-
-        addAttemptsToTaskStats( newStats, events );
-        count += events.length;
-        }
+      addAttemptsToTaskStats( newStats, captureAttempts );
 
       setTaskStats( newStats );
       }
@@ -511,31 +495,12 @@ public abstract class HadoopStepStats extends FlowStepStats
       }
     }
 
-  private void addTaskStats( Map<String, HadoopSliceStats> taskStats, HadoopSliceStats.Kind kind, TaskReport[] taskReports, boolean skipLast )
-    {
-    for( int i = 0; i < taskReports.length - ( skipLast ? 1 : 0 ); i++ )
-      {
-      TaskReport taskReport = taskReports[ i ];
-
-      if( taskReport == null )
-        {
-        LOG.warn( "found empty task report" );
-        continue;
-        }
-
-      String id = getIDFor( taskReport.getTaskID() );
-      taskStats.put( id, new HadoopSliceStats( id, getStatus(), kind, stepHasReducers(), taskReport ) );
-
-      incrementKind( kind );
-      }
-    }
-
-  private boolean stepHasReducers()
+  boolean stepHasReducers()
     {
     return !getFlowStep().getGroups().isEmpty();
     }
 
-  private void incrementKind( HadoopSliceStats.Kind kind )
+  void incrementKind( HadoopSliceStats.Kind kind )
     {
     switch( kind )
       {
@@ -552,35 +517,7 @@ public abstract class HadoopStepStats extends FlowStepStats
       }
     }
 
-  private void addAttemptsToTaskStats( Map<String, HadoopSliceStats> taskStats, TaskCompletionEvent[] events )
-    {
-    for( TaskCompletionEvent event : events )
-      {
-      if( event == null )
-        {
-        LOG.warn( "found empty completion event" );
-        continue;
-        }
+  protected abstract void addTaskStats( Map<String, HadoopSliceStats> taskStats, HadoopSliceStats.Kind kind, boolean skipLast ) throws IOException;
 
-      // this will return a housekeeping task, which we are not tracking
-      HadoopSliceStats stats = taskStats.get( getIDFor( event.getTaskAttemptId().getTaskID() ) );
-
-      if( stats != null )
-        stats.addAttempt( event );
-      }
-    }
-
-  private String getIDFor( TaskID taskID )
-    {
-    // using taskID instance as #toString is quite painful
-    String id = idCache.get( taskID );
-
-    if( id == null )
-      {
-      id = Util.createUniqueID();
-      idCache.put( taskID, id );
-      }
-
-    return id;
-    }
+  protected abstract void addAttemptsToTaskStats( Map<String, HadoopSliceStats> taskStats, boolean captureAttempts );
   }

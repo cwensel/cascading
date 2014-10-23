@@ -27,6 +27,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
+import cascading.stats.hadoop.BaseHadoopStepStats;
 import cascading.stats.hadoop.HadoopStepStats;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -184,8 +185,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
    * the exception and not just print it to stderr. FlowMapper and FlowReducer use this method.
    *
    * @param throwable the throwable to be reported.
-   *
-   * */
+   */
   public static void reportLocalError( Throwable throwable )
     {
     localError = throwable;

@@ -2,7 +2,11 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
-  Updated c.p.h.HadoopPlatform to set 'mapreduce.jobtracker.staging.root.dir' to a fully qualified path for non-cluster tests.
+  Update c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
+  Hadoop 2.x.
+
+  Updated c.p.h.HadoopPlatform to set 'mapreduce.jobtracker.staging.root.dir' to a fully qualified path for non-cluster
+  tests.
 
   Fixed issue where c.u.Version was leaking file descriptors.
 

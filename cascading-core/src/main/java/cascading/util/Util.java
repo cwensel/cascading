@@ -887,6 +887,19 @@ public class Util
       }
     }
 
+  public static <R> R returnInstanceFieldIfExistsSafe( Object target, String fieldName )
+    {
+    try
+      {
+      return returnInstanceFieldIfExists( target, fieldName );
+      }
+    catch( Exception exception )
+      {
+      // do nothing
+      return null;
+      }
+    }
+
   public static Object invokeConstructor( String className, Object[] parameters, Class[] parameterTypes )
     {
     try
@@ -914,6 +927,23 @@ public class Util
     catch( Exception exception )
       {
       throw new CascadingException( "unable to create new instance: " + target.getName() + "(" + Arrays.toString( parameters ) + ")", exception );
+      }
+    }
+
+  public static <R> R returnInstanceFieldIfExists( Object target, String fieldName )
+    {
+    try
+      {
+      Class<?> type = target.getClass();
+      Field field = getDeclaredField( fieldName, type );
+
+      field.setAccessible( true );
+
+      return (R) field.get( target );
+      }
+    catch( Exception exception )
+      {
+      throw new CascadingException( "unable to get instance field: " + target.getClass().getName() + "." + fieldName, exception );
       }
     }
 

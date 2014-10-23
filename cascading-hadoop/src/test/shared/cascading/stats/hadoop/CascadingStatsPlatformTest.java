@@ -125,7 +125,7 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
       assertEquals( 2, flowStats1.getStepsCount() );
       assertEquals( 2, flowStats2.getStepsCount() );
 
-      HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getFlowStepStats().get( 0 );
+      BaseHadoopStepStats stats1 = (BaseHadoopStepStats) flowStats1.getFlowStepStats().get( 0 );
 
       assertNotNull( stats1.getID() );
       assertNotNull( stats1.getJobID() );
@@ -144,7 +144,7 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
           }
         }
 
-      HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getFlowStepStats().get( 0 );
+      BaseHadoopStepStats stats2 = (BaseHadoopStepStats) flowStats2.getFlowStepStats().get( 0 );
 
       assertNotNull( stats2.getID() );
       assertNotNull( stats2.getJobID() );
