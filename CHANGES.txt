@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a
+  predecessor fails.
+
 2.6.1
 
   Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.

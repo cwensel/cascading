@@ -25,13 +25,18 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import cascading.CascadingException;
 import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowProcess;
 import cascading.flow.FlowSkipStrategy;
 import cascading.flow.LockingFlowListener;
 import cascading.flow.planner.FlowStepJob;
+import cascading.operation.BaseOperation;
+import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
@@ -46,7 +51,6 @@ import org.junit.Test;
 
 import static data.InputData.inputFileIps;
 
-
 public class CascadePlatformTest extends PlatformTestCase
   {
   public CascadePlatformTest()
@@ -54,13 +58,30 @@ public class CascadePlatformTest extends PlatformTestCase
     super( true );
     }
 
-  private Flow firstFlow( String path )
+  public class FailFunction extends BaseOperation implements Function
+    {
+    public FailFunction( Fields fieldDeclaration )
+      {
+      super( 1, fieldDeclaration );
+      }
+
+    @Override
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+      {
+      throw new CascadingException( "testing" );
+      }
+    }
+
+  private Flow firstFlow( String path, boolean doFail )
     {
     Tap source = getPlatform().getTextFile( inputFileIps );
 
     Pipe pipe = new Pipe( "first" );
 
     pipe = new Each( pipe, new Fields( "line" ), new Identity( new Fields( "ip" ) ), new Fields( "ip" ) );
+
+    if( doFail )
+      pipe = new Each( pipe, new Fields( "ip" ), new FailFunction( Fields.ARGS ), Fields.REPLACE );
 
     Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path ), SinkMode.REPLACE );
 
@@ -153,7 +174,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "simple";
 
-    Flow first = firstFlow( path + "/first" );
+    Flow first = firstFlow( path + "/first", false );
     Flow second = secondFlow( first.getSink(), path + "/second" );
     Flow third = thirdFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
@@ -171,6 +192,60 @@ public class CascadePlatformTest extends PlatformTestCase
 
     assertTrue( cascade.getTailFlows().contains( fourth ) );
     assertTrue( cascade.getSinkTaps().containsAll( fourth.getSinksCollection() ) );
+    }
+
+  @Test
+  public void testSimpleCascadeFail() throws IOException, InterruptedException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "simple";
+
+    Flow first = firstFlow( path + "/first", true );
+    Flow second = secondFlow( first.getSink(), path + "/second" );
+    Flow third = thirdFlow( second.getSink(), path + "/third" );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
+
+    LockingFlowListener firstFlowListener = new LockingFlowListener();
+    LockingFlowListener secondFlowListener = new LockingFlowListener();
+    LockingFlowListener thirdFlowListener = new LockingFlowListener();
+    LockingFlowListener fourthFlowListener = new LockingFlowListener();
+
+    first.addListener( firstFlowListener );
+    second.addListener( secondFlowListener );
+    third.addListener( thirdFlowListener );
+    fourth.addListener( fourthFlowListener );
+
+    Map<Object, Object> properties = getPlatform().getProperties();
+
+//    properties.put( CascadeProps.MAX_CONCURRENT_FLOWS, "1" );
+
+    Cascade cascade = new CascadeConnector( properties ).connect( fourth, second, third, first );
+
+    cascade.start();
+
+    try
+      {
+      cascade.complete();
+      fail( "did not fail" );
+      }
+    catch( Exception exception )
+      {
+      // ignore
+      }
+
+    assertEquals( "first did not fail", 1, firstFlowListener.thrown.availablePermits() );
+    assertEquals( "second failed", 0, secondFlowListener.thrown.availablePermits() );
+    assertEquals( "third failed", 0, thirdFlowListener.thrown.availablePermits() );
+    assertEquals( "fourth failed", 0, fourthFlowListener.thrown.availablePermits() );
+
+    assertEquals( "second started", 0, secondFlowListener.started.availablePermits() );
+    assertEquals( "third started", 0, thirdFlowListener.started.availablePermits() );
+    assertEquals( "fourth started", 0, fourthFlowListener.started.availablePermits() );
+
+    assertEquals( "second did not stop", 1, secondFlowListener.stopped.availablePermits() );
+    assertEquals( "second did not stop", 1, thirdFlowListener.stopped.availablePermits() );
+    assertEquals( "second did not stop", 1, fourthFlowListener.stopped.availablePermits() );
     }
 
   @Test
@@ -200,7 +275,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "skipped";
 
-    Flow first = firstFlow( path + "/first" );
+    Flow first = firstFlow( path + "/first", false );
     Flow second = secondFlow( first.getSink(), path + "/second" );
     Flow third = thirdFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
@@ -231,7 +306,7 @@ public class CascadePlatformTest extends PlatformTestCase
     String path = "stopped";
 
     // remove from comparison tests
-    Flow first = firstFlow( path + "/first" + ComparePlatformsTest.NONDETERMINISTIC );
+    Flow first = firstFlow( path + "/first" + ComparePlatformsTest.NONDETERMINISTIC, false );
     Flow second = secondFlow( first.getSink(), path + "/second" + ComparePlatformsTest.NONDETERMINISTIC );
     Flow third = thirdFlow( second.getSink(), path + "/third" + ComparePlatformsTest.NONDETERMINISTIC );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" + ComparePlatformsTest.NONDETERMINISTIC );
@@ -286,7 +361,7 @@ public class CascadePlatformTest extends PlatformTestCase
     {
     String path = "idtest";
 
-    Flow first = firstFlow( path + "/first" );
+    Flow first = firstFlow( path + "/first", false );
     Flow second = secondFlow( first.getSink(), path + "/second" );
     Flow third = thirdFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
@@ -312,7 +387,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "checkpoint";
 
-    Flow first = firstFlow( path + "/first" );
+    Flow first = firstFlow( path + "/first", false );
     Flow second = secondFlow( first.getSink(), path + "/second" );
     Flow third = thirdCheckpointFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( (Tap) third.getCheckpoints().values().iterator().next(), path + "/fourth" );
