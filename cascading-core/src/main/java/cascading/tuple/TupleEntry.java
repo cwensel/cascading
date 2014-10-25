@@ -355,7 +355,7 @@ public class TupleEntry
    * Method setTuple sets the tuple of this TupleEntry object, no copy will be performed.
    * <p/>
    * If the given tuple is "unmodifiable" ({@code Tuple.isUnmodifiable() == true}) and this TupleEntry is
-   * not "unmodifiable", a warning will be issued.
+   * not "unmodifiable", an exception will be thrown.
    * <p/>
    * Unmodifiable tuples are generally owned by the system and cannot be be changed and must not be cached.
    *
