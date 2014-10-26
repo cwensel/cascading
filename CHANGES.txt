@@ -2,10 +2,10 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
-  Update c.t.Tuple#isUnmodifiable to be transient to prevent the value from being serialized and restored as an
-  unmodifiable Tuple from a data source.
+  Updated c.t.Tuple#isUnmodifiable to be transient to prevent the value from being serialized and restored resulting in
+  an unmodifiable Tuple from a data source.
 
-  Update c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
+  Updated c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
   Hadoop 2.x.
 
   Updated c.p.h.HadoopPlatform to set 'mapreduce.jobtracker.staging.root.dir' to a fully qualified path for non-cluster
