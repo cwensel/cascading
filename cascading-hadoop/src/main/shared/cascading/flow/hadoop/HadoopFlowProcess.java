@@ -60,6 +60,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   private final boolean isMapper;
   /** Field reporter */
   Reporter reporter = Reporter.NULL;
+  /** Field outputCollector */
   private OutputCollector outputCollector;
 
   public HadoopFlowProcess()
@@ -171,7 +172,10 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
    */
   public void setReporter( Reporter reporter )
     {
-    this.reporter = reporter;
+    if( reporter == null )
+      this.reporter = Reporter.NULL;
+    else
+      this.reporter = reporter;
     }
 
   /**

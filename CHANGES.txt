@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
+  Fixed issue where c.t.h.i.TapOutputCollector did not honor the current task o.a.h.m.Reporter instance on the
+  cluster side. This should improve the accuracy of Hadoop counters wrapped by c.t.h.PartitionTap.
+
   Updated c.t.Tuple#isUnmodifiable to be transient to prevent the value from being serialized and restored resulting in
   an unmodifiable Tuple from a data source.
 
