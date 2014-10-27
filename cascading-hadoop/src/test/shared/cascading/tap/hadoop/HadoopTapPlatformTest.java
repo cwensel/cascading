@@ -99,7 +99,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Tap tap = new Dfs( new Fields( "foo" ), "some/path" );
 
     String path = tap.getFullIdentifier( HadoopPlanner.createJobConf( getProperties() ) );
-    assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
+    assertFalse( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Dfs( new Fields( "foo" ), "hdfs://localhost:5001/some/path" );
     new Dfs( new Fields( "foo" ), new URI( "hdfs://localhost:5001/some/path" ) );
