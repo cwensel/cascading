@@ -21,15 +21,13 @@
 package cascading.stats.hadoop;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import cascading.stats.CascadingStats;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.Counters;
-import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.TaskCompletionEvent;
-import org.apache.hadoop.mapreduce.TaskCounter;
 import org.apache.hadoop.mapreduce.TaskReport;
 
 import static cascading.stats.CascadingStats.Status.*;

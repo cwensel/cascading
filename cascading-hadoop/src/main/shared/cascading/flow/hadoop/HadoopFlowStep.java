@@ -35,6 +35,7 @@ import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
@@ -202,11 +203,23 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   protected FlowStepJob<JobConf> createFlowStepJob( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
-    JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
+    try
+      {
+      JobConf initializedConfig = getInitializedConfig( flowProcess, parentConfig );
 
-    setConf( initializedConfig );
+      setConf( initializedConfig );
 
-    return new HadoopFlowStepJob( createClientState( flowProcess ), this, initializedConfig );
+      return new HadoopFlowStepJob( createClientState( flowProcess ), this, initializedConfig );
+      }
+    catch( NoClassDefFoundError error )
+      {
+      PlatformInfo platformInfo = HadoopUtil.getPlatformInfo();
+      String message = "unable to load platform specific class, please verify Hadoop cluster version: '%s', matches the Hadoop platform build dependency and associated FlowConnector, cascading-hadoop or cascading-hadoop2-mr1";
+
+      logError( String.format( message, platformInfo.toString() ), error );
+
+      throw error;
+      }
     }
 
   /**
