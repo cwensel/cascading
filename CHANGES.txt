@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
+  Fixed issues where a c.f.Flow instance could be marked stopped while transitioning to a started state when used in
+  a c.c.Cascade.
+
   Fixed issue where c.t.h.i.TapOutputCollector did not honor the current task o.a.h.m.Reporter instance on the
   cluster side. This should improve the accuracy of Hadoop counters wrapped by c.t.h.PartitionTap.
 
