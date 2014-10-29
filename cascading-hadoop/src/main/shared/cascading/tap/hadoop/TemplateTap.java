@@ -53,6 +53,8 @@ import org.apache.hadoop.mapred.OutputCollector;
  * Though Hadoop has no mechanism to prevent simultaneous writes to a directory from multiple jobs, it doesn't mean
  * its safe to do so. Same is true with the TemplateTap. Interleaving writes to a common parent (root) directory
  * across multiple flows will very likely lead to data loss.
+ *
+ * @deprecated see {@link cascading.tap.hadoop.PartitionTap}
  */
 @Deprecated
 public class TemplateTap extends BaseTemplateTap<JobConf, OutputCollector>
