@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.1 [unreleased]
 
+  Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.
+
   Fixed issues where a c.f.Flow instance could be marked stopped while transitioning to a started state when used in
   a c.c.Cascade.
 
