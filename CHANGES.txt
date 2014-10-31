@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.6.1 [unreleased]
+2.6.1
 
   Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.
 
