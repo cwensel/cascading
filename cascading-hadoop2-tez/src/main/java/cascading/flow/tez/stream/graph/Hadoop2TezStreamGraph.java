@@ -33,9 +33,9 @@ import cascading.flow.FlowElements;
 import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
+import cascading.flow.Flows;
 import cascading.flow.hadoop.stream.HadoopMemoryJoinGate;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.Gate;
@@ -133,7 +133,7 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
     // this made the assumption we can have a physical and logical input per vertex. seems we can't
     if( inputMultiMap.getKeys().size() == 1 )
       {
-      streamedSource = BaseFlowStep.getFlowElementForID( node.getSourceElements(), Util.getFirst( inputMultiMap.getKeys() ) );
+      streamedSource = Flows.getFlowElementForID( node.getSourceElements(), Util.getFirst( inputMultiMap.getKeys() ) );
       }
     else
       {

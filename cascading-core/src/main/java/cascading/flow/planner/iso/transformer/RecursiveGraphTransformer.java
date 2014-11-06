@@ -68,7 +68,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     {
     if( depth == TRANSFORM_RECURSION_DEPTH_MAX )
       {
-      LOG.info( "!!! transform recursion ending, reached depth: {}", depth );
+      transformed.getPlannerContext().getLogger().logInfo( "!!! transform recursion ending, reached depth: {}", depth );
       return graph;
       }
 

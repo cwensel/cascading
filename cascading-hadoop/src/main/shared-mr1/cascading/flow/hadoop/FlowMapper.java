@@ -28,12 +28,12 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
+import cascading.flow.Flows;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.stream.graph.HadoopMapStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowNode;
-import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.element.ElementDuct;
 import cascading.flow.stream.element.SourceStage;
@@ -82,7 +82,7 @@ public class FlowMapper implements MapRunnable
 
       FlowNode node = deserializeBase64( mapNodeState, jobConf, BaseFlowNode.class );
 
-      Tap source = BaseFlowStep.getTapForID( node.getSourceTaps(), jobConf.get( "cascading.step.source" ) );
+      Tap source = Flows.getTapForID( node.getSourceTaps(), jobConf.get( "cascading.step.source" ) );
 
       streamGraph = new HadoopMapStreamGraph( currentProcess, node, source );
 

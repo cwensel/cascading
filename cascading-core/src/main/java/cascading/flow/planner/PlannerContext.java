@@ -28,6 +28,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.operation.PlannerLevel;
+import cascading.util.ProcessLogger;
 
 /**
  *
@@ -78,6 +79,11 @@ public class PlannerContext
   public Flow getFlow()
     {
     return flow;
+    }
+
+  public ProcessLogger getLogger()
+    {
+    return (ProcessLogger) getFlow();
     }
 
   public boolean isTransformTracingEnabled()

@@ -46,8 +46,7 @@ import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.util.EnumMultiMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cascading.util.ProcessLogger;
 
 import static java.lang.String.format;
 
@@ -56,8 +55,6 @@ import static java.lang.String.format;
  */
 public class RuleExec
   {
-  private static final Logger LOG = LoggerFactory.getLogger( RuleExec.class );
-
   private static final int ELEMENT_THRESHOLD = 600;
 
   final TraceWriter traceWriter;
@@ -71,11 +68,12 @@ public class RuleExec
 
   public RuleResult exec( PlannerContext plannerContext, FlowElementGraph flowElementGraph )
     {
+    ProcessLogger logger = plannerContext.getLogger();
     int size = flowElementGraph.vertexSet().size();
     boolean logAsInfo = size >= ELEMENT_THRESHOLD;
 
     if( logAsInfo )
-      LOG.info( "elements in graph: {}, info logging threshold: {}, logging planner execution status", size, ELEMENT_THRESHOLD );
+      logger.logInfo( "elements in graph: {}, info logging threshold: {}, logging planner execution status", size, ELEMENT_THRESHOLD );
 
     long beginExec = System.currentTimeMillis();
 
@@ -87,7 +85,7 @@ public class RuleExec
       {
       long beginPhase = System.currentTimeMillis();
 
-      logPhase( logAsInfo, "starting rule phase: {}", phase );
+      logPhase( logger, logAsInfo, "starting rule phase: {}", phase );
 
       switch( phase.getAction() )
         {
@@ -104,14 +102,14 @@ public class RuleExec
 
       ruleResult.setPhaseDuration( phase, beginPhase, endPhase );
 
-      logPhase( logAsInfo, "ending rule phase: {}, duration: {} sec", phase, ( endPhase - beginPhase ) / 1000 );
+      logPhase( logger, logAsInfo, "ending rule phase: {}, duration: {} sec", phase, ( endPhase - beginPhase ) / 1000 );
       }
 
     long endExec = System.currentTimeMillis();
 
     ruleResult.setDuration( beginExec, endExec );
 
-    logPhase( logAsInfo, "completed planner duration: {} sec", ( endExec - beginExec ) / 1000 );
+    logPhase( logger, logAsInfo, "completed planner duration: {} sec", ( endExec - beginExec ) / 1000 );
 
     return ruleResult;
     }
@@ -135,7 +133,9 @@ public class RuleExec
 
   public RuleResult executeRulePhase( PlanPhase phase, PlannerContext plannerContext, RuleResult ruleResult )
     {
-    LOG.debug( "executing plan phase: {}", phase );
+    ProcessLogger logger = plannerContext.getLogger();
+
+    logger.logDebug( "executing plan phase: {}", phase );
 
     LinkedList<Rule> rules = registry.getRulesFor( phase );
 
@@ -146,7 +146,7 @@ public class RuleExec
       // within this phase, execute all rules in declared order
       for( Rule rule : rules )
         {
-        LOG.debug( "executing rule: {}", rule );
+        logger.logDebug( "executing rule: {}", rule );
 
         long begin = System.currentTimeMillis();
 
@@ -172,14 +172,14 @@ public class RuleExec
 
         ruleResult.setRuleDuration( rule, begin, end );
 
-        LOG.debug( "completed rule: {}", rule );
+        logger.logDebug( "completed rule: {}", rule );
         }
 
       return ruleResult;
       }
     finally
       {
-      LOG.debug( "completed plan phase: {}", phase );
+      logger.logDebug( "completed plan phase: {}", phase );
       writePhaseResultPlan( phase, ruleResult );
       }
     }
@@ -249,7 +249,7 @@ public class RuleExec
         for( ElementGraph prior : resultChildren )
           {
           if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
-            LOG.info( "re-partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
+            plannerContext.getLogger().logInfo( "re-partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
           }
 
         // order no longer preserved
@@ -291,7 +291,7 @@ public class RuleExec
       for( ElementGraph prior : priors )
         {
         if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
-          LOG.info( "partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
+          plannerContext.getLogger().logInfo( "partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
         }
 
       // order no longer preserved
@@ -303,7 +303,7 @@ public class RuleExec
 
   private void performAssertion( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, GraphAssert rule )
     {
-    LOG.debug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
+    plannerContext.getLogger().logDebug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
 
     Map<ElementGraph, List<? extends ElementGraph>> levelResults = ruleResult.getLevelResults( phase.getLevel() );
 
@@ -330,7 +330,7 @@ public class RuleExec
 
   private void performTransform( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, GraphTransformer transformer )
     {
-    LOG.debug( "applying transform: {}", ( (Rule) transformer ).getRuleName() );
+    plannerContext.getLogger().logDebug( "applying transform: {}", ( (Rule) transformer ).getRuleName() );
 
     Map<ElementGraph, List<? extends ElementGraph>> levelResults = ruleResult.getLevelResults( phase.getLevel() );
 
@@ -451,12 +451,12 @@ public class RuleExec
       }
     }
 
-  private void logPhase( boolean logAsInfo, String message, Object... items )
+  private void logPhase( ProcessLogger logger, boolean logAsInfo, String message, Object... items )
     {
     if( logAsInfo )
-      LOG.info( message, items );
+      logger.logInfo( message, items );
     else
-      LOG.debug( message, items );
+      logger.logDebug( message, items );
     }
 
   private void writeTransformTrace( RuleResult ruleResult, PlanPhase phase, Rule rule, ElementGraph parent, ElementGraph child, GraphResult result )

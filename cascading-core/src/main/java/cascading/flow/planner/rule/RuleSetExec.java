@@ -29,6 +29,7 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.rule.util.TraceWriter;
+import cascading.util.ProcessLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +40,6 @@ import static cascading.util.Util.formatDurationFromMillis;
  */
 public class RuleSetExec
   {
-  private static final Logger LOG = LoggerFactory.getLogger( RuleSetExec.class );
-
   private TraceWriter traceWriter;
   private FlowPlanner flowPlanner;
   private Flow flow;
@@ -56,6 +55,11 @@ public class RuleSetExec
     this.registrySet = registrySet;
     this.flowDef = flowDef;
     this.flowElementGraph = flowElementGraph;
+    }
+
+  protected ProcessLogger getFlowLogger()
+    {
+    return (ProcessLogger) flow;
     }
 
   public RuleResult exec()
@@ -74,7 +78,7 @@ public class RuleSetExec
 
       RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 
-      LOG.info( "executed rule registry: {}, completed in: {}", registryName, formatDurationFromMillis( ruleResult.getDuration() ) );
+      getFlowLogger().logInfo( "executed rule registry: {}, completed in: {}", registryName, formatDurationFromMillis( ruleResult.getDuration() ) );
 
       traceWriter.writeTracePlan( registryName, "completed-flow-element-graph", ruleResult.getAssemblyGraph() );
 

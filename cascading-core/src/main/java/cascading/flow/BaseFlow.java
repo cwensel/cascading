@@ -57,6 +57,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.ProcessLogger;
 import cascading.util.ShutdownUtil;
 import cascading.util.Update;
 import cascading.util.Util;
@@ -75,10 +76,11 @@ import static cascading.util.Util.formatDurationFromMillis;
 import static org.jgrapht.Graphs.predecessorListOf;
 
 @riffle.process.Process
-public abstract class BaseFlow<Config> implements Flow<Config>
+public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   {
   /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( Flow.class );
+  private static final Logger LOG = LoggerFactory.getLogger( Flow.class ); // wrapped by ProcessLogger interface methods
+  private static final int LOG_FLOW_NAME_MAX = 25;
 
   private PlatformInfo platformInfo;
 
@@ -166,7 +168,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     this.name = name;
 
     if( flowDescriptor != null )
-      this.flowDescriptor = new LinkedHashMap<String, String>( flowDescriptor );
+      this.flowDescriptor = new LinkedHashMap<>( flowDescriptor );
 
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
@@ -1389,24 +1391,46 @@ public abstract class BaseFlow<Config> implements Flow<Config>
     return buffer.toString();
     }
 
-  protected void logInfo( String message )
+  @Override
+  public final boolean isInfoEnabled()
     {
-    LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    return LOG.isInfoEnabled();
     }
 
-  private void logDebug( String message )
+  @Override
+  public final boolean isDebugEnabled()
     {
-    LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    return LOG.isDebugEnabled();
     }
 
-  private void logWarn( String message, Throwable throwable )
+  @Override
+  public void logInfo( String message, Object... arguments )
     {
-    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    LOG.info( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, arguments );
     }
 
-  private void logError( String message, Throwable throwable )
+  @Override
+  public void logDebug( String message, Object... arguments )
     {
-    LOG.error( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    LOG.debug( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, arguments );
+    }
+
+  @Override
+  public void logWarn( String message )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message );
+    }
+
+  @Override
+  public void logWarn( String message, Throwable throwable )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, throwable );
+    }
+
+  @Override
+  public void logError( String message, Throwable throwable )
+    {
+    LOG.error( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, throwable );
     }
 
   @Override

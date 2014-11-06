@@ -36,7 +36,6 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowElements;
 import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
@@ -57,10 +56,9 @@ import cascading.property.ConfigDef;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
 import cascading.util.EnumMultiMap;
+import cascading.util.ProcessLogger;
 import cascading.util.Util;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static cascading.flow.planner.graph.ElementGraphs.findAllGroups;
 
@@ -74,11 +72,8 @@ import static cascading.flow.planner.graph.ElementGraphs.findAllGroups;
  * <p/>
  * This class is for internal use, there are no stable public methods.
  */
-public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Config>
+public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessLogger, Serializable
   {
-  /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( FlowStep.class );
-
   /** Field flow */
   private transient Flow<Config> flow;
   /** Field flowName */
@@ -469,7 +464,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       }
     finally
       {
-      if( LOG.isInfoEnabled() )
+      if( isInfoEnabled() )
         logInfo( "source modification date at: " + new Date( sourceModified ) ); // not oldest, we didnt check them all
       }
     }
@@ -478,7 +473,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     {
     long sinkModified = Util.getSinkModified( getConfig(), sinks.keySet() );
 
-    if( LOG.isInfoEnabled() )
+    if( isInfoEnabled() )
       {
       if( sinkModified == -1L )
         logInfo( "at least one sink is marked for delete" );
@@ -689,7 +684,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
 
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onCompleted event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
@@ -701,7 +696,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onThrowable event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
@@ -713,7 +708,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStopping event: " + getListeners() );
 
       for( Object flowStepListener : getListeners() )
@@ -725,7 +720,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStarting event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
@@ -737,7 +732,7 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onRunning event: " + getListeners().size() );
 
       for( Object flowStepListener : getListeners() )
@@ -831,61 +826,46 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return buffer.toString();
     }
 
+  @Override
   public final boolean isInfoEnabled()
     {
-    return LOG.isInfoEnabled();
+    return ( (ProcessLogger) flow ).isInfoEnabled();
     }
 
+  @Override
   public final boolean isDebugEnabled()
     {
-    return LOG.isDebugEnabled();
+    return ( (ProcessLogger) flow ).isDebugEnabled();
     }
 
-  public void logDebug( String message )
+  @Override
+  public void logDebug( String message, Object... arguments )
     {
-    LOG.debug( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message );
+    ( (ProcessLogger) flow ).logDebug( message, arguments );
     }
 
-  public void logInfo( String message )
+  @Override
+  public void logInfo( String message, Object... arguments )
     {
-    LOG.info( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message );
+    ( (ProcessLogger) flow ).logInfo( message, arguments );
     }
 
+  @Override
   public void logWarn( String message )
     {
-    LOG.warn( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message );
+    ( (ProcessLogger) flow ).logWarn( message );
     }
 
+  @Override
   public void logWarn( String message, Throwable throwable )
     {
-    LOG.warn( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
+    ( (ProcessLogger) flow ).logWarn( message, throwable );
     }
 
+  @Override
   public void logError( String message, Throwable throwable )
     {
-    LOG.error( "[" + Util.truncate( getFlowName(), 25 ) + "] " + message, throwable );
-    }
-
-  public static Tap getTapForID( Set<Tap> taps, String id )
-    {
-    for( Tap tap : taps )
-      {
-      if( Tap.id( tap ).equals( id ) )
-        return tap;
-      }
-
-    return null;
-    }
-
-  public static FlowElement getFlowElementForID( Set<FlowElement> flowElements, String id )
-    {
-    for( FlowElement flowElement : flowElements )
-      {
-      if( FlowElements.id( flowElement ).equals( id ) )
-        return flowElement;
-      }
-
-    return null;
+    ( (ProcessLogger) flow ).logError( message, throwable );
     }
 
   /**

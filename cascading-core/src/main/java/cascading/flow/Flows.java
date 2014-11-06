@@ -21,13 +21,15 @@
 package cascading.flow;
 
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowStepGraph;
+import cascading.tap.Tap;
 
 /** Flows is a utility helper class. */
-public class Flows
+public final class Flows
   {
   private Flows()
     {
@@ -57,5 +59,27 @@ public class Flows
       return flow.getName();
 
     return flow.getID().substring( 0, 6 );
+    }
+
+  public static Tap getTapForID( Set<Tap> taps, String id )
+    {
+    for( Tap tap : taps )
+      {
+      if( Tap.id( tap ).equals( id ) )
+        return tap;
+      }
+
+    return null;
+    }
+
+  public static FlowElement getFlowElementForID( Set<FlowElement> flowElements, String id )
+    {
+    for( FlowElement flowElement : flowElements )
+      {
+      if( FlowElements.id( flowElement ).equals( id ) )
+        return flowElement;
+      }
+
+    return null;
     }
   }

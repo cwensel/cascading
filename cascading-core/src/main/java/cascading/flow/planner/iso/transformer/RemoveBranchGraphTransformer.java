@@ -49,7 +49,6 @@ public class RemoveBranchGraphTransformer extends MutateGraphTransformer
   protected boolean transformGraphInPlaceUsing( Transformed<ElementGraph> transformed, ElementGraph graph, Match match )
     {
     Set<FlowElement> primary = match.getCapturedElements( ElementCapture.Primary );
-
     Set<FlowElement> secondary = match.getCapturedElements( ElementCapture.Secondary );
 
     if( primary.isEmpty() )
