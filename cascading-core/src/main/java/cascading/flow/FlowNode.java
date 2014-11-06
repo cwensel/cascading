@@ -21,6 +21,7 @@
 package cascading.flow;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.planner.Scope;
@@ -72,6 +73,8 @@ public interface FlowNode extends ProcessModel
   Collection<? extends Scope> getPreviousScopes( FlowElement flowElement );
 
   Collection<? extends Scope> getNextScopes( FlowElement flowElement );
+
+  List<? extends ElementGraph> getPipelineGraphs();
 
   ElementGraph getPipelineGraphFor( FlowElement streamedSource );
   }

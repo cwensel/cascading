@@ -47,4 +47,15 @@ public class Flows
     {
     return ( (BaseFlow) flow ).getFlowStepGraph();
     }
+
+  public static String getNameOrID( Flow flow )
+    {
+    if( flow == null )
+      return null;
+
+    if( flow.getName() != null )
+      return flow.getName();
+
+    return flow.getID().substring( 0, 6 );
+    }
   }

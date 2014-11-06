@@ -32,16 +32,12 @@ import cascading.flow.planner.graph.FlowElementGraph;
 
 public class FlowStepGraph extends ProcessGraph<FlowStep>
   {
-  private transient String tracePath;
-
   public FlowStepGraph()
     {
     }
 
-  public FlowStepGraph( String tracePath, FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+  public FlowStepGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
-    this.tracePath = tracePath;
-
     buildGraph( flowPlanner, flowElementGraph, nodeSubGraphsMap, pipelineSubGraphsMap );
 
     Iterator<FlowStep> iterator = getTopologicalIterator();
@@ -53,14 +49,8 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
       {
       BaseFlowStep flowStep = (BaseFlowStep) iterator.next();
 
-      flowStep.setOrdinal( ordinal );
-      flowStep.setName( flowPlanner.makeFlowStepName( flowStep, size, ordinal ) );
-
-      ElementGraph stepSubGraph = flowStep.getElementGraph();
-
-      writePlan( ordinal, stepSubGraph, nodeSubGraphsMap.get( stepSubGraph ), pipelineSubGraphsMap );
-
-      ordinal++;
+      flowStep.setOrdinal( ordinal++ );
+      flowStep.setName( flowPlanner.makeFlowStepName( flowStep, size, flowStep.getOrdinal() ) );
       }
     }
 
@@ -81,44 +71,5 @@ public class FlowStepGraph extends ProcessGraph<FlowStep>
   protected FlowNodeGraph createFlowNodeGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap, List<? extends ElementGraph> nodeSubGraphs )
     {
     return new FlowNodeGraph( flowPlanner, flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
-    }
-
-  private void writePlan( int stepCount, ElementGraph stepSubGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
-    {
-    if( getTracePath() == null )
-      return;
-
-    String rootPath = getTracePath() + "/steps";
-    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, stepCount );
-
-    stepSubGraph.writeDOT( stepGraphName );
-
-    for( int i = 0; i < nodeSubGraphs.size(); i++ )
-      {
-      ElementGraph nodeGraph = nodeSubGraphs.get( i );
-      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, stepCount, i );
-
-      nodeGraph.writeDOT( nodeGraphName );
-
-      List<? extends ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeGraph );
-
-      if( pipelineGraphs == null )
-        continue;
-
-      for( int j = 0; j < pipelineGraphs.size(); j++ )
-        {
-        ElementGraph pipelineGraph = pipelineGraphs.get( j );
-
-        String pipelineGraphName = String.format( "%s/%04d-%04d-%04d-step-node-pipeline-sub-graph.dot", rootPath, stepCount, i, j );
-
-        pipelineGraph.writeDOT( pipelineGraphName );
-        }
-
-      }
-    }
-
-  private String getTracePath()
-    {
-    return tracePath;
     }
   }

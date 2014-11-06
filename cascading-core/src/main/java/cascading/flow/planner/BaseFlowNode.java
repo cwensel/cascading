@@ -208,6 +208,7 @@ public class BaseFlowNode implements Serializable, FlowNode
     return results;
     }
 
+  @Override
   public List<? extends ElementGraph> getPipelineGraphs()
     {
     return pipelineGraphs;

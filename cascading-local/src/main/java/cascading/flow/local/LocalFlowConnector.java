@@ -27,7 +27,7 @@ import cascading.flow.FlowConnector;
 import cascading.flow.local.planner.LocalPlanner;
 import cascading.flow.local.planner.LocalRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.RuleRegistrySet;
 import cascading.scheme.Scheme;
 
 /**
@@ -57,10 +57,10 @@ public class LocalFlowConnector extends FlowConnector
     }
 
   /** Constructor LocalFlowConnector creates a default instance. */
-  @ConstructorProperties({"ruleRegistry"})
-  public LocalFlowConnector( RuleRegistry ruleRegistry )
+  @ConstructorProperties({"ruleRegistrySet"})
+  public LocalFlowConnector( RuleRegistrySet ruleRegistrySet )
     {
-    super( ruleRegistry );
+    super( ruleRegistrySet );
     }
 
   /**
@@ -68,10 +68,10 @@ public class LocalFlowConnector extends FlowConnector
    *
    * @param properties of type Map
    */
-  @ConstructorProperties({"properties","ruleRegistry"})
-  public LocalFlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+  @ConstructorProperties({"properties", "ruleRegistrySet"})
+  public LocalFlowConnector( Map<Object, Object> properties, RuleRegistrySet ruleRegistrySet )
     {
-    super( properties, ruleRegistry );
+    super( properties, ruleRegistrySet );
     }
 
   @Override
@@ -87,8 +87,8 @@ public class LocalFlowConnector extends FlowConnector
     }
 
   @Override
-  protected RuleRegistry createDefaultRuleRegistry()
+  protected RuleRegistrySet createDefaultRuleRegistrySet()
     {
-    return new LocalRuleRegistry();
+    return new RuleRegistrySet( new LocalRuleRegistry() );
     }
   }

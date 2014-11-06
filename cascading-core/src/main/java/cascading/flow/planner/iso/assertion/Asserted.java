@@ -124,7 +124,7 @@ public class Asserted extends GraphResult
 
   public void addChildTransform( Transformed transformed )
     {
-    if( plannerContext.isTracingEnabled() )
+    if( plannerContext.isTransformTracingEnabled() )
       getChildTransforms().add( transformed );
     }
 

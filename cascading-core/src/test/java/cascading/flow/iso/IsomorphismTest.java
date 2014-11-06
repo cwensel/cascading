@@ -67,6 +67,7 @@ import cascading.flow.planner.rule.partitioner.WholeGraphStepPartitioner;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.flow.planner.rule.transformer.RemoveNoOpPipeTransformer;
 import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.pipe.Pipe;
 import org.junit.Test;
 
@@ -149,7 +150,7 @@ public class IsomorphismTest extends CascadingTestCase
     ruleRegistry.addRule( new RuleInsertionTransformer( PlanPhase.PreResolveAssembly, new TestCheckpointExpression(), IntermediateTapElementFactory.TEMP_TAP ) );
 //    ruleRegistry.addRule( new RuleContractedTransform( PlanPhase.PreResolve, new NoOpPipeExpression() ) );
 
-    RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new StandardElementGraph() ) );
+    RuleResult ruleResult = new RuleExec( new TraceWriter(), ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new StandardElementGraph() ) );
     FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
@@ -175,7 +176,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     FlowElementGraph elementGraph = new HashJoinMergeIntoHashJoinStreamedStreamedMergeGraph();
 //    FlowElementGraph elementGraph = new HashJoinAroundHashJoinLeftMostGraph();
-    RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( elementGraph ) );
+    RuleResult ruleResult = new RuleExec( new TraceWriter(), ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( elementGraph ) );
     FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
     flowElementGraph.writeDOT( getPlanPath() + "/mergejoin.dot" );
@@ -252,9 +253,9 @@ public class IsomorphismTest extends CascadingTestCase
     );
 
     FlowElementGraph elementGraph = new SelfCoGroupGraph();
-    RuleExec ruleExec = new RuleExec( ruleRegistry );
+    RuleExec ruleExec = new RuleExec( new TraceWriter( null ), ruleRegistry );
 
-    ruleExec.enableTransformTracing( getPlanPath() );
+//    ruleExec.enableTransformTracing( Paths.get( getPlanPath() ) );
 
     PlannerContext plannerContext = new PlannerContext( ruleRegistry );
 
@@ -281,7 +282,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     ruleRegistry.addRule( new RemoveNoOpPipeTransformer() );
 
-    RuleResult ruleResult = new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( elementGraph ) );
+    RuleResult ruleResult = new RuleExec( new TraceWriter(), ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( elementGraph ) );
     FlowElementGraph flowElementGraph = ruleResult.getAssemblyGraph();
 
     flowElementGraph.writeDOT( getPlanPath() + "/node.dot" );
@@ -323,7 +324,7 @@ public class IsomorphismTest extends CascadingTestCase
 
     try
       {
-      new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new LoneGroupAssertionGraph() ) );
+      new RuleExec( new TraceWriter(), ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new LoneGroupAssertionGraph() ) );
       fail();
       }
     catch( PlannerException exception )
@@ -331,7 +332,7 @@ public class IsomorphismTest extends CascadingTestCase
       // do nothing
       }
 
-    new RuleExec( ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new HashJoinSameSourceGraph() ) );
+    new RuleExec( new TraceWriter(), ruleRegistry ).executeRulePhase( PlanPhase.PreResolveAssembly, plannerContext, new RuleResult( new HashJoinSameSourceGraph() ) );
     }
 
   @Test

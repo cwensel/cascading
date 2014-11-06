@@ -21,14 +21,13 @@
 package cascading.flow.planner;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,17 +46,18 @@ import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.rule.ProcessLevel;
-import cascading.flow.planner.rule.RuleExec;
 import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.RuleRegistrySet;
 import cascading.flow.planner.rule.RuleResult;
+import cascading.flow.planner.rule.RuleSetExec;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
+import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
 import cascading.pipe.Checkpoint;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
-import cascading.property.AppProps;
 import cascading.property.ConfigDef;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
@@ -65,12 +65,10 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.util.Util;
-import cascading.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.property.PropertyUtil.getStringProperty;
-import static cascading.util.Util.formatDurationFromMillis;
 import static java.util.Arrays.asList;
 
 /**
@@ -155,7 +153,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     this.defaultDebugLevel = getDebugLevel( properties );
     }
 
-  public F buildFlow( FlowDef flowDef, RuleRegistry ruleRegistry )
+  public F buildFlow( FlowDef flowDef, RuleRegistrySet ruleRegistrySet )
     {
     FlowElementGraph flowElementGraph = null;
 
@@ -164,45 +162,29 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       verifyAllTaps( flowDef );
 
       F flow = createFlow( flowDef );
-      String nameOrID = getNameOrID( flow );
-      String transformPath = getPlanTransformTracePath();
-
-      if( transformPath != null )
-        transformPath = FileSystems.getDefault().getPath( transformPath, nameOrID ).toString();
 
       Pipe[] tails = resolveTails( flowDef, flow );
 
       verifyAssembly( flowDef, tails );
 
-      configRuleRegistryDefaults( ruleRegistry );
-
-      RuleExec ruleExec = new RuleExec( ruleRegistry );
-
       flowElementGraph = createFlowElementGraph( flowDef, tails );
 
-      writeTracePlan( nameOrID, "0-initial-flow-element-graph", flowElementGraph );
+      TraceWriter traceWriter = new TraceWriter( flow );
+      RuleSetExec ruleSetExec = new RuleSetExec( traceWriter, this, flow, ruleRegistrySet, flowDef, flowElementGraph );
 
-      ruleExec.enableTransformTracing( transformPath );
+      RuleResult ruleResult = ruleSetExec.exec();
 
-      PlannerContext plannerContext = new PlannerContext( ruleRegistry, this, flowDef, flow, transformPath != null );
-
-      RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
-
-      LOG.info( "executed rule registry: {}, completed in: {}", ruleRegistry.getName(), formatDurationFromMillis( ruleResult.getDuration() ) );
-
-      writeTracePlan( nameOrID, "1-completed-flow-element-graph", ruleResult.getAssemblyGraph() );
-
-      writeStats( plannerContext, nameOrID, ruleResult );
-
-      verifyResult( ruleResult );
+      traceWriter.writeTracePlan( null, "0-initial-flow-element-graph", flowElementGraph );
 
       FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
       Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
       Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
 
-      FlowStepGraph flowStepGraph = new FlowStepGraph( transformPath, this, finalFlowElementGraph, stepToNodes, nodeToPipeline );
+      FlowStepGraph flowStepGraph = new FlowStepGraph( this, finalFlowElementGraph, stepToNodes, nodeToPipeline );
 
-      writeTracePlan( nameOrID, "2-completed-flow-step-graph", flowStepGraph );
+      traceWriter.writeTracePlan( ruleResult.getRegistry().getName(), "1-final-flow-element-graph", finalFlowElementGraph );
+      traceWriter.writeTracePlan( ruleResult.getRegistry().getName(), "2-final-flow-step-graph", flowStepGraph );
+      traceWriter.writeTracePlanSteps( flowStepGraph );
 
       flow.initialize( finalFlowElementGraph, flowStepGraph );
 
@@ -214,114 +196,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     }
 
-  /**
-   * If there are rules for a given {@link cascading.flow.planner.rule.ProcessLevel} on the current platform
-   * there must be sub-graphs partitioned at that level.
-   */
-  private void verifyResult( RuleResult ruleResult )
-    {
-    Set<ProcessLevel> processLevels = ruleResult.getRegistry().getProcessLevels();
-
-    for( ProcessLevel processLevel : processLevels )
-      {
-      switch( processLevel )
-        {
-        case Assembly:
-
-          FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
-
-          if( finalFlowElementGraph.vertexSet().isEmpty() )
-            throw new PlannerException( "final assembly graph is empty: " + ruleResult.getRegistry().getName() );
-
-          break;
-
-        case Step:
-
-          Map<ElementGraph, List<? extends ElementGraph>> assemblyToSteps = ruleResult.getAssemblyToStepGraphMap();
-
-          if( assemblyToSteps.isEmpty() )
-            throw new PlannerException( "no steps partitioned: " + ruleResult.getRegistry().getName() );
-
-          for( ElementGraph assembly : assemblyToSteps.keySet() )
-            {
-            List<? extends ElementGraph> steps = assemblyToSteps.get( assembly );
-
-            if( steps.isEmpty() )
-              throw new PlannerException( "no steps partitioned from assembly: " + ruleResult.getRegistry().getName(), assembly );
-
-            Set<FlowElement> elements = new HashSet<>();
-
-            for( ElementGraph step : steps )
-              elements.addAll( step.vertexSet() );
-
-            if( elements.size() < assembly.vertexSet().size() )
-              throw new PlannerException( "union of steps have fewer elements than parent assembly: " + ruleResult.getRegistry().getName(), assembly );
-            }
-
-          break;
-
-        case Node:
-
-          Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
-
-          if( stepToNodes.isEmpty() )
-            throw new PlannerException( "no nodes partitioned: " + ruleResult.getRegistry().getName() );
-
-          for( ElementGraph step : stepToNodes.keySet() )
-            {
-            List<? extends ElementGraph> nodes = stepToNodes.get( step );
-
-            if( nodes.isEmpty() )
-              throw new PlannerException( "no nodes partitioned from step: " + ruleResult.getRegistry().getName(), step );
-
-            Set<FlowElement> elements = new HashSet<>();
-
-            for( ElementGraph node : nodes )
-              elements.addAll( node.vertexSet() );
-
-            if( elements.size() < step.vertexSet().size() )
-              throw new PlannerException( "union of nodes have fewer elements than parent step: " + ruleResult.getRegistry().getName(), step );
-            }
-
-          break;
-
-        case Pipeline:
-
-          // all nodes are partitioned into pipelines, but if partitioned all elements should be represented
-          Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
-
-          if( nodeToPipeline.isEmpty() )
-            throw new PlannerException( "no pipelines partitioned: " + ruleResult.getRegistry().getName() );
-
-          for( ElementGraph node : nodeToPipeline.keySet() )
-            {
-            List<? extends ElementGraph> pipelines = nodeToPipeline.get( node );
-
-            if( pipelines.isEmpty() )
-              throw new PlannerException( "no pipelines partitioned from node: " + ruleResult.getRegistry().getName(), node );
-
-            Set<FlowElement> elements = new HashSet<>();
-
-            for( ElementGraph pipeline : pipelines )
-              elements.addAll( pipeline.vertexSet() );
-
-            if( elements.size() < node.vertexSet().size() )
-              throw new PlannerException( "union of pipelines have fewer elements than parent node: " + ruleResult.getRegistry().getName(), node );
-            }
-
-          break;
-        }
-      }
-    }
-
-  private String getNameOrID( F flow )
-    {
-    if( flow.getName() != null )
-      return flow.getName();
-
-    return flow.getID().substring( 0, 6 );
-    }
-
   protected abstract F createFlow( FlowDef flowDef );
 
   public abstract FlowStep<Config> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
@@ -331,7 +205,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return new BaseFlowNode( flowElementGraph, nodeSubGraph, pipelineGraphs );
     }
 
-  protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
+  public void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
     {
 
     }
@@ -616,6 +490,106 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       }
     }
 
+  /**
+   * If there are rules for a given {@link cascading.flow.planner.rule.ProcessLevel} on the current platform
+   * there must be sub-graphs partitioned at that level.
+   */
+  public void verifyResult( RuleResult ruleResult )
+    {
+    Set<ProcessLevel> processLevels = ruleResult.getRegistry().getProcessLevels();
+
+    for( ProcessLevel processLevel : processLevels )
+      {
+      switch( processLevel )
+        {
+        case Assembly:
+
+          FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
+
+          if( finalFlowElementGraph.vertexSet().isEmpty() )
+            throw new PlannerException( "final assembly graph is empty: " + ruleResult.getRegistry().getName() );
+
+          break;
+
+        case Step:
+
+          Map<ElementGraph, List<? extends ElementGraph>> assemblyToSteps = ruleResult.getAssemblyToStepGraphMap();
+
+          if( assemblyToSteps.isEmpty() )
+            throw new PlannerException( "no steps partitioned: " + ruleResult.getRegistry().getName() );
+
+          for( ElementGraph assembly : assemblyToSteps.keySet() )
+            {
+            List<? extends ElementGraph> steps = assemblyToSteps.get( assembly );
+
+            if( steps.isEmpty() )
+              throw new PlannerException( "no steps partitioned from assembly: " + ruleResult.getRegistry().getName(), assembly );
+
+            Set<FlowElement> elements = new HashSet<>();
+
+            for( ElementGraph step : steps )
+              elements.addAll( step.vertexSet() );
+
+            if( elements.size() < assembly.vertexSet().size() )
+              throw new PlannerException( "union of steps have fewer elements than parent assembly: " + ruleResult.getRegistry().getName(), assembly );
+            }
+
+          break;
+
+        case Node:
+
+          Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
+
+          if( stepToNodes.isEmpty() )
+            throw new PlannerException( "no nodes partitioned: " + ruleResult.getRegistry().getName() );
+
+          for( ElementGraph step : stepToNodes.keySet() )
+            {
+            List<? extends ElementGraph> nodes = stepToNodes.get( step );
+
+            if( nodes.isEmpty() )
+              throw new PlannerException( "no nodes partitioned from step: " + ruleResult.getRegistry().getName(), step );
+
+            Set<FlowElement> elements = new HashSet<>();
+
+            for( ElementGraph node : nodes )
+              elements.addAll( node.vertexSet() );
+
+            if( elements.size() < step.vertexSet().size() )
+              throw new PlannerException( "union of nodes have fewer elements than parent step: " + ruleResult.getRegistry().getName(), step );
+            }
+
+          break;
+
+        case Pipeline:
+
+          // all nodes are partitioned into pipelines, but if partitioned all elements should be represented
+          Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
+
+          if( nodeToPipeline.isEmpty() )
+            throw new PlannerException( "no pipelines partitioned: " + ruleResult.getRegistry().getName() );
+
+          for( ElementGraph node : nodeToPipeline.keySet() )
+            {
+            List<? extends ElementGraph> pipelines = nodeToPipeline.get( node );
+
+            if( pipelines.isEmpty() )
+              throw new PlannerException( "no pipelines partitioned from node: " + ruleResult.getRegistry().getName(), node );
+
+            Set<FlowElement> elements = new HashSet<>();
+
+            for( ElementGraph pipeline : pipelines )
+              elements.addAll( pipeline.vertexSet() );
+
+            if( elements.size() < node.vertexSet().size() )
+              throw new PlannerException( "union of pipelines have fewer elements than parent node: " + ruleResult.getRegistry().getName(), node );
+            }
+
+          break;
+        }
+      }
+    }
+
   protected PlannerException handleExceptionDuringPlanning( FlowDef flowDef, Exception exception, FlowElementGraph flowElementGraph )
     {
     if( exception instanceof PlannerException )
@@ -749,24 +723,15 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_PLAN_PATH );
     }
 
-  protected String getPlanTransformTracePath()
-    {
-    return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_PLAN_TRANSFORM_PATH );
-    }
-
-  protected String getPlanStatsPath()
-    {
-    return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_STATS_PATH );
-    }
-
-  protected void writeTracePlan( String flowName, String fileName, ElementGraph flowElementGraph )
+  protected void writeTracePlan( String flowName, String registryName, String fileName, ElementGraph flowElementGraph )
     {
     String path = getPlanTracePath();
 
     if( path == null )
       return;
 
-    Path filePath = FileSystems.getDefault().getPath( path, flowName, String.format( "%s.dot", fileName ) );
+    String format = registryName == null ? String.format( "%s.dot", fileName ) : String.format( "%s-%s.dot", fileName, registryName );
+    Path filePath = FileSystems.getDefault().getPath( path, flowName, format );
     File file = filePath.toFile();
 
     LOG.info( "writing trace element plan: {}", file );
@@ -776,14 +741,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     flowElementGraph.writeDOT( filename );
     }
 
-  protected void writeTracePlan( String flowName, String fileName, FlowStepGraph stepGraph )
+  protected void writeTracePlan( String flowName, String registryName, String fileName, FlowStepGraph stepGraph )
     {
     String path = getPlanTracePath();
 
     if( path == null )
       return;
 
-    Path filePath = FileSystems.getDefault().getPath( path, flowName, String.format( "%s.dot", fileName ) );
+    Path filePath = FileSystems.getDefault().getPath( path, flowName, String.format( "%s-%s.dot", fileName, registryName ) );
     File file = filePath.toFile();
 
     LOG.info( "writing trace step plan: {}", file );
@@ -791,49 +756,56 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     stepGraph.writeDOT( file.toString() );
     }
 
-  private void writeStats( PlannerContext plannerContext, String flowName, RuleResult ruleResult )
+  protected void writeTracePlanSteps( String flowName, FlowStepGraph stepGraph )
     {
-    if( getPlanStatsPath() == null )
-      return;
+    Iterator<FlowStep> iterator = stepGraph.getTopologicalIterator();
 
-    Path path = FileSystems.getDefault().getPath( getPlanStatsPath(), flowName, "planner-stats.txt" );
-    File file = path.toFile();
+    while( iterator.hasNext() )
+      writePlan( flowName, iterator.next() );
 
-    LOG.info( "writing planner stats to: {}", file );
-
-    file.getParentFile().mkdirs();
-
-    try( PrintWriter writer = new PrintWriter( file ) )
-      {
-      Flow flow = plannerContext.getFlow();
-
-      Map<Object, Object> configAsProperties = flow.getConfigAsProperties();
-
-      writer.format( "cascading version: %s, build: %s\n", emptyOrValue( Version.getReleaseFull() ), emptyOrValue( Version.getReleaseBuild() ) );
-      writer.format( "application id: %s\n", emptyOrValue( AppProps.getApplicationID( configAsProperties ) ) );
-      writer.format( "application name: %s\n", emptyOrValue( AppProps.getApplicationName( configAsProperties ) ) );
-      writer.format( "application version: %s\n", emptyOrValue( AppProps.getApplicationVersion( configAsProperties ) ) );
-      writer.format( "platform: %s\n", emptyOrValue( flow.getPlatformInfo() ) );
-      writer.format( "frameworks: %s\n", emptyOrValue( AppProps.getApplicationFrameworks( configAsProperties ) ) );
-
-      writer.println();
-
-      ruleResult.writeStats( writer );
-      }
-    catch( IOException exception )
-      {
-      LOG.error( "could not write stats", exception );
-      }
     }
 
-  private static String emptyOrValue( Object value )
+  private void writePlan( String flowName, FlowStep flowStep )
     {
-    if( value == null )
-      return "";
+    String path = getPlanTracePath();
 
-    if( Util.isEmpty( value.toString() ) )
-      return "";
+    if( path == null )
+      return;
 
-    return value.toString();
+    int ordinal = flowStep.getOrdinal();
+
+    Path rootPath = FileSystems.getDefault().getPath( path, flowName, "steps" );
+    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, ordinal );
+
+    ElementGraph stepSubGraph = flowStep.getElementGraph();
+
+    stepSubGraph.writeDOT( stepGraphName );
+
+    FlowNodeGraph flowNodeGraph = flowStep.getFlowNodeGraph();
+
+    Iterator<FlowNode> iterator = flowNodeGraph.getOrderedTopologicalIterator();
+
+    int i = 0;
+    while( iterator.hasNext() )
+      {
+      FlowNode flowNode = iterator.next();
+      ElementGraph nodeGraph = flowNode.getElementGraph();
+      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, ordinal, i );
+
+      nodeGraph.writeDOT( nodeGraphName );
+
+      List<? extends ElementGraph> pipelineGraphs = flowNode.getPipelineGraphs();
+
+      for( int j = 0; j < pipelineGraphs.size(); j++ )
+        {
+        ElementGraph pipelineGraph = pipelineGraphs.get( j );
+
+        String pipelineGraphName = String.format( "%s/%04d-%04d-%04d-step-node-pipeline-sub-graph.dot", rootPath, ordinal, i, j );
+
+        pipelineGraph.writeDOT( pipelineGraphName );
+        }
+
+      i++;
+      }
     }
   }

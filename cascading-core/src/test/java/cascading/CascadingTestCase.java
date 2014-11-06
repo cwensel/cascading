@@ -90,9 +90,9 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
 
     if( Boolean.getBoolean( TEST_TRACEPLAN_ENABLED ) )
       {
+      System.setProperty( FlowPlanner.TRACE_PLAN_PATH, Util.join( "/", getPlanPath(), "planner" ) );
       System.setProperty( FlowPlanner.TRACE_PLAN_TRANSFORM_PATH, Util.join( "/", getPlanPath(), "planner" ) );
-      System.setProperty( FlowPlanner.TRACE_PLAN_PATH, getPlanPath() );
-      System.setProperty( FlowPlanner.TRACE_STATS_PATH, getPlanPath() );
+      System.setProperty( FlowPlanner.TRACE_STATS_PATH, Util.join( "/", getPlanPath(), "planner" ) );
       System.setProperty( "platform." + StreamGraph.DOT_FILE_PATH, Util.join( "/", getPlanPath(), "stream" ) ); // pass down
       }
     }

@@ -21,24 +21,43 @@
 package cascading.flow.planner.rule.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.Flow;
+import cascading.flow.FlowNode;
+import cascading.flow.FlowStep;
+import cascading.flow.Flows;
+import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.assertion.Asserted;
 import cascading.flow.planner.iso.subgraph.Partitions;
 import cascading.flow.planner.iso.transformer.Transformed;
+import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.ProcessLevel;
 import cascading.flow.planner.rule.Rule;
+import cascading.flow.planner.rule.RuleResult;
+import cascading.property.AppProps;
 import cascading.util.Util;
+import cascading.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.property.PropertyUtil.getStringProperty;
 
 public class TraceWriter
   {
@@ -48,7 +67,8 @@ public class TraceWriter
   public static final String ORANGE = "0000000000000000000E00000000000000000000000000000000000000000000";
   public static final String RED = "0000000000000000000C00000000000000000000000000000000000000000000";
 
-  public String transformTracePath;
+  private String flowName;
+  private Map properties = Collections.emptyMap();
 
   Map<ProcessLevel, Set<Rule>> counts = new EnumMap<>( ProcessLevel.class );
 
@@ -56,32 +76,38 @@ public class TraceWriter
     {
     }
 
-  public void setTracePath( String transformTracePath )
+  public TraceWriter( Flow flow )
     {
-    if( transformTracePath != null && transformTracePath.endsWith( File.separator ) )
-      transformTracePath = transformTracePath.substring( 0, transformTracePath.length() - 2 );
-
-    this.transformTracePath = transformTracePath;
+    if( flow != null )
+      {
+      this.properties = flow.getConfigAsProperties();
+      this.flowName = Flows.getNameOrID( flow );
+      }
     }
 
-  protected String getTracePath()
+  protected Path getFullTransformTracePath( String registryName )
     {
-    return transformTracePath + File.separator;
+    Path planTransformTracePath = getPlanTransformTracePath();
+
+    if( planTransformTracePath == null )
+      return null;
+
+    return planTransformTracePath.resolve( registryName );
     }
 
-  public boolean isEnabled()
+  public boolean isTransformTraceEnabled()
     {
-    return !isDisabled();
+    return !isTransformTraceDisabled();
     }
 
-  public boolean isDisabled()
+  public boolean isTransformTraceDisabled()
     {
-    return transformTracePath == null;
+    return getPlanTransformTracePath() == null;
     }
 
-  public void writePlan( PlanPhase phase, Rule rule, int[] ordinals, GraphResult graphResult )
+  public void writeTransformPlan( String registryName, PlanPhase phase, Rule rule, int[] ordinals, GraphResult graphResult )
     {
-    if( isDisabled() )
+    if( isTransformTraceDisabled() )
       return;
 
     String ruleName = String.format( "%02d-%s-%04d", phase.ordinal(), phase, addRule( rule ) );
@@ -91,27 +117,28 @@ public class TraceWriter
 
     ruleName = String.format( "%s-%s", ruleName, graphResult.getRuleName() );
 
-    String path = new File( getTracePath(), ruleName ).toString();
-    graphResult.writeDOTs( path );
+    Path path = getFullTransformTracePath( registryName ).resolve( ruleName );
+
+    graphResult.writeDOTs( path.toString() );
 
     markResult( graphResult, path );
     }
 
-  public void writePlan( FlowElementGraph flowElementGraph, String name )
+  public void writeTransformPlan( String registryName, FlowElementGraph flowElementGraph, String name )
     {
-    if( isDisabled() )
+    if( isTransformTraceDisabled() )
       return;
 
-    File file = new File( getTracePath(), name );
+    Path file = getFullTransformTracePath( registryName ).resolve( name ).normalize();
 
     LOG.info( "writing phase assembly trace: {}, to: {}", name, file );
 
     flowElementGraph.writeDOT( file.toString() );
     }
 
-  public void writePlan( List<? extends ElementGraph> flowElementGraphs, PlanPhase phase, String subName )
+  public void writeTransformPlan( String registryName, List<? extends ElementGraph> flowElementGraphs, PlanPhase phase, String subName )
     {
-    if( isDisabled() )
+    if( isTransformTraceDisabled() )
       return;
 
     for( int i = 0; i < flowElementGraphs.size(); i++ )
@@ -119,7 +146,7 @@ public class TraceWriter
       ElementGraph flowElementGraph = flowElementGraphs.get( i );
       String name = String.format( "%02d-%s-%s-%04d.dot", phase.ordinal(), phase, subName, i );
 
-      File file = new File( getTracePath(), name );
+      Path file = getFullTransformTracePath( registryName ).resolve( name ).normalize();
 
       LOG.info( "writing phase step trace: {}, to: {}", name, file );
 
@@ -127,9 +154,9 @@ public class TraceWriter
       }
     }
 
-  public void writePlan( Map<ElementGraph, List<? extends ElementGraph>> parentGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> subGraphsMap, PlanPhase phase, String subName )
+  public void writeTransformPlan( String registryName, Map<ElementGraph, List<? extends ElementGraph>> parentGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> subGraphsMap, PlanPhase phase, String subName )
     {
-    if( isDisabled() )
+    if( isTransformTraceDisabled() )
       return;
 
     int stepCount = 0;
@@ -148,7 +175,7 @@ public class TraceWriter
           ElementGraph flowElementGraph = pipelineGraphs.get( i );
           String name = String.format( "%02d-%s-%s-%04d-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, nodeCount, i );
 
-          File file = new File( getTracePath(), name );
+          Path file = getFullTransformTracePath( registryName ).resolve( name );
 
           LOG.info( "writing phase node pipeline trace: {}, to: {}", name, file );
 
@@ -162,9 +189,9 @@ public class TraceWriter
       }
     }
 
-  public void writePlan( Map<ElementGraph, List<? extends ElementGraph>> subGraphsMap, PlanPhase phase, String subName )
+  public void writeTransformPlan( String registryName, Map<ElementGraph, List<? extends ElementGraph>> subGraphsMap, PlanPhase phase, String subName )
     {
-    if( isDisabled() )
+    if( isTransformTraceDisabled() )
       return;
 
     int stepCount = 0;
@@ -177,7 +204,7 @@ public class TraceWriter
         ElementGraph flowElementGraph = flowElementGraphs.get( i );
         String name = String.format( "%02d-%s-%s-%04d-%04d.dot", phase.ordinal(), phase, subName, stepCount, i );
 
-        File file = new File( getTracePath(), name );
+        Path file = getFullTransformTracePath( registryName ).resolve( name );
 
         LOG.info( "writing phase node trace: {}, to: {}", name, file );
 
@@ -188,7 +215,162 @@ public class TraceWriter
       }
     }
 
-  private void markResult( GraphResult graphResult, String path )
+  protected Path getPlanTracePath()
+    {
+    return applyScope( getStringProperty( System.getProperties(), properties, FlowPlanner.TRACE_PLAN_PATH ) );
+    }
+
+  protected Path getPlanTransformTracePath()
+    {
+    return applyScope( getStringProperty( System.getProperties(), properties, FlowPlanner.TRACE_PLAN_TRANSFORM_PATH ) );
+    }
+
+  protected Path getPlanStatsPath()
+    {
+    return applyScope( getStringProperty( System.getProperties(), properties, FlowPlanner.TRACE_STATS_PATH ) );
+    }
+
+  private Path applyScope( String path )
+    {
+    if( path == null )
+      return null;
+
+    return FileSystems.getDefault().getPath( path, flowName );
+    }
+
+  public void writeTracePlan( String registryName, String fileName, ElementGraph flowElementGraph )
+    {
+    Path path = getPlanTracePath();
+
+    if( path == null )
+      return;
+
+    fileName = registryName == null ? String.format( "%s.dot", fileName ) : String.format( "%s-%s.dot", fileName, registryName );
+    Path filePath = path.resolve( fileName );
+    File file = filePath.toFile();
+
+    LOG.info( "writing trace element plan: {}", file );
+
+    String filename = file.toString();
+
+    flowElementGraph.writeDOT( filename );
+    }
+
+  public void writeTracePlan( String registryName, String fileName, FlowStepGraph stepGraph )
+    {
+    Path path = getPlanTracePath();
+
+    if( path == null )
+      return;
+
+    Path filePath = path.resolve( String.format( "%s-%s.dot", fileName, registryName ) );
+    File file = filePath.toFile();
+
+    LOG.info( "writing trace step plan: {}", file );
+
+    stepGraph.writeDOT( file.toString() );
+    }
+
+  public void writeTracePlanSteps( FlowStepGraph stepGraph )
+    {
+    Iterator<FlowStep> iterator = stepGraph.getTopologicalIterator();
+
+    while( iterator.hasNext() )
+      writePlan( iterator.next() );
+    }
+
+  private void writePlan( FlowStep flowStep )
+    {
+    Path path = getPlanTracePath();
+
+    if( path == null )
+      return;
+
+    int ordinal = flowStep.getOrdinal();
+
+    Path rootPath = path.resolve( "3-final-flow-steps" );
+    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, ordinal );
+
+    ElementGraph stepSubGraph = flowStep.getElementGraph();
+
+    stepSubGraph.writeDOT( stepGraphName );
+
+    FlowNodeGraph flowNodeGraph = flowStep.getFlowNodeGraph();
+
+    Iterator<FlowNode> iterator = flowNodeGraph.getOrderedTopologicalIterator();
+
+    int i = 0;
+    while( iterator.hasNext() )
+      {
+      FlowNode flowNode = iterator.next();
+      ElementGraph nodeGraph = flowNode.getElementGraph();
+      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, ordinal, i );
+
+      nodeGraph.writeDOT( nodeGraphName );
+
+      List<? extends ElementGraph> pipelineGraphs = flowNode.getPipelineGraphs();
+
+      for( int j = 0; j < pipelineGraphs.size(); j++ )
+        {
+        ElementGraph pipelineGraph = pipelineGraphs.get( j );
+
+        String pipelineGraphName = String.format( "%s/%04d-%04d-%04d-step-node-pipeline-sub-graph.dot", rootPath, ordinal, i, j );
+
+        pipelineGraph.writeDOT( pipelineGraphName );
+        }
+
+      i++;
+      }
+    }
+
+  public void writeStats( String registryName, PlannerContext plannerContext, RuleResult ruleResult )
+    {
+    Path path = getPlanStatsPath();
+
+    if( path == null )
+      return;
+
+    File file = path.resolve( String.format( "planner-stats-%s.txt", registryName ) ).toFile();
+
+    LOG.info( "writing planner stats to: {}", file );
+
+    file.getParentFile().mkdirs();
+
+    try( PrintWriter writer = new PrintWriter( file ) )
+      {
+      Flow flow = plannerContext.getFlow();
+
+      Map<Object, Object> configAsProperties = flow.getConfigAsProperties();
+
+      writer.format( "cascading version: %s, build: %s\n", emptyOrValue( Version.getReleaseFull() ), emptyOrValue( Version.getReleaseBuild() ) );
+      writer.format( "application id: %s\n", emptyOrValue( AppProps.getApplicationID( configAsProperties ) ) );
+      writer.format( "application name: %s\n", emptyOrValue( AppProps.getApplicationName( configAsProperties ) ) );
+      writer.format( "application version: %s\n", emptyOrValue( AppProps.getApplicationVersion( configAsProperties ) ) );
+      writer.format( "platform: %s\n", emptyOrValue( flow.getPlatformInfo() ) );
+      writer.format( "frameworks: %s\n", emptyOrValue( AppProps.getApplicationFrameworks( configAsProperties ) ) );
+
+      writer.println();
+
+      ruleResult.writeStats( writer );
+      }
+    catch( IOException exception )
+      {
+      LOG.error( "could not write stats", exception );
+      }
+    }
+
+  private static String emptyOrValue( Object value )
+    {
+    if( value == null )
+      return "";
+
+    if( Util.isEmpty( value.toString() ) )
+      return "";
+
+    return value.toString();
+    }
+
+  private void markResult( GraphResult graphResult, Path path )
     {
     if( graphResult instanceof Transformed )
       markTransformed( (Transformed) graphResult, path );
@@ -198,7 +380,7 @@ public class TraceWriter
       markPartitioned( (Partitions) graphResult, path );
     }
 
-  private void markPartitioned( Partitions partition, String path )
+  private void markPartitioned( Partitions partition, Path path )
     {
     String color = null;
 
@@ -211,19 +393,19 @@ public class TraceWriter
     markFolder( path, color );
     }
 
-  private void markAsserted( Asserted asserted, String path )
+  private void markAsserted( Asserted asserted, Path path )
     {
     if( asserted.getFirstAnchor() != null )
       markFolder( path, RED );
     }
 
-  private void markTransformed( Transformed transformed, String path )
+  private void markTransformed( Transformed transformed, Path path )
     {
     if( transformed.getEndGraph() != null && !transformed.getBeginGraph().equals( transformed.getEndGraph() ) )
       markFolder( path, GREEN );
     }
 
-  private void markFolder( String path, String color )
+  private void markFolder( Path path, String color )
     {
     if( !Util.IS_OSX )
       return;
@@ -233,7 +415,7 @@ public class TraceWriter
 
     // xattr -wx com.apple.FinderInfo 0000000000000000000400000000000000000000000000000000000000000000 child-0-ContractedGraphTransformer
 
-    File file = new File( path );
+    File file = path.toFile();
 
     File parentFile = file.getParentFile();
     String name = file.getName();

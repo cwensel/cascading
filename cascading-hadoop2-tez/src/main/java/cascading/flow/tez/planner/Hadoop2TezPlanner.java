@@ -142,7 +142,7 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
     }
 
   @Override
-  protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
+  public void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
     {
     super.configRuleRegistryDefaults( ruleRegistry );
 

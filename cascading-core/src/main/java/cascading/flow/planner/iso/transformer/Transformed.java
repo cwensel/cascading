@@ -50,7 +50,7 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     this.plannerContext = plannerContext;
     this.graphTransformer = graphTransformer;
 
-    if( plannerContext.isTracingEnabled() )
+    if( plannerContext.isTransformTracingEnabled() )
       beginGraph = new ElementDirectedGraph( beginGraph );
 
     this.beginGraph = beginGraph;
@@ -62,7 +62,7 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     this.graphTransformer = graphTransformer;
     this.expressionGraph = expressionGraph;
 
-    if( plannerContext.isTracingEnabled() )
+    if( plannerContext.isTransformTracingEnabled() )
       beginGraph = new ElementDirectedGraph( beginGraph );
 
     this.beginGraph = beginGraph;
@@ -133,13 +133,13 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     {
     recursionCount++;
 
-    if( plannerContext.isTracingEnabled() )
+    if( plannerContext.isTransformTracingEnabled() )
       getRecursions().add( new ElementDirectedGraph( transformed ) );
     }
 
   public void addChildTransform( Transformed transformed )
     {
-    if( plannerContext.isTracingEnabled() )
+    if( plannerContext.isTransformTracingEnabled() )
       getChildTransforms().add( transformed );
     }
 

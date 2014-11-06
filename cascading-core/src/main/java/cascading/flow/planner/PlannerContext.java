@@ -40,7 +40,7 @@ public class PlannerContext
   FlowPlanner flowPlanner;
   FlowDef flowDef;
   Flow flow;
-  private boolean isTracingEnabled = false;
+  boolean isTransformTracingEnabled = false;
 
   public PlannerContext()
     {
@@ -51,13 +51,13 @@ public class PlannerContext
     this.ruleRegistry = ruleRegistry;
     }
 
-  public PlannerContext( RuleRegistry ruleRegistry, FlowPlanner flowPlanner, FlowDef flowDef, Flow flow, boolean isTracingEnabled )
+  public PlannerContext( RuleRegistry ruleRegistry, FlowPlanner flowPlanner, FlowDef flowDef, Flow flow, boolean isTransformTracingEnabled )
     {
     this.ruleRegistry = ruleRegistry;
     this.flowPlanner = flowPlanner;
     this.flowDef = flowDef;
     this.flow = flow;
-    this.isTracingEnabled = isTracingEnabled;
+    this.isTransformTracingEnabled = isTransformTracingEnabled;
     }
 
   public RuleRegistry getRuleRegistry()
@@ -80,9 +80,9 @@ public class PlannerContext
     return flow;
     }
 
-  public boolean isTracingEnabled()
+  public boolean isTransformTracingEnabled()
     {
-    return isTracingEnabled;
+    return isTransformTracingEnabled;
     }
 
   public PlannerLevel getPlannerLevelFor( Class<? extends PlannerLevel> plannerLevelClass )

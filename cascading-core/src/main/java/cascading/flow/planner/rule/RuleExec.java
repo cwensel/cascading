@@ -60,18 +60,13 @@ public class RuleExec
 
   private static final int ELEMENT_THRESHOLD = 600;
 
-  final TraceWriter traceWriter = new TraceWriter();
+  final TraceWriter traceWriter;
+  final RuleRegistry registry;
 
-  RuleRegistry registry;
-
-  public RuleExec( RuleRegistry registry )
+  public RuleExec( TraceWriter traceWriter, RuleRegistry registry )
     {
+    this.traceWriter = traceWriter;
     this.registry = registry;
-    }
-
-  public void enableTransformTracing( String dotPath )
-    {
-    this.traceWriter.setTracePath( dotPath );
     }
 
   public RuleResult exec( PlannerContext plannerContext, FlowElementGraph flowElementGraph )
@@ -235,7 +230,7 @@ public class RuleExec
 
         Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
-        writeTrace( ruleResult, phase, rule, parent, child, partitions );
+        writeTransformTrace( ruleResult, phase, rule, parent, child, partitions );
 
         List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
@@ -283,7 +278,7 @@ public class RuleExec
 
       Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
 
-      writeTrace( ruleResult, phase, rule, parent, null, partitions );
+      writeTransformTrace( ruleResult, phase, rule, parent, null, partitions );
 
       List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
@@ -321,7 +316,7 @@ public class RuleExec
         {
         Asserted asserted = rule.assertion( plannerContext, child );
 
-        writeTrace( ruleResult, phase, (Rule) rule, parent, child, asserted );
+        writeTransformTrace( ruleResult, phase, (Rule) rule, parent, child, asserted );
 
         FlowElement primary = asserted.getFirstAnchor();
 
@@ -350,7 +345,7 @@ public class RuleExec
         {
         Transformed transformed = transformer.transform( plannerContext, child );
 
-        writeTrace( ruleResult, phase, (Rule) transformer, parent, child, transformed );
+        writeTransformTrace( ruleResult, phase, (Rule) transformer, parent, child, transformed );
 
         ElementGraph endGraph = transformed.getEndGraph();
 
@@ -426,7 +421,7 @@ public class RuleExec
     switch( phase.getLevel() )
       {
       case Assembly:
-        traceWriter.writePlan( ruleResult.getAssemblyGraph(), format( "%02d-%s-init.dot", phase.ordinal(), phase ) );
+        traceWriter.writeTransformPlan( registry.getName(), ruleResult.getAssemblyGraph(), format( "%02d-%s-init.dot", phase.ordinal(), phase ) );
         break;
       case Step:
         break;
@@ -442,16 +437,16 @@ public class RuleExec
     switch( phase.getLevel() )
       {
       case Assembly:
-        traceWriter.writePlan( ruleResult.getAssemblyGraph(), format( "%02d-%s-result.dot", phase.ordinal(), phase ) );
+        traceWriter.writeTransformPlan( registry.getName(), ruleResult.getAssemblyGraph(), format( "%02d-%s-result.dot", phase.ordinal(), phase ) );
         break;
       case Step:
-        traceWriter.writePlan( ruleResult.getAssemblyToStepGraphMap().get( ruleResult.getAssemblyGraph() ), phase, "result" );
+        traceWriter.writeTransformPlan( registry.getName(), ruleResult.getAssemblyToStepGraphMap().get( ruleResult.getAssemblyGraph() ), phase, "result" );
         break;
       case Node:
-        traceWriter.writePlan( ruleResult.getStepToNodeGraphMap(), phase, "result" );
+        traceWriter.writeTransformPlan( registry.getName(), ruleResult.getStepToNodeGraphMap(), phase, "result" );
         break;
       case Pipeline:
-        traceWriter.writePlan( ruleResult.getStepToNodeGraphMap(), ruleResult.getNodeToPipelineGraphMap(), phase, "result" );
+        traceWriter.writeTransformPlan( registry.getName(), ruleResult.getStepToNodeGraphMap(), ruleResult.getNodeToPipelineGraphMap(), phase, "result" );
         break;
       }
     }
@@ -464,13 +459,13 @@ public class RuleExec
       LOG.debug( message, items );
     }
 
-  private void writeTrace( RuleResult ruleResult, PlanPhase phase, Rule rule, ElementGraph parent, ElementGraph child, GraphResult result )
+  private void writeTransformTrace( RuleResult ruleResult, PlanPhase phase, Rule rule, ElementGraph parent, ElementGraph child, GraphResult result )
     {
-    if( traceWriter.isDisabled() )
+    if( traceWriter.isTransformTraceDisabled() )
       return;
 
     int[] path = child != null ? ruleResult.getPathFor( parent, child ) : ruleResult.getPathFor( parent );
 
-    traceWriter.writePlan( phase, rule, path, result );
+    traceWriter.writeTransformPlan( registry.getName(), phase, rule, path, result );
     }
   }

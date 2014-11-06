@@ -31,7 +31,7 @@ import java.util.Set;
 import cascading.CascadingException;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
-import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.RuleRegistrySet;
 import cascading.pipe.Pipe;
 import cascading.property.AppProps;
 import cascading.property.PropertyUtil;
@@ -104,13 +104,14 @@ import static cascading.flow.FlowDef.flowDef;
  *
  * @see cascading.flow.local.LocalFlowConnector
  * @see cascading.flow.hadoop.HadoopFlowConnector
+ * @see cascading.flow.hadoop2.Hadoop2MR1FlowConnector
  */
 public abstract class FlowConnector
   {
   /** Field properties */
   protected Map<Object, Object> properties; // may be a Map or Properties instance. see PropertyUtil
 
-  private RuleRegistry ruleRegistry;
+  private RuleRegistrySet ruleRegistrySet;
 
   /**
    * Method getIntermediateSchemeClass is used for debugging.
@@ -170,10 +171,10 @@ public abstract class FlowConnector
     this.properties = new HashMap<>();
     }
 
-  protected FlowConnector( RuleRegistry ruleRegistry )
+  protected FlowConnector( RuleRegistrySet ruleRegistrySet )
     {
     this();
-    this.ruleRegistry = ruleRegistry;
+    this.ruleRegistrySet = ruleRegistrySet;
     }
 
   protected FlowConnector( Map<Object, Object> properties )
@@ -186,10 +187,10 @@ public abstract class FlowConnector
       this.properties = new HashMap<>( properties );
     }
 
-  protected FlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+  protected FlowConnector( Map<Object, Object> properties, RuleRegistrySet ruleRegistrySet )
     {
     this( properties );
-    this.ruleRegistry = ruleRegistry;
+    this.ruleRegistrySet = ruleRegistrySet;
     }
 
   /**
@@ -474,9 +475,9 @@ public abstract class FlowConnector
 
     flowPlanner.initialize( this, properties );
 
-    RuleRegistry ruleRegistry = getRuleRegistry();
+    RuleRegistrySet ruleRegistrySet = getRuleRegistrySet();
 
-    return flowPlanner.buildFlow( flowDef, ruleRegistry );
+    return flowPlanner.buildFlow( flowDef, ruleRegistrySet );
     }
 
   protected abstract FlowPlanner createFlowPlanner();
@@ -488,17 +489,17 @@ public abstract class FlowConnector
    *
    * @return the current RuleRegistry instance
    */
-  public RuleRegistry getRuleRegistry()
+  public RuleRegistrySet getRuleRegistrySet()
     {
-    if( ruleRegistry != null )
-      return ruleRegistry;
+    if( ruleRegistrySet != null )
+      return ruleRegistrySet;
 
-    ruleRegistry = createDefaultRuleRegistry();
+    ruleRegistrySet = createDefaultRuleRegistrySet();
 
-    return ruleRegistry;
+    return ruleRegistrySet;
     }
 
-  protected abstract RuleRegistry createDefaultRuleRegistry();
+  protected abstract RuleRegistrySet createDefaultRuleRegistrySet();
 
   /**
    * Method getPlatformInfo returns an instance of {@link PlatformInfo} for the underlying platform.

@@ -26,7 +26,7 @@ import java.util.Map;
 import cascading.flow.FlowConnector;
 import cascading.flow.hadoop.planner.MapReduceHadoopRuleRegistry;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.RuleRegistrySet;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 
@@ -69,25 +69,25 @@ public class Hadoop2MR1FlowConnector extends FlowConnector
    * All properties passed to Hadoop are retrieved from a default instantiation of the Hadoop
    * {@link org.apache.hadoop.mapred.JobConf} which pulls all properties from the local CLASSPATH.
    *
-   * @param ruleRegistry of type RuleRegistry
+   * @param ruleRegistrySet of type RuleRegistry
    */
-  @ConstructorProperties({"ruleRegistry"})
-  public Hadoop2MR1FlowConnector( RuleRegistry ruleRegistry )
+  @ConstructorProperties({"ruleRegistrySet"})
+  public Hadoop2MR1FlowConnector( RuleRegistrySet ruleRegistrySet )
     {
-    super( ruleRegistry );
+    super( ruleRegistrySet );
     }
 
   /**
    * Constructor HadoopFlowConnector creates a new HadoopFlowConnector instance using the given {@link java.util.Properties} instance as
    * default value for the underlying jobs. All properties are copied to a new native configuration instance.
    *
-   * @param properties   of type Map
-   * @param ruleRegistry of type RuleRegistry
+   * @param properties      of type Map
+   * @param ruleRegistrySet of type RuleRegistry
    */
-  @ConstructorProperties({"properties", "ruleRegistry"})
-  public Hadoop2MR1FlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+  @ConstructorProperties({"properties", "ruleRegistrySet"})
+  public Hadoop2MR1FlowConnector( Map<Object, Object> properties, RuleRegistrySet ruleRegistrySet )
     {
-    super( properties, ruleRegistry );
+    super( properties, ruleRegistrySet );
     }
 
   @Override
@@ -103,8 +103,8 @@ public class Hadoop2MR1FlowConnector extends FlowConnector
     }
 
   @Override
-  protected RuleRegistry createDefaultRuleRegistry()
+  protected RuleRegistrySet createDefaultRuleRegistrySet()
     {
-    return new MapReduceHadoopRuleRegistry();
+    return new RuleRegistrySet( new MapReduceHadoopRuleRegistry() );
     }
   }

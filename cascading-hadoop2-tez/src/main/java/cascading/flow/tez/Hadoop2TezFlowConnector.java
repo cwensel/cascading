@@ -25,9 +25,10 @@ import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.planner.FlowPlanner;
-import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.RuleRegistrySet;
 import cascading.flow.tez.planner.Hadoop2TezPlanner;
 import cascading.flow.tez.planner.HashJoinHadoop2TezRuleRegistry;
+import cascading.flow.tez.planner.NoHashJoinHadoop2TezRuleRegistry;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 
@@ -39,22 +40,22 @@ public class Hadoop2TezFlowConnector extends FlowConnector
     {
     }
 
-  @ConstructorProperties( {"properties"} )
+  @ConstructorProperties({"properties"})
   public Hadoop2TezFlowConnector( Map<Object, Object> properties )
     {
     super( properties );
     }
 
-  @ConstructorProperties( {"ruleRegistry"} )
-  public Hadoop2TezFlowConnector( RuleRegistry ruleRegistry )
+  @ConstructorProperties({"ruleRegistrySet"})
+  public Hadoop2TezFlowConnector( RuleRegistrySet ruleRegistrySet )
     {
-    super( ruleRegistry );
+    super( ruleRegistrySet );
     }
 
-  @ConstructorProperties( {"properties", "ruleRegistry"} )
-  public Hadoop2TezFlowConnector( Map<Object, Object> properties, RuleRegistry ruleRegistry )
+  @ConstructorProperties({"properties", "ruleRegistrySet"})
+  public Hadoop2TezFlowConnector( Map<Object, Object> properties, RuleRegistrySet ruleRegistrySet )
     {
-    super( properties, ruleRegistry );
+    super( properties, ruleRegistrySet );
     }
 
   @Override
@@ -70,9 +71,8 @@ public class Hadoop2TezFlowConnector extends FlowConnector
     }
 
   @Override
-  protected RuleRegistry createDefaultRuleRegistry()
+  protected RuleRegistrySet createDefaultRuleRegistrySet()
     {
-//    return new NoHashJoinHadoop2TezRuleRegistry();
-    return new HashJoinHadoop2TezRuleRegistry();
+    return new RuleRegistrySet( new NoHashJoinHadoop2TezRuleRegistry(), new HashJoinHadoop2TezRuleRegistry() );
     }
   }

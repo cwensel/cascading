@@ -356,7 +356,6 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexFilter( "^68.*" ) );
 
-
     // this is ok
     Pipe left = new Each( new Pipe( "left", pipe ), new Fields( "line" ), new RegexFilter( ".*46.*" ) );
     Pipe right = new Each( new Pipe( "right", pipe ), new Fields( "line" ), new RegexFilter( ".*192.*" ) );
@@ -1740,7 +1739,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     List<FlowStep> steps = flow.getFlowSteps();
 
     // if the optimization isn't in place, don't test for it
-    if( testTempReplaced && !flowConnector.getRuleRegistry().hasRule( "CombineAdjacentTapTransformer" ) )
+    if( testTempReplaced && flowConnector.getRuleRegistrySet().findRegistryWith( "CombineAdjacentTapTransformer" ) == null )
       testTempReplaced = false;
 
     assertEquals( "not equal: steps.size()", testTempReplaced ? 2 : 3, steps.size() );
@@ -1761,13 +1760,9 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     operator = step.getNextFlowElement( nextScope );
 
     if( testTempReplaced )
-      {
       assertEquals( "not proper sink", sinkLeft, operator );
-      }
     else
-      {
       assertTrue( "not a TempHfs", operator instanceof TempHfs );
-      }
     }
 
   @Test

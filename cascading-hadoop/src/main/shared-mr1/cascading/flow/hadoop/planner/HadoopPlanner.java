@@ -163,7 +163,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     }
 
   @Override
-  protected void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
+  public void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
     {
     super.configRuleRegistryDefaults( ruleRegistry );
 
