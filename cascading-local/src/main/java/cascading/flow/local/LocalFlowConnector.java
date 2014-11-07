@@ -43,7 +43,7 @@ public class LocalFlowConnector extends FlowConnector
     }
 
   /**
-   * Constructor LocalFlowConnector creates an instance using any of the given properites.
+   * Constructor LocalFlowConnector creates a new instance using any of the given properties.
    *
    * @param properties of type Map
    */
@@ -51,7 +51,6 @@ public class LocalFlowConnector extends FlowConnector
     {
     super( properties );
     }
-
 
   @Override
   protected Class<? extends Scheme> getDefaultIntermediateSchemeClass()
