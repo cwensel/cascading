@@ -32,13 +32,28 @@ import cascading.flow.planner.iso.transformer.Transformed;
  */
 public abstract class GraphAssert<E extends ElementGraph>
   {
+  public enum AssertionType
+    {
+      Unsupported,
+      Illegal
+    }
+
   private final GraphFinder finder;
   private final String message;
+  private AssertionType assertionType = AssertionType.Illegal;
 
   public GraphAssert( ExpressionGraph expressionGraph, String message )
     {
+    this( expressionGraph, message, null );
+    }
+
+  public GraphAssert( ExpressionGraph expressionGraph, String message, AssertionType assertionType )
+    {
     this.finder = new GraphFinder( expressionGraph );
     this.message = message;
+
+    if( assertionType != null )
+      this.assertionType = assertionType;
     }
 
   protected abstract Transformed transform( PlannerContext plannerContext, E graph );
@@ -52,7 +67,7 @@ public abstract class GraphAssert<E extends ElementGraph>
 
     Match match = finder.findFirstMatch( plannerContext, graph );
 
-    Asserted asserted = new Asserted( plannerContext, this, graph, message, match );
+    Asserted asserted = new Asserted( plannerContext, this, graph, message, assertionType, match );
 
     if( transform != null )
       asserted.addChildTransform( transform );

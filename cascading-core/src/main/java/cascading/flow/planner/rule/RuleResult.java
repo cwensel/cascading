@@ -48,6 +48,14 @@ public class RuleResult
 
   private static final Logger LOG = LoggerFactory.getLogger( RuleResult.class );
 
+  public enum ResultStatus
+    {
+      SUCCESS,
+      UNSUPPORTED,
+      ILLEGAL,
+      INTERRUPTED
+    }
+
   private Map<ProcessLevel, Set<ElementGraph>> levelParents = new HashMap<>();
   private ResultTree resultTree = new ResultTree();
 
@@ -57,6 +65,7 @@ public class RuleResult
 
   protected FlowElementGraph initialAssembly;
   private RuleRegistry registry;
+  private Exception plannerException;
 
   public RuleResult()
     {
@@ -78,9 +87,66 @@ public class RuleResult
     initResult( initialAssembly );
     }
 
+  public RuleResult( RuleRegistry registry, FlowElementGraph initialAssembly )
+    {
+    this();
+    this.registry = registry;
+
+    initResult( initialAssembly );
+    }
+
   public RuleRegistry getRegistry()
     {
     return registry;
+    }
+
+  public void setPlannerException( Exception plannerException )
+    {
+    this.plannerException = plannerException;
+    }
+
+  public Exception getPlannerException()
+    {
+    return plannerException;
+    }
+
+  public boolean hasPlannerException()
+    {
+    return plannerException != null;
+    }
+
+  public boolean isSuccess()
+    {
+    return !hasPlannerException();
+    }
+
+  public boolean isIllegal()
+    {
+    return !isSuccess() && !isUnsupported() && !isInterrupted();
+    }
+
+  public boolean isUnsupported()
+    {
+    return getPlannerException() instanceof UnsupportedPlanException;
+    }
+
+  public boolean isInterrupted()
+    {
+    return getPlannerException() instanceof InterruptedException;
+    }
+
+  public ResultStatus getResultStatus()
+    {
+    if( isSuccess() )
+      return ResultStatus.SUCCESS;
+
+    if( isUnsupported() )
+      return ResultStatus.UNSUPPORTED;
+
+    if( isInterrupted() )
+      return ResultStatus.INTERRUPTED;
+
+    return ResultStatus.ILLEGAL;
     }
 
   public void initResult( FlowElementGraph initialAssembly )
@@ -174,6 +240,21 @@ public class RuleResult
   public Map<ElementGraph, List<? extends ElementGraph>> getNodeToPipelineGraphMap()
     {
     return getLevelResults( ProcessLevel.Pipeline );
+    }
+
+  public int getNumSteps()
+    {
+    return getStepToNodeGraphMap().size();
+    }
+
+  public int getNumNodes()
+    {
+    int nodes = 0;
+
+    for( List<? extends ElementGraph> nodesList : getStepToNodeGraphMap().values() )
+      nodes += nodesList.size();
+
+    return nodes;
     }
 
   public void setDuration( long begin, long end )

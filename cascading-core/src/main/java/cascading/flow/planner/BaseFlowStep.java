@@ -863,6 +863,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     }
 
   @Override
+  public void logWarn( String message, Object... arguments )
+    {
+    ( (ProcessLogger) flow ).logWarn( message, arguments );
+    }
+
+  @Override
   public void logError( String message, Throwable throwable )
     {
     ( (ProcessLogger) flow ).logError( message, throwable );

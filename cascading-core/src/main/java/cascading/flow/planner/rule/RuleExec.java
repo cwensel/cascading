@@ -48,6 +48,7 @@ import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.util.EnumMultiMap;
 import cascading.util.ProcessLogger;
 
+import static cascading.util.Util.formatDurationFromMillis;
 import static java.lang.String.format;
 
 /**
@@ -68,6 +69,8 @@ public class RuleExec
 
   public RuleResult exec( PlannerContext plannerContext, FlowElementGraph flowElementGraph )
     {
+    RuleResult ruleResult = new RuleResult( registry, flowElementGraph );
+
     ProcessLogger logger = plannerContext.getLogger();
     int size = flowElementGraph.vertexSet().size();
     boolean logAsInfo = size >= ELEMENT_THRESHOLD;
@@ -77,9 +80,31 @@ public class RuleExec
 
     long beginExec = System.currentTimeMillis();
 
-    RuleResult ruleResult = new RuleResult( registry );
+    try
+      {
+      planPhases( plannerContext, logAsInfo, ruleResult );
+      }
+    catch( Exception exception )
+      {
+      ruleResult.setPlannerException( exception );
+      }
+    finally
+      {
+      long endExec = System.currentTimeMillis();
 
-    ruleResult.initResult( flowElementGraph );
+      ruleResult.setDuration( beginExec, endExec );
+
+      RuleResult.ResultStatus status = ruleResult.getResultStatus();
+      String duration = formatDurationFromMillis( endExec - beginExec );
+      logPhase( logger, logAsInfo, "rule registry completed: {}, with status: {}, and duration: {}", registry.getName(), status, duration );
+      }
+
+    return ruleResult;
+    }
+
+  protected void planPhases( PlannerContext plannerContext, boolean logAsInfo, RuleResult ruleResult )
+    {
+    ProcessLogger logger = plannerContext.getLogger();
 
     for( PlanPhase phase : PlanPhase.values() ) // iterate in order, all planner phases
       {
@@ -102,16 +127,8 @@ public class RuleExec
 
       ruleResult.setPhaseDuration( phase, beginPhase, endPhase );
 
-      logPhase( logger, logAsInfo, "ending rule phase: {}, duration: {} sec", phase, ( endPhase - beginPhase ) / 1000 );
+      logPhase( logger, logAsInfo, "ending rule phase: {}, duration: {}", phase, formatDurationFromMillis( endPhase - beginPhase ) );
       }
-
-    long endExec = System.currentTimeMillis();
-
-    ruleResult.setDuration( beginExec, endExec );
-
-    logPhase( logger, logAsInfo, "completed planner duration: {} sec", ( endExec - beginExec ) / 1000 );
-
-    return ruleResult;
     }
 
   private void resolveElements( PlannerContext plannerContext, RuleResult ruleResult )
@@ -163,16 +180,22 @@ public class RuleExec
               break;
             }
           }
+        catch( UnsupportedPlanException exception )
+          {
+          throw new UnsupportedPlanException( rule, exception );
+          }
         catch( Exception exception )
           {
           throw new PlannerException( rule, exception );
           }
+        finally
+          {
+          long end = System.currentTimeMillis();
 
-        long end = System.currentTimeMillis();
+          ruleResult.setRuleDuration( rule, begin, end );
 
-        ruleResult.setRuleDuration( rule, begin, end );
-
-        logger.logDebug( "completed rule: {}", rule );
+          logger.logDebug( "completed rule: {}", rule );
+          }
         }
 
       return ruleResult;
@@ -323,7 +346,10 @@ public class RuleExec
         if( primary == null )
           continue;
 
-        throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
+        if( asserted.getAssertionType() == GraphAssert.AssertionType.Unsupported )
+          throw new UnsupportedPlanException( asserted.getFirstAnchor(), asserted.getMessage() );
+        else // only two options
+          throw new PlannerException( asserted.getFirstAnchor(), asserted.getMessage() );
         }
       }
     }

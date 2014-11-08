@@ -182,9 +182,10 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       FlowStepGraph flowStepGraph = new FlowStepGraph( this, finalFlowElementGraph, stepToNodes, nodeToPipeline );
 
-      traceWriter.writeTracePlan( ruleResult.getRegistry().getName(), "1-final-flow-element-graph", finalFlowElementGraph );
-      traceWriter.writeTracePlan( ruleResult.getRegistry().getName(), "2-final-flow-step-graph", flowStepGraph );
-      traceWriter.writeTracePlanSteps( flowStepGraph );
+      traceWriter.writeFinal( "1-final-flow-registry", ruleResult );
+      traceWriter.writeTracePlan( null, "2-final-flow-element-graph", finalFlowElementGraph );
+      traceWriter.writeTracePlan( null, "3-final-flow-step-graph", flowStepGraph );
+      traceWriter.writeTracePlanSteps( "4-final-flow-steps", flowStepGraph );
 
       flow.initialize( finalFlowElementGraph, flowStepGraph );
 

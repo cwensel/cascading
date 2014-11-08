@@ -245,8 +245,10 @@ public class TraceWriter
     if( path == null )
       return;
 
-    fileName = registryName == null ? String.format( "%s.dot", fileName ) : String.format( "%s-%s.dot", fileName, registryName );
-    Path filePath = path.resolve( fileName );
+    if( registryName != null )
+      path = path.resolve( registryName );
+
+    Path filePath = path.resolve( String.format( "%s.dot", fileName ) );
     File file = filePath.toFile();
 
     LOG.info( "writing trace element plan: {}", file );
@@ -263,7 +265,10 @@ public class TraceWriter
     if( path == null )
       return;
 
-    Path filePath = path.resolve( String.format( "%s-%s.dot", fileName, registryName ) );
+    if( registryName != null )
+      path = path.resolve( registryName );
+
+    Path filePath = path.resolve( String.format( "%s.dot", fileName ) );
     File file = filePath.toFile();
 
     LOG.info( "writing trace step plan: {}", file );
@@ -271,15 +276,15 @@ public class TraceWriter
     stepGraph.writeDOT( file.toString() );
     }
 
-  public void writeTracePlanSteps( FlowStepGraph stepGraph )
+  public void writeTracePlanSteps( String directoryName, FlowStepGraph stepGraph )
     {
     Iterator<FlowStep> iterator = stepGraph.getTopologicalIterator();
 
     while( iterator.hasNext() )
-      writePlan( iterator.next() );
+      writePlan( iterator.next(), directoryName );
     }
 
-  private void writePlan( FlowStep flowStep )
+  private void writePlan( FlowStep flowStep, String directoryName )
     {
     Path path = getPlanTracePath();
 
@@ -288,7 +293,7 @@ public class TraceWriter
 
     int ordinal = flowStep.getOrdinal();
 
-    Path rootPath = path.resolve( "3-final-flow-steps" );
+    Path rootPath = path.resolve( directoryName );
     String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, ordinal );
 
     ElementGraph stepSubGraph = flowStep.getElementGraph();
@@ -323,14 +328,36 @@ public class TraceWriter
       }
     }
 
-  public void writeStats( String registryName, PlannerContext plannerContext, RuleResult ruleResult )
+  public void writeFinal( String fileName, RuleResult ruleResult )
+    {
+    Path path = getPlanTracePath();
+
+    if( path == null )
+      return;
+
+    Path filePath = path.resolve( String.format( "%s-%s.txt", fileName, ruleResult.getRegistry().getName() ) );
+    File file = filePath.toFile();
+
+    LOG.info( "writing final registry: {}", file );
+
+    try
+      {
+      file.createNewFile();
+      }
+    catch( IOException exception )
+      {
+      // do nothing
+      }
+    }
+
+  public void writeStats( PlannerContext plannerContext, RuleResult ruleResult )
     {
     Path path = getPlanStatsPath();
 
     if( path == null )
       return;
 
-    File file = path.resolve( String.format( "planner-stats-%s.txt", registryName ) ).toFile();
+    File file = path.resolve( String.format( "planner-stats-%s-%s.txt", ruleResult.getRegistry().getName(), ruleResult.getResultStatus() ) ).toFile();
 
     LOG.info( "writing planner stats to: {}", file );
 

@@ -39,7 +39,12 @@ public class RuleAssert extends GraphAssert<ElementGraph> implements Rule
 
   public RuleAssert( PlanPhase phase, RuleExpression ruleExpression, String message )
     {
-    super( ruleExpression.getMatchExpression(), message );
+    this( phase, ruleExpression, message, null );
+    }
+
+  public RuleAssert( PlanPhase phase, RuleExpression ruleExpression, String message, AssertionType assertionType )
+    {
+    super( ruleExpression.getMatchExpression(), message, assertionType );
     this.phase = phase;
     this.ruleExpression = ruleExpression;
 

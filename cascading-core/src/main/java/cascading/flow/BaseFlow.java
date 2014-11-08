@@ -1428,6 +1428,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     }
 
   @Override
+  public void logWarn( String message, Object... arguments )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, arguments );
+    }
+
+  @Override
   public void logError( String message, Throwable throwable )
     {
     LOG.error( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, throwable );

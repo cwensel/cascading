@@ -65,7 +65,7 @@ public class RuleRegistry
 
   /**
    * Method enableDebugLogging forces log4j to emit DEBUG level stats for the planner classes.
-   *
+   * <p/>
    * For planner tracing, see {@link cascading.flow.planner.FlowPlanner} properties.
    */
   public void enableDebugLogging()
@@ -164,5 +164,37 @@ public class RuleRegistry
   public String getName()
     {
     return getClass().getSimpleName();
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+
+    if( object == null || getClass() != object.getClass() )
+      return false;
+
+    RuleRegistry that = (RuleRegistry) object;
+
+    if( resolveElementsEnabled != that.resolveElementsEnabled )
+      return false;
+
+    if( factories != null ? !factories.equals( that.factories ) : that.factories != null )
+      return false;
+
+    if( rules != null ? !rules.equals( that.rules ) : that.rules != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = factories != null ? factories.hashCode() : 0;
+    result = 31 * result + ( rules != null ? rules.hashCode() : 0 );
+    result = 31 * result + ( resolveElementsEnabled ? 1 : 0 );
+    return result;
     }
   }

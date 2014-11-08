@@ -45,16 +45,18 @@ public class Asserted extends GraphResult
   GraphAssert graphAssert;
   ElementGraph beginGraph;
   final String message;
+  private GraphAssert.AssertionType assertionType;
   final Match match;
 
   List<Transformed> childTransforms;
 
-  public Asserted( PlannerContext plannerContext, GraphAssert graphAssert, ElementGraph beginGraph, String message, Match match )
+  public Asserted( PlannerContext plannerContext, GraphAssert graphAssert, ElementGraph beginGraph, String message, GraphAssert.AssertionType assertionType, Match match )
     {
     this.plannerContext = plannerContext;
     this.graphAssert = graphAssert;
     this.beginGraph = beginGraph;
     this.message = message;
+    this.assertionType = assertionType;
     this.match = match;
     }
 
@@ -82,6 +84,11 @@ public class Asserted extends GraphResult
       }
 
     return result;
+    }
+
+  public GraphAssert.AssertionType getAssertionType()
+    {
+    return assertionType;
     }
 
   @Override

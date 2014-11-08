@@ -83,7 +83,12 @@ public class PlannerContext
 
   public ProcessLogger getLogger()
     {
-    return (ProcessLogger) getFlow();
+    Flow flow = getFlow();
+
+    if( flow == null )
+      return ProcessLogger.NULL;
+
+    return (ProcessLogger) flow;
     }
 
   public boolean isTransformTracingEnabled()

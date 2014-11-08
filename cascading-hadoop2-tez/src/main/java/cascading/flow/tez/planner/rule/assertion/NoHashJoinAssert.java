@@ -44,7 +44,9 @@ public class NoHashJoinAssert extends RuleAssert
           new FlowElementExpression( ElementCapture.Primary, HashJoin.class )
         ) ),
 
-      "HashJoins not supported by this rule registry, found {Primary}"
+      "HashJoins not supported by this rule registry, found {Primary}",
+
+      AssertionType.Unsupported
     );
     }
   }
