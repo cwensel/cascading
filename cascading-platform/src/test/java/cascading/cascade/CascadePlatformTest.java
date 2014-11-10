@@ -174,10 +174,10 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "simple";
 
-    Flow first = firstFlow( path + "/first", false );
-    Flow second = secondFlow( first.getSink(), path + "/second" );
-    Flow third = thirdFlow( second.getSink(), path + "/third" );
-    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
+    Flow first = firstFlow( path + "/first" + getTestName(), false );
+    Flow second = secondFlow( first.getSink(), path + "/second" + getTestName() );
+    Flow third = thirdFlow( second.getSink(), path + "/third" + getTestName() );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" + getTestName() );
 
     Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
 
@@ -201,10 +201,10 @@ public class CascadePlatformTest extends PlatformTestCase
 
     String path = "simple";
 
-    Flow first = firstFlow( path + "/first", true );
-    Flow second = secondFlow( first.getSink(), path + "/second" );
-    Flow third = thirdFlow( second.getSink(), path + "/third" );
-    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
+    Flow first = firstFlow( path + "/first" + getTestName(), true );
+    Flow second = secondFlow( first.getSink(), path + "/second" + getTestName() );
+    Flow third = thirdFlow( second.getSink(), path + "/third" + getTestName() );
+    Flow fourth = fourthFlow( third.getSink(), path + "/fourth" + getTestName() );
 
     LockingFlowListener firstFlowListener = new LockingFlowListener();
     LockingFlowListener secondFlowListener = new LockingFlowListener();
