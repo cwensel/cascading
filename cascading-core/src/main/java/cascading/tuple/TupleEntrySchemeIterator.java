@@ -125,6 +125,9 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   @Override
   public boolean hasNext()
     {
+    if (currentException != null)
+      return true;
+
     if( isComplete )
       return false;
 
@@ -147,7 +150,6 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
         }
 
       currentException = new TupleException( "unable to read from input identifier: " + identifier, exception );
-
       return true;
       }
 
