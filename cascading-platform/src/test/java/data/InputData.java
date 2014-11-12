@@ -24,7 +24,8 @@ public interface InputData
   {
   public static final String TEST_DATA_PATH = "test.data.path";
 
-  String inputPath = System.getProperty( TEST_DATA_PATH, "../cascading-platform/src/test/resources/data/" );
+  String inputPath = System.getProperty(TEST_DATA_PATH, "../cascading-platform/src/test/resources/data/");
+  String partitionedInputPath = inputPath + "partitioned/2014/";
 
   String inputFileApache = inputPath + "apache.10.txt";
   String inputFileApacheClean = inputPath + "apache-clean.10.txt";
@@ -51,6 +52,7 @@ public interface InputData
   String testDelimitedSpecialCharData = inputPath + "delimited-spec-char.txt";
   String testDelimitedExtraField = inputPath + "delimited-extra-field.txt";
   String testDelimitedProblematic = inputPath + "delimited-problematic.txt";
+  String testDelimitedProblematicPartitioned = partitionedInputPath + "delimited-problematic.txt";
 
   String inputFileComments = inputPath + "comments+lower.txt";
 

@@ -370,4 +370,35 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
       // ignore
       }
     }
+  
+  @Test
+  public void testNestedTupleEntrySchemeIteratorException() throws Throwable 
+    {
+    if(! getPlatformName().equals( "local" ) )
+      return; //only works on local
+
+    getPlatform().copyFromLocal( testDelimitedProblematicPartitioned );
+
+    Tap parent = getPlatform().getDelimitedFile( new Fields( "id", "name" ).applyTypes( int.class, String.class ), ",", partitionedInputPath );
+    Partition partition = new DelimitedPartition( new Fields( "year") );
+    Tap source = getPlatform().getPartitionTap(parent, partition, 300);
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "id", "name" ).applyTypes( int.class, String.class ), ",", getOutputPath( getTestName() ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "data" );
+    pipe = new Each( pipe, new Identity() );
+
+    FlowDef flowDef = FlowDef.flowDef().addSource( pipe, source ).addTailSink( pipe, sink );
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    try
+      {
+      flow.complete();
+      fail( "flow should have thrown an Exception" );
+      }
+    catch( Exception exception )
+      {
+    	//FlowException -> DuctException -> TapException: The TapException is the actual exception so we expect that a different exception implies something else is wrong
+      assertEquals(TapException.class, exception.getCause().getCause().getClass());
+      }
+    }
   }
