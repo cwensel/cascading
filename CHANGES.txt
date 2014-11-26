@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Update c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
+  Hadoop 2.x.
+
   Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a
   predecessor fails.
 
