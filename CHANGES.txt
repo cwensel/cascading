@@ -2,9 +2,6 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
-  Update c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
-  Hadoop 2.x.
-
   Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a
   predecessor fails.
 
@@ -19,6 +16,30 @@ Cascading Change Log
 
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
+
+2.6.1
+
+  Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.
+
+  Fixed issues where a c.f.Flow instance could be marked stopped while transitioning to a started state when used in
+  a c.c.Cascade.
+
+  Fixed issue where c.t.h.i.TapOutputCollector did not honor the current task o.a.h.m.Reporter instance on the
+  cluster side. This should improve the accuracy of Hadoop counters wrapped by c.t.h.PartitionTap.
+
+  Updated c.t.Tuple#isUnmodifiable to be transient to prevent the value from being serialized and restored resulting in
+  an unmodifiable Tuple from a data source.
+
+  Updated c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
+  Hadoop 2.x.
+
+  Updated c.p.h.HadoopPlatform to set 'mapreduce.jobtracker.staging.root.dir' to a fully qualified path for non-cluster
+  tests.
+
+  Fixed issue where c.u.Version was leaking file descriptors.
+
+  Fixed issue where c.t.h.Hfs would not properly ignore 'hidden' files starting with '.' or '_' when listing children
+  in a directory.
 
 2.6.0
 

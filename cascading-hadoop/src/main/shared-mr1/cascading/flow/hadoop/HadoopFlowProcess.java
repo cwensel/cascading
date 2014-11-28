@@ -53,7 +53,7 @@ import org.apache.hadoop.util.ReflectionUtils;
  * @see JobConf
  * @see Reporter
  */
-public class HadoopFlowProcess extends FlowProcess<JobConf>
+public class HadoopFlowProcess extends FlowProcess<JobConf> implements MapRed
   {
   /** Field jobConf */
   final JobConf jobConf;
@@ -61,6 +61,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
   private final boolean isMapper;
   /** Field reporter */
   Reporter reporter = Reporter.NULL;
+  /** Field outputCollector */
   private OutputCollector outputCollector;
 
   public HadoopFlowProcess()
@@ -177,14 +178,13 @@ public class HadoopFlowProcess extends FlowProcess<JobConf>
    */
   public void setReporter( Reporter reporter )
     {
-    this.reporter = reporter;
+    if( reporter == null )
+      this.reporter = Reporter.NULL;
+    else
+      this.reporter = reporter;
     }
 
-  /**
-   * Method getReporter returns the reporter of this HadoopFlowProcess object.
-   *
-   * @return the reporter (type Reporter) of this HadoopFlowProcess object.
-   */
+  @Override
   public Reporter getReporter()
     {
     return reporter;

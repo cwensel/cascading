@@ -150,12 +150,28 @@ public class Version
     if( stream == null )
       return properties;
 
-    properties.load( stream );
+    try
+      {
+      properties.load( stream );
+      }
+    finally
+      {
+      stream.close();
+      }
 
     stream = Version.class.getClassLoader().getResourceAsStream( "cascading/build.number.properties" );
 
     if( stream != null )
-      properties.load( stream );
+      {
+      try
+        {
+        properties.load( stream );
+        }
+      finally
+        {
+        stream.close();
+        }
+      }
 
     return properties;
     }

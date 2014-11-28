@@ -30,13 +30,16 @@ import java.util.Set;
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
+import cascading.flow.hadoop.MapRed;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.tez.dag.api.TezConfiguration;
+import org.apache.tez.mapreduce.processor.MRTaskReporter;
 import org.apache.tez.runtime.api.ProcessorContext;
 import org.apache.tez.runtime.api.Writer;
 
@@ -49,7 +52,7 @@ import org.apache.tez.runtime.api.Writer;
  *
  * @see cascading.flow.FlowSession
  */
-public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration>
+public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration> implements MapRed
   {
   /** Field jobConf */
   final TezConfiguration configuration;
@@ -127,42 +130,21 @@ public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration>
   public int getNumProcessSlices()
     {
     return 0;
-
-//    if( isMapper() )
-//      return getCurrentNumMappers();
-//    else
-//      return getCurrentNumReducers();
     }
-
-  /**
-   * Method setReporter sets the reporter of this HadoopFlowProcess object.
-   *
-   * @param reporter the reporter of this HadoopFlowProcess object.
-   */
-//  public void setReporter( Reporter reporter )
-//    {
-//    this.reporter = reporter;
-//    }
 
   /**
    * Method getReporter returns the reporter of this HadoopFlowProcess object.
    *
    * @return the reporter (type Reporter) of this HadoopFlowProcess object.
    */
-//  public Reporter getReporter()
-//    {
-//    return reporter;
-//    }
+  public Reporter getReporter()
+    {
+    if( context == null )
+      return Reporter.NULL;
 
-//  public void setOutputCollector( OutputCollector outputCollector )
-//    {
-//    this.outputCollector = outputCollector;
-//    }
+    return new MRTaskReporter( context );
+    }
 
-//  public OutputCollector getOutputCollector()
-//    {
-//    return outputCollector;
-//    }
   @Override
   public Object getProperty( String key )
     {

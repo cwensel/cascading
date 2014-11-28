@@ -138,7 +138,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         {
         markSkipped();
 
-        if( flowStep.isInfoEnabled() )
+        if( flowStep.isInfoEnabled() && flowStepStats.isSkipped() )
           flowStep.logInfo( "skipping step: " + stepName );
 
         return;
@@ -176,6 +176,16 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
 
     internalCleanup();
+    }
+
+  private synchronized boolean markStarted()
+    {
+    if( flowStepStats.isFinished() ) // if stopped, return
+      return false;
+
+    flowStepStats.markStarted();
+
+    return true;
     }
 
   private void applyFlowStepConfStrategy()
@@ -341,6 +351,9 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
   private synchronized void markSkipped()
     {
+    if( flowStepStats.isFinished() )
+      return;
+
     flowStepStats.markSkipped();
 
     markFlowRunning();

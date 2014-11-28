@@ -96,7 +96,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     Tap tap = new Dfs( new SequenceFile( new Fields( "foo" ) ), "some/path" );
 
     String path = tap.getFullIdentifier( getPlatform().getFlowProcess() );
-    assertTrue( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "hdfs" ) );
+    assertFalse( "wrong scheme", new Path( path ).toUri().getScheme().equalsIgnoreCase( "file" ) );
 
     new Dfs( new SequenceFile( new Fields( "foo" ) ), "hdfs://localhost:5001/some/path" );
     new Dfs( new SequenceFile( new Fields( "foo" ) ), new URI( "hdfs://localhost:5001/some/path" ) );
@@ -632,6 +632,20 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 1, false ) );
     assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 0, true ) );
     assertEqualsSize( "current", -1, tap.getChildIdentifiers( jobConf, 0, false ) );
+
+    tap = new Hfs( new TextLine( new Fields( "offset", "line" ) ), getOutputPath( "hiddenfiles" ) );
+
+    writeFileTo( "hiddenfiles/A" );
+    writeFileTo( "hiddenfiles/B" );
+    writeFileTo( "hiddenfiles/.hidden" );
+
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 2, true ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 2, false ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 1, true ) );
+    assertEqualsSize( "children", 2, tap.getChildIdentifiers( jobConf, 1, false ) );
+    assertEqualsSize( "children", 1, tap.getChildIdentifiers( jobConf, 0, true ) );
+    assertEqualsSize( "children", 1, tap.getChildIdentifiers( jobConf, 0, false ) );
     }
 
   public void assertEqualsSize( String message, int expected, String[] actual )

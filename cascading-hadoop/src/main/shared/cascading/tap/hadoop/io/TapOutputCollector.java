@@ -24,6 +24,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.MapRed;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
@@ -66,8 +67,6 @@ public class TapOutputCollector implements OutputCollector, Closeable
   private long sequence;
   /** Field isFileOutputFormat */
   private boolean isFileOutputFormat;
-  /** Field reporter */
-  private final Reporter reporter = Reporter.NULL;
   private final FlowProcess<? extends Configuration> flowProcess;
 
   public TapOutputCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap ) throws IOException
@@ -115,7 +114,17 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
     LOG.info( "creating path: {}", filename );
 
-    writer = outputFormat.getRecordWriter( null, asJobConfInstance( conf ), filename, Reporter.NULL );
+    writer = outputFormat.getRecordWriter( null, asJobConfInstance( conf ), filename, getReporter() );
+    }
+
+  private Reporter getReporter()
+    {
+    Reporter reporter = Reporter.NULL;
+
+    if( flowProcess instanceof MapRed )
+      reporter = ( (MapRed) flowProcess ).getReporter(); // may return Reporter.NULL
+
+    return reporter;
     }
 
   /**
@@ -142,7 +151,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
       try
         {
-        writer.close( reporter );
+        writer.close( getReporter() );
         }
       finally
         {

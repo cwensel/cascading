@@ -48,6 +48,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.InputFormat;
@@ -56,7 +57,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.Utils;
 import org.apache.hadoop.mapred.lib.CombineFileInputFormat;
 import org.apache.hadoop.mapred.lib.CombineFileRecordReader;
 import org.apache.hadoop.mapred.lib.CombineFileSplit;
@@ -128,6 +128,21 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
 
   private transient String cachedPath = null;
 
+  private static final PathFilter HIDDEN_FILES_FILTER = new PathFilter()
+  {
+  public boolean accept( Path path )
+    {
+    String name = path.getName();
+
+    if( name.isEmpty() ) // should never happen
+      return true;
+
+    char first = name.charAt( 0 );
+
+    return first != '_' && first != '.';
+    }
+  };
+
   /**
    * Method setTemporaryDirectory sets the temporary directory on the given properties object.
    *
@@ -173,7 +188,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     {
     }
 
-  @ConstructorProperties({"scheme"})
+  @ConstructorProperties( {"scheme"} )
   protected Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme )
     {
     super( scheme );
@@ -185,7 +200,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
-  @ConstructorProperties({"scheme", "stringPath"})
+  @ConstructorProperties( {"scheme", "stringPath"} )
   public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
@@ -200,7 +215,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
    * @param replace    of type boolean
    */
   @Deprecated
-  @ConstructorProperties({"scheme", "stringPath", "replace"})
+  @ConstructorProperties( {"scheme", "stringPath", "replace"} )
   public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
     {
     super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
@@ -214,7 +229,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
-  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
+  @ConstructorProperties( {"scheme", "stringPath", "sinkMode"} )
   public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
@@ -638,7 +653,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       return;
       }
 
-    FileStatus[] statuses = getFileSystem( conf ).listStatus( path, new Utils.OutputFileUtils.OutputFilesFilter() );
+    FileStatus[] statuses = getFileSystem( conf ).listStatus( path, HIDDEN_FILES_FILTER );
 
     if( statuses == null )
       return;

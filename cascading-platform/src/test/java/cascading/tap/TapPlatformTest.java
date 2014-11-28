@@ -326,6 +326,8 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
     if( getPlatformName().equals( "local" ) )
       return;  // no gzip support
 
+    getPlatform().copyFromLocal( inputFileUnexpectedEndOfFile );
+
     Tap source = getPlatform().getTextFile( inputFileUnexpectedEndOfFile );
     Tap sink = getPlatform().getTextFile( getOutputPath( getTestName() ), SinkMode.REPLACE );
 
@@ -346,6 +348,8 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
     {
     if( getPlatformName().equals( "local" ) )
       return;  // no gzip support
+
+    getPlatform().copyFromLocal( inputFileUnexpectedEndOfFile );
 
     Tap source = getPlatform().getTextFile( inputFileUnexpectedEndOfFile );
     Tap sink = getPlatform().getTextFile( getOutputPath( getTestName() ), SinkMode.REPLACE );

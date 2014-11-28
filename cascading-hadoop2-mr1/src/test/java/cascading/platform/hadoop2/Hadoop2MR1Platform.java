@@ -118,6 +118,12 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform<JobConf>
       {
       LOG.info( "not using cluster" );
       configuration = new JobConf();
+
+      // enforce settings to make local mode behave the same across distributions
+      configuration.set( "fs.defaultFS", "file:///" );
+      configuration.set( "mapreduce.framework.name", "local" );
+      configuration.set( "mapreduce.jobtracker.staging.root.dir", System.getProperty( "user.dir" ) + "/" + "build/tmp/cascading/staging" );
+
       fileSys = FileSystem.get( configuration );
       }
     else

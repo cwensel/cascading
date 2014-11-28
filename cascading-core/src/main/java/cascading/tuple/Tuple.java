@@ -76,7 +76,8 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   private final static String printDelim = "\t";
 
   /** Field isUnmodifiable */
-  protected boolean isUnmodifiable = false;
+  protected transient boolean isUnmodifiable = false;
+
   /** Field elements */
   protected List<Object> elements;
 
