@@ -21,12 +21,17 @@
 package cascading.cascade.hadoop;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import cascading.CascadingException;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
+import cascading.flow.FlowListener;
 import cascading.flow.LockingFlowListener;
 import cascading.flow.hadoop.ProcessFlow;
 import cascading.operation.Identity;
@@ -38,10 +43,14 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import org.junit.Test;
+import riffle.process.DependencyIncoming;
+import riffle.process.DependencyOutgoing;
+import riffle.process.ProcessComplete;
+import riffle.process.ProcessStart;
+import riffle.process.ProcessStop;
 import riffle.process.scheduler.ProcessChain;
 
 import static data.InputData.inputFileIps;
-
 
 public class RiffleCascadePlatformTest extends PlatformTestCase
   {
@@ -148,4 +157,181 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
 
     validateLength( fourth, 20 );
     }
+
+  @Test
+  public void testProcessFlowFlowListenerExceptionHandlingInStart() throws IOException, InterruptedException
+    {
+
+    ThrowableListener listener = new ThrowableListener();
+
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "startException";
+
+    Flow process = flowWithException( path, FailingRiffle.Failing.START );
+    process.addListener( listener );
+
+    try
+      {
+      process.start();
+      fail( "there should have been an exception" );
+      }
+    catch( CascadingException exception )
+      {
+      assertNotNull( listener.getThrowable() );
+      }
+
+    }
+
+  @Test
+  public void testProcessFlowFlowListenerExceptionHandlingInComplete() throws IOException, InterruptedException
+    {
+
+    ThrowableListener listener = new ThrowableListener();
+
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "completeException";
+
+    Flow process = flowWithException( path, FailingRiffle.Failing.COMPLETE );
+    process.addListener( listener );
+
+    try
+      {
+      process.complete();
+      fail( "there should have been an exception" );
+      }
+    catch( CascadingException exception )
+      {
+      assertNotNull( listener.getThrowable() );
+      }
+    }
+
+  @Test
+  public void testProcessFlowFlowListenerExceptionHandlingInStop() throws IOException, InterruptedException
+    {
+    ThrowableListener listener = new ThrowableListener();
+
+    getPlatform().copyFromLocal( inputFileIps );
+
+    String path = "stopException";
+
+    Flow process = flowWithException( path, FailingRiffle.Failing.STOP );
+    process.addListener( listener );
+    process.start();
+
+    try
+      {
+      process.stop();
+      fail( "there should have been an exception" );
+      }
+    catch( CascadingException exception )
+      {
+      assertNotNull( listener.getThrowable() );
+      }
+    }
+
+  private Flow flowWithException( String path, FailingRiffle.Failing failing )
+    {
+    Tap source = getPlatform().getTextFile( inputFileIps );
+
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
+
+    return new ProcessFlow( "flow", new FailingRiffle( source, sink, failing ) );
+    }
+
+  @riffle.process.Process
+  static class FailingRiffle
+    {
+
+    enum Failing
+      {
+        START, STOP, COMPLETE
+      }
+
+    Tap sink;
+    Tap source;
+    Failing failing;
+
+    FailingRiffle( Tap source, Tap sink, Failing failing )
+      {
+      this.source = source;
+      this.sink = sink;
+      this.failing = failing;
+      }
+
+    @ProcessStart
+    public void start()
+      {
+      if( failing == Failing.START )
+        crash();
+      }
+
+    @ProcessStop
+    public void stop()
+      {
+      if( failing == Failing.STOP )
+        crash();
+      }
+
+    private void crash()
+      {
+      throw new CascadingException( "testing" );
+      }
+
+    @ProcessComplete
+    public void complete()
+      {
+      if( failing == Failing.COMPLETE )
+        crash();
+      }
+
+    @DependencyOutgoing
+    public Collection getOutgoing()
+      {
+      return Collections.unmodifiableCollection( Arrays.asList( sink ) );
+      }
+
+    @DependencyIncoming
+    public Collection getIncoming()
+      {
+      return Collections.unmodifiableCollection( Arrays.asList( source ) );
+      }
+    }
+
+  class ThrowableListener implements FlowListener
+    {
+    public Throwable throwable;
+
+    @Override
+    public void onStarting( Flow flow )
+      {
+
+      }
+
+    @Override
+    public void onStopping( Flow flow )
+      {
+
+      }
+
+    @Override
+    public void onCompleted( Flow flow )
+      {
+
+      }
+
+    @Override
+    public boolean onThrowable( Flow flow, Throwable throwable )
+      {
+      this.throwable = throwable;
+      return true;
+      }
+
+    public Throwable getThrowable()
+      {
+      return throwable;
+      }
+    }
+
   }

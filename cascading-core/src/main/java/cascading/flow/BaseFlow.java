@@ -1318,6 +1318,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>
       }
     }
 
+  protected void fireOnThrowable( Throwable throwable )
+    {
+    this.throwable = throwable;
+    fireOnThrowable();
+    }
+
   protected void fireOnThrowable()
     {
     if( hasListeners() )

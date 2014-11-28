@@ -134,12 +134,12 @@ public class ProcessFlow<P> extends HadoopFlow
       {
       processWrapper.prepare();
       }
-    catch( ProcessException exception )
+    catch( Throwable throwable )
       {
-      if( exception.getCause() instanceof RuntimeException )
-        throw (RuntimeException) exception.getCause();
+      if( throwable.getCause() instanceof RuntimeException )
+        throw (RuntimeException) throwable.getCause();
 
-      throw new FlowException( "could not call prepare on process", exception.getCause() );
+      throw new FlowException( "could not call prepare on process", throwable.getCause() );
       }
     }
 
@@ -153,12 +153,14 @@ public class ProcessFlow<P> extends HadoopFlow
       flowStats.markStarted();
       isStarted = true;
       }
-    catch( ProcessException exception )
+    catch( Throwable throwable )
       {
-      if( exception.getCause() instanceof RuntimeException )
-        throw (RuntimeException) exception.getCause();
+      fireOnThrowable( throwable );
 
-      throw new FlowException( "could not call start on process", exception.getCause() );
+      if( throwable.getCause() instanceof RuntimeException )
+        throw (RuntimeException) throwable.getCause();
+
+      throw new FlowException( "could not call start on process", throwable.getCause() );
       }
     }
 
@@ -173,13 +175,15 @@ public class ProcessFlow<P> extends HadoopFlow
       if( !flowStats.isFinished() )
         flowStats.markStopped();
       }
-    catch( ProcessException exception )
+    catch( Throwable throwable )
       {
-      flowStats.markFailed( exception );
-      if( exception.getCause() instanceof RuntimeException )
-        throw (RuntimeException) exception.getCause();
+      flowStats.markFailed( throwable );
+      fireOnThrowable( throwable );
 
-      throw new FlowException( "could not call stop on process", exception.getCause() );
+      if( throwable.getCause() instanceof RuntimeException )
+        throw (RuntimeException) throwable.getCause();
+
+      throw new FlowException( "could not call stop on process", throwable.getCause() );
       }
     }
 
@@ -200,13 +204,15 @@ public class ProcessFlow<P> extends HadoopFlow
       fireOnCompleted();
       flowStats.markSuccessful();
       }
-    catch( ProcessException exception )
+    catch( Throwable throwable )
       {
-      flowStats.markFailed( exception );
-      if( exception.getCause() instanceof RuntimeException )
-        throw (RuntimeException) exception.getCause();
+      flowStats.markFailed( throwable );
+      fireOnThrowable( throwable );
 
-      throw new FlowException( "could not call complete on process", exception.getCause() );
+      if( throwable.getCause() instanceof RuntimeException )
+        throw (RuntimeException) throwable.getCause();
+
+      throw new FlowException( "could not call complete on process", throwable.getCause() );
       }
     }
 
@@ -217,12 +223,12 @@ public class ProcessFlow<P> extends HadoopFlow
       {
       processWrapper.cleanup();
       }
-    catch( ProcessException exception )
+    catch( Throwable throwable )
       {
-      if( exception.getCause() instanceof RuntimeException )
-        throw (RuntimeException) exception.getCause();
+      if( throwable.getCause() instanceof RuntimeException )
+        throw (RuntimeException) throwable.getCause();
 
-      throw new FlowException( "could not call cleanup on process", exception.getCause() );
+      throw new FlowException( "could not call cleanup on process", throwable.getCause() );
       }
     }
 
