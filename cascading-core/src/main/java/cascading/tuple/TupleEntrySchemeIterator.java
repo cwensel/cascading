@@ -125,6 +125,9 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   @Override
   public boolean hasNext()
     {
+    if( currentException != null )
+      return true;
+
     if( isComplete )
       return false;
 
