@@ -478,7 +478,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   public TupleEntryCollector openForWrite( FlowProcess<? extends Configuration> flowProcess, OutputCollector output ) throws IOException
     {
     // output may be null when this method is called on the client side or cluster side when creating
-    // side files with the TemplateTap
+    // side files with the PartitionTap
     return new HadoopTupleEntrySchemeCollector( flowProcess, this, output );
     }
 

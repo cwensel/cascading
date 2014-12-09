@@ -265,12 +265,6 @@ public abstract class TestPlatform
 
   public abstract Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode );
 
-  @Deprecated
-  public abstract Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold );
-
-  @Deprecated
-  public abstract Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold );
-
   public abstract Tap getPartitionTap( Tap sink, Partition partition, int openThreshold );
 
   public abstract Scheme getTestConfigDefScheme();

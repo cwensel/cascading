@@ -39,7 +39,6 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.PartitionTap;
-import cascading.tap.hadoop.TemplateTap;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.partition.Partition;
 import cascading.tuple.Fields;
@@ -228,18 +227,6 @@ public abstract class BaseHadoopPlatform<Config extends Configuration> extends T
   public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
     {
     return new Hfs( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), safeFileName( filename ), mode );
-    }
-
-  @Override
-  public Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold )
-    {
-    return new TemplateTap( (Hfs) sink, pathTemplate, openThreshold );
-    }
-
-  @Override
-  public Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold )
-    {
-    return new TemplateTap( (Hfs) sink, pathTemplate, fields, openThreshold );
     }
 
   @Override

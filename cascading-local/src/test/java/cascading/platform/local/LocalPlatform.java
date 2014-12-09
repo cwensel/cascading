@@ -41,7 +41,6 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.local.FileTap;
 import cascading.tap.local.PartitionTap;
-import cascading.tap.local.TemplateTap;
 import cascading.tap.partition.Partition;
 import cascading.tuple.Fields;
 import org.apache.commons.io.FileUtils;
@@ -156,18 +155,6 @@ public class LocalPlatform extends TestPlatform
   public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
     {
     return new FileTap( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), filename, mode );
-    }
-
-  @Override
-  public Tap getTemplateTap( Tap sink, String pathTemplate, int openThreshold )
-    {
-    return new TemplateTap( (FileTap) sink, pathTemplate, openThreshold );
-    }
-
-  @Override
-  public Tap getTemplateTap( Tap sink, String pathTemplate, Fields fields, int openThreshold )
-    {
-    return new TemplateTap( (FileTap) sink, pathTemplate, fields, openThreshold );
     }
 
   @Override
