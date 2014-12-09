@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Updated c.f.h.MapReduceFlow to support both the org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* APIs.
+
   Fixed issue where c.t.TupleEntrySchemeIterator was not behaving correctly if #hasNext() is called multiple times
   without calling #next().
 

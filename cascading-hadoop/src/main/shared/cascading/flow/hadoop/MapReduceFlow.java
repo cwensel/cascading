@@ -21,11 +21,12 @@
 package cascading.flow.hadoop;
 
 import java.beans.ConstructorProperties;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import cascading.CascadingException;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.planner.HadoopStepGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -37,6 +38,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 
 /**
  * Class MapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs
@@ -54,6 +56,8 @@ import org.apache.hadoop.mapred.JobConf;
  * {@link #createSources(org.apache.hadoop.mapred.JobConf)}, {@link #createSinks(org.apache.hadoop.mapred.JobConf)}, and
  * {@link #createTraps(org.apache.hadoop.mapred.JobConf)} methods to properly resolve the configured paths into
  * usable {@link Tap} instances. By default createTraps returns an empty collection and should probably be left alone.
+ * <p/>
+ * MapReduceFlow supports both org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* API Jobs.
  */
 public class MapReduceFlow extends HadoopFlow
   {
@@ -65,7 +69,7 @@ public class MapReduceFlow extends HadoopFlow
    *
    * @param jobConf of type JobConf
    */
-  @ConstructorProperties({"jobConf"})
+  @ConstructorProperties( {"jobConf"} )
   public MapReduceFlow( JobConf jobConf )
     {
     this( jobConf.getJobName(), jobConf, false );
@@ -77,7 +81,7 @@ public class MapReduceFlow extends HadoopFlow
    * @param jobConf          of type JobConf
    * @param deleteSinkOnInit of type boolean
    */
-  @ConstructorProperties({"jobConf", "deleteSinkOnInit"})
+  @ConstructorProperties( {"jobConf", "deleteSinkOnInit"} )
   public MapReduceFlow( JobConf jobConf, boolean deleteSinkOnInit )
     {
     this( jobConf.getJobName(), jobConf, deleteSinkOnInit );
@@ -89,7 +93,7 @@ public class MapReduceFlow extends HadoopFlow
    * @param name    of type String
    * @param jobConf of type JobConf
    */
-  @ConstructorProperties({"name", "jobConf"})
+  @ConstructorProperties( {"name", "jobConf"} )
   public MapReduceFlow( String name, JobConf jobConf )
     {
     this( name, jobConf, false );
@@ -102,7 +106,7 @@ public class MapReduceFlow extends HadoopFlow
    * @param jobConf          of type JobConf
    * @param deleteSinkOnInit of type boolean
    */
-  @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit"})
+  @ConstructorProperties( {"name", "jobConf", "deleteSinkOnInit"} )
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit )
     {
     this( name, jobConf, deleteSinkOnInit, true );
@@ -116,7 +120,7 @@ public class MapReduceFlow extends HadoopFlow
    * @param deleteSinkOnInit of type boolean
    * @param stopJobsOnExit   of type boolean
    */
-  @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit", "stopJobsOnExit"})
+  @ConstructorProperties( {"name", "jobConf", "deleteSinkOnInit", "stopJobsOnExit"} )
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
     super( HadoopUtil.getPlatformInfo(), new Properties(), jobConf, name, null );
@@ -148,6 +152,18 @@ public class MapReduceFlow extends HadoopFlow
     {
     Path[] paths = FileInputFormat.getInputPaths( jobConf );
 
+    if( paths.length == 0 )
+      {
+      try
+        {
+        paths = org.apache.hadoop.mapreduce.lib.input.FileInputFormat.getInputPaths( new Job( jobConf ) );
+        }
+      catch( IOException exception )
+        {
+        throw new CascadingException( exception );
+        }
+      }
+
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
     for( Path path : paths )
@@ -160,9 +176,21 @@ public class MapReduceFlow extends HadoopFlow
     {
     Map<String, Tap> taps = new HashMap<String, Tap>();
 
-    String path = FileOutputFormat.getOutputPath( jobConf ).toString();
+    Path path = FileOutputFormat.getOutputPath( jobConf );
 
-    taps.put( path, new Hfs( new NullScheme(), path, deleteSinkOnInit ) );
+    if( path == null )
+      {
+      try
+        {
+        path = org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.getOutputPath( new Job( jobConf ) );
+        }
+      catch( IOException exception )
+        {
+        throw new CascadingException( exception );
+        }
+      }
+
+    taps.put( path.toString(), new Hfs( new NullScheme(), path.toString(), deleteSinkOnInit ) );
 
     return taps;
     }
