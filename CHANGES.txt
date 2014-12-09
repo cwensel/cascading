@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Removed the deprecated c.t.PlatformRunner, c.t.HadoopPlatform, and c.t.LocalPlatform. See c.p.PlatformRunner,
+  c.p.h.HadoopPlatform, and c.p.l.LocalPlatform as alternatives.
+
   Removed the deprecated c.f.h.HadoopFlowConnector from the cascading-hadoop2-mr1 sub-project.
 
   Removed all deprecated methods, constructors, enums, and constants.
