@@ -27,7 +27,7 @@ import cascading.tuple.Fields;
 /**
  * Class Min is an {@link cascading.operation.Aggregator} that returns the minimum value encountered in the current group.
  * <p/>
- * As opposed to the {@link Min} class, values are expected to be {@link Comparable} types vs numeric representations and
+ * Values are expected to be {@link Comparable} types vs numeric representations and
  * the {@link Comparable#compareTo(Object)} result is use for min comparison.
  */
 public class MinValue extends ExtremaValueBase
@@ -46,7 +46,7 @@ public class MinValue extends ExtremaValueBase
    *
    * @param fieldDeclaration of type Fields
    */
-  @ConstructorProperties({"fieldDeclaration"})
+  @ConstructorProperties( {"fieldDeclaration"} )
   public MinValue( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
@@ -59,7 +59,7 @@ public class MinValue extends ExtremaValueBase
    * @param fieldDeclaration of type Fields
    * @param ignoreValues     of type Object...
    */
-  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
+  @ConstructorProperties( {"fieldDeclaration", "ignoreValues"} )
   public MinValue( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration, ignoreValues );

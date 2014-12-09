@@ -131,42 +131,6 @@ public class AggregatorsTest extends CascadingTestCase
     }
 
   @Test
-  public void testMax()
-    {
-    Aggregator aggregator = new Max();
-
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
-                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
-                                    new Tuple( new Double( -5.0 ) )};
-
-    Fields resultFields = new Fields( "field" );
-
-    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
-
-    Tuple tuple = resultEntryCollector.iterator().next();
-
-    assertEquals( "got expected value after aggregate", 4.0, tuple.getDouble( 0 ), 0.0d );
-    }
-
-  @Test
-  public void testMin()
-    {
-    Aggregator aggregator = new Min();
-
-    Tuple[] arguments = new Tuple[]{new Tuple( new Double( 1.0 ) ), new Tuple( new Double( 3.0 ) ),
-                                    new Tuple( new Double( 2.0 ) ), new Tuple( new Double( 4.0 ) ),
-                                    new Tuple( new Double( -5.0 ) )};
-
-    Fields resultFields = new Fields( "field" );
-
-    TupleListCollector resultEntryCollector = invokeAggregator( aggregator, arguments, resultFields );
-
-    Tuple tuple = resultEntryCollector.iterator().next();
-
-    assertEquals( "got expected value after aggregate", -5.0, tuple.getDouble( 0 ), 0.0d );
-    }
-
-  @Test
   public void testSum()
     {
     Aggregator aggregator = new Sum();

@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Removed the deprecated c.o.a.Max, c.o.a.Min, and c.o.a.ExtremaBase classes. See c.o.a.MaxValue and c.o.a.MinValue
+  classes as alternatives.
+
   Removed the deprecated c.t.h.TemplateTap, c.t.l.TemplateTap, and c.t.BaseTemplateTap classes and associated tests.
 
   Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a

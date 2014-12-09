@@ -28,7 +28,7 @@ import cascading.tuple.Fields;
  * Class MaxValue is an {@link cascading.operation.Aggregator} that returns the maximum value encountered in the
  * current group.
  * <p/>
- * As opposed to the {@link Max} class, values are expected to be {@link Comparable} types vs numeric representations and
+ * Values are expected to be {@link Comparable} types vs numeric representations and
  * the {@link Comparable#compareTo(Object)} result is use for max comparison.
  */
 public class MaxValue extends ExtremaValueBase
@@ -47,7 +47,7 @@ public class MaxValue extends ExtremaValueBase
    *
    * @param fieldDeclaration of type Fields
    */
-  @ConstructorProperties({"fieldDeclaration"})
+  @ConstructorProperties( {"fieldDeclaration"} )
   public MaxValue( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
@@ -60,7 +60,7 @@ public class MaxValue extends ExtremaValueBase
    * @param fieldDeclaration of type Fields
    * @param ignoreValues     of type Object...
    */
-  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
+  @ConstructorProperties( {"fieldDeclaration", "ignoreValues"} )
   public MaxValue( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration, ignoreValues );
