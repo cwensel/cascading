@@ -507,6 +507,7 @@ public class Util
     return TraceUtil.captureDebugTrace( type );
     }
 
+  @Deprecated
   public static String formatTrace( final Pipe pipe, String message )
     {
     return TraceUtil.formatTrace( pipe, message );
