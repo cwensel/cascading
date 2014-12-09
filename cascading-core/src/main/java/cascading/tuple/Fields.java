@@ -612,7 +612,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    *
    * @param kind of type Kind
    */
-  @SuppressWarnings({"SameParameterValue"})
+  @SuppressWarnings( {"SameParameterValue"} )
   protected Fields( Kind kind )
     {
     this.kind = kind;
@@ -623,7 +623,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    *
    * @param fields of type Comparable...
    */
-  @ConstructorProperties({"fields"})
+  @ConstructorProperties( {"fields"} )
   public Fields( Comparable... fields )
     {
     if( fields.length == 0 )
@@ -1173,30 +1173,6 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method is used for appending the given Fields instance to this instance, into a new Fields instance.
-   * <p/>
-   * See {@link #subtract(Fields)} for removing field names.
-   * <p/>
-   * This method has been deprecated, see {@link #join(Fields...)}
-   *
-   * @param fields of type Fields[]
-   * @return Fields
-   */
-  @Deprecated
-  public Fields append( Fields[] fields )
-    {
-    if( fields.length == 0 )
-      return null;
-
-    Fields field = this;
-
-    for( Fields current : fields )
-      field = field.append( current );
-
-    return field;
-    }
-
-  /**
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance suitable
    * for use as a field declaration.
    * <p/>
@@ -1502,7 +1478,6 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     return "[{" + ( isDefined() ? size() : "?" ) + "}:" + fieldsString + "]";
     }
-
 
   @Override
   public String toString()

@@ -57,9 +57,6 @@ import cascading.CascadingException;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.Scope;
-import cascading.operation.Operation;
-import cascading.pipe.Pipe;
-import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.coerce.Coercions;
@@ -534,7 +531,7 @@ public class Util
       }
     }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings( {"unchecked"} )
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
@@ -571,63 +568,11 @@ public class Util
    *
    * @param list
    */
-  @SuppressWarnings({"StatementWithEmptyBody"})
+  @SuppressWarnings( {"StatementWithEmptyBody"} )
   public static void removeAllNulls( List list )
     {
     while( list.remove( null ) )
       ;
-    }
-
-  /**
-   * Allows for custom trace fields on Pipe, Tap, and Scheme types
-   *
-   * @deprecated see {@link cascading.util.TraceUtil#setTrace(Object, String)}
-   */
-  @Deprecated
-  public static void setTrace( Object object, String trace )
-    {
-    TraceUtil.setTrace( object, trace );
-    }
-
-  /**
-   * @deprecated see {@link cascading.util.TraceUtil#captureDebugTrace(Object)}
-   */
-  @Deprecated
-  public static String captureDebugTrace( Class type )
-    {
-    return TraceUtil.captureDebugTrace( type );
-    }
-
-  public static String formatTrace( final Pipe pipe, String message )
-    {
-    return TraceUtil.formatTrace( pipe, message );
-    }
-
-  /**
-   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.tap.Tap, String)}
-   */
-  @Deprecated
-  public static String formatTrace( final Tap tap, String message )
-    {
-    return TraceUtil.formatTrace( tap, message );
-    }
-
-  /**
-   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.scheme.Scheme, String)}
-   */
-  @Deprecated
-  public static String formatTrace( final Scheme scheme, String message )
-    {
-    return TraceUtil.formatTrace( scheme, message );
-    }
-
-  /**
-   * @deprecated see {@link cascading.util.TraceUtil#formatTrace(cascading.operation.Operation, String)}
-   */
-  @Deprecated
-  public static String formatTrace( Operation operation, String message )
-    {
-    return TraceUtil.formatTrace( operation, message );
     }
 
   public static void writeDOT( Writer writer, DirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
@@ -1212,17 +1157,6 @@ public class Util
       {
       return getDeclaredField( fieldName, type.getSuperclass() );
       }
-    }
-
-  @Deprecated
-  public static String makeTempPath( String name )
-    {
-    if( name == null || name.isEmpty() )
-      throw new IllegalArgumentException( "name may not be null or empty " );
-
-    name = cleansePathName( name.substring( 0, name.length() < 25 ? name.length() : 25 ) );
-
-    return name + "/" + (int) ( Math.random() * 100000 ) + "/";
     }
 
   public static String makePath( String prefix, String name )

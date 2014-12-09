@@ -31,6 +31,7 @@ import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.pipe.Pipe;
 import cascading.platform.hadoop.BaseHadoopPlatform;
 import cascading.scheme.hadoop.TextLine;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
@@ -112,11 +113,11 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
     // Setup two standard cascading flows that will generate the input for the first MapReduceFlow
     Tap source1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( inputFileApache, false ) );
     String sinkPath4 = getOutputPath( "flow4" );
-    Tap sink1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( sinkPath4, true ), true );
+    Tap sink1 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( sinkPath4, true ), SinkMode.REPLACE );
     Flow firstFlow = getPlatform().getFlowConnector( getProperties() ).connect( source1, sink1, new Pipe( "first-flow" ) );
 
     String sinkPath5 = getOutputPath( "flow5" );
-    Tap sink2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( sinkPath5, true ), true );
+    Tap sink2 = new Hfs( new TextLine( new Fields( "offset", "line" ) ), remove( sinkPath5, true ), SinkMode.REPLACE );
     Flow secondFlow = getPlatform().getFlowConnector( getProperties() ).connect( sink1, sink2, new Pipe( "second-flow" ) );
 
     JobConf defaultConf = HadoopPlanner.createJobConf( getProperties() );

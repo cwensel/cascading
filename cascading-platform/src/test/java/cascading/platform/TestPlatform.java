@@ -222,18 +222,6 @@ public abstract class TestPlatform
     return getDelimitedFile( fields, false, delimiter, "\"", null, filename, mode );
     }
 
-  @Deprecated
-  public Tap getDelimitedFile( Fields fields, String filename, SinkMode mode )
-    {
-    return getDelimitedFile( fields, false, "\t", "\"", null, filename, mode );
-    }
-
-  @Deprecated
-  public Tap getDelimitedFile( Fields fields, boolean hasHeader, String filename, SinkMode mode )
-    {
-    return getDelimitedFile( fields, hasHeader, "\t", "\"", null, filename, mode );
-    }
-
   public Tap getTabDelimitedFile( Fields fields, String filename, SinkMode mode )
     {
     return getDelimitedFile( fields, false, "\t", "\"", null, filename, mode );

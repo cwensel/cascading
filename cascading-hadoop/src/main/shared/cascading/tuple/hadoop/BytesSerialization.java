@@ -44,11 +44,11 @@ import org.apache.hadoop.io.serializer.Serializer;
  * This class also implements {@link Comparison} so it is not required to set a {@link cascading.tuple.hadoop.util.BytesComparator}
  * when attempting to group on a byte array via GroupBy or CoGroup.
  *
- * @see TupleSerialization#addSerialization(java.util.Map, String)
+ * @see TupleSerializationProps#addSerialization(java.util.Map, String)
  * @see cascading.tuple.hadoop.util.BytesComparator
  * @see Comparison
  */
-@SerializationToken(tokens = {126}, classNames = {"[B"})
+@SerializationToken( tokens = {126}, classNames = {"[B"} )
 public class BytesSerialization extends Configured implements Comparison<byte[]>, Serialization<byte[]>
   {
 
@@ -110,7 +110,6 @@ public class BytesSerialization extends Configured implements Comparison<byte[]>
       out.close();
       }
     }
-
 
   public BytesSerialization()
     {

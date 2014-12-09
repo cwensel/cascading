@@ -26,7 +26,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
@@ -86,7 +85,7 @@ import org.slf4j.LoggerFactory;
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
  * <code>hdfs://...</code> will denote Dfs, and <code>file://...</code> will denote Lfs.
  * <p/>
- * Call {@link #setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
+ * Call {@link HfsProps#setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
  * other than the current Hadoop default path.
  * <p/>
  * By default Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
@@ -108,14 +107,6 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
-
-  /**
-   * Field TEMPORARY_DIRECTORY
-   *
-   * @deprecated see {@link HfsProps#TEMPORARY_DIRECTORY}
-   */
-  @Deprecated
-  public static final String TEMPORARY_DIRECTORY = HfsProps.TEMPORARY_DIRECTORY;
 
   /** Field stringPath */
   protected String stringPath;
@@ -142,32 +133,6 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     return first != '_' && first != '.';
     }
   };
-
-  /**
-   * Method setTemporaryDirectory sets the temporary directory on the given properties object.
-   *
-   * @param properties of type Map<Object,Object>
-   * @param tempDir    of type String
-   * @deprecated see {@link HfsProps}
-   */
-  @Deprecated
-  public static void setTemporaryDirectory( Map<Object, Object> properties, String tempDir )
-    {
-    properties.put( HfsProps.TEMPORARY_DIRECTORY, tempDir );
-    }
-
-  /**
-   * Method getTemporaryDirectory returns the configured temporary directory from the given properties object.
-   *
-   * @param properties of type Map<Object,Object>
-   * @return a String or null if not set
-   * @deprecated see {@link HfsProps}
-   */
-  @Deprecated
-  public static String getTemporaryDirectory( Map<Object, Object> properties )
-    {
-    return (String) properties.get( HfsProps.TEMPORARY_DIRECTORY );
-    }
 
   protected static String getLocalModeScheme( Configuration conf, String defaultValue )
     {
@@ -204,21 +169,6 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
-    setStringPath( stringPath );
-    }
-
-  /**
-   * Constructor Hfs creates a new Hfs instance.
-   *
-   * @param scheme     of type Scheme
-   * @param stringPath of type String
-   * @param replace    of type boolean
-   */
-  @Deprecated
-  @ConstructorProperties( {"scheme", "stringPath", "replace"} )
-  public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, boolean replace )
-    {
-    super( scheme, replace ? SinkMode.REPLACE : SinkMode.KEEP );
     setStringPath( stringPath );
     }
 

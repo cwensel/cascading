@@ -22,7 +22,6 @@ package cascading.tuple;
 
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +29,6 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
@@ -110,44 +108,6 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     }
 
   /**
-   * Method parse will parse the {@link #print()} String representation of a Tuple instance and return a new Tuple instance.
-   * <p/>
-   * This method has been deprecated as it doesn't properly handle nulls, and any types other than primitive types.
-   *
-   * @param string of type String
-   * @return Tuple
-   * @deprecated
-   */
-  @Deprecated
-  public static Tuple parse( String string )
-    {
-    if( string == null || string.length() == 0 )
-      return null;
-
-    string = string.replaceAll( "^ *\\[*", "" );
-    string = string.replaceAll( "\\]* *$", "" );
-
-    Scanner scanner = new Scanner( new StringReader( string ) );
-    scanner.useDelimiter( "(' *, *')|(^ *')|(' *$)" );
-
-    Tuple result = new Tuple();
-
-    while( scanner.hasNext() )
-      {
-      if( scanner.hasNextInt() )
-        result.add( scanner.nextInt() );
-      else if( scanner.hasNextDouble() )
-        result.add( scanner.nextDouble() );
-      else
-        result.add( scanner.next() );
-      }
-
-    scanner.close();
-
-    return result;
-    }
-
-  /**
    * Returns a reference to the private elements of the given Tuple.
    * <p/>
    * This method is for internal use and is subject to change scope in a future release.
@@ -176,7 +136,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    *
    * @param tuple of type Tuple
    */
-  @ConstructorProperties({"tuple"})
+  @ConstructorProperties( {"tuple"} )
   public Tuple( Tuple tuple )
     {
     this( new ArrayList<Object>( tuple.elements ) );
@@ -187,7 +147,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    *
    * @param values of type Object...
    */
-  @ConstructorProperties({"values"})
+  @ConstructorProperties( {"values"} )
   public Tuple( Object... values )
     {
     this( new ArrayList<Object>( values.length ) );
@@ -205,23 +165,6 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   public boolean isUnmodifiable()
     {
     return isUnmodifiable;
-    }
-
-  /**
-   * Method get returns the element at the given position i.
-   * <p/>
-   * This method assumes the element implements {@link Comparable} in order to maintain backwards compatibility. See
-   * {@link #getObject(int)} for an alternative.
-   * <p/>
-   * This method is deprecated, use {@link #getObject(int)} instead.
-   *
-   * @param pos of type int
-   * @return Comparable
-   */
-  @Deprecated
-  public Comparable get( int pos )
-    {
-    return (Comparable) elements.get( pos );
     }
 
   /**
@@ -1033,7 +976,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
       return -1;
     }
 
-  @SuppressWarnings({"ForLoopReplaceableByForEach"})
+  @SuppressWarnings( {"ForLoopReplaceableByForEach"} )
   @Override
   public boolean equals( Object object )
     {

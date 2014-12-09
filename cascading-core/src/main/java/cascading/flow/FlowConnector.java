@@ -140,30 +140,6 @@ public abstract class FlowConnector
       }
     }
 
-  /**
-   * This has moved to {@link cascading.property.AppProps#setApplicationJarClass(java.util.Map, Class)}.
-   *
-   * @param properties
-   * @param type
-   */
-  @Deprecated
-  public static void setApplicationJarClass( Map<Object, Object> properties, Class type )
-    {
-    AppProps.setApplicationJarClass( properties, type );
-    }
-
-  /**
-   * This has moved to {@link cascading.property.AppProps#setApplicationJarPath(java.util.Map, String)}.
-   *
-   * @param properties
-   * @param path
-   */
-  @Deprecated
-  public static void setApplicationJarPath( Map<Object, Object> properties, String path )
-    {
-    AppProps.setApplicationJarPath( properties, path );
-    }
-
   protected abstract Class<? extends Scheme> getDefaultIntermediateSchemeClass();
 
   protected FlowConnector()

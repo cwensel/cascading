@@ -129,12 +129,6 @@ public class AggregateBy extends SubAssembly
       Num_Keys_Missed
     }
 
-  @Deprecated
-  public enum Flush
-    {
-      Num_Keys_Flushed
-    }
-
   /**
    * Interface Functor provides a means to create a simple function for use with the {@link CompositeFunction} class.
    * <p/>
@@ -315,7 +309,6 @@ public class AggregateBy extends SubAssembly
           {
           completeFunctors( flowProcess, ( (FunctionCall) operationCall ).getOutputCollector(), context.result, eldest );
           flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
-          flowProcess.increment( Flush.Num_Keys_Flushed, 1 );
 
           if( flushes % threshold == 0 ) // every multiple, write out data
             {
@@ -470,7 +463,7 @@ public class AggregateBy extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties({"pipe", "groupingFields", "assemblies"})
+  @ConstructorProperties( {"pipe", "groupingFields", "assemblies"} )
   public AggregateBy( Pipe pipe, Fields groupingFields, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, 0, assemblies );
@@ -484,7 +477,7 @@ public class AggregateBy extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties({"pipe", "groupingFields", "threshold", "assemblies"})
+  @ConstructorProperties( {"pipe", "groupingFields", "threshold", "assemblies"} )
   public AggregateBy( Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
@@ -498,7 +491,7 @@ public class AggregateBy extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields", "threshold", "assemblies"})
+  @ConstructorProperties( {"name", "pipe", "groupingFields", "threshold", "assemblies"} )
   public AggregateBy( String name, Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
@@ -512,7 +505,7 @@ public class AggregateBy extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "assemblies"})
+  @ConstructorProperties( {"name", "pipes", "groupingFields", "assemblies"} )
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, AggregateBy... assemblies )
     {
     this( name, pipes, groupingFields, 0, assemblies );
@@ -527,7 +520,7 @@ public class AggregateBy extends SubAssembly
    * @param threshold      of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "threshold", "assemblies"})
+  @ConstructorProperties( {"name", "pipes", "groupingFields", "threshold", "assemblies"} )
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, int threshold, AggregateBy... assemblies )
     {
     this( name, threshold );
@@ -655,9 +648,9 @@ public class AggregateBy extends SubAssembly
     return groupBy;
     }
 
-  @Property(name = "threshold", visibility = Visibility.PUBLIC)
-  @PropertyDescription("Threshold of the aggregation.")
-  @PropertyConfigured(value = AGGREGATE_BY_THRESHOLD, defaultValue = "10000")
+  @Property( name = "threshold", visibility = Visibility.PUBLIC )
+  @PropertyDescription( "Threshold of the aggregation." )
+  @PropertyConfigured( value = AGGREGATE_BY_THRESHOLD, defaultValue = "10000" )
   public int getThreshold()
     {
     return threshold;

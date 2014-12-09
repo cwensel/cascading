@@ -89,7 +89,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testIdentity() throws Exception
     {
     Tap source = new Hfs( new TextLine(), "input/path" );
-    Tap sink = new Hfs( new TextLine(), "output/path", true );
+    Tap sink = new Hfs( new TextLine(), "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -318,8 +318,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplit()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -349,8 +349,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplitHangingTails()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -383,8 +383,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplitOnNonSafeOperations()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -418,8 +418,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplitOnNonSafeOperationsSimple()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -452,9 +452,9 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplitOnNonSafeOperations2()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
-    Tap sink3 = new Hfs( new TextLine(), "foo/split3", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
+    Tap sink3 = new Hfs( new TextLine(), "foo/split3", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -496,8 +496,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplitComplex()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -551,8 +551,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testSplitComplex2()
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink1 = new Hfs( new TextLine(), "foo/split1", true );
-    Tap sink2 = new Hfs( new TextLine(), "foo/split2", true );
+    Tap sink1 = new Hfs( new TextLine(), "foo/split1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "foo/split2", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "split" );
 
@@ -851,7 +851,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "source102", source10 );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "baz", true );
+    Tap sink = new Hfs( new TextLine(), "baz", SinkMode.REPLACE );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
@@ -879,7 +879,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "source102", source10 );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "baz", true );
+    Tap sink = new Hfs( new TextLine(), "baz", SinkMode.REPLACE );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
@@ -914,7 +914,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "output", true );
+    Tap sink = new Hfs( new TextLine(), "output", SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( "lower", new Fields( "line" ), splitter );
     Pipe pipeUpper1 = new Each( "upper1", new Fields( "line" ), splitter );
@@ -962,7 +962,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), "/complex/cogroup/", SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
@@ -988,7 +988,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "/complex/cogroup/", true );
+    Tap sink = new Hfs( new TextLine(), "/complex/cogroup/", SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
@@ -1014,8 +1014,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "upper2", sourceUpper );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), "output1", true );
-    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+    Tap sink1 = new Hfs( new TextLine(), "output1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "output2", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1066,8 +1066,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "upper1", sourceUpper );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), "output1", true );
-    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+    Tap sink1 = new Hfs( new TextLine(), "output1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "output2", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1116,8 +1116,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "upper1", sourceUpper );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), "output1", true );
-    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+    Tap sink1 = new Hfs( new TextLine(), "output1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "output2", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1179,8 +1179,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "lower1", sourceLower );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), "output1", true );
-    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+    Tap sink1 = new Hfs( new TextLine(), "output1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "output2", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1219,8 +1219,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "lower1", sourceLower );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), "output1", true );
-    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+    Tap sink1 = new Hfs( new TextLine(), "output1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "output2", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1255,8 +1255,8 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "lower1", sourceLower );
 
     // using null pos so all fields are written
-    Tap sink1 = new Hfs( new TextLine(), "output1", true );
-    Tap sink2 = new Hfs( new TextLine(), "output2", true );
+    Tap sink1 = new Hfs( new TextLine(), "output1", SinkMode.REPLACE );
+    Tap sink2 = new Hfs( new TextLine(), "output2", SinkMode.REPLACE );
 
     Map sinks = new HashMap();
 
@@ -1626,7 +1626,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     sources.put( "source102", source10 );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), "baz", true );
+    Tap sink = new Hfs( new TextLine(), "baz", SinkMode.REPLACE );
 
     Pipe pipeNum20 = new Pipe( "source20" );
     Pipe pipeNum101 = new Pipe( "source101" );
@@ -1787,7 +1787,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
   public void testReplaceFail() throws Exception
     {
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), "foo" );
-    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "line2" ) ), "bar", true );
+    Tap sink = new Hfs( new TextLine( new Fields( "offset", "line" ), new Fields( "offset", "line2" ) ), "bar", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -1820,7 +1820,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new RegexSplitter( new Fields( "first", "second", "third" ), "\\s" ), Fields.ALL );
 
-    Tap sink = new Hfs( new TextLine(), "output", true );
+    Tap sink = new Hfs( new TextLine(), "output", SinkMode.REPLACE );
 
     Properties defaultProperties = new Properties();
 
@@ -1900,7 +1900,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
       }
 
     long start = System.currentTimeMillis();
-    Flow flow = new HadoopFlowConnector().connect( sources, sinks, pipes );
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, pipes );
     long end = System.currentTimeMillis();
     System.out.printf( "n = %d: elements: %d: %.03f seconds\n", n, count, ( end - start ) / 1000.0 );
     }

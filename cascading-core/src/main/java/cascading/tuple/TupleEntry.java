@@ -153,7 +153,7 @@ public class TupleEntry
    *
    * @param isUnmodifiable of type boolean
    */
-  @ConstructorProperties({"isUnmodifiable"})
+  @ConstructorProperties( {"isUnmodifiable"} )
   public TupleEntry( boolean isUnmodifiable )
     {
     this.fields = Fields.NONE;
@@ -167,7 +167,7 @@ public class TupleEntry
    *
    * @param fields of type Fields
    */
-  @ConstructorProperties({"fields"})
+  @ConstructorProperties( {"fields"} )
   public TupleEntry( Fields fields )
     {
     this.fields = fields;
@@ -181,7 +181,7 @@ public class TupleEntry
    * @param fields         of type Fields
    * @param isUnmodifiable of type boolean
    */
-  @ConstructorProperties({"fields", "isUnmodifiable"})
+  @ConstructorProperties( {"fields", "isUnmodifiable"} )
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
     this.fields = fields;
@@ -197,7 +197,7 @@ public class TupleEntry
    * @param tuple          of type Tuple
    * @param isUnmodifiable of type boolean
    */
-  @ConstructorProperties({"fields", "tuple", "isUnmodifiable"})
+  @ConstructorProperties( {"fields", "tuple", "isUnmodifiable"} )
   public TupleEntry( Fields fields, Tuple tuple, boolean isUnmodifiable )
     {
     this.fields = fields;
@@ -213,7 +213,7 @@ public class TupleEntry
    * @param fields of type Fields
    * @param tuple  of type Tuple
    */
-  @ConstructorProperties({"fields", "tuple"})
+  @ConstructorProperties( {"fields", "tuple"} )
   public TupleEntry( Fields fields, Tuple tuple )
     {
     this.fields = fields;
@@ -229,7 +229,7 @@ public class TupleEntry
    *
    * @param tupleEntry of type TupleEntry
    */
-  @ConstructorProperties({"tupleEntry"})
+  @ConstructorProperties( {"tupleEntry"} )
   public TupleEntry( TupleEntry tupleEntry )
     {
     this.fields = tupleEntry.getFields();
@@ -243,7 +243,7 @@ public class TupleEntry
    *
    * @param tuple of type Tuple
    */
-  @ConstructorProperties({"tuple"})
+  @ConstructorProperties( {"tuple"} )
   public TupleEntry( Tuple tuple )
     {
     this.fields = Fields.size( tuple.size() );
@@ -429,20 +429,6 @@ public class TupleEntry
     }
 
   /**
-   * Method get returns the value in the given position pos.
-   * <p/>
-   * This method is deprecated, use {@link #getObject(int)} instead.
-   *
-   * @param pos position of the element to return.
-   * @return Comparable
-   */
-  @Deprecated
-  public Comparable get( int pos )
-    {
-    return tuple.get( pos );
-    }
-
-  /**
    * Method getObject returns the value in the given position pos.
    * <p/>
    * No coercion is performed if there is an associated coercible type.
@@ -466,23 +452,6 @@ public class TupleEntry
   public Object getObject( int pos, Type type )
     {
     return Coercions.coerce( coercions[ pos ], tuple.getObject( pos ), type );
-    }
-
-  /**
-   * Method get returns the value in the given field or position.
-   * <br/>
-   * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
-   * be considered.
-   * <p/>
-   * This method is deprecated, use {@link #getObject(Comparable)} instead.
-   *
-   * @param fieldName field name or position to return
-   * @return Comparable
-   */
-  @Deprecated
-  public Comparable get( Comparable fieldName )
-    {
-    return tuple.get( fields.getPos( asFieldName( fieldName ) ) );
     }
 
   /**
@@ -517,20 +486,6 @@ public class TupleEntry
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
     return Coercions.coerce( coercions[ pos ], tuple.getObject( pos ), type );
-    }
-
-  /**
-   * Method set sets the value in the given field or position.
-   * <p/>
-   * This method is deprecated in favor of {@link #setRaw(Comparable, Object)}
-   *
-   * @param fieldName field name or position to set
-   * @param value     of type Comparable
-   */
-  @Deprecated
-  public void set( Comparable fieldName, Object value )
-    {
-    tuple.set( fields.getPos( asFieldName( fieldName ) ), value );
     }
 
   /**

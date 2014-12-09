@@ -24,8 +24,6 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.operation.Assertion;
-import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
 import cascading.operation.PlannedOperation;
@@ -218,18 +216,6 @@ public abstract class Operator extends Pipe
   public Fields getOutputSelector()
     {
     return outputSelector;
-    }
-
-  /**
-   * Method getAssertionLevel returns the assertionLevel of this Operator object. Only used if the {@link cascading.operation.Operation}
-   * is an {@link Assertion}.
-   *
-   * @return the assertionLevel (type Assertion.Level) of this Operator object.
-   */
-  @Deprecated
-  public AssertionLevel getAssertionLevel()
-    {
-    return (AssertionLevel) plannerLevel;
     }
 
   /**
@@ -437,7 +423,7 @@ public abstract class Operator extends Pipe
     return true;
     }
 
-  @SuppressWarnings({"RedundantIfStatement"})
+  @SuppressWarnings( {"RedundantIfStatement"} )
   public boolean equals( Object object )
     {
     if( this == object )

@@ -133,7 +133,7 @@ public class FlowPlatformTest extends PlatformTestCase
       return;
 
     Tap source = new Hfs( new TextLine(), "input/path" );
-    Tap sink = new Hfs( new TextLine(), "output/path", true );
+    Tap sink = new Hfs( new TextLine(), "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -171,7 +171,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), getOutputPath( "stopped" ), true );
+    Tap sink = new Hfs( new TextLine(), getOutputPath( "stopped" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
@@ -264,7 +264,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), getOutputPath( "badserialization" ), true );
+    Tap sink = new Hfs( new TextLine(), getOutputPath( "badserialization" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
@@ -350,7 +350,7 @@ public class FlowPlatformTest extends PlatformTestCase
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
     // using null pos so all fields are written
-    Tap sink = new Hfs( new TextLine(), getOutputPath( onFail + "/stopped" ), true );
+    Tap sink = new Hfs( new TextLine(), getOutputPath( onFail + "/stopped" ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
 
@@ -426,7 +426,7 @@ public class FlowPlatformTest extends PlatformTestCase
   public void testFlowID() throws Exception
     {
     Tap source = new Lfs( new TextLine(), "input/path" );
-    Tap sink = new Hfs( new TextLine(), "output/path", true );
+    Tap sink = new Hfs( new TextLine(), "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -448,7 +448,7 @@ public class FlowPlatformTest extends PlatformTestCase
   public void testCopyConfig() throws Exception
     {
     Tap source = new Lfs( new TextLine(), "input/path" );
-    Tap sink = new Hfs( new TextLine(), "output/path", true );
+    Tap sink = new Hfs( new TextLine(), "output/path", SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );
 

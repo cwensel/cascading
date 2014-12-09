@@ -58,22 +58,6 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( SpillableTupleList.class );
 
-  /** Number of tuples to hold in memory before spilling them to disk. */
-  @Deprecated
-  public static final String SPILL_THRESHOLD = SpillableProps.LIST_THRESHOLD;
-
-  /**
-   * Whether to enable compress of the spills or not, on by default.
-   *
-   * @see Boolean#parseBoolean(String)
-   */
-  @Deprecated
-  public static final String SPILL_COMPRESS = SpillableProps.SPILL_COMPRESS;
-
-  /** A comma delimited list of possible codecs to try. This is platform dependent. */
-  @Deprecated
-  public static final String SPILL_CODECS = SpillableProps.SPILL_CODECS;
-
   public static int getThreshold( FlowProcess flowProcess, int defaultValue )
     {
     String value = (String) flowProcess.getProperty( SpillableProps.LIST_THRESHOLD );
@@ -125,7 +109,6 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
 
     return codecClass;
     }
-
 
   private SpillStrategy spillStrategy;
 

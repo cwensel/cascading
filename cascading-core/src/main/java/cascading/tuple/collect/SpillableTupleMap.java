@@ -48,26 +48,6 @@ import static cascading.tuple.collect.SpillableProps.defaultMapLoadFactor;
  */
 public abstract class SpillableTupleMap extends HashMap<Tuple, Collection<Tuple>> implements Spillable
   {
-  /** The total number of tuple values (not keys) to attempt to keep in memory. */
-  @Deprecated
-  public static final String MAP_THRESHOLD = SpillableProps.MAP_THRESHOLD;
-
-  /**
-   * The initial hash map capacity.
-   *
-   * @see java.util.HashMap
-   */
-  @Deprecated
-  public static final String MAP_CAPACITY = SpillableProps.MAP_CAPACITY;
-
-  /**
-   * The initial hash map load factor.
-   *
-   * @see java.util.HashMap
-   */
-  @Deprecated
-  public static final String MAP_LOADFACTOR = SpillableProps.MAP_LOADFACTOR;
-
   private int mapThreshold;
   private int initListThreshold;
   private Spillable.SpillListener spillListener = Spillable.SpillListener.NULL;

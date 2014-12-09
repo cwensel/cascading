@@ -22,10 +22,12 @@ package cascading.detail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
@@ -171,7 +173,35 @@ public abstract class PipeAssemblyTestBase extends PlatformTestCase
 
   Tuple getResultTuple()
     {
-    return Tuple.parse( (String) properties.get( key + ".tuple" ) );
+    return parse( (String) properties.get( key + ".tuple" ) );
+    }
+
+  static Tuple parse( String string )
+    {
+    if( string == null || string.length() == 0 )
+      return null;
+
+    string = string.replaceAll( "^ *\\[*", "" );
+    string = string.replaceAll( "\\]* *$", "" );
+
+    Scanner scanner = new Scanner( new StringReader( string ) );
+    scanner.useDelimiter( "(' *, *')|(^ *')|(' *$)" );
+
+    Tuple result = new Tuple();
+
+    while( scanner.hasNext() )
+      {
+      if( scanner.hasNextInt() )
+        result.add( scanner.nextInt() );
+      else if( scanner.hasNextDouble() )
+        result.add( scanner.nextDouble() );
+      else
+        result.add( scanner.next() );
+      }
+
+    scanner.close();
+
+    return result;
     }
 
   boolean isWriteDOT()

@@ -47,7 +47,6 @@ import org.junit.Test;
 
 import static data.InputData.*;
 
-
 public class TypedFieldedPipesPlatformTest extends PlatformTestCase
   {
   public TypedFieldedPipesPlatformTest()
@@ -129,7 +128,6 @@ public class TypedFieldedPipesPlatformTest extends PlatformTestCase
     runJoinIncomparableTypes( true, false, false, true );
     }
 
-
   private void runJoinIncomparableTypes( boolean isMerge, boolean isGroup, boolean includeComparator, boolean isDeclared ) throws Exception
     {
     getPlatform().copyFromLocal( inputFileLhs );
@@ -148,7 +146,7 @@ public class TypedFieldedPipesPlatformTest extends PlatformTestCase
     sources.put( "lhs", getPlatform().getDelimitedFile( lhsFields, " ", inputFileLhs, SinkMode.KEEP ) );
     sources.put( "rhs", getPlatform().getDelimitedFile( rhsFields, " ", inputFileRhs, SinkMode.KEEP ) );
 
-    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, true, getOutputPath( getTestName() ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getDelimitedFile( Fields.ALL, true, "\t", "\"", getOutputPath( getTestName() ), SinkMode.REPLACE );
 
     Pipe pipeLower = new Pipe( "lhs" );
     Pipe pipeUpper = new Pipe( "rhs" );

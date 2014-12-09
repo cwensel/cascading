@@ -181,7 +181,7 @@ public class TupleEntryTest extends CascadingTestCase
 
     try
       {
-      entryA.set( "a", "A" );
+      entryA.setRaw( "a", "A" );
       fail( "did not fail" );
       }
     catch( Exception exception )

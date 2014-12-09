@@ -29,6 +29,7 @@ import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.process.FlowStepGraph;
 import cascading.scheme.NullScheme;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import org.apache.hadoop.fs.Path;
@@ -160,7 +161,7 @@ public class MapReduceFlow extends HadoopFlow
 
     String path = FileOutputFormat.getOutputPath( jobConf ).toString();
 
-    taps.put( path, new Hfs( new NullScheme(), path, deleteSinkOnInit ) );
+    taps.put( path, new Hfs( new NullScheme(), path, deleteSinkOnInit ? SinkMode.REPLACE : SinkMode.KEEP ) );
 
     return taps;
     }

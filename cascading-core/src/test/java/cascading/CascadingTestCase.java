@@ -60,7 +60,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
  * <p/>
  * It included a few helpful utility methods for testing Cascading applications.
  */
-@RunWith(BlockJUnit4ClassRunner.class)
+@RunWith( BlockJUnit4ClassRunner.class )
 public abstract class CascadingTestCase extends TestCase implements Serializable
   {
   public static final String ROOT_OUTPUT_PATH = "test.output.root";
@@ -122,16 +122,6 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   protected String[] getPlanPathElements()
     {
     return new String[]{getTestPlanRoot(), getTestCaseName(), getTestName()};
-    }
-
-  /**
-   * @return
-   * @deprecated use {@link #getOutputPath()}
-   */
-  @Deprecated
-  protected String getRootPath()
-    {
-    return getOutputPath();
     }
 
   protected String getOutputPath()

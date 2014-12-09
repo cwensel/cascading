@@ -166,7 +166,7 @@ public class CheckpointPlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "checkpoint/sink" ), SinkMode.REPLACE );
 
-    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, true, getOutputPath( "checkpoint/tap" ), SinkMode.REPLACE );
+    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, true, "\t", "\"", getOutputPath( "checkpoint/tap" ), SinkMode.REPLACE );
 
     FlowDef flowDef = flowDef()
       .addSource( pipe, source )
@@ -208,7 +208,7 @@ public class CheckpointPlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "failcheckpoint/sink" ), SinkMode.REPLACE );
 
-    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, true, getOutputPath( "failcheckpoint/tap" ), SinkMode.REPLACE );
+    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, true, "\t", "\"", getOutputPath( "failcheckpoint/tap" ), SinkMode.REPLACE );
 
     FlowDef flowDef = flowDef()
       .addSource( pipe, source )
@@ -246,7 +246,7 @@ public class CheckpointPlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "failcheckpointevery/sink" ), SinkMode.REPLACE );
 
-    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, true, getOutputPath( "failcheckpointevery/tap" ), SinkMode.REPLACE );
+    Tap checkpoint = getPlatform().getDelimitedFile( Fields.ALL, true, "\t", "\"", getOutputPath( "failcheckpointevery/tap" ), SinkMode.REPLACE );
 
     FlowDef flowDef = flowDef()
       .addSource( pipe, source )

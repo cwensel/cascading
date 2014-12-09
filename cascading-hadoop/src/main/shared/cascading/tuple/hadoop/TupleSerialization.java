@@ -80,7 +80,7 @@ import static cascading.tuple.hadoop.TupleSerializationProps.HADOOP_IO_SERIALIZA
  */
 @SerializationToken(
   tokens = {127},
-  classNames = {"org.apache.hadoop.io.BytesWritable"})
+  classNames = {"org.apache.hadoop.io.BytesWritable"} )
 public class TupleSerialization extends Configured implements Serialization
   {
   /** Field LOG */
@@ -100,53 +100,9 @@ public class TupleSerialization extends Configured implements Serialization
   /** Field tokenMapSize */
   private long tokensSize = 0;
 
-  /**
-   * Adds the given token and className pair as a serialization token property. During object serialization and deserialization,
-   * the given token will be used instead of the className when an instance of the className is encountered.
-   * <p/>
-   * This method has moved to {@link TupleSerializationProps#addSerializationToken(java.util.Map, int, String)}.
-   *
-   * @param properties of type Map
-   * @param token      of type int
-   * @param className  of type String
-   */
-  @Deprecated
-  public static void addSerializationToken( Map<Object, Object> properties, int token, String className )
-    {
-    TupleSerializationProps.addSerializationToken( properties, token, className );
-    }
-
-  /**
-   * Returns the serialization tokens property.
-   * <p/>
-   * This method has moved to {@link TupleSerializationProps#getSerializationTokens(java.util.Map)}.
-   *
-   * @param properties of type Map
-   * @return returns a String
-   */
-  @Deprecated
-  public static String getSerializationTokens( Map<Object, Object> properties )
-    {
-    return TupleSerializationProps.getSerializationTokens( properties );
-    }
-
   static String getSerializationTokens( Configuration jobConf )
     {
     return jobConf.get( TupleSerializationProps.SERIALIZATION_TOKENS );
-    }
-
-  /**
-   * Adds the given className as a Hadoop IO serialization class.
-   * <p/>
-   * This method has moved to {@link TupleSerializationProps#addSerialization(java.util.Map, String)}.
-   *
-   * @param properties of type Map
-   * @param className  of type String
-   */
-  @Deprecated
-  public static void addSerialization( Map<Object, Object> properties, String className )
-    {
-    TupleSerializationProps.addSerialization( properties, className );
     }
 
   /**

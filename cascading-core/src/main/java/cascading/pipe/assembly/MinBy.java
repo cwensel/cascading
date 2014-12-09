@@ -51,10 +51,6 @@ import cascading.tuple.TupleEntry;
  */
 public class MinBy extends AggregateBy
   {
-  /** DEFAULT_THRESHOLD */
-  @Deprecated
-  public static final int DEFAULT_THRESHOLD = 10000;
-
   public static class MinPartials implements Functor
     {
     private final Fields declaredFields;
@@ -105,7 +101,7 @@ public class MinBy extends AggregateBy
    * @param valueField of type Fields
    * @param minField   of type Fields
    */
-  @ConstructorProperties({"valueField", "minField"})
+  @ConstructorProperties( {"valueField", "minField"} )
   public MinBy( Fields valueField, Fields minField )
     {
     super( valueField, new MinPartials( minField ), new MinValue( minField ) );
@@ -121,7 +117,7 @@ public class MinBy extends AggregateBy
    * @param valueField     of type Fields
    * @param minField       of type Fields
    */
-  @ConstructorProperties({"pipe", "groupingFields", "valueField", "minField"})
+  @ConstructorProperties( {"pipe", "groupingFields", "valueField", "minField"} )
   public MinBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields minField )
     {
     this( null, pipe, groupingFields, valueField, minField, 0 );
@@ -136,7 +132,7 @@ public class MinBy extends AggregateBy
    * @param minField       of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"pipe", "groupingFields", "valueField", "minField", "threshold"})
+  @ConstructorProperties( {"pipe", "groupingFields", "valueField", "minField", "threshold"} )
   public MinBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields minField, int threshold )
     {
     this( null, pipe, groupingFields, valueField, minField, threshold );
@@ -151,7 +147,7 @@ public class MinBy extends AggregateBy
    * @param valueField     of type Fields
    * @param minField       of type Fields
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "minField"})
+  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueField", "minField"} )
   public MinBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields minField )
     {
     this( name, pipe, groupingFields, valueField, minField, USE_DEFAULT_THRESHOLD );
@@ -167,7 +163,7 @@ public class MinBy extends AggregateBy
    * @param minField       of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "minField", "threshold"})
+  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueField", "minField", "threshold"} )
   public MinBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields minField, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, valueField, minField, threshold );
@@ -181,7 +177,7 @@ public class MinBy extends AggregateBy
    * @param valueField     of type Fields
    * @param minField       of type Fields
    */
-  @ConstructorProperties({"pipes", "groupingFields", "valueField", "minField"})
+  @ConstructorProperties( {"pipes", "groupingFields", "valueField", "minField"} )
   public MinBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields minField )
     {
     this( null, pipes, groupingFields, valueField, minField, USE_DEFAULT_THRESHOLD );
@@ -196,7 +192,7 @@ public class MinBy extends AggregateBy
    * @param minField       of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"pipes", "groupingFields", "valueField", "minField", "threshold"})
+  @ConstructorProperties( {"pipes", "groupingFields", "valueField", "minField", "threshold"} )
   public MinBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields minField, int threshold )
     {
     this( null, pipes, groupingFields, valueField, minField, threshold );
@@ -211,7 +207,7 @@ public class MinBy extends AggregateBy
    * @param valueField     of type Fields
    * @param minField       of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "minField"})
+  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueField", "minField"} )
   public MinBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields minField )
     {
     this( name, pipes, groupingFields, valueField, minField, USE_DEFAULT_THRESHOLD );
@@ -227,7 +223,7 @@ public class MinBy extends AggregateBy
    * @param minField       of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "minField", "threshold"})
+  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueField", "minField", "threshold"} )
   public MinBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields minField, int threshold )
     {
     super( name, pipes, groupingFields, valueField, new MinPartials( minField ), new MinValue( minField ), threshold );

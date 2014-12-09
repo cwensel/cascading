@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import cascading.operation.OperationException;
-import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 
 /**
@@ -167,47 +166,6 @@ public class Tuples
     return tuple.elements( destination );
     }
 
-  /**
-   * Method asArray convert the given {@link Tuple} instance into an Object[]. The given Class[] array
-   * denotes the types each tuple element value should be coerced into.
-   * <p/>
-   * Coercion types are Object, String, Integer, Long, Float, Double, Short, and Boolean.
-   * <p/>
-   * If all Tuple element values are null, they will remain null for String and Object, but become zero for the numeric types.
-   * <p/>
-   * The string value 'true' can be converted to the boolean true.
-   *
-   * @param tuple of type Tuple
-   * @param types of type Class[]
-   * @return Object[]
-   */
-  @Deprecated
-  public static Object[] asArray( Tuple tuple, Class[] types )
-    {
-    return asArray( tuple, types, new Object[ tuple.size() ] );
-    }
-
-  /**
-   * Method asArray convert the given {@link Tuple} instance into an Object[]. The given Class[] array
-   * denotes the types each tuple element value should be coerced into.
-   *
-   * @param tuple       of type Tuple
-   * @param types       of type Class[]
-   * @param destination of type Object[]
-   * @return Object[]
-   */
-  @Deprecated
-  public static Object[] asArray( Tuple tuple, Class[] types, Object[] destination )
-    {
-    if( tuple.size() != types.length )
-      throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match number of coercion types: " + types.length );
-
-    for( int i = 0; i < types.length; i++ )
-      destination[ i ] = coerce( tuple, i, types[ i ] );
-
-    return destination;
-    }
-
   public static Object[] asArray( Tuple tuple, CoercibleType[] coercions, Class[] types, Object[] destination )
     {
     if( tuple.size() != types.length )
@@ -250,148 +208,6 @@ public class Tuples
   public static int frequency( TupleEntry tupleEntry, Object value )
     {
     return Collections.frequency( tupleEntry.getTuple().elements, value );
-    }
-
-  /**
-   * Method coerce returns the value in the tuple at the given position to the requested type.
-   * <p/>
-   * If the given type is a primitive (long), and the tuple value is null, 0 is returned.
-   * <p/>
-   * If the type is an Object (Long), and the tuple value is null, null is returned.
-   *
-   * @param tuple of type Tuple
-   * @param pos   of type int
-   * @param type  of type Class
-   * @return returns the value coerced
-   */
-  @Deprecated
-  public static Object coerce( Tuple tuple, int pos, Class type )
-    {
-    Object value = tuple.getObject( pos );
-
-    return coerce( value, type );
-    }
-
-  @Deprecated
-  public static Object coerce( Object value, Class type )
-    {
-    return Coercions.coerce( value, type );
-    }
-
-  @Deprecated
-  public static final String toString( Object value )
-    {
-    return Coercions.STRING.coerce( value );
-    }
-
-  @Deprecated
-  public static final int toInteger( Object value )
-    {
-    return Coercions.INTEGER.coerce( value );
-    }
-
-  @Deprecated
-  public static final long toLong( Object value )
-    {
-    return Coercions.LONG.coerce( value );
-    }
-
-  @Deprecated
-  public static final double toDouble( Object value )
-    {
-    return Coercions.DOUBLE.coerce( value );
-    }
-
-  @Deprecated
-  public static final float toFloat( Object value )
-    {
-    return Coercions.FLOAT.coerce( value );
-    }
-
-  @Deprecated
-  public static final short toShort( Object value )
-    {
-    return Coercions.SHORT.coerce( value );
-    }
-
-  @Deprecated
-  public static final boolean toBoolean( Object value )
-    {
-    return Coercions.BOOLEAN.coerce( value );
-    }
-
-  @Deprecated
-  public static final Integer toIntegerObject( Object value )
-    {
-    return Coercions.INTEGER_OBJECT.coerce( value );
-    }
-
-  @Deprecated
-  public static final Long toLongObject( Object value )
-    {
-    return Coercions.LONG_OBJECT.coerce( value );
-    }
-
-  @Deprecated
-  public static final Double toDoubleObject( Object value )
-    {
-    return Coercions.DOUBLE_OBJECT.coerce( value );
-    }
-
-  @Deprecated
-  public static final Float toFloatObject( Object value )
-    {
-    return Coercions.FLOAT_OBJECT.coerce( value );
-    }
-
-  @Deprecated
-  public static final Short toShortObject( Object value )
-    {
-    return Coercions.SHORT_OBJECT.coerce( value );
-    }
-
-  @Deprecated
-  public static final Boolean toBooleanObject( Object value )
-    {
-    return Coercions.BOOLEAN_OBJECT.coerce( value );
-    }
-
-  /**
-   * Method coerce forces each element value in the given Tuple to the corresponding primitive type.
-   *
-   * @param tuple of type Tuple
-   * @param types of type Class[]
-   * @return Tuple
-   */
-  @Deprecated
-  public static Tuple coerce( Tuple tuple, Class[] types )
-    {
-    return new Tuple( (Object[]) asArray( tuple, types, new Object[ types.length ] ) );
-    }
-
-  /**
-   * Method coerce forces each element value in the given Tuple to the corresponding primitive type.
-   * <p/>
-   * This method expects the destination Tuple was created with the same size at the types array.
-   *
-   * @param tuple       of type Tuple
-   * @param types       of type Class[]
-   * @param destination of type Tuple
-   * @return Tuple
-   */
-  @Deprecated
-  public static Tuple coerce( Tuple tuple, Class[] types, Tuple destination )
-    {
-    if( tuple.size() != types.length )
-      throw new OperationException( "number of input tuple values: " + tuple.size() + ", does not match number of coercion types: " + types.length );
-
-    if( destination.size() != types.length )
-      throw new OperationException( "number of destination tuple values: " + destination.size() + ", does not match number of coercion types: " + types.length );
-
-    for( int i = 0; i < types.length; i++ )
-      destination.set( i, coerce( tuple, i, types[ i ] ) );
-
-    return destination;
     }
 
   /**

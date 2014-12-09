@@ -50,7 +50,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.coerce.Coercions;
-import cascading.tuple.collect.SpillableTupleList;
+import cascading.tuple.collect.SpillableProps;
 import cascading.tuple.hadoop.util.BytesComparator;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
@@ -248,7 +248,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> jobProperties = getProperties();
 
-    TupleSerialization.addSerializationToken( jobProperties, 1000, BooleanWritable.class.getName() );
+    TupleSerializationProps.addSerializationToken( jobProperties, 1000, BooleanWritable.class.getName() );
 
     Flow flow = getPlatform().getFlowConnector( jobProperties ).connect( source, sink, pipe );
 
@@ -403,7 +403,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> properties = getProperties();
 
-    properties.put( SpillableTupleList.SPILL_THRESHOLD, 1 );
+    properties.put( SpillableProps.LIST_THRESHOLD, 1 );
 //    String serializations = MultiMapReducePlanner.getJobConf( properties ).get( "io.serializations" );
 //    serializations = Util.join( ",", serializations, JavaSerialization.class.getName() );
 //    System.out.println( "serializations = " + serializations );
@@ -513,13 +513,13 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     if( !ignoreSerializationToken )
       {
-      TupleSerialization.addSerialization( properties, TestSerialization.class.getName() );
-      TupleSerialization.addSerialization( properties, BytesSerialization.class.getName() );
+      TupleSerializationProps.addSerialization( properties, TestSerialization.class.getName() );
+      TupleSerializationProps.addSerialization( properties, BytesSerialization.class.getName() );
       }
     else
       {
-      TupleSerialization.addSerialization( properties, NoTokenTestSerialization.class.getName() );
-      TupleSerialization.addSerialization( properties, NoTokenTestBytesSerialization.class.getName() );
+      TupleSerializationProps.addSerialization( properties, NoTokenTestSerialization.class.getName() );
+      TupleSerializationProps.addSerialization( properties, NoTokenTestBytesSerialization.class.getName() );
       }
 
     getPlatform().setNumMapTasks( properties, 1 );
@@ -575,7 +575,7 @@ public class SerializedPipesPlatformTest extends PlatformTestCase
 
     Map<Object, Object> jobProperties = getProperties();
 
-    TupleSerialization.addSerialization( jobProperties, BigDecimalSerialization.class.getName() );
+    TupleSerializationProps.addSerialization( jobProperties, BigDecimalSerialization.class.getName() );
 
     Flow flow = getPlatform().getFlowConnector( jobProperties ).connect( source, sink, pipe );
 

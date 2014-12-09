@@ -43,26 +43,10 @@ public class Dfs extends Hfs
    * @param scheme of type Scheme
    * @param uri    of type URI
    */
-  @ConstructorProperties({"scheme", "uri"})
+  @ConstructorProperties( {"scheme", "uri"} )
   public Dfs( Scheme scheme, URI uri )
     {
     super( scheme, uri.getPath() );
-
-    init( uri );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param scheme  of type Scheme
-   * @param uri     of type URI
-   * @param replace of type boolean
-   */
-  @ConstructorProperties({"scheme", "uri", "replace"})
-  @Deprecated
-  public Dfs( Scheme scheme, URI uri, boolean replace )
-    {
-    super( scheme, uri.getPath(), replace );
 
     init( uri );
     }
@@ -74,7 +58,7 @@ public class Dfs extends Hfs
    * @param uri      of type URI
    * @param sinkMode of type SinkMode
    */
-  @ConstructorProperties({"scheme", "uri", "sinkMode"})
+  @ConstructorProperties( {"scheme", "uri", "sinkMode"} )
   public Dfs( Scheme scheme, URI uri, SinkMode sinkMode )
     {
     super( scheme, uri.getPath(), sinkMode );
@@ -88,7 +72,7 @@ public class Dfs extends Hfs
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
-  @ConstructorProperties({"scheme", "stringPath"})
+  @ConstructorProperties( {"scheme", "stringPath"} )
   public Dfs( Scheme scheme, String stringPath )
     {
     super( scheme, stringPath );
@@ -99,23 +83,9 @@ public class Dfs extends Hfs
    *
    * @param scheme     of type Scheme
    * @param stringPath of type String
-   * @param replace    of type boolean
-   */
-  @ConstructorProperties({"scheme", "stringPath", "replace"})
-  @Deprecated
-  public Dfs( Scheme scheme, String stringPath, boolean replace )
-    {
-    super( scheme, stringPath, replace );
-    }
-
-  /**
-   * Constructor Dfs creates a new Dfs instance.
-   *
-   * @param scheme     of type Scheme
-   * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
-  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
+  @ConstructorProperties( {"scheme", "stringPath", "sinkMode"} )
   public Dfs( Scheme scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, stringPath, sinkMode );

@@ -205,22 +205,6 @@ public class FieldsTest extends CascadingTestCase
     }
 
   @Test
-  public void testAppendArray()
-    {
-    Fields fieldA = new Fields( 0, 1 );
-    Fields fieldB = new Fields( 0 );
-    Fields fieldC = new Fields( 0 );
-
-    Fields appended = fieldA.append( Fields.fields( fieldB, fieldC ) );
-
-    assertEquals( "not equal: ", 4, appended.size() );
-    assertEquals( "not equal: ", 0, appended.get( 0 ) );
-    assertEquals( "not equal: ", 1, appended.get( 1 ) );
-    assertEquals( "not equal: ", 2, appended.get( 2 ) );
-    assertEquals( "not equal: ", 3, appended.get( 3 ) );
-    }
-
-  @Test
   public void testRename()
     {
     Fields fields = new Fields( "a", "b", "c", "d" );

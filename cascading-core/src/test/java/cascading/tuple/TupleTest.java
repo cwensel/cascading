@@ -20,8 +20,6 @@
 
 package cascading.tuple;
 
-import java.util.Date;
-
 import cascading.CascadingTestCase;
 import cascading.tuple.io.TuplePair;
 import org.junit.Test;
@@ -88,7 +86,6 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
     assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
-
     assertEquals( "not equal: tuple.size()", 4, tuple.size() );
     assertEquals( "not equal: tuple.get( 0 )", "b", tuple.getObject( 0 ) );
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 1 ) );
@@ -100,7 +97,6 @@ public class TupleTest extends CascadingTestCase
     Tuple aTuple = tuple.remove( new int[]{2, 4} );
     assertEquals( "not equal: aTuple.size()", 2, aTuple.size() );
     assertEquals( "not equal: aTuple.get( 0 )", "c", aTuple.getObject( 0 ) );
-
 
     assertEquals( "not equal: tuple.size()", 3, tuple.size() );
     assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
@@ -269,37 +265,6 @@ public class TupleTest extends CascadingTestCase
 
     assertTrue( "not less than: aTuple < bTuple", aTuple.compareTo( bTuple ) < 0 );
     assertTrue( "not less than: bTuple < aTuple", bTuple.compareTo( aTuple ) > 0 );
-    }
-
-  @Test
-  public void testCoerce()
-    {
-    Date date = new Date();
-    Tuple tuple = new Tuple( "1", null, date, date );
-
-    Tuple results = Tuples.coerce( tuple, new Class[]{int.class, boolean.class, Date.class, String.class} );
-
-    assertEquals( results.getObject( 0 ), 1 );
-    assertEquals( results.getObject( 1 ), false );
-    assertEquals( results.getObject( 2 ), date );
-    assertEquals( results.getObject( 3 ), date.toString() );
-    }
-
-  @Test
-  public void testCoerceInto()
-    {
-    Date date = new Date();
-    Tuple tuple = new Tuple( "1", null, date, date );
-    Tuple destination = Tuple.size( 4 );
-
-    Tuple results = Tuples.coerce( tuple, new Class[]{int.class, boolean.class, Date.class,
-                                                      String.class}, destination );
-
-    assertTrue( results == destination );
-    assertEquals( results.getObject( 0 ), 1 );
-    assertEquals( results.getObject( 1 ), false );
-    assertEquals( results.getObject( 2 ), date );
-    assertEquals( results.getObject( 3 ), date.toString() );
     }
 
   @Test
