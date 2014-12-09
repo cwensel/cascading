@@ -47,13 +47,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class HadoopPlanner is the core Hadoop MapReduce planner used by default through the {@link cascading.flow.hadoop.HadoopFlowConnector}.
+ * Class HadoopPlanner is the core Hadoop MapReduce planner used by default through a {@link cascading.flow.FlowConnector}
+ * sub-class.
  * <p/>
  * Notes:
  * <p/>
  * <strong>Custom JobConf properties</strong><br/>
  * A custom JobConf instance can be passed to this planner by calling {@link #copyJobConf(java.util.Map, org.apache.hadoop.mapred.JobConf)}
- * on a map properties object before constructing a new {@link cascading.flow.hadoop.HadoopFlowConnector}.
+ * on a map properties object before constructing a new {@link cascading.flow.FlowConnector} sub-class.
  * <p/>
  * A better practice would be to set Hadoop properties directly on the map properties object handed to the FlowConnector.
  * All values in the map will be passed to a new default JobConf instance to be used as defaults for all resulting

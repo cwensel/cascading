@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class Hfs is the base class for all Hadoop file system access. Hfs may only be used with the
- * {@link cascading.flow.hadoop.HadoopFlowConnector} when creating Hadoop executable {@link cascading.flow.Flow}
+ * Hadoop {@link cascading.flow.FlowConnector} sub-classes when creating Hadoop executable {@link cascading.flow.Flow}
  * instances.
  * <p/>
  * Paths typically should point to a directory, where in turn all the "part" files immediately in that directory will

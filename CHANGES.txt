@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Removed the deprecated c.f.h.HadoopFlowConnector from the cascading-hadoop2-mr1 sub-project.
+
   Removed all deprecated methods, constructors, enums, and constants.
 
   Removed the deprecated c.o.a.Max, c.o.a.Min, and c.o.a.ExtremaBase classes. See c.o.a.MaxValue and c.o.a.MinValue

@@ -44,7 +44,7 @@ import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
 /**
  * Class HadoopFlow is the Apache Hadoop specific implementation of a {@link Flow}.
  * <p/>
- * HadoopFlow must be created through a {@link HadoopFlowConnector} instance.
+ * HadoopFlow must be created through a {@link cascading.flow.FlowConnector} sub-class instance.
  * <p/>
  * If classpath paths are provided on the {@link FlowDef}, the Hadoop distributed cache mechanism will be used
  * to augment the remote classpath.
@@ -52,7 +52,7 @@ import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
  * Any path elements that are relative will be uploaded to HDFS, and the HDFS URI will be used on the JobConf. Note
  * all paths are added as "files" to the JobConf, not archives, so they aren't needlessly uncompressed cluster side.
  *
- * @see HadoopFlowConnector
+ * @see cascading.flow.FlowConnector
  */
 public class HadoopFlow extends BaseFlow<JobConf>
   {
