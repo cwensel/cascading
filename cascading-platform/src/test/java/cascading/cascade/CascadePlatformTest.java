@@ -49,6 +49,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import org.junit.Test;
 
+import static data.InputData.inputFileApache;
 import static data.InputData.inputFileIps;
 
 public class CascadePlatformTest extends PlatformTestCase
@@ -408,5 +409,35 @@ public class CascadePlatformTest extends PlatformTestCase
 
     assertTrue( cascade.getTailFlows().contains( fourth ) );
     assertTrue( cascade.getSinkTaps().containsAll( fourth.getSinksCollection() ) );
+    }
+
+  @Test( expected = CascadeException.class )
+  public void testPlannerFailureDuplicateSinks() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+
+    Tap source = getPlatform().getTextFile( inputFileIps );
+    Tap sink = getPlatform().getTextFile( "output" );
+    Pipe copyPipe = new Pipe( "copy" );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( copyPipe, source )
+      .addTailSink( copyPipe, sink );
+
+    Flow firstFlow = getPlatform().getFlowConnector().connect( flowDef );
+
+    getPlatform().copyFromLocal( inputFileApache );
+    Tap secondSource = getPlatform().getTextFile( inputFileApache );
+    Tap secondSink = getPlatform().getTextFile( "output2" );
+    Pipe secondCopyPipe = new Pipe( "copy2", copyPipe );
+
+    flowDef = FlowDef.flowDef()
+      .addSource( copyPipe, secondSource )
+      .addSink( copyPipe, sink )
+      .addTailSink( secondCopyPipe, secondSink );
+
+    Flow secondFlow = getPlatform().getFlowConnector().connect( flowDef );
+
+    new CascadeConnector().connect( firstFlow, secondFlow );
     }
   }
