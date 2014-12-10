@@ -43,6 +43,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
@@ -443,7 +444,7 @@ public class Util
       }
     }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings( {"unchecked"} )
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
@@ -480,7 +481,7 @@ public class Util
    *
    * @param list
    */
-  @SuppressWarnings({"StatementWithEmptyBody"})
+  @SuppressWarnings( {"StatementWithEmptyBody"} )
   public static void removeAllNulls( List list )
     {
     while( list.remove( null ) )
@@ -1012,5 +1013,10 @@ public class Util
   public static String cleansePathName( String name )
     {
     return name.replaceAll( "\\s+|\\*|\\+|/+", "_" );
+    }
+
+  public static boolean containsWhitespace( String string )
+    {
+    return Pattern.compile( "\\s" ).matcher( string ).find();
     }
   }

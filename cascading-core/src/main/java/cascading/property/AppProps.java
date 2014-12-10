@@ -205,10 +205,15 @@ public class AppProps extends Props
     if( tag == null )
       return;
 
+    tag = tag.trim();
+
+    if( Util.containsWhitespace( tag ) )
+      LOG.warn( "tags should not contain whitespace characters: '{}'", tag );
+
     String tags = PropertyUtil.getProperty( properties, APP_TAGS, (String) null );
 
     if( tags != null )
-      tags = join( ",", tag.trim(), tags );
+      tags = join( ",", tag, tags );
     else
       tags = tag;
 
@@ -321,6 +326,9 @@ public class AppProps extends Props
    * <lli>org: - the group, team or organization that is responsible for the application.</lli>
    * <lli>support: - the email address of the user who should be notified of failures or issues.</lli>
    * </ul>
+   * <p/>
+   * Note that tags should not contain whitespace characters, even though this is not an error, a warning will be
+   * issues.
    *
    * @param tag type String
    * @return this
@@ -348,6 +356,9 @@ public class AppProps extends Props
    * <lli>org: - the group, team or organization that is responsible for the application.</lli>
    * <lli>support: - the email address of the user who should be notified of failures or issues.</lli>
    * </ul>
+   * <p/>
+   * Note that tags should not contain whitespace characters, even though this is not an error, a warning will be
+   * issues.
    *
    * @param tags type String
    * @return this

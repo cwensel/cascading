@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Updated c.p.AppProps and c.p.UnitOfWorkDef to log a warning if a tag contains whitespace characters.
+
   Fixed issue where c.c.CascadeDef was allowing multiple flows with the same sink to be part of a Cascade.
 
   Updated c.f.h.MapReduceFlow to support both the org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* APIs.
