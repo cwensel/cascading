@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.2 [unreleased]
 
+  Fixed issue in c.p.h.Hadoop2MR1Platform causing tests to not properly run on a remote cluster when configured to do
+  so.
+
 2.6.1
 
   Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.
