@@ -21,9 +21,13 @@
 package cascading.cascade.hadoop;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
@@ -39,13 +43,17 @@ import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
+import cascading.stats.FlowStats;
+import cascading.stats.hadoop.ProcessStepStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import org.junit.Test;
 import riffle.process.DependencyIncoming;
 import riffle.process.DependencyOutgoing;
+import riffle.process.ProcessChildren;
 import riffle.process.ProcessComplete;
+import riffle.process.ProcessCounters;
 import riffle.process.ProcessStart;
 import riffle.process.ProcessStop;
 import riffle.process.scheduler.ProcessChain;
@@ -208,6 +216,54 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testProcessFlowWithCounters() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+    Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
+
+    Map<String, Long> innerMap = new HashMap<String, Long>();
+    innerMap.put( "inner-key", 42L );
+
+    counters.put( "outer-key", innerMap );
+
+    Flow process = flowWithCounters( "counter", counters );
+    process.complete();
+    FlowStats flowStats = process.getFlowStats();
+    assertNotNull( flowStats );
+
+    List children = new ArrayList( flowStats.getChildren() );
+    assertEquals( 1, children.size() );
+    ProcessStepStats stepStats = (ProcessStepStats) children.get( 0 );
+    assertEquals( counters.keySet(), stepStats.getCounterGroups() );
+    assertEquals( innerMap.keySet(), stepStats.getCountersFor( "outer-key" ) );
+    assertEquals( 42L, stepStats.getCounterValue( "outer-key", "inner-key" ) );
+    }
+
+  @Test
+  public void testProcessFlowWithChildCounters() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileIps );
+    Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
+
+    Map<String, Long> innerMap = new HashMap<String, Long>();
+    innerMap.put( "inner-key", 42L );
+
+    counters.put( "outer-key", innerMap );
+
+    Flow process = flowWithChildren( "children", counters );
+    process.complete();
+    FlowStats flowStats = process.getFlowStats();
+    assertNotNull( flowStats );
+
+    List children = new ArrayList( flowStats.getChildren() );
+    assertEquals( 1, children.size() );
+    ProcessStepStats stepStats = (ProcessStepStats) children.get( 0 );
+    assertEquals( counters.keySet(), stepStats.getCounterGroups() );
+    assertEquals( innerMap.keySet(), stepStats.getCountersFor( "outer-key" ) );
+    assertEquals( 42L, stepStats.getCounterValue( "outer-key", "inner-key" ) );
+    }
+
+  @Test
   public void testProcessFlowFlowListenerExceptionHandlingInStop() throws IOException, InterruptedException
     {
     ThrowableListener listener = new ThrowableListener();
@@ -238,6 +294,24 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
     Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
 
     return new ProcessFlow( "flow", new FailingRiffle( source, sink, failing ) );
+    }
+
+  private Flow flowWithCounters( String path, Map<String, Map<String, Long>> counters )
+    {
+    Tap source = getPlatform().getTextFile( inputFileIps );
+
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
+
+    return new ProcessFlow( "counter-flow", new CounterRiffle( source, sink, counters ) );
+    }
+
+  private Flow flowWithChildren( String path, Map<String, Map<String, Long>> counters )
+    {
+    Tap source = getPlatform().getTextFile( inputFileIps );
+
+    Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/first" ), SinkMode.REPLACE );
+
+    return new ProcessFlow( "counter-flow", new ChildCounterRiffle( source, sink, counters ) );
     }
 
   @riffle.process.Process
@@ -331,6 +405,109 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
     public Throwable getThrowable()
       {
       return throwable;
+      }
+    }
+
+  @riffle.process.Process
+  class CounterRiffle
+    {
+    Tap sink;
+    Tap source;
+    Map<String, Map<String, Long>> counter;
+
+    CounterRiffle( Tap source, Tap sink, Map<String, Map<String, Long>> counter )
+      {
+      this.source = source;
+      this.sink = sink;
+      this.counter = counter;
+      }
+
+    @ProcessStart
+    public void start()
+      {
+      }
+
+    @ProcessStop
+    public void stop()
+      {
+      }
+
+    @ProcessCounters
+    public Map<String, Map<String, Long>> getCounters()
+      {
+      return counter;
+      }
+
+    @ProcessComplete
+    public void complete()
+      {
+      }
+
+    @DependencyOutgoing
+    public Collection getOutgoing()
+      {
+      return Collections.unmodifiableCollection( Arrays.asList( sink ) );
+      }
+
+    @DependencyIncoming
+    public Collection getIncoming()
+      {
+      return Collections.unmodifiableCollection( Arrays.asList( source ) );
+      }
+
+    }
+
+  @riffle.process.Process
+  class ChildCounterRiffle
+    {
+    Tap sink;
+    Tap source;
+    Map<String, Map<String, Long>> counter;
+
+    ChildCounterRiffle( Tap source, Tap sink, Map<String, Map<String, Long>> counter )
+      {
+      this.source = source;
+      this.sink = sink;
+      this.counter = counter;
+      }
+
+    @ProcessStart
+    public void start()
+      {
+      }
+
+    @ProcessStop
+    public void stop()
+      {
+      }
+
+    @ProcessCounters
+    public Map<String, Map<String, Long>> getCounters()
+      {
+      return null;
+      }
+
+    @ProcessChildren
+    public List<Object> getChildren()
+      {
+      return Arrays.<Object>asList( new CounterRiffle( source, sink, counter ) );
+      }
+
+    @ProcessComplete
+    public void complete()
+      {
+      }
+
+    @DependencyOutgoing
+    public Collection getOutgoing()
+      {
+      return Collections.unmodifiableCollection( Arrays.asList( sink ) );
+      }
+
+    @DependencyIncoming
+    public Collection getIncoming()
+      {
+      return Collections.unmodifiableCollection( Arrays.asList( source ) );
       }
     }
 

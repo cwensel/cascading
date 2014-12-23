@@ -34,6 +34,7 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
+import cascading.stats.hadoop.ProcessFlowStats;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -67,7 +68,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param name    of type String
    * @param process of type JobConf
    */
-  @ConstructorProperties({"name", "process"})
+  @ConstructorProperties( {"name", "process"} )
   public ProcessFlow( String name, P process )
     {
     this( new Properties(), name, process );
@@ -80,7 +81,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param name       of type String
    * @param process    of type P
    */
-  @ConstructorProperties({"properties", "name", "process"})
+  @ConstructorProperties( {"properties", "name", "process"} )
   public ProcessFlow( Map<Object, Object> properties, String name, P process )
     {
     this( properties, name, process, null );
@@ -94,15 +95,28 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param process        of type P
    * @param flowDescriptor pf type LinkedHashMap<String, String>
    */
-  @ConstructorProperties({"properties", "name", "process", "flowDescriptor"})
+  @ConstructorProperties( {"properties", "name", "process", "flowDescriptor"} )
   public ProcessFlow( Map<Object, Object> properties, String name, P process, Map<String, String> flowDescriptor )
     {
     super( HadoopUtil.getPlatformInfo(), properties, null, name, flowDescriptor );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
-
     setName( name );
     setTapFromProcess();
+    initStats();
+    }
+
+  private void initStats()
+    {
+    try
+      {
+      if( processWrapper.hasCounters() )
+        this.flowStats = new ProcessFlowStats( this, getFlowSession().getCascadingServices().createClientState( getID() ), processWrapper );
+      }
+    catch( ProcessException exception )
+      {
+      throw new FlowException( exception );
+      }
     }
 
   /**
@@ -148,6 +162,7 @@ public class ProcessFlow<P> extends HadoopFlow
     {
     try
       {
+      flowStats.markPending();
       fireOnStarting();
       processWrapper.start();
       flowStats.markStarted();
@@ -194,6 +209,7 @@ public class ProcessFlow<P> extends HadoopFlow
       {
       if( !isStarted )
         {
+        flowStats.markPending();
         fireOnStarting();
         isStarted = true;
         flowStats.markStarted();
