@@ -25,8 +25,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -52,6 +55,22 @@ import junit.framework.TestCase;
  */
 public class CascadingTestCase extends TestCase implements Serializable
   {
+  static class TestFlowProcess extends FlowProcess.NullFlowProcess
+    {
+    private final Map<Object, Object> properties;
+
+    public TestFlowProcess( Map<Object, Object> properties )
+      {
+      this.properties = properties;
+      }
+
+    @Override
+    public Object getProperty( String key )
+      {
+      return properties.get( key );
+      }
+    }
+
   public CascadingTestCase()
     {
     }
@@ -141,17 +160,28 @@ public class CascadingTestCase extends TestCase implements Serializable
     return invokeFunction( function, new TupleEntry( arguments ), resultFields );
     }
 
+  public static TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields, Map<Object, Object> properties )
+    {
+    return invokeFunction( function, new TupleEntry( arguments ), resultFields, properties );
+    }
+
   public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
     {
+    return invokeFunction( function, arguments, resultFields, new HashMap<Object, Object>() );
+    }
+
+  public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields, Map<Object, Object> properties )
+    {
+    FlowProcess flowProcess = new TestFlowProcess( properties );
     ConcreteCall operationCall = new ConcreteCall( arguments.getFields() );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     operationCall.setArguments( arguments );
     operationCall.setOutputCollector( collector );
 
-    function.prepare( FlowProcess.NULL, operationCall );
-    function.operate( FlowProcess.NULL, operationCall );
-    function.cleanup( FlowProcess.NULL, operationCall );
+    function.prepare( flowProcess, operationCall );
+    function.operate( flowProcess, operationCall );
+    function.cleanup( flowProcess, operationCall );
 
     return collector;
     }
@@ -163,21 +193,35 @@ public class CascadingTestCase extends TestCase implements Serializable
     return invokeFunction( function, entries, resultFields );
     }
 
+  public static TupleListCollector invokeFunction( Function function, Tuple[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
+
+    return invokeFunction( function, entries, resultFields, properties );
+    }
+
   public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
     {
+    return invokeFunction( function, argumentsArray, resultFields, new HashMap<Object, Object>() );
+    }
+
+  public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    FlowProcess flowProcess = new TestFlowProcess( properties );
     ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
 
-    function.prepare( FlowProcess.NULL, operationCall );
+    function.prepare( flowProcess, operationCall );
     operationCall.setOutputCollector( collector );
 
     for( TupleEntry arguments : argumentsArray )
       {
       operationCall.setArguments( arguments );
-      function.operate( FlowProcess.NULL, operationCall );
+      function.operate( flowProcess, operationCall );
       }
 
-    function.cleanup( FlowProcess.NULL, operationCall );
+    function.flush( flowProcess, operationCall );
+    function.cleanup( flowProcess, operationCall );
 
     return collector;
     }
@@ -187,17 +231,28 @@ public class CascadingTestCase extends TestCase implements Serializable
     return invokeFilter( filter, new TupleEntry( arguments ) );
     }
 
+  public static boolean invokeFilter( Filter filter, Tuple arguments, Map<Object, Object> properties )
+    {
+    return invokeFilter( filter, new TupleEntry( arguments ), properties );
+    }
+
   public static boolean invokeFilter( Filter filter, TupleEntry arguments )
     {
+    return invokeFilter( filter, arguments, new HashMap<Object, Object>() );
+    }
+
+  public static boolean invokeFilter( Filter filter, TupleEntry arguments, Map<Object, Object> properties )
+    {
+    FlowProcess flowProcess = new TestFlowProcess( properties );
     ConcreteCall operationCall = new ConcreteCall( arguments.getFields() );
 
     operationCall.setArguments( arguments );
 
-    filter.prepare( FlowProcess.NULL, operationCall );
+    filter.prepare( flowProcess, operationCall );
 
-    boolean isRemove = filter.isRemove( FlowProcess.NULL, operationCall );
+    boolean isRemove = filter.isRemove( flowProcess, operationCall );
 
-    filter.cleanup( FlowProcess.NULL, operationCall );
+    filter.cleanup( flowProcess, operationCall );
 
     return isRemove;
     }
@@ -206,14 +261,28 @@ public class CascadingTestCase extends TestCase implements Serializable
     {
     TupleEntry[] entries = makeArgumentsArray( argumentsArray );
 
-    return invokeFilter( filter, entries );
+    return invokeFilter( filter, entries, Collections.emptyMap() );
+    }
+
+  public static boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray, Map<Object, Object> properties )
+    {
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
+
+    return invokeFilter( filter, entries, properties );
     }
 
   public static boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray )
     {
+    return invokeFilter( filter, argumentsArray, Collections.emptyMap() );
+    }
+
+  public static boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray, Map<Object, Object> properties )
+    {
     ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
 
-    filter.prepare( FlowProcess.NULL, operationCall );
+    FlowProcess flowProcess = new TestFlowProcess( properties );
+
+    filter.prepare( flowProcess, operationCall );
 
     boolean[] results = new boolean[ argumentsArray.length ];
 
@@ -221,11 +290,11 @@ public class CascadingTestCase extends TestCase implements Serializable
       {
       operationCall.setArguments( argumentsArray[ i ] );
 
-      results[ i ] = filter.isRemove( FlowProcess.NULL, operationCall );
+      results[ i ] = filter.isRemove( flowProcess, operationCall );
       }
 
-    filter.flush( FlowProcess.NULL, operationCall );
-    filter.cleanup( FlowProcess.NULL, operationCall );
+    filter.flush( flowProcess, operationCall );
+    filter.cleanup( flowProcess, operationCall );
 
     return results;
     }
@@ -237,31 +306,49 @@ public class CascadingTestCase extends TestCase implements Serializable
     return invokeAggregator( aggregator, entries, resultFields );
     }
 
+  public static TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
+
+    return invokeAggregator( aggregator, entries, resultFields, properties );
+    }
+
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields )
     {
     return invokeAggregator( aggregator, null, argumentsArray, resultFields );
     }
 
+  public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    return invokeAggregator( aggregator, null, argumentsArray, resultFields, properties );
+    }
+
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
+    return invokeAggregator( aggregator, group, argumentsArray, resultFields, Collections.emptyMap() );
+    }
+
+  public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    FlowProcess flowProcess = new TestFlowProcess( properties );
     ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
 
     operationCall.setGroup( group );
 
-    aggregator.prepare( FlowProcess.NULL, operationCall );
+    aggregator.prepare( flowProcess, operationCall );
 
-    aggregator.start( FlowProcess.NULL, operationCall );
+    aggregator.start( flowProcess, operationCall );
 
     for( TupleEntry arguments : argumentsArray )
       {
       operationCall.setArguments( arguments );
-      aggregator.aggregate( FlowProcess.NULL, operationCall );
+      aggregator.aggregate( flowProcess, operationCall );
       }
 
     TupleListCollector collector = new TupleListCollector( resultFields, true );
     operationCall.setOutputCollector( collector );
 
-    aggregator.complete( FlowProcess.NULL, operationCall );
+    aggregator.complete( flowProcess, operationCall );
 
     aggregator.cleanup( null, operationCall );
 
@@ -275,24 +362,42 @@ public class CascadingTestCase extends TestCase implements Serializable
     return invokeBuffer( buffer, entries, resultFields );
     }
 
+  public static TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
+
+    return invokeBuffer( buffer, entries, resultFields, properties );
+    }
+
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields )
     {
     return invokeBuffer( buffer, null, argumentsArray, resultFields );
     }
 
+  public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    return invokeBuffer( buffer, null, argumentsArray, resultFields, properties );
+    }
+
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
+    return invokeBuffer( buffer, group, argumentsArray, resultFields, Collections.emptyMap() );
+    }
+
+  public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
+    {
+    FlowProcess flowProcess = new TestFlowProcess( properties );
     ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
 
     operationCall.setGroup( group );
 
-    buffer.prepare( FlowProcess.NULL, operationCall );
+    buffer.prepare( flowProcess, operationCall );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
     operationCall.setOutputCollector( collector );
 
     operationCall.setArgumentsIterator( Arrays.asList( argumentsArray ).iterator() );
 
-    buffer.operate( FlowProcess.NULL, operationCall );
+    buffer.operate( flowProcess, operationCall );
 
     buffer.cleanup( null, operationCall );
 

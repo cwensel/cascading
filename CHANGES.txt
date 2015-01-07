@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Added ability to use custom properties in the various invoke methods in c.CascadingTestCase to simplify testing of
+  functions, filters, buffers and aggregators.
+
   Updated c.f.h.ProcessFlow to support optional counters provided by Riffle based flows.
 
   Updated c.p.AppProps and c.p.UnitOfWorkDef to log a warning if a tag contains whitespace characters.
