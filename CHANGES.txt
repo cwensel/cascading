@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.2 [unreleased]
 
+  Updated c.u.Version to warn if multiple 'cascading/version.properties' files are present on the classpath.
+
   Fixed issue where a c.p.a.Coerce constructor would throw a j.l.IllegalArgumentException on a valid types argument.
 
   Fixed issue where c.t.TapPlatformTest was not preserving properties coming from the TestPlatform when creating a Flow
