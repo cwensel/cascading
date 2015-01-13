@@ -46,7 +46,7 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
     {
-    super( null );
+    super( Fields.UNKNOWN, Fields.ALL );
     }
 
   /**
