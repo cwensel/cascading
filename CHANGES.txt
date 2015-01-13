@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.6.2 [unreleased]
+2.6.2
 
   Fixed issue where c.s.h.SequenceFile default ctor would throw an NPE.
 
