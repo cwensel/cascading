@@ -87,7 +87,7 @@ subprojects {
   }
 
   javadoc {
-    def copyright = '<i>Copyright &#169; 2007-2014 Concurrent, Inc. All Rights Reserved.</i>'
+    def copyright = '<i>Copyright &#169; 2007-2015 Concurrent, Inc. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
