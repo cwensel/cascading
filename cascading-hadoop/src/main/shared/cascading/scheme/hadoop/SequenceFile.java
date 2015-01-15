@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,7 +46,7 @@ public class SequenceFile extends Scheme<JobConf, RecordReader, OutputCollector,
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
     {
-    super( Fields.UNKNOWN, Fields.ALL );
+    super( null );
     }
 
   /**
