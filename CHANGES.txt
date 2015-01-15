@@ -21,6 +21,20 @@ Cascading Change Log
   Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a
   predecessor fails.
 
+2.6.2
+
+  Fixed issue where c.s.h.SequenceFile default ctor would throw an NPE.
+
+  Updated c.u.Version to warn if multiple 'cascading/version.properties' files are present on the classpath.
+
+  Fixed issue where a c.p.a.Coerce constructor would throw a j.l.IllegalArgumentException on a valid types argument.
+
+  Fixed issue where c.t.TapPlatformTest was not preserving properties coming from the TestPlatform when creating a Flow
+  causing remote test failures.
+
+  Fixed issue in c.p.h.Hadoop2MR1Platform causing tests to not properly run on a remote cluster when configured to do
+  so.
+
 2.6.1
 
   Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.

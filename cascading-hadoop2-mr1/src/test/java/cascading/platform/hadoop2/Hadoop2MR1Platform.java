@@ -23,7 +23,6 @@ package cascading.platform.hadoop2;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Random;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProps;
@@ -140,13 +139,26 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform
           jobConf.set( "fs.default.name", System.getProperty( "fs.default.name" ) );
           }
 
-        if( !Util.isEmpty( System.getProperty( "mapred.job.tracker" ) ) )
+        if( !Util.isEmpty( System.getProperty( "fs.defaultFS" ) ) )
           {
-          LOG.info( "using {}={}", "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
-          jobConf.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
+          LOG.info( "using {}={}", "fs.defaultFS", System.getProperty( "fs.defaultFS" ) );
+          jobConf.set( "fs.defaultFS", System.getProperty( "fs.defaultFS" ) );
+          }
+
+        if( !Util.isEmpty( System.getProperty( "yarn.resourcemanager.address" ) ) )
+          {
+          LOG.info( "using {}={}", "yarn.resourcemanager.address", System.getProperty( "yarn.resourcemanager.address" ) );
+          jobConf.set( "yarn.resourcemanager.address", System.getProperty( "yarn.resourcemanager.address" ) );
+          }
+
+        if( !Util.isEmpty( System.getProperty( "mapreduce.jobhistory.address" ) ) )
+          {
+          LOG.info( "using {}={}", "mapreduce.jobhistory.address", System.getProperty( "mapreduce.jobhistory.address" ) );
+          jobConf.set( "mapreduce.jobhistory.address", System.getProperty( "mapreduce.jobhistory.address" ) );
           }
 
         jobConf.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
+        jobConf.set( "mapreduce.framework.name", "yarn" );
         fileSys = FileSystem.get( jobConf );
         }
       else
