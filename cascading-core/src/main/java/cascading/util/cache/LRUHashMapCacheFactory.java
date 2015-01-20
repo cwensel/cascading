@@ -18,24 +18,19 @@
  * limitations under the License.
  */
 
-package cascading.management.annotation;
+package cascading.util.cache;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import cascading.flow.FlowProcess;
 
 /**
- * PropertyConfigured is an annotation to document the configuration key and the default value of a given @Property
- * annotation on the same {@link java.lang.reflect.AnnotatedElement}.
- * <p/>
- * See {@link cascading.pipe.assembly.AggregateBy#getCapacity()} for an example.
+ * Concrete sub-class of {@link cascading.util.cache.BaseCacheFactory} for creating {@link LRUHashMapCache}
+ * instances.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.METHOD, ElementType.FIELD})
-public @interface PropertyConfigured
+public class LRUHashMapCacheFactory extends BaseCacheFactory
   {
-  String value();
-
-  String defaultValue() default "";
+  @Override
+  public CascadingCache create( FlowProcess flowProcess )
+    {
+    return new LRUHashMapCache();
+    }
   }

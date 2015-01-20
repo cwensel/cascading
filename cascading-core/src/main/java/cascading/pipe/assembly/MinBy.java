@@ -44,8 +44,8 @@ import cascading.tuple.TupleEntry;
  * The {@code threshold} value tells the underlying MinPartials functions how many unique key sums to accumulate
  * in the LRU cache, before emitting the least recently used entry.
  * <p/>
- * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
- * will be used.
+ * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
+ * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
  *
  * @see cascading.pipe.assembly.AggregateBy
  */

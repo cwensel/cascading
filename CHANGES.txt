@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Added ability to provide a custom cache to be used in c.p.a.AggregateBy and c.p.a.Unique and all sub-classes.
+
   Added ability to use custom properties in the various invoke methods in c.CascadingTestCase to simplify testing of
   functions, filters, buffers and aggregators.
 
@@ -145,7 +147,7 @@ Cascading Change Log
 
   Fixed an issue where c.t.h.Hfs#getChildIdentifiers() could throw an j.l.StringIndexOutOfBoundsException.
 
-  Updated c.p.a.AggregateBy$CompositeFunction to not use the threshold in #equals or #hashCode.
+  Updated c.p.a.AggregateBy$CompositeFunction to not use the capacity in #equals or #hashCode.
 
   Fixed issue where a c.p.Merge could hide the streamed/accumulated nature of a stream when leading to a c.p.Group
   pipe. This could result in duplicate data passed to the c.p.GroupBy or c.p.CoGroup within a MapReduce job.
@@ -231,7 +233,7 @@ Cascading Change Log
   did not treat null values as equal. SQL semantics expect null values to not be equivalent. c.p.HashJoin
   does not support non-equality between null and will issue a warning.
 
-  Updated c.p.a.AggregateBy sub-classes to pass 0 as default threshold value to allow the system default value
+  Updated c.p.a.AggregateBy sub-classes to pass 0 as default capacity value to allow the system default value
   to be honored.
 
   Added c.o.a.MaxValue and c.o.a.MinValue c.o.Aggregator sub-classes to replace c.o.a.Max and c.o.a.Min classes
@@ -395,7 +397,7 @@ Cascading Change Log
 
   Fix for c.f.FlowProcess#getNumProcessSlices() incorrectly returning zero in local mode, should be 1.
 
-  Fix for c.p.a.AggregateBy not honoring the global system property threshold value if not overridden on the ctor.
+  Fix for c.p.a.AggregateBy not honoring the global system property capacity value if not overridden on the ctor.
 
   Fix for NPE if c.f.FlowProcess returns null config.
 
@@ -653,7 +655,7 @@ Cascading Change Log
 
   Fixed issue where c.p.a.AggregateBy.AveragePartials functor was using fixed declared fields.
 
-  Added the "cascading.aggregateby.threshold" property so that a default threshold can be set for the
+  Added the "cascading.aggregateby.capacity" property so that a default capacity can be set for the
   c.p.a.AggregateBy sub-assemblies.
 
   Added the c.m.UnitOfWork interface to give c.f.Flow and c.c.Cascade a common contract.
@@ -984,7 +986,7 @@ Cascading Change Log
 
   Added support for custom EMR properties used for managing task attempt temporary path management for some filesystems.
 
-  Changed c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the threshold
+  Changed c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the capacity
   is met, 10% of the least recently used open taps will be closed.
 
   Changed c.t.Fields #setComparator fieldName argument to accept Fields instances as the fieldName argument.
@@ -1701,7 +1703,7 @@ Cascading Change Log
 
   Changed c.t.h.S3HttpFileSystem so it can now create files remotely.
 
-  Renamed cascading.spill.threshold to cascading.cogroup.spill.threshold, so there is less a chance of collision.
+  Renamed cascading.spill.capacity to cascading.cogroup.spill.capacity, so there is less a chance of collision.
 
   Made numerous optimizations to improve overall performance. Namely split and merge of key/value tuples to remove
   redundancy in the stream between the mapper and reducer.
@@ -1767,7 +1769,7 @@ Cascading Change Log
 
 0.2.0
 
-  CoGroup will now spill to disk on extremely large co-groupings. Configurable via "cascading.spill.threshold".
+  CoGroup will now spill to disk on extremely large co-groupings. Configurable via "cascading.spill.capacity".
   Defaults to 10k elements.
 
   java.util.Properties instances can be used to set defauls for FlowConnectors.

@@ -22,9 +22,9 @@ package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
@@ -36,10 +36,14 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
+import cascading.provider.FactoryLoader;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.Tuples;
 import cascading.tuple.util.TupleHasher;
+import cascading.util.cache.BaseCacheFactory;
+import cascading.util.cache.CacheEvictionCallback;
+import cascading.util.cache.CascadingCache;
 
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
@@ -56,11 +60,25 @@ import cascading.tuple.util.TupleHasher;
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
  * <p/>
- * The {@code threshold} value tells the underlying FilterPartialDuplicates how many values to cache for duplicate
+ * Unique uses a {@link cascading.util.cache.CascadingCache} or LRU to do the filtering. To tune the cache, set the
+ * {@code capacity} value to a high enough value to utilize available memory. Or set a default value via the
+ * {@link cascading.pipe.assembly.UniqueProps#UNIQUE_CACHE_CAPACITY} property. The current default is {@code 10, 000} unique keys.
+ * <p/>
+ * The LRU cache is pluggable and defaults to {@link cascading.util.cache.LRUHashMapCache}. It can be changed
+ * by setting {@link cascading.pipe.assembly.UniqueProps#UNIQUE_CACHE_FACTORY} property to the name of a sub-class of
+ * {@link cascading.util.cache.BaseCacheFactory}.
+ * <p/>
+ * The {@code capacity} value tells the underlying FilterPartialDuplicates how many values to cache for duplicate
  * comparison before dropping values from the LRU cache.
+ *
+ * @see cascading.util.cache.LRUHashMapCacheFactory
+ * @see cascading.util.cache.DirectMappedCacheFactory
+ * @see cascading.util.cache.LRUHashMapCache
+ * @see cascading.util.cache.DirectMappedCache
  */
 public class Unique extends SubAssembly
   {
+
   public enum Include
     {
       ALL,
@@ -81,14 +99,17 @@ public class Unique extends SubAssembly
    * {@link cascading.operation.Aggregator} in order to improve de-duping performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.
    * <p/>
-   * The {@code threshold} value is used to maintain a LRU of a constant size. If more than threshold unique values
+   * The {@code capacity} value is used to maintain a LRU of a constant size. If more than capacity unique values
    * are seen, the oldest cached values will be removed from the cache.
    *
    * @see Unique
    */
-  public static class FilterPartialDuplicates extends BaseOperation<LinkedHashMap<Tuple, Object>> implements Filter<LinkedHashMap<Tuple, Object>>
+  public static class FilterPartialDuplicates extends BaseOperation<CascadingCache<Tuple, Object>> implements Filter<CascadingCache<Tuple, Object>>
     {
-    private int threshold = 10000;
+    /** special null value for the caches, since a cache might not permit 'null' as a value */
+    private final static Object NULL_VALUE = new Object();
+
+    private int capacity = 0;
     private Include include = Include.ALL;
     private TupleHasher tupleHasher;
 
@@ -100,61 +121,74 @@ public class Unique extends SubAssembly
     /**
      * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
      *
-     * @param threshold of type int
+     * @param capacity of type int
      */
-    @ConstructorProperties( {"threshold"} )
-    public FilterPartialDuplicates( int threshold )
+    @ConstructorProperties({"capacity"})
+    public FilterPartialDuplicates( int capacity )
       {
-      this.threshold = threshold;
+      this.capacity = capacity;
       }
 
     /**
      * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
      *
-     * @param include   of type Include
-     * @param threshold of type int
+     * @param include  of type Include
+     * @param capacity of type int
      */
-    @ConstructorProperties( {"include", "threshold"} )
-    public FilterPartialDuplicates( Include include, int threshold )
+    @ConstructorProperties({"include", "capacity"})
+    public FilterPartialDuplicates( Include include, int capacity )
       {
-      this( include, threshold, null );
+      this( include, capacity, null );
       }
 
     /**
      * Constructor FilterPartialDuplicates creates a new FilterPartialDuplicates instance.
      *
-     * @param threshold   of type int
+     * @param capacity    of type int
      * @param include     of type Include
      * @param tupleHasher of type TupleHasher
      */
-    @ConstructorProperties( {"include", "threshold", "tupleHasher"} )
-    public FilterPartialDuplicates( Include include, int threshold, TupleHasher tupleHasher )
+    @ConstructorProperties({"include", "capacity", "tupleHasher"})
+    public FilterPartialDuplicates( Include include, int capacity, TupleHasher tupleHasher )
       {
-      this.threshold = threshold;
+      this.capacity = capacity;
       this.include = include == null ? this.include : include;
       this.tupleHasher = tupleHasher;
       }
 
     @Override
-    public void prepare( final FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
+    public void prepare( final FlowProcess flowProcess, OperationCall<CascadingCache<Tuple, Object>> operationCall )
       {
-      operationCall.setContext( new LinkedHashMap<Tuple, Object>( threshold, 0.75f, true )
+      CacheEvictionCallback callback = new CacheEvictionCallback()
       {
       @Override
-      protected boolean removeEldestEntry( Map.Entry eldest )
+      public void evict( Map.Entry entry )
         {
-        boolean doFlush = size() > threshold;
-
-        if( doFlush )
-          flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
-
-        return doFlush;
+        flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
         }
-      } );
+      };
+      FactoryLoader loader = FactoryLoader.getInstance();
+      BaseCacheFactory cacheFactory = loader.loadFactoryFrom( flowProcess, UniqueProps.UNIQUE_CACHE_FACTORY, UniqueProps.DEFAULT_CACHE_FACTORY_CLASS );
+      if( cacheFactory == null )
+        throw new CascadingException( "unable to load cache factory, please check your '" + UniqueProps.UNIQUE_CACHE_FACTORY + "' setting." );
+
+      CascadingCache cache = cacheFactory.create( flowProcess );
+      cache.setCacheEvictionCallback( callback );
+      Integer cacheCapacity = capacity;
+      if( capacity == 0 )
+        {
+        cacheCapacity = flowProcess.getIntegerProperty( UniqueProps.UNIQUE_CACHE_CAPACITY );
+        if( cacheCapacity == null )
+          cacheCapacity = UniqueProps.UNIQUE_DEFAULT_CAPACITY;
+        }
+      cache.setCapacity( cacheCapacity.intValue() );
+      cache.initialize();
+
+      operationCall.setContext( cache );
       }
 
     @Override
-    public boolean isRemove( FlowProcess flowProcess, FilterCall<LinkedHashMap<Tuple, Object>> filterCall )
+    public boolean isRemove( FlowProcess flowProcess, FilterCall<CascadingCache<Tuple, Object>> filterCall )
       {
       // we assume its more painful to create lots of tuple copies vs comparisons
       Tuple args = TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTuple() );
@@ -178,7 +212,7 @@ public class Unique extends SubAssembly
         }
 
       // only do the copy here
-      filterCall.getContext().put( TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTupleCopy() ), null );
+      filterCall.getContext().put( TupleHasher.wrapTuple( tupleHasher, filterCall.getArguments().getTupleCopy() ), NULL_VALUE );
 
       flowProcess.increment( Cache.Num_Keys_Missed, 1 );
 
@@ -186,7 +220,7 @@ public class Unique extends SubAssembly
       }
 
     @Override
-    public void cleanup( FlowProcess flowProcess, OperationCall<LinkedHashMap<Tuple, Object>> operationCall )
+    public void cleanup( FlowProcess flowProcess, OperationCall<CascadingCache<Tuple, Object>> operationCall )
       {
       operationCall.setContext( null );
       }
@@ -203,7 +237,7 @@ public class Unique extends SubAssembly
 
       FilterPartialDuplicates that = (FilterPartialDuplicates) object;
 
-      if( threshold != that.threshold )
+      if( capacity != that.capacity )
         return false;
 
       return true;
@@ -213,7 +247,7 @@ public class Unique extends SubAssembly
     public int hashCode()
       {
       int result = super.hashCode();
-      result = 31 * result + threshold;
+      result = 31 * result + capacity;
       return result;
       }
     }
@@ -224,7 +258,7 @@ public class Unique extends SubAssembly
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties( {"pipe", "uniqueFields"} )
+  @ConstructorProperties({"pipe", "uniqueFields"})
   public Unique( Pipe pipe, Fields uniqueFields )
     {
     this( null, pipe, uniqueFields );
@@ -237,7 +271,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties( {"pipe", "uniqueFields", "include"} )
+  @ConstructorProperties({"pipe", "uniqueFields", "include"})
   public Unique( Pipe pipe, Fields uniqueFields, Include include )
     {
     this( null, pipe, uniqueFields, include );
@@ -250,7 +284,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties( {"pipe", "uniqueFields", "threshold"} )
+  @ConstructorProperties({"pipe", "uniqueFields", "capacity"})
   public Unique( Pipe pipe, Fields uniqueFields, int threshold )
     {
     this( null, pipe, uniqueFields, threshold );
@@ -264,7 +298,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties( {"pipe", "uniqueFields", "include", "threshold"} )
+  @ConstructorProperties({"pipe", "uniqueFields", "include", "capacity"})
   public Unique( Pipe pipe, Fields uniqueFields, Include include, int threshold )
     {
     this( null, pipe, uniqueFields, include, threshold );
@@ -277,10 +311,10 @@ public class Unique extends SubAssembly
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties( {"name", "pipe", "uniqueFields"} )
+  @ConstructorProperties({"name", "pipe", "uniqueFields"})
   public Unique( String name, Pipe pipe, Fields uniqueFields )
     {
-    this( name, pipe, uniqueFields, 10000 );
+    this( name, pipe, uniqueFields, null );
     }
 
   /**
@@ -291,10 +325,10 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties( {"name", "pipe", "uniqueFields", "include"} )
+  @ConstructorProperties({"name", "pipe", "uniqueFields", "include"})
   public Unique( String name, Pipe pipe, Fields uniqueFields, Include include )
     {
-    this( name, pipe, uniqueFields, include, 10000 );
+    this( name, pipe, uniqueFields, include, 0 );
     }
 
   /**
@@ -305,7 +339,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties( {"name", "pipe", "uniqueFields", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "uniqueFields", "capacity"})
   public Unique( String name, Pipe pipe, Fields uniqueFields, int threshold )
     {
     this( name, Pipe.pipes( pipe ), uniqueFields, threshold );
@@ -320,7 +354,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties( {"name", "pipe", "uniqueFields", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "uniqueFields", "include", "capacity"})
   public Unique( String name, Pipe pipe, Fields uniqueFields, Include include, int threshold )
     {
     this( name, Pipe.pipes( pipe ), uniqueFields, include, threshold );
@@ -332,10 +366,10 @@ public class Unique extends SubAssembly
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties( {"pipes", "uniqueFields"} )
+  @ConstructorProperties({"pipes", "uniqueFields"})
   public Unique( Pipe[] pipes, Fields uniqueFields )
     {
-    this( null, pipes, uniqueFields, 10000 );
+    this( null, pipes, uniqueFields );
     }
 
   /**
@@ -345,10 +379,10 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties( {"pipes", "uniqueFields", "include"} )
+  @ConstructorProperties({"pipes", "uniqueFields", "include"})
   public Unique( Pipe[] pipes, Fields uniqueFields, Include include )
     {
-    this( null, pipes, uniqueFields, include, 10000 );
+    this( null, pipes, uniqueFields, include );
     }
 
   /**
@@ -358,7 +392,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param threshold    of type int
    */
-  @ConstructorProperties( {"pipes", "uniqueFields", "threshold"} )
+  @ConstructorProperties({"pipes", "uniqueFields", "capacity"})
   public Unique( Pipe[] pipes, Fields uniqueFields, int threshold )
     {
     this( null, pipes, uniqueFields, threshold );
@@ -372,7 +406,7 @@ public class Unique extends SubAssembly
    * @param include      of type Include
    * @param threshold    of type int
    */
-  @ConstructorProperties( {"pipes", "uniqueFields", "include", "threshold"} )
+  @ConstructorProperties({"pipes", "uniqueFields", "include", "capacity"})
   public Unique( Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
     {
     this( null, pipes, uniqueFields, include, threshold );
@@ -385,10 +419,10 @@ public class Unique extends SubAssembly
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
    */
-  @ConstructorProperties( {"name", "pipes", "uniqueFields"} )
+  @ConstructorProperties({"name", "pipes", "uniqueFields"})
   public Unique( String name, Pipe[] pipes, Fields uniqueFields )
     {
-    this( name, pipes, uniqueFields, 10000 );
+    this( name, pipes, uniqueFields, null );
     }
 
   /**
@@ -399,7 +433,7 @@ public class Unique extends SubAssembly
    * @param uniqueFields of type Fields
    * @param include      of type Include
    */
-  @ConstructorProperties( {"name", "pipes", "uniqueFields", "include"} )
+  @ConstructorProperties({"name", "pipes", "uniqueFields", "include"})
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include )
     {
     this( name, pipes, uniqueFields, include, 10000 );
@@ -411,12 +445,12 @@ public class Unique extends SubAssembly
    * @param name         of type String
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
-  @ConstructorProperties( {"name", "pipes", "uniqueFields", "threshold"} )
-  public Unique( String name, Pipe[] pipes, Fields uniqueFields, int threshold )
+  @ConstructorProperties({"name", "pipes", "uniqueFields", "capacity"})
+  public Unique( String name, Pipe[] pipes, Fields uniqueFields, int capacity )
     {
-    this( name, pipes, uniqueFields, null, threshold );
+    this( name, pipes, uniqueFields, null, capacity );
     }
 
   /**
@@ -425,10 +459,10 @@ public class Unique extends SubAssembly
    * @param name         of type String
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
-  @ConstructorProperties( {"name", "pipes", "uniqueFields", "include", "threshold"} )
-  public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
+  @ConstructorProperties({"name", "pipes", "uniqueFields", "include", "capacity"})
+  public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include, int capacity )
     {
     super( pipes );
 
@@ -443,7 +477,7 @@ public class Unique extends SubAssembly
     if( !TupleHasher.isNull( comparators ) )
       tupleHasher = new TupleHasher( null, comparators );
 
-    FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, threshold, tupleHasher );
+    FilterPartialDuplicates partialDuplicates = new FilterPartialDuplicates( include, capacity, tupleHasher );
 
     for( int i = 0; i < filters.length; i++ )
       filters[ i ] = new Each( pipes[ i ], uniqueFields, partialDuplicates );

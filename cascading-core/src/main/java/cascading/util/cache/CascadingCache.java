@@ -18,24 +18,26 @@
  * limitations under the License.
  */
 
-package cascading.management.annotation;
+package cascading.util.cache;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Map;
 
 /**
- * PropertyConfigured is an annotation to document the configuration key and the default value of a given @Property
- * annotation on the same {@link java.lang.reflect.AnnotatedElement}.
- * <p/>
- * See {@link cascading.pipe.assembly.AggregateBy#getCapacity()} for an example.
+ * Interface that defines a Cache.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.METHOD, ElementType.FIELD})
-public @interface PropertyConfigured
+public interface CascadingCache<Key, Value> extends Map<Key, Value>
   {
-  String value();
+  /** Method to initialize the Cache. Any setup should be done in here. */
+  void initialize();
 
-  String defaultValue() default "";
+  /** Sets the capacity of the Cache. */
+  void setCapacity( int capacity );
+
+  /**
+   * Returns the capacity of this cache.
+   */
+  int getCapacity();
+
+  /** Sets the {@link CacheEvictionCallback} of this Cache. */
+  void setCacheEvictionCallback( CacheEvictionCallback cacheEvictionCallback );
   }
