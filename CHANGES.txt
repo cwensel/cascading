@@ -2,6 +2,12 @@ Cascading Change Log
 
 2.6.3 [unreleased]
 
+  Fixed issue where c.t.Tuple#set( Fields declarator, Fields selector, Tuple tuple ) did not honor given type
+  information.
+
+  Fixed issue where c.t.TupleEntry#set( TupleEntry tupleEntry ) could cause an NPE if complete type information is
+  not provided.
+
 2.6.2
 
   Fixed issue where c.s.h.SequenceFile default ctor would throw an NPE.

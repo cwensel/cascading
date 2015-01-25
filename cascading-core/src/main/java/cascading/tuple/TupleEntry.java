@@ -257,14 +257,20 @@ public class TupleEntry
     if( coercions != EMPTY_COERCIONS )
       return;
 
-    Fields fields = getFields();
+    coercions = getCoercions( getFields(), tuple );
+    }
+
+  static CoercibleType[] getCoercions( Fields fields, Tuple tuple )
+    {
     Type[] types = fields.types; // safe to not get a copy
     int size = fields.size();
 
     size = size == 0 && tuple != null ? tuple.size() : size;
 
-    if( coercions.length < size )
-      coercions = Coercions.coercibleArray( size, types );
+    if( size == 0 )
+      return EMPTY_COERCIONS;
+
+    return Coercions.coercibleArray( size, types );
     }
 
   /**
@@ -910,7 +916,7 @@ public class TupleEntry
    * Method set sets the values from the given tupleEntry into this TupleEntry instance based on the given
    * tupleEntry field names.
    * <p/>
-   * If type information is given, each incoming value will be coerced from its canonical type to the given types.
+   * If type information is given, each incoming value will be coerced from its canonical type to the current type.
    *
    * @param tupleEntry of type TupleEntry
    */
