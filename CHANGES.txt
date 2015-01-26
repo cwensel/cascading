@@ -2,9 +2,8 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
-  Fixed issue where c.m.a.URISanitizer would fail parsing glob expressions.
-
-  Added ability to provide a custom cache to be used in c.p.a.AggregateBy and c.p.a.Unique and all sub-classes.
+  Updated c.f.h.HadoopPlanner and c.f.h2.Hadoop2MR1Planner to log a warning if a flow is being run on the wrong version
+  of Hadoop.
 
   Added ability to use custom properties in the various invoke methods in c.CascadingTestCase to simplify testing of
   functions, filters, buffers and aggregators.

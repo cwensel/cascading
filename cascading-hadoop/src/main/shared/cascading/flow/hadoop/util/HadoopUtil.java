@@ -759,6 +759,11 @@ public class HadoopUtil
     return conf.get( "mapred.job.tracker" ).equals( "local" );
     }
 
+  public static boolean isYARN( JobConf conf )
+    {
+    return conf.get( "mapreduce.framework.name" ) != null;
+    }
+
   public static void setLocal( JobConf conf )
     {
     // set both properties to local

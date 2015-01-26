@@ -207,6 +207,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     super.initialize( flowConnector, properties );
 
     jobConf = HadoopUtil.createJobConf( properties, createJobConf( properties ) );
+    checkPlatform( jobConf );
     intermediateSchemeClass = flowConnector.getIntermediateSchemeClass( properties );
 
     Class type = AppProps.getApplicationJarClass( properties );
@@ -223,6 +224,12 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     AppProps.setApplicationJarPath( properties, jobConf.getJar() );
 
     LOG.info( "using application jar: {}", jobConf.getJar() );
+    }
+
+  protected void checkPlatform( JobConf jobConf )
+    {
+    if( HadoopUtil.isYARN( jobConf ) )
+      LOG.warn( "running YARN based flows on Hadoop 1.x may cause problems, please use the 'cascading-hadoop2-mr1' dependencies" );
     }
 
   @Override

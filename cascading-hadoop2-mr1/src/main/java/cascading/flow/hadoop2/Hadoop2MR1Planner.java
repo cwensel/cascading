@@ -25,13 +25,20 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.hadoop.planner.HadoopPlanner;
+import cascading.flow.hadoop.util.HadoopUtil;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Hadoop 2 (YARN) specific planner implementation.
  */
 public class Hadoop2MR1Planner extends HadoopPlanner
   {
+  /** Field LOG */
+  private static final Logger LOG = LoggerFactory.getLogger( Hadoop2MR1Planner.class );
+
   /**
    * Method copyJobConf adds the given JobConf values to the given properties object. Use this method to pass
    * custom default Hadoop JobConf properties to Hadoop.
@@ -44,21 +51,6 @@ public class Hadoop2MR1Planner extends HadoopPlanner
     for( Map.Entry<String, String> entry : configuration )
       properties.put( entry.getKey(), entry.getValue() );
     }
-
-//  /**
-//   * Method createJobConf returns a new JobConf instance using the values in the given properties argument.
-//   *
-//   * @param properties of type Map
-//   * @return a JobConf instance
-//   */
-//  public static JobConf createJobConf( Map<Object, Object> properties )
-//    {
-//    JobConf conf = new JobConf();
-//
-//    copyProperties( conf, properties );
-//
-//    return conf;
-//    }
 
   /**
    * Method copyProperties adds the given Map values to the given JobConf object.
@@ -84,5 +76,12 @@ public class Hadoop2MR1Planner extends HadoopPlanner
           configuration.set( entry.getKey().toString(), entry.getValue().toString() );
         }
       }
+    }
+
+  @Override
+  protected void checkPlatform( JobConf jobConf )
+    {
+    if( !HadoopUtil.isYARN( jobConf ) )
+      LOG.warn( "running Hadoop 1.x based flows on YARN may cause problems, please use the 'cascading-hadoop' dependencies" );
     }
   }
