@@ -39,6 +39,13 @@ import cascading.util.Pair;
  * <p/>
  * RegexReplace only expects one field value. If more than one argument value is passed, only the
  * first is handled, the remainder are ignored.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type if type information is provided. See the
+ * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
+ * values.
  */
 public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
   {

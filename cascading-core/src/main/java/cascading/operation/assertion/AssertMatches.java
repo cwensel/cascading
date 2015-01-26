@@ -30,6 +30,7 @@ import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.operation.regex.RegexMatcher;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 
 /**
  * Class AssertMatches matches the given regular expression patternString against the whole argument
@@ -37,6 +38,11 @@ import cascading.tuple.Tuple;
  * See {@link AssertMatchesAll} if you need to match the patternString regex against each individual tuple element.
  * <p/>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type via its {@code toString()} method.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
@@ -78,9 +84,9 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion<Matche
   @Override
   public void doAssert( FlowProcess flowProcess, ValueAssertionCall<Matcher> assertionCall )
     {
-    Tuple tuple = assertionCall.getArguments().getTuple();
+    TupleEntry tupleEntry = assertionCall.getArguments();
 
-    if( matchWholeTuple( assertionCall.getContext(), tuple ) )
-      BaseAssertion.throwFail( message, tuple.print(), patternString );
+    if( matchWholeTuple( assertionCall.getContext(), tupleEntry ) )
+      BaseAssertion.throwFail( message, tupleEntry.getTuple().print(), patternString );
     }
   }

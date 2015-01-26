@@ -37,6 +37,11 @@ import cascading.tuple.TupleEntry;
  * the tuple as a whole.
  * <p/>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type via its {@code toString()} method.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
@@ -80,7 +85,7 @@ public class AssertMatchesAll extends RegexMatcher implements ValueAssertion<Mat
     {
     TupleEntry input = assertionCall.getArguments();
 
-    int pos = matchEachElementPos( assertionCall.getContext(), input.getTuple() );
+    int pos = matchEachElementPos( assertionCall.getContext(), input );
 
     if( pos != -1 )
       BaseAssertion.throwFail( message, input.getFields().get( pos ), input.getObject( pos ), patternString, input.getTuple().print() );

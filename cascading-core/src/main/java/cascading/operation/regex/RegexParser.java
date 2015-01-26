@@ -36,12 +36,22 @@ import cascading.util.Pair;
 /**
  * Class RegexParser is used to extract a matched regex from an incoming argument value.
  * <p/>
+ * RegexParser only expects one field value. If more than one argument value is passed, only the
+ * first is handled, the remainder are ignored.
+ * <p/>
  * Sometimes its useful to parse out a value from a key/value pair in a string, if the key exists. If the key does
  * not exist, returning an empty string instead of failing is typically expected.
  * <p/>
  * The following regex can extract a value from {@code key1=value1&key2=value2} if key1 exists, otherwise an
  * empty string is returned:<br/>
  * <pre>(?<=key1=)[^&]*|$</pre>
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type if type information is provided. See the
+ * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
+ * values.
  */
 public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
   {
