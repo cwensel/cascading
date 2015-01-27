@@ -140,8 +140,18 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         return;
         }
 
-      if( !markStarted() )
-        return;
+      synchronized( this ) // backport from 3.0
+        {
+        if( stop )
+          {
+          if( flowStep.isInfoEnabled() )
+            flowStep.logInfo( "stop called before start: " + stepName );
+          return;
+          }
+
+        if( !markStarted() )
+          return;
+        }
 
       blockOnPredecessors();
 

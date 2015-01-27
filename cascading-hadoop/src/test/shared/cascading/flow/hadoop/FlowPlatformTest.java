@@ -53,6 +53,7 @@ import cascading.pipe.Pipe;
 import cascading.platform.hadoop.BaseHadoopPlatform;
 import cascading.property.AppProps;
 import cascading.scheme.hadoop.TextLine;
+import cascading.stats.CascadingStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
@@ -202,14 +203,18 @@ public class FlowPlatformTest extends PlatformTestCase
     while( true )
       {
       LOG.info( "testing if running" );
-      Thread.sleep( 100 );
+      Thread.sleep( 1000 );
 
       Map<String, FlowStepJob> map = Flows.getJobsMap( flow );
 
       if( map == null || map.values().size() == 0 )
         continue;
 
-      if( ( (HadoopFlowStepJob) map.values().iterator().next() ).isStarted() )
+      HadoopFlowStepJob flowStepJob = (HadoopFlowStepJob) map.values().iterator().next();
+      if( flowStepJob.getStepStats().getStatus() == CascadingStats.Status.FAILED )
+        fail( "failed to start Hadoop step, please check your environment." );
+
+      if( flowStepJob.isStarted() )
         break;
       }
 
@@ -400,7 +405,11 @@ public class FlowPlatformTest extends PlatformTestCase
         if( map == null || map.values().size() == 0 )
           continue;
 
-        if( ( (HadoopFlowStepJob) map.values().iterator().next() ).isStarted() )
+        HadoopFlowStepJob flowStepJob = (HadoopFlowStepJob) map.values().iterator().next();
+        if( flowStepJob.getStepStats().getStatus() == CascadingStats.Status.FAILED )
+          fail( "failed to start Hadoop step, please check your environment." );
+
+        if( flowStepJob.isStarted() )
           break;
         }
 
@@ -409,8 +418,8 @@ public class FlowPlatformTest extends PlatformTestCase
       flow.stop();
       }
 
-    assertTrue( "did not complete", listener.completed.tryAcquire( 120, TimeUnit.SECONDS ) );
-    assertTrue( "did not stop", listener.stopped.tryAcquire( 120, TimeUnit.SECONDS ) );
+    assertTrue( "did not complete", listener.completed.tryAcquire( 360, TimeUnit.SECONDS ) );
+    assertTrue( "did not stop", listener.stopped.tryAcquire( 360, TimeUnit.SECONDS ) );
 
     try
       {

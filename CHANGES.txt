@@ -1,6 +1,9 @@
 Cascading Change Log
 
 2.6.3 [unreleased]
+ 
+  Fixed issues in c.f.h.FlowPlatformTest which caused the test go into an endless loop. Also increased timeout to make
+  tests more reliable on slower hardware.
 
   Fixed issue where c.t.Tuple#set( Fields declarator, Fields selector, Tuple tuple ) did not honor given type
   information.
