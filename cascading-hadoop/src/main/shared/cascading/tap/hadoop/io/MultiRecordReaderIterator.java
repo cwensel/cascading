@@ -23,6 +23,7 @@ package cascading.tap.hadoop.io;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.HadoopFlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
@@ -109,7 +110,12 @@ public class MultiRecordReaderIterator implements CloseableIterator<RecordReader
     {
     LOG.debug( "reading split: {}", currentSplit );
 
-    return inputFormat.getRecordReader( splits[ currentSplit ], conf, Reporter.NULL );
+    Reporter reporter = Reporter.NULL;
+
+    if( flowProcess instanceof HadoopFlowProcess )
+      reporter = ( (HadoopFlowProcess) flowProcess ).getReporter(); // may return Reporter.NULL
+
+    return inputFormat.getRecordReader( splits[ currentSplit ], conf, reporter );
     }
 
   /**
