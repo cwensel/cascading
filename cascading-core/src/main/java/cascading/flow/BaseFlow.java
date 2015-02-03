@@ -41,6 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import cascading.CascadingException;
 import cascading.cascade.Cascade;
+import cascading.flow.planner.BaseFlowNode;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.PlatformInfo;
@@ -352,8 +353,17 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     if( flowStepGraph == null )
       return;
 
-    for( Object flowStep : flowStepGraph.vertexSet() )
-      ( (BaseFlowStep<Config>) flowStep ).setFlow( this );
+    Set<FlowStep> flowSteps = flowStepGraph.vertexSet();
+
+    for( FlowStep flowStep : flowSteps )
+      {
+      ( (BaseFlowStep) flowStep ).setFlow( this );
+
+      Set<FlowNode> flowNodes = flowStep.getFlowNodeGraph().vertexSet();
+
+      for( FlowNode flowNode : flowNodes )
+        ( (BaseFlowNode) flowNode ).setFlowStep( flowStep );
+      }
     }
 
   private void initFromTaps()
@@ -1268,7 +1278,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     while( topoIterator.hasNext() )
       {
       BaseFlowStep<Config> step = (BaseFlowStep) topoIterator.next();
-      FlowStepJob<Config> flowStepJob = step.getFlowStepJob( getFlowProcess(), getConfig() );
+      FlowStepJob<Config> flowStepJob = step.getCreateFlowStepJob( getFlowProcess(), getConfig() );
 
       jobsMap.put( step.getName(), flowStepJob );
 

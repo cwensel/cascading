@@ -52,6 +52,8 @@ public interface FlowNode extends ProcessModel
 
   String getID();
 
+  FlowStep getFlowStep();
+
   Collection<? extends FlowElement> getFlowElementsFor( Enum annotation );
 
   Set<? extends FlowElement> getSourceElements( Enum annotation );

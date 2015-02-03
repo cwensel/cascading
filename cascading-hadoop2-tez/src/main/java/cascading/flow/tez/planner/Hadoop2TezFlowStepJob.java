@@ -34,6 +34,9 @@ import cascading.management.state.ClientState;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
 import cascading.stats.tez.TezStepStats;
+import cascading.stats.tez.util.TezStatsUtil;
+import cascading.stats.tez.util.TimelineClient;
+import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -67,6 +70,8 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   private TezClient tezClient;
   private DAGClient dagClient;
 
+  private String dagId;
+
   private static long getStoreInterval( Configuration configuration )
     {
     return configuration.getLong( STATS_STORE_INTERVAL, 60 * 1000 );
@@ -77,7 +82,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     return configuration.getLong( JOB_POLLING_INTERVAL, 5000 );
     }
 
-  public Hadoop2TezFlowStepJob( ClientState clientState, BaseFlowStep flowStep, TezConfiguration currentConf, DAG dag )
+  public Hadoop2TezFlowStepJob( ClientState clientState, BaseFlowStep<TezConfiguration> flowStep, TezConfiguration currentConf, DAG dag )
     {
     super( clientState, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
     this.currentConf = currentConf;
@@ -98,16 +103,24 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     return new TezStepStats( flowStep, clientState )
     {
+    TimelineClient timelineClient = null;
+
     @Override
-    public DAGStatus getJobStatusClient()
+    public DAGClient getJobStatusClient()
       {
-      return getDagStatusWithCounters();
+      if( timelineClient == null && isTimelineServiceEnabled( currentConf ) )
+        timelineClient = TezStatsUtil.createTimelineClient( dagClient, this );
+
+      if( timelineClient != null )
+        return timelineClient;
+
+      return dagClient;
       }
 
     @Override
-    protected DAGClient getDAGClient()
+    public String getProcessStepID()
       {
-      return dagClient;
+      return dagId;
       }
     };
     }
@@ -116,10 +129,10 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     try
       {
-      TezConfiguration workingConf = new TezConfiguration( currentConf );
-
-      if( !workingConf.getBoolean( YarnConfiguration.TIMELINE_SERVICE_ENABLED, YarnConfiguration.DEFAULT_TIMELINE_SERVICE_ENABLED ) )
+      if( !isTimelineServiceEnabled( currentConf ) )
         flowStep.logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, please enable to capture detailed metrics of completed flows, this may require starting the YARN timeline server daemon." );
+
+      TezConfiguration workingConf = new TezConfiguration( currentConf );
 
       // this could be problematic
       flowStep.logInfo( "tez session mode enabled: " + workingConf.getBoolean( TezConfiguration.TEZ_AM_SESSION_MODE, TezConfiguration.TEZ_AM_SESSION_MODE_DEFAULT ) );
@@ -132,7 +145,9 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
       dagClient = tezClient.submitDAG( dag );
 
-      flowStep.logInfo( "submitted tez dag to app master: " + tezClient.getAppMasterApplicationId() );
+      dagId = Util.returnInstanceFieldIfExistsSafe( dagClient, "dagId" );
+
+      flowStep.logInfo( "submitted tez dag to app master: {}, with dag id: {}", tezClient.getAppMasterApplicationId(), dagId );
       }
     catch( TezException exception )
       {
@@ -140,8 +155,13 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       }
     }
 
+  private boolean isTimelineServiceEnabled( TezConfiguration workingConf )
+    {
+    return workingConf.getBoolean( YarnConfiguration.TIMELINE_SERVICE_ENABLED, YarnConfiguration.DEFAULT_TIMELINE_SERVICE_ENABLED );
+    }
+
   @Override
-  protected void markNodeRunningStatus( FlowNodeStats flowNodeStats )
+  protected void updateNodeStatus( FlowNodeStats flowNodeStats )
     {
     if( dagClient == null )
       return;
@@ -249,14 +269,26 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     DAGStatus dagStatus = getDagStatus();
 
     if( dagStatus == null )
-      return null;
+      {
+      flowStep.logWarn( "getDagStatus returned null" );
 
-    return dagStatus.getState();
+      return null;
+      }
+
+    DAGStatus.State state = dagStatus.getState();
+
+    if( state == null )
+      flowStep.logWarn( "dagStatus#getState returned null" );
+
+    return state;
     }
 
   private boolean isDagStatusComplete()
     {
     DAGStatus dagStatus = getDagStatus();
+
+    if( dagStatus == null )
+      flowStep.logWarn( "getDagStatus returned null" );
 
     return dagStatus != null && dagStatus.isCompleted();
     }
@@ -353,7 +385,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
   protected boolean internalNonBlockingIsSuccessful() throws IOException
     {
-    return getDagStatusState() == DAGStatus.State.SUCCEEDED;
+    return isDagStatusComplete() && getDagStatusState() == DAGStatus.State.SUCCEEDED;
     }
 
   @Override

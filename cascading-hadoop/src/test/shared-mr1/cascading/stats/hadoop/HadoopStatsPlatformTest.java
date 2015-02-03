@@ -135,7 +135,7 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
     HadoopStepStats stats1 = (HadoopStepStats) flowStats1.getFlowStepStats().get( 0 );
 
     assertNotNull( stats1.getID() );
-    assertNotNull( stats1.getJobID() );
+    assertNotNull( stats1.getProcessStepID() );
 
 //      assertEquals( 2, stats1.getNumMapTasks() );
 //      assertEquals( 1, stats1.getNumReducerTasks() );
@@ -169,7 +169,7 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
     HadoopStepStats stats2 = (HadoopStepStats) flowStats2.getFlowStepStats().get( 0 );
 
     assertNotNull( stats2.getID() );
-    assertNotNull( stats2.getJobID() );
+    assertNotNull( stats2.getProcessStepID() );
 
 //      assertEquals( 2, stats2.getNumMapTasks() );
 //      assertEquals( 1, stats2.getNumReducerTasks() );

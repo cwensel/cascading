@@ -31,6 +31,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowNode;
+import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
@@ -50,6 +51,8 @@ public class BaseFlowNode implements Serializable, FlowNode
   private int ordinal;
   private String name;
 
+  private transient FlowStep flowStep;
+
   protected ElementGraph nodeSubGraph;
   protected List<? extends ElementGraph> pipelineGraphs = Collections.emptyList();
 
@@ -63,9 +66,17 @@ public class BaseFlowNode implements Serializable, FlowNode
   private Map<Tap, Set<String>> reverseSinkTaps;
   private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
 
+  // for testing
+  public BaseFlowNode( String name, int ordinal )
+    {
+    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
+    setName( name );
+    this.ordinal = ordinal;
+    }
+
   public BaseFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
     {
-    this.id = Util.createUniqueID();
+    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.nodeSubGraph = nodeSubGraph;
 
     if( pipelineGraphs != null )
@@ -106,19 +117,16 @@ public class BaseFlowNode implements Serializable, FlowNode
     return name;
     }
 
-/*
-  protected String getNodeDisplayName( int idLength )
+  public void setFlowStep( FlowStep flowStep )
     {
-    if( idLength > Util.ID_LENGTH )
-      idLength = Util.ID_LENGTH;
-
-    String flowID = getFlowID().substring( 0, idLength );
-    String stepID = getID().substring( 0, idLength );
-    String nodeID = getID().substring( 0, idLength );
-
-    return String.format( "[%s/%s/%s] %s/%s", flowID, stepID, nodeID, getFlowName(), getName() );
+    this.flowStep = flowStep;
     }
-*/
+
+  @Override
+  public FlowStep getFlowStep()
+    {
+    return flowStep;
+    }
 
   @Override
   public ElementGraph getElementGraph()

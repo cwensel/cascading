@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.stats.CascadingStats;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowSliceStats;
 import org.apache.hadoop.conf.Configuration;
@@ -92,7 +93,7 @@ public class HadoopNodeCounterCache extends CounterCache<FlowNodeStats, Map<Stri
   protected Map<String, Map<String, Long>> getCounters( FlowNodeStats flowNodeStats ) throws IOException
     {
     // will use final or cached remote stats
-    flowNodeStats.captureDetail();
+    flowNodeStats.captureDetail( CascadingStats.Type.SLICE );
 
     Map<String, Map<String, Long>> allCounters = new HashMap<>();
 

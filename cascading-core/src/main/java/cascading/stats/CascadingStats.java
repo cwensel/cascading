@@ -22,10 +22,14 @@ package cascading.stats;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.management.state.ClientState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of
@@ -52,14 +56,20 @@ import cascading.management.state.ClientState;
  * </ul>
  * <p/>
  * A unit of work is considered {@code finished} when the Flow or Cascade is no longer processing a workload and {@code successful},
- * {@code failed}, or {@code stopped} is true.
+ * {@code skipped}, {@code failed}, or {@code stopped} is true.
+ * <p/>
+ * It is important to note all the timestamps are client side observations. Not values reported by the underlying
+ * platform. That said, the transitions are seen by polling the client interface to the underlying platform so are
+ * effected by the {@link cascading.flow.FlowProps#getJobPollingInterval()} value.
  *
  * @see CascadeStats
  * @see FlowStats
  * @see FlowStepStats
  */
-public abstract class CascadingStats<Child> implements Serializable
+public abstract class CascadingStats<Child> implements ProvidesCounters, Serializable
   {
+  private static final Logger LOG = LoggerFactory.getLogger( CascadingStats.class );
+
   public static final String STATS_STORE_INTERVAL = "cascading.stats.store.interval";
 
   /**
@@ -77,9 +87,31 @@ public abstract class CascadingStats<Child> implements Serializable
     properties.put( STATS_STORE_INTERVAL, Long.toString( intervalMs ) );
     }
 
+  public enum Type
+    {
+      CASCADE, FLOW, STEP, NODE, SLICE, ATTEMPT;
+
+    public boolean isChild( Type type )
+      {
+      return ordinal() < type.ordinal();
+      }
+    }
+
   public enum Status
     {
-      PENDING, SKIPPED, STARTED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, FAILED
+      PENDING( false ), SKIPPED( true ), STARTED( false ), SUBMITTED( false ), RUNNING( false ), SUCCESSFUL( true ), STOPPED( true ), FAILED( true );
+
+    boolean isFinished = false; // is this a completed state
+
+    Status( boolean isFinished )
+      {
+      this.isFinished = isFinished;
+      }
+
+    public boolean isFinished()
+      {
+      return isFinished;
+      }
     }
 
   /** Field name */
@@ -88,6 +120,8 @@ public abstract class CascadingStats<Child> implements Serializable
 
   /** Field status */
   Status status = Status.PENDING;
+
+  Set<StatsListener> listeners;
 
   /** Field pendingTime */
   long pendingTime;
@@ -136,6 +170,8 @@ public abstract class CascadingStats<Child> implements Serializable
     {
     return name;
     }
+
+  public abstract Type getType();
 
   /**
    * Method getThrowable returns the throwable of this CascadingStats object.
@@ -274,6 +310,9 @@ public abstract class CascadingStats<Child> implements Serializable
   public synchronized void markPending()
     {
     markPendingTime();
+
+    fireListeners( null, Status.PENDING );
+
     recordStats();
     recordInfo();
     }
@@ -309,8 +348,11 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.PENDING )
       throw new IllegalStateException( "may not mark as " + Status.STARTED + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.STARTED;
     markStartTime();
+
+    fireListeners( priorStatus, status );
 
     clientState.start( startTime );
     clientState.setStatus( status, startTime );
@@ -332,8 +374,11 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.STARTED )
       throw new IllegalStateException( "may not mark as " + Status.SUBMITTED + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.SUBMITTED;
     markSubmitTime();
+
+    fireListeners( priorStatus, status );
 
     clientState.submit( submitTime );
     clientState.setStatus( status, submitTime );
@@ -356,8 +401,11 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.STARTED && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.RUNNING + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.RUNNING;
     markRunTime();
+
+    fireListeners( priorStatus, status );
 
     clientState.run( runTime );
     clientState.setStatus( status, runTime );
@@ -376,8 +424,11 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.SUCCESSFUL + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.SUCCESSFUL;
     markFinishedTime();
+
+    fireListeners( priorStatus, status );
 
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
@@ -400,9 +451,12 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.STARTED && status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.FAILED + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.FAILED;
     markFinishedTime();
     this.throwable = throwable;
+
+    fireListeners( priorStatus, status );
 
     clientState.setStatus( status, finishedTime );
     clientState.stop( finishedTime );
@@ -416,8 +470,11 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.PENDING && status != Status.STARTED && status != Status.SUBMITTED && status != Status.RUNNING )
       throw new IllegalStateException( "may not mark as " + Status.STOPPED + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.STOPPED;
     markFinishedTime();
+
+    fireListeners( priorStatus, status );
 
     clientState.setStatus( status, finishedTime );
     recordStats();
@@ -431,7 +488,10 @@ public abstract class CascadingStats<Child> implements Serializable
     if( status != Status.PENDING )
       throw new IllegalStateException( "may not mark as " + Status.SKIPPED + ", is already " + status );
 
+    Status priorStatus = status;
     status = Status.SKIPPED;
+
+    fireListeners( priorStatus, status );
 
     clientState.setStatus( status, System.currentTimeMillis() );
     recordStats();
@@ -521,12 +581,11 @@ public abstract class CascadingStats<Child> implements Serializable
       return System.currentTimeMillis() - startTime;
     }
 
-  /**
-   * Method getCounterGroups returns all the available counter group names.
-   *
-   * @return the counterGroups (type Collection<String>) of this CascadingStats object.
-   */
-  public abstract Collection<String> getCounterGroups();
+  @Override
+  public Collection<String> getCountersFor( Class<? extends Enum> group )
+    {
+    return getCountersFor( group.getName() );
+    }
 
   /**
    * Method getCounterGroupsMatching returns all the available counter group names that match
@@ -538,42 +597,6 @@ public abstract class CascadingStats<Child> implements Serializable
   public abstract Collection<String> getCounterGroupsMatching( String regex );
 
   /**
-   * Method getCountersFor returns all the counter names for the give group name.
-   *
-   * @param group
-   * @return Collection<String>
-   */
-  public abstract Collection<String> getCountersFor( String group );
-
-  /**
-   * Method getCountersFor returns all the counter names for the counter Enum.
-   *
-   * @param group
-   * @return Collection<String>
-   */
-  public Collection<String> getCountersFor( Class<? extends Enum> group )
-    {
-    return getCountersFor( group.getName() );
-    }
-
-  /**
-   * Method getCounter returns the current value for the given counter Enum.
-   *
-   * @param counter of type Enum
-   * @return the current counter value
-   */
-  public abstract long getCounterValue( Enum counter );
-
-  /**
-   * Method getCounter returns the current value for the given group and counter.
-   *
-   * @param group   of type String
-   * @param counter of type String
-   * @return the current counter value
-   */
-  public abstract long getCounterValue( String group, String counter );
-
-  /**
    * Method captureDetail will recursively capture details about nested systems. Use this method to persist
    * statistics about a given Cascade, Flow, FlowStep, or FlowNode.
    * <p/>
@@ -582,7 +605,12 @@ public abstract class CascadingStats<Child> implements Serializable
    * Each call to this method will refresh the internal cache unless the current Stats object is marked finished. One
    * additional refresh will happen after this instance is marked finished.
    */
-  public abstract void captureDetail();
+  public void captureDetail()
+    {
+    captureDetail( Type.ATTEMPT );
+    }
+
+  public abstract void captureDetail( Type depth );
 
   /**
    * Method getChildren returns any relevant child statistics instances. They may not be of type CascadingStats, but
@@ -591,6 +619,37 @@ public abstract class CascadingStats<Child> implements Serializable
    * @return a Collection of child statistics
    */
   public abstract Collection<Child> getChildren();
+
+  public synchronized void addListener( StatsListener statsListener )
+    {
+    if( listeners == null )
+      listeners = new LinkedHashSet<>();
+
+    listeners.add( statsListener );
+    }
+
+  public synchronized boolean removeListener( StatsListener statsListener )
+    {
+    return listeners != null && listeners.remove( statsListener );
+    }
+
+  protected synchronized void fireListeners( CascadingStats.Status fromStatus, CascadingStats.Status toStatus )
+    {
+    if( listeners == null )
+      return;
+
+    for( StatsListener listener : listeners )
+      {
+      try
+        {
+        listener.notify( this, fromStatus, toStatus );
+        }
+      catch( Throwable throwable )
+        {
+        LOG.warn( "error during listener notification, continuing with remaining listener notification", throwable );
+        }
+      }
+    }
 
   protected String getStatsString()
     {

@@ -20,12 +20,14 @@
 
 package cascading.stats.tez;
 
+import java.util.Collection;
 import java.util.List;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
+import cascading.flow.SliceCounters;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.state.Counter;
 import cascading.pipe.Each;
@@ -33,6 +35,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.stats.CascadeStats;
 import cascading.stats.FlowNodeStats;
+import cascading.stats.FlowSliceStats;
 import cascading.stats.FlowStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -126,22 +129,35 @@ public class TezStatsPlatformTest extends PlatformTestCase
 
     if( getPlatform().isUseCluster() )
       {
+      assertTrue( stats1.getCounterValue( SliceCounters.Process_Duration ) != 0L );
+
       List<FlowNodeStats> flowNodeStats = stats1.getFlowNodeStats();
+
+      assertTrue( flowNodeStats.get( 0 ).getCounterValue( SliceCounters.Process_Duration ) != 0L );
+
       assertEquals( 3, flowNodeStats.size() );
 
-      // disabled as we cannot get vertex counters in a mini cluster
-//      assertTrue( stats1.getCounterValue( SliceCounters.Process_Duration ) != 0L );
-//      assertTrue( flowNodeStats.get( 0 ).getCounterValue( SliceCounters.Process_Duration ) != 0L );
+      FlowNodeStats mapperNode = flowNodeStats.get( 0 );
+      FlowNodeStats reducerNode = flowNodeStats.get( 1 );
 
-//        assertEquals( 5, stats1.getTaskStats().size() );
-//
-//        for( FlowSliceStats flowSliceStats : stats1.getTaskStats().values() )
-//          {
-//          Hadoop2TezSliceStats hadoopSliceStats = (Hadoop2TezSliceStats) flowSliceStats;
-//
-//          if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )
-//            assertTrue( hadoopSliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
-//          }
+      assertEquals( 1, mapperNode.getChildren().size() );
+      assertEquals( 1, reducerNode.getChildren().size() );
+
+      boolean foundCounter = false;
+
+      Collection<FlowSliceStats> children = reducerNode.getChildren();
+      for( FlowSliceStats flowSliceStats : children )
+        {
+        TezSliceStats sliceStats = (TezSliceStats) flowSliceStats;
+
+        if( sliceStats.getCounters().containsKey( TestEnum.FIRST.getDeclaringClass().getName() ) )
+          {
+          foundCounter = true;
+          assertTrue( sliceStats.getCounterValue( TestEnum.FIRST ) > 0 ); // in reducer
+          }
+        }
+
+      assertTrue( "did not find counter in any slice", foundCounter );
       }
 
     TezStepStats stats2 = (TezStepStats) flowStats2.getFlowStepStats().get( 0 );

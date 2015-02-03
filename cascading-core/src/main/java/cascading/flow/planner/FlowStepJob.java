@@ -67,7 +67,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( ClientState clientState, BaseFlowStep flowStep, long pollingInterval, long statsStoreInterval )
+  public FlowStepJob( ClientState clientState, BaseFlowStep<Config> flowStep, long pollingInterval, long statsStoreInterval )
     {
     this.flowStep = flowStep;
     this.stepName = flowStep.getName();
@@ -178,16 +178,6 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     internalCleanup();
     }
 
-  private synchronized boolean markStarted()
-    {
-    if( flowStepStats.isFinished() ) // if stopped, return
-      return false;
-
-    flowStepStats.markStarted();
-
-    return true;
-    }
-
   private void applyFlowStepConfStrategy()
     {
     FlowStepStrategy flowStepStrategy = flowStep.getFlow().getFlowStepStrategy();
@@ -233,13 +223,13 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         {
         flowStep.rollbackSinks();
         flowStepStats.markFailed( getThrowable() );
-        markNodesStatus();
+        updateNodesStatus();
         flowStep.fireOnThrowable( getThrowable() );
         }
 
       // if available, rethrow the unrecoverable error
       if( getThrowable() instanceof OutOfMemoryError )
-        throw ( (OutOfMemoryError) getThrowable() );
+        throw (OutOfMemoryError) getThrowable();
 
       dumpDebugInfo();
 
@@ -257,13 +247,13 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         if( throwable != null )
           {
           flowStepStats.markFailed( throwable );
-          markNodesStatus();
+          updateNodesStatus();
           flowStep.fireOnThrowable( throwable );
           }
         else
           {
           flowStepStats.markSuccessful();
-          markNodesStatus();
+          updateNodesStatus();
           flowStep.fireOnCompleted();
           }
         }
@@ -297,7 +287,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         }
 
       if( flowStepStats.isRunning() )
-        markNodesStatus();
+        updateNodesStatus(); // records node stats on node status change, not slices
 
       if( stop || internalNonBlockingIsComplete() )
         break;
@@ -308,7 +298,7 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         {
         count = 0;
         flowStepStats.recordStats();
-        flowStepStats.recordChildStats();
+        flowStepStats.recordChildStats(); // records node and slice stats
         }
       }
     }
@@ -378,21 +368,21 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     }
 
-  private void markNodesStatus()
+  private void updateNodesStatus()
     {
     Collection<FlowNodeStats> children = flowStepStats.getFlowNodeStats();
 
     for( FlowNodeStats child : children )
       {
+      // child#markStarted is called above
       if( child.isFinished() || child.isPending() )
         continue;
 
-      // call if started or running
-      markNodeRunningStatus( child );
+      updateNodeStatus( child );
       }
     }
 
-  protected abstract void markNodeRunningStatus( FlowNodeStats flowNodeStats );
+  protected abstract void updateNodeStatus( FlowNodeStats flowNodeStats );
 
   protected abstract boolean internalNonBlockingIsComplete() throws IOException;
 

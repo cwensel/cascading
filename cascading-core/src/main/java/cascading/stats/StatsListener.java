@@ -18,25 +18,17 @@
  * limitations under the License.
  */
 
-package cascading.management;
+package cascading.stats;
 
-import java.util.List;
-import java.util.Map;
-
-import cascading.provider.CascadingService;
-
-/** Interface DocumentService provides coarse grained hooks for managing various statistics. */
-public interface DocumentService extends CascadingService
+/**
+ * For internal use to track status transitions
+ */
+public interface StatsListener
   {
-  String DOCUMENT_SERVICE_CLASS_PROPERTY = "cascading3.management.document.service.classname";
-
-  void put( String key, Object object );
-
-  void put( String type, String key, Object object );
-
-  Map get( String type, String key );
-
-  boolean supportsFind();
-
-  List<Map<String, Object>> find( String type, String[] query );
+  /**
+   * @param current
+   * @param fromStatus the originating status, may be null
+   * @param toStatus
+   */
+  void notify( CascadingStats current, CascadingStats.Status fromStatus, CascadingStats.Status toStatus );
   }

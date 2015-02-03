@@ -22,6 +22,7 @@ package cascading.flow.planner.process;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -239,7 +240,7 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
       }
     }
 
-  public static class ProcessEdge<Process extends ProcessModel>
+  public static class ProcessEdge<Process extends ProcessModel> implements Serializable
     {
     FlowElement flowElement;
     Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process

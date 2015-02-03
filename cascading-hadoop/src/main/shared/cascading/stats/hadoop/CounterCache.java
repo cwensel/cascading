@@ -46,7 +46,8 @@ import org.slf4j.LoggerFactory;
 public abstract class CounterCache<JobStatus, Counters>
   {
   public static final String COUNTER_TIMEOUT_PROPERTY = "cascading.step.counter.timeout";
-  public static final int TIMEOUT_MAX = 3;
+  public static final int TIMEOUT_TIMEOUT_SEC = 60 * 10;
+  public static final int TIMEOUTS_MAX = 3;
 
   private static final Logger LOG = LoggerFactory.getLogger( CounterCache.class );
 
@@ -74,7 +75,7 @@ public abstract class CounterCache<JobStatus, Counters>
   protected CounterCache( CascadingStats stats, Configuration configuration )
     {
     this.stats = stats;
-    this.timeout = configuration.getInt( COUNTER_TIMEOUT_PROPERTY, 5 );
+    this.timeout = configuration.getInt( COUNTER_TIMEOUT_PROPERTY, TIMEOUT_TIMEOUT_SEC );
     }
 
   protected abstract JobStatus getJobStatusClient();
@@ -165,7 +166,7 @@ public abstract class CounterCache<JobStatus, Counters>
     if( !force && isFinished )
       force = true;
 
-    if( cachedCounters != null && !force && numTimeouts >= TIMEOUT_MAX )
+    if( cachedCounters != null && !force && numTimeouts >= TIMEOUTS_MAX )
       return cachedCounters;
 
     JobStatus runningJob = getJobStatusClient();
@@ -210,7 +211,7 @@ public abstract class CounterCache<JobStatus, Counters>
       {
       numTimeouts++;
 
-      if( numTimeouts >= TIMEOUT_MAX )
+      if( numTimeouts >= TIMEOUTS_MAX )
         LOG.warn( "fetching counters timed out after: {} seconds, final attempt: {}", timeout, numTimeouts );
       else
         LOG.warn( "fetching counters timed out after: {} seconds, attempts: {}", timeout, numTimeouts );

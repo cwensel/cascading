@@ -63,7 +63,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     return jobConf.getLong( JOB_POLLING_INTERVAL, 5000 );
     }
 
-  public HadoopFlowStepJob( ClientState clientState, BaseFlowStep flowStep, JobConf currentConf )
+  public HadoopFlowStepJob( ClientState clientState, BaseFlowStep<JobConf> flowStep, JobConf currentConf )
     {
     super( clientState, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
     this.currentConf = currentConf;
@@ -115,7 +115,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     }
 
   @Override
-  protected void markNodeRunningStatus( FlowNodeStats flowNodeStats )
+  protected void updateNodeStatus( FlowNodeStats flowNodeStats )
     {
     try
       {

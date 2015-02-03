@@ -23,30 +23,51 @@ package cascading.stats;
 import java.util.Map;
 
 /**
- *
+ * Typically CascadingStats objects have an internal state model with timings, the FlowSliceStats is a simplified
+ * Stats object and only reports what the underlying platform reports, not the client side observations.
+ * <p/>
+ * Implementations may optionally implement the {@link cascading.stats.ProvidesCounters} interface.
+ * <p/>
+ * Provided as an abstract class so that implementations will be resilient to API additions.
  */
-public interface FlowSliceStats
+public abstract class FlowSliceStats<K extends Enum>
   {
-  String getID();
+  public abstract static class FlowSliceAttempt
+    {
+    public abstract String getProcessAttemptID();
 
-  CascadingStats.Status getStatus();
+    public abstract int getEventId();
 
-  Map<String, Map<String, Long>> getCounters();
+    public abstract int getProcessDuration();
 
-  /**
-   * Method getCounterValue returns the raw Hadoop counter value.
-   *
-   * @param counter of Enum
-   * @return long
-   */
-  long getCounterValue( Enum counter );
+    public abstract String getProcessStatus();
 
-  /**
-   * Method getCounterValue returns the raw Hadoop counter value.
-   *
-   * @param group of String
-   * @param name  of String
-   * @return long
-   */
-  long getCounterValue( String group, String name );
+    public abstract String getStatusURL();
+
+    public abstract CascadingStats.Status getStatus();
+    }
+
+  public abstract String getID();
+
+  public abstract long getProcessStartTime();
+
+  public abstract long getProcessFinishTime();
+
+  public abstract CascadingStats.Status getStatus();
+
+  public abstract K getKind();
+
+  public abstract String getProcessSliceID();
+
+  public abstract String getProcessStepID();
+
+  public abstract String getProcessStatus();
+
+  public abstract float getProcessProgress();
+
+  public abstract String[] getDiagnostics();
+
+  public abstract Map<String, Map<String, Long>> getCounters();
+
+  public abstract Map<Integer, FlowSliceAttempt> getAttempts();
   }

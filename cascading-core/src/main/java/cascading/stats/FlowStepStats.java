@@ -47,7 +47,13 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     return flowStep.getID();
     }
 
-  protected FlowStep getFlowStep()
+  @Override
+  public Type getType()
+    {
+    return Type.STEP;
+    }
+
+  public FlowStep getFlowStep()
     {
     return flowStep;
     }
@@ -96,4 +102,19 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     }
 
   public abstract void recordChildStats();
+
+  /**
+   * Method getProcessStepID returns the ID representing the under platform process.
+   * <p/>
+   * A FlowStep represents a unit of work on a remote platform, in the case of MapReduce, a
+   * MapReduce job. The step ID would be the job id.
+   *
+   * @return a String or null if unavailable
+   */
+  public abstract String getProcessStepID();
+
+  public String getProcessStatusURL()
+    {
+    return null;
+    }
   }

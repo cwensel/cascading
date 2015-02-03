@@ -130,14 +130,17 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     }
 
   @Override
-  public final synchronized void captureDetail()
+  public final synchronized void captureDetail( Type depth )
     {
     boolean finished = isFinished();
 
     if( finished && hasCapturedFinalDetail )
       return;
 
-    boolean success = captureDetailInternal();
+    if( !getType().isChild( depth ) )
+      return;
+
+    boolean success = captureChildDetailInternal();
 
     if( success )
       LOG.info( "captured remote node statistic details" );
@@ -150,7 +153,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
    *
    * @return true if successful
    */
-  protected abstract boolean captureDetailInternal();
+  protected abstract boolean captureChildDetailInternal();
 
   /** Synchronized to prevent state changes mid record, #stop may be called out of band */
   @Override
@@ -168,7 +171,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     if( !clientState.isEnabled() )
       return;
 
-    captureDetail();
+    captureDetail( Type.ATTEMPT );
 
     // FlowSliceStats are not full blown Stats types, but implementation specific
     // so we can't call recordStats/recordChildStats

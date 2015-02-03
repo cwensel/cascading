@@ -24,9 +24,11 @@ idea {
   pathVariables MODULE_DIR: file( "${rootDir}/cascading-hadoop" )
 }
 
-ext.hadoop2Version = '2.4.0'
-//ext.tezVersion = '0.5.0-SNAPSHOT'
-ext.tezVersion = '0.5.2'
+//ext.hadoop2Version = '2.6.0'
+//ext.tezVersion = '0.7.0-SNAPSHOT'
+
+ext.hadoop2Version = '2.4.1'
+ext.tezVersion = '0.5.3'
 
 if( System.properties[ 'hadoop2tez.release.final' ] )
   tezVersion = System.properties[ 'hadoop2tez.release.final' ]
@@ -60,6 +62,16 @@ dependencies {
   testCompile( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
   testCompile( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
+
+  if( hadoop2Version.startsWith( '2.4' ) ) // hadoop 2.4
+  {
+    testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history', version: tezVersion )
+  }
+  else // hadoop 2.5 +
+  {
+    provided( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop2Version )
+    testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history-with-acls', version: tezVersion )
+  }
 }
 
 test {

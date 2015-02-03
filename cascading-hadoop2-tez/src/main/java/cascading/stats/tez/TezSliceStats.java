@@ -20,37 +20,89 @@
 
 package cascading.stats.tez;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import cascading.stats.CascadingStats;
 import cascading.stats.FlowSliceStats;
+import cascading.stats.ProvidesCounters;
 
-public class TezSliceStats implements FlowSliceStats
+public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements ProvidesCounters
   {
-  private final CascadingStats.Status parentStatus;
-  private CascadingStats.Status status;
-
-  public static class TezAttempt
+  public static class TezAttempt extends FlowSliceAttempt
     {
+    @Override
+    public String getProcessAttemptID()
+      {
+      return null;
+      }
+
+    @Override
+    public int getEventId()
+      {
+      return 0;
+      }
+
+    @Override
+    public int getProcessDuration()
+      {
+      return 0;
+      }
+
+    @Override
+    public String getProcessStatus()
+      {
+      return null;
+      }
+
+    @Override
+    public String getStatusURL()
+      {
+      return null;
+      }
+
+    @Override
+    public CascadingStats.Status getStatus()
+      {
+      return null;
+      }
     }
 
   private String id;
-  private Map<String, Map<String, Long>> counters;
+  private TezNodeStats.Kind kind;
+  private final CascadingStats.Status parentStatus;
+  private CascadingStats.Status status;
+  private String taskID;
+  private Map<String, Map<String, Long>> counters = Collections.emptyMap();
 
-  private Map<Integer, TezAttempt> attempts = new HashMap<Integer, TezAttempt>();
+  private Map<Integer, FlowSliceAttempt> attempts = new HashMap<>();
 
-  TezSliceStats( String id, CascadingStats.Status parentStatus )
+  TezSliceStats( String id, TezNodeStats.Kind kind, CascadingStats.Status parentStatus, String taskID )
     {
-    this.parentStatus = parentStatus;
     this.id = id;
+    this.kind = kind;
+    this.parentStatus = parentStatus;
+    this.taskID = taskID;
     }
 
   @Override
   public String getID()
     {
     return id;
+    }
+
+  @Override
+  public long getProcessStartTime()
+    {
+    return 0;
+    }
+
+  @Override
+  public long getProcessFinishTime()
+    {
+    return 0;
     }
 
   public CascadingStats.Status getParentStatus()
@@ -69,9 +121,15 @@ public class TezSliceStats implements FlowSliceStats
     return status;
     }
 
+  @Override
+  public TezNodeStats.Kind getKind()
+    {
+    return kind;
+    }
+
   public String[] getDiagnostics()
     {
-    return null;
+    return new String[ 0 ];
     }
 
   @Override
@@ -83,14 +141,56 @@ public class TezSliceStats implements FlowSliceStats
     return counters;
     }
 
-  public Map<Integer, TezAttempt> getAttempts()
+  public String getProcessSliceID()
+    {
+    return taskID;
+    }
+
+  @Override
+  public String getProcessStepID()
+    {
+    return null;
+    }
+
+  @Override
+  public String getProcessStatus()
+    {
+    return null;
+    }
+
+  @Override
+  public float getProcessProgress()
+    {
+    return 0;
+    }
+
+  public Map<Integer, FlowSliceAttempt> getAttempts()
     {
     return attempts;
     }
 
-  private void setCounters( Object taskReport )
+  public void setCounters( Map<String, Map<String, Long>> counters )
     {
-    counters = Collections.emptyMap();
+    if( counters != null )
+      this.counters = counters;
+    }
+
+  @Override
+  public Collection<String> getCounterGroups()
+    {
+    return getCounters().keySet();
+    }
+
+  @Override
+  public Collection<String> getCountersFor( String group )
+    {
+    return getCounters().get( group ).keySet();
+    }
+
+  @Override
+  public Collection<String> getCountersFor( Class<? extends Enum> group )
+    {
+    return getCountersFor( group.getDeclaringClass().getName() );
     }
 
   @Override

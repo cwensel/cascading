@@ -31,7 +31,7 @@ import cascading.stats.CascadingStats;
  */
 public abstract class ClientState extends BaseState
   {
-  public static final String STATE_SERVICE_CLASS_PROPERTY = "cascading.management.state.service.classname";
+  public static final String STATE_SERVICE_CLASS_PROPERTY = "cascading3.management.state.service.classname";
 
   public static ClientState NULL = new ClientState()
   {

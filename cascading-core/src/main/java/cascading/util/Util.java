@@ -140,6 +140,19 @@ public class Util
     return set;
     }
 
+  public static synchronized String createUniqueIDWhichStartsWithAChar()
+    {
+    String value;
+
+    do
+      {
+      value = createUniqueID();
+      }
+    while( Character.isDigit( value.charAt( 0 ) ) );
+
+    return value;
+    }
+
   public static synchronized String createUniqueID()
     {
     // creates a cryptographically secure random value
@@ -531,7 +544,7 @@ public class Util
       }
     }
 
-  @SuppressWarnings( {"unchecked"} )
+  @SuppressWarnings({"unchecked"})
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
@@ -568,7 +581,7 @@ public class Util
    *
    * @param list
    */
-  @SuppressWarnings( {"StatementWithEmptyBody"} )
+  @SuppressWarnings({"StatementWithEmptyBody"})
   public static void removeAllNulls( List list )
     {
     while( list.remove( null ) )

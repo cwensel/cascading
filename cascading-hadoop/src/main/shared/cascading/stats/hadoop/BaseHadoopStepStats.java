@@ -132,7 +132,7 @@ public abstract class BaseHadoopStepStats<JobStatusClient, Counters> extends Flo
     if( !clientState.isEnabled() )
       return;
 
-    captureDetail();
+    captureDetail( Type.ATTEMPT );
 
     try
       {

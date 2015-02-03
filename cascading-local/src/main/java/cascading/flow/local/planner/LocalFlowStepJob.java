@@ -84,9 +84,8 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
     }
 
   @Override
-  protected void markNodeRunningStatus( FlowNodeStats flowNodeStats )
+  protected void updateNodeStatus( FlowNodeStats flowNodeStats )
     {
-
     }
 
   @Override

@@ -99,16 +99,17 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
     }
 
   /**
-   * Method getJobID returns the Hadoop running job JobID.
+   * Method getProcessStepID returns the Hadoop running job JobID.
    *
    * @return the jobID (type String) of this HadoopStepStats object.
    */
-  public String getJobID()
+  @Override
+  public String getProcessStepID()
     {
     if( getJobStatusClient() == null )
       return null;
 
-    return getJobStatusClient().getJobID();
+    return getJobStatusClient().getID().toString();
     }
 
   /**
@@ -183,13 +184,11 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
 
   /** Method captureDetail captures statistics task details and completion events. */
   @Override
-  public synchronized void captureDetail()
+  public synchronized void captureDetail( Type depth )
     {
-    captureDetail( true );
-    }
+    if( !getType().isChild( depth ) )
+      return;
 
-  public void captureDetail( boolean captureAttempts )
-    {
     JobClient jobClient = getJobClient();
     RunningJob runningJob = getJobStatusClient();
 
@@ -198,14 +197,14 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
 
     try
       {
-      mapperNodeStats.captureDetail();
+      mapperNodeStats.captureDetail( depth );
 
       if( reducerNodeStats != null )
-        reducerNodeStats.captureDetail();
+        reducerNodeStats.captureDetail( depth );
 
       int count = 0;
 
-      while( captureAttempts )
+      while( depth == Type.ATTEMPT )
         {
         // todo: we may be able to continue where we left off if we retain the count
         TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( count );

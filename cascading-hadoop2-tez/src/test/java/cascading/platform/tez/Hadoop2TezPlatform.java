@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.security.Permission;
 import java.util.Map;
 
+import cascading.CascadingException;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProps;
@@ -40,7 +41,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.util.ExitUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.yarn.server.applicationhistoryservice.ApplicationHistoryServer;
 import org.apache.tez.dag.api.TezConfiguration;
+import org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService;
 import org.apache.tez.mapreduce.hadoop.MRJobConfig;
 import org.apache.tez.test.MiniTezCluster;
 import org.slf4j.Logger;
@@ -56,6 +59,7 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
   private transient static MiniDFSCluster miniDFSCluster;
   private transient static MiniTezCluster miniTezCluster;
   private transient static SecurityManager securityManager;
+  private transient ApplicationHistoryServer yarnHistoryServer;
 
   public Hadoop2TezPlatform()
     {
@@ -180,9 +184,6 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
 
       defaultConf.setInt( YarnConfiguration.DEBUG_NM_DELETE_DELAY_SEC, -1 );
 
-      // stats won't work after completion unless ATS is used
-//      defaultConf.set( TezConfiguration.TEZ_HISTORY_LOGGING_SERVICE_CLASS, "org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService" );
-
 //      defaultConf.set( TezConfiguration.TEZ_AM_LOG_LEVEL, "DEBUG" );
 //      defaultConf.set( TezConfiguration.TEZ_TASK_LOG_LEVEL, "DEBUG" );
 
@@ -206,11 +207,26 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
       tezConf.set( "fs.defaultFS", fileSys.getUri().toString() ); // use HDFS
       tezConf.set( MRJobConfig.MR_AM_STAGING_DIR, "/apps_staging_dir" );
 
+      // see MiniTezClusterWithTimeline as alterante
       miniTezCluster = new MiniTezCluster( getClass().getName(), 1, 4, 4 ); // todo: set to 4
       miniTezCluster.init( tezConf );
       miniTezCluster.start();
 
       configuration = miniTezCluster.getConfig();
+
+      // stats won't work after completion unless ATS is used
+      if( setTimelineStore( configuration ) ) // true if ats can be loaded and configured for this hadoop version
+        {
+        configuration.set( TezConfiguration.TEZ_HISTORY_LOGGING_SERVICE_CLASS, ATSHistoryLoggingService.class.getName() );
+        configuration.setBoolean( YarnConfiguration.TIMELINE_SERVICE_ENABLED, true );
+        configuration.set( YarnConfiguration.TIMELINE_SERVICE_ADDRESS, "localhost:10200" );
+        configuration.set( YarnConfiguration.TIMELINE_SERVICE_WEBAPP_ADDRESS, "localhost:8188" );
+        configuration.set( YarnConfiguration.TIMELINE_SERVICE_WEBAPP_HTTPS_ADDRESS, "localhost:8190" );
+
+        yarnHistoryServer = new ApplicationHistoryServer();
+        yarnHistoryServer.init( configuration );
+        yarnHistoryServer.start();
+        }
 
       ///////////////// other
 /*
@@ -289,6 +305,37 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
     ExitUtil.disableSystemExit();
 
 //    forbidSystemExitCall();
+    }
+
+  protected boolean setTimelineStore( Configuration configuration )
+    {
+    try
+      {
+      // try hadoop 2.6
+      Class<?> target = Util.loadClass( "org.apache.hadoop.yarn.server.timeline.TimelineStore" );
+      Class<?> type = Util.loadClass( "org.apache.hadoop.yarn.server.timeline.MemoryTimelineStore" );
+
+      configuration.setClass( YarnConfiguration.TIMELINE_SERVICE_STORE, type, target );
+
+      return true;
+      }
+    catch( CascadingException exception )
+      {
+      try
+        {
+        // try hadoop 2.4
+        Class<?> target = Util.loadClass( "org.apache.hadoop.yarn.server.applicationhistoryservice.timeline.TimelineStore" );
+        Class<?> type = Util.loadClass( "org.apache.hadoop.yarn.server.applicationhistoryservice.timeline.MemoryTimelineStore" );
+
+        configuration.setClass( YarnConfiguration.TIMELINE_SERVICE_STORE, type, target );
+
+        return true;
+        }
+      catch( CascadingException ignore )
+        {
+        return false;
+        }
+      }
     }
 
   private static class ExitTrappedException extends SecurityException

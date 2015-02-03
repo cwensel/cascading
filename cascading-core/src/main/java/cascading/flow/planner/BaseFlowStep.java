@@ -119,7 +119,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   // for testing
   protected BaseFlowStep( String name, int ordinal )
     {
-    this.id = Util.createUniqueID();
+    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     setName( name );
     this.ordinal = ordinal;
 
@@ -129,7 +129,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
     {
-    this.id = Util.createUniqueID();
+    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.graph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
@@ -747,7 +747,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     return services.createClientState( getID() );
     }
 
-  public FlowStepJob<Config> getFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig )
+  public FlowStepJob<Config> getFlowStepJob()
+    {
+    return flowStepJob;
+    }
+
+  public FlowStepJob<Config> getCreateFlowStepJob( FlowProcess<Config> flowProcess, Config parentConfig )
     {
     if( flowStepJob != null )
       return flowStepJob;

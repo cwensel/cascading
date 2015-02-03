@@ -40,7 +40,13 @@ public abstract class FlowNodeStats extends CascadingStats<FlowSliceStats>
     return flowNode.getID();
     }
 
-  protected FlowNode getFlowNode()
+  @Override
+  public Type getType()
+    {
+    return Type.NODE;
+    }
+
+  public FlowNode getFlowNode()
     {
     return flowNode;
     }

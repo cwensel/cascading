@@ -74,7 +74,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
     }
 
   @Override
-  protected boolean captureDetailInternal()
+  protected boolean captureChildDetailInternal()
     {
     JobClient jobClient = parentStepStats.getJobClient();
     RunningJob runningJob = parentStepStats.getJobStatusClient();

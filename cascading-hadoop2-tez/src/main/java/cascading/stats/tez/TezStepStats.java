@@ -28,6 +28,7 @@ import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.hadoop.BaseHadoopStepStats;
+import cascading.stats.tez.util.TezStatsUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.tez.common.counters.TezCounters;
 import org.apache.tez.dag.api.client.DAGClient;
@@ -36,7 +37,7 @@ import org.apache.tez.dag.api.client.DAGStatus;
 /**
  *
  */
-public abstract class TezStepStats extends BaseHadoopStepStats<DAGStatus, TezCounters>
+public abstract class TezStepStats extends BaseHadoopStepStats<DAGClient, TezCounters>
   {
   /**
    * Constructor CascadingStats creates a new CascadingStats instance.
@@ -50,17 +51,27 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGStatus, TezCou
 
     Configuration config = (Configuration) flowStep.getConfig();
 
-    this.counterCache = new TezCounterCache<DAGStatus>( this, config )
+    this.counterCache = new TezCounterCache<DAGClient>( this, config )
     {
     @Override
-    protected DAGStatus getJobStatusClient()
+    protected DAGClient getJobStatusClient()
       {
       return TezStepStats.this.getJobStatusClient();
       }
 
-    protected TezCounters getCounters( DAGStatus statusClient ) throws IOException
+    protected TezCounters getCounters( DAGClient statusClient ) throws IOException
       {
-      return statusClient.getDAGCounters();
+      DAGStatus dagStatus = TezStatsUtil.getDagStatusWithCounters( statusClient );
+
+      if( dagStatus != null )
+        {
+        TezCounters counters = dagStatus.getDAGCounters();
+
+        if( counters != null && counters.countCounters() != 0 )
+          return counters;
+        }
+
+      return null;
       }
     };
 
@@ -70,19 +81,19 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGStatus, TezCou
       addNodeStats( new TezNodeStats( this, iterator.next(), clientState, config ) );
     }
 
-  protected abstract DAGClient getDAGClient();
-
   /** Method captureDetail captures statistics task details and completion events. */
   @Override
-  public synchronized void captureDetail()
+  public synchronized void captureDetail( Type depth )
     {
-    DAGClient dagClient = getDAGClient();
-    DAGStatus jobStatus = getJobStatusClient();
+    if( !getType().isChild( depth ) )
+      return;
 
-    if( dagClient == null || jobStatus == null )
+    DAGClient dagClient = getJobStatusClient();
+
+    if( dagClient == null )
       return;
 
     for( FlowNodeStats flowNodeStats : getFlowNodeStatsMap().values() )
-      flowNodeStats.captureDetail();
+      flowNodeStats.captureDetail( depth );
     }
   }

@@ -138,8 +138,14 @@ public class LocalStepStats extends FlowStepStats
     }
 
   @Override
-  public void captureDetail()
+  public void captureDetail( Type depth )
     {
+    }
+
+  @Override
+  public String getProcessStepID()
+    {
+    return getID();
     }
 
   @Override

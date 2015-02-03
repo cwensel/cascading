@@ -65,6 +65,17 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     }
 
   @Override
+  public Type getType()
+    {
+    return Type.FLOW;
+    }
+
+  public Flow getFlow()
+    {
+    return flow;
+    }
+
+  @Override
   public synchronized void recordInfo()
     {
     clientState.recordFlow( flow );
@@ -151,10 +162,13 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     }
 
   @Override
-  public void captureDetail()
+  public void captureDetail( Type depth )
     {
+    if( !getType().isChild( depth ) )
+      return;
+
     for( FlowStepStats flowStepStats : flowStepStatsList )
-      flowStepStats.captureDetail();
+      flowStepStats.captureDetail( depth );
     }
 
   @Override

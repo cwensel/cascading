@@ -49,6 +49,17 @@ public class CascadeStats extends CascadingStats<FlowStats>
     }
 
   @Override
+  public Type getType()
+    {
+    return Type.CASCADE;
+    }
+
+  public Cascade getCascade()
+    {
+    return cascade;
+    }
+
+  @Override
   public synchronized void recordInfo()
     {
     clientState.recordCascade( cascade );
@@ -130,10 +141,13 @@ public class CascadeStats extends CascadingStats<FlowStats>
     }
 
   @Override
-  public void captureDetail()
+  public void captureDetail( Type depth )
     {
+    if( !getType().isChild( depth ) )
+      return;
+
     for( FlowStats flowStats : flowStatsList )
-      flowStats.captureDetail();
+      flowStats.captureDetail( depth );
     }
 
   @Override

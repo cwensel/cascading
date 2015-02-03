@@ -20,11 +20,13 @@
 
 package cascading.stats.hadoop;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import cascading.stats.CascadingStats;
 import cascading.stats.FlowSliceStats;
+import cascading.stats.ProvidesCounters;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapred.TaskReport;
@@ -32,11 +34,11 @@ import org.apache.hadoop.mapred.TaskReport;
 import static cascading.stats.CascadingStats.Status.*;
 
 /** Class HadoopTaskStats tracks individual task stats. */
-public class HadoopSliceStats implements FlowSliceStats
+public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> implements ProvidesCounters
   {
   private final CascadingStats.Status parentStatus;
 
-  public static class HadoopAttempt
+  public static class HadoopAttempt extends FlowSliceAttempt
     {
     private final TaskCompletionEvent event;
 
@@ -45,27 +47,38 @@ public class HadoopSliceStats implements FlowSliceStats
       this.event = event;
       }
 
+    @Override
+    public String getProcessAttemptID()
+      {
+      return event.getTaskAttemptId().toString();
+      }
+
+    @Override
     public int getEventId()
       {
       return event.getEventId();
       }
 
-    public int getTaskRunTime()
+    @Override
+    public int getProcessDuration()
       {
       return event.getTaskRunTime();
       }
 
-    public String getTaskStatus()
+    @Override
+    public String getProcessStatus()
       {
       return event.getTaskStatus().toString();
       }
 
-    public String getTaskTrackerHttp()
+    @Override
+    public String getStatusURL()
       {
       return event.getTaskTrackerHttp();
       }
 
-    public CascadingStats.Status getStatusFor()
+    @Override
+    public CascadingStats.Status getStatus()
       {
       CascadingStats.Status status = null;
 
@@ -101,7 +114,7 @@ public class HadoopSliceStats implements FlowSliceStats
   private TaskReport taskReport;
   private Map<String, Map<String, Long>> counters;
 
-  private Map<Integer, HadoopAttempt> attempts = new HashMap<Integer, HadoopAttempt>();
+  private Map<Integer, FlowSliceAttempt> attempts = new HashMap<>();
 
   HadoopSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport )
     {
@@ -117,17 +130,14 @@ public class HadoopSliceStats implements FlowSliceStats
     return id;
     }
 
+  @Override
   public Kind getKind()
     {
     return kind;
     }
 
-  /**
-   * Method getId returns the Hadoop task id.
-   *
-   * @return the id (type String) of this HadoopTaskStats object.
-   */
-  public String getTaskID()
+  @Override
+  public String getProcessSliceID()
     {
     return taskReport.getTaskID().toString();
     }
@@ -137,7 +147,8 @@ public class HadoopSliceStats implements FlowSliceStats
     return taskReport.getTaskID().getId();
     }
 
-  public String getJobID()
+  @Override
+  public String getProcessStepID()
     {
     return taskReport.getTaskID().getJobID().toString();
     }
@@ -147,27 +158,26 @@ public class HadoopSliceStats implements FlowSliceStats
     return taskReport;
     }
 
-  public boolean parentStepHasReducers()
-    {
-    return kind == Kind.REDUCER;
-    }
-
-  public float getProgress()
-    {
-    return taskReport.getProgress();
-    }
-
-  public String getState()
+  @Override
+  public String getProcessStatus()
     {
     return taskReport.getState();
     }
 
-  public long getStartTime()
+  @Override
+  public float getProcessProgress()
+    {
+    return taskReport.getProgress();
+    }
+
+  @Override
+  public long getProcessStartTime()
     {
     return taskReport.getStartTime();
     }
 
-  public long getFinishTime()
+  @Override
+  public long getProcessFinishTime()
     {
     return taskReport.getFinishTime();
     }
@@ -204,6 +214,7 @@ public class HadoopSliceStats implements FlowSliceStats
     return status;
     }
 
+  @Override
   public String[] getDiagnostics()
     {
     return taskReport.getDiagnostics();
@@ -218,7 +229,8 @@ public class HadoopSliceStats implements FlowSliceStats
     return counters;
     }
 
-  public Map<Integer, HadoopAttempt> getAttempts()
+  @Override
+  public Map<Integer, FlowSliceAttempt> getAttempts()
     {
     return attempts;
     }
@@ -238,6 +250,24 @@ public class HadoopSliceStats implements FlowSliceStats
       for( Counters.Counter counter : group )
         values.put( counter.getName(), counter.getCounter() );
       }
+    }
+
+  @Override
+  public Collection<String> getCounterGroups()
+    {
+    return getCounters().keySet();
+    }
+
+  @Override
+  public Collection<String> getCountersFor( String group )
+    {
+    return getCounters().get( group ).keySet();
+    }
+
+  @Override
+  public Collection<String> getCountersFor( Class<? extends Enum> group )
+    {
+    return getCountersFor( group.getDeclaringClass().getName() );
     }
 
   @Override
