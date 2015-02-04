@@ -55,8 +55,6 @@ configurations {
   s3AntTask
 }
 
-ext.distDir = mkdir( "${rootDir}/build/dist" )
-
 allprojects {
 
   apply plugin: 'java'
@@ -69,6 +67,12 @@ allprojects {
     maven { url 'http://conjars.org/repo/' }
     maven { url 'https://repository.apache.org/content/repositories/releases/' }
   }
+}
+
+project.ext.distDir = null
+
+task prepareDist() {
+  project.distDir = mkdir( "${rootDir}/build/dist" )
 }
 
 subprojects {
@@ -85,6 +89,8 @@ subprojects {
       extendsFrom testRuntime
     }
   }
+
+  javadoc.dependsOn << prepareDist
 
   javadoc {
     def copyright = '<i>Copyright &#169; 2007-2015 Concurrent, Inc. All Rights Reserved.</i>'
@@ -144,6 +150,8 @@ subprojects {
     include '**/*Test.class'
   }
 
+  assemble.dependsOn << prepareDist
+
   assemble << {
 
     if( project.name.equals( 'cascading-platform' ) )
@@ -198,7 +206,7 @@ subprojects {
   }
 }
 
-task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
+task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
 
   s3UploadDocs.dependsOn << prepareRelease
   s3UploadArtifacts.dependsOn << prepareRelease
@@ -219,6 +227,7 @@ prepareRelease << {
 }
 
 javadoc.enabled = false
+jar.enabled = false
 
 task buildDist( dependsOn: [prepareRelease, javadoc] ) << {
 

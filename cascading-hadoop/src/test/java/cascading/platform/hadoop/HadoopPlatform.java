@@ -115,7 +115,11 @@ public class HadoopPlatform extends BaseHadoopPlatform
       // enforce the local file system in local mode
       jobConf.set( "fs.default.name", "file:///" );
       jobConf.set( "mapred.job.tracker", "local" );
-      jobConf.set( "mapreduce.jobtracker.staging.root.dir", System.getProperty( "user.dir" ) + "/build/tmp/cascading/staging" );
+
+      String stagingDir = jobConf.get( "mapreduce.jobtracker.staging.root.dir" );
+
+      if( Util.isEmpty( stagingDir ) )
+        jobConf.set( "mapreduce.jobtracker.staging.root.dir", System.getProperty( "user.dir" ) + "/build/tmp/cascading/staging" );
 
       fileSys = FileSystem.get( jobConf );
       }
@@ -124,10 +128,10 @@ public class HadoopPlatform extends BaseHadoopPlatform
       LOG.info( "using cluster" );
 
       if( Util.isEmpty( System.getProperty( "hadoop.log.dir" ) ) )
-        System.setProperty( "hadoop.log.dir", "build/test/log" );
+        System.setProperty( "hadoop.log.dir", "cascading-hadoop/build/test/log" );
 
       if( Util.isEmpty( System.getProperty( "hadoop.tmp.dir" ) ) )
-        System.setProperty( "hadoop.tmp.dir", "build/test/tmp" );
+        System.setProperty( "hadoop.tmp.dir", "cascading-hadoop/build/test/tmp" );
 
       new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs(); // ignored
 
