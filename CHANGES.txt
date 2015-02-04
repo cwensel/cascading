@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.6.3 [unreleased]
 
+  Updated local mode counter implementation to be thread-safe.
+
   Updated c.t.h.i.MultiRecordReaderIterator to use an existing o.a.h.m.Reporter if present.
 
   Fixed issues in c.f.h.FlowPlatformTest which caused the test go into an endless loop. Also increased timeout to make
