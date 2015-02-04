@@ -30,9 +30,11 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowProcess;
 import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
+import cascading.operation.Debug;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
@@ -50,6 +52,7 @@ import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
+import data.InputData;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -682,11 +685,55 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     flow.complete();
 
     Tuple[] results = new Tuple[]{
-      new Tuple( 1, "c" ,"A" ),
+      new Tuple( 1, "c", "A" ),
       new Tuple( 2, "d", "B" ),
       new Tuple( 3, "c", "C" ),
       new Tuple( 4, "d", "B" ),
       new Tuple( 5, "e", "A" )
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    assertTrue( !iterator.hasNext() );
+
+    iterator.close();
+    }
+
+  /**
+   * This test should pick the first tuple in the series
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testFirstByWithoutComparator() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileCrossRev );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ), " ", inputFileCrossRev );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ), "\t",
+      new Class[]{Integer.TYPE, String.class,
+                  String.class}, getOutputPath( "firstnfieldswithoutcomparator" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "first" );
+
+    Fields charFields = new Fields( "lower", "upper" );
+
+    pipe = new FirstBy( pipe, new Fields( "num" ), charFields, 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 1, "c", "C" ),
+      new Tuple( 2, "d", "D" ),
+      new Tuple( 3, "c", "C" ),
+      new Tuple( 4, "d", "D" ),
+      new Tuple( 5, "e", "E" )
     };
 
     TupleEntryIterator iterator = flow.openSink();
@@ -793,7 +840,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
         long offset = 2166136261L;
         long prime = 16777619L;
         long hash = offset;
-        for ( byte b : value.toString().getBytes() )
+        for( byte b : value.toString().getBytes() )
           hash = ( hash ^ b ) * prime;
         return (int) hash;
         }
@@ -807,7 +854,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Fields sumFields = new Fields( "sum" );
     sumFields.setComparator( "sum", new CustomHasher() );
-    SumBy sumPipe = new SumBy( new Fields( "num" ), sumFields , long.class );
+    SumBy sumPipe = new SumBy( new Fields( "num" ), sumFields, long.class );
 
     Fields countFields = new Fields( "count" );
     countFields.setComparator( "count", new CustomHasher() );
@@ -1053,7 +1100,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
   /**
    * inserts null values into the tuple stream.
-   * */
+   */
   class NullInsert extends BaseOperation implements Function
     {
     private final int number;
@@ -1063,6 +1110,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       super( 2, fieldDeclaration );
       this.number = numberToFilter;
       }
+
     @Override
     public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
@@ -1070,7 +1118,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       int num = argument.getInteger( 0 );
       String chr = argument.getString( 1 );
       Tuple result;
-      if ( num == number )
+      if( num == number )
         result = new Tuple( null, chr );
       else
         result = new Tuple( num, chr );

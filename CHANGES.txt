@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.3 [unreleased]
 
+  Fixed issue where c.p.a.FirstBy would perform a comparison on the aggregating values when no j.u.Comparator was
+  provided to the argument c.t.Fields selector.
+
   Updated local mode counter implementation to be thread-safe.
 
   Updated c.t.h.i.MultiRecordReaderIterator to use an existing o.a.h.m.Reporter if present.
