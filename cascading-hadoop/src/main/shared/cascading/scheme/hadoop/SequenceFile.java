@@ -48,7 +48,7 @@ public class SequenceFile extends Scheme<Configuration, RecordReader, OutputColl
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
     {
-    super( null );
+    super( Fields.UNKNOWN, Fields.ALL );
     }
 
   /**
@@ -56,7 +56,7 @@ public class SequenceFile extends Scheme<Configuration, RecordReader, OutputColl
    *
    * @param fields
    */
-  @ConstructorProperties({"fields"})
+  @ConstructorProperties( {"fields"} )
   public SequenceFile( Fields fields )
     {
     super( fields, fields );

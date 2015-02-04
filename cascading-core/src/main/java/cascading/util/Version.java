@@ -22,6 +22,9 @@ package cascading.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -145,7 +148,18 @@ public class Version
     {
     Properties properties = new Properties();
 
-    InputStream stream = Version.class.getClassLoader().getResourceAsStream( "cascading/version.properties" );
+    List<URL> resources = Collections.list( Version.class.getClassLoader().getResources( "cascading/version.properties" ) );
+
+    if( resources.isEmpty() )
+      return properties;
+
+    if( resources.size() > 1 )
+      {
+      LOG.warn( "found multiple 'cascading/version.properties' files on the CLASSPATH. Please check your dependencies: {}", Util.join( resources, "," ) );
+      return properties;
+      }
+
+    InputStream stream = resources.get( 0 ).openStream();
 
     if( stream == null )
       return properties;

@@ -22,7 +22,6 @@ package cascading.tap;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -238,14 +237,15 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
     Tap source = getPlatform().getTextFile( inputFileUnexpectedEndOfFile );
     Tap sink = getPlatform().getTextFile( getOutputPath( getTestName() ), SinkMode.REPLACE );
 
-    Map<Object, Object> props = new HashMap<Object, Object>();
-    TupleEntrySchemeIteratorProps.setPermittedExceptions( props, java.io.EOFException.class );
+    Map<Object, Object> properties = getProperties();
+
+    TupleEntrySchemeIteratorProps.setPermittedExceptions( properties, java.io.EOFException.class );
 
     Pipe pipe = new Pipe( "data" );
     pipe = new Each( pipe, new Identity() );
 
     FlowDef flowDef = FlowDef.flowDef().addSource( pipe, source ).addTailSink( pipe, sink );
-    Flow flow = getPlatform().getFlowConnector( props ).connect( flowDef );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( flowDef );
     flow.complete();
     validateLength( flow.openSink(), 307 );
     }

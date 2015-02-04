@@ -36,6 +36,9 @@ import cascading.tuple.Fields;
  * If the type is an Object ({@code java.lang.Long}), and the tuple value is {@code null}, {@code null} is returned.
  * <p/>
  * Coerce encapsulates the {@link Identity} function.
+ * <p/>
+ * Note if the resolved coerceFields size does not equal the number of given types there will be a
+ * runtime error during execution.
  *
  * @see cascading.pipe.SubAssembly
  * @see cascading.operation.Identity
@@ -44,16 +47,19 @@ public class Coerce extends SubAssembly
   {
   /**
    * Constructor Coerce creates a new Coerce instance that will coerce all input Tuple values.
+   * <p/>
+   * Note if the resolved coerceFields size does not equal the number of given types there will be a
+   * runtime error during execution. Declaring the fields that must be coerced is a suggested practice.
    *
    * @param previous of type Pipe
    * @param types    of type Class...
    */
-  @ConstructorProperties({"previous", "types"})
+  @ConstructorProperties( {"previous", "types"} )
   public Coerce( Pipe previous, Class... types )
     {
     super( previous );
 
-    if( types.length > 0 )
+    if( types.length == 0 )
       throw new IllegalArgumentException( "given types array may not be zero length" );
 
     setTails( new Each( previous, new Identity( types ) ) );
@@ -63,18 +69,24 @@ public class Coerce extends SubAssembly
    * Constructor Coerce creates a new Coerce instance that will only coerce the given coerceFields Tuple values.
    * <p/>
    * Note the resulting output Tuple will contain all the original incoming Fields.
+   * <p/>
+   * Also note if the resolved coerceFields size does not equal the number of given types there will be a
+   * runtime error during execution.
    *
    * @param previous     of type Pipe
    * @param coerceFields of type Fields
    * @param types        of type Class...
    */
-  @ConstructorProperties({"previous", "coerceFields", "types"})
+  @ConstructorProperties( {"previous", "coerceFields", "types"} )
   public Coerce( Pipe previous, Fields coerceFields, Class... types )
     {
     super( previous );
 
     if( coerceFields == null )
       throw new IllegalArgumentException( "coerceFields may not be null" );
+
+    if( types.length == 0 )
+      throw new IllegalArgumentException( "given types array may not be zero length" );
 
     setTails( new Each( previous, coerceFields, new Identity( types ), Fields.REPLACE ) );
     }
@@ -90,7 +102,7 @@ public class Coerce extends SubAssembly
    * @param previous     of type Pipe
    * @param coerceFields of type Fields
    */
-  @ConstructorProperties({"previous", "coerceFields"})
+  @ConstructorProperties( {"previous", "coerceFields"} )
   public Coerce( Pipe previous, Fields coerceFields )
     {
     super( previous );

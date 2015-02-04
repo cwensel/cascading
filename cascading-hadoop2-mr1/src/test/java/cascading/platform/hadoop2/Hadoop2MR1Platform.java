@@ -159,7 +159,27 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform<JobConf>
           configuration.set( "mapred.job.tracker", System.getProperty( "mapred.job.tracker" ) );
           }
 
+        if( !Util.isEmpty( System.getProperty( "fs.defaultFS" ) ) )
+          {
+          LOG.info( "using {}={}", "fs.defaultFS", System.getProperty( "fs.defaultFS" ) );
+          configuration.set( "fs.defaultFS", System.getProperty( "fs.defaultFS" ) );
+          }
+
+        if( !Util.isEmpty( System.getProperty( "yarn.resourcemanager.address" ) ) )
+          {
+          LOG.info( "using {}={}", "yarn.resourcemanager.address", System.getProperty( "yarn.resourcemanager.address" ) );
+          configuration.set( "yarn.resourcemanager.address", System.getProperty( "yarn.resourcemanager.address" ) );
+          }
+
+        if( !Util.isEmpty( System.getProperty( "mapreduce.jobhistory.address" ) ) )
+          {
+          LOG.info( "using {}={}", "mapreduce.jobhistory.address", System.getProperty( "mapreduce.jobhistory.address" ) );
+          configuration.set( "mapreduce.jobhistory.address", System.getProperty( "mapreduce.jobhistory.address" ) );
+          }
+
         configuration.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
+        configuration.set( "mapreduce.framework.name", "yarn" );
+
         fileSys = FileSystem.get( configuration );
         }
       else
