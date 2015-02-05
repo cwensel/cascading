@@ -28,6 +28,7 @@ import cascading.flow.stream.MemorySpliceGate;
 import cascading.tuple.Fields;
 import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
+import cascading.util.Murmur3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,10 @@ public class TupleHasher implements Serializable
   {
   private static final Logger LOG = LoggerFactory.getLogger( MemorySpliceGate.class );
 
-  private static Hasher DEFAULT = new ObjectHasher();
+  private static HashFunction DEFAULT_HASH_FUNCTION = new HashFunction();
+  private static Hasher DEFAULT_HASHER = new ObjectHasher();
+
+  protected HashFunction hashFunction = DEFAULT_HASH_FUNCTION;
   private Hasher[] hashers;
 
   public TupleHasher()
@@ -94,7 +98,7 @@ public class TupleHasher implements Serializable
 
   protected void initialize( Comparator defaultComparator, Comparator[] comparators )
     {
-    Hasher defaultHasher = DEFAULT;
+    Hasher defaultHasher = DEFAULT_HASHER;
 
     if( defaultComparator instanceof Hasher )
       defaultHasher = (Hasher) defaultComparator;
@@ -114,18 +118,12 @@ public class TupleHasher implements Serializable
 
   public final int hashCode( Tuple tuple )
     {
-    int hash = 1;
+    return getHashFunction().hash( tuple, hashers );
+    }
 
-    List<Object> elements = Tuple.elements( tuple );
-
-    for( int i = 0; i < elements.size(); i++ )
-      {
-      Object element = elements.get( i );
-
-      hash = 31 * hash + ( element != null ? hashers[ i % hashers.length ].hashCode( element ) : 0 );
-      }
-
-    return hash;
+  protected HashFunction getHashFunction()
+    {
+    return hashFunction;
     }
 
   private static class ObjectHasher implements Hasher<Object>
@@ -155,8 +153,8 @@ public class TupleHasher implements Serializable
     }
 
   /**
-   * Wraps the given Tuple in a subtype, that uses the provided Hasher for hashCode calculations. If the given Hahser
-   * is <code>null</code> the input Tuple will be returned.
+   * Wraps the given Tuple in a subtype, that uses the provided Hasher for hashCode calculations. If the given Hasher
+   * is {@code null} the input Tuple will be returned.
    *
    * @param tupleHasher A TupleHasher instance.
    * @param input       A Tuple instance.
@@ -168,5 +166,28 @@ public class TupleHasher implements Serializable
       return input;
 
     return new WrappedTuple( tupleHasher, input );
+    }
+
+  public static class HashFunction implements Serializable
+    {
+    public int hash( Tuple tuple, Hasher[] hashers )
+      {
+      int hash = Murmur3.SEED;
+
+      List<Object> elements = Tuple.elements( tuple );
+
+      for( int i = 0; i < elements.size(); i++ )
+        {
+        Object element = elements.get( i );
+        int hashCode = 0;
+
+        if( element != null )
+          hashCode = hashers[ i % hashers.length ].hashCode( element );
+
+        hash = Murmur3.mixH1( hash, Murmur3.mixK1( hashCode ) );
+
+        }
+      return Murmur3.fmix( hash, elements.size() );
+      }
     }
   }

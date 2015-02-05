@@ -682,7 +682,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     flow.complete();
 
     Tuple[] results = new Tuple[]{
-      new Tuple( 1, "c" ,"A" ),
+      new Tuple( 1, "c", "A" ),
       new Tuple( 2, "d", "B" ),
       new Tuple( 3, "c", "C" ),
       new Tuple( 4, "d", "B" ),
@@ -753,18 +753,34 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testParallelAggregatesMergeLegacyHash() throws IOException
+    {
+    Map<Object, Object> properties = getProperties();
+    properties.put( "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash", "true" );
+    performParallelAggregatesMerge( false, properties );
+    }
+
+  @Test
+  public void testParallelAggregatesPriorMergeLegacyHash() throws IOException
+    {
+    Map<Object, Object> properties = getProperties();
+    properties.put( "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash", "true" );
+    performParallelAggregatesMerge( true, properties );
+    }
+
+  @Test
   public void testParallelAggregatesMerge() throws IOException
     {
-    performParallelAggregatesMerge( false );
+    performParallelAggregatesMerge( false, getProperties() );
     }
 
   @Test
   public void testParallelAggregatesPriorMerge() throws IOException
     {
-    performParallelAggregatesMerge( true );
+    performParallelAggregatesMerge( true, getProperties() );
     }
 
-  private void performParallelAggregatesMerge( boolean priorMerge ) throws IOException
+  private void performParallelAggregatesMerge( boolean priorMerge, Map<Object, Object> properties ) throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );
     getPlatform().copyFromLocal( inputFileRhs );
@@ -777,7 +793,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
         String.class,
         Integer.TYPE,
         Integer.TYPE, Double.TYPE},
-      getOutputPath( "multimerge+" + priorMerge ), SinkMode.REPLACE );
+      getOutputPath( "multimerge+" + priorMerge + String.valueOf( properties.size() ) ), SinkMode.REPLACE );
 
     Pipe lhsPipe = new Pipe( "multi-lhs" );
     Pipe rhsPipe = new Pipe( "multi-rhs" );
@@ -793,7 +809,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
         long offset = 2166136261L;
         long prime = 16777619L;
         long hash = offset;
-        for ( byte b : value.toString().getBytes() )
+        for( byte b : value.toString().getBytes() )
           hash = ( hash ^ b ) * prime;
         return (int) hash;
         }
@@ -807,7 +823,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Fields sumFields = new Fields( "sum" );
     sumFields.setComparator( "sum", new CustomHasher() );
-    SumBy sumPipe = new SumBy( new Fields( "num" ), sumFields , long.class );
+    SumBy sumPipe = new SumBy( new Fields( "num" ), sumFields, long.class );
 
     Fields countFields = new Fields( "count" );
     countFields.setComparator( "count", new CustomHasher() );
@@ -835,7 +851,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 
-    Flow flow = getPlatform().getFlowConnector().connect( tapMap, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( tapMap, sink, pipe );
 
     flow.complete();
 
@@ -1053,7 +1069,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
   /**
    * inserts null values into the tuple stream.
-   * */
+   */
   class NullInsert extends BaseOperation implements Function
     {
     private final int number;
@@ -1063,6 +1079,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       super( 2, fieldDeclaration );
       this.number = numberToFilter;
       }
+
     @Override
     public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
@@ -1070,7 +1087,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       int num = argument.getInteger( 0 );
       String chr = argument.getString( 1 );
       Tuple result;
-      if ( num == number )
+      if( num == number )
         result = new Tuple( null, chr );
       else
         result = new Tuple( num, chr );

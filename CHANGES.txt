@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Updated c.t.u.TupleHasher to use MurmurHash3 32bit for hashCode calculation. Users relying on the old hashCode
+  implementation for partitioning can set "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash" to true.
+
   Updated c.f.h.HadoopPlanner and c.f.h2.Hadoop2MR1Planner to log a warning if a flow is being run on the wrong version
   of Hadoop.
 
