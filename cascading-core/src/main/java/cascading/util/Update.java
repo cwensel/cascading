@@ -34,7 +34,9 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlatformInfo;
 import cascading.property.AppProps;
 import org.slf4j.Logger;
@@ -51,8 +53,26 @@ public class Update extends TimerTask
   public static final String UPDATE_CHECK_SKIP = "cascading.update.skip";
   public static final String UPDATE_URL = "cascading.update.url";
 
+  private static final Set<String> plannerSet = Collections.synchronizedSet( new TreeSet<String>() );
   private static final Set<PlatformInfo> platformInfoSet = Collections.synchronizedSet( new TreeSet<PlatformInfo>() );
   private static Timer timer;
+  private static AtomicInteger requests = new AtomicInteger( 0 ); // successful requests
+  private static AtomicInteger pending = new AtomicInteger( 0 ); // pending requests
+
+  // set foundation for checking planner versions from third-parties
+  public static void registerPlanner( Class<? extends FlowPlanner> plannerClass )
+    {
+    if( Boolean.getBoolean( UPDATE_CHECK_SKIP ) || plannerClass == null )
+      return;
+
+    if( !plannerSet.add( plannerClass.getSimpleName() ) ) // not new
+      return;
+
+    if( timer == null || pending.get() > 0 ) // already have updates queued, do not schedule
+      return;
+
+    timer.schedule( new Update(), 1000 * 30 );
+    }
 
   public static synchronized void checkForUpdate( PlatformInfo platformInfo )
     {
@@ -69,10 +89,23 @@ public class Update extends TimerTask
     timer.scheduleAtFixedRate( new Update(), 1000 * 30, 24 * 60 * 60 * 1000L );
     }
 
+  private boolean hasUpdated = false;
+
+  public Update()
+    {
+    pending.incrementAndGet(); // update queued
+    }
+
   @Override
   public void run()
     {
     checkForUpdate();
+
+    if( hasUpdated ) // don't count subsequent updates from this instance
+      return;
+
+    hasUpdated = true;
+    pending.decrementAndGet(); // update completed
     }
 
   public boolean checkForUpdate()
@@ -129,24 +162,28 @@ public class Update extends TimerTask
       URLConnection connection = updateUrl.openConnection();
       connection.setConnectTimeout( 3 * 1000 );
 
-      InputStream in = connection.getInputStream();
+      InputStream inputStream = connection.getInputStream();
 
       try
         {
         Properties props = new Properties();
 
-        props.load( connection.getInputStream() );
+        if( inputStream != null )
+          {
+          props.load( inputStream );
+          requests.incrementAndGet();
+          }
 
         return props;
         }
       finally
         {
-        if( in != null )
-          close( in );
+        close( inputStream );
         }
       }
     catch( IOException exception )
       {
+      // do not reschedule requests
       LOG.debug( "unable to fetch latest properties", exception );
       return new Properties();
       }
@@ -202,6 +239,8 @@ public class Update extends TimerTask
     sb.append( getClientId() );
     sb.append( "&instance=" );
     sb.append( urlEncode( AppProps.getApplicationID( null ) ) );
+    sb.append( "&request=" );
+    sb.append( requests.get() );
     sb.append( "&os-name=" );
     sb.append( urlEncode( getProperty( "os.name" ) ) );
     sb.append( "&jvm-name=" );
@@ -219,6 +258,15 @@ public class Update extends TimerTask
     sb.append( "&frameworks=" );
     sb.append( urlEncode( getProperty( AppProps.APP_FRAMEWORKS ) ) );
 
+    synchronized( plannerSet )
+      {
+      for( String plannerName : plannerSet )
+        {
+        sb.append( "&planner-name=" );
+        sb.append( urlEncode( plannerName ) );
+        }
+      }
+
     synchronized( platformInfoSet )
       {
       for( PlatformInfo platformInfo : platformInfoSet )
@@ -230,8 +278,6 @@ public class Update extends TimerTask
         sb.append( "&platform-vendor=" );
         sb.append( urlEncode( platformInfo.vendor ) );
         }
-
-      platformInfoSet.clear();
       }
 
     return sb.toString();
@@ -280,7 +326,8 @@ public class Update extends TimerTask
     {
     try
       {
-      in.close();
+      if( in != null )
+        in.close();
       }
     catch( IOException exception )
       {

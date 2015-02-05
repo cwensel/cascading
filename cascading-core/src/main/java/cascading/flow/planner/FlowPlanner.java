@@ -56,6 +56,7 @@ import cascading.tap.DecoratorTap;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
+import cascading.util.Update;
 import cascading.util.Util;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
@@ -106,6 +107,10 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
     return DebugLevel.valueOf( debugLevel );
     }
+
+  {
+  Update.registerPlanner( getClass() );
+  }
 
   public Map<Object, Object> getProperties()
     {
