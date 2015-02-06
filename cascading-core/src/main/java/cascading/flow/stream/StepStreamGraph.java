@@ -266,7 +266,8 @@ public abstract class StepStreamGraph extends StreamGraph
 
         if( trap != null )
           {
-          elementDuct.setTrapHandler( new TrapHandler( flowProcess, trap, branchName ) );
+          FlowProcess elementFlowProcess = new ElementFlowProcess( flowProcess, trap.getConfigDef() );
+          elementDuct.setTrapHandler( new TrapHandler( elementFlowProcess, flowElement, trap, branchName ) );
           break;
           }
         }

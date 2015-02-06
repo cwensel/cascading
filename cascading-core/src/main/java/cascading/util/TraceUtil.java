@@ -20,6 +20,12 @@
 
 package cascading.util;
 
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -231,5 +237,50 @@ public class TraceUtil
       }
 
     return false;
+    }
+
+  public static String stringifyStackTrace( Throwable throwable, String lineSeparator, boolean trimLines, int lineLimit )
+    {
+    if( lineLimit == 0 )
+      return null;
+
+    Writer traceWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter( traceWriter );
+
+    throwable.printStackTrace( printWriter );
+
+    String trace = traceWriter.toString();
+
+    if( lineSeparator.equals( System.getProperty( "line.separator" ) ) && !trimLines && lineLimit == -1 )
+      return trace;
+
+    lineLimit = lineLimit == -1 ? Integer.MAX_VALUE : lineLimit;
+
+    StringBuilder buffer = new StringBuilder();
+    LineNumberReader reader = new LineNumberReader( new StringReader( trace ) );
+
+    try
+      {
+      String line = reader.readLine();
+
+      while( line != null && reader.getLineNumber() - 1 < lineLimit )
+        {
+        if( reader.getLineNumber() > 1 )
+          buffer.append( lineSeparator );
+
+        if( trimLines )
+          line = line.trim();
+
+        buffer.append( line );
+
+        line = reader.readLine();
+        }
+      }
+    catch( IOException exception )
+      {
+      // ignore - reading a string
+      }
+
+    return buffer.toString();
     }
   }

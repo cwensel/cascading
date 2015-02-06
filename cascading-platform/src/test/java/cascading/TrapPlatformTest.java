@@ -35,14 +35,16 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.property.ConfigDef;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.TrapProps;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import data.InputData;
 import org.junit.Test;
 
+import static cascading.ComparePlatformsTest.NONDETERMINISTIC;
 import static data.InputData.inputFileApache;
 import static data.InputData.testDelimitedProblematic;
 
@@ -390,5 +392,73 @@ public class TrapPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow.openTrap(), 1 );
+    }
+
+  @Test
+  public void testTrapDiagnostics() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    // always fail
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
+
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "diag/tap" + NONDETERMINISTIC ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTabDelimitedFile( Fields.ALL, getOutputPath( "diag/trap" + NONDETERMINISTIC ), SinkMode.REPLACE );
+
+    Map<Object, Object> properties = getProperties();
+
+    properties = TrapProps.trapProps()
+      .recordAllDiagnostics()
+      .buildProperties( properties );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 0 );
+    validateLength( flow.openTrap(), 10, 4, Pattern.compile( ".*TrapPlatformTest.*" ) ); // 4 columns, not 1
+    }
+
+  @Test
+  public void testTrapDiagnosticsLocalConfig() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( inputFileApache );
+
+    Pipe pipe = new Pipe( "map" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    // always fail
+    pipe = new Each( pipe, new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
+
+    pipe = new GroupBy( "reduce", pipe, new Fields( "ip" ) );
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "diagconfigdef/tap" + NONDETERMINISTIC ), SinkMode.REPLACE );
+    Tap trap = getPlatform().getTabDelimitedFile( Fields.ALL, getOutputPath( "diagconfigdef/trap" + NONDETERMINISTIC ), SinkMode.REPLACE );
+
+    Map<Object, Object> properties = getProperties();
+
+    TrapProps.trapProps()
+      .recordAllDiagnostics()
+      .setProperties( trap.getConfigDef(), ConfigDef.Mode.DEFAULT );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 0 );
+    validateLength( flow.openTrap(), 10, 4, Pattern.compile( ".*TrapPlatformTest.*" ) ); // 4 columns, not 1
     }
   }

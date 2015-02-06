@@ -2,6 +2,11 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Updated trap handling to capture diagnostic information within a trap when configured via a c.t.TrapProps instance.
+
+  Added the c.t.TrapProp class to provide fine grained configuration over c.t.Tap traps per c.f.Flow or per
+  c.t.Tap instances.
+
   Updated c.t.u.TupleHasher to use MurmurHash3 32bit for hashCode calculation. Users relying on the old hashCode
   implementation for partitioning can set "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash" to true.
 

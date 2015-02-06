@@ -24,12 +24,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tap.TrapProps;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
+import cascading.util.TraceUtil;
+import cascading.util.Traceable;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +50,22 @@ public class TrapHandler
   static final Map<Tap, TupleEntryCollector> trapCollectors = new HashMap<Tap, TupleEntryCollector>();
 
   final FlowProcess flowProcess;
+  final FlowElement flowElement;
+  final String elementTrace;
   final Tap trap;
   final String trapName;
+
+  boolean recordElementTrace = false;
+  boolean recordThrowableMessage = false;
+  boolean recordThrowableStackTrace = false;
+  boolean logThrowableStackTrace = true;
+  boolean stackTraceTrimLine = true;
+  String stackTraceLineDelimiter = "|";
+
+  boolean recordAnyDiagnostics;
+
+  Fields diagnosticFields = Fields.UNKNOWN;
+  TupleEntry diagnosticEntry;
 
   static TupleEntryCollector getTrapCollector( Tap trap, FlowProcess flowProcess )
     {
@@ -87,15 +107,48 @@ public class TrapHandler
   public TrapHandler( FlowProcess flowProcess )
     {
     this.flowProcess = flowProcess;
+    this.flowElement = null;
     this.trap = null;
     this.trapName = null;
+    this.elementTrace = null;
     }
 
-  public TrapHandler( FlowProcess flowProcess, Tap trap, String trapName )
+  public TrapHandler( FlowProcess flowProcess, FlowElement flowElement, Tap trap, String trapName )
     {
     this.flowProcess = flowProcess;
+    this.flowElement = flowElement;
     this.trap = trap;
     this.trapName = trapName;
+
+    if( flowElement instanceof Traceable )
+      this.elementTrace = ( (Traceable) flowElement ).getTrace();
+    else
+      this.elementTrace = null;
+
+    this.recordElementTrace = flowProcess.getBooleanProperty( TrapProps.RECORD_ELEMENT_TRACE, this.recordElementTrace );
+    this.recordThrowableMessage = flowProcess.getBooleanProperty( TrapProps.RECORD_THROWABLE_MESSAGE, this.recordThrowableMessage );
+    this.recordThrowableStackTrace = flowProcess.getBooleanProperty( TrapProps.RECORD_THROWABLE_STACK_TRACE, this.recordThrowableStackTrace );
+    this.logThrowableStackTrace = flowProcess.getBooleanProperty( TrapProps.LOG_THROWABLE_STACK_TRACE, this.logThrowableStackTrace );
+    this.stackTraceLineDelimiter = flowProcess.getStringProperty( TrapProps.STACK_TRACE_LINE_DELIMITER, this.stackTraceLineDelimiter );
+    this.stackTraceTrimLine = flowProcess.getBooleanProperty( TrapProps.STACK_TRACE_LINE_TRIM, this.stackTraceTrimLine );
+
+    this.recordAnyDiagnostics = this.recordElementTrace || this.recordThrowableMessage || this.recordThrowableStackTrace;
+
+    Fields fields = new Fields();
+
+    if( this.recordElementTrace )
+      fields = fields.append( new Fields( "element-trace" ) );
+
+    if( this.recordThrowableMessage )
+      fields = fields.append( new Fields( "throwable-message" ) );
+
+    if( this.recordThrowableStackTrace )
+      fields = fields.append( new Fields( "throwable-stacktrace" ) );
+
+    if( fields.size() != 0 )
+      this.diagnosticFields = fields;
+
+    this.diagnosticEntry = new TupleEntry( diagnosticFields );
     }
 
   protected void handleReThrowableException( String message, Throwable throwable )
@@ -125,13 +178,17 @@ public class TrapHandler
     if( trap == null )
       handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
 
+    TupleEntryCollector trapCollector = getTrapCollector( trap, flowProcess );
+
+    TupleEntry payload;
+
     if( cause instanceof TapException && ( (TapException) cause ).getPayload() != null )
       {
-      getTrapCollector( trap, flowProcess ).add( ( (TapException) cause ).getPayload() );
+      payload = new TupleEntry( Fields.UNKNOWN, ( (TapException) cause ).getPayload() );
       }
     else if( tupleEntry != null )
       {
-      getTrapCollector( trap, flowProcess ).add( tupleEntry );
+      payload = tupleEntry;
       }
     else
       {
@@ -139,9 +196,38 @@ public class TrapHandler
       throw new DuctException( "failure resolving tuple entry", throwable );
       }
 
+    TupleEntry diagnostics = getDiagnostics( throwable );
+
+    if( diagnostics != TupleEntry.NULL ) // prepend diagnostics, payload is variable
+      payload = diagnostics.appendNew( payload );
+
+    trapCollector.add( payload );
+
     flowProcess.increment( StepCounters.Tuples_Trapped, 1 );
 
-    LOG.warn( "exception trap on branch: '" + trapName + "', for " + Util.truncate( print( tupleEntry ), 75 ), throwable );
+    if( logThrowableStackTrace )
+      LOG.warn( "exception trap on branch: '" + trapName + "', for " + Util.truncate( print( tupleEntry ), 75 ), throwable );
+    }
+
+  private TupleEntry getDiagnostics( Throwable throwable )
+    {
+    if( !recordAnyDiagnostics )
+      return TupleEntry.NULL;
+
+    Tuple diagnostics = new Tuple();
+
+    if( recordElementTrace )
+      diagnostics.add( elementTrace );
+
+    if( recordThrowableMessage )
+      diagnostics.add( throwable.getMessage() );
+
+    if( recordThrowableStackTrace )
+      diagnostics.add( TraceUtil.stringifyStackTrace( throwable, stackTraceLineDelimiter, stackTraceTrimLine, -1 ) );
+
+    diagnosticEntry.setTuple( diagnostics );
+
+    return diagnosticEntry;
     }
 
   private String print( TupleEntry tupleEntry )

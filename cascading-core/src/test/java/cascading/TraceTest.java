@@ -271,4 +271,18 @@ public class TraceTest extends CascadingTestCase
     String substring = trace.substring( 0, trace.lastIndexOf( ":" ) );
     assertEquals( expected, substring );
     }
+
+  @Test
+  public void testStringify()
+    {
+    Throwable top = new CascadingException( "test message", new NullPointerException( "had an npe" ) );
+
+    assertNotNull( TraceUtil.stringifyStackTrace( top, "|", true, -1 ) );
+    assertTrue( !TraceUtil.stringifyStackTrace( top, "|", true, -1 ).contains( "\t" ) );
+    assertTrue( TraceUtil.stringifyStackTrace( top, "|", false, -1 ).contains( "\t" ) );
+
+    assertNull( TraceUtil.stringifyStackTrace( top, "|", true, 0 ) );
+    assertEquals( 1, TraceUtil.stringifyStackTrace( top, "|", true, 1 ).split( "\\|" ).length );
+    assertEquals( 2, TraceUtil.stringifyStackTrace( top, "|", true, 2 ).split( "\\|" ).length );
+    }
   }

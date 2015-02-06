@@ -238,8 +238,8 @@ public abstract class FlowProcess<Config>
    * <p/>
    * In the case of Hadoop, the current Configuration will be queried.
    *
-   * @param key of type String, null if property is not set
-   * @return an Object
+   * @param key of type String,
+   * @return null if property is not set
    */
   public String getStringProperty( String key )
     {
@@ -252,12 +252,31 @@ public abstract class FlowProcess<Config>
     }
 
   /**
+   * Method getStringProperty should be used to return configuration parameters from the underlying system.
+   * <p/>
+   * In the case of Hadoop, the current Configuration will be queried.
+   *
+   * @param key          of type String,
+   * @param defaultValue of type String,
+   * @return {@code defaultValue} if property is not set
+   */
+  public String getStringProperty( String key, String defaultValue )
+    {
+    Object value = getProperty( key );
+
+    if( value == null )
+      return defaultValue;
+
+    return value.toString();
+    }
+
+  /**
    * Method getIntegerProperty should be used to return configuration parameters from the underlying system.
    * <p/>
    * In the case of Hadoop, the current Configuration will be queried.
    *
-   * @param key of type Integer, null if property is not set
-   * @return an Object
+   * @param key of type String,
+   * @return null if property is not set
    */
   public Integer getIntegerProperty( String key )
     {
@@ -267,6 +286,62 @@ public abstract class FlowProcess<Config>
       return null;
 
     return Integer.valueOf( value );
+    }
+
+  /**
+   * Method getIntegerProperty should be used to return configuration parameters from the underlying system.
+   * <p/>
+   * In the case of Hadoop, the current Configuration will be queried.
+   *
+   * @param key          of type String,
+   * @param defaultValue of type int,
+   * @return {@code defaultValue} if property is not set
+   */
+  public int getIntegerProperty( String key, int defaultValue )
+    {
+    String value = getStringProperty( key );
+
+    if( value == null || value.isEmpty() )
+      return defaultValue;
+
+    return Integer.valueOf( value );
+    }
+
+  /**
+   * Method getBooleanProperty should be used to return configuration parameters from the underlying system.
+   * <p/>
+   * In the case of Hadoop, the current Configuration will be queried.
+   *
+   * @param key of type Boolean, null if property is not set
+   * @return an Object
+   */
+  public Boolean getBooleanProperty( String key )
+    {
+    String value = getStringProperty( key );
+
+    if( value == null || value.isEmpty() )
+      return null;
+
+    return Boolean.valueOf( value );
+    }
+
+  /**
+   * Method getBooleanProperty should be used to return configuration parameters from the underlying system.
+   * <p/>
+   * In the case of Hadoop, the current Configuration will be queried.
+   *
+   * @param key          of type String
+   * @param defaultValue of type boolean
+   * @return {@code defaultValue} if property is not set
+   */
+  public boolean getBooleanProperty( String key, boolean defaultValue )
+    {
+    String value = getStringProperty( key );
+
+    if( value == null || value.isEmpty() )
+      return defaultValue;
+
+    return Boolean.valueOf( value );
     }
 
   /**
