@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.6.3 [unreleased]
 
+  Updated c.p.Splice to throw an IllegalArgumentException if performing a self c.p.Merge on a split with no intermediate
+  c.o.Operations after the split.
+
   Fixed issue where c.p.a.FirstBy would perform a comparison on the aggregating values when no j.u.Comparator was
   provided to the argument c.t.Fields selector.
 

@@ -279,6 +279,9 @@ public class Splice extends Pipe
 
     if( pipes.length > 1 && uniques == 1 )
       {
+      if( isMerge() )
+        throw new IllegalArgumentException( "may not merge a pipe with itself without intermediate operations after the split" );
+
       if( groupFields == null )
         throw new IllegalArgumentException( "groupFields array may not be null" );
 
