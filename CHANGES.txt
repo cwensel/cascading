@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.6.3 [unreleased]
+2.6.3
 
   Updated c.p.Splice to throw an IllegalArgumentException if performing a self c.p.Merge on a split with no intermediate
   c.o.Operations after the split.
