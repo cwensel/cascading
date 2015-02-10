@@ -83,7 +83,6 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: aTuple.size()", 1, aTuple.size() );
     assertEquals( "not equal: aTuple.get( 0 )", "a", aTuple.getObject( 0 ) );
 
-
     assertEquals( "not equal: tuple.size()", 4, tuple.size() );
     assertEquals( "not equal: tuple.get( 0 )", "b", tuple.getObject( 0 ) );
     assertEquals( "not equal: tuple.get( 1 )", "c", tuple.getObject( 1 ) );
@@ -94,7 +93,6 @@ public class TupleTest extends CascadingTestCase
     Tuple aTuple = tuple.remove( new int[]{2, 4} );
     assertEquals( "not equal: aTuple.size()", 2, aTuple.size() );
     assertEquals( "not equal: aTuple.get( 0 )", "c", aTuple.getObject( 0 ) );
-
 
     assertEquals( "not equal: tuple.size()", 3, tuple.size() );
     assertEquals( "not equal: tuple.get( 0 )", "a", tuple.getObject( 0 ) );
@@ -305,5 +303,21 @@ public class TupleTest extends CascadingTestCase
 
     for( int i = 0; i < tuple.size(); i++ )
       assertEquals( "wrong value on: " + count, tuple.getObject( i ), result.getObject( count++ ) );
+    }
+
+  public void testSetCoerce()
+    {
+    Fields fieldsA = new Fields( "a", "b", "c" ).applyTypes( String.class, String.class, String.class );
+    Tuple tupleA = new Tuple( "0", "1", "2" );
+
+    Fields fieldsB = new Fields( "c", "b" ).applyTypes( Integer.class, Integer.class );
+    Tuple tupleB = new Tuple( -2, -1 );
+
+    tupleA.set( fieldsA, fieldsB, tupleB );
+
+    assertEquals( "wrong size", 3, tupleA.size() );
+    assertEquals( "not equal: tuple.get(0)", "0", tupleA.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "-1", tupleA.getObject( 1 ) );
+    assertEquals( "not equal: tuple.get(2)", "-2", tupleA.getObject( 2 ) );
     }
   }

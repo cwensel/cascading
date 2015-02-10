@@ -67,6 +67,7 @@ public class FirstBy extends AggregateBy
   public static class FirstPartials implements Functor
     {
     private final Fields declaredFields;
+    private Boolean doComparison;
 
     /**
      * Constructor FirstPartials creates a new FirstPartials instance.
@@ -87,7 +88,10 @@ public class FirstBy extends AggregateBy
     @Override
     public Tuple aggregate( FlowProcess flowProcess, TupleEntry args, Tuple context )
       {
-      if( context == null || args.getFields().compare( context, args.getTuple() ) > 0 )
+      if( doComparison == null )
+        doComparison = args.getFields().hasComparators(); // ensure we use resolved fields
+
+      if( context == null || ( doComparison && args.getFields().compare( context, args.getTuple() ) > 0 ) )
         return args.getTupleCopy();
 
       return context;
@@ -106,7 +110,7 @@ public class FirstBy extends AggregateBy
    *
    * @param firstFields of type Fields
    */
-  @ConstructorProperties({"firstFields"})
+  @ConstructorProperties( {"firstFields"} )
   public FirstBy( Fields firstFields )
     {
     super( firstFields, new FirstPartials( firstFields ), new First( firstFields ) );
@@ -118,7 +122,7 @@ public class FirstBy extends AggregateBy
    *
    * @param firstFields of type Fields
    */
-  @ConstructorProperties({"argumentFields", "firstFields"})
+  @ConstructorProperties( {"argumentFields", "firstFields"} )
   public FirstBy( Fields argumentFields, Fields firstFields )
     {
     super( argumentFields, new FirstPartials( argumentFields ), new First( firstFields ) );
@@ -133,7 +137,7 @@ public class FirstBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param firstFields    of type Fields
    */
-  @ConstructorProperties({"pipe", "groupingFields", "firstFields"})
+  @ConstructorProperties( {"pipe", "groupingFields", "firstFields"} )
   public FirstBy( Pipe pipe, Fields groupingFields, Fields firstFields )
     {
     this( null, pipe, groupingFields, firstFields );
@@ -147,7 +151,7 @@ public class FirstBy extends AggregateBy
    * @param firstFields    fo type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"pipe", "groupingFields", "firstFields", "threshold"})
+  @ConstructorProperties( {"pipe", "groupingFields", "firstFields", "threshold"} )
   public FirstBy( Pipe pipe, Fields groupingFields, Fields firstFields, int threshold )
     {
     this( null, pipe, groupingFields, firstFields, threshold );
@@ -161,7 +165,7 @@ public class FirstBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param firstFields    of type Fields
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields", "firstFields"})
+  @ConstructorProperties( {"name", "pipe", "groupingFields", "firstFields"} )
   public FirstBy( String name, Pipe pipe, Fields groupingFields, Fields firstFields )
     {
     this( name, pipe, groupingFields, firstFields, USE_DEFAULT_THRESHOLD );
@@ -176,7 +180,7 @@ public class FirstBy extends AggregateBy
    * @param firstFields    of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipe", "groupingFields", "firstFields", "threshold"})
+  @ConstructorProperties( {"name", "pipe", "groupingFields", "firstFields", "threshold"} )
   public FirstBy( String name, Pipe pipe, Fields groupingFields, Fields firstFields, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, firstFields, threshold );
@@ -189,7 +193,7 @@ public class FirstBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param firstFields    of type Fields
    */
-  @ConstructorProperties({"pipes", "groupingFields", "firstFields"})
+  @ConstructorProperties( {"pipes", "groupingFields", "firstFields"} )
   public FirstBy( Pipe[] pipes, Fields groupingFields, Fields firstFields )
     {
     this( null, pipes, groupingFields, firstFields, USE_DEFAULT_THRESHOLD );
@@ -203,7 +207,7 @@ public class FirstBy extends AggregateBy
    * @param firstFields    of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"pipes", "groupingFields", "firstFields", "threshold"})
+  @ConstructorProperties( {"pipes", "groupingFields", "firstFields", "threshold"} )
   public FirstBy( Pipe[] pipes, Fields groupingFields, Fields firstFields, int threshold )
     {
     this( null, pipes, groupingFields, firstFields, threshold );
@@ -217,7 +221,7 @@ public class FirstBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param firstFields    of type Fields
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "firstFields"})
+  @ConstructorProperties( {"name", "pipes", "groupingFields", "firstFields"} )
   public FirstBy( String name, Pipe[] pipes, Fields groupingFields, Fields firstFields )
     {
     this( name, pipes, groupingFields, firstFields, USE_DEFAULT_THRESHOLD );
@@ -232,7 +236,7 @@ public class FirstBy extends AggregateBy
    * @param firstFields    of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties({"name", "pipes", "groupingFields", "firstFields", "threshold"})
+  @ConstructorProperties( {"name", "pipes", "groupingFields", "firstFields", "threshold"} )
   public FirstBy( String name, Pipe[] pipes, Fields groupingFields, Fields firstFields, int threshold )
     {
     super( name, pipes, groupingFields, firstFields, new FirstPartials( firstFields ), new First( firstFields ), threshold );

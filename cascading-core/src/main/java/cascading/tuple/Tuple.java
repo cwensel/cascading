@@ -820,15 +820,24 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     for( int i : pos )
       {
       Object element = tuple.elements.get( count );
-      Type type = types[ count++ ];
-      element = coercions[ i ].coerce( element, type );
+
+      if( types != null )
+        {
+        Type type = types[ i ];
+        element = coercions[ count ].coerce( element, type );
+        }
 
       elements.set( i, element );
+
+      count++;
       }
     }
 
   /**
    * Method set sets the values in the given selector positions to the values from the given Tuple.
+   * <p/>
+   * If type information is given, each incoming value from tuple will be coerced from its canonical type to the
+   * current type as declared in the declarator.
    *
    * @param declarator of type Fields
    * @param selector   of type Fields
@@ -838,7 +847,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     {
     try
       {
-      set( declarator.getPos( selector ), tuple );
+      set( declarator.getPos( selector ), declarator.getTypes(), tuple, TupleEntry.getCoercions( declarator, tuple ) );
       }
     catch( Exception exception )
       {

@@ -192,7 +192,6 @@ public class Splice extends Pipe
     this( null, pipes, groupFields, null, null );
     }
 
-
   /**
    * Constructor Splice creates a new Splice instance.
    *
@@ -270,6 +269,9 @@ public class Splice extends Pipe
    */
   protected Splice( String spliceName, Pipe[] pipes, Fields[] groupFields, Fields declaredFields, Fields resultGroupFields, Joiner joiner )
     {
+    if( pipes == null )
+      throw new IllegalArgumentException( "pipes array may not be null" );
+
     setKind();
     this.spliceName = spliceName;
 
@@ -277,6 +279,12 @@ public class Splice extends Pipe
 
     if( pipes.length > 1 && uniques == 1 )
       {
+      if( isMerge() )
+        throw new IllegalArgumentException( "may not merge a pipe with itself without intermediate operations after the split" );
+
+      if( groupFields == null )
+        throw new IllegalArgumentException( "groupFields array may not be null" );
+
       if( new HashSet<Fields>( asList( groupFields ) ).size() != 1 )
         throw new IllegalArgumentException( "all groupFields must be identical" );
 
@@ -782,6 +790,12 @@ public class Splice extends Pipe
    */
   protected Splice( String spliceName, Pipe[] pipes, Fields groupFields, Fields sortFields, boolean reverseOrder )
     {
+    if( pipes == null )
+      throw new IllegalArgumentException( "pipes array may not be null" );
+
+    if( groupFields == null )
+      throw new IllegalArgumentException( "groupFields may not be null" );
+
     setKind();
     this.spliceName = spliceName;
 
