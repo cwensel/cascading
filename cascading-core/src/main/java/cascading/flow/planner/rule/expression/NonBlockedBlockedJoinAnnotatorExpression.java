@@ -21,7 +21,7 @@
 package cascading.flow.planner.rule.expression;
 
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.expressiongraph.NoGroupJoinTapExpressionGraph;
+import cascading.flow.planner.rule.expressiongraph.NoCoGroupJoinTapExpressionGraph;
 import cascading.flow.planner.rule.expressiongraph.NonBlockedBlockedJoinExpressionGraph;
 
 /**
@@ -32,7 +32,7 @@ public class NonBlockedBlockedJoinAnnotatorExpression extends RuleExpression
   public NonBlockedBlockedJoinAnnotatorExpression()
     {
     super(
-      new NoGroupJoinTapExpressionGraph(),
+      new NoCoGroupJoinTapExpressionGraph(),
       new NonBlockedBlockedJoinExpressionGraph()
     );
     }

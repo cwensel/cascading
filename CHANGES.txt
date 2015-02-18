@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Fixed issue where local mode could deadlock during a c.p.HashJoin on the same source in some situations.
+
   Removed the deprecated c.t.PlatformRunner, c.t.HadoopPlatform, and c.t.LocalPlatform. See c.p.PlatformRunner,
   c.p.h.HadoopPlatform, and c.p.l.LocalPlatform as alternatives.
 
