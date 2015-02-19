@@ -496,7 +496,7 @@ public class ElementGraphs
 
   public static void removeAndContract( ElementGraph elementGraph, FlowElement flowElement )
     {
-    LOG.debug( "removing element, contracting edge : " + flowElement );
+    LOG.debug( "removing element, contracting edge for: {}", flowElement );
 
     Set<Scope> incomingScopes = elementGraph.incomingEdgesOf( flowElement );
 
