@@ -153,7 +153,7 @@ public class TupleEntry
    *
    * @param isUnmodifiable of type boolean
    */
-  @ConstructorProperties( {"isUnmodifiable"} )
+  @ConstructorProperties({"isUnmodifiable"})
   public TupleEntry( boolean isUnmodifiable )
     {
     this.fields = Fields.NONE;
@@ -167,7 +167,7 @@ public class TupleEntry
    *
    * @param fields of type Fields
    */
-  @ConstructorProperties( {"fields"} )
+  @ConstructorProperties({"fields"})
   public TupleEntry( Fields fields )
     {
     this.fields = fields;
@@ -181,7 +181,7 @@ public class TupleEntry
    * @param fields         of type Fields
    * @param isUnmodifiable of type boolean
    */
-  @ConstructorProperties( {"fields", "isUnmodifiable"} )
+  @ConstructorProperties({"fields", "isUnmodifiable"})
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
     this.fields = fields;
@@ -197,7 +197,7 @@ public class TupleEntry
    * @param tuple          of type Tuple
    * @param isUnmodifiable of type boolean
    */
-  @ConstructorProperties( {"fields", "tuple", "isUnmodifiable"} )
+  @ConstructorProperties({"fields", "tuple", "isUnmodifiable"})
   public TupleEntry( Fields fields, Tuple tuple, boolean isUnmodifiable )
     {
     this.fields = fields;
@@ -213,7 +213,7 @@ public class TupleEntry
    * @param fields of type Fields
    * @param tuple  of type Tuple
    */
-  @ConstructorProperties( {"fields", "tuple"} )
+  @ConstructorProperties({"fields", "tuple"})
   public TupleEntry( Fields fields, Tuple tuple )
     {
     this.fields = fields;
@@ -229,7 +229,7 @@ public class TupleEntry
    *
    * @param tupleEntry of type TupleEntry
    */
-  @ConstructorProperties( {"tupleEntry"} )
+  @ConstructorProperties({"tupleEntry"})
   public TupleEntry( TupleEntry tupleEntry )
     {
     this.fields = tupleEntry.getFields();
@@ -243,7 +243,7 @@ public class TupleEntry
    *
    * @param tuple of type Tuple
    */
-  @ConstructorProperties( {"tuple"} )
+  @ConstructorProperties({"tuple"})
   public TupleEntry( Tuple tuple )
     {
     this.fields = Fields.size( tuple.size() );
@@ -257,14 +257,20 @@ public class TupleEntry
     if( coercions != EMPTY_COERCIONS )
       return;
 
-    Fields fields = getFields();
+    coercions = getCoercions( getFields(), tuple );
+    }
+
+  static CoercibleType[] getCoercions( Fields fields, Tuple tuple )
+    {
     Type[] types = fields.types; // safe to not get a copy
     int size = fields.size();
 
     size = size == 0 && tuple != null ? tuple.size() : size;
 
-    if( coercions.length < size )
-      coercions = Coercions.coercibleArray( size, types );
+    if( size == 0 )
+      return EMPTY_COERCIONS;
+
+    return Coercions.coercibleArray( size, types );
     }
 
   /**
@@ -865,7 +871,7 @@ public class TupleEntry
    * Method set sets the values from the given tupleEntry into this TupleEntry instance based on the given
    * tupleEntry field names.
    * <p/>
-   * If type information is given, each incoming value will be coerced from its canonical type to the given types.
+   * If type information is given, each incoming value will be coerced from its canonical type to the current type.
    *
    * @param tupleEntry of type TupleEntry
    */

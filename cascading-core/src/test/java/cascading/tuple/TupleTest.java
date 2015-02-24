@@ -290,4 +290,20 @@ public class TupleTest extends CascadingTestCase
     for( int i = 0; i < tuple.size(); i++ )
       assertEquals( "wrong value on: " + count, tuple.getObject( i ), result.getObject( count++ ) );
     }
+
+  public void testSetCoerce()
+    {
+    Fields fieldsA = new Fields( "a", "b", "c" ).applyTypes( String.class, String.class, String.class );
+    Tuple tupleA = new Tuple( "0", "1", "2" );
+
+    Fields fieldsB = new Fields( "c", "b" ).applyTypes( Integer.class, Integer.class );
+    Tuple tupleB = new Tuple( -2, -1 );
+
+    tupleA.set( fieldsA, fieldsB, tupleB );
+
+    assertEquals( "wrong size", 3, tupleA.size() );
+    assertEquals( "not equal: tuple.get(0)", "0", tupleA.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "-1", tupleA.getObject( 1 ) );
+    assertEquals( "not equal: tuple.get(2)", "-2", tupleA.getObject( 2 ) );
+    }
   }

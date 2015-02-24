@@ -31,6 +31,27 @@ Cascading Change Log
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
 
+2.6.3
+
+  Updated c.p.Splice to throw an IllegalArgumentException if performing a self c.p.Merge on a split with no intermediate
+  c.o.Operations after the split.
+
+  Fixed issue where c.p.a.FirstBy would perform a comparison on the aggregating values when no j.u.Comparator was
+  provided to the argument c.t.Fields selector.
+
+  Updated local mode counter implementation to be thread-safe.
+
+  Updated c.t.h.i.MultiRecordReaderIterator to use an existing o.a.h.m.Reporter if present.
+
+  Fixed issues in c.f.h.FlowPlatformTest which caused the test go into an endless loop. Also increased timeout to make
+  tests more reliable on slower hardware.
+
+  Fixed issue where c.t.Tuple#set( Fields declarator, Fields selector, Tuple tuple ) did not honor given type
+  information.
+
+  Fixed issue where c.t.TupleEntry#set( TupleEntry tupleEntry ) could cause an NPE if complete type information is
+  not provided.
+
 2.6.2
 
   Fixed issue where c.s.h.SequenceFile default ctor would throw an NPE.

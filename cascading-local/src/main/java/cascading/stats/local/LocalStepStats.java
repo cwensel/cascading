@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -32,12 +33,15 @@ import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
 
+import static java.util.Collections.synchronizedMap;
+import static java.util.Collections.unmodifiableCollection;
+
 /**
  *
  */
 public class LocalStepStats extends FlowStepStats
   {
-  final Map<String, Map<String, Long>> counters = new HashMap<String, Map<String, Long>>();
+  final Map<String, Map<String, Long>> counters = synchronizedMap( new HashMap<String, Map<String, Long>>() );
 
   /** Constructor CascadingStats creates a new CascadingStats instance. */
   public LocalStepStats( FlowStep<Properties> flowStep, ClientState clientState )
@@ -53,23 +57,29 @@ public class LocalStepStats extends FlowStepStats
   @Override
   public Collection<String> getCounterGroups()
     {
-    return counters.keySet();
+    synchronized( counters )
+      {
+      return unmodifiableCollection( new LinkedHashSet<String>( counters.keySet() ) );
+      }
     }
 
   @Override
   public Collection<String> getCounterGroupsMatching( String regex )
     {
-    Collection<String> counters = getCounterGroups();
+    Collection<String> counterGroups = getCounterGroups();
 
     Set<String> results = new HashSet<String>();
 
-    for( String counter : counters )
+    synchronized( counters )
       {
-      if( counter.matches( regex ) )
-        results.add( counter );
+      for( String group : counterGroups )
+        {
+        if( group.matches( regex ) )
+          results.add( group );
+        }
       }
 
-    return Collections.unmodifiableCollection( results );
+    return unmodifiableCollection( results );
     }
 
   @Override
@@ -80,7 +90,10 @@ public class LocalStepStats extends FlowStepStats
     if( groupCollection == null )
       return Collections.emptySet();
 
-    return groupCollection.keySet();
+    synchronized( groupCollection )
+      {
+      return unmodifiableCollection( new LinkedHashSet<String>( groupCollection.keySet() ) );
+      }
     }
 
   @Override
@@ -90,6 +103,7 @@ public class LocalStepStats extends FlowStepStats
 
     String counterString = counter.toString();
 
+    // we don't remove counters, so safe
     if( counterMap == null || !counterMap.containsKey( counterString ) )
       return 0;
 
@@ -101,6 +115,7 @@ public class LocalStepStats extends FlowStepStats
     {
     Map<String, Long> counterMap = counters.get( group );
 
+    // we don't remove counters, so safe
     if( counterMap == null || !counterMap.containsKey( counter ) )
       return 0;
 
@@ -116,25 +131,31 @@ public class LocalStepStats extends FlowStepStats
     {
     Map<String, Long> groupMap = getCreateCounter( group );
 
-    Long value = groupMap.get( counter );
+    synchronized( groupMap )
+      {
+      Long value = groupMap.get( counter );
 
-    if( value == null )
-      value = 0L;
+      if( value == null )
+        value = 0L;
 
-    groupMap.put( counter, value + amount );
+      groupMap.put( counter, value + amount );
+      }
     }
 
   private Map<String, Long> getCreateCounter( String group )
     {
-    Map<String, Long> counterMap = counters.get( group );
-
-    if( counterMap == null )
+    synchronized( counters )
       {
-      counterMap = new HashMap<String, Long>();
-      counters.put( group, counterMap );
-      }
+      Map<String, Long> counterMap = counters.get( group );
 
-    return counterMap;
+      if( counterMap == null )
+        {
+        counterMap = synchronizedMap( new HashMap<String, Long>() );
+        counters.put( group, counterMap );
+        }
+
+      return counterMap;
+      }
     }
 
   @Override

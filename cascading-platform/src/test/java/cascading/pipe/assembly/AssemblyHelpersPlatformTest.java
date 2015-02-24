@@ -31,10 +31,12 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
+import cascading.operation.Debug;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
@@ -52,6 +54,7 @@ import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
+import data.InputData;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -689,6 +692,50 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( 3, "c", "C" ),
       new Tuple( 4, "d", "B" ),
       new Tuple( 5, "e", "A" )
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    assertTrue( !iterator.hasNext() );
+
+    iterator.close();
+    }
+
+  /**
+   * This test should pick the first tuple in the series
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testFirstByWithoutComparator() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileCrossRev );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ), " ", inputFileCrossRev );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ), "\t",
+      new Class[]{Integer.TYPE, String.class,
+                  String.class}, getOutputPath( "firstnfieldswithoutcomparator" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "first" );
+
+    Fields charFields = new Fields( "lower", "upper" );
+
+    pipe = new FirstBy( pipe, new Fields( "num" ), charFields, 2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 1, "c", "C" ),
+      new Tuple( 2, "d", "D" ),
+      new Tuple( 3, "c", "C" ),
+      new Tuple( 4, "d", "D" ),
+      new Tuple( 5, "e", "E" )
     };
 
     TupleEntryIterator iterator = flow.openSink();

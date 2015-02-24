@@ -137,6 +137,7 @@ public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration> impleme
    *
    * @return the reporter (type Reporter) of this HadoopFlowProcess object.
    */
+  @Override
   public Reporter getReporter()
     {
     if( context == null )

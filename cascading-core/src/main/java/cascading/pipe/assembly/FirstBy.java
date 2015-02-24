@@ -67,6 +67,7 @@ public class FirstBy extends AggregateBy
   public static class FirstPartials implements Functor
     {
     private final Fields declaredFields;
+    private Boolean doComparison;
 
     /**
      * Constructor FirstPartials creates a new FirstPartials instance.
@@ -87,7 +88,10 @@ public class FirstBy extends AggregateBy
     @Override
     public Tuple aggregate( FlowProcess flowProcess, TupleEntry args, Tuple context )
       {
-      if( context == null || args.getFields().compare( context, args.getTuple() ) > 0 )
+      if( doComparison == null )
+        doComparison = args.getFields().hasComparators(); // ensure we use resolved fields
+
+      if( context == null || ( doComparison && args.getFields().compare( context, args.getTuple() ) > 0 ) )
         return args.getTupleCopy();
 
       return context;
