@@ -34,6 +34,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ShutdownUtil
   {
+  /**
+   * System property set to true when we have entered shutdown
+   */
+  public static final String SHUTDOWN_EXECUTING = "cascading.jvm.shutdown.executing";
+
   private static final Logger LOG = LoggerFactory.getLogger( ShutdownUtil.class );
 
   public static abstract class Hook
@@ -93,22 +98,31 @@ public class ShutdownUtil
     @Override
     public void run()
       {
-      // These are not threads, so each one will be run in priority order
-      // blocking until the previous is complete
-      while( !queue.isEmpty() )
+      System.setProperty( SHUTDOWN_EXECUTING, "true" );
+
+      try
         {
-        Hook hook = null;
-
-        try
+        // These are not threads, so each one will be run in priority order
+        // blocking until the previous is complete
+        while( !queue.isEmpty() )
           {
-          hook = queue.poll();
+          Hook hook = null;
 
-          hook.execute();
+          try
+            {
+            hook = queue.poll();
+
+            hook.execute();
+            }
+          catch( Exception exception )
+            {
+            LOG.error( "failed executing hook: {}, with exception: {}", hook, exception );
+            }
           }
-        catch( Exception exception )
-          {
-          LOG.error( "failed executing hook: {}, with exception: {}", hook, exception );
-          }
+        }
+      finally
+        {
+        System.setProperty( SHUTDOWN_EXECUTING, "false" );
         }
       }
     };

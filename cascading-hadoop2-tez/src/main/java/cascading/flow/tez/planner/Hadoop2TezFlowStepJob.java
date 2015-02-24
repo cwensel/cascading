@@ -63,8 +63,6 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   {
   private static final Set<StatusGetOpts> STATUS_GET_OPTS = EnumSet.of( StatusGetOpts.GET_COUNTERS );
 
-  /** Field currentConf */
-  private final TezConfiguration currentConf;
   private DAG dag;
 
   private TezClient tezClient;
@@ -84,18 +82,11 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
   public Hadoop2TezFlowStepJob( ClientState clientState, BaseFlowStep<TezConfiguration> flowStep, TezConfiguration currentConf, DAG dag )
     {
-    super( clientState, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
-    this.currentConf = currentConf;
+    super( clientState, currentConf, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
     this.dag = dag;
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
-    }
-
-  @Override
-  public TezConfiguration getConfig()
-    {
-    return currentConf;
     }
 
   @Override
@@ -108,7 +99,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     @Override
     public DAGClient getJobStatusClient()
       {
-      if( timelineClient == null && isTimelineServiceEnabled( currentConf ) )
+      if( timelineClient == null && isTimelineServiceEnabled( jobConfiguration ) )
         timelineClient = TezStatsUtil.createTimelineClient( dagClient, this );
 
       if( timelineClient != null )
@@ -129,10 +120,10 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     try
       {
-      if( !isTimelineServiceEnabled( currentConf ) )
+      if( !isTimelineServiceEnabled( jobConfiguration ) )
         flowStep.logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, please enable to capture detailed metrics of completed flows, this may require starting the YARN timeline server daemon." );
 
-      TezConfiguration workingConf = new TezConfiguration( currentConf );
+      TezConfiguration workingConf = new TezConfiguration( jobConfiguration );
 
       // this could be problematic
       flowStep.logInfo( "tez session mode enabled: " + workingConf.getBoolean( TezConfiguration.TEZ_AM_SESSION_MODE, TezConfiguration.TEZ_AM_SESSION_MODE_DEFAULT ) );
@@ -256,8 +247,8 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     String result = "";
 
-    if( HadoopUtil.isLocal( currentConf ) )
-      result = currentConf.get( "hadoop.tmp.dir" ) + Path.SEPARATOR;
+    if( HadoopUtil.isLocal( jobConfiguration ) )
+      result = jobConfiguration.get( "hadoop.tmp.dir" ) + Path.SEPARATOR;
 
     String flowStagingPath = ( (Hadoop2TezFlow) flowStep.getFlow() ).getFlowStagingPath();
 
@@ -391,7 +382,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   @Override
   protected boolean isRemoteExecution()
     {
-    return !HadoopUtil.isLocal( currentConf );
+    return !HadoopUtil.isLocal( jobConfiguration );
     }
 
   @Override

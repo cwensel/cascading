@@ -97,7 +97,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to get slice stats", exception );
+      LOG.warn( "unable to retrieve slice stats via task reports", exception );
       }
 
     return false;

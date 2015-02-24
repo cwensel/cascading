@@ -43,6 +43,12 @@ public abstract class TezCounterCache<JobStatus> extends CounterCache<JobStatus,
     }
 
   @Override
+  protected boolean areCountersAvailable( JobStatus runningJob )
+    {
+    return true;
+    }
+
+  @Override
   protected Collection<String> getGroupNames( TezCounters counterGroups )
     {
     Iterable<String> iterable = counterGroups.getGroupNames();

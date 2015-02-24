@@ -40,14 +40,20 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.formatDurationFromMillis;
+import static java.lang.System.currentTimeMillis;
+
 /**
  *
  */
 public abstract class CounterCache<JobStatus, Counters>
   {
-  public static final String COUNTER_TIMEOUT_PROPERTY = "cascading.step.counter.timeout";
-  public static final int TIMEOUT_TIMEOUT_SEC = 60 * 10;
-  public static final int TIMEOUTS_MAX = 3;
+  public static final String COUNTER_TIMEOUT_PROPERTY = "cascading.counter.timeout.seconds";
+  public static final String COUNTER_FETCH_RETRIES_PROPERTY = "cascading.counter.fetch.retries";
+  public static final String COUNTER_MAX_AGE_PROPERTY = "cascading.counter.age.max.seconds";
+  public static final int DEFAULT_TIMEOUT_TIMEOUT_SEC = 0; // zero means making the call synchronously
+  public static final int DEFAULT_FETCH_RETRIES = 3;
+  public static final int DEFAULT_CACHED_AGE_MAX = 0; // rely on client interface caching
 
   private static final Logger LOG = LoggerFactory.getLogger( CounterCache.class );
 
@@ -58,7 +64,7 @@ public abstract class CounterCache<JobStatus, Counters>
   @Override
   public Thread newThread( Runnable runnable )
     {
-    Thread thread = new Thread( runnable, "stats-futures" );
+    Thread thread = new Thread( runnable, "stats-counter-future" );
 
     thread.setDaemon( true );
 
@@ -68,17 +74,29 @@ public abstract class CounterCache<JobStatus, Counters>
 
   private CascadingStats stats;
   private boolean hasCapturedFinalCounters;
+  private boolean hasAvailableCounters = true;
   private Counters cachedCounters = null;
-  private int numTimeouts;
-  private int timeout;
+  private long lastFetch = 0;
+  private boolean warnedStale = false;
+
+  protected int maxFetchAttempts;
+  protected int fetchAttempts;
+  protected int timeout;
+  protected int maxAge;
 
   protected CounterCache( CascadingStats stats, Configuration configuration )
     {
     this.stats = stats;
-    this.timeout = configuration.getInt( COUNTER_TIMEOUT_PROPERTY, TIMEOUT_TIMEOUT_SEC );
+    this.timeout = configuration.getInt( COUNTER_TIMEOUT_PROPERTY, DEFAULT_TIMEOUT_TIMEOUT_SEC );
+    this.maxFetchAttempts = configuration.getInt( COUNTER_FETCH_RETRIES_PROPERTY, DEFAULT_FETCH_RETRIES );
+    this.maxAge = configuration.getInt( COUNTER_MAX_AGE_PROPERTY, DEFAULT_CACHED_AGE_MAX );
     }
 
   protected abstract JobStatus getJobStatusClient();
+
+  protected abstract boolean areCountersAvailable( JobStatus runningJob );
+
+  protected abstract Counters getCounters( JobStatus runningJob ) throws IOException;
 
   protected abstract Collection<String> getGroupNames( Counters counters );
 
@@ -87,8 +105,6 @@ public abstract class CounterCache<JobStatus, Counters>
   protected abstract long getCounterValue( Counters counters, Enum counter );
 
   protected abstract long getCounterValue( Counters counters, String group, String counter );
-
-  protected abstract Counters getCounters( JobStatus runningJob ) throws IOException;
 
   public Collection<String> getCounterGroups()
     {
@@ -157,16 +173,41 @@ public abstract class CounterCache<JobStatus, Counters>
 
   protected synchronized Counters cachedCounters( boolean force )
     {
-    boolean isFinished = stats.isFinished();
-
-    // ignore force, no reason to refresh completed stats
-    if( isFinished && hasCapturedFinalCounters )
+    if( !hasAvailableCounters )
       return cachedCounters;
 
-    if( !force && isFinished )
+    // no point in trying again
+    if( fetchAttempts >= maxFetchAttempts )
+      {
+      if( !hasCapturedFinalCounters && !warnedStale )
+        {
+        if( cachedCounters == null )
+          LOG.warn( "no counters fetched, max num consecutive retries reached: {}, type: {}, status: {}", maxFetchAttempts, stats.getType(), stats.getStatus() );
+        else
+          LOG.warn( "stale counters being returned, max num consecutive retries reached, age: {}, type: {}, status: {}", formatDurationFromMillis( currentTimeMillis() - lastFetch ), stats.getType(), stats.getStatus() );
+
+        warnedStale = true;
+        }
+
+      return cachedCounters;
+      }
+
+    boolean isProcessFinished = stats.isFinished();
+
+    // ignore force, no reason to refresh completed stats
+    if( isProcessFinished && hasCapturedFinalCounters )
+      return cachedCounters;
+
+    // have not capturedFinalCounters - force it
+    if( !force && isProcessFinished )
       force = true;
 
-    if( cachedCounters != null && !force && numTimeouts >= TIMEOUTS_MAX )
+    int currentAge = (int) ( ( lastFetch - currentTimeMillis() ) / 1000 );
+
+    boolean isStale = currentAge >= maxAge;
+
+    // if we have counters, aren't being forced to update, and values aren't considered stale, return them
+    if( cachedCounters != null && !force && !isStale )
       return cachedCounters;
 
     JobStatus runningJob = getJobStatusClient();
@@ -174,18 +215,26 @@ public abstract class CounterCache<JobStatus, Counters>
     if( runningJob == null )
       return cachedCounters;
 
-    Future<Counters> future = runFuture( runningJob );
+    if( !areCountersAvailable( runningJob ) )
+      {
+      hasAvailableCounters = false;
+      return cachedCounters;
+      }
 
     boolean success = false;
 
     try
       {
-      Counters fetched = future.get( timeout, TimeUnit.SECONDS );
+      Counters fetched = fetchCounters( runningJob );
 
       success = fetched != null;
 
       if( success )
+        {
         cachedCounters = fetched;
+        lastFetch = currentTimeMillis();
+        fetchAttempts = 0; // reset attempt counter, mitigates for transient non-consecutive failures
+        }
       }
     catch( InterruptedException exception )
       {
@@ -193,14 +242,21 @@ public abstract class CounterCache<JobStatus, Counters>
       }
     catch( ExecutionException exception )
       {
+      fetchAttempts++;
+
+      if( fetchAttempts >= maxFetchAttempts )
+        LOG.error( "fetching counters failed, was final consecutive attempt: {}, type: {}, status: {}", fetchAttempts, stats.getType(), stats.getStatus(), exception.getCause() );
+      else
+        LOG.warn( "fetching counters failed, consecutive attempts: {}, type: {}, status: {}, message: {}", fetchAttempts, stats.getType(), stats.getStatus(), exception.getCause().getMessage() );
+
       if( cachedCounters != null )
         {
-        LOG.error( "unable to get remote counters, returning cached values", exception.getCause() );
+        LOG.error( "returning cached values" );
 
         return cachedCounters;
         }
 
-      LOG.error( "unable to get remote counters, no cached values, throwing exception", exception.getCause() );
+      LOG.error( "unable to get remote counters, no cached values, rethrowing exception", exception.getCause() );
 
       if( exception.getCause() instanceof FlowException )
         throw (FlowException) exception.getCause();
@@ -209,17 +265,33 @@ public abstract class CounterCache<JobStatus, Counters>
       }
     catch( TimeoutException exception )
       {
-      numTimeouts++;
+      fetchAttempts++;
 
-      if( numTimeouts >= TIMEOUTS_MAX )
-        LOG.warn( "fetching counters timed out after: {} seconds, final attempt: {}", timeout, numTimeouts );
+      if( fetchAttempts >= maxFetchAttempts )
+        LOG.warn( "fetching counters timed out after: {} seconds, was final consecutive attempt: {}, type: {}, status: {}", timeout, fetchAttempts, stats.getType(), stats.getStatus() );
       else
-        LOG.warn( "fetching counters timed out after: {} seconds, attempts: {}", timeout, numTimeouts );
+        LOG.warn( "fetching counters timed out after: {} seconds, consecutive attempts: {}, type: {}, status: {}", timeout, fetchAttempts, stats.getType(), stats.getStatus() );
       }
 
-    hasCapturedFinalCounters = isFinished && success;
+    hasCapturedFinalCounters = isProcessFinished && success;
 
     return cachedCounters;
+    }
+
+  private Counters fetchCounters( JobStatus runningJob ) throws InterruptedException, ExecutionException, TimeoutException
+    {
+    // if timeout greater than zero, perform async call
+    if( timeout > 0 )
+      return runFuture( runningJob ).get( timeout, TimeUnit.SECONDS );
+
+    try
+      {
+      return getCounters( runningJob );
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to get remote counter values", exception );
+      }
     }
 
   private Future<Counters> runFuture( final JobStatus jobStatus )
@@ -235,7 +307,7 @@ public abstract class CounterCache<JobStatus, Counters>
         }
       catch( IOException exception )
         {
-        throw new FlowException( "unable to get remote counter values" );
+        throw new FlowException( "unable to get remote counter values", exception );
         }
       }
     };

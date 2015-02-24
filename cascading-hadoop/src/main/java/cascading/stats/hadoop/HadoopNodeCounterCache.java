@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.stats.CascadingStats;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowSliceStats;
@@ -39,12 +40,18 @@ import org.apache.hadoop.mapred.TaskReport;
  */
 public class HadoopNodeCounterCache extends CounterCache<FlowNodeStats, Map<String, Map<String, Long>>>
   {
+  public static final String NODE_COUNTER_MAX_AGE_PROPERTY = "cascading.node.counter.age.max.seconds";
+  public static final int DEFAULT_NODE_CACHED_AGE_MAX = 30; // don't re-fetch task reports for 30 seconds
+
   private FlowNodeStats flowNodeStats;
 
   protected HadoopNodeCounterCache( FlowNodeStats flowNodeStats, Configuration configuration )
     {
     super( flowNodeStats, configuration );
     this.flowNodeStats = flowNodeStats;
+
+    // age matters here since we are aggregating task reports vs getting a pre-aggregated value at the node level
+    this.maxAge = configuration.getInt( NODE_COUNTER_MAX_AGE_PROPERTY, DEFAULT_NODE_CACHED_AGE_MAX );
     }
 
   @Override
@@ -53,41 +60,10 @@ public class HadoopNodeCounterCache extends CounterCache<FlowNodeStats, Map<Stri
     return flowNodeStats;
     }
 
-  protected Collection<String> getGroupNames( Map<String, Map<String, Long>> groups )
+  @Override
+  protected boolean areCountersAvailable( FlowNodeStats runningJob )
     {
-    return groups.keySet();
-    }
-
-  protected Set<String> getCountersFor( Map<String, Map<String, Long>> counters, String group )
-    {
-    Set<String> results = new HashSet<>();
-
-    Map<String, Long> map = counters.get( group );
-
-    if( map != null )
-      results.addAll( map.keySet() );
-
-    return results;
-    }
-
-  protected long getCounterValue( Map<String, Map<String, Long>> counters, Enum counter )
-    {
-    return getCounterValue( counters, counter.getDeclaringClass().getName(), counter.name() );
-    }
-
-  protected long getCounterValue( Map<String, Map<String, Long>> counters, String groupName, String counterName )
-    {
-    Map<String, Long> counterGroup = counters.get( groupName );
-
-    if( counterGroup == null )
-      return 0;
-
-    Long counterValue = counterGroup.get( counterName );
-
-    if( counterValue == null )
-      return 0;
-
-    return counterValue;
+    return !HadoopUtil.isLocal( (Configuration) runningJob.getFlowNode().getFlowStep().getConfig() );
     }
 
   protected Map<String, Map<String, Long>> getCounters( FlowNodeStats flowNodeStats ) throws IOException
@@ -130,5 +106,42 @@ public class HadoopNodeCounterCache extends CounterCache<FlowNodeStats, Map<Stri
       }
 
     return allCounters;
+    }
+
+  protected Collection<String> getGroupNames( Map<String, Map<String, Long>> groups )
+    {
+    return groups.keySet();
+    }
+
+  protected Set<String> getCountersFor( Map<String, Map<String, Long>> counters, String group )
+    {
+    Set<String> results = new HashSet<>();
+
+    Map<String, Long> map = counters.get( group );
+
+    if( map != null )
+      results.addAll( map.keySet() );
+
+    return results;
+    }
+
+  protected long getCounterValue( Map<String, Map<String, Long>> counters, Enum counter )
+    {
+    return getCounterValue( counters, counter.getDeclaringClass().getName(), counter.name() );
+    }
+
+  protected long getCounterValue( Map<String, Map<String, Long>> counters, String groupName, String counterName )
+    {
+    Map<String, Long> counterGroup = counters.get( groupName );
+
+    if( counterGroup == null )
+      return 0;
+
+    Long counterValue = counterGroup.get( counterName );
+
+    if( counterValue == null )
+      return 0;
+
+    return counterValue;
     }
   }

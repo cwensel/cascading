@@ -87,32 +87,25 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
    * @return An array of TaskReports, but never <code>nul</code>.
    * @throws IOException
    */
-  private TaskReport[] retrieveTaskReports( HadoopSliceStats.Kind kind ) throws IOException
+  private TaskReport[] retrieveTaskReports( HadoopSliceStats.Kind kind ) throws IOException, InterruptedException
     {
     Job job = HadoopStepStats.getJob( getJobStatusClient() );
 
     if( job == null )
       return new TaskReport[ 0 ];
 
-    try
+    switch( kind )
       {
-      switch( kind )
-        {
-        case MAPPER:
-          return job.getTaskReports( TaskType.MAP );
-        case REDUCER:
-          return job.getTaskReports( TaskType.REDUCE );
-        case SETUP:
-          return job.getTaskReports( TaskType.JOB_SETUP );
-        case CLEANUP:
-          return job.getTaskReports( TaskType.JOB_CLEANUP );
-        default:
-          return new TaskReport[ 0 ];
-        }
-      }
-    catch( InterruptedException exception )
-      {
-      throw new CascadingException( exception );
+      case MAPPER:
+        return job.getTaskReports( TaskType.MAP );
+      case REDUCER:
+        return job.getTaskReports( TaskType.REDUCE );
+      case SETUP:
+        return job.getTaskReports( TaskType.JOB_SETUP );
+      case CLEANUP:
+        return job.getTaskReports( TaskType.JOB_CLEANUP );
+      default:
+        return new TaskReport[ 0 ];
       }
     }
 
@@ -134,7 +127,11 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to get slice stats", exception );
+      LOG.warn( "unable to retrieve slice stats via task reports", exception );
+      }
+    catch( InterruptedException exception )
+      {
+      LOG.warn( "retrieving task reports timed out, consider increasing timeout delay in CounterCache via: '{}', message: {}", CounterCache.COUNTER_TIMEOUT_PROPERTY, exception.getMessage() );
       }
 
     return false;

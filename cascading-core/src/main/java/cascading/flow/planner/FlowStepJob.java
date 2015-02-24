@@ -50,6 +50,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
   /** Field stepName */
   protected final String stepName;
+  /** Field jobConfiguration */
+  protected final Config jobConfiguration;
   /** Field pollingInterval */
   protected long pollingInterval = 1000;
   /** Field recordStatsInterval */
@@ -67,8 +69,9 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( ClientState clientState, BaseFlowStep<Config> flowStep, long pollingInterval, long statsStoreInterval )
+  public FlowStepJob( ClientState clientState, Config jobConfiguration, BaseFlowStep<Config> flowStep, long pollingInterval, long statsStoreInterval )
     {
+    this.jobConfiguration = jobConfiguration;
     this.flowStep = flowStep;
     this.stepName = flowStep.getName();
     this.pollingInterval = pollingInterval;
@@ -79,7 +82,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     this.flowStepStats.markPending();
     }
 
-  public abstract Config getConfig();
+  public Config getConfig()
+    {
+    return jobConfiguration;
+    }
 
   protected abstract FlowStepStats createStepStats( ClientState clientState );
 

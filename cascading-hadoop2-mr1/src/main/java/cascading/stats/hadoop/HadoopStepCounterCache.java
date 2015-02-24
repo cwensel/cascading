@@ -44,6 +44,18 @@ public abstract class HadoopStepCounterCache extends CounterCache<RunningJob, Co
     }
 
   @Override
+  protected boolean areCountersAvailable( RunningJob runningJob )
+    {
+    return true;
+    }
+
+  @Override
+  protected Counters getCounters( RunningJob runningJob ) throws IOException
+    {
+    return HadoopStepStats.getJob( runningJob ).getCounters();
+    }
+
+  @Override
   protected Collection<String> getGroupNames( Counters groups )
     {
     LinkedHashSet<String> result = new LinkedHashSet<>();
@@ -92,11 +104,5 @@ public abstract class HadoopStepCounterCache extends CounterCache<RunningJob, Co
       return 0;
 
     return counterValue.getValue();
-    }
-
-  @Override
-  protected Counters getCounters( RunningJob runningJob ) throws IOException
-    {
-    return HadoopStepStats.getJob( runningJob ).getCounters();
     }
   }

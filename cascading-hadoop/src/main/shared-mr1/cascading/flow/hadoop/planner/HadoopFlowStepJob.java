@@ -46,8 +46,6 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   {
   /** static field to capture errors in hadoop local mode */
   private static Throwable localError;
-  /** Field currentConf */
-  private final JobConf currentConf;
   /** Field jobClient */
   private JobClient jobClient;
   /** Field runningJob */
@@ -65,17 +63,10 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
 
   public HadoopFlowStepJob( ClientState clientState, BaseFlowStep<JobConf> flowStep, JobConf currentConf )
     {
-    super( clientState, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
-    this.currentConf = currentConf;
+    super( clientState, currentConf, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );
-    }
-
-  @Override
-  public JobConf getConfig()
-    {
-    return currentConf;
     }
 
   @Override
@@ -105,8 +96,8 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
 
   protected void internalNonBlockingStart() throws IOException
     {
-    jobClient = new JobClient( currentConf );
-    runningJob = jobClient.submitJob( currentConf );
+    jobClient = new JobClient( jobConfiguration );
+    runningJob = jobClient.submitJob( jobConfiguration );
 
     flowStep.logInfo( "submitted hadoop job: " + runningJob.getID() );
 
