@@ -31,27 +31,32 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
 /**
- * Class CountBy is used to count duplicates in a tuple stream.
+ * Class CountBy is used to count duplicates in a tuple stream, where "duplicates" means all tuples with the same
+ * values for the groupingFields fields. The resulting count is output as a long value in the specified countField.
  * <p/>
- * Typically finding the count of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count}
- * {@link cascading.operation.Aggregator} operation.
+ * Typically finding the count of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a
+ * {@link cascading.operation.aggregator.Count} {@link cascading.operation.Aggregator} operation.
  * <p/>
- * If {@code include} is {@link Include#NO_NULLS}, argument tuples with all null values will be ignored. When counting
- * the occurrence of a single field (when {@code valueFields} is set on the constructor), this is the same behavior
- * as {@code select count(foo) ...} in SQL. If {@code include} is
- * {@link Include#ONLY_NULLS} then only tuples will all null values will be counted.
- * <p/>
- * This SubAssembly also uses the {@link CountBy.CountPartials} {@link AggregateBy.Functor}
- * to count field values before the GroupBy operator to reduce IO over the network.
+ * The CountBy SubAssembly is a (typically) more efficient replacement for these two steps, because it does map-side
+ * pre-reduce counting (via {@link CountBy.CountPartials}  {@link AggregateBy.Functor}) before the GroupBy operator;
+ * this reduces network I/O from the map to reduce phases.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
  * <p/>
  * The {@code threshold} value tells the underlying CountPartials functions how many unique key counts to accumulate
- * in the LRU cache, before emitting the least recently used entry.
+ * in the LRU cache, before emitting the least recently used entry. This accumulation happens map-side, and thus is
+ * bounded by the size of your map task JVM and the typical size of each group key.
  * <p/>
  * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
  * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
+ * <p/>
+ * If {@code include} is {@link Include#NO_NULLS}, argument tuples with all null values will be ignored.
+ * <p/>
+ * The values in the argument Tuple are normally all the remaining fields not used for grouping, but this can be
+ * narrowed using the valueFields parameter. When counting the occurrence of a single field (when {@code valueFields}
+ * is set on the constructor), this is the same behavior as {@code select count(foo) ...} in SQL. If {@code include} is
+ * {@link Include#ONLY_NULLS} then only argument tuples with all null values will be counted.
  *
  * @see AggregateBy
  */
