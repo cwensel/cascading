@@ -88,7 +88,6 @@ import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.dag.api.UserPayload;
 import org.apache.tez.dag.api.Vertex;
 import org.apache.tez.dag.api.VertexGroup;
-import org.apache.tez.mapreduce.hadoop.MRJobConfig;
 import org.apache.tez.mapreduce.input.MRInput;
 import org.apache.tez.mapreduce.output.MROutput;
 import org.apache.tez.runtime.library.api.TezRuntimeConfiguration;
@@ -462,7 +461,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
       // we have to set sane defaults if not set by the tap
       // typically the case of MultiSinkTap
-      String formatClassName = sinkConf.get( "mapred.output.format.class", sinkConf.get( MRJobConfig.OUTPUT_FORMAT_CLASS_ATTR ) );
+      String formatClassName = sinkConf.get( "mapred.output.format.class", sinkConf.get( "mapreduce.job.outputformat.class" ) );
 
       if( formatClassName == null )
         {
@@ -472,10 +471,10 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       else
         {
         outputFormatClass = Util.loadClass( formatClassName );
-        outputPath = sinkConf.get( "mapred.output.dir" );
+        outputPath = getOutputPath( sinkConf );
         }
 
-      if( outputPath == null && sinkConf.get( "mapred.output.dir" ) == null )
+      if( outputPath == null && getOutputPath( sinkConf ) == null && isFileOutputFormat( outputFormatClass ) )
         outputPath = Hfs.getTempPath( sinkConf ).toString(); // unused
 
       MROutput.MROutputConfigBuilder configBuilder = MROutput.createConfigBuilder( sinkConf, outputFormatClass, outputPath );
@@ -489,6 +488,17 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     addRemoteProfiling( flowNode, vertex );
 
     return vertex;
+    }
+
+  protected String getOutputPath( Configuration sinkConf )
+    {
+    return sinkConf.get( "mapred.output.dir", sinkConf.get( "mapreduce.output.fileoutputformat.outputdir" ) );
+    }
+
+  protected boolean isFileOutputFormat( Class outputFormatClass )
+    {
+    return org.apache.hadoop.mapred.FileOutputFormat.class.isAssignableFrom( outputFormatClass ) ||
+      org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.class.isAssignableFrom( outputFormatClass );
     }
 
   protected int getParallelism( FlowNode flowNode, JobConf conf )

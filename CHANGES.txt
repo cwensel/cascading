@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Fixed issue where c.f.t.Hadoop2TezFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
+  implementations.
+
   Fixed issue where local mode could deadlock during a c.p.HashJoin on the same source in some situations.
 
   Removed the deprecated c.t.PlatformRunner, c.t.HadoopPlatform, and c.t.LocalPlatform. See c.p.PlatformRunner,
