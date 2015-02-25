@@ -25,7 +25,7 @@ idea {
 }
 
 //ext.hadoop2Version = '2.6.0'
-//ext.tezVersion = '0.7.0-SNAPSHOT'
+//ext.tezVersion = '0.6.0'
 
 ext.hadoop2Version = '2.4.1'
 ext.tezVersion = '0.5.3'
@@ -71,6 +71,15 @@ dependencies {
   {
     provided( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop2Version )
     testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history-with-acls', version: tezVersion )
+  }
+}
+
+configurations.all {
+  resolutionStrategy {
+    eachDependency { def details ->
+      if( details.requested.group == 'org.apache.hadoop' )
+        details.useVersion hadoop2Version
+    }
   }
 }
 

@@ -36,6 +36,7 @@ import cascading.stats.tez.util.TaskStatus;
 import cascading.stats.tez.util.TimelineClient;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.tez.common.counters.TezCounters;
 import org.apache.tez.dag.api.TezException;
 import org.apache.tez.dag.api.client.DAGClient;
@@ -47,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.stats.tez.util.TezStatsUtil.STATUS_GET_COUNTERS;
+import static cascading.util.Util.formatDurationFromMillis;
 
 /**
  *
@@ -92,9 +94,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
     protected TezCounters getCounters( DAGClient dagClient ) throws IOException
       {
-      retrieveVertexID( dagClient );
-
-      VertexStatus vertexStatus = retrieveProgress( dagClient, STATUS_GET_COUNTERS );
+      VertexStatus vertexStatus = updateProgress( dagClient, STATUS_GET_COUNTERS );
 
       if( vertexStatus == null )
         return null;
@@ -109,10 +109,10 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     };
     }
 
-  private void retrieveVertexID( DAGClient dagClient )
+  private String retrieveVertexID( DAGClient dagClient )
     {
     if( vertexID != null || !( dagClient instanceof TimelineClient ) )
-      return;
+      return vertexID;
 
     try
       {
@@ -122,6 +122,8 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       {
       LOG.warn( "unable to get vertex id for: {}", getID(), exception );
       }
+
+    return vertexID;
     }
 
   public int getTotalTaskCount()
@@ -157,16 +159,17 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     if( dagClient == null )
       return false;
 
+    // we cannot get task counters without the timeline server running
     if( dagClient instanceof TimelineClient )
       return withTimelineServer( (TimelineClient) dagClient );
 
+    // these are just placeholders without counters, otherwise the order would be reversed as a failover mechanism
     return withoutTimelineServer( dagClient );
     }
 
   private boolean withTimelineServer( TimelineClient timelineClient )
     {
-    retrieveProgress( timelineClient, null );
-    retrieveVertexID( timelineClient );
+    updateProgress( timelineClient, null ); // get latest task counts
 
     if( sliceStatsMap.size() == getTotalTaskCount() )
       return updateAllTasks( timelineClient );
@@ -198,9 +201,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     if( count == 0 )
       allTasksAreFinished = true;
 
-    LOG.info( "updated {} slices in: {}", count, Util.formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
+    LOG.info( "updated {} slices in: {}", count, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
 
-    return true;
+    return sliceStatsMap.size() == getTotalTaskCount();
     }
 
   private boolean fetchAllTasks( TimelineClient timelineClient )
@@ -209,8 +212,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     String fromTaskId = null;
     int startSize = sliceStatsMap.size();
     int iteration = 0;
+    boolean continueIterating = true;
 
-    while( sliceStatsMap.size() != getTotalTaskCount() )
+    while( continueIterating && sliceStatsMap.size() != getTotalTaskCount() )
       {
       // we will see the same tasks twice as we paginate
       Iterator<TaskStatus> vertexChildren = getTaskStatusIterator( timelineClient, fromTaskId );
@@ -232,7 +236,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
         if( sliceStats == null )
           {
           added++;
+
           sliceStats = new TezSliceStats( Util.createUniqueID(), kind, this.getStatus(), fromTaskId );
+
           sliceStatsMap.put( sliceStats.getProcessSliceID(), sliceStats );
           }
         else
@@ -243,13 +249,18 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
         updateSliceWith( sliceStats, taskStatus );
         }
 
-      LOG.info( "added new {}, updated {} slices in iteration: {}, with fetch size: {}", added, updated, ++iteration, fetchLimit );
+      continueIterating = added + updated != 0;
+
+      if( !continueIterating )
+        LOG.info( "no slices retrieved in iteration: {}, with fetch size: {}, ending fetch", ++iteration, fetchLimit );
+      else
+        LOG.info( "added new {}, updated {} slices in iteration: {}, with fetch size: {}", added, updated, ++iteration, fetchLimit );
       }
 
     int total = sliceStatsMap.size();
-    LOG.info( "added {} new slices, with total: {}, in: {}", total - startSize, total, Util.formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
+    LOG.info( "added {} new slices, total fetched: {}, with missing: {} in: {}", total - startSize, total, getTotalTaskCount() - total, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
 
-    return true;
+    return total == getTotalTaskCount();
     }
 
   private void updateSliceWith( TezSliceStats sliceStats, TaskStatus taskStatus )
@@ -279,6 +290,14 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     {
     try
       {
+      String vertexID = retrieveVertexID( timelineClient );
+
+      if( vertexID == null )
+        {
+        LOG.warn( "unable to get slice stats from timeline server, did not retrieve valid vertex id for vertex name: {}", getID() );
+        return null;
+        }
+
       return timelineClient.getVertexChildren( vertexID, fetchLimit, startTaskID );
       }
     catch( IOException | TezException exception )
@@ -291,12 +310,15 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
   private boolean withoutTimelineServer( DAGClient dagClient )
     {
-    VertexStatus vertexStatus = retrieveProgress( dagClient, STATUS_GET_COUNTERS );
+    VertexStatus vertexStatus = updateProgress( dagClient, STATUS_GET_COUNTERS );
 
     if( vertexStatus == null )
       return false;
 
     int total = sliceStatsMap.size();
+
+    if( total == 0 ) // yet to be initialized
+      LOG.warn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, task level counters cannot be retrieved" );
 
     for( int i = total; i < totalTaskCount; i++ )
       {
@@ -352,7 +374,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     return null;
     }
 
-  private VertexStatus retrieveProgress( DAGClient dagClient, Set<StatusGetOpts> statusGetOpts )
+  private VertexStatus updateProgress( DAGClient dagClient, Set<StatusGetOpts> statusGetOpts )
     {
     VertexStatus vertexStatus = null;
 

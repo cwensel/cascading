@@ -121,7 +121,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     try
       {
       if( !isTimelineServiceEnabled( jobConfiguration ) )
-        flowStep.logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, please enable to capture detailed metrics of completed flows, this may require starting the YARN timeline server daemon." );
+        flowStep.logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, please enable to capture detailed metrics of completed flows, this may require starting the YARN timeline server daemon" );
 
       TezConfiguration workingConf = new TezConfiguration( jobConfiguration );
 

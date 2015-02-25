@@ -101,6 +101,14 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     return "Step{" + getStatsString() + '}';
     }
 
+  /**
+   * An internal method that will refresh current counters and, if a clientState client is enabled, the child details
+   * including node and slice statistics.
+   * <p/>
+   * All results will be then recorded by the clientState implementation.
+   * <p/>
+   * See {@link #captureDetail()} to force all statistics to be cached and locally accessible.
+   */
   public abstract void recordChildStats();
 
   /**

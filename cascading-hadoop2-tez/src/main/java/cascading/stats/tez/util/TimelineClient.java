@@ -66,6 +66,11 @@ public class TimelineClient extends DAGClientTimelineImpl
     this.dagClient = dagClient;
     }
 
+  public DAGClient getDAGClient()
+    {
+    return dagClient;
+    }
+
   @Override
   public DAGStatus getDAGStatus( @Nullable Set<StatusGetOpts> statusOptions ) throws IOException, TezException
     {
@@ -101,6 +106,9 @@ public class TimelineClient extends DAGClientTimelineImpl
 
   public Iterator<TaskStatus> getVertexChildren( String vertexID, int limit, String startTaskID ) throws IOException, TezException
     {
+    if( vertexID == null )
+      throw new IllegalArgumentException( "vertexID is required" );
+
     String format = "%s/%s?primaryFilter=%s:%s&fields=%s&limit=%s";
     String url = String.format( format, baseUri, TEZ_TASK_ID, TEZ_VERTEX_ID, vertexID, FILTER_BY_FIELDS, limit );
 
