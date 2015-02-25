@@ -48,7 +48,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.fs.s3native.NativeS3FileSystem;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
@@ -153,7 +152,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     {
     }
 
-  @ConstructorProperties( {"scheme"} )
+  @ConstructorProperties({"scheme"})
   protected Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme )
     {
     super( scheme );
@@ -165,7 +164,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
-  @ConstructorProperties( {"scheme", "stringPath"} )
+  @ConstructorProperties({"scheme", "stringPath"})
   public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath )
     {
     super( scheme );
@@ -179,7 +178,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
-  @ConstructorProperties( {"scheme", "stringPath", "sinkMode"} )
+  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
   public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
@@ -469,7 +468,8 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     catch( NullPointerException exception )
       {
       // hack to get around npe thrown when fs reaches root directory
-      if( !( fileSystem instanceof NativeS3FileSystem ) )
+      // removes coupling to the new aws hadoop artifacts that may not be deployed
+      if( !( fileSystem.getClass().getSimpleName().equals( "NativeS3FileSystem" ) ) )
         throw exception;
       }
 
