@@ -35,7 +35,6 @@ import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
 import cascading.stats.tez.TezStepStats;
 import cascading.stats.tez.util.TezStatsUtil;
-import cascading.stats.tez.util.TimelineClient;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -94,18 +93,21 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     {
     return new TezStepStats( flowStep, clientState )
     {
-    TimelineClient timelineClient = null;
+    DAGClient timelineClient = null;
 
     @Override
-    public DAGClient getJobStatusClient()
+    public synchronized DAGClient getJobStatusClient()
       {
-      if( timelineClient == null && isTimelineServiceEnabled( jobConfiguration ) )
-        timelineClient = TezStatsUtil.createTimelineClient( dagClient, this );
-
       if( timelineClient != null )
         return timelineClient;
 
-      return dagClient;
+      if( isTimelineServiceEnabled( jobConfiguration ) )
+        timelineClient = TezStatsUtil.createTimelineClient( dagClient ); // may return null
+
+      if( timelineClient == null )
+        timelineClient = dagClient;
+
+      return timelineClient;
       }
 
     @Override

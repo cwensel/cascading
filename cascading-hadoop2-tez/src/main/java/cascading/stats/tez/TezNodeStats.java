@@ -169,7 +169,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
   private boolean withTimelineServer( TimelineClient timelineClient )
     {
-    updateProgress( timelineClient, null ); // get latest task counts
+    updateProgress( (DAGClient) timelineClient, null ); // get latest task counts
 
     if( sliceStatsMap.size() == getTotalTaskCount() )
       return updateAllTasks( timelineClient );
@@ -290,7 +290,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     {
     try
       {
-      String vertexID = retrieveVertexID( timelineClient );
+      String vertexID = retrieveVertexID( (DAGClient) timelineClient );
 
       if( vertexID == null )
         {
