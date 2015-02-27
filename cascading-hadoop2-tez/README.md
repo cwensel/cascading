@@ -63,9 +63,9 @@ onto HDFS for use by YARN.
 | 0.6.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ |
 | 0.6.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop26/ |
 
-To copy Tez 0.5.3 to HDFS, execute:
+To copy Tez 0.6.0 to HDFS, execute:
 
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.5.3/ /apps/tez-0.5.3
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ /apps/tez-0.6.0
 
 ## Running on Amazon EMR
 
@@ -98,10 +98,10 @@ Next shell into where you are running your Hadoop jobs, then:
     hdfs dfs -mkdir -p /apps/
     hdfs dfs -chmod -R 777 /apps/
      
-    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.5.3/ tez-0.5.3
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.5.3/ /apps/tez-0.5.3
+    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ tez-0.6.0
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ /apps/tez-0.6.0
      
-    export HADOOP_CLASSPATH=~/tez-0.5.3/*:~/tez-0.5.3/lib/*:$HADOOP_CLASSPATH
+    export HADOOP_CLASSPATH=~/tez-0.6.0/*:~/tez-0.6.0/lib/*:$HADOOP_CLASSPATH
 
 See above for other available Tez versions.     
      
@@ -109,13 +109,12 @@ You also need to start the YARN History Server (not on by default in EMR):
      
     ./.versions/2.4.0/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR start historyserver
 
-Then to execute your application:
+Then to execute your application you nee to make sure these properties are set on the Hadoop2TezFlowConnector:
  
-    hadoop jar <your>.jar <your args> \
-     -DH 'tez.lib.uris=${fs.default.name}/apps/tez-0.5.3,${fs.default.name}/apps/tez-0.5.3/lib/' \
-     -DH "yarn.timeline-service.hostname=$HOSTNAME" \
-     -DH 'io.compression.codecs=org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.SnappyCodec' \
-     -DH 'mapred.output.committer.class=org.apache.hadoop.mapred.FileOutputCommitter'
+     tez.lib.uris=${fs.default.name}/apps/tez-0.6.0,${fs.default.name}/apps/tez-0.6.0/lib/
+     yarn.timeline-service.hostname=$HOSTNAME
+     io.compression.codecs=org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.SnappyCodec
+     mapred.output.committer.class=org.apache.hadoop.mapred.FileOutputCommitter
 
 The last two lines provide missing EMR parameters. May be unnecessary on a local cluster. 
 
