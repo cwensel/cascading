@@ -22,7 +22,7 @@ You cannot have both `cascading-hadoop2-mr1` and `cascading-hadoop2-tez` in your
 Both c.t.Tap and c.s.Scheme implementations will work with both MapReduce and Tez platforms, though custom Tap/Scheme
 implementations may need to be updated to work against Cascading 3.0.
 
-This release has been tested and built against Tez 0.5.3. Currently all applicable tests pass against the Tez platform.
+This release has been tested and built against Tez 0.6.0. Currently all applicable tests pass against the Tez platform.
 
 See below for notes and issues against this release.
 
@@ -46,6 +46,26 @@ or test method
 To enable a remote debugger, 
     
     -Dtest.debug.node=[ordinal or source name]
+
+## Tez Binaries
+
+Unfortunately Apache Tez does not release with downloadable binaries. And as of 0.6.0, the set of binaries that work
+on a given Hadoop revision are slightly different.
+
+As a convenience, we are providing the full build for each supported version of Tez. Of which can be easily copied down
+onto HDFS for use by YARN.
+
+| Tez Version | Hadoop Version | Bucket + Path                                                 |
+|-------------|----------------|---------------------------------------------------------------|
+| 0.5.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.0/          |
+| 0.5.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.1/          |
+| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/          |
+| 0.6.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ |
+| 0.6.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop26/ |
+
+To copy Tez 0.5.3 to HDFS, execute:
+
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.5.3/ /apps/tez-0.5.3
 
 ## Running on Amazon EMR
 
@@ -82,6 +102,8 @@ Next shell into where you are running your Hadoop jobs, then:
     hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.5.3/ /apps/tez-0.5.3
      
     export HADOOP_CLASSPATH=~/tez-0.5.3/*:~/tez-0.5.3/lib/*:$HADOOP_CLASSPATH
+
+See above for other available Tez versions.     
      
 You also need to start the YARN History Server (not on by default in EMR):
      
