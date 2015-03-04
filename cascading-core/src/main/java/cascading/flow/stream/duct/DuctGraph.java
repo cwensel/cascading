@@ -79,6 +79,16 @@ public class DuctGraph extends SimpleDirectedGraph<Duct, DuctGraph.Ordinal>
       {
       return count;
       }
+
+    @Override
+    public String toString()
+      {
+      final StringBuilder sb = new StringBuilder( "Ordinal{" );
+      sb.append( "count=" ).append( count );
+      sb.append( ", ordinal=" ).append( ordinal );
+      sb.append( '}' );
+      return sb.toString();
+      }
     }
 
   public DuctGraph()

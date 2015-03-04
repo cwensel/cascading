@@ -48,7 +48,7 @@ public class MergeStage extends ElementStage<TupleEntry, TupleEntry> implements 
     {
     super.bind( streamGraph );
 
-    numIncomingPaths = streamGraph.countAllEventingPathsTo( this );
+    numIncomingPaths = streamGraph.findAllPreviousFor( this ).length;
     }
 
   @Override

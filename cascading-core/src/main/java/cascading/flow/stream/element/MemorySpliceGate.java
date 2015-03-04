@@ -29,7 +29,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
+import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.graph.StreamGraph;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
@@ -62,7 +64,7 @@ public abstract class MemorySpliceGate extends GroupingSpliceGate
     {
     super.bind( streamGraph );
 
-    numIncomingEventingPaths = streamGraph.countAllEventingPathsTo( this );
+    numIncomingEventingPaths = streamGraph.findAllPreviousFor( this ).length;
     }
 
   // we must make a new Tuple instance to wrap the incoming copy
