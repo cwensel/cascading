@@ -2,6 +2,10 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Fixed issue where the Hadoop o.a.h.m.OutputFormat would be ignored during job configuration as configured by a custom
+  c.s.Scheme that was not a o.a.h.m.FileOutputFormat sub-class. In such cases a o.a.h.m.l.NullOutputFormat would be
+  erroneously set and passed to c.t.Tap#openForWrite().
+
   Fixed issue where c.f.t.Hadoop2TezFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
   implementations.
 

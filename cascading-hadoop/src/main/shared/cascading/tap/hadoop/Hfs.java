@@ -89,8 +89,8 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * By default Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
  * intends to read files from the local client filesystem (for example when using the {@code Lfs} Tap) where the Hadoop
- * job jar is started, Tap so will force any MapReduce jobs reading or writing to {@code file://} resources to run in
- * Hadoop "standalone mode" so that the file can be read.
+ * job jar is started. Subsequently Cascading will force any MapReduce jobs reading or writing to {@code file://} resources
+ * to run in Hadoop "standalone mode" so that the file can be read.
  * <p/>
  * To change this behavior, {@link HfsProps#setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
