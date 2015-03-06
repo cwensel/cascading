@@ -20,14 +20,10 @@
 
 package cascading.flow.planner;
 
-import java.io.File;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +64,6 @@ import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.property.PropertyUtil.getStringProperty;
 import static java.util.Arrays.asList;
 
 /**
@@ -718,95 +713,4 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     }
 
   protected abstract Tap makeTempTap( String prefix, String name );
-
-  protected String getPlanTracePath()
-    {
-    return getStringProperty( System.getProperties(), getDefaultProperties(), FlowPlanner.TRACE_PLAN_PATH );
-    }
-
-  protected void writeTracePlan( String flowName, String registryName, String fileName, ElementGraph flowElementGraph )
-    {
-    String path = getPlanTracePath();
-
-    if( path == null )
-      return;
-
-    String format = registryName == null ? String.format( "%s.dot", fileName ) : String.format( "%s-%s.dot", fileName, registryName );
-    Path filePath = FileSystems.getDefault().getPath( path, flowName, format );
-    File file = filePath.toFile();
-
-    LOG.info( "writing trace element plan: {}", file );
-
-    String filename = file.toString();
-
-    flowElementGraph.writeDOT( filename );
-    }
-
-  protected void writeTracePlan( String flowName, String registryName, String fileName, FlowStepGraph stepGraph )
-    {
-    String path = getPlanTracePath();
-
-    if( path == null )
-      return;
-
-    Path filePath = FileSystems.getDefault().getPath( path, flowName, String.format( "%s-%s.dot", fileName, registryName ) );
-    File file = filePath.toFile();
-
-    LOG.info( "writing trace step plan: {}", file );
-
-    stepGraph.writeDOT( file.toString() );
-    }
-
-  protected void writeTracePlanSteps( String flowName, FlowStepGraph stepGraph )
-    {
-    Iterator<FlowStep> iterator = stepGraph.getTopologicalIterator();
-
-    while( iterator.hasNext() )
-      writePlan( flowName, iterator.next() );
-
-    }
-
-  private void writePlan( String flowName, FlowStep flowStep )
-    {
-    String path = getPlanTracePath();
-
-    if( path == null )
-      return;
-
-    int ordinal = flowStep.getOrdinal();
-
-    Path rootPath = FileSystems.getDefault().getPath( path, flowName, "steps" );
-    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, ordinal );
-
-    ElementGraph stepSubGraph = flowStep.getElementGraph();
-
-    stepSubGraph.writeDOT( stepGraphName );
-
-    FlowNodeGraph flowNodeGraph = flowStep.getFlowNodeGraph();
-
-    Iterator<FlowNode> iterator = flowNodeGraph.getOrderedTopologicalIterator();
-
-    int i = 0;
-    while( iterator.hasNext() )
-      {
-      FlowNode flowNode = iterator.next();
-      ElementGraph nodeGraph = flowNode.getElementGraph();
-      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, ordinal, i );
-
-      nodeGraph.writeDOT( nodeGraphName );
-
-      List<? extends ElementGraph> pipelineGraphs = flowNode.getPipelineGraphs();
-
-      for( int j = 0; j < pipelineGraphs.size(); j++ )
-        {
-        ElementGraph pipelineGraph = pipelineGraphs.get( j );
-
-        String pipelineGraphName = String.format( "%s/%04d-%04d-%04d-step-node-pipeline-sub-graph.dot", rootPath, ordinal, i, j );
-
-        pipelineGraph.writeDOT( pipelineGraphName );
-        }
-
-      i++;
-      }
-    }
   }

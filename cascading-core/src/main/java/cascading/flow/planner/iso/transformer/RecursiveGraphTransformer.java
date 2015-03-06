@@ -29,6 +29,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
+import cascading.util.ProcessLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,6 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     {
     this.expressionGraph = expressionGraph;
     this.finder = new GraphFinder( expressionGraph );
-
     this.findAllPrimaries = expressionGraph.supportsNonRecursiveMatch();
     }
 
@@ -57,28 +57,28 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     {
     Transformed<E> transformed = new Transformed<>( plannerContext, this, expressionGraph, rootGraph );
 
-    E result = transform( transformed, rootGraph, 0 );
+    E result = transform( plannerContext.getLogger(), transformed, rootGraph, 0 );
 
     transformed.setEndGraph( result );
 
     return transformed;
     }
 
-  protected E transform( Transformed<E> transformed, E graph, int depth )
+  protected E transform( ProcessLogger processLogger, Transformed<E> transformed, E graph, int depth )
     {
     if( depth == TRANSFORM_RECURSION_DEPTH_MAX )
       {
-      transformed.getPlannerContext().getLogger().logInfo( "!!! transform recursion ending, reached depth: {}", depth );
+      processLogger.logInfo( "!!! transform recursion ending, reached depth: {}", depth );
       return graph;
       }
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "preparing match within: {}", this.getClass().getSimpleName() );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "preparing match within: {}", this.getClass().getSimpleName() );
 
-    ElementGraph prepared = prepareForMatch( transformed, graph );
+    ElementGraph prepared = prepareForMatch( processLogger, transformed, graph );
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "completed match within: {}, with result: {}", this.getClass().getSimpleName(), prepared != null );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "completed match within: {}, with result: {}", this.getClass().getSimpleName(), prepared != null );
 
     if( prepared == null )
       return graph;
@@ -87,8 +87,8 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
 
     Match match;
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "performing match within: {}, using recursion: {}", this.getClass().getSimpleName(), !findAllPrimaries );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "performing match within: {}, using recursion: {}", this.getClass().getSimpleName(), !findAllPrimaries );
 
     // for trivial cases, disable recursion and capture all primaries initially
     if( findAllPrimaries )
@@ -96,16 +96,16 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     else
       match = finder.findFirstMatch( transformed.getPlannerContext(), prepared, exclusions );
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "completed match within: {}", this.getClass().getSimpleName() );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "completed match within: {}", this.getClass().getSimpleName() );
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "performing transform in place within: {}", this.getClass().getSimpleName() );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "performing transform in place within: {}", this.getClass().getSimpleName() );
 
     boolean transformResult = transformGraphInPlaceUsing( transformed, graph, match );
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "completed transform in place within: {}, with result: {}", this.getClass().getSimpleName(), transformResult );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "completed transform in place within: {}, with result: {}", this.getClass().getSimpleName(), transformResult );
 
     if( !transformResult )
       return graph;
@@ -115,7 +115,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     if( findAllPrimaries )
       return graph;
 
-    return transform( transformed, graph, ++depth );
+    return transform( processLogger, transformed, graph, ++depth );
     }
 
   protected Set<FlowElement> addExclusions( E graph )
@@ -123,7 +123,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     return Collections.emptySet();
     }
 
-  protected ElementGraph prepareForMatch( Transformed<E> transformed, E graph )
+  protected ElementGraph prepareForMatch( ProcessLogger processLogger, Transformed<E> transformed, E graph )
     {
     return graph;
     }

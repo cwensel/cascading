@@ -22,6 +22,7 @@ package cascading.flow.planner.iso.transformer;
 
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.util.ProcessLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +48,13 @@ public abstract class MutateGraphTransformer extends RecursiveGraphTransformer<E
     }
 
   @Override
-  protected ElementGraph prepareForMatch( Transformed<ElementGraph> transformed, ElementGraph graph )
+  protected ElementGraph prepareForMatch( ProcessLogger processLogger, Transformed<ElementGraph> transformed, ElementGraph graph )
     {
     if( graphTransformer == null )
       return graph;
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "transforming with: {}", graphTransformer.getClass().getSimpleName() );
+    if( processLogger.isDebugEnabled() )
+      processLogger.logDebug( "transforming with: {}", graphTransformer.getClass().getSimpleName() );
 
     Transformed child = graphTransformer.transform( transformed.getPlannerContext(), graph );
 

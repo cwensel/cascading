@@ -29,6 +29,7 @@ import cascading.flow.planner.graph.ElementMultiGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
+import cascading.util.ProcessLogger;
 
 /**
  *
@@ -54,7 +55,7 @@ public class AnnotateGraphTransformer extends RecursiveGraphTransformer<ElementG
     }
 
   @Override
-  protected ElementGraph prepareForMatch( Transformed<ElementGraph> transformed, ElementGraph graph )
+  protected ElementGraph prepareForMatch( ProcessLogger processLogger, Transformed<ElementGraph> transformed, ElementGraph graph )
     {
     if( graphTransformer == null )
       return makeAnnotated( graph );

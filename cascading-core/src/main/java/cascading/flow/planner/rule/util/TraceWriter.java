@@ -52,6 +52,7 @@ import cascading.flow.planner.rule.ProcessLevel;
 import cascading.flow.planner.rule.Rule;
 import cascading.flow.planner.rule.RuleResult;
 import cascading.property.AppProps;
+import cascading.util.ProcessLogger;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.slf4j.Logger;
@@ -66,9 +67,9 @@ public class TraceWriter
   public static final String GREEN = "0000000000000000000400000000000000000000000000000000000000000000";
   public static final String ORANGE = "0000000000000000000E00000000000000000000000000000000000000000000";
   public static final String RED = "0000000000000000000C00000000000000000000000000000000000000000000";
-
   private String flowName;
   private Map properties = Collections.emptyMap();
+  private ProcessLogger processLogger = ProcessLogger.NULL;
 
   Map<ProcessLevel, Set<Rule>> counts = new EnumMap<>( ProcessLevel.class );
 
@@ -78,11 +79,12 @@ public class TraceWriter
 
   public TraceWriter( Flow flow )
     {
-    if( flow != null )
-      {
-      this.properties = flow.getConfigAsProperties();
-      this.flowName = Flows.getNameOrID( flow );
-      }
+    if( flow == null )
+      return;
+
+    this.properties = flow.getConfigAsProperties();
+    this.flowName = Flows.getNameOrID( flow );
+    this.processLogger = (ProcessLogger) flow;
     }
 
   protected Path getFullTransformTracePath( String registryName )
@@ -129,9 +131,15 @@ public class TraceWriter
     if( isTransformTraceDisabled() )
       return;
 
+    if( flowElementGraph == null )
+      {
+      processLogger.logInfo( "cannot write phase assembly trace, flowElementGraph is null" );
+      return;
+      }
+
     Path file = getFullTransformTracePath( registryName ).resolve( name ).normalize();
 
-    LOG.info( "writing phase assembly trace: {}, to: {}", name, file );
+    processLogger.logInfo( "writing phase assembly trace: {}, to: {}", name, file );
 
     flowElementGraph.writeDOT( file.toString() );
     }
@@ -141,6 +149,12 @@ public class TraceWriter
     if( isTransformTraceDisabled() )
       return;
 
+    if( flowElementGraphs == null || flowElementGraphs.isEmpty() )
+      {
+      processLogger.logInfo( "cannot write phase step trace, flowElementGraphs is empty" );
+      return;
+      }
+
     for( int i = 0; i < flowElementGraphs.size(); i++ )
       {
       ElementGraph flowElementGraph = flowElementGraphs.get( i );
@@ -148,7 +162,7 @@ public class TraceWriter
 
       Path file = getFullTransformTracePath( registryName ).resolve( name ).normalize();
 
-      LOG.info( "writing phase step trace: {}, to: {}", name, file );
+      processLogger.logInfo( "writing phase step trace: {}, to: {}", name, file );
 
       flowElementGraph.writeDOT( file.toString() );
       }
@@ -158,6 +172,12 @@ public class TraceWriter
     {
     if( isTransformTraceDisabled() )
       return;
+
+    if( parentGraphsMap == null || parentGraphsMap.isEmpty() )
+      {
+      processLogger.logInfo( "cannot write phase node pipeline trace, parentGraphsMap is empty" );
+      return;
+      }
 
     int stepCount = 0;
     for( Map.Entry<ElementGraph, List<? extends ElementGraph>> entry : parentGraphsMap.entrySet() )
@@ -177,7 +197,7 @@ public class TraceWriter
 
           Path file = getFullTransformTracePath( registryName ).resolve( name );
 
-          LOG.info( "writing phase node pipeline trace: {}, to: {}", name, file );
+          processLogger.logInfo( "writing phase node pipeline trace: {}, to: {}", name, file );
 
           flowElementGraph.writeDOT( file.toString() );
           }
@@ -194,6 +214,12 @@ public class TraceWriter
     if( isTransformTraceDisabled() )
       return;
 
+    if( subGraphsMap == null || subGraphsMap.isEmpty() )
+      {
+      processLogger.logInfo( "cannot write phase node trace, subGraphs is empty" );
+      return;
+      }
+
     int stepCount = 0;
     for( Map.Entry<ElementGraph, List<? extends ElementGraph>> entry : subGraphsMap.entrySet() )
       {
@@ -206,7 +232,7 @@ public class TraceWriter
 
         Path file = getFullTransformTracePath( registryName ).resolve( name );
 
-        LOG.info( "writing phase node trace: {}, to: {}", name, file );
+        processLogger.logInfo( "writing phase node trace: {}, to: {}", name, file );
 
         flowElementGraph.writeDOT( file.toString() );
         }
@@ -245,13 +271,19 @@ public class TraceWriter
     if( path == null )
       return;
 
+    if( flowElementGraph == null )
+      {
+      processLogger.logInfo( "cannot write trace element plan, flowElementGraph is null" );
+      return;
+      }
+
     if( registryName != null )
       path = path.resolve( registryName );
 
     Path filePath = path.resolve( String.format( "%s.dot", fileName ) );
     File file = filePath.toFile();
 
-    LOG.info( "writing trace element plan: {}", file );
+    processLogger.logInfo( "writing trace element plan: {}", file );
 
     String filename = file.toString();
 
@@ -265,19 +297,31 @@ public class TraceWriter
     if( path == null )
       return;
 
+    if( stepGraph == null )
+      {
+      processLogger.logInfo( "cannot write step plan, stepGraph is null" );
+      return;
+      }
+
     if( registryName != null )
       path = path.resolve( registryName );
 
     Path filePath = path.resolve( String.format( "%s.dot", fileName ) );
     File file = filePath.toFile();
 
-    LOG.info( "writing trace step plan: {}", file );
+    processLogger.logInfo( "writing trace step plan: {}", file );
 
     stepGraph.writeDOT( file.toString() );
     }
 
   public void writeTracePlanSteps( String directoryName, FlowStepGraph stepGraph )
     {
+    if( stepGraph == null )
+      {
+      processLogger.logInfo( "cannot write trace step plan, stepGraph is null" );
+      return;
+      }
+
     Iterator<FlowStep> iterator = stepGraph.getTopologicalIterator();
 
     while( iterator.hasNext() )
@@ -338,15 +382,15 @@ public class TraceWriter
     Path filePath = path.resolve( String.format( "%s-%s.txt", fileName, ruleResult.getRegistry().getName() ) );
     File file = filePath.toFile();
 
-    LOG.info( "writing final registry: {}", file );
+    processLogger.logInfo( "writing final registry: {}", file );
 
-    try
+    try( PrintWriter writer = new PrintWriter( file ) )
       {
-      file.createNewFile();
+      writer.println( "filename names winning rule registry" );
       }
     catch( IOException exception )
       {
-      // do nothing
+      processLogger.logError( "could not write final registry", exception );
       }
     }
 
@@ -359,7 +403,7 @@ public class TraceWriter
 
     File file = path.resolve( String.format( "planner-stats-%s-%s.txt", ruleResult.getRegistry().getName(), ruleResult.getResultStatus() ) ).toFile();
 
-    LOG.info( "writing planner stats to: {}", file );
+    processLogger.logInfo( "writing planner stats to: {}", file );
 
     file.getParentFile().mkdirs();
 
@@ -382,7 +426,7 @@ public class TraceWriter
       }
     catch( IOException exception )
       {
-      LOG.error( "could not write stats", exception );
+      processLogger.logError( "could not write stats", exception );
       }
     }
 
