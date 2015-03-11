@@ -48,7 +48,7 @@ public class SplitJoinBoundariesNodeRePartitioner extends UniquePathRulePartitio
         new TopDownSplitJoinBoundariesExpressionGraph()
       ),
 
-      new ElementAnnotation( ElementCapture.Include, IORole.sink )
+      new ElementAnnotation( ElementCapture.Include, IORole.source )
     );
     }
   }

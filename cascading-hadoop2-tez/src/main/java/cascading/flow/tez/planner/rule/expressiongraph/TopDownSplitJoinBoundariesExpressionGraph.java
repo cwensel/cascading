@@ -37,11 +37,11 @@ public class TopDownSplitJoinBoundariesExpressionGraph extends ExpressionGraph
     super( SearchOrder.Topological );
 
     this.arc(
-      new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Split ),
+      new BoundariesElementExpression( TypeExpression.Topo.Split ),
 
       PathScopeExpression.ANY,
 
-      new BoundariesElementExpression( TypeExpression.Topo.Splice )
+      new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Splice )
     );
     }
   }

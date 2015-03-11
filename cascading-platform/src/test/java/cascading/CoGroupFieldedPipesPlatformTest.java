@@ -31,13 +31,11 @@ import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowProps;
-import cascading.operation.Debug;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
-import cascading.operation.filter.Sample;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitGenerator;
 import cascading.operation.regex.RegexSplitter;
@@ -302,6 +300,57 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     List<Tuple> values = getSinkAsList( flow );
 
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
+    }
+
+  @Test
+  public void testSplitCoGroupSelf() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lowerLhs", source );
+    sources.put( "upperLhs", source );
+    sources.put( "lowerRhs", source );
+    sources.put( "upperRhs", source );
+
+    Tap sinkLhs = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "splitcogroupself/lhs" ), SinkMode.REPLACE );
+    Tap sinkRhs = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "splitcogroupself/rhs" ), SinkMode.REPLACE );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "lhs", sinkLhs );
+    sinks.put( "rhs", sinkRhs );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLowerLhs = new Each( new Pipe( "lowerLhs" ), new Fields( "line" ), splitter );
+    Pipe pipeUpperLhs = new Each( new Pipe( "upperLhs" ), new Fields( "line" ), splitter );
+
+    Pipe spliceLhs = new CoGroup( "lhs", pipeLowerLhs, new Fields( "num" ), pipeUpperLhs, new Fields( "num" ), Fields.size( 4 ) );
+
+    Pipe pipeLowerRhs = new Each( new Pipe( "lowerRhs" ), new Fields( "line" ), splitter );
+    Pipe pipeUpperRhs = new Each( new Pipe( "upperRhs" ), new Fields( "line" ), splitter );
+
+    Pipe spliceRhs = new CoGroup( "rhs", pipeLowerRhs, new Fields( "num" ), pipeUpperRhs, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, spliceLhs, spliceRhs );
+
+    flow.complete();
+
+    List<Tuple> values = asList( flow, sinkLhs );
+
+    assertEquals( 5, values.size() );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
+
+    values = asList( flow, sinkRhs );
+
+    assertEquals( 5, values.size() );
     assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
