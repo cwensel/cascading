@@ -42,25 +42,25 @@ import static org.jgrapht.Graphs.getPathVertexList;
  */
 public class UniquePathSubGraphIterator implements SubGraphIterator
   {
-  SubGraphIterator parentIterator;
+  SubGraphIterator subGraphIterator;
   ElementGraph current = null;
   private Iterator<GraphPath<FlowElement, Scope>> pathsIterator;
 
-  public UniquePathSubGraphIterator( SubGraphIterator parentIterator )
+  public UniquePathSubGraphIterator( SubGraphIterator subGraphIterator )
     {
-    this.parentIterator = parentIterator;
+    this.subGraphIterator = subGraphIterator;
     }
 
   @Override
   public ElementGraph getElementGraph()
     {
-    return parentIterator.getElementGraph();
+    return subGraphIterator.getElementGraph();
     }
 
   @Override
   public EnumMultiMap getAnnotationMap( ElementAnnotation[] annotations )
     {
-    return parentIterator.getAnnotationMap( annotations ); // unsure we need to narrow results
+    return subGraphIterator.getAnnotationMap( annotations ); // unsure we need to narrow results
     }
 
   @Override
@@ -72,17 +72,22 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
     if( current == null || pathsIterator == null )
       return false;
 
-    return pathsIterator.hasNext();
+    boolean hasNextPath = pathsIterator.hasNext();
+
+    if( hasNextPath )
+      return true;
+
+    return subGraphIterator.hasNext();
     }
 
   private void advance()
     {
     if( current == null )
       {
-      if( !parentIterator.hasNext() )
+      if( !subGraphIterator.hasNext() )
         return;
 
-      current = parentIterator.next();
+      current = subGraphIterator.next();
       pathsIterator = null;
       }
 
@@ -104,7 +109,9 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
     if( !pathsIterator.hasNext() )
       {
       current = null;
-      parentIterator = null;
+      pathsIterator = null;
+
+      advance();
 
       return next();
       }
@@ -119,6 +126,6 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
   @Override
   public void remove()
     {
-    parentIterator.remove();
+    subGraphIterator.remove();
     }
   }

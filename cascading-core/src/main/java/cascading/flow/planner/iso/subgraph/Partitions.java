@@ -139,7 +139,7 @@ public class Partitions extends GraphResult
       // want to write annotations with elements
       new ElementDirectedGraph( subGraph, annotatedSubGraphs.get( subGraph ) ).writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
 
-      if( contractedMatches.size() < i )
+      if( i < contractedMatches.size() )
         contractedMatches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, i, "partition-contracted-graph" ) ).toString() );
       }
     }

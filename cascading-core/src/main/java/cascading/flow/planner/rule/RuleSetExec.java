@@ -48,6 +48,7 @@ import static java.util.Collections.synchronizedList;
 
 public class RuleSetExec
   {
+  public static final int MAX_CONCURRENT_PLANNERS = 1;
   public static final int DEFAULT_TIMEOUT = 10 * 60;
   public static final Comparator<RuleResult> DEFAULT_RESULT_COMPARATOR = new Comparator<RuleResult>()
   {
@@ -149,12 +150,23 @@ public class RuleSetExec
     if( ruleResult.isSuccess() )
       flowPlanner.verifyResult( ruleResult );
 
+    Exception plannerException = ruleResult.getPlannerException();
+
+    if( plannerException != null && plannerException instanceof PlannerException && ( (PlannerException) plannerException ).getElementGraph() != null )
+      traceWriter.writeTracePlan( registryName, "failed-source-element-graph", ( (PlannerException) plannerException ).getElementGraph() );
+
     return ruleResult;
     }
 
   protected Set<Future<RuleResult>> submitCallables( List<Callable<RuleResult>> callables )
     {
-    ExecutorService executor = Executors.newFixedThreadPool( callables.size() );
+    int size = callables.size();
+
+    // forcing to sequential runs for now until we resolve the re-hashing issue with modified vertexes in the graph
+    if( MAX_CONCURRENT_PLANNERS > 0 )
+      size = Math.min( MAX_CONCURRENT_PLANNERS, size );
+
+    ExecutorService executor = Executors.newFixedThreadPool( size );
     ExecutorCompletionService<RuleResult> completionService = new ExecutorCompletionService<>( executor );
     Set<Future<RuleResult>> futures = new HashSet<>();
 

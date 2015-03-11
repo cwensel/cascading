@@ -112,22 +112,27 @@ public class RuleExec
 
       logPhase( logger, logAsInfo, "starting rule phase: {}", phase );
 
-      switch( phase.getAction() )
+      try
         {
-        case Resolve:
-          resolveElements( plannerContext, ruleResult );
-          break;
+        switch( phase.getAction() )
+          {
+          case Resolve:
+            resolveElements( plannerContext, ruleResult );
+            break;
 
-        case Rule:
-          executeRulePhase( phase, plannerContext, ruleResult );
-          break;
+          case Rule:
+            executeRulePhase( phase, plannerContext, ruleResult );
+            break;
+          }
         }
+      finally
+        {
+        long endPhase = System.currentTimeMillis();
 
-      long endPhase = System.currentTimeMillis();
+        ruleResult.setPhaseDuration( phase, beginPhase, endPhase );
 
-      ruleResult.setPhaseDuration( phase, beginPhase, endPhase );
-
-      logPhase( logger, logAsInfo, "ending rule phase: {}, duration: {}", phase, formatDurationFromMillis( endPhase - beginPhase ) );
+        logPhase( logger, logAsInfo, "ending rule phase: {}, duration: {}", phase, formatDurationFromMillis( endPhase - beginPhase ) );
+        }
       }
     }
 
@@ -141,9 +146,8 @@ public class RuleExec
     elementGraph = (FlowElementGraph) elementGraph.copyGraph();
 
     elementGraph.resolveFields();
-    ( (BaseFlow) plannerContext.getFlow() ).updateSchemes( elementGraph );
 
-    elementGraph = new FlowElementGraph( elementGraph ); // forces a re-hash in graph
+    elementGraph = ( (BaseFlow) plannerContext.getFlow() ).updateSchemes( elementGraph );
 
     ruleResult.setLevelResults( ProcessLevel.Assembly, ruleResult.initialAssembly, elementGraph );
     }
@@ -182,11 +186,21 @@ public class RuleExec
           }
         catch( UnsupportedPlanException exception )
           {
+          logger.logDebug( "executing rule failed: {}, message: {}", rule, exception.getMessage() );
+
           throw new UnsupportedPlanException( rule, exception );
+          }
+        catch( PlannerException exception )
+          {
+          logger.logDebug( "executing rule failed: {}, message: {}", rule, exception.getMessage() );
+
+          throw exception; // rethrow
           }
         catch( Exception exception )
           {
-          throw new PlannerException( rule, exception );
+          logger.logDebug( "executing rule failed: {}, message: {}", rule, exception.getMessage() );
+
+          throw new PlannerException( registry, phase, rule, exception );
           }
         finally
           {
@@ -225,14 +239,14 @@ public class RuleExec
     RulePartitioner partitioner = (RulePartitioner) rule;
 
     if( partitioner.getPartitionSource() == RulePartitioner.PartitionSource.PartitionParent )
-      handleParentPartitioning( plannerContext, ruleResult, phase, rule, partitioner );
+      handleParentPartitioning( plannerContext, ruleResult, phase, partitioner );
     else if( partitioner.getPartitionSource() == RulePartitioner.PartitionSource.PartitionCurrent )
-      handleCurrentPartitioning( plannerContext, ruleResult, phase, rule, partitioner );
+      handleCurrentPartitioning( plannerContext, ruleResult, phase, partitioner );
     else
       throw new IllegalStateException( "unknown partitioning type: " + partitioner.getPartitionSource() );
     }
 
-  private void handleCurrentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, Rule rule, RulePartitioner partitioner )
+  private void handleCurrentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, RulePartitioner partitioner )
     {
     Map<ElementGraph, List<? extends ElementGraph>> priorResults = ruleResult.getLevelResults( phase.getLevel() );
 
@@ -251,9 +265,18 @@ public class RuleExec
         {
         ElementGraph priorAnnotated = annotateWithPriors( child, priors );
 
-        Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+        Partitions partitions;
 
-        writeTransformTrace( ruleResult, phase, rule, parent, child, partitions );
+        try
+          {
+          partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+          }
+        catch( Throwable throwable )
+          {
+          throw new PlannerException( registry, phase, partitioner, priorAnnotated, throwable );
+          }
+
+        writeTransformTrace( ruleResult, phase, partitioner, parent, child, partitions );
 
         List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
@@ -285,7 +308,7 @@ public class RuleExec
     ruleResult.setLevelResults( phase.getLevel(), subGraphs );
     }
 
-  private void handleParentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, Rule rule, RulePartitioner partitioner )
+  private void handleParentPartitioning( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, RulePartitioner partitioner )
     {
     Map<ElementGraph, List<? extends ElementGraph>> priorResults = ruleResult.getLevelResults( phase.getLevel() );
 
@@ -299,9 +322,18 @@ public class RuleExec
       Set<FlowElement> exclusions = getExclusions( priors, partitioner.getAnnotationExcludes() );
       ElementGraph priorAnnotated = annotateWithPriors( parent, priors );
 
-      Partitions partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+      Partitions partitions;
 
-      writeTransformTrace( ruleResult, phase, rule, parent, null, partitions );
+      try
+        {
+        partitions = partitioner.partition( plannerContext, priorAnnotated, exclusions );
+        }
+      catch( Throwable throwable )
+        {
+        throw new PlannerException( registry, phase, partitioner, priorAnnotated, throwable );
+        }
+
+      writeTransformTrace( ruleResult, phase, partitioner, parent, null, partitions );
 
       List<ElementGraph> results = makeBoundedOn( ruleResult.getAssemblyGraph(), partitions.getAnnotatedSubGraphs() );
 
@@ -324,9 +356,9 @@ public class RuleExec
     ruleResult.setLevelResults( phase.getLevel(), subGraphs );
     }
 
-  private void performAssertion( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, GraphAssert rule )
+  private void performAssertion( PlannerContext plannerContext, RuleResult ruleResult, PlanPhase phase, GraphAssert asserter )
     {
-    plannerContext.getLogger().logDebug( "applying assertion: {}", ( (Rule) rule ).getRuleName() );
+    plannerContext.getLogger().logDebug( "applying assertion: {}", ( (Rule) asserter ).getRuleName() );
 
     Map<ElementGraph, List<? extends ElementGraph>> levelResults = ruleResult.getLevelResults( phase.getLevel() );
 
@@ -337,9 +369,17 @@ public class RuleExec
 
       for( ElementGraph child : children )
         {
-        Asserted asserted = rule.assertion( plannerContext, child );
+        Asserted asserted;
+        try
+          {
+          asserted = asserter.assertion( plannerContext, child );
+          }
+        catch( Throwable throwable )
+          {
+          throw new PlannerException( registry, phase, (Rule) asserter, child, throwable );
+          }
 
-        writeTransformTrace( ruleResult, phase, (Rule) rule, parent, child, asserted );
+        writeTransformTrace( ruleResult, phase, (Rule) asserter, parent, child, asserted );
 
         FlowElement primary = asserted.getFirstAnchor();
 
@@ -369,7 +409,16 @@ public class RuleExec
 
       for( ElementGraph child : children )
         {
-        Transformed transformed = transformer.transform( plannerContext, child );
+        Transformed transformed;
+
+        try
+          {
+          transformed = transformer.transform( plannerContext, child );
+          }
+        catch( Throwable throwable )
+          {
+          throw new PlannerException( registry, phase, (Rule) transformer, child, throwable );
+          }
 
         writeTransformTrace( ruleResult, phase, (Rule) transformer, parent, child, transformed );
 

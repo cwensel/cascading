@@ -76,7 +76,7 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
     {
     ElementGraph next = parentIterator.next();
 
-    if( hasNext() )
+    if( parentIterator.hasNext() )
       {
       maskedElements.addAll( next.vertexSet() );
       maskedScopes.addAll( next.edgeSet() ); // catches case with no elements on path

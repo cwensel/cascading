@@ -55,15 +55,11 @@ import cascading.property.AppProps;
 import cascading.util.ProcessLogger;
 import cascading.util.Util;
 import cascading.util.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static cascading.property.PropertyUtil.getStringProperty;
 
 public class TraceWriter
   {
-  private static final Logger LOG = LoggerFactory.getLogger( TraceWriter.class );
-
   public static final String GREEN = "0000000000000000000400000000000000000000000000000000000000000000";
   public static final String ORANGE = "0000000000000000000E00000000000000000000000000000000000000000000";
   public static final String RED = "0000000000000000000C00000000000000000000000000000000000000000000";

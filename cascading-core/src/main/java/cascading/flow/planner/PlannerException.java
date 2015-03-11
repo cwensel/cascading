@@ -24,7 +24,9 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.finder.GraphFinderException;
+import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.Rule;
+import cascading.flow.planner.rule.RuleRegistry;
 import cascading.util.TraceUtil;
 
 /**
@@ -143,12 +145,34 @@ public class PlannerException extends FlowException
     super( "failed on rule: " + rule.getRuleName(), exception );
     }
 
+  public PlannerException( PlanPhase phase, Rule rule, Throwable throwable )
+    {
+    super( "phase: " + phase + ", failed on rule: " + rule.getRuleName(), throwable );
+    }
+
+  public PlannerException( PlanPhase phase, Rule rule, ElementGraph elementGraph, Throwable throwable )
+    {
+    super( "phase: " + phase + ", failed on rule: " + rule.getRuleName() + ( elementGraph != null ? ", see attached source element-graph" : "" ), throwable );
+    this.elementGraph = elementGraph;
+    }
+
+  public PlannerException( RuleRegistry registry, PlanPhase phase, Rule rule, Throwable throwable )
+    {
+    super( "registry: " + registry.getName() + ", phase: " + phase + ", failed on rule: " + rule.getRuleName(), throwable );
+    }
+
+  public PlannerException( RuleRegistry registry, PlanPhase phase, Rule rule, ElementGraph elementGraph, Throwable throwable )
+    {
+    super( "registry: " + registry.getName() + ", phase: " + phase + ", failed on rule: " + rule.getRuleName() + ( elementGraph != null ? ", see attached source element-graph" : "" ), throwable );
+    this.elementGraph = elementGraph;
+    }
+
   /**
    * Method getElementGraph returns the elementGraph of this PlannerException object.
    *
    * @return the pipeGraph (ElementGraph) of this PlannerException object.
    */
-  ElementGraph getElementGraph()
+  public ElementGraph getElementGraph()
     {
     return elementGraph;
     }

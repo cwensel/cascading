@@ -44,7 +44,7 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
       AfterEachEdge
     }
 
-  private Insertion insert = Insertion.After;
+  private Insertion insertion = Insertion.After;
   private final String factoryName;
   private ElementCapture capture = ElementCapture.Primary;
 
@@ -53,9 +53,9 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
     this( expressionGraph, ElementCapture.Primary, factoryName );
     }
 
-  public InsertionGraphTransformer( ExpressionGraph expressionGraph, String factoryName, Insertion insert )
+  public InsertionGraphTransformer( ExpressionGraph expressionGraph, String factoryName, Insertion insertion )
     {
-    this( expressionGraph, ElementCapture.Primary, factoryName, insert );
+    this( expressionGraph, ElementCapture.Primary, factoryName, insertion );
     }
 
   public InsertionGraphTransformer( ExpressionGraph expressionGraph, ElementCapture capture, String factoryName )
@@ -63,11 +63,11 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
     this( expressionGraph, capture, factoryName, Insertion.After );
     }
 
-  public InsertionGraphTransformer( ExpressionGraph expressionGraph, ElementCapture capture, String factoryName, Insertion insert )
+  public InsertionGraphTransformer( ExpressionGraph expressionGraph, ElementCapture capture, String factoryName, Insertion insertion )
     {
     super( expressionGraph );
 
-    this.insert = insert;
+    this.insertion = insertion;
 
     if( capture != null )
       this.capture = capture;
@@ -88,11 +88,11 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
     this( graphTransformer, filter, capture, factoryName, Insertion.After );
     }
 
-  public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, ElementCapture capture, String factoryName, Insertion insert )
+  public InsertionGraphTransformer( GraphTransformer graphTransformer, ExpressionGraph filter, ElementCapture capture, String factoryName, Insertion insertion )
     {
     super( graphTransformer, filter );
 
-    this.insert = insert;
+    this.insertion = insertion;
 
     if( capture != null )
       this.capture = capture;
@@ -115,7 +115,7 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
 
     for( FlowElement flowElement : insertions )
       {
-      switch( insert )
+      switch( insertion )
         {
         case Before:
 
@@ -128,6 +128,7 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
           break;
 
         case BeforeEachEdge:
+
           List<FlowElement> predecessors = Graphs.predecessorListOf( graph, flowElement );
 
           for( FlowElement predecessor : predecessors )
