@@ -358,6 +358,24 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(2)", "C", tuple.getObject( 2 ) );
     }
 
+  public void testSetNull()
+    {
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
+
+    entryA.setTuple( null );
+
+    assertTrue( entryA.getTuple() == null );
+    }
+
+  public void testSetCanonicalNull()
+    {
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
+
+    entryA.setCanonicalTuple( null );
+
+    assertTrue( entryA.getTuple() == null );
+    }
+
   public void testSetCoerce()
     {
     Fields fieldsA = new Fields( "a", "b", "c" ).applyTypes( String.class, String.class, String.class );

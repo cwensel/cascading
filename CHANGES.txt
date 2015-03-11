@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Fixed issue where c.t.TupleEntry#setTuple( Tuple tuple ) and c.t.TupleEntry#setCanonicalTuple( Tuple tuple ) would
+  cause an NPE if given an null argument.
+
   Updated trap handling to capture diagnostic information within a trap when configured via a c.t.TrapProps instance.
 
   Added the c.t.TrapProp class to provide fine grained configuration over c.t.Tap traps per c.f.Flow or per

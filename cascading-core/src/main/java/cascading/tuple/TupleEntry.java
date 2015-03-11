@@ -345,6 +345,9 @@ public class TupleEntry
    */
   public Tuple getCoercedTuple( Type[] types, Tuple into )
     {
+    if( into == null )
+      throw new IllegalArgumentException( "into argument Tuple may not be null" );
+
     if( coercions.length != types.length || types.length != into.size() )
       throw new IllegalArgumentException( "current entry and given tuple and types must be same length" );
 
@@ -369,7 +372,7 @@ public class TupleEntry
    */
   public void setTuple( Tuple tuple )
     {
-    if( !isUnmodifiable && tuple.isUnmodifiable() )
+    if( !isUnmodifiable && tuple != null && tuple.isUnmodifiable() )
       throw new IllegalArgumentException( "current entry is modifiable but given tuple is not modifiable, make copy of given Tuple first" );
 
     if( tuple != null && isUnmodifiable )
@@ -386,11 +389,19 @@ public class TupleEntry
    * <p/>
    * This method will modify the existing Tuple wrapped by this TupleEntry instance even
    * if it is marked as unmodifiable.
+   * <p/>
+   * If tuple argument is {@code null}, the current tuple will be set to {@code null}.
    *
    * @param tuple to replace the current wrapped Tuple instance
    */
   public void setCanonicalTuple( Tuple tuple )
     {
+    if( tuple == null )
+      {
+      this.tuple = null;
+      return;
+      }
+
     if( isUnmodifiable )
       tuple = Tuples.asUnmodifiable( tuple );
 
