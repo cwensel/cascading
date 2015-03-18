@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.BaseFlow;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
@@ -117,7 +116,7 @@ public class RuleExec
         switch( phase.getAction() )
           {
           case Resolve:
-            resolveElements( plannerContext, ruleResult );
+            resolveElements( ruleResult );
             break;
 
           case Rule:
@@ -136,7 +135,7 @@ public class RuleExec
       }
     }
 
-  private void resolveElements( PlannerContext plannerContext, RuleResult ruleResult )
+  private void resolveElements( RuleResult ruleResult )
     {
     if( !registry.enabledResolveElements() )
       return;
@@ -146,8 +145,6 @@ public class RuleExec
     elementGraph = (FlowElementGraph) elementGraph.copyGraph();
 
     elementGraph.resolveFields();
-
-    elementGraph = ( (BaseFlow) plannerContext.getFlow() ).updateSchemes( elementGraph );
 
     ruleResult.setLevelResults( ProcessLevel.Assembly, ruleResult.initialAssembly, elementGraph );
     }

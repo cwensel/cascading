@@ -35,6 +35,7 @@ import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
+import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.pipe.Group;
@@ -347,6 +348,9 @@ public class BaseFlowNode implements Serializable, FlowNode
     for( FlowElement flowElement : nodeSubGraph.vertexSet() )
       {
       Set<String> names = new HashSet<>();
+
+      if( flowElement instanceof Extent )
+        continue;
 
       if( flowElement instanceof Pipe )
         {

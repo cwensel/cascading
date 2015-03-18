@@ -37,6 +37,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowStep;
+import cascading.flow.Flows;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
@@ -154,6 +155,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
     try
       {
+      flowDef = normalizeTaps( flowDef );
+
       verifyAllTaps( flowDef );
 
       F flow = createFlow( flowDef );
@@ -172,6 +175,9 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       traceWriter.writeTracePlan( null, "0-initial-flow-element-graph", flowElementGraph );
 
       FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
+
+      finalFlowElementGraph = flow.updateSchemes( finalFlowElementGraph );
+
       Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
       Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
 
@@ -264,6 +270,57 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     checkpointTapRootPath = makeCheckpointRootPath( flowDef );
 
     return new FlowElementGraph( getPlatformInfo(), flowTails, sources, sinks, traps, checkpoints, checkpointTapRootPath != null );
+    }
+
+  private FlowDef normalizeTaps( FlowDef flowDef )
+    {
+    Set<Tap> taps = new HashSet<>();
+
+    Map<String, Tap> sources = flowDef.getSourcesCopy();
+    Map<String, Tap> sinks = flowDef.getSinksCopy();
+    Map<String, Tap> traps = flowDef.getTrapsCopy();
+    Map<String, Tap> checkpoints = flowDef.getCheckpointsCopy();
+
+    boolean sourcesHasDupes = addTaps( sources, taps );
+    boolean sinksHasDupes = addTaps( sinks, taps );
+    boolean trapsHasDupes = addTaps( traps, taps );
+    boolean checkpointsHasDupes = addTaps( checkpoints, taps );
+
+    if( sourcesHasDupes )
+      normalize( taps, sources );
+
+    if( sinksHasDupes )
+      normalize( taps, sinks );
+
+    if( trapsHasDupes )
+      normalize( taps, traps );
+
+    if( checkpointsHasDupes )
+      normalize( taps, checkpoints );
+
+    return Flows.copy( flowDef, sources, sinks, traps, checkpoints );
+    }
+
+  private boolean addTaps( Map<String, Tap> current, Set<Tap> taps )
+    {
+    int size = taps.size();
+
+    taps.addAll( current.values() );
+
+    // if all the added values are not unique, taps.size will be less than original size + num tap instances
+    return size + current.size() != taps.size();
+    }
+
+  private void normalize( Set<Tap> taps, Map<String, Tap> current )
+    {
+    for( Tap tap : taps )
+      {
+      for( Map.Entry<String, Tap> entry : current.entrySet() )
+        {
+        if( entry.getValue().equals( tap ) ) // force equivalent instance to being the same instance
+          entry.setValue( tap );
+        }
+      }
     }
 
   private String makeCheckpointRootPath( FlowDef flowDef )

@@ -82,4 +82,9 @@ public final class Flows
 
     return null;
     }
+
+  public static FlowDef copy( FlowDef flowDef, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints )
+    {
+    return new FlowDef( flowDef, sources, sinks, traps, checkpoints );
+    }
   }

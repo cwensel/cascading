@@ -77,6 +77,24 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
     {
     }
 
+  protected FlowDef( FlowDef flowDef, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints )
+    {
+    super( flowDef );
+
+    this.sources = sources;
+    this.sinks = sinks;
+    this.traps = traps;
+    this.checkpoints = checkpoints;
+
+    this.classPath = flowDef.classPath;
+    this.tails = flowDef.tails;
+    this.assemblyPlanners = flowDef.assemblyPlanners;
+    this.flowDescriptor = flowDef.flowDescriptor;
+    this.assertionLevel = flowDef.assertionLevel;
+    this.debugLevel = flowDef.debugLevel;
+    this.runID = flowDef.runID;
+    }
+
   /**
    * Method getAssemblyPlanners returns the current registered AssemblyPlanners.
    *

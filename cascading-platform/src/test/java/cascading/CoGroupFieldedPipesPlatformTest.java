@@ -275,6 +275,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     {
     getPlatform().copyFromLocal( inputFileLower );
 
+    // intentionally creating multiple instances that are equivalent
     Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
     Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
 

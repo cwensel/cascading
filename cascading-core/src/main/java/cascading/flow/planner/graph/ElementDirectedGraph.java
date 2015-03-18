@@ -20,6 +20,8 @@
 
 package cascading.flow.planner.graph;
 
+import java.util.IdentityHashMap;
+
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
@@ -58,6 +60,12 @@ public class ElementDirectedGraph extends SimpleDirectedGraph<FlowElement, Scope
     this( parent );
 
     this.getAnnotations().addAll( annotations );
+    }
+
+  @Override
+  protected DirectedSpecifics createDirectedSpecifics()
+    {
+    return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
     }
 
   @Override

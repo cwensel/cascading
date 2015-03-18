@@ -31,6 +31,16 @@ public class UnitOfWorkDef<T>
   protected String name;
   protected Set<String> tags = new TreeSet<String>();
 
+  public UnitOfWorkDef()
+    {
+    }
+
+  protected UnitOfWorkDef( UnitOfWorkDef<T> unitOfWorkDef )
+    {
+    this.name = unitOfWorkDef.name;
+    this.tags.addAll( unitOfWorkDef.tags );
+    }
+
   public String getName()
     {
     return name;

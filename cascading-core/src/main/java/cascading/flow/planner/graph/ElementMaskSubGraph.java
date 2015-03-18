@@ -23,6 +23,7 @@ package cascading.flow.planner.graph;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 import cascading.flow.FlowElement;

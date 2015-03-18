@@ -85,7 +85,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path ), SinkMode.REPLACE );
 
-    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( "first", source, sink, pipe );
     }
 
   private Flow secondFlow( Tap source, String path )
@@ -96,7 +96,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTabDelimitedFile( new Fields( "first", "second", "third", "fourth" ), getOutputPath( path ), SinkMode.REPLACE );
 
-    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( "second", source, sink, pipe );
     }
 
   private Flow thirdFlow( Tap source, String path )
@@ -107,7 +107,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTabDelimitedFile( new Fields( "mangled" ), getOutputPath( path ), SinkMode.REPLACE );
 
-    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( "third", source, sink, pipe );
     }
 
   private Flow thirdCheckpointFlow( Tap source, String path )
@@ -139,7 +139,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( getOutputPath( path ), SinkMode.REPLACE );
 
-    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( "fourth", source, sink, pipe );
     }
 
   private Flow previousMultiTapFlow( String path, String ordinal )
@@ -152,7 +152,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTabDelimitedFile( new Fields( "ip" ), getOutputPath( path + "/" + ordinal ), SinkMode.REPLACE );
 
-    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( "previous-multi-tap-" + ordinal, source, sink, pipe );
     }
 
   private Flow multiTapFlow( Tap[] sources, String path )
@@ -164,7 +164,7 @@ public class CascadePlatformTest extends PlatformTestCase
     Tap source = new MultiSourceTap( sources );
     Tap sink = getPlatform().getTextFile( getOutputPath( path + "/multitap" ), SinkMode.REPLACE );
 
-    return getPlatform().getFlowConnector().connect( source, sink, pipe );
+    return getPlatform().getFlowConnector().connect( "multi-tap", source, sink, pipe );
     }
 
   @Test

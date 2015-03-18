@@ -48,7 +48,7 @@ import static java.util.Collections.synchronizedList;
 
 public class RuleSetExec
   {
-  public static final int MAX_CONCURRENT_PLANNERS = 1;
+  public static final int MAX_CONCURRENT_PLANNERS = 5;
   public static final int DEFAULT_TIMEOUT = 10 * 60;
   public static final Comparator<RuleResult> DEFAULT_RESULT_COMPARATOR = new Comparator<RuleResult>()
   {
@@ -160,11 +160,7 @@ public class RuleSetExec
 
   protected Set<Future<RuleResult>> submitCallables( List<Callable<RuleResult>> callables )
     {
-    int size = callables.size();
-
-    // forcing to sequential runs for now until we resolve the re-hashing issue with modified vertexes in the graph
-    if( MAX_CONCURRENT_PLANNERS > 0 )
-      size = Math.min( MAX_CONCURRENT_PLANNERS, size );
+    int size = Math.min( MAX_CONCURRENT_PLANNERS, callables.size() );
 
     ExecutorService executor = Executors.newFixedThreadPool( size );
     ExecutorCompletionService<RuleResult> completionService = new ExecutorCompletionService<>( executor );

@@ -20,6 +20,8 @@
 
 package cascading.flow.planner.graph;
 
+import java.util.IdentityHashMap;
+
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
@@ -68,6 +70,12 @@ public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> im
   public ElementMultiGraph()
     {
     super( Scope.class );
+    }
+
+  @Override
+  protected DirectedSpecifics createDirectedSpecifics()
+    {
+    return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
     }
 
   @Override

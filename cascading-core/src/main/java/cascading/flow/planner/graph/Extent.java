@@ -22,23 +22,19 @@ package cascading.flow.planner.graph;
 
 import java.util.Set;
 
+import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.pipe.Pipe;
+import cascading.property.ConfigDef;
+import cascading.tuple.Fields;
 
 /**
  *
  */
-public class Extent extends Pipe
+public enum Extent implements FlowElement
   {
-  /** Field head */
-  public static final Extent head = new Extent( "head" );
-  /** Field tail */
-  public static final Extent tail = new Extent( "tail" );
-
-  private Extent( String name )
-    {
-    super( name );
-    }
+    head,
+    tail;
 
   @Override
   public Scope outgoingScopeFor( Set<Scope> scopes )
@@ -47,23 +43,50 @@ public class Extent extends Pipe
     }
 
   @Override
-  public String toString()
+  public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
     {
-    return "[" + getName() + "]";
+    return null;
     }
 
   @Override
-  public boolean equals( Object object )
+  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
     {
-    if( object == null )
-      return false;
+    return null;
+    }
 
-    if( this == object )
-      return true;
+  @Override
+  public boolean isEquivalentTo( FlowElement element )
+    {
+    return false;
+    }
 
-    if( object.getClass() != this.getClass() )
-      return false;
+  @Override
+  public ConfigDef getStepConfigDef()
+    {
+    return null;
+    }
 
-    return this.getName().equals( ( (Pipe) object ).getName() );
+  @Override
+  public boolean hasStepConfigDef()
+    {
+    return false;
+    }
+
+  @Override
+  public ConfigDef getConfigDef()
+    {
+    return null;
+    }
+
+  @Override
+  public boolean hasConfigDef()
+    {
+    return false;
+    }
+
+  @Override
+  public String toString()
+    {
+    return "[" + name() + "]";
     }
   }
