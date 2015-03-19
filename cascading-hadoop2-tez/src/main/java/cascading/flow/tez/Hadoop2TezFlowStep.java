@@ -746,7 +746,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     if( opts == null )
       opts = "";
 
-    opts += " -agentlib:jdwp=transport=dt_socket,server=n,address=localhost:5005,suspend=y";
+    String address = System.getProperty( "test.debug.address", "localhost:5005" ).trim();
+
+    opts += " -agentlib:jdwp=transport=dt_socket,server=n,address=" + address + ",suspend=y";
 
     vertex.setTaskLaunchCmdOpts( opts );
     }

@@ -45,7 +45,17 @@ or test method
   
 To enable a remote debugger, 
     
-    -Dtest.debug.node=[ordinal or source name]
+    -Dtest.debug.node=[ordinal or source name] -Dtest.debug.address=localhost:5005
+    
+To enable Java Flight Recorder,    
+
+    -Dtest.profile.node=[ordinal or source name] -Dtest.profile.path=/tmp/jfr/
+     
+Note that the ordinal value is consistent across runs if there are no changes to the assembly graph. See the node/vertex
+logs for the node ordinal value.
+ 
+And source name can be the name of a CoGroup or GroupBy that acts as the boundary between two nodes, or the bound source 
+Tap name provided to the FlowDef.
 
 ## Tez Binaries
 
@@ -145,7 +155,7 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 * There is no Vertex 'parallelization' default in Tez, FlowRuntimeProps must be called per application (see sample 
   applications above).
 
-* Currently no way to algorithmically set node parallelization.update
+* Currently no way to algorithmically set node parallelization.
 
 * Tests ignore parallelization settings, otherwise both local mode and mini cluster modes deadlock.
     

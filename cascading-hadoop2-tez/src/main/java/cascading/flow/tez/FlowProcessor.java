@@ -80,12 +80,14 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
       HadoopUtil.initLog4j( configuration );
 
       LOG.info( "cascading version: {}", configuration.get( "cascading.version", "" ) );
-      // print jvm settings
-//      LOG.info( "child jvm opts: {}", configuration.get( "mapred.child.java.opts", "" ) );
 
       currentProcess = new Hadoop2TezFlowProcess( new FlowSession(), getContext(), configuration );
 
       flowNode = deserializeBase64( configuration.getRaw( FlowNode.CASCADING_FLOW_NODE ), configuration, BaseFlowNode.class );
+
+      LOG.info( "flow node ordinal: {}, tez vertex name: {}", flowNode.getOrdinal(), flowNode.getID() );
+
+      logMemory( "mem on start" );
       }
     catch( Throwable throwable )
       {
@@ -147,7 +149,11 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
           Duct next = iterator.next();
 
           if( next != streamedHead )
+            {
             ( (InputSource) next ).run( null );
+
+            logMemory( "mem after accumulating source: " + ( (ElementDuct) next ).getFlowElement() + ", " );
+            }
           }
 
         streamedHead.run( null );
@@ -191,12 +197,22 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
   @Override
   public void handleEvents( List<Event> events )
     {
-    LOG.info( "in events" );
+    LOG.debug( "in events" );
     }
 
   @Override
   public void close() throws Exception
     {
-    LOG.info( "in close" );
+    logMemory( "mem on close" );
+    }
+
+  protected void logMemory( String message )
+    {
+    Runtime runtime = Runtime.getRuntime();
+    long freeMem = runtime.freeMemory() / 1024 / 1024;
+    long maxMem = runtime.maxMemory() / 1024 / 1024;
+    long totalMem = runtime.totalMemory() / 1024 / 1024;
+
+    LOG.info( message + " (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
     }
   }
