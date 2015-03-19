@@ -49,8 +49,8 @@ public class UniquePathGraphPartitioner extends ExpressionGraphPartitioner
   protected SubGraphIterator wrapIterator( ExpressionSubGraphIterator expressionIterator )
     {
     if( !includeRemainders )
-      return new UniquePathSubGraphIterator( expressionIterator );
+      return new UniquePathSubGraphIterator( expressionIterator, true );
 
-    return new IncludeRemainderSubGraphIterator( new UniquePathSubGraphIterator( expressionIterator ) );
+    return new IncludeRemainderSubGraphIterator( new UniquePathSubGraphIterator( expressionIterator, true ) );
     }
   }

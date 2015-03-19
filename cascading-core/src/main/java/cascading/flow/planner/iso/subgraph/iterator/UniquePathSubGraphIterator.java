@@ -20,6 +20,8 @@
 
 package cascading.flow.planner.iso.subgraph.iterator;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.util.EnumMultiMap;
+import cascading.util.Pair;
 import org.jgrapht.GraphPath;
 
 import static cascading.flow.planner.graph.ElementGraphs.*;
@@ -43,12 +46,20 @@ import static org.jgrapht.Graphs.getPathVertexList;
 public class UniquePathSubGraphIterator implements SubGraphIterator
   {
   SubGraphIterator subGraphIterator;
+  boolean longestFirst;
   ElementGraph current = null;
-  private Iterator<GraphPath<FlowElement, Scope>> pathsIterator;
+  Iterator<GraphPath<FlowElement, Scope>> pathsIterator;
+  Set<Pair<FlowElement, FlowElement>> pairs = new HashSet<>();
 
-  public UniquePathSubGraphIterator( SubGraphIterator subGraphIterator )
+  public UniquePathSubGraphIterator( SubGraphIterator subGraphIterator, boolean longestFirst )
     {
     this.subGraphIterator = subGraphIterator;
+    this.longestFirst = longestFirst;
+    }
+
+  public Set<Pair<FlowElement, FlowElement>> getPairs()
+    {
+    return pairs;
     }
 
   @Override
@@ -99,7 +110,17 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
       if( sources.size() > 1 || sinks.size() > 1 )
         throw new IllegalArgumentException( "only supports single source and single sink graphs" );
 
-      pathsIterator = getAllShortestPathsBetween( current, getFirst( sources ), getFirst( sinks ) ).iterator();
+      FlowElement source = getFirst( sources );
+      FlowElement sink = getFirst( sinks );
+
+      pairs.add( new Pair<>( source, sink ) );
+
+      List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( current, source, sink );
+
+      if( longestFirst )
+        Collections.reverse( paths ); // break off longest paths into own partitions
+
+      pathsIterator = paths.iterator();
       }
     }
 

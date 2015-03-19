@@ -53,4 +53,30 @@ public class Pair<Lhs, Rhs>
     {
     this.rhs = rhs;
     }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || getClass() != object.getClass() )
+      return false;
+
+    Pair pair = (Pair) object;
+
+    if( lhs != null ? !lhs.equals( pair.lhs ) : pair.lhs != null )
+      return false;
+    if( rhs != null ? !rhs.equals( pair.rhs ) : pair.rhs != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = lhs != null ? lhs.hashCode() : 0;
+    result = 31 * result + ( rhs != null ? rhs.hashCode() : 0 );
+    return result;
+    }
   }

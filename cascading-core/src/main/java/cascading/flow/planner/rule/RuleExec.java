@@ -292,7 +292,7 @@ public class RuleExec
         for( ElementGraph prior : resultChildren )
           {
           if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
-            plannerContext.getLogger().logInfo( "re-partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
+            plannerContext.getLogger().logDebug( "re-partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
           }
 
         // order no longer preserved
@@ -343,7 +343,7 @@ public class RuleExec
       for( ElementGraph prior : priors )
         {
         if( !uniques.add( prior ) ) // todo: setting to force failure on duplicates
-          plannerContext.getLogger().logInfo( "partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
+          plannerContext.getLogger().logDebug( "partition rule created duplicate element graph to prior partitioner: {}, replacing duplicate result", partitioner.getRuleName() );
         }
 
       // order no longer preserved

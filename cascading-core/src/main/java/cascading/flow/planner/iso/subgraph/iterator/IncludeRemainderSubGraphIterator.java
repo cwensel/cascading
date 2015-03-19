@@ -20,7 +20,9 @@
 
 package cascading.flow.planner.iso.subgraph.iterator;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
@@ -31,6 +33,11 @@ import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.ElementAnnotation;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.util.EnumMultiMap;
+import cascading.util.Pair;
+import org.jgrapht.GraphPath;
+import org.jgrapht.Graphs;
+
+import static cascading.flow.planner.graph.ElementGraphs.*;
 
 /**
  *
@@ -87,7 +94,48 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
     maskedElements.removeAll( next.vertexSet() );
     maskedScopes.removeAll( next.edgeSet() );
 
-    return new ElementMaskSubGraph( parentIterator.getElementGraph(), maskedElements, maskedScopes );
+    // if there is branching in the root graph, common ancestors could be masked out
+    // here we iterate all paths for all remaining paths
+
+    // previously source/sink pairs captured in prior partitions
+    Set<Pair<FlowElement, FlowElement>> pairs = getPairs();
+
+    ElementGraph elementGraph = parentIterator.getElementGraph();
+    ElementMaskSubGraph maskSubGraph = new ElementMaskSubGraph( elementGraph, maskedElements, maskedScopes );
+
+    // remaining source/sink pairs we need to traverse
+    Set<FlowElement> sources = findSources( maskSubGraph, FlowElement.class );
+    Set<FlowElement> sinks = findSinks( maskSubGraph, FlowElement.class );
+
+    for( FlowElement source : sources )
+      {
+      for( FlowElement sink : sinks )
+        {
+        if( pairs.contains( new Pair<>( source, sink ) ) )
+          continue;
+
+        List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( elementGraph, source, sink );
+
+        for( GraphPath<FlowElement, Scope> path : paths )
+          {
+          maskedElements.removeAll( Graphs.getPathVertexList( path ) );
+          maskedScopes.removeAll( path.getEdgeList() );
+          }
+        }
+      }
+
+    // new graph since the prior made a copy of the masked vertices/edges
+    return new ElementMaskSubGraph( elementGraph, maskedElements, maskedScopes );
+    }
+
+  protected Set<Pair<FlowElement, FlowElement>> getPairs()
+    {
+    Set<Pair<FlowElement, FlowElement>> pairs = Collections.emptySet();
+
+    if( parentIterator instanceof UniquePathSubGraphIterator )
+      pairs = ( (UniquePathSubGraphIterator) parentIterator ).getPairs();
+
+    return pairs;
     }
 
   @Override

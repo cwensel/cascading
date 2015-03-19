@@ -30,6 +30,7 @@ import java.util.Set;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnectorProps;
+import cascading.flow.FlowDef;
 import cascading.flow.FlowProps;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -45,6 +46,7 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Discard;
+import cascading.pipe.assembly.Rename;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
 import cascading.pipe.joiner.LeftJoin;
@@ -1701,5 +1703,98 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     validateLength( flow.openTapForRead( outerSink ), 84 );
     validateLength( flow.openTapForRead( leftSink ), 74 );
     validateLength( flow.openTapForRead( rightSink ), 84 );
+    }
+
+  /**
+   * This test checks that a valid node is created when adding back remainders during unique
+   * path sub-graph partitioning.
+   */
+  @Test
+  public void testMultiJoinWithSplits() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileCrossX2 );
+
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileCrossX2 );
+    Tap innerSinkLhs = getPlatform().getTextFile( getOutputPath( "innerLhs" ), SinkMode.REPLACE );
+    Tap uniqueSinkLhs = getPlatform().getTextFile( getOutputPath( "uniquesLhs" ), SinkMode.REPLACE );
+    Tap innerSinkRhs = getPlatform().getTextFile( getOutputPath( "innerRhs" ), SinkMode.REPLACE );
+    Tap uniqueSinkRhs = getPlatform().getTextFile( getOutputPath( "uniquesRhs" ), SinkMode.REPLACE );
+
+    Pipe incoming = new Pipe( "incoming" );
+    Pipe uniquesLhs;
+    Pipe innerLhs;
+    Pipe uniquesRhs;
+    Pipe innerRhs;
+
+    {
+    Pipe generatorLhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+
+    generatorLhs = new Each( generatorLhs, new Identity() );
+
+    Pipe generatorRhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+
+    Pipe uniques = new Each( generatorLhs, new Identity() );
+
+    uniques = new GroupBy( "uniquesLhs", uniques, new Fields( "word" ) );
+
+    uniques = new Every( uniques, new Fields( "word" ), new First( Fields.ARGS ), Fields.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs", generatorLhs );
+
+    lhs = new Rename( lhs, new Fields( "word" ), new Fields( "lhs" ) );
+
+    Pipe rhs = new Pipe( "rhs", generatorRhs );
+
+    rhs = new Rename( rhs, new Fields( "word" ), new Fields( "rhs" ) );
+
+    Pipe inner = new CoGroup( "innerLhs", lhs, new Fields( 0 ), rhs, new Fields( 0 ), new InnerJoin() );
+
+    uniquesLhs = uniques;
+    innerLhs = inner;
+    }
+
+    {
+    Pipe generatorLhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+
+    generatorLhs = new Each( generatorLhs, new Identity() );
+
+    Pipe generatorRhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+
+    Pipe uniques = new Each( generatorLhs, new Identity() );
+
+    uniques = new GroupBy( "uniquesRhs", uniques, new Fields( "word" ) );
+
+    uniques = new Every( uniques, new Fields( "word" ), new First( Fields.ARGS ), Fields.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs", generatorLhs );
+
+    lhs = new Rename( lhs, new Fields( "word" ), new Fields( "lhs" ) );
+
+    Pipe rhs = new Pipe( "rhs", generatorRhs );
+
+    rhs = new Rename( rhs, new Fields( "word" ), new Fields( "rhs" ) );
+
+    Pipe inner = new CoGroup( "innerRhs", lhs, new Fields( 0 ), rhs, new Fields( 0 ), new InnerJoin() );
+
+    uniquesRhs = uniques;
+    innerRhs = inner;
+    }
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .setName( "multi-joins" )
+      .addSource( "incoming", source )
+      .addTailSink( innerLhs, innerSinkLhs )
+      .addTailSink( uniquesLhs, uniqueSinkLhs )
+      .addTailSink( innerRhs, innerSinkRhs )
+      .addTailSink( uniquesRhs, uniqueSinkRhs );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow.openTapForRead( innerSinkLhs ), 3900 );
+    validateLength( flow.openTapForRead( uniqueSinkLhs ), 15 );
+    validateLength( flow.openTapForRead( innerSinkRhs ), 3900 );
+    validateLength( flow.openTapForRead( uniqueSinkRhs ), 15 );
     }
   }
