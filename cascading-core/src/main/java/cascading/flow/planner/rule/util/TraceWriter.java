@@ -331,10 +331,9 @@ public class TraceWriter
     if( path == null )
       return;
 
-    int ordinal = flowStep.getOrdinal();
-
+    int stepOrdinal = flowStep.getOrdinal();
     Path rootPath = path.resolve( directoryName );
-    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, ordinal );
+    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, stepOrdinal );
 
     ElementGraph stepSubGraph = flowStep.getElementGraph();
 
@@ -344,12 +343,12 @@ public class TraceWriter
 
     Iterator<FlowNode> iterator = flowNodeGraph.getOrderedTopologicalIterator();
 
-    int i = 0;
     while( iterator.hasNext() )
       {
       FlowNode flowNode = iterator.next();
       ElementGraph nodeGraph = flowNode.getElementGraph();
-      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, ordinal, i );
+      int nodeOrdinal = flowNode.getOrdinal();
+      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, stepOrdinal, nodeOrdinal );
 
       nodeGraph.writeDOT( nodeGraphName );
 
@@ -359,12 +358,10 @@ public class TraceWriter
         {
         ElementGraph pipelineGraph = pipelineGraphs.get( j );
 
-        String pipelineGraphName = String.format( "%s/%04d-%04d-%04d-step-node-pipeline-sub-graph.dot", rootPath, ordinal, i, j );
+        String pipelineGraphName = String.format( "%s/%04d-%04d-%04d-step-node-pipeline-sub-graph.dot", rootPath, stepOrdinal, nodeOrdinal, j );
 
         pipelineGraph.writeDOT( pipelineGraphName );
         }
-
-      i++;
       }
     }
 
