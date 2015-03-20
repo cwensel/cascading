@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -1344,6 +1344,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       for( FlowListener flowListener : getListeners() )
         flowListener.onCompleted( this );
       }
+    }
+
+  protected void fireOnThrowable( Throwable throwable )
+    {
+    this.throwable = throwable;
+    fireOnThrowable();
     }
 
   protected void fireOnThrowable()

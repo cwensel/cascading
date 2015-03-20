@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -43,7 +43,7 @@ public class Dfs extends Hfs
    * @param scheme of type Scheme
    * @param uri    of type URI
    */
-  @ConstructorProperties( {"scheme", "uri"} )
+  @ConstructorProperties({"scheme", "uri"})
   public Dfs( Scheme scheme, URI uri )
     {
     super( scheme, uri.getPath() );
@@ -58,7 +58,7 @@ public class Dfs extends Hfs
    * @param uri      of type URI
    * @param sinkMode of type SinkMode
    */
-  @ConstructorProperties( {"scheme", "uri", "sinkMode"} )
+  @ConstructorProperties({"scheme", "uri", "sinkMode"})
   public Dfs( Scheme scheme, URI uri, SinkMode sinkMode )
     {
     super( scheme, uri.getPath(), sinkMode );
@@ -72,7 +72,7 @@ public class Dfs extends Hfs
    * @param scheme     of type Scheme
    * @param stringPath of type String
    */
-  @ConstructorProperties( {"scheme", "stringPath"} )
+  @ConstructorProperties({"scheme", "stringPath"})
   public Dfs( Scheme scheme, String stringPath )
     {
     super( scheme, stringPath );
@@ -85,7 +85,7 @@ public class Dfs extends Hfs
    * @param stringPath of type String
    * @param sinkMode   of type SinkMode
    */
-  @ConstructorProperties( {"scheme", "stringPath", "sinkMode"} )
+  @ConstructorProperties({"scheme", "stringPath", "sinkMode"})
   public Dfs( Scheme scheme, String stringPath, SinkMode sinkMode )
     {
     super( scheme, stringPath, sinkMode );

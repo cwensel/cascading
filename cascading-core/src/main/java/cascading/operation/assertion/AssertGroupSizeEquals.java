@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -41,7 +41,7 @@ public class AssertGroupSizeEquals extends AssertGroupBase
    *
    * @param size of type long
    */
-  @ConstructorProperties( {"size"} )
+  @ConstructorProperties({"size"})
   public AssertGroupSizeEquals( long size )
     {
     super( "group size: %s, is not equal to: %s, in group %s: %s", size );
@@ -53,14 +53,14 @@ public class AssertGroupSizeEquals extends AssertGroupBase
    * @param patternString of type String
    * @param size          of type long
    */
-  @ConstructorProperties( {"patternString", "size"} )
+  @ConstructorProperties({"patternString", "size"})
   public AssertGroupSizeEquals( String patternString, long size )
     {
     super( "group matching '%s' with size: %s, is not equal to: %s, in group %s: %s", patternString, size );
     }
 
-  @Property( name = "size", visibility = Visibility.PRIVATE )
-  @PropertyDescription( "The expected group size." )
+  @Property(name = "size", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The expected group size.")
   @Override
   public long getSize()
     {

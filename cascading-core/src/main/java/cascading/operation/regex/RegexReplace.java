@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -39,6 +39,13 @@ import cascading.util.Pair;
  * <p/>
  * RegexReplace only expects one field value. If more than one argument value is passed, only the
  * first is handled, the remainder are ignored.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type if type information is provided. See the
+ * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
+ * values.
  */
 public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
   {
@@ -55,7 +62,7 @@ public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implement
    * @param replacement      of type String
    * @param replaceAll       of type boolean
    */
-  @ConstructorProperties( {"fieldDeclaration", "patternString", "replacement", "replaceAll"} )
+  @ConstructorProperties({"fieldDeclaration", "patternString", "replacement", "replaceAll"})
   public RegexReplace( Fields fieldDeclaration, String patternString, String replacement, boolean replaceAll )
     {
     this( fieldDeclaration, patternString, replacement );
@@ -69,22 +76,22 @@ public class RegexReplace extends RegexOperation<Pair<Matcher, Tuple>> implement
    * @param patternString    of type String
    * @param replacement      of type String
    */
-  @ConstructorProperties( {"fieldDeclaration", "patternString", "replacement"} )
+  @ConstructorProperties({"fieldDeclaration", "patternString", "replacement"})
   public RegexReplace( Fields fieldDeclaration, String patternString, String replacement )
     {
     super( 1, fieldDeclaration, patternString );
     this.replacement = replacement;
     }
 
-  @Property( name = "replacement", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The string replacement value." )
+  @Property(name = "replacement", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The string replacement value.")
   public String getReplacement()
     {
     return replacement;
     }
 
-  @Property( name = "replaceAll", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "Will replace all occurrences of pattern." )
+  @Property(name = "replaceAll", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Will replace all occurrences of pattern.")
   public boolean isReplaceAll()
     {
     return replaceAll;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -44,7 +44,7 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
    *
    * @param value of type Comparable
    */
-  @ConstructorProperties( {"value"} )
+  @ConstructorProperties({"value"})
   public AssertEqualsAll( Object value )
     {
     super( "argument '%s' value was: %s, not: %s, in tuple: %s" );
@@ -55,8 +55,8 @@ public class AssertEqualsAll extends BaseAssertion implements ValueAssertion
     this.value = value;
     }
 
-  @Property( name = "value", visibility = Visibility.PRIVATE )
-  @PropertyDescription( "The expected value." )
+  @Property(name = "value", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The expected value.")
   public Object getValue()
     {
     return value;

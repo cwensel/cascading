@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -111,7 +111,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStepStats flowStepStats : flowStepStatsList )
+    for( FlowStepStats flowStepStats : getFlowStepStats() )
       results.addAll( flowStepStats.getCounterGroups() );
 
     return results;
@@ -122,7 +122,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStepStats flowStepStats : flowStepStatsList )
+    for( FlowStepStats flowStepStats : getFlowStepStats() )
       results.addAll( flowStepStats.getCounterGroupsMatching( regex ) );
 
     return results;
@@ -133,7 +133,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStepStats flowStepStats : flowStepStatsList )
+    for( FlowStepStats flowStepStats : getFlowStepStats() )
       results.addAll( flowStepStats.getCountersFor( group ) );
 
     return results;
@@ -144,7 +144,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     long value = 0;
 
-    for( FlowStepStats flowStepStats : flowStepStatsList )
+    for( FlowStepStats flowStepStats : getFlowStepStats() )
       value += flowStepStats.getCounterValue( counter );
 
     return value;
@@ -155,7 +155,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     long value = 0;
 
-    for( FlowStepStats flowStepStats : flowStepStatsList )
+    for( FlowStepStats flowStepStats : getFlowStepStats() )
       value += flowStepStats.getCounterValue( group, counter );
 
     return value;
@@ -187,5 +187,22 @@ public class FlowStats extends CascadingStats<FlowStepStats>
   public String toString()
     {
     return "Flow{" + getStatsString() + '}';
+    }
+
+  @Override
+  public int hashCode()
+    {
+    return getID().hashCode();
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( object == null || !( object instanceof FlowStats ) )
+      return false;
+
+    return getID().equals( ( (FlowStats) object ).getID() );
     }
   }

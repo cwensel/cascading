@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,7 +46,7 @@ public class LocalFlowConnector extends FlowConnector
     }
 
   /**
-   * Constructor LocalFlowConnector creates an instance using any of the given properties.
+   * Constructor LocalFlowConnector creates a new instance using any of the given properties.
    *
    * @param properties of type Map
    */

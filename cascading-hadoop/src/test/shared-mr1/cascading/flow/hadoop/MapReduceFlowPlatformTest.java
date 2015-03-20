@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,6 +46,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.mapreduce.Job;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -158,23 +159,25 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
 
     Flow secondMR = new MapReduceFlow( secondConf, true );
 
-    JobConf thirdConf = new JobConf( defaultConf );
-    thirdConf.setJobName( "third-mr" );
+    Job job = new Job( defaultConf );
+    job.setJobName( "third-mr" );
 
-    thirdConf.setOutputKeyClass( LongWritable.class );
-    thirdConf.setOutputValueClass( Text.class );
+    job.setOutputKeyClass( LongWritable.class );
+    job.setOutputValueClass( Text.class );
 
-    thirdConf.setMapperClass( IdentityMapper.class );
-    thirdConf.setReducerClass( IdentityReducer.class );
+    job.setMapperClass( org.apache.hadoop.mapreduce.Mapper.class );
+    job.setReducerClass( org.apache.hadoop.mapreduce.Reducer.class );
 
-    thirdConf.setInputFormat( TextInputFormat.class );
-    thirdConf.setOutputFormat( TextOutputFormat.class );
+    job.setInputFormatClass( org.apache.hadoop.mapreduce.lib.input.TextInputFormat.class );
+    job.setOutputFormatClass( org.apache.hadoop.mapreduce.lib.output.TextOutputFormat.class );
+    job.getConfiguration().set( "mapred.mapper.new-api", "true" );
+    job.getConfiguration().set( "mapred.reducer.new-api", "true" );
 
-    FileInputFormat.setInputPaths( thirdConf, new Path( remove( sinkPath2, true ) ) );
+    org.apache.hadoop.mapreduce.lib.input.FileInputFormat.addInputPath( job, new Path( remove( sinkPath2, true ) ) );
     String sinkPath3 = getOutputPath( "flow3" );
-    FileOutputFormat.setOutputPath( thirdConf, new Path( remove( sinkPath3, true ) ) );
+    org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.setOutputPath( job, new Path( remove( sinkPath3, true ) ) );
 
-    Flow thirdMR = new MapReduceFlow( thirdConf, true );
+    Flow thirdMR = new MapReduceFlow( new JobConf( job.getConfiguration() ), true );
 
     CascadeConnector cascadeConnector = new CascadeConnector();
 

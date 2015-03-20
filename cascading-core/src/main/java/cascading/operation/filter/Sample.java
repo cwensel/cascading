@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,7 +61,7 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
    *
    * @param fraction of type double
    */
-  @ConstructorProperties( {"fraction"} )
+  @ConstructorProperties({"fraction"})
   public Sample( double fraction )
     {
     this.seed = makeSeed();
@@ -74,22 +74,22 @@ public class Sample extends BaseOperation<Random> implements Filter<Random>
    * @param seed     of type long
    * @param fraction of type double
    */
-  @ConstructorProperties( {"seed", "fraction"} )
+  @ConstructorProperties({"seed", "fraction"})
   public Sample( long seed, double fraction )
     {
     this.seed = seed;
     this.fraction = fraction;
     }
 
-  @Property( name = "seed", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The randomization seed." )
+  @Property(name = "seed", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The randomization seed.")
   public long getSeed()
     {
     return seed;
     }
 
-  @Property( name = "fraction", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The fraction of tuples to be returned." )
+  @Property(name = "fraction", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The fraction of tuples to be returned.")
   public double getFraction()
     {
     return fraction;

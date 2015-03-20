@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -38,6 +38,11 @@ import cascading.operation.FilterCall;
  * is set to true, the pattern is applied to each Tuple value individually.
  * <p/>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type via its {@code toString()} method.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
@@ -94,9 +99,9 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Matcher> filterCall )
     {
     if( matchEachElement )
-      return matchEachElement( filterCall.getContext(), filterCall.getArguments().getTuple() );
+      return matchEachElement( filterCall.getContext(), filterCall.getArguments() );
     else
-      return matchWholeTuple( filterCall.getContext(), filterCall.getArguments().getTuple() );
+      return matchWholeTuple( filterCall.getContext(), filterCall.getArguments() );
     }
 
   @Override

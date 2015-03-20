@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -54,10 +54,11 @@ import cascading.tuple.type.CoercibleType;
  * in a much simpler mechanism.
  * <p/>
  * The {@code threshold} value tells the underlying AveragePartials functions how many unique key sums and counts to accumulate
- * in the LRU cache, before emitting the least recently used entry.
+ * in the LRU cache, before emitting the least recently used entry. This accumulation happens map-side, and thus is
+ * bounded by the size of your map task JVM and the typical size of each group key.
  * <p/>
- * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
- * will be used.
+ * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
+ * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
  *
  * @see cascading.pipe.assembly.AggregateBy
  */
@@ -239,7 +240,7 @@ public class AverageBy extends AggregateBy
    * @param valueField   of type Fields
    * @param averageField of type Fields
    */
-  @ConstructorProperties( {"valueField", "averageField"} )
+  @ConstructorProperties({"valueField", "averageField"})
   public AverageBy( Fields valueField, Fields averageField )
     {
     super( valueField, new AveragePartials( averageField ), new AverageFinal( averageField ) );
@@ -253,7 +254,7 @@ public class AverageBy extends AggregateBy
    * @param averageField of type Fields
    * @param include      of type boolean
    */
-  @ConstructorProperties( {"valueField", "averageField", "include"} )
+  @ConstructorProperties({"valueField", "averageField", "include"})
   public AverageBy( Fields valueField, Fields averageField, Include include )
     {
     super( valueField, new AveragePartials( averageField, include ), new AverageFinal( averageField ) );
@@ -269,7 +270,7 @@ public class AverageBy extends AggregateBy
    * @param valueField     of type Fields
    * @param averageField   of type Fields
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueField", "averageField"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueField", "averageField"})
   public AverageBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField )
     {
     this( null, pipe, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
@@ -284,7 +285,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueField", "averageField", "threshold"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueField", "averageField", "threshold"})
   public AverageBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, int threshold )
     {
     this( null, pipe, groupingFields, valueField, averageField, threshold );
@@ -299,7 +300,7 @@ public class AverageBy extends AggregateBy
    * @param valueField     of type Fields
    * @param averageField   of type Fields
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueField", "averageField"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "averageField"})
   public AverageBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField )
     {
     this( name, pipe, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
@@ -315,7 +316,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueField", "averageField", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "averageField", "threshold"})
   public AverageBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, valueField, averageField, threshold );
@@ -329,7 +330,7 @@ public class AverageBy extends AggregateBy
    * @param valueField     of type Fields
    * @param averageField   of type Fields
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueField", "averageField"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField )
     {
     this( null, pipes, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
@@ -344,7 +345,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueField", "averageField", "threshold"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField", "threshold"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, int threshold )
     {
     this( null, pipes, groupingFields, valueField, averageField, threshold );
@@ -359,7 +360,7 @@ public class AverageBy extends AggregateBy
    * @param valueField     of type Fields
    * @param averageField   of type Fields
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueField", "averageField"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField )
     {
     this( name, pipes, groupingFields, valueField, averageField, USE_DEFAULT_THRESHOLD );
@@ -375,7 +376,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueField", "averageField", "threshold"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "threshold"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, int threshold )
     {
     super( name, pipes, groupingFields, valueField, new AveragePartials( averageField ), new AverageFinal( averageField ), threshold );
@@ -390,7 +391,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param include        of type boolean
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueField", "averageField", "include"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
     this( null, pipe, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
@@ -406,7 +407,7 @@ public class AverageBy extends AggregateBy
    * @param include        of type boolean
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueField", "averageField", "include", "threshold"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueField", "averageField", "include", "threshold"})
   public AverageBy( Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, Include include, int threshold )
     {
     this( null, pipe, groupingFields, valueField, averageField, include, threshold );
@@ -422,7 +423,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param include        of type boolean
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueField", "averageField", "include"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
     this( name, pipe, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
@@ -439,7 +440,7 @@ public class AverageBy extends AggregateBy
    * @param include        of type boolean
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueField", "averageField", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueField", "averageField", "include", "threshold"})
   public AverageBy( String name, Pipe pipe, Fields groupingFields, Fields valueField, Fields averageField, Include include, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, valueField, averageField, include, threshold );
@@ -454,7 +455,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param include        of type boolean
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueField", "averageField", "include"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
     this( null, pipes, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
@@ -470,7 +471,7 @@ public class AverageBy extends AggregateBy
    * @param include        of type boolean
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueField", "averageField", "include", "threshold"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueField", "averageField", "include", "threshold"})
   public AverageBy( Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include, int threshold )
     {
     this( null, pipes, groupingFields, valueField, averageField, include, threshold );
@@ -486,7 +487,7 @@ public class AverageBy extends AggregateBy
    * @param averageField   of type Fields
    * @param include        of type boolean
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueField", "averageField", "include"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "include"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include )
     {
     this( name, pipes, groupingFields, valueField, averageField, include, USE_DEFAULT_THRESHOLD );
@@ -503,7 +504,7 @@ public class AverageBy extends AggregateBy
    * @param include        of type boolean
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueField", "averageField", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueField", "averageField", "include", "threshold"})
   public AverageBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueField, Fields averageField, Include include, int threshold )
     {
     super( name, pipes, groupingFields, valueField, new AveragePartials( averageField, include ), new AverageFinal( averageField ), threshold );

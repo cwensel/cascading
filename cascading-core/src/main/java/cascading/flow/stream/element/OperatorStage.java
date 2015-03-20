@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -244,7 +244,6 @@ public abstract class OperatorStage<Incoming> extends ElementStage<Incoming, Tup
     Tuple appended = createComposite( inputFields, declaredFields );
     Fields allFields = Fields.resolve( Fields.ALL, inputFields, declaredFields );
     Tuple result = createNarrow( allFields.getPos( outgoingSelector ), appended );
-
 
     @Override
     public Tuple makeResult( Tuple input, Tuple output )

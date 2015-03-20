@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -36,8 +36,8 @@ import java.lang.annotation.Target;
  * <p/>
  * Order.GIVEN and an array of Strings containing <em>all</em> properties of that class, will result in a custom order.
  */
-@Retention( RetentionPolicy.RUNTIME )
-@Target( ElementType.TYPE )
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface PropertyOrder
   {
   Order order() default Order.DECLARED;

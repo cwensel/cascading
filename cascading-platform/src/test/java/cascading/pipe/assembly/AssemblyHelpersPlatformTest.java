@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -802,18 +802,34 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testParallelAggregatesMergeLegacyHash() throws IOException
+    {
+    Map<Object, Object> properties = getProperties();
+    properties.put( "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash", "true" );
+    performParallelAggregatesMerge( false, properties );
+    }
+
+  @Test
+  public void testParallelAggregatesPriorMergeLegacyHash() throws IOException
+    {
+    Map<Object, Object> properties = getProperties();
+    properties.put( "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash", "true" );
+    performParallelAggregatesMerge( true, properties );
+    }
+
+  @Test
   public void testParallelAggregatesMerge() throws IOException
     {
-    performParallelAggregatesMerge( false );
+    performParallelAggregatesMerge( false, getProperties() );
     }
 
   @Test
   public void testParallelAggregatesPriorMerge() throws IOException
     {
-    performParallelAggregatesMerge( true );
+    performParallelAggregatesMerge( true, getProperties() );
     }
 
-  private void performParallelAggregatesMerge( boolean priorMerge ) throws IOException
+  private void performParallelAggregatesMerge( boolean priorMerge, Map<Object, Object> properties ) throws IOException
     {
     getPlatform().copyFromLocal( inputFileLhs );
     getPlatform().copyFromLocal( inputFileRhs );
@@ -826,7 +842,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
         String.class,
         Integer.TYPE,
         Integer.TYPE, Double.TYPE},
-      getOutputPath( "multimerge+" + priorMerge ), SinkMode.REPLACE );
+      getOutputPath( "multimerge+" + priorMerge + String.valueOf( properties.size() ) ), SinkMode.REPLACE );
 
     Pipe lhsPipe = new Pipe( "multi-lhs" );
     Pipe rhsPipe = new Pipe( "multi-rhs" );
@@ -884,7 +900,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
 
     Map<String, Tap> tapMap = Cascades.tapsMap( Pipe.pipes( lhsPipe, rhsPipe ), Tap.taps( lhs, rhs ) );
 
-    Flow flow = getPlatform().getFlowConnector().connect( tapMap, sink, pipe );
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( tapMap, sink, pipe );
 
     flow.complete();
 

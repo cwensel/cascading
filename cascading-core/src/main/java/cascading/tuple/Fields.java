@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -612,7 +612,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    *
    * @param kind of type Kind
    */
-  @SuppressWarnings( {"SameParameterValue"} )
+  @SuppressWarnings({"SameParameterValue"})
   protected Fields( Kind kind )
     {
     this.kind = kind;
@@ -623,7 +623,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    *
    * @param fields of type Comparable...
    */
-  @ConstructorProperties( {"fields"} )
+  @ConstructorProperties({"fields"})
   public Fields( Comparable... fields )
     {
     if( fields.length == 0 )

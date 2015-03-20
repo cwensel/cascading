@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -73,7 +73,6 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: iterator.next().get(0)", "foo", iterator.next().getObject( 0 ) );
     assertEquals( "not equal: iterator.next().get(0)", "bar", iterator.next().getObject( 0 ) );
     }
-
 
   @Test
   public void testReplace() throws IOException

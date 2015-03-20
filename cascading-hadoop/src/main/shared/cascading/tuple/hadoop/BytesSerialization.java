@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -48,7 +48,7 @@ import org.apache.hadoop.io.serializer.Serializer;
  * @see cascading.tuple.hadoop.util.BytesComparator
  * @see Comparison
  */
-@SerializationToken( tokens = {126}, classNames = {"[B"} )
+@SerializationToken(tokens = {126}, classNames = {"[B"})
 public class BytesSerialization extends Configured implements Comparison<byte[]>, Serialization<byte[]>
   {
 

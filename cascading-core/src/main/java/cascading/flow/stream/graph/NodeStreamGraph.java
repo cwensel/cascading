@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -39,6 +39,7 @@ import cascading.flow.stream.duct.Gate;
 import cascading.flow.stream.element.AggregatorEveryStage;
 import cascading.flow.stream.element.BufferEveryWindow;
 import cascading.flow.stream.element.ElementDuct;
+import cascading.flow.stream.element.ElementFlowProcess;
 import cascading.flow.stream.element.FilterEachStage;
 import cascading.flow.stream.element.FunctionEachStage;
 import cascading.flow.stream.element.GroupAssertionEveryStage;
@@ -301,7 +302,8 @@ public abstract class NodeStreamGraph extends StreamGraph
 
         if( trap != null )
           {
-          elementDuct.setTrapHandler( new TrapHandler( flowProcess, trap, branchName ) );
+          FlowProcess elementFlowProcess = new ElementFlowProcess( flowProcess, trap.getConfigDef() );
+          elementDuct.setTrapHandler( new TrapHandler( elementFlowProcess, flowElement, trap, branchName ) );
           break;
           }
         }

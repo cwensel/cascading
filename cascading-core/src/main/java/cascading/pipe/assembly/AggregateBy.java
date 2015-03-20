@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyConfigured;
@@ -45,14 +45,16 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
+import cascading.provider.FactoryLoader;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.util.TupleHasher;
 import cascading.tuple.util.TupleViews;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cascading.util.cache.BaseCacheFactory;
+import cascading.util.cache.CacheEvictionCallback;
+import cascading.util.cache.CascadingCache;
 
 /**
  * Class AggregateBy is a {@link SubAssembly} that serves two roles for handling aggregate operations.
@@ -89,11 +91,14 @@ import org.slf4j.LoggerFactory;
  * to for secondary sorting (see {@link GroupBy} {@code sortFields}. This feature is used by {@link FirstBy} to
  * control which Tuple is seen first for a grouping.
  * <p/>
+ * To tune the LRU, set the {@code capacity} value to a high enough value to utilize available memory. Or set a
+ * default value via the {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} property. The current default
+ * ({@link cascading.util.cache.BaseCacheFactory#DEFAULT_CAPACITY})
+ * is {@code 10, 000} unique keys.
  * <p/>
- * To tune the LRU, set the {@code threshold} value to a high enough value to utilize available memory. Or set a
- * default value via the {@link #AGGREGATE_BY_THRESHOLD} property. The current default ({@link CompositeFunction#DEFAULT_THRESHOLD})
- * is {@code 10, 000} unique keys. Note "flushes" from the LRU will be logged in threshold increments along with memory
- * information.
+ * The LRU cache is pluggable and defaults to {@link cascading.util.cache.LRUHashMapCache}. It can be changed
+ * by setting {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CACHE_FACTORY} property to the name of a sub-class of
+ * {@link cascading.util.cache.BaseCacheFactory}.
  * <p/>
  * Note using a AggregateBy instance automatically inserts a {@link GroupBy} into the resulting {@link cascading.flow.Flow}.
  * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
@@ -105,17 +110,17 @@ import org.slf4j.LoggerFactory;
  * @see SumBy
  * @see CountBy
  * @see Unique
+ * @see cascading.util.cache.LRUHashMapCacheFactory
+ * @see cascading.util.cache.DirectMappedCacheFactory
+ * @see cascading.util.cache.LRUHashMapCache
+ * @see cascading.util.cache.DirectMappedCache
  */
 public class AggregateBy extends SubAssembly
   {
-  private static final Logger LOG = LoggerFactory.getLogger( AggregateBy.class );
-
   public static final int USE_DEFAULT_THRESHOLD = 0;
-  public static final int DEFAULT_THRESHOLD = CompositeFunction.DEFAULT_THRESHOLD;
-  public static final String AGGREGATE_BY_THRESHOLD = "cascading.aggregateby.threshold";
 
   private String name;
-  private int threshold;
+  private int capacity;
   private Fields groupingFields;
   private Fields[] argumentFields;
   private Functor[] functors;
@@ -178,9 +183,7 @@ public class AggregateBy extends SubAssembly
    */
   public static class CompositeFunction extends BaseOperation<CompositeFunction.Context> implements Function<CompositeFunction.Context>
     {
-    public static final int DEFAULT_THRESHOLD = 10000;
-
-    private int threshold = 0;
+    private int capacity = 0;
     private final Fields groupingFields;
     private final Fields[] argumentFields;
     private final Fields[] functorFields;
@@ -189,7 +192,7 @@ public class AggregateBy extends SubAssembly
 
     public static class Context
       {
-      LinkedHashMap<Tuple, Tuple[]> lru;
+      CascadingCache<Tuple, Tuple[]> lru;
       TupleEntry[] arguments;
       Tuple result;
       }
@@ -200,11 +203,11 @@ public class AggregateBy extends SubAssembly
      * @param groupingFields of type Fields
      * @param argumentFields of type Fields
      * @param functor        of type Functor
-     * @param threshold      of type int
+     * @param capacity       of type int
      */
-    public CompositeFunction( Fields groupingFields, Fields argumentFields, Functor functor, int threshold )
+    public CompositeFunction( Fields groupingFields, Fields argumentFields, Functor functor, int capacity )
       {
-      this( groupingFields, Fields.fields( argumentFields ), new Functor[]{functor}, threshold );
+      this( groupingFields, Fields.fields( argumentFields ), new Functor[]{functor}, capacity );
       }
 
     /**
@@ -213,15 +216,15 @@ public class AggregateBy extends SubAssembly
      * @param groupingFields of type Fields
      * @param argumentFields of type Fields[]
      * @param functors       of type Functor[]
-     * @param threshold      of type int
+     * @param capacity       of type int
      */
-    public CompositeFunction( Fields groupingFields, Fields[] argumentFields, Functor[] functors, int threshold )
+    public CompositeFunction( Fields groupingFields, Fields[] argumentFields, Functor[] functors, int capacity )
       {
       super( getFields( groupingFields, functors ) ); // todo: groupingFields should lookup incoming type information
       this.groupingFields = groupingFields;
       this.argumentFields = argumentFields;
       this.functors = functors;
-      this.threshold = threshold;
+      this.capacity = capacity;
 
       this.functorFields = new Fields[ functors.length ];
 
@@ -248,18 +251,6 @@ public class AggregateBy extends SubAssembly
     @Override
     public void prepare( final FlowProcess flowProcess, final OperationCall<CompositeFunction.Context> operationCall )
       {
-      if( threshold == 0 )
-        {
-        Integer value = flowProcess.getIntegerProperty( AGGREGATE_BY_THRESHOLD );
-
-        if( value != null && value > 0 )
-          threshold = value;
-        else
-          threshold = DEFAULT_THRESHOLD;
-        }
-
-      LOG.info( "using threshold value: {}", threshold );
-
       Fields[] fields = new Fields[ functors.length + 1 ];
 
       fields[ 0 ] = groupingFields;
@@ -296,42 +287,39 @@ public class AggregateBy extends SubAssembly
 
       context.result = TupleViews.createComposite( fields );
 
-      context.lru = new LinkedHashMap<Tuple, Tuple[]>( threshold, 0.75f, true )
-      {
-      long flushes = 0;
-
-      @Override
-      protected boolean removeEldestEntry( Map.Entry<Tuple, Tuple[]> eldest )
+      class AggregateByEviction implements CacheEvictionCallback<Tuple, Tuple[]>
         {
-        boolean doRemove = size() > threshold;
-
-        if( doRemove )
+        @Override
+        public void evict( Map.Entry<Tuple, Tuple[]> entry )
           {
-          completeFunctors( flowProcess, ( (FunctionCall) operationCall ).getOutputCollector(), context.result, eldest );
+          completeFunctors( flowProcess, ( (FunctionCall) operationCall ).getOutputCollector(), context.result, entry );
           flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
-
-          if( flushes % threshold == 0 ) // every multiple, write out data
-            {
-            Runtime runtime = Runtime.getRuntime();
-            long freeMem = runtime.freeMemory() / 1024 / 1024;
-            long maxMem = runtime.maxMemory() / 1024 / 1024;
-            long totalMem = runtime.totalMemory() / 1024 / 1024;
-
-            LOG.info( "flushed keys num times: {}, with threshold: {}", flushes + 1, threshold );
-            LOG.info( "mem on flush (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
-
-            float percent = (float) totalMem / (float) maxMem;
-
-            if( percent < 0.80F )
-              LOG.info( "total mem is {}% of max mem, to better utilize unused memory consider increasing current LRU threshold with system property \"{}\"", (int) ( percent * 100.0F ), AGGREGATE_BY_THRESHOLD );
-            }
-
-          flushes++;
           }
-
-        return doRemove;
         }
-      };
+
+      FactoryLoader loader = FactoryLoader.getInstance();
+
+      BaseCacheFactory<Tuple, Tuple[], ?> factory = loader.loadFactoryFrom( flowProcess, AggregateByProps.AGGREGATE_BY_CACHE_FACTORY, AggregateByProps.DEFAULT_CACHE_FACTORY_CLASS );
+
+      if( factory == null )
+        throw new CascadingException( "unable to load cache factory, please check your '" + AggregateByProps.AGGREGATE_BY_CACHE_FACTORY + "' setting." );
+
+      CascadingCache<Tuple, Tuple[]> cache = factory.create( flowProcess );
+
+      cache.setCacheEvictionCallback( new AggregateByEviction() );
+
+      Integer cacheCapacity = capacity;
+      if( capacity == 0 )
+        {
+        cacheCapacity = flowProcess.getIntegerProperty( AggregateByProps.AGGREGATE_BY_CAPACITY );
+
+        if( cacheCapacity == null )
+          cacheCapacity = AggregateByProps.AGGREGATE_BY_DEFAULT_CAPACITY;
+        }
+      cache.setCapacity( cacheCapacity.intValue() );
+      cache.initialize();
+
+      context.lru = cache;
 
       operationCall.setContext( context );
       }
@@ -370,7 +358,7 @@ public class AggregateBy extends SubAssembly
       TupleEntryCollector collector = ( (FunctionCall) operationCall ).getOutputCollector();
 
       Tuple result = operationCall.getContext().result;
-      LinkedHashMap<Tuple, Tuple[]> context = operationCall.getContext().lru;
+      Map<Tuple, Tuple[]> context = operationCall.getContext().lru;
 
       for( Map.Entry<Tuple, Tuple[]> entry : context.entrySet() )
         completeFunctors( flowProcess, collector, result, entry );
@@ -433,13 +421,13 @@ public class AggregateBy extends SubAssembly
   /**
    * Constructor CompositeAggregator creates a new CompositeAggregator instance.
    *
-   * @param name      of type String
-   * @param threshold of type int
+   * @param name     of type String
+   * @param capacity of type int
    */
-  protected AggregateBy( String name, int threshold )
+  protected AggregateBy( String name, int capacity )
     {
     this.name = name;
-    this.threshold = threshold;
+    this.capacity = capacity;
     }
 
   /**
@@ -463,7 +451,7 @@ public class AggregateBy extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "assemblies"} )
+  @ConstructorProperties({"pipe", "groupingFields", "assemblies"})
   public AggregateBy( Pipe pipe, Fields groupingFields, AggregateBy... assemblies )
     {
     this( null, Pipe.pipes( pipe ), groupingFields, 0, assemblies );
@@ -474,13 +462,13 @@ public class AggregateBy extends SubAssembly
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param capacity       of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "threshold", "assemblies"} )
-  public AggregateBy( Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
+  @ConstructorProperties({"pipe", "groupingFields", "capacity", "assemblies"})
+  public AggregateBy( Pipe pipe, Fields groupingFields, int capacity, AggregateBy... assemblies )
     {
-    this( null, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
+    this( null, Pipe.pipes( pipe ), groupingFields, capacity, assemblies );
     }
 
   /**
@@ -488,13 +476,13 @@ public class AggregateBy extends SubAssembly
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param capacity       of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "threshold", "assemblies"} )
-  public AggregateBy( String name, Pipe pipe, Fields groupingFields, int threshold, AggregateBy... assemblies )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "capacity", "assemblies"})
+  public AggregateBy( String name, Pipe pipe, Fields groupingFields, int capacity, AggregateBy... assemblies )
     {
-    this( name, Pipe.pipes( pipe ), groupingFields, threshold, assemblies );
+    this( name, Pipe.pipes( pipe ), groupingFields, capacity, assemblies );
     }
 
   /**
@@ -505,7 +493,7 @@ public class AggregateBy extends SubAssembly
    * @param groupingFields of type Fields
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "assemblies"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "assemblies"})
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, AggregateBy... assemblies )
     {
     this( name, pipes, groupingFields, 0, assemblies );
@@ -517,13 +505,13 @@ public class AggregateBy extends SubAssembly
    * @param name           of type String
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
-   * @param threshold      of type int
+   * @param capacity       of type int
    * @param assemblies     of type CompositeAggregator...
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "threshold", "assemblies"} )
-  public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, int threshold, AggregateBy... assemblies )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "capacity", "assemblies"})
+  public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, int capacity, AggregateBy... assemblies )
     {
-    this( name, threshold );
+    this( name, capacity );
 
     List<Fields> arguments = new ArrayList<Fields>();
     List<Functor> functors = new ArrayList<Functor>();
@@ -541,9 +529,9 @@ public class AggregateBy extends SubAssembly
     initialize( groupingFields, pipes, arguments.toArray( new Fields[ arguments.size() ] ), functors.toArray( new Functor[ functors.size() ] ), aggregators.toArray( new Aggregator[ aggregators.size() ] ) );
     }
 
-  protected AggregateBy( String name, Pipe[] pipes, Fields groupingFields, Fields argumentFields, Functor functor, Aggregator aggregator, int threshold )
+  protected AggregateBy( String name, Pipe[] pipes, Fields groupingFields, Fields argumentFields, Functor functor, Aggregator aggregator, int capacity )
     {
-    this( name, threshold );
+    this( name, capacity );
     initialize( groupingFields, pipes, argumentFields, functor, aggregator );
     }
 
@@ -573,7 +561,7 @@ public class AggregateBy extends SubAssembly
 
     Pipe[] functions = new Pipe[ pipes.length ];
 
-    CompositeFunction function = new CompositeFunction( this.groupingFields, this.argumentFields, this.functors, threshold );
+    CompositeFunction function = new CompositeFunction( this.groupingFields, this.argumentFields, this.functors, capacity );
 
     for( int i = 0; i < functions.length; i++ )
       functions[ i ] = new Each( pipes[ i ], argumentSelector, function, Fields.RESULTS );
@@ -648,11 +636,11 @@ public class AggregateBy extends SubAssembly
     return groupBy;
     }
 
-  @Property( name = "threshold", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "Threshold of the aggregation." )
-  @PropertyConfigured( value = AGGREGATE_BY_THRESHOLD, defaultValue = "10000" )
-  public int getThreshold()
+  @Property(name = "capacity", visibility = Visibility.PUBLIC)
+  @PropertyDescription("Capacity of the aggregation cache.")
+  @PropertyConfigured(value = AggregateByProps.AGGREGATE_BY_CAPACITY, defaultValue = "10000")
+  public int getCapacity()
     {
-    return threshold;
+    return capacity;
     }
   }

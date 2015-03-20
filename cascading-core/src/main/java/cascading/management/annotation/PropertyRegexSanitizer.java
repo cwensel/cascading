@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -36,8 +36,8 @@ import java.lang.annotation.Target;
  * once and the result is stored as the value for the declared {@link cascading.management.annotation.Visibility}
  * for the property. See PropertySanitizer if different values should be returned for each Visibility type.
  */
-@Retention( RetentionPolicy.RUNTIME )
-@Target( {ElementType.METHOD, ElementType.FIELD} )
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD})
 public @interface PropertyRegexSanitizer
   {
   String value();

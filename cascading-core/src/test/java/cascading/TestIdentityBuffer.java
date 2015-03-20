@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -52,7 +52,6 @@ public class TestIdentityBuffer extends BaseOperation<Integer> implements Buffer
     {
     operationCall.setContext( 0 );
     }
-
 
   @Override
   public void cleanup( FlowProcess flowProcess, OperationCall<Integer> operationCall )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -62,8 +62,6 @@ configurations {
   s3AntTask
 }
 
-ext.distDir = mkdir( "${rootDir}/build/dist" )
-
 allprojects {
 
   apply plugin: 'java'
@@ -84,6 +82,12 @@ allprojects {
   }
 }
 
+project.ext.distDir = null
+
+task prepareDist() {
+  project.distDir = mkdir( "${rootDir}/build/dist" )
+}
+
 subprojects {
 
   apply plugin: 'maven'
@@ -99,9 +103,10 @@ subprojects {
     }
   }
 
-  javadoc {
+  javadoc.dependsOn << prepareDist
 
-    def copyright = '<i>Copyright &#169; 2007-2014 Concurrent, Inc. All Rights Reserved.</i>'
+  javadoc {
+    def copyright = '<i>Copyright &#169; 2007-2015 Concurrent, Inc. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
@@ -159,6 +164,8 @@ subprojects {
     ignoreFailures = !System.getProperty( 'test.haltonerror', "true" ).equals( "true" )
   }
 
+  assemble.dependsOn << prepareDist
+
   assemble << {
 
     if( project.name.equals( 'cascading-platform' ) )
@@ -213,7 +220,7 @@ subprojects {
   }
 }
 
-task prepareRelease( type: Copy, dependsOn: ['cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-hadoop2-tez:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
+task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-hadoop2-tez:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
 
   s3UploadDocs.dependsOn << prepareRelease
   s3UploadArtifacts.dependsOn << prepareRelease
@@ -234,6 +241,7 @@ prepareRelease << {
 }
 
 javadoc.enabled = false
+jar.enabled = false
 
 task buildDist( dependsOn: [prepareRelease, javadoc] ) << {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,7 +23,7 @@ package cascading;
 import cascading.util.Util;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.*;
 
 /**
  *
@@ -96,4 +96,16 @@ public class UtilTest
       assertEquals( paths[ i ], versions[ i ], Util.findVersion( paths[ i ] ) );
       }
     }
+
+  @Test
+  public void testContainsWhiteSpace()
+    {
+    assertFalse( Util.containsWhitespace( "" ) );
+    assertFalse( Util.containsWhitespace( "aGoodTagMayLookLikeThis" ) );
+    assertTrue( Util.containsWhitespace( " aaa" ) );
+    assertTrue( Util.containsWhitespace( "aaa\t " ) );
+    assertTrue( Util.containsWhitespace( "\tabc\tdef\tghi\t" ) );
+    assertTrue( Util.containsWhitespace( "contains\tstuff\twe\rdon't\nwant\f" ) );
+    }
+
   }

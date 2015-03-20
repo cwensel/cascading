@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -782,6 +782,11 @@ public class HadoopUtil
 
     // hadoop 1.0: use the old property to determine the local mode
     return conf.get( "mapred.job.tracker" ).equals( "local" );
+    }
+
+  public static boolean isYARN( Configuration conf )
+    {
+    return conf.get( "mapreduce.framework.name" ) != null;
     }
 
   public static void setLocal( Configuration conf )

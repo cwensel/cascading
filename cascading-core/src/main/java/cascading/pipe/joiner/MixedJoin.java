@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -58,7 +58,7 @@ public class MixedJoin extends BaseJoiner
     this.asInner = Arrays.copyOf( asInner, asInner.length );
     }
 
-  @ConstructorProperties({"fieldDeclaration","asInner"})
+  @ConstructorProperties({"fieldDeclaration", "asInner"})
   public MixedJoin( Fields fieldDeclaration, boolean[] asInner )
     {
     super( fieldDeclaration );

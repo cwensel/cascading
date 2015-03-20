@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,7 +21,7 @@
 dependencies {
   compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.1-SNAPSHOT'
   compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.1-SNAPSHOT'
-  compile group: 'riffle', name: 'riffle', version: '0.1-dev'
+  compile group: 'riffle', name: 'riffle', version: '1.0.0-wip-7'
   compile group: 'org.codehaus.janino', name: 'janino', version: '2.7.6'
 
   // this prevents a transitive dependency until it is required downstream

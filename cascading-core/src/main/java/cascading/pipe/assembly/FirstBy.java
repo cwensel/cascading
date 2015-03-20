@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,10 +46,11 @@ import cascading.tuple.TupleEntry;
  * in a much simpler mechanism.
  * <p/>
  * The {@code threshold} value tells the underlying FirstPartials functions how many unique key counts to accumulate
- * in the LRU cache, before emitting the least recently used entry.
+ * in the LRU cache, before emitting the least recently used entry.  This accumulation happens map-side, and thus is
+ * bounded by the size of your map task JVM and the typical size of each group key.
  * <p/>
- * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
- * will be used.
+ * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
+ * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
  *
  * @see AggregateBy
  */

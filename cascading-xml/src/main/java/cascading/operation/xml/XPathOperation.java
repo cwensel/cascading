@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -156,8 +156,7 @@ public class XPathOperation extends BaseOperation<Pair<DocumentBuilder, Tuple>>
    * Method getTransformer returns the transformer of this XPathOperation object.
    *
    * @return the transformer (type Transformer) of this XPathOperation object.
-   * @throws TransformerConfigurationException
-   *          when
+   * @throws TransformerConfigurationException when
    */
   public Transformer getTransformer() throws TransformerConfigurationException
     {

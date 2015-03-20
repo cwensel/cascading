@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -60,7 +60,6 @@ import org.junit.Test;
 
 import static cascading.ComparePlatformsTest.NONDETERMINISTIC;
 import static data.InputData.*;
-
 
 public class FieldedPipesPlatformTest extends PlatformTestCase
   {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -31,27 +31,32 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
 
 /**
- * Class CountBy is used to count duplicates in a tuple stream.
+ * Class CountBy is used to count duplicates in a tuple stream, where "duplicates" means all tuples with the same
+ * values for the groupingFields fields. The resulting count is output as a long value in the specified countField.
  * <p/>
- * Typically finding the count of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Count}
- * {@link cascading.operation.Aggregator} operation.
+ * Typically finding the count of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a
+ * {@link cascading.operation.aggregator.Count} {@link cascading.operation.Aggregator} operation.
  * <p/>
- * If {@code include} is {@link Include#NO_NULLS}, argument tuples with all null values will be ignored. When counting
- * the occurrence of a single field (when {@code valueFields} is set on the constructor), this is the same behavior
- * as {@code select count(foo) ...} in SQL. If {@code include} is
- * {@link Include#ONLY_NULLS} then only tuples will all null values will be counted.
- * <p/>
- * This SubAssembly also uses the {@link CountBy.CountPartials} {@link AggregateBy.Functor}
- * to count field values before the GroupBy operator to reduce IO over the network.
+ * The CountBy SubAssembly is a (typically) more efficient replacement for these two steps, because it does map-side
+ * pre-reduce counting (via {@link CountBy.CountPartials}  {@link AggregateBy.Functor}) before the GroupBy operator;
+ * this reduces network I/O from the map to reduce phases.
  * <p/>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
  * <p/>
  * The {@code threshold} value tells the underlying CountPartials functions how many unique key counts to accumulate
- * in the LRU cache, before emitting the least recently used entry.
+ * in the LRU cache, before emitting the least recently used entry. This accumulation happens map-side, and thus is
+ * bounded by the size of your map task JVM and the typical size of each group key.
  * <p/>
- * By default, either the value of {@link #AGGREGATE_BY_THRESHOLD} System property or {@link AggregateBy#DEFAULT_THRESHOLD}
- * will be used.
+ * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
+ * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
+ * <p/>
+ * If {@code include} is {@link Include#NO_NULLS}, argument tuples with all null values will be ignored.
+ * <p/>
+ * The values in the argument Tuple are normally all the remaining fields not used for grouping, but this can be
+ * narrowed using the valueFields parameter. When counting the occurrence of a single field (when {@code valueFields}
+ * is set on the constructor), this is the same behavior as {@code select count(foo) ...} in SQL. If {@code include} is
+ * {@link Include#ONLY_NULLS} then only argument tuples with all null values will be counted.
  *
  * @see AggregateBy
  */
@@ -147,7 +152,7 @@ public class CountBy extends AggregateBy
    *
    * @param countField of type Fields
    */
-  @ConstructorProperties( {"countField"} )
+  @ConstructorProperties({"countField"})
   public CountBy( Fields countField )
     {
     super( Fields.ALL, new CountPartials( countField.applyTypes( Long.TYPE ) ), new Sum( countField.applyTypes( Long.TYPE ) ) );
@@ -160,7 +165,7 @@ public class CountBy extends AggregateBy
    * @param countField of type Fields
    * @param include    of type Include
    */
-  @ConstructorProperties( {"countField", "include"} )
+  @ConstructorProperties({"countField", "include"})
   public CountBy( Fields countField, Include include )
     {
     super( Fields.ALL, new CountPartials( countField.applyTypes( Long.TYPE ), include ), new Sum( countField.applyTypes( Long.TYPE ) ) );
@@ -172,7 +177,7 @@ public class CountBy extends AggregateBy
    *
    * @param countField of type Fields
    */
-  @ConstructorProperties( {"valueFields", "countField"} )
+  @ConstructorProperties({"valueFields", "countField"})
   public CountBy( Fields valueFields, Fields countField )
     {
     super( valueFields, new CountPartials( countField.applyTypes( Long.TYPE ) ), new Sum( countField.applyTypes( Long.TYPE ) ) );
@@ -184,7 +189,7 @@ public class CountBy extends AggregateBy
    *
    * @param countField of type Fields
    */
-  @ConstructorProperties( {"valueFields", "countField", "include"} )
+  @ConstructorProperties({"valueFields", "countField", "include"})
   public CountBy( Fields valueFields, Fields countField, Include include )
     {
     super( valueFields, new CountPartials( countField.applyTypes( Long.TYPE ), include ), new Sum( countField.applyTypes( Long.TYPE ) ) );
@@ -199,7 +204,7 @@ public class CountBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "countField"} )
+  @ConstructorProperties({"pipe", "groupingFields", "countField"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields countField )
     {
     this( null, pipe, groupingFields, countField );
@@ -213,7 +218,7 @@ public class CountBy extends AggregateBy
    * @param countField     fo type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "countField", "threshold"} )
+  @ConstructorProperties({"pipe", "groupingFields", "countField", "threshold"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields countField, int threshold )
     {
     this( null, pipe, groupingFields, countField, threshold );
@@ -227,7 +232,7 @@ public class CountBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "countField"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "countField"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields countField )
     {
     this( name, pipe, groupingFields, countField, USE_DEFAULT_THRESHOLD );
@@ -242,7 +247,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "countField", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "threshold"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields countField, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, countField, threshold );
@@ -255,7 +260,7 @@ public class CountBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "countField"} )
+  @ConstructorProperties({"pipes", "groupingFields", "countField"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields countField )
     {
     this( null, pipes, groupingFields, countField, USE_DEFAULT_THRESHOLD );
@@ -269,7 +274,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "countField", "threshold"} )
+  @ConstructorProperties({"pipes", "groupingFields", "countField", "threshold"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
     {
     this( null, pipes, groupingFields, countField, threshold );
@@ -283,7 +288,7 @@ public class CountBy extends AggregateBy
    * @param groupingFields of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "countField"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "countField"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields countField )
     {
     this( name, pipes, groupingFields, countField, USE_DEFAULT_THRESHOLD );
@@ -298,7 +303,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "countField", "threshold"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "countField", "threshold"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields countField, int threshold )
     {
     super( name, pipes, groupingFields, groupingFields, new CountPartials( countField.applyTypes( Long.TYPE ) ), new Sum( countField.applyTypes( Long.TYPE ) ), threshold );
@@ -314,7 +319,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "countField", "include"} )
+  @ConstructorProperties({"pipe", "groupingFields", "countField", "include"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields countField, Include include )
     {
     this( null, pipe, groupingFields, countField, include );
@@ -329,7 +334,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"pipe", "groupingFields", "countField", "include", "threshold"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields countField, Include include, int threshold )
     {
     this( null, pipe, groupingFields, countField, include, threshold );
@@ -344,7 +349,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "countField", "include"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "include"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields countField, Include include )
     {
     this( name, pipe, groupingFields, countField, include, USE_DEFAULT_THRESHOLD );
@@ -360,7 +365,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "include", "threshold"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields countField, Include include, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, countField, include, threshold );
@@ -374,7 +379,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "countField", "include"} )
+  @ConstructorProperties({"pipes", "groupingFields", "countField", "include"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields countField, Include include )
     {
     this( null, pipes, groupingFields, countField, include, USE_DEFAULT_THRESHOLD );
@@ -389,7 +394,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"pipes", "groupingFields", "countField", "include", "threshold"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields countField, Include include, int threshold )
     {
     this( null, pipes, groupingFields, countField, include, threshold );
@@ -404,7 +409,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "countField", "include"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "countField", "include"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields countField, Include include )
     {
     this( name, pipes, groupingFields, countField, include, USE_DEFAULT_THRESHOLD );
@@ -420,7 +425,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "countField", "include", "threshold"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields countField, Include include, int threshold )
     {
     super( name, pipes, groupingFields, groupingFields, new CountPartials( countField.applyTypes( Long.TYPE ), include ), new Sum( countField.applyTypes( Long.TYPE ) ), threshold );
@@ -436,7 +441,7 @@ public class CountBy extends AggregateBy
    * @param valueFields    of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueFields", "countField"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueFields", "countField"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField )
     {
     this( null, pipe, groupingFields, valueFields, countField, Include.ALL );
@@ -451,7 +456,7 @@ public class CountBy extends AggregateBy
    * @param countField     fo type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueFields", "countField", "threshold"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueFields", "countField", "threshold"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, int threshold )
     {
     this( null, pipe, groupingFields, valueFields, countField, threshold );
@@ -466,7 +471,7 @@ public class CountBy extends AggregateBy
    * @param valueFields    of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueFields", "countField"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueFields", "countField"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField )
     {
     this( name, pipe, groupingFields, valueFields, countField, USE_DEFAULT_THRESHOLD );
@@ -482,7 +487,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueFields", "countField", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueFields", "countField", "threshold"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, valueFields, countField, threshold );
@@ -496,7 +501,7 @@ public class CountBy extends AggregateBy
    * @param valueFields    of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueFields", "countField"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueFields", "countField"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField )
     {
     this( null, pipes, groupingFields, valueFields, countField, USE_DEFAULT_THRESHOLD );
@@ -511,7 +516,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueFields", "countField", "threshold"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueFields", "countField", "threshold"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField, int threshold )
     {
     this( null, pipes, groupingFields, valueFields, countField, threshold );
@@ -526,7 +531,7 @@ public class CountBy extends AggregateBy
    * @param valueFields    of type Fields
    * @param countField     of type Fields
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueFields", "countField"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueFields", "countField"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField )
     {
     this( name, pipes, groupingFields, valueFields, countField, USE_DEFAULT_THRESHOLD );
@@ -542,7 +547,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueFields", "countField", "threshold"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueFields", "countField", "threshold"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField, int threshold )
     {
     super( name, pipes, groupingFields, valueFields, new CountPartials( countField.applyTypes( Long.TYPE ) ), new Sum( countField.applyTypes( Long.TYPE ) ), threshold );
@@ -559,7 +564,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueFields", "countField", "include"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueFields", "countField", "include"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, Include include )
     {
     this( null, pipe, groupingFields, valueFields, countField, include );
@@ -575,7 +580,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipe", "groupingFields", "valueFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"pipe", "groupingFields", "valueFields", "countField", "include", "threshold"})
   public CountBy( Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, Include include, int threshold )
     {
     this( null, pipe, groupingFields, valueFields, countField, include, threshold );
@@ -591,7 +596,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueFields", "countField", "include"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueFields", "countField", "include"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, Include include )
     {
     this( name, pipe, groupingFields, valueFields, countField, include, USE_DEFAULT_THRESHOLD );
@@ -608,7 +613,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipe", "groupingFields", "valueFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipe", "groupingFields", "valueFields", "countField", "include", "threshold"})
   public CountBy( String name, Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, Include include, int threshold )
     {
     this( name, Pipe.pipes( pipe ), groupingFields, valueFields, countField, include, threshold );
@@ -623,7 +628,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueFields", "countField", "include"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueFields", "countField", "include"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField, Include include )
     {
     this( null, pipes, groupingFields, valueFields, countField, include, USE_DEFAULT_THRESHOLD );
@@ -639,7 +644,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"pipes", "groupingFields", "valueFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"pipes", "groupingFields", "valueFields", "countField", "include", "threshold"})
   public CountBy( Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField, Include include, int threshold )
     {
     this( null, pipes, groupingFields, valueFields, countField, include, threshold );
@@ -655,7 +660,7 @@ public class CountBy extends AggregateBy
    * @param countField     of type Fields
    * @param include        of type Include
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueFields", "countField", "include"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueFields", "countField", "include"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField, Include include )
     {
     this( name, pipes, groupingFields, valueFields, countField, include, USE_DEFAULT_THRESHOLD );
@@ -672,7 +677,7 @@ public class CountBy extends AggregateBy
    * @param include        of type Include
    * @param threshold      of type int
    */
-  @ConstructorProperties( {"name", "pipes", "groupingFields", "valueFields", "countField", "include", "threshold"} )
+  @ConstructorProperties({"name", "pipes", "groupingFields", "valueFields", "countField", "include", "threshold"})
   public CountBy( String name, Pipe[] pipes, Fields groupingFields, Fields valueFields, Fields countField, Include include, int threshold )
     {
     super( name, pipes, groupingFields, valueFields, new CountPartials( countField.applyTypes( Long.TYPE ), include ), new Sum( countField.applyTypes( Long.TYPE ) ), threshold );

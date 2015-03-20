@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -44,7 +44,6 @@ public class Sum extends BaseOperation<Pair<Double[], Tuple>> implements Aggrega
   /** Field type */
   private Type type = Double.class;
   private CoercibleType canonical;
-
 
   /** Constructor Sum creates a new Sum instance that accepts one argument and returns a single field named "sum". */
   public Sum()

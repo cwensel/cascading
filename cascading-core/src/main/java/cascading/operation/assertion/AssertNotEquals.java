@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -47,7 +47,7 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
    *
    * @param values of type Object...
    */
-  @ConstructorProperties( {"values"} )
+  @ConstructorProperties({"values"})
   public AssertNotEquals( Object... values )
     {
     // set to 1 if null, will fail immediately afterwards
@@ -62,8 +62,8 @@ public class AssertNotEquals extends BaseAssertion implements ValueAssertion
     this.values = new Tuple( values );
     }
 
-  @Property( name = "values", visibility = Visibility.PRIVATE )
-  @PropertyDescription( "The expected values." )
+  @Property(name = "values", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The expected values.")
   public Collection getValues()
     {
     return Tuples.asCollection( values );

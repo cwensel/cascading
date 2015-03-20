@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -34,7 +34,17 @@ import cascading.util.Pair;
 /**
  * Class RegexGenerator will emit a new Tuple for every split on the incoming argument value delimited by the given patternString.
  * <p/>
+ * RegexGenerator only expects one field value. If more than one argument value is passed, only the
+ * first is handled, the remainder are ignored.
+ * <p/>
  * This could be used to break a document into single word tuples for later processing for a word count.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type if type information is provided. See the
+ * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
+ * values.
  */
 public class RegexSplitGenerator extends RegexOperation<Pair<Pattern, Tuple>> implements Function<Pair<Pattern, Tuple>>
   {

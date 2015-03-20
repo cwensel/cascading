@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,7 +46,6 @@ public class TestStringComparator implements Hasher<String>, Comparator<String>,
     {
     return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
     }
-
 
   @Override
   public int hashCode( String value )

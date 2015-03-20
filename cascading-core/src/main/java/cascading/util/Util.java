@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import cascading.CascadingException;
 import cascading.flow.FlowElement;
@@ -1247,5 +1248,10 @@ public class Util
       }
 
     return null;
+    }
+
+  public static boolean containsWhitespace( String string )
+    {
+    return Pattern.compile( "\\s" ).matcher( string ).find();
     }
   }

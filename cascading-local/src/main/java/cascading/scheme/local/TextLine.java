@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -85,7 +85,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    *
    * @param sourceFields of Fields
    */
-  @ConstructorProperties( {"sourceFields"} )
+  @ConstructorProperties({"sourceFields"})
   public TextLine( Fields sourceFields )
     {
     super( sourceFields );
@@ -100,7 +100,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * @param sourceFields of Fields
    * @param charsetName  of type String
    */
-  @ConstructorProperties( {"sourceFields", "charsetName"} )
+  @ConstructorProperties({"sourceFields", "charsetName"})
   public TextLine( Fields sourceFields, String charsetName )
     {
     super( sourceFields );
@@ -118,7 +118,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * @param sourceFields of Fields
    * @param sinkFields   of Fields
    */
-  @ConstructorProperties( {"sourceFields", "sinkFields"} )
+  @ConstructorProperties({"sourceFields", "sinkFields"})
   public TextLine( Fields sourceFields, Fields sinkFields )
     {
     super( sourceFields, sinkFields );
@@ -134,7 +134,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    * @param sinkFields   of Fields
    * @param charsetName  of type String
    */
-  @ConstructorProperties( {"sourceFields", "sinkFields", "charsetName"} )
+  @ConstructorProperties({"sourceFields", "sinkFields", "charsetName"})
   public TextLine( Fields sourceFields, Fields sinkFields, String charsetName )
     {
     super( sourceFields, sinkFields );
@@ -153,8 +153,8 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     Charset.forName( this.charsetName );
     }
 
-  @Property( name = "charset", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "character set used." )
+  @Property(name = "charset", visibility = Visibility.PUBLIC)
+  @PropertyDescription("character set used.")
   public String getCharsetName()
     {
     return charsetName;

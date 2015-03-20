@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,19 +46,19 @@ public abstract class BaseAssertion<C> extends BaseOperation<C> implements Plann
     {
     }
 
-  @ConstructorProperties( {"message"} )
+  @ConstructorProperties({"message"})
   protected BaseAssertion( String message )
     {
     this.message = message;
     }
 
-  @ConstructorProperties( {"numArgs"} )
+  @ConstructorProperties({"numArgs"})
   protected BaseAssertion( int numArgs )
     {
     super( numArgs );
     }
 
-  @ConstructorProperties( {"numArgs", "message"} )
+  @ConstructorProperties({"numArgs", "message"})
   protected BaseAssertion( int numArgs, String message )
     {
     super( numArgs );

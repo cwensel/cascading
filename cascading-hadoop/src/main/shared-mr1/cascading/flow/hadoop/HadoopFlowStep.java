@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -74,6 +74,11 @@ import static cascading.flow.hadoop.util.HadoopUtil.pack;
  */
 public class HadoopFlowStep extends BaseFlowStep<JobConf>
   {
+  protected HadoopFlowStep( String name, int ordinal )
+    {
+    super( name, ordinal );
+    }
+
   public HadoopFlowStep( ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
     super( elementGraph, flowNodeGraph );

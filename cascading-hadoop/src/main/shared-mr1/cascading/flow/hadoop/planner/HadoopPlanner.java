@@ -42,6 +42,7 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +146,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     super.initialize( flowConnector, properties );
 
     defaultJobConf = HadoopUtil.createJobConf( properties, createJobConf( properties ) );
+    checkPlatform( defaultJobConf );
     intermediateSchemeClass = flowConnector.getIntermediateSchemeClass( properties );
 
     Class type = AppProps.getApplicationJarClass( properties );
@@ -169,6 +171,12 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     super.configRuleRegistryDefaults( ruleRegistry );
 
     ruleRegistry.addDefaultElementFactory( IntermediateTapElementFactory.TEMP_TAP, new TempTapElementFactory() );
+    }
+
+  protected void checkPlatform( Configuration conf )
+    {
+    if( HadoopUtil.isYARN( conf ) )
+      LOG.warn( "running YARN based flows on Hadoop 1.x may cause problems, please use the 'cascading-hadoop2-mr1' dependencies" );
     }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -110,7 +110,7 @@ public class URISanitizer implements Sanitizer
       {
       try
         {
-        uri = URI.create( value.toString() );
+        uri = URI.create( encode( value.toString() ) );
         }
       catch( IllegalArgumentException exception )
         {
@@ -150,6 +150,13 @@ public class URISanitizer implements Sanitizer
       }
 
     return buffer.toString();
+    }
+
+  private String encode( String input )
+    {
+    input = input.replaceAll( "\\[", "%5B" );
+    input = input.replaceAll( "\\]", "%5D" );
+    return input;
     }
 
   private String sanitizeQuery( String query )

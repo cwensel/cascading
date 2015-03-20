@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -125,6 +125,9 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   @Override
   public boolean hasNext()
     {
+    if( currentException != null )
+      return true;
+
     if( isComplete )
       return false;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -80,7 +80,7 @@ import static cascading.tuple.hadoop.TupleSerializationProps.HADOOP_IO_SERIALIZA
  */
 @SerializationToken(
   tokens = {127},
-  classNames = {"org.apache.hadoop.io.BytesWritable"} )
+  classNames = {"org.apache.hadoop.io.BytesWritable"})
 public class TupleSerialization extends Configured implements Serialization
   {
   /** Field LOG */

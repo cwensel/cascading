@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -60,14 +60,14 @@ public abstract class ExtremaValueBase extends BaseOperation<ExtremaValueBase.Co
       }
     }
 
-  @ConstructorProperties( {"fieldDeclaration"} )
+  @ConstructorProperties({"fieldDeclaration"})
   public ExtremaValueBase( Fields fieldDeclaration )
     {
     super( fieldDeclaration );
     ignoreValues = null;
     }
 
-  @ConstructorProperties( {"numArgs", "fieldDeclaration"} )
+  @ConstructorProperties({"numArgs", "fieldDeclaration"})
   public ExtremaValueBase( int numArgs, Fields fieldDeclaration )
     {
     super( numArgs, fieldDeclaration );
@@ -77,7 +77,7 @@ public abstract class ExtremaValueBase extends BaseOperation<ExtremaValueBase.Co
       throw new IllegalArgumentException( "fieldDeclaration may only declare 1 field, got: " + fieldDeclaration.size() );
     }
 
-  @ConstructorProperties( {"fieldDeclaration", "ignoreValues"} )
+  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
   protected ExtremaValueBase( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration );

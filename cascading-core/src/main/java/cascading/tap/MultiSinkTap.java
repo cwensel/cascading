@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -65,7 +65,7 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
     {
     TupleEntryCollector[] collectors;
 
-    public <C extends Config> MultiSinkCollector( FlowProcess<C> flowProcess, Tap<Config,?,?>... taps ) throws IOException
+    public <C extends Config> MultiSinkCollector( FlowProcess<C> flowProcess, Tap<Config, ?, ?>... taps ) throws IOException
       {
       super( Fields.asDeclaration( getSinkFields() ) );
 
@@ -76,7 +76,7 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
       for( int i = 0; i < taps.length; i++ )
         {
         C mergedConf = childConfigs == null ? conf : flowProcess.mergeMapIntoConfig( conf, childConfigs.get( i ) );
-        Tap<Config,?,?> tap = taps[ i ];
+        Tap<Config, ?, ?> tap = taps[ i ];
         LOG.info( "opening for write: {}", tap.toString() );
 
         collectors[ i ] = tap.openForWrite( flowProcess.copyWith( mergedConf ), null );
@@ -175,7 +175,7 @@ public class MultiSinkTap<Child extends Tap, Config, Output> extends SinkTap<Con
     for( int i = 0; i < getTaps().length; i++ )
       {
       Tap tap = getTaps()[ i ];
-      Object newConfig =  flowProcess.copyConfig( conf );
+      Object newConfig = flowProcess.copyConfig( conf );
 
       tap.sinkConfInit( flowProcess, newConfig );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,7 +32,7 @@ import cascading.property.ConfigDef;
 /**
  *
  */
-class ElementFlowProcess extends FlowProcessWrapper
+public class ElementFlowProcess extends FlowProcessWrapper
   {
   private final ConfigDef configDef;
   private final ConfigDef.Getter getter;

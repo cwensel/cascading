@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -165,10 +165,18 @@ public class URISanitizerTest
   @Test
   public void testHDFSPrivate()
     {
-    String uri = "hdfs://hadoop42.example.com:8020/some/dataset";
+    String uri = "hdfs://hadoop42.example.com:8020/some/dataset/";
     URISanitizer sanitizer = new URISanitizer();
     String result = sanitizer.apply( Visibility.PRIVATE, uri );
     assertEquals( uri, result );
     }
 
+  @Test
+  public void testS3NGlob()
+    {
+    String uri = "s3n://some-bucket/2014/12/2[5-9]/*";
+    URISanitizer sanitizer = new URISanitizer();
+    String result = sanitizer.apply( Visibility.PROTECTED, uri );
+    assertEquals( "/2014/12/2[5-9]/*", result );
+    }
   }

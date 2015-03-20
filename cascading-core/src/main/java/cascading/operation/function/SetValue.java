@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,7 +61,7 @@ public class SetValue extends BaseOperation implements Function
    * @param fieldDeclaration of type Fields
    * @param filter           of type Filter
    */
-  @ConstructorProperties( {"fieldDeclaration", "filter"} )
+  @ConstructorProperties({"fieldDeclaration", "filter"})
   public SetValue( Fields fieldDeclaration, Filter filter )
     {
     super( fieldDeclaration );
@@ -78,7 +78,7 @@ public class SetValue extends BaseOperation implements Function
    * @param firstValue       of type Serializable
    * @param secondValue      of type Serializable
    */
-  @ConstructorProperties( {"fieldDeclaration", "filter", "firstValue", "secondValue"} )
+  @ConstructorProperties({"fieldDeclaration", "filter", "firstValue", "secondValue"})
   public SetValue( Fields fieldDeclaration, Filter filter, Serializable firstValue, Serializable secondValue )
     {
     super( fieldDeclaration );
@@ -88,13 +88,13 @@ public class SetValue extends BaseOperation implements Function
     verify();
     }
 
-  @Property( name = "firstValue", visibility = Visibility.PRIVATE )
+  @Property(name = "firstValue", visibility = Visibility.PRIVATE)
   public Serializable getFirstValue()
     {
     return (Serializable) values[ 0 ].getObject( 0 );
     }
 
-  @Property( name = "secondValue", visibility = Visibility.PRIVATE )
+  @Property(name = "secondValue", visibility = Visibility.PRIVATE)
   public Serializable getSecondValue()
     {
     return (Serializable) values[ 1 ].getObject( 0 );

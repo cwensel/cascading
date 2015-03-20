@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,7 +25,11 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.hadoop.planner.HadoopPlanner;
+import cascading.flow.hadoop.util.HadoopUtil;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.JobConf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class Hadoop2MR1Planner is the core Hadoop MapReduce planner used by default through the {@link cascading.flow.hadoop2.Hadoop2MR1FlowConnector}.
@@ -45,6 +49,9 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class Hadoop2MR1Planner extends HadoopPlanner
   {
+  /** Field LOG */
+  private static final Logger LOG = LoggerFactory.getLogger( Hadoop2MR1Planner.class );
+
   /**
    * Method copyJobConf adds the given JobConf values to the given properties object. Use this method to pass
    * custom default Hadoop JobConf properties to Hadoop.
@@ -82,5 +89,12 @@ public class Hadoop2MR1Planner extends HadoopPlanner
           configuration.set( entry.getKey().toString(), entry.getValue().toString() );
         }
       }
+    }
+
+  @Override
+  protected void checkPlatform( Configuration conf )
+    {
+    if( !HadoopUtil.isYARN( conf ) )
+      LOG.warn( "running Hadoop 1.x based flows on YARN may cause problems, please use the 'cascading-hadoop' dependencies" );
     }
   }

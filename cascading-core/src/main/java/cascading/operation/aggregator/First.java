@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -59,7 +59,7 @@ public class First extends ExtentBase
    *
    * @param firstN of type int
    */
-  @ConstructorProperties( {"firstN"} )
+  @ConstructorProperties({"firstN"})
   public First( int firstN )
     {
     super( Fields.ARGS );
@@ -72,7 +72,7 @@ public class First extends ExtentBase
    *
    * @param fieldDeclaration of type Fields
    */
-  @ConstructorProperties( {"fieldDeclaration"} )
+  @ConstructorProperties({"fieldDeclaration"})
   public First( Fields fieldDeclaration )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
@@ -86,7 +86,7 @@ public class First extends ExtentBase
    * @param fieldDeclaration of type Fields
    * @param firstN           of type int
    */
-  @ConstructorProperties( {"fieldDeclaration", "firstN"} )
+  @ConstructorProperties({"fieldDeclaration", "firstN"})
   public First( Fields fieldDeclaration, int firstN )
     {
     super( fieldDeclaration.size(), fieldDeclaration );
@@ -101,7 +101,7 @@ public class First extends ExtentBase
    * @param fieldDeclaration of type Fields
    * @param ignoreTuples     of type Tuple...
    */
-  @ConstructorProperties( {"fieldDeclaration", "ignoreTuples"} )
+  @ConstructorProperties({"fieldDeclaration", "ignoreTuples"})
   public First( Fields fieldDeclaration, Tuple... ignoreTuples )
     {
     super( fieldDeclaration, ignoreTuples );
@@ -109,8 +109,8 @@ public class First extends ExtentBase
     this.firstN = 1;
     }
 
-  @Property( name = "firstN", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The number of tuples to return." )
+  @Property(name = "firstN", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The number of tuples to return.")
   public int getFirstN()
     {
     return firstN;

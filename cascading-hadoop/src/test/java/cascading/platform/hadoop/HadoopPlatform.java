@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -132,6 +132,11 @@ public class HadoopPlatform extends BaseHadoopPlatform<JobConf>
       configuration.set( "mapred.job.tracker", "local" );
       configuration.set( "mapreduce.jobtracker.staging.root.dir", System.getProperty( "user.dir" ) + "/build/tmp/cascading/staging" );
 
+      String stagingDir = configuration.get( "mapreduce.jobtracker.staging.root.dir" );
+
+      if( Util.isEmpty( stagingDir ) )
+        configuration.set( "mapreduce.jobtracker.staging.root.dir", System.getProperty( "user.dir" ) + "/build/tmp/cascading/staging" );
+
       fileSys = FileSystem.get( configuration );
       }
     else
@@ -139,10 +144,10 @@ public class HadoopPlatform extends BaseHadoopPlatform<JobConf>
       LOG.info( "using cluster" );
 
       if( Util.isEmpty( System.getProperty( "hadoop.log.dir" ) ) )
-        System.setProperty( "hadoop.log.dir", "build/test/log" );
+        System.setProperty( "hadoop.log.dir", "cascading-hadoop/build/test/log" );
 
       if( Util.isEmpty( System.getProperty( "hadoop.tmp.dir" ) ) )
-        System.setProperty( "hadoop.tmp.dir", "build/test/tmp" );
+        System.setProperty( "hadoop.tmp.dir", "cascading-hadoop/build/test/tmp" );
 
       new File( System.getProperty( "hadoop.log.dir" ) ).mkdirs(); // ignored
 

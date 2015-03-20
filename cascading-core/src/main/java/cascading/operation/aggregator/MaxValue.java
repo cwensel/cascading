@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -47,7 +47,7 @@ public class MaxValue extends ExtremaValueBase
    *
    * @param fieldDeclaration of type Fields
    */
-  @ConstructorProperties( {"fieldDeclaration"} )
+  @ConstructorProperties({"fieldDeclaration"})
   public MaxValue( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration );
@@ -60,7 +60,7 @@ public class MaxValue extends ExtremaValueBase
    * @param fieldDeclaration of type Fields
    * @param ignoreValues     of type Object...
    */
-  @ConstructorProperties( {"fieldDeclaration", "ignoreValues"} )
+  @ConstructorProperties({"fieldDeclaration", "ignoreValues"})
   public MaxValue( Fields fieldDeclaration, Object... ignoreValues )
     {
     super( fieldDeclaration, ignoreValues );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -54,7 +54,7 @@ public class Coerce extends SubAssembly
    * @param previous of type Pipe
    * @param types    of type Class...
    */
-  @ConstructorProperties( {"previous", "types"} )
+  @ConstructorProperties({"previous", "types"})
   public Coerce( Pipe previous, Class... types )
     {
     super( previous );
@@ -77,7 +77,7 @@ public class Coerce extends SubAssembly
    * @param coerceFields of type Fields
    * @param types        of type Class...
    */
-  @ConstructorProperties( {"previous", "coerceFields", "types"} )
+  @ConstructorProperties({"previous", "coerceFields", "types"})
   public Coerce( Pipe previous, Fields coerceFields, Class... types )
     {
     super( previous );
@@ -102,7 +102,7 @@ public class Coerce extends SubAssembly
    * @param previous     of type Pipe
    * @param coerceFields of type Fields
    */
-  @ConstructorProperties( {"previous", "coerceFields"} )
+  @ConstructorProperties({"previous", "coerceFields"})
   public Coerce( Pipe previous, Fields coerceFields )
     {
     super( previous );

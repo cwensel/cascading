@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -369,6 +369,24 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "a", tuple.getObject( 0 ) );
     assertEquals( "not equal: tuple.get(1)", "B", tuple.getObject( 1 ) );
     assertEquals( "not equal: tuple.get(2)", "C", tuple.getObject( 2 ) );
+    }
+
+  public void testSetNull()
+    {
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
+
+    entryA.setTuple( null );
+
+    assertTrue( entryA.getTuple() == null );
+    }
+
+  public void testSetCanonicalNull()
+    {
+    TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
+
+    entryA.setCanonicalTuple( null );
+
+    assertTrue( entryA.getTuple() == null );
     }
 
   public void testSetCoerce()

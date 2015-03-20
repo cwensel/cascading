@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,6 +26,7 @@ import java.util.Map;
 
 import cascading.flow.Flow;
 import cascading.property.UnitOfWorkDef;
+import cascading.tap.Tap;
 
 /**
  * Class CascadeDef is a fluent interface for defining a {@link Cascade}.
@@ -91,6 +92,24 @@ public class CascadeDef extends UnitOfWorkDef<CascadeDef>
 
     if( flows.containsKey( flow.getName() ) )
       throw new CascadeException( "all flow names must be unique, found duplicate: " + flow.getName() );
+
+    Collection<Tap> sinks = flow.getSinksCollection();
+
+    for( Tap sink : sinks )
+      {
+      String fullIdentifier = sink.getFullIdentifier( flow.getConfigCopy() );
+
+      for( Flow existingFlow : flows.values() )
+        {
+        Collection<Tap> existingSinks = existingFlow.getSinksCollection();
+
+        for( Tap existingSink : existingSinks )
+          {
+          if( fullIdentifier.equals( existingSink.getFullIdentifier( flow.getConfigCopy() ) ) )
+            throw new CascadeException( "the flow: " + flow.getName() + ", has a sink identifier: " + fullIdentifier + ", in common with the flow: " + existingFlow.getName() );
+          }
+        }
+      }
 
     flows.put( flow.getName(), flow );
 

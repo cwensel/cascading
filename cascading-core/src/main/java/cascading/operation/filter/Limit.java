@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -68,14 +68,14 @@ public class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.
    *
    * @param limit the number of tuples to let pass
    */
-  @ConstructorProperties( {"limit"} )
+  @ConstructorProperties({"limit"})
   public Limit( long limit )
     {
     this.limit = limit;
     }
 
-  @Property( name = "limit", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The upper limit." )
+  @Property(name = "limit", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The upper limit.")
   public long getLimit()
     {
     return limit;

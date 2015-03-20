@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,6 +27,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,34 +96,50 @@ public class RegexMatcher extends RegexOperation<Matcher>
     operationCall.setContext( getPattern().matcher( "" ) );
     }
 
+  protected boolean matchWholeTuple( Matcher matcher, TupleEntry input )
+    {
+    return matchWholeTuple( matcher, input.getTuple() );
+    }
+
   /**
-   * Method matchWholeTuple ...
-   *
-   * @param matcher
-   * @param input   of type Tuple @return boolean
+   * @deprecated use {@link #matchWholeTuple(java.util.regex.Matcher, cascading.tuple.TupleEntry)}
    */
+  @Deprecated
   protected boolean matchWholeTuple( Matcher matcher, Tuple input )
     {
     matcher.reset( input.toString( "\t", false ) );
 
     boolean matchFound = matcher.find();
 
-    LOG.debug( "pattern: {}, matches: {}", getPatternString(), matchFound );
+    if( LOG.isDebugEnabled() )
+      LOG.debug( "pattern: {}, matches: {}", getPatternString(), matchFound );
 
     return matchFound == negateMatch;
     }
 
+  protected boolean matchEachElement( Matcher matcher, TupleEntry input )
+    {
+    return matchEachElement( matcher, input.getTuple() );
+    }
+
   /**
-   * Method matchEachElement ...
-   *
-   * @param matcher
-   * @param input   of type Tuple @return boolean
+   * @deprecated use {@link #matchEachElementPos(java.util.regex.Matcher, cascading.tuple.TupleEntry)}
    */
+  @Deprecated
   protected boolean matchEachElement( Matcher matcher, Tuple input )
     {
     return matchEachElementPos( matcher, input ) != -1;
     }
 
+  protected int matchEachElementPos( Matcher matcher, TupleEntry input )
+    {
+    return matchEachElementPos( matcher, input.getTuple() );
+    }
+
+  /**
+   * @deprecated use {@link #matchEachElementPos(java.util.regex.Matcher, cascading.tuple.TupleEntry)}
+   */
+  @Deprecated
   protected int matchEachElementPos( Matcher matcher, Tuple input )
     {
     int pos = 0;

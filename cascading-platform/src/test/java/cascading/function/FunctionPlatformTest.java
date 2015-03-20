@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,7 @@
 package cascading.function;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -157,13 +158,12 @@ public class FunctionPlatformTest extends PlatformTestCase
       new TupleEntry( incoming, new Tuple( "d" ) ),
     };
 
-    Tuple[] expected = new Tuple[]{
-      new Tuple( "a", 2L ),
-      new Tuple( "b", 2L ),
-      new Tuple( "c", 2L ),
-      new Tuple( "a", 2L ),
-      new Tuple( "d", 2L ),
-    };
+    List<Tuple> expected = new ArrayList<Tuple>();
+    expected.add( new Tuple( "a", 2L ) );
+    expected.add( new Tuple( "b", 2L ) );
+    expected.add( new Tuple( "c", 2L ) );
+    expected.add( new Tuple( "a", 2L ) );
+    expected.add( new Tuple( "d", 2L ) );
 
     TupleListCollector collector = invokeFunction( function, tuples, new Fields( "value", "count" ) );
 
@@ -171,7 +171,15 @@ public class FunctionPlatformTest extends PlatformTestCase
 
     int count = 0;
     while( iterator.hasNext() )
-      assertEquals( expected[ count++ ], iterator.next() );
+      {
+      count++;
+      Tuple result = iterator.next();
+      int index = expected.indexOf( result );
+      assertTrue( index > -1 );
+      assertEquals( result, expected.get( index ) );
+      expected.remove( index );
+      }
+    assertEquals( 5, count );
     }
 
   @Test
@@ -193,13 +201,12 @@ public class FunctionPlatformTest extends PlatformTestCase
       new TupleEntry( incoming, new Tuple( "d", 1 ) ),
     };
 
-    Tuple[] expected = new Tuple[]{
-      new Tuple( "a", 2F ),
-      new Tuple( "b", 2F ),
-      new Tuple( "c", 2F ),
-      new Tuple( "a", 2F ),
-      new Tuple( "d", 2F ),
-    };
+    List<Tuple> expected = new ArrayList<Tuple>();
+    expected.add( new Tuple( "a", 2F ) );
+    expected.add( new Tuple( "b", 2F ) );
+    expected.add( new Tuple( "c", 2F ) );
+    expected.add( new Tuple( "a", 2F ) );
+    expected.add( new Tuple( "d", 2F ) );
 
     TupleListCollector collector = invokeFunction( function, tuples, new Fields( "key", "sum" ) );
 
@@ -207,6 +214,15 @@ public class FunctionPlatformTest extends PlatformTestCase
 
     int count = 0;
     while( iterator.hasNext() )
-      assertEquals( expected[ count++ ], iterator.next() );
+      {
+      count++;
+      Tuple result = iterator.next();
+      int index = expected.indexOf( result );
+      assertTrue( index > -1 );
+      assertEquals( result, expected.get( index ) );
+      expected.remove( index );
+      }
+
+    assertEquals( 5, count );
     }
   }

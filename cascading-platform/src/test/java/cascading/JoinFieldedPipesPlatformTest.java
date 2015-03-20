@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -61,7 +61,6 @@ import cascading.tuple.Tuple;
 import org.junit.Test;
 
 import static data.InputData.*;
-
 
 public class JoinFieldedPipesPlatformTest extends PlatformTestCase
   {
@@ -1336,7 +1335,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
   /**
    * Loosely tests for a deadlock when BlockingHashJoinAnnotator rule doesn't excluce the GroupBy from the blocking
    * annotation.
-   *
+   * <p/>
    * the deadlock is random on the order of the paths traversed from the Source Tap + fork.
    *
    * @throws Exception
@@ -1361,8 +1360,8 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper1 = new Each( new Pipe( "upper1" ), new Fields( "line" ), splitter );
     Pipe pipeUpper2 = new Each( new Pipe( "upper2" ), new Fields( "line" ), splitter );
 
-    pipeUpper1 = new GroupBy(  pipeUpper1, new Fields( "num" ) );
-    pipeUpper2 = new GroupBy(  pipeUpper2, new Fields( "num" ) );
+    pipeUpper1 = new GroupBy( pipeUpper1, new Fields( "num" ) );
+    pipeUpper2 = new GroupBy( pipeUpper2, new Fields( "num" ) );
 
     Pipe splice1 = new HashJoin( pipeUpper1, new Fields( "num" ), pipeUpper2, new Fields( "num" ), new Fields( "num1", "char1", "num2", "char2" ) );
 

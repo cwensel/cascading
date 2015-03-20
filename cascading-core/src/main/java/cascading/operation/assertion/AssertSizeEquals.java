@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,15 +45,15 @@ public class AssertSizeEquals extends BaseAssertion implements ValueAssertion
    *
    * @param size of type int
    */
-  @ConstructorProperties( {"size"} )
+  @ConstructorProperties({"size"})
   public AssertSizeEquals( int size )
     {
     super( "tuple size %s, is not equal to: %s, in tuple: %s" );
     this.size = size;
     }
 
-  @Property( name = "size", visibility = Visibility.PRIVATE )
-  @PropertyDescription( "The expected tuple size." )
+  @Property(name = "size", visibility = Visibility.PRIVATE)
+  @PropertyDescription("The expected tuple size.")
   public int getSize()
     {
     return size;

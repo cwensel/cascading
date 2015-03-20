@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -141,7 +141,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param hasHeader
    * @param delimiter
    */
-  @ConstructorProperties( {"hasHeader", "delimiter"} )
+  @ConstructorProperties({"hasHeader", "delimiter"})
   public TextDelimited( boolean hasHeader, String delimiter )
     {
     this( Fields.ALL, hasHeader, delimiter, null, (Class[]) null );
@@ -158,7 +158,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter
    * @param quote
    */
-  @ConstructorProperties( {"hasHeader", "delimiter", "quote"} )
+  @ConstructorProperties({"hasHeader", "delimiter", "quote"})
   public TextDelimited( boolean hasHeader, String delimiter, String quote )
     {
     this( Fields.ALL, hasHeader, delimiter, quote, (Class[]) null );
@@ -174,7 +174,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param hasHeader
    * @param delimitedParser
    */
-  @ConstructorProperties( {"hasHeader", "delimitedParser"} )
+  @ConstructorProperties({"hasHeader", "delimitedParser"})
   public TextDelimited( boolean hasHeader, DelimitedParser delimitedParser )
     {
     this( Fields.ALL, hasHeader, hasHeader, delimitedParser );
@@ -191,7 +191,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    *
    * @param delimitedParser
    */
-  @ConstructorProperties( {"delimitedParser"} )
+  @ConstructorProperties({"delimitedParser"})
   public TextDelimited( DelimitedParser delimitedParser )
     {
     this( Fields.ALL, true, true, delimitedParser );
@@ -202,7 +202,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    *
    * @param fields of type Fields
    */
-  @ConstructorProperties( {"fields"} )
+  @ConstructorProperties({"fields"})
   public TextDelimited( Fields fields )
     {
     this( fields, "\t", null, null );
@@ -214,7 +214,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param fields    of type Fields
    * @param delimiter of type String
    */
-  @ConstructorProperties( {"fields", "delimiter"} )
+  @ConstructorProperties({"fields", "delimiter"})
   public TextDelimited( Fields fields, String delimiter )
     {
     this( fields, delimiter, null, null );
@@ -227,7 +227,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param hasHeader of type boolean
    * @param delimiter of type String
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter )
     {
     this( fields, hasHeader, hasHeader, delimiter, null, null );
@@ -240,7 +240,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param skipHeader of type boolean
    * @param delimiter  of type String
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimiter"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter )
     {
     this( fields, skipHeader, writeHeader, delimiter, null, null );
@@ -253,7 +253,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter of type String
    * @param types     of type Class[]
    */
-  @ConstructorProperties( {"fields", "delimiter", "types"} )
+  @ConstructorProperties({"fields", "delimiter", "types"})
   public TextDelimited( Fields fields, String delimiter, Class[] types )
     {
     this( fields, delimiter, null, types );
@@ -267,7 +267,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter of type String
    * @param types     of type Class[]
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter", "types"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "types"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter, Class[] types )
     {
     this( fields, hasHeader, hasHeader, delimiter, null, types );
@@ -282,7 +282,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter   of type String
    * @param types       of type Class[]
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimiter", "types"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "types"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, Class[] types )
     {
     this( fields, skipHeader, writeHeader, delimiter, null, types );
@@ -296,7 +296,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param quote     of type String
    * @param types     of type Class[]
    */
-  @ConstructorProperties( {"fields", "delimiter", "quote", "types"} )
+  @ConstructorProperties({"fields", "delimiter", "quote", "types"})
   public TextDelimited( Fields fields, String delimiter, String quote, Class[] types )
     {
     this( fields, false, delimiter, quote, types );
@@ -311,7 +311,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param quote     of type String
    * @param types     of type Class[]
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter", "quote", "types"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types )
     {
     this( fields, hasHeader, hasHeader, delimiter, quote, types, true );
@@ -327,7 +327,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param quote       of type String
    * @param types       of type Class[]
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimiter", "quote", "types"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "quote", "types"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types )
     {
     this( fields, skipHeader, writeHeader, delimiter, quote, types, true );
@@ -342,7 +342,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param types     of type Class[]
    * @param safe      of type boolean
    */
-  @ConstructorProperties( {"fields", "delimiter", "quote", "types", "safe"} )
+  @ConstructorProperties({"fields", "delimiter", "quote", "types", "safe"})
   public TextDelimited( Fields fields, String delimiter, String quote, Class[] types, boolean safe )
     {
     this( fields, false, delimiter, quote, types, safe );
@@ -358,7 +358,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param types     of type Class[]
    * @param safe      of type boolean
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter", "quote", "types", "safe"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types", "safe"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe )
     {
     this( fields, hasHeader, hasHeader, delimiter, true, quote, types, safe );
@@ -375,7 +375,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param safe        of type boolean
    * @param charsetName of type String
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter", "quote", "types", "safe", "charsetName"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "types", "safe", "charsetName"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe, String charsetName )
     {
     this( fields, hasHeader, hasHeader, delimiter, true, quote, types, safe, charsetName );
@@ -392,7 +392,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param types       of type Class[]
    * @param safe        of type boolean
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimiter", "quote", "types", "safe"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "quote", "types", "safe"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, boolean safe )
     {
     this( fields, skipHeader, writeHeader, delimiter, true, quote, types, safe );
@@ -405,7 +405,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter of type String
    * @param quote     of type String
    */
-  @ConstructorProperties( {"fields", "delimiter", "quote"} )
+  @ConstructorProperties({"fields", "delimiter", "quote"})
   public TextDelimited( Fields fields, String delimiter, String quote )
     {
     this( fields, false, delimiter, quote, null, true );
@@ -419,7 +419,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param delimiter of type String
    * @param quote     of type String
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter", "quote"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote )
     {
     this( fields, hasHeader, delimiter, quote, null, true );
@@ -434,7 +434,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param quote       of type String
    * @param charsetName of type String
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimiter", "quote", "charsetName"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimiter", "quote", "charsetName"})
   public TextDelimited( Fields fields, boolean hasHeader, String delimiter, String quote, String charsetName )
     {
     this( fields, hasHeader, delimiter, quote, null, true, charsetName );
@@ -452,7 +452,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param types       of type Class[]
    * @param safe        of type boolean
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
     {
     this( fields, skipHeader, writeHeader, delimiter, strict, quote, types, safe, DEFAULT_CHARSET );
@@ -471,8 +471,8 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param safe        of type boolean
    * @param charsetName of type String
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe",
-                           "charsetName"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types", "safe",
+                          "charsetName"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
     {
     this( fields, skipHeader, writeHeader, charsetName, new DelimitedParser( delimiter, quote, types, strict, safe ) );
@@ -485,7 +485,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param writeHeader     of type boolean
    * @param delimitedParser of type DelimitedParser
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "delimitedParser"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "delimitedParser"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, DelimitedParser delimitedParser )
     {
     this( fields, skipHeader, writeHeader, null, delimitedParser );
@@ -498,7 +498,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param hasHeader       of type boolean
    * @param delimitedParser of type DelimitedParser
    */
-  @ConstructorProperties( {"fields", "hasHeader", "delimitedParser"} )
+  @ConstructorProperties({"fields", "hasHeader", "delimitedParser"})
   public TextDelimited( Fields fields, boolean hasHeader, DelimitedParser delimitedParser )
     {
     this( fields, hasHeader, hasHeader, null, delimitedParser );
@@ -512,7 +512,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param charsetName     of type String
    * @param delimitedParser of type DelimitedParser
    */
-  @ConstructorProperties( {"fields", "skipHeader", "writeHeader", "charsetName", "delimitedParser"} )
+  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "charsetName", "delimitedParser"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
     {
     super( fields, fields );
@@ -534,8 +534,8 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     Charset.forName( this.charsetName );
     }
 
-  @Property( name = "charset", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "character set used." )
+  @Property(name = "charset", visibility = Visibility.PUBLIC)
+  @PropertyDescription("character set used.")
   public String getCharsetName()
     {
     return charsetName;
@@ -546,8 +546,8 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    *
    * @return a String
    */
-  @Property( name = "delimiter", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The delimiter used to separate fields." )
+  @Property(name = "delimiter", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The delimiter used to separate fields.")
   public String getDelimiter()
     {
     return delimitedParser.getDelimiter();
@@ -558,8 +558,8 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    *
    * @return a String
    */
-  @Property( name = "quote", visibility = Visibility.PUBLIC )
-  @PropertyDescription( "The string used for quoting." )
+  @Property(name = "quote", visibility = Visibility.PUBLIC)
+  @PropertyDescription("The string used for quoting.")
   public String getQuote()
     {
     return delimitedParser.getQuote();

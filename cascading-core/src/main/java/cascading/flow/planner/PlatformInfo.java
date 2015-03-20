@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,7 +25,7 @@ import java.io.Serializable;
 /**
  *
  */
-public class PlatformInfo implements Serializable, Comparable
+public class PlatformInfo implements Serializable, Comparable<PlatformInfo>
   {
   public final String name;
   public final String vendor;
@@ -36,6 +36,15 @@ public class PlatformInfo implements Serializable, Comparable
     this.name = name;
     this.vendor = vendor;
     this.version = version;
+    }
+
+  @Override
+  public int compareTo( PlatformInfo other )
+    {
+    if( other == null )
+      return 1;
+
+    return this.toString().compareTo( other.toString() );
     }
 
   @Override
@@ -59,15 +68,6 @@ public class PlatformInfo implements Serializable, Comparable
     }
 
   @Override
-  public int compareTo( Object o )
-    {
-    if( name == null )
-      return -1;
-
-    return name.compareTo( ( (PlatformInfo) o ).name );
-    }
-
-  @Override
   public int hashCode()
     {
     int result = name != null ? name.hashCode() : 0;
@@ -81,7 +81,10 @@ public class PlatformInfo implements Serializable, Comparable
     {
     final StringBuilder sb = new StringBuilder();
 
-    sb.append( name ).append( ':' );
+    if( name == null )
+      sb.append( "UNKNOWN" ).append( ':' );
+    else
+      sb.append( name ).append( ':' );
 
     if( version != null )
       sb.append( version ).append( ':' );

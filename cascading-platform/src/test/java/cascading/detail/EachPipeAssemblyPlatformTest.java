@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +26,6 @@ import cascading.pipe.Pipe;
 import cascading.platform.TestPlatform;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 
 public class EachPipeAssemblyPlatformTest extends PipeAssemblyTestBase
   {

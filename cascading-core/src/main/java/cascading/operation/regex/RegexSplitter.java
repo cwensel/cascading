@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -31,7 +31,19 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.util.Pair;
 
-/** Class RegexSplitter will split an incoming argument value by the given regex delimiter patternString. */
+/**
+ * Class RegexSplitter will split an incoming argument value by the given regex delimiter patternString.
+ * <p/>
+ * RegexSplitter only expects one field value. If more than one argument value is passed, only the
+ * first is handled, the remainder are ignored.
+ * <p/>
+ * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
+ * the regex is applied.
+ * <p/>
+ * Any Object value will be coerced to a String type if type information is provided. See the
+ * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
+ * values.
+ */
 public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implements Function<Pair<Pattern, Tuple>>
   {
   private final int length;
