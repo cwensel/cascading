@@ -282,12 +282,12 @@ public class Unique extends SubAssembly
    *
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
   @ConstructorProperties({"pipe", "uniqueFields", "capacity"})
-  public Unique( Pipe pipe, Fields uniqueFields, int threshold )
+  public Unique( Pipe pipe, Fields uniqueFields, int capacity )
     {
-    this( null, pipe, uniqueFields, threshold );
+    this( null, pipe, uniqueFields, capacity );
     }
 
   /**
@@ -296,12 +296,12 @@ public class Unique extends SubAssembly
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
    * @param include      of type Include
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
   @ConstructorProperties({"pipe", "uniqueFields", "include", "capacity"})
-  public Unique( Pipe pipe, Fields uniqueFields, Include include, int threshold )
+  public Unique( Pipe pipe, Fields uniqueFields, Include include, int capacity )
     {
-    this( null, pipe, uniqueFields, include, threshold );
+    this( null, pipe, uniqueFields, include, capacity );
     }
 
   /**
@@ -337,12 +337,12 @@ public class Unique extends SubAssembly
    * @param name         of type String
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
   @ConstructorProperties({"name", "pipe", "uniqueFields", "capacity"})
-  public Unique( String name, Pipe pipe, Fields uniqueFields, int threshold )
+  public Unique( String name, Pipe pipe, Fields uniqueFields, int capacity )
     {
-    this( name, Pipe.pipes( pipe ), uniqueFields, threshold );
+    this( name, Pipe.pipes( pipe ), uniqueFields, capacity );
     }
 
   /**
@@ -352,12 +352,12 @@ public class Unique extends SubAssembly
    * @param pipe         of type Pipe
    * @param uniqueFields of type Fields
    * @param include      of type Include
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
   @ConstructorProperties({"name", "pipe", "uniqueFields", "include", "capacity"})
-  public Unique( String name, Pipe pipe, Fields uniqueFields, Include include, int threshold )
+  public Unique( String name, Pipe pipe, Fields uniqueFields, Include include, int capacity )
     {
-    this( name, Pipe.pipes( pipe ), uniqueFields, include, threshold );
+    this( name, Pipe.pipes( pipe ), uniqueFields, include, capacity );
     }
 
   /**
@@ -390,12 +390,12 @@ public class Unique extends SubAssembly
    *
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
   @ConstructorProperties({"pipes", "uniqueFields", "capacity"})
-  public Unique( Pipe[] pipes, Fields uniqueFields, int threshold )
+  public Unique( Pipe[] pipes, Fields uniqueFields, int capacity )
     {
-    this( null, pipes, uniqueFields, threshold );
+    this( null, pipes, uniqueFields, capacity );
     }
 
   /**
@@ -404,12 +404,12 @@ public class Unique extends SubAssembly
    * @param pipes        of type Pipe[]
    * @param uniqueFields of type Fields
    * @param include      of type Include
-   * @param threshold    of type int
+   * @param capacity     of type int
    */
   @ConstructorProperties({"pipes", "uniqueFields", "include", "capacity"})
-  public Unique( Pipe[] pipes, Fields uniqueFields, Include include, int threshold )
+  public Unique( Pipe[] pipes, Fields uniqueFields, Include include, int capacity )
     {
-    this( null, pipes, uniqueFields, include, threshold );
+    this( null, pipes, uniqueFields, include, capacity );
     }
 
   /**
@@ -436,7 +436,7 @@ public class Unique extends SubAssembly
   @ConstructorProperties({"name", "pipes", "uniqueFields", "include"})
   public Unique( String name, Pipe[] pipes, Fields uniqueFields, Include include )
     {
-    this( name, pipes, uniqueFields, include, 10000 );
+    this( name, pipes, uniqueFields, include, 0 );
     }
 
   /**
