@@ -461,4 +461,32 @@ public class TrapPlatformTest extends PlatformTestCase
     validateLength( flow, 0 );
     validateLength( flow.openTrap(), 10, 4, Pattern.compile( ".*TrapPlatformTest.*" ) ); // 4 columns, not 1
     }
+
+  @Test(expected = CascadingException.class)
+  public void testTrapFailure() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( inputFileApache );
+    Scheme scheme = getPlatform().getTestFailScheme();
+    Tap trap2 = getPlatform().getTap( scheme, getOutputPath( "trapFailure/badTrap" ), SinkMode.REPLACE );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "trapFailure/tap" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Each( new Pipe( "firstPipe" ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new Each( new Pipe( "secondPipe", pipe ), new Fields( "ip" ), new TestFunction( new Fields( "test" ), null ), Fields.ALL );
+
+    Tap trap1 = getPlatform().getTextFile( getOutputPath( "trapFailure/firstTrap" ), SinkMode.REPLACE );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( "firstPipe", source )
+      .addTrap( "firstPipe", trap1 )
+      .addTrap( "secondPipe", trap2 )
+      .addTail( pipe )
+      .addSink( pipe, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+    }
   }
