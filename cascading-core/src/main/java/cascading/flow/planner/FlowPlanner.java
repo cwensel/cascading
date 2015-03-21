@@ -583,6 +583,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
             if( steps.isEmpty() )
               throw new PlannerException( "no steps partitioned from assembly: " + ruleResult.getRegistry().getName(), assembly );
 
+            Set<ElementGraph> stepSet = new HashSet<>( steps.size() );
+
+            for( ElementGraph step : steps )
+              {
+              if( !stepSet.add( step ) )
+                throw new PlannerException( "found duplicate step in flow: " + ruleResult.getRegistry().getName(), step );
+              }
+
             Set<FlowElement> elements = new HashSet<>();
 
             for( ElementGraph step : steps )
@@ -607,6 +615,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( nodes.isEmpty() )
               throw new PlannerException( "no nodes partitioned from step: " + ruleResult.getRegistry().getName(), step );
+
+            Set<ElementGraph> nodesSet = new HashSet<>( nodes.size() );
+
+            for( ElementGraph node : nodes )
+              {
+              if( !nodesSet.add( node ) )
+                throw new PlannerException( "found duplicate node in step: " + ruleResult.getRegistry().getName(), node );
+              }
 
             Set<FlowElement> elements = new HashSet<>();
 
@@ -633,6 +649,14 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( pipelines.isEmpty() )
               throw new PlannerException( "no pipelines partitioned from node: " + ruleResult.getRegistry().getName(), node );
+
+            Set<ElementGraph> pipelineSet = new HashSet<>( pipelines.size() );
+
+            for( ElementGraph pipeline : pipelines )
+              {
+              if( !pipelineSet.add( pipeline ) )
+                throw new PlannerException( "found duplicate pipeline in node: " + ruleResult.getRegistry().getName(), pipeline );
+              }
 
             Set<FlowElement> elements = new HashSet<>();
 
