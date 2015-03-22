@@ -48,11 +48,14 @@ import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
+import cascading.flow.planner.process.ProcessGraph;
+import cascading.flow.planner.process.ProcessModel;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
+import cascading.util.DOTProcessGraphWriter;
 import cascading.util.Pair;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -573,6 +576,38 @@ public class ElementGraphs
     return false;
     }
 
+  public static boolean printProcessGraph( String filename, final ElementGraph graph, final ProcessGraph<? extends ProcessModel> processGraph )
+    {
+    try
+      {
+      File parentFile = new File( filename ).getParentFile();
+
+      if( parentFile != null && !parentFile.exists() )
+        parentFile.mkdirs();
+
+      Writer writer = new FileWriter( filename );
+
+      DOTProcessGraphWriter graphWriter = new DOTProcessGraphWriter(
+        new IntegerNameProvider<Pair<ElementGraph, FlowElement>>(),
+        new FlowElementVertexNameProvider( graph, null ),
+        new ScopeEdgeNameProvider(),
+        new VertexAttributeProvider(), new EdgeAttributeProvider(),
+        new ProcessGraphNameProvider(), new ProcessGraphLabelProvider()
+      );
+
+      graphWriter.writeGraph( writer, graph, processGraph );
+
+      writer.close();
+      return true;
+      }
+    catch( IOException exception )
+      {
+      LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
+      }
+
+    return false;
+    }
+
   public static void insertFlowElementAfter( ElementGraph elementGraph, FlowElement previousElement, FlowElement flowElement )
     {
     Set<Scope> outgoing = new HashSet<>( elementGraph.outgoingEdgesOf( previousElement ) );
@@ -945,4 +980,23 @@ public class ElementGraphs
       return attributes;
       }
     }
+
+  private static class ProcessGraphNameProvider implements VertexNameProvider<ProcessModel>
+    {
+    @Override
+    public String getVertexName( ProcessModel processModel )
+      {
+      return "" + processModel.getOrdinal();
+      }
+    }
+
+  private static class ProcessGraphLabelProvider implements VertexNameProvider<ProcessModel>
+    {
+    @Override
+    public String getVertexName( ProcessModel processModel )
+      {
+      return "ordinal: " + processModel.getOrdinal() + "\\nid: " + processModel.getID();
+      }
+    }
+
   }

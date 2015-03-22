@@ -341,6 +341,14 @@ public class TraceWriter
 
     FlowNodeGraph flowNodeGraph = flowStep.getFlowNodeGraph();
 
+    String stepNodeElementGraphName = String.format( "%s/%04d-step-node-sub-graph.dot", rootPath, stepOrdinal );
+
+    flowNodeGraph.writeDOTNested( stepNodeElementGraphName, stepSubGraph );
+
+    String stepNodeGraphName = String.format( "%s/%04d-step-node-graph.dot", rootPath, stepOrdinal );
+
+    flowNodeGraph.writeDOT( stepNodeGraphName );
+
     Iterator<FlowNode> iterator = flowNodeGraph.getOrderedTopologicalIterator();
 
     while( iterator.hasNext() )
@@ -377,7 +385,7 @@ public class TraceWriter
 
     processLogger.logInfo( "writing final registry: {}", file );
 
-    try( PrintWriter writer = new PrintWriter( file ) )
+    try (PrintWriter writer = new PrintWriter( file ))
       {
       writer.println( "filename names winning rule registry" );
       }
@@ -400,7 +408,7 @@ public class TraceWriter
 
     file.getParentFile().mkdirs();
 
-    try( PrintWriter writer = new PrintWriter( file ) )
+    try (PrintWriter writer = new PrintWriter( file ))
       {
       Flow flow = plannerContext.getFlow();
 

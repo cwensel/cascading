@@ -1727,15 +1727,15 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     Pipe innerRhs;
 
     {
-    Pipe generatorLhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+    Pipe generatorLhs = new Each( new Pipe( "genLhsLhs", incoming ), new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
 
     generatorLhs = new Each( generatorLhs, new Identity() );
 
-    Pipe generatorRhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+    Pipe generatorRhs = new Each( new Pipe( "genRhsLhs", incoming ), new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
 
-    Pipe uniques = new Each( generatorLhs, new Identity() );
+    Pipe uniques = new Each( new Pipe( "uniquesLhs", generatorLhs ), new Identity() );
 
-    uniques = new GroupBy( "uniquesLhs", uniques, new Fields( "word" ) );
+    uniques = new GroupBy( uniques, new Fields( "word" ) );
 
     uniques = new Every( uniques, new Fields( "word" ), new First( Fields.ARGS ), Fields.REPLACE );
 
@@ -1754,15 +1754,15 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     }
 
     {
-    Pipe generatorLhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+    Pipe generatorLhs = new Each( new Pipe( "genLhsRhs", incoming ), new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
 
     generatorLhs = new Each( generatorLhs, new Identity() );
 
-    Pipe generatorRhs = new Each( incoming, new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
+    Pipe generatorRhs = new Each( new Pipe( "genRhsRhs", incoming ), new Fields( "line" ), new RegexSplitGenerator( new Fields( "word" ), "\\s" ) );
 
-    Pipe uniques = new Each( generatorLhs, new Identity() );
+    Pipe uniques = new Each( new Pipe( "uniquesRhs", generatorLhs ), new Identity() );
 
-    uniques = new GroupBy( "uniquesRhs", uniques, new Fields( "word" ) );
+    uniques = new GroupBy( uniques, new Fields( "word" ) );
 
     uniques = new Every( uniques, new Fields( "word" ), new First( Fields.ARGS ), Fields.REPLACE );
 

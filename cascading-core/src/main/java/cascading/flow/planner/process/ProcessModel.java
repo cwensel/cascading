@@ -34,6 +34,8 @@ import cascading.tap.Tap;
  */
 public interface ProcessModel
   {
+  String getID();
+
   int getOrdinal();
 
   String getName();

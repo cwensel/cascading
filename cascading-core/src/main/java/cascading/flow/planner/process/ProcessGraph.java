@@ -41,6 +41,8 @@ import cascading.flow.FlowElements;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
+import cascading.flow.planner.graph.Extent;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -154,6 +156,31 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, comparator ) );
     }
 
+  public List<ElementGraph> getElementGraphs( FlowElement flowElement )
+    {
+    List<Process> elementProcesses = getElementProcesses( flowElement );
+
+    List<ElementGraph> elementGraphs = new ArrayList<>();
+
+    for( Process elementProcess : elementProcesses )
+      elementGraphs.add( elementProcess.getElementGraph() );
+
+    return elementGraphs;
+    }
+
+  public List<Process> getElementProcesses( FlowElement flowElement )
+    {
+    List<Process> processes = new ArrayList<>();
+
+    for( Process process : vertexSet() )
+      {
+      if( process.getElementGraph().vertexSet().contains( flowElement ) )
+        processes.add( process );
+      }
+
+    return processes;
+    }
+
   public List<Process> getElementSourceProcesses( FlowElement flowElement )
     {
     List<Process> sources = new ArrayList<>();
@@ -178,6 +205,50 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
       }
 
     return sinks;
+    }
+
+  public Set<FlowElement> getAllSourceElements()
+    {
+    Set<FlowElement> results = new HashSet<>();
+
+    for( Process process : vertexSet() )
+      results.addAll( process.getSourceElements() );
+
+    return results;
+    }
+
+  public Set<FlowElement> getAllSinkElements()
+    {
+    Set<FlowElement> results = new HashSet<>();
+
+    for( Process process : vertexSet() )
+      results.addAll( process.getSinkElements() );
+
+    return results;
+    }
+
+  /**
+   * All elements, from the given ElementGraph, that belong to two or more processes, that are not sink or source elements that
+   * connect processes.
+   *
+   * @return Set
+   */
+  public Set<FlowElement> getDuplicatedElements( ElementGraph elementGraph )
+    {
+    Set<FlowElement> results = new HashSet<>();
+
+    for( FlowElement flowElement : elementGraph.vertexSet() )
+      {
+      if( getElementProcesses( flowElement ).size() > 1 )
+        results.add( flowElement );
+      }
+
+    results.remove( Extent.head );
+    results.remove( Extent.tail );
+    results.removeAll( getAllSourceElements() );
+    results.removeAll( getAllSinkElements() );
+
+    return results;
     }
 
   /**
@@ -238,6 +309,11 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
       {
       LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
+    }
+
+  public void writeDOTNested( String filename, ElementGraph graph )
+    {
+    ElementGraphs.printProcessGraph( filename, graph, this );
     }
 
   public static class ProcessEdge<Process extends ProcessModel> implements Serializable
