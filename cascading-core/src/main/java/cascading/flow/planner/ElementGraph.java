@@ -45,6 +45,7 @@ import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
+import cascading.property.AppProps;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -489,7 +490,9 @@ public class ElementGraph extends SimpleDirectedGraph<FlowElement, Scope>
             if( platformInfo != null )
               versionString = ( versionString == null ? "" : versionString + "\\n" ) + platformInfo;
 
-            return versionString == null ? result : result + "\\n" + versionString;
+            result = versionString == null ? result : result + "\\n" + versionString;
+
+            return result + "\\napp id: " + AppProps.getApplicationID( null );
             }
 
           if( object instanceof Tap || object instanceof Extent )
