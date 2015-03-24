@@ -386,7 +386,7 @@ public abstract class FlowPlanner<F extends Flow, Config>
     for( String name : flowDef.getCheckpoints().keySet() )
       {
       if( !names.contains( name ) )
-        throw new PlannerException( "checkpoint name not found in assembly: '" + name + "'" );
+        throw new PlannerException( "named checkpoint declared in FlowDef, but no named branch found in pipe assembly: '" + name + "'" );
 
       Set<Pipe> pipes = new HashSet<Pipe>( asList( Pipe.named( name, flowTails ) ) );
 
@@ -399,10 +399,10 @@ public abstract class FlowPlanner<F extends Flow, Config>
         }
 
       if( count == 0 )
-        throw new PlannerException( "no checkpoint with name found in assembly: '" + name + "'" );
+        throw new PlannerException( "no checkpoint pipe with branch name found in pipe assembly: '" + name + "'" );
 
       if( count > 1 )
-        throw new PlannerException( "more than one checkpoint with name found in assembly: '" + name + "'" );
+        throw new PlannerException( "more than one checkpoint pipe with branch name found in pipe assembly: '" + name + "'" );
       }
     }
 
