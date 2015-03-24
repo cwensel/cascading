@@ -438,6 +438,13 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
         continue;
 
       Configuration sourceConf = sourceConfigs.get( flowElement );
+
+      // not setting the new-api value could result in failures if not set by the Scheme
+      if( sourceConf.get( "mapred.mapper.new-api" ) == null )
+        HadoopUtil.setNewApi( sourceConf, sourceConf.get( "mapred.input.format.class", sourceConf.get( "mapreduce.job.inputformat.class" ) ) );
+
+      // unfortunately we cannot just load the input format and set it on the builder with also pulling all other
+      // values out of the configuration.
       MRInput.MRInputConfigBuilder configBuilder = MRInput.createConfigBuilder( sourceConf, null );
 
       // grouping splits loses file name info, breaking partition tap default impl

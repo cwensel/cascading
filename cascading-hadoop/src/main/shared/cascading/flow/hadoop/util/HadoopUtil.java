@@ -802,6 +802,24 @@ public class HadoopUtil
     conf.set( "tez.runtime.optimize.local.fetch", "true" );
     }
 
+  public static boolean setNewApi( Configuration conf, String className )
+    {
+    if( className == null ) // silently return and let the error be caught downstream
+      return false;
+
+    boolean isStable = className.startsWith( "org.apache.hadoop.mapred." );
+    boolean isNew = className.startsWith( "org.apache.hadoop.mapreduce." );
+
+    if( isStable )
+      conf.setBoolean( "mapred.mapper.new-api", false );
+    else if( isNew )
+      conf.setBoolean( "mapred.mapper.new-api", true );
+    else
+      throw new IllegalStateException( "cannot determine if class denotes stable or new api, please set 'mapred.mapper.new-api' to the appropriate value" );
+
+    return true;
+    }
+
   public static void addInputPath( Configuration conf, Path path )
     {
     Path workingDirectory = getWorkingDirectory( conf );
