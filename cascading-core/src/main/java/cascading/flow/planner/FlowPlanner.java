@@ -565,7 +565,10 @@ public abstract class FlowPlanner<F extends Flow, Config>
 
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
-      String message = String.format( "could not build flow from assembly: [%s]", cause.getMessage() );
+      String message = "could not build flow from assembly";
+
+      if( cause.getMessage() != null )
+        message = String.format( "%s: [%s]", message, cause.getMessage() );
 
       if( cause instanceof OperatorException )
         return new PlannerException( message, cause, elementGraph );
@@ -579,7 +582,11 @@ public abstract class FlowPlanner<F extends Flow, Config>
       {
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
-      String message = String.format( "could not build flow from assembly: [%s]", exception.getMessage() );
+      String message = "could not build flow from assembly";
+
+      if( exception.getMessage() != null )
+        message = String.format( "%s: [%s]", message, exception.getMessage() );
+
       return new PlannerException( message, exception, elementGraph );
       }
     }
