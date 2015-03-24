@@ -126,7 +126,17 @@ public class Util
     return narrowSet( type, collection.iterator() );
     }
 
+  public static <T> Set<T> narrowSet( Class<T> type, Collection collection, boolean include )
+    {
+    return narrowSet( type, collection.iterator(), include );
+    }
+
   public static <T> Set<T> narrowSet( Class<T> type, Iterator iterator )
+    {
+    return narrowSet( type, iterator, true );
+    }
+
+  public static <T> Set<T> narrowSet( Class<T> type, Iterator iterator, boolean include )
     {
     Set<T> set = new HashSet<>();
 
@@ -134,11 +144,29 @@ public class Util
       {
       Object o = iterator.next();
 
-      if( type.isInstance( o ) )
+      if( type.isInstance( o ) == include )
         set.add( (T) o );
       }
 
     return set;
+    }
+
+  public static <T> boolean contains( Class<T> type, Collection collection )
+    {
+    return contains( type, collection.iterator() );
+    }
+
+  public static <T> boolean contains( Class<T> type, Iterator iterator )
+    {
+    while( iterator.hasNext() )
+      {
+      Object o = iterator.next();
+
+      if( type.isInstance( o ) )
+        return true;
+      }
+
+    return false;
     }
 
   public static synchronized String createUniqueIDWhichStartsWithAChar()

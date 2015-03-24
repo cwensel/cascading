@@ -35,6 +35,7 @@ import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
+import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.stream.annotations.StreamMode;
@@ -133,6 +134,12 @@ public class BaseFlowNode implements Serializable, FlowNode
   public ElementGraph getElementGraph()
     {
     return nodeSubGraph;
+    }
+
+  @Override
+  public ElementGraph getMaskedElementGraph()
+    {
+    return new ElementMaskSubGraph( nodeSubGraph, Extent.head, Extent.tail );
     }
 
   @Override

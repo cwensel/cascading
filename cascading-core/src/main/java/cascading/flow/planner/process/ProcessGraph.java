@@ -151,6 +151,18 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     } );
     }
 
+  public Iterator<Process> getOrdinalTopologicalIterator()
+    {
+    return getOrderedTopologicalIterator( new Comparator<Process>()
+    {
+    @Override
+    public int compare( Process lhs, Process rhs )
+      {
+      return Integer.valueOf( lhs.getOrdinal() ).compareTo( rhs.getOrdinal() );
+      }
+    } );
+    }
+
   public Iterator<Process> getOrderedTopologicalIterator( Comparator<Process> comparator )
     {
     return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, comparator ) );
@@ -175,6 +187,31 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     for( Process process : vertexSet() )
       {
       if( process.getElementGraph().vertexSet().contains( flowElement ) )
+        processes.add( process );
+      }
+
+    return processes;
+    }
+
+  public List<ElementGraph> getElementGraphs( Scope scope )
+    {
+    List<Process> elementProcesses = getElementProcesses( scope );
+
+    List<ElementGraph> elementGraphs = new ArrayList<>();
+
+    for( Process elementProcess : elementProcesses )
+      elementGraphs.add( elementProcess.getElementGraph() );
+
+    return elementGraphs;
+    }
+
+  public List<Process> getElementProcesses( Scope scope )
+    {
+    List<Process> processes = new ArrayList<>();
+
+    for( Process process : vertexSet() )
+      {
+      if( process.getElementGraph().edgeSet().contains( scope ) )
         processes.add( process );
       }
 
@@ -247,6 +284,36 @@ public abstract class ProcessGraph<Process extends ProcessModel> extends SimpleD
     results.remove( Extent.tail );
     results.removeAll( getAllSourceElements() );
     results.removeAll( getAllSinkElements() );
+
+    return results;
+    }
+
+  public Set<ElementGraph> getIdentityElementGraphs()
+    {
+    Set<ElementGraph> results = new HashSet<>();
+
+    for( Process process : getIdentityProcesses() )
+      results.add( process.getElementGraph() );
+
+    return results;
+    }
+
+  /**
+   * Returns a set of processes that perform no internal operations.
+   * <p/>
+   * for example if a FlowNode only has a Merge source and a GroupBy sink.
+   *
+   * @return
+   */
+  public Set<Process> getIdentityProcesses()
+    {
+    Set<Process> results = new HashSet<>();
+
+    for( Process process : vertexSet() )
+      {
+      if( ProcessModels.isIdentity( process ) )
+        results.add( process );
+      }
 
     return results;
     }

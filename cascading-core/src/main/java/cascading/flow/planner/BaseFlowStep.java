@@ -44,6 +44,8 @@ import cascading.flow.FlowStepListener;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
+import cascading.flow.planner.graph.ElementMaskSubGraph;
+import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.management.CascadingServices;
@@ -281,6 +283,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   public ElementGraph getElementGraph()
     {
     return graph;
+    }
+
+  @Override
+  public ElementGraph getMaskedElementGraph()
+    {
+    return new ElementMaskSubGraph( graph, Extent.head, Extent.tail );
     }
 
   protected EnumMultiMap getAnnotations()

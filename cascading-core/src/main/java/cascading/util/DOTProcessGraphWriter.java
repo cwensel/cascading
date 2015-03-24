@@ -36,6 +36,8 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.process.ProcessGraph;
 import cascading.flow.planner.process.ProcessModel;
+import cascading.flow.planner.process.ProcessModels;
+import cascading.tap.Tap;
 import org.jgrapht.ext.ComponentAttributeProvider;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
@@ -77,21 +79,14 @@ public class DOTProcessGraphWriter
 
     out.println( "digraph G {" );
 
-    Set<FlowElement> spanElements = new HashSet<>();
-
-    spanElements.add( Extent.head );
-    spanElements.add( Extent.tail );
-    spanElements.addAll( processGraph.getAllSourceElements() );
-    spanElements.addAll( processGraph.getAllSinkElements() );
-    spanElements.removeAll( processGraph.getSourceTaps() );
-    spanElements.removeAll( processGraph.getSinkTaps() );
-
+    Set<FlowElement> spanElements = getSpanElements( processGraph );
+    Set<FlowElement> identityElements = getIdentityElements( processGraph );
     Set<FlowElement> duplicatedElements = processGraph.getDuplicatedElements( parentGraph );
 
-    writeVertexSet( processGraph, parentGraph, out, spanElements, true, duplicatedElements );
-    writeEdgeSet( processGraph, parentGraph, parentGraph, out, spanElements, true );
+    writeVertexSet( null, parentGraph, parentGraph, out, spanElements, true, duplicatedElements, identityElements );
+    writeEdgeSet( processGraph, parentGraph, parentGraph, out, spanElements, true, identityElements );
 
-    Iterator<? extends ProcessModel> topologicalIterator = processGraph.getTopologicalIterator();
+    Iterator<? extends ProcessModel> topologicalIterator = processGraph.getOrdinalTopologicalIterator();
 
     while( topologicalIterator.hasNext() )
       {
@@ -108,8 +103,8 @@ public class DOTProcessGraphWriter
       out.println( "\";" );
       out.println();
 
-      writeVertexSet( processGraph, processModel.getElementGraph(), out, spanElements, false, duplicatedElements );
-      writeEdgeSet( processGraph, parentGraph, processModel.getElementGraph(), out, spanElements, false );
+      writeVertexSet( processModel, parentGraph, processModel.getElementGraph(), out, spanElements, false, duplicatedElements, identityElements );
+      writeEdgeSet( processGraph, parentGraph, processModel.getElementGraph(), out, spanElements, false, identityElements );
 
       out.println( "}" );
       }
@@ -119,7 +114,43 @@ public class DOTProcessGraphWriter
     out.flush();
     }
 
-  protected void writeEdgeSet( ProcessGraph<? extends ProcessModel> processGraph, ElementGraph parentGraph, ElementGraph currentGraph, PrintWriter out, Set<FlowElement> spansClusters, boolean onlySpans )
+  protected Set<FlowElement> getIdentityElements( ProcessGraph<? extends ProcessModel> processGraph )
+    {
+    Set<FlowElement> identityElements;
+    identityElements = new HashSet<>();
+    // force identity nodes to be visualized
+    for( ElementGraph elementGraph : processGraph.getIdentityElementGraphs() )
+      {
+      if( !Util.contains( Tap.class, elementGraph.vertexSet() ) )
+        identityElements.addAll( elementGraph.vertexSet() );
+      }
+
+    identityElements.remove( Extent.head );
+    identityElements.remove( Extent.tail );
+
+    return identityElements;
+    }
+
+  protected Set<FlowElement> getSpanElements( ProcessGraph<? extends ProcessModel> processGraph )
+    {
+    Set<FlowElement> spanElements = new HashSet<>();
+
+    spanElements.add( Extent.head );
+    spanElements.add( Extent.tail );
+    spanElements.addAll( processGraph.getAllSourceElements() );
+    spanElements.addAll( processGraph.getAllSinkElements() );
+
+    // forces tap to be within a node
+    spanElements.removeAll( processGraph.getSourceTaps() );
+    spanElements.removeAll( processGraph.getSinkTaps() );
+    return spanElements;
+    }
+
+  /**
+   * if renderSpans == true, write edges if either side crosses a node boundary.
+   * if renderSpans == false, only write edged that are contained in a node
+   */
+  protected void writeEdgeSet( ProcessGraph<? extends ProcessModel> processGraph, ElementGraph parentGraph, ElementGraph currentGraph, PrintWriter out, Set<FlowElement> spansClusters, boolean renderSpans, Set<FlowElement> identityElements )
     {
     out.println();
 
@@ -132,19 +163,34 @@ public class DOTProcessGraphWriter
       boolean targetSpans = spansClusters.contains( edgeTarget );
       boolean spans = sourceSpans || targetSpans;
 
-      if( spans != onlySpans )
+      boolean sourceIdentity = identityElements.contains( edgeSource );
+      boolean targetIdentity = identityElements.contains( edgeTarget );
+
+      if( sourceIdentity && targetIdentity )
+        spans = false;
+
+      if( spans != renderSpans )
         continue;
 
       List<ElementGraph> sourceGraphs = Arrays.asList( currentGraph );
       List<ElementGraph> targetGraphs = Arrays.asList( currentGraph );
 
-      if( sourceSpans )
+      if( sourceIdentity && targetIdentity )
+        {
+        sourceGraphs = Arrays.asList( parentGraph );
+        targetGraphs = Arrays.asList( parentGraph );
+        }
+      else if( sourceSpans && targetSpans )
+        {
+        sourceGraphs = Arrays.asList( currentGraph );
+        targetGraphs = Arrays.asList( currentGraph );
+        }
+      else if( sourceSpans )
         {
         sourceGraphs = Arrays.asList( parentGraph );
         targetGraphs = processGraph.getElementGraphs( edgeTarget );
         }
-
-      if( targetSpans )
+      else if( targetSpans )
         {
         sourceGraphs = processGraph.getElementGraphs( edgeSource );
         targetGraphs = Arrays.asList( parentGraph );
@@ -153,40 +199,55 @@ public class DOTProcessGraphWriter
       for( ElementGraph sourceGraph : sourceGraphs )
         {
         for( ElementGraph targetGraph : targetGraphs )
-          {
-          String source = getVertexID( sourceGraph, edgeSource );
-          String target = getVertexID( targetGraph, edgeTarget );
-
-          out.print( INDENT + source + CONNECTOR + target );
-
-          String labelName = null;
-
-          if( edgeLabelProvider != null )
-            labelName = edgeLabelProvider.getEdgeName( scope );
-
-          Map<String, String> attributes = null;
-
-          if( edgeAttributeProvider != null )
-            attributes = edgeAttributeProvider.getComponentAttributes( scope );
-
-          renderAttributes( out, labelName, attributes );
-
-          out.println( ";" );
-          }
+          writeEdge( out, scope, edgeSource, edgeTarget, sourceGraph, targetGraph );
         }
       }
     }
 
-  protected void writeVertexSet( ProcessGraph<? extends ProcessModel> processGraph, ElementGraph elementGraph, PrintWriter out, Set<FlowElement> spansClusters, boolean onlySpans, Set<FlowElement> duplicatedElements )
+  private void writeEdge( PrintWriter out, Scope scope, FlowElement edgeSource, FlowElement edgeTarget, ElementGraph sourceGraph, ElementGraph targetGraph )
     {
-    for( FlowElement flowElement : elementGraph.vertexSet() )
+    String source = getVertexID( sourceGraph, edgeSource );
+    String target = getVertexID( targetGraph, edgeTarget );
+
+    out.print( INDENT + source + CONNECTOR + target );
+
+    String labelName = null;
+
+    if( edgeLabelProvider != null )
+      labelName = edgeLabelProvider.getEdgeName( scope );
+
+    Map<String, String> attributes = null;
+
+    if( edgeAttributeProvider != null )
+      attributes = edgeAttributeProvider.getComponentAttributes( scope );
+
+    renderAttributes( out, labelName, attributes );
+
+    out.println( ";" );
+    }
+
+  protected void writeVertexSet( ProcessModel processModel, ElementGraph parentGraph, ElementGraph currentGraph, PrintWriter out, Set<FlowElement> spansClusters, boolean onlySpans, Set<FlowElement> duplicatedElements, Set<FlowElement> identityElements )
+    {
+    boolean isIdentityGraph = false;
+
+    if( processModel != null )
+      isIdentityGraph = ProcessModels.isIdentity( processModel, Tap.class );
+
+    for( FlowElement flowElement : currentGraph.vertexSet() )
       {
       boolean spans = spansClusters.contains( flowElement );
+      boolean isIdentity = identityElements.contains( flowElement );
+
+      if( isIdentity && isIdentityGraph )
+        continue;
+
+      if( isIdentity )
+        spans = false;
 
       if( spans != onlySpans )
         continue;
 
-      out.print( INDENT + getVertexID( elementGraph, flowElement ) );
+      out.print( INDENT + getVertexID( isIdentity ? parentGraph : currentGraph, flowElement ) );
 
       String labelName = null;
 
