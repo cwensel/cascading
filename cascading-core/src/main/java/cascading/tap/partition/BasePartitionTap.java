@@ -207,12 +207,12 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         LOG.error( "exception while closing TupleEntryCollector {}", path, exception );
 
         boolean failOnError = false;
-        Object failProperty = flowProcess.getProperty( PartitionTapProps.FAIL_ON_CLOSE ) ;
+        Object failProperty = flowProcess.getProperty( PartitionTapProps.FAIL_ON_CLOSE );
 
-        if ( failProperty != null )
+        if( failProperty != null )
           failOnError = Boolean.parseBoolean( failProperty.toString() );
 
-        if ( failOnError )
+        if( failOnError )
           throw new TapException( exception );
         }
       }
@@ -353,6 +353,18 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   public boolean deleteResource( Config conf ) throws IOException
     {
     return keepParentOnDelete || parent.deleteResource( conf );
+    }
+
+  @Override
+  public boolean prepareResourceForRead( Config conf ) throws IOException
+    {
+    return parent.prepareResourceForRead( conf );
+    }
+
+  @Override
+  public boolean prepareResourceForWrite( Config conf ) throws IOException
+    {
+    return parent.prepareResourceForWrite( conf );
     }
 
   @Override

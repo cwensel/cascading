@@ -155,21 +155,40 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
       blockOnPredecessors();
 
-      applyFlowStepConfStrategy();
+      prepareResources(); // throws Throwable to skip next steps
+
+      applyFlowStepConfStrategy(); // prepare resources beforehand
 
       blockOnJob();
       }
     catch( Throwable throwable )
       {
       dumpDebugInfo();
+
       this.throwable = throwable;
-      flowStep.fireOnThrowable( throwable );
+
+      if( !flowStepStats.isFinished() )
+        {
+        flowStepStats.markFailed( this.throwable );
+        flowStep.fireOnThrowable( this.throwable );
+        }
       }
     finally
       {
       latch.countDown();
       flowStepStats.cleanup();
       }
+    }
+
+  private void prepareResources() throws Throwable
+    {
+    if( stop ) // true if a predecessor failed
+      return;
+
+    Throwable throwable = flowStep.prepareResources();
+
+    if( throwable != null )
+      throw throwable;
     }
 
   private synchronized boolean markStarted()
@@ -237,20 +256,20 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         throw ( (OutOfMemoryError) getThrowable() );
 
       if( !isRemoteExecution() )
-        throwable = new FlowException( "local step failed", getThrowable() );
+        this.throwable = new FlowException( "local step failed", getThrowable() );
       else
-        throwable = new FlowException( "step failed: " + stepName + ", with job id: " + internalJobId() + ", please see cluster logs for failure messages" );
+        this.throwable = new FlowException( "step failed: " + stepName + ", with job id: " + internalJobId() + ", please see cluster logs for failure messages" );
       }
     else
       {
       if( internalNonBlockingIsSuccessful() && !flowStepStats.isFinished() )
         {
-        throwable = flowStep.commitSinks();
+        this.throwable = flowStep.commitSinks();
 
-        if( throwable != null )
+        if( this.throwable != null )
           {
-          flowStepStats.markFailed( throwable );
-          flowStep.fireOnThrowable( throwable );
+          flowStepStats.markFailed( this.throwable );
+          flowStep.fireOnThrowable( this.throwable );
           }
         else
           {

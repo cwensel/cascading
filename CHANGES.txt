@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.7.0 [unreleased]
 
+  Added c.t.Tap#prepareResourceForRead() and c.t.Tap#prepareResourceForWrite() methods to allow for client side tap
+  resource initialization.
+
   Fixed issue where c.t.h.PartitionTap would not throw an error if 'cascading.hadoop.hfs.combine.files' was enabled.
 
   Fixed issue where a failure to open or write a trap would pass the throwable up to the prior trap. Failures on trap

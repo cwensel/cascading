@@ -416,6 +416,68 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
     return sinkModified;
     }
 
+  protected Throwable prepareResources()
+    {
+    Throwable throwable = prepareResources( getSources(), false );
+
+    if( throwable == null )
+      throwable = prepareResources( getSinks(), true );
+
+    if( throwable == null )
+      throwable = prepareResources( getTraps(), true );
+
+    return throwable;
+    }
+
+  private Throwable prepareResources( Collection<Tap> taps, boolean forWrite )
+    {
+    Throwable throwable = null;
+
+    for( Tap tap : taps )
+      {
+      throwable = prepareResource( tap, forWrite );
+
+      if( throwable != null )
+        break;
+      }
+
+    return throwable;
+    }
+
+  private Throwable prepareResource( Tap tap, boolean forWrite )
+    {
+    Throwable throwable = null;
+
+    try
+      {
+      boolean result;
+
+      if( forWrite )
+        result = tap.prepareResourceForWrite( getConfig() );
+      else
+        result = tap.prepareResourceForRead( getConfig() );
+
+      if( !result )
+        {
+        String message = String.format( "unable to prepare tap for %s: %s", forWrite ? "write" : "read", tap.getFullIdentifier( getConfig() ) );
+
+        logError( message, null );
+
+        throwable = new FlowException( message );
+        }
+      }
+    catch( Throwable exception )
+      {
+      String message = String.format( "unable to prepare tap for %s: %s", forWrite ? "write" : "read", tap.getFullIdentifier( getConfig() ) );
+
+      logError( message, exception );
+
+      throwable = new FlowException( message, exception );
+      }
+
+    return throwable;
+    }
+
   protected Throwable commitSinks()
     {
     Throwable throwable = null;
@@ -692,7 +754,6 @@ public abstract class BaseFlowStep<Config> implements Serializable, FlowStep<Con
       {
       if( LOG.isDebugEnabled() )
         logDebug( "firing onThrowable event: " + getListeners().size() );
-
 
       for( Object flowStepListener : getListeners() )
         ( (FlowStepListener) flowStepListener ).onStepThrowable( this, throwable );

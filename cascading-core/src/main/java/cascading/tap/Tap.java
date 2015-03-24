@@ -464,17 +464,60 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public abstract boolean deleteResource( Config conf ) throws IOException;
 
   /**
+   * Method prepareResourceForRead allows the underlying resource to be notified when reading will begin.
+   * <p/>
+   * This method will be called client side so that any remote or external resources can be initialized.
+   * <p/>
+   * If this method returns {@code false}, an exception will be thrown halting the current Flow.
+   * <p/>
+   * In most cases, resource initialization should happen in the {@link #openForRead(FlowProcess, Object)}  method.
+   * <p/>
+   * This allows for initialization of cluster side resources, like a JDBC driver used to read data from a database,
+   * that cannot be passed client to cluster.
+   *
+   * @param conf of type Config
+   * @return returns true if successful
+   * @throws IOException
+   */
+  public boolean prepareResourceForRead( Config conf ) throws IOException
+    {
+    return true;
+    }
+
+  /**
+   * Method prepareResourceForWrite allows the underlying resource to be notified when writing will begin.
+   * <p/>
+   * This method will be called once client side so that any remote or external resources can be initialized.
+   * <p/>
+   * If this method returns {@code false}, an exception will be thrown halting the current Flow.
+   * <p/>
+   * In most cases, resource initialization should happen in the {@link #openForWrite(FlowProcess, Object)} method.
+   * <p/>
+   * This allows for initialization of cluster side resources, like a JDBC driver used to write data to a database,
+   * that cannot be passed client to cluster.
+   * <p/>
+   * In the above JDBC example, overriding this method will allow for testing for the existence of and/or creating
+   * a remote table used by all individual cluster side tasks.
+   *
+   * @param conf of type Config
+   * @return returns true if successful
+   * @throws IOException
+   */
+  public boolean prepareResourceForWrite( Config conf ) throws IOException
+    {
+    return true;
+    }
+
+  /**
    * Method commitResource allows the underlying resource to be notified when all write processing is
    * successful so that any additional cleanup or processing may be completed.
    * <p/>
    * See {@link #rollbackResource(Object)} to handle cleanup in the face of failures.
    * <p/>
-   * This method is invoked once "client side" and not in the cluster, if any.
+   * This method is invoked once client side and not in the cluster, if any.
    * <p/>
    * If other sink Tap instance in a given Flow fail on commitResource after called on this instance,
    * rollbackResource will not be called.
-   * <p/>
-   * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
    *
    * @param conf of type Config
    * @return returns true if successful
@@ -491,9 +534,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * <p/>
    * See {@link #commitResource(Object)} to handle cleanup when the write has successfully completed.
    * <p/>
-   * This method is invoked once "client side" and not in the cluster, if any.
-   * <p/>
-   * <emphasis>This is an experimental API and subject to refinement!!</emphasis>
+   * This method is invoked once client side and not in the cluster, if any.
    *
    * @param conf of type Config
    * @return returns true if successful

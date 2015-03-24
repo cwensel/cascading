@@ -57,6 +57,12 @@ public abstract class SinkTap<Config, Output> extends Tap<Config, Void, Output>
     }
 
   @Override
+  public boolean prepareResourceForRead( Config conf ) throws IOException
+    {
+    throw new UnsupportedOperationException( "unable to prepare resource for read via a SinkTap instance" );
+    }
+
+  @Override
   public boolean isSource()
     {
     return false;

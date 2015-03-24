@@ -70,6 +70,12 @@ public abstract class SourceTap<Config, Input> extends Tap<Config, Input, Void>
     }
 
   @Override
+  public boolean prepareResourceForWrite( Config conf ) throws IOException
+    {
+    throw new UnsupportedOperationException( "unable to prepare resource for write via a SourceTap instance" );
+    }
+
+  @Override
   public boolean createResource( Config conf ) throws IOException
     {
     throw new UnsupportedOperationException( "unable to make dirs via a SourceTap instance" );

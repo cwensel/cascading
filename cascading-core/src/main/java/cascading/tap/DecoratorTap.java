@@ -60,7 +60,7 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
    * @param metaInfo meta-information about the current Tap
    * @param original the decorated Tap instance
    */
-  @ConstructorProperties( {"metaInfo", "original"} )
+  @ConstructorProperties({"metaInfo", "original"})
   public DecoratorTap( MetaInfo metaInfo, Tap<Config, Input, Output> original )
     {
     setMetaInfo( metaInfo );
@@ -73,7 +73,7 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
    *
    * @param original the decorated Tap instance
    */
-  @ConstructorProperties( {"original"} )
+  @ConstructorProperties({"original"})
   public DecoratorTap( Tap<Config, Input, Output> original )
     {
     setOriginal( original );
@@ -114,21 +114,25 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
     return original.getTrace();
     }
 
+  @Override
   public void flowConfInit( Flow<Config> flow )
     {
     original.flowConfInit( flow );
     }
 
+  @Override
   public void sourceConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
     original.sourceConfInit( flowProcess, conf );
     }
 
+  @Override
   public void sinkConfInit( FlowProcess<Config> flowProcess, Config conf )
     {
     original.sinkConfInit( flowProcess, conf );
     }
 
+  @Override
   public String getIdentifier()
     {
     return original.getIdentifier();
@@ -146,21 +150,25 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
     return original.getSinkFields();
     }
 
+  @Override
   public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess, Input input ) throws IOException
     {
     return original.openForRead( flowProcess, input );
     }
 
+  @Override
   public TupleEntryIterator openForRead( FlowProcess<Config> flowProcess ) throws IOException
     {
     return original.openForRead( flowProcess );
     }
 
+  @Override
   public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess, Output output ) throws IOException
     {
     return original.openForWrite( flowProcess, output );
     }
 
+  @Override
   public TupleEntryCollector openForWrite( FlowProcess<Config> flowProcess ) throws IOException
     {
     return original.openForWrite( flowProcess );
@@ -172,21 +180,25 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
     return original.outgoingScopeFor( incomingScopes );
     }
 
+  @Override
   public Fields retrieveSourceFields( FlowProcess<Config> flowProcess )
     {
     return original.retrieveSourceFields( flowProcess );
     }
 
+  @Override
   public void presentSourceFields( FlowProcess<Config> flowProcess, Fields fields )
     {
     original.presentSourceFields( flowProcess, fields );
     }
 
+  @Override
   public Fields retrieveSinkFields( FlowProcess<Config> flowProcess )
     {
     return original.retrieveSinkFields( flowProcess );
     }
 
+  @Override
   public void presentSinkFields( FlowProcess<Config> flowProcess, Fields fields )
     {
     original.presentSinkFields( flowProcess, fields );
@@ -204,61 +216,85 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
     return original.resolveIncomingOperationPassThroughFields( incomingScope );
     }
 
+  @Override
   public String getFullIdentifier( FlowProcess<Config> flowProcess )
     {
     return original.getFullIdentifier( flowProcess );
     }
 
+  @Override
   public String getFullIdentifier( Config conf )
     {
     return original.getFullIdentifier( conf );
     }
 
+  @Override
   public boolean createResource( FlowProcess<Config> flowProcess ) throws IOException
     {
     return original.createResource( flowProcess );
     }
 
+  @Override
   public boolean createResource( Config conf ) throws IOException
     {
     return original.createResource( conf );
     }
 
+  @Override
   public boolean deleteResource( FlowProcess<Config> flowProcess ) throws IOException
     {
     return original.deleteResource( flowProcess );
     }
 
+  @Override
   public boolean deleteResource( Config conf ) throws IOException
     {
     return original.deleteResource( conf );
     }
 
+  @Override
+  public boolean prepareResourceForRead( Config conf ) throws IOException
+    {
+    return original.prepareResourceForRead( conf );
+    }
+
+  @Override
+  public boolean prepareResourceForWrite( Config conf ) throws IOException
+    {
+    return original.prepareResourceForWrite( conf );
+    }
+
+  @Override
   public boolean commitResource( Config conf ) throws IOException
     {
     return original.commitResource( conf );
     }
 
+  @Override
   public boolean rollbackResource( Config conf ) throws IOException
     {
     return original.rollbackResource( conf );
     }
 
+  @Override
   public boolean resourceExists( FlowProcess<Config> flowProcess ) throws IOException
     {
     return original.resourceExists( flowProcess );
     }
 
+  @Override
   public boolean resourceExists( Config conf ) throws IOException
     {
     return original.resourceExists( conf );
     }
 
+  @Override
   public long getModifiedTime( FlowProcess<Config> flowProcess ) throws IOException
     {
     return original.getModifiedTime( flowProcess );
     }
 
+  @Override
   public long getModifiedTime( Config conf ) throws IOException
     {
     return original.getModifiedTime( conf );
