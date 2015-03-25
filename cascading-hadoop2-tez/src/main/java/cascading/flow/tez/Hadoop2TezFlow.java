@@ -40,8 +40,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tez.common.counters.TaskCounter;
 import org.apache.tez.dag.api.TezConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static cascading.flow.FlowProps.MAX_CONCURRENT_STEPS;
 import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
@@ -49,7 +47,7 @@ import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
 /**
  * Class HadoopFlow is the Apache Hadoop specific implementation of a {@link cascading.flow.Flow}.
  * <p/>
- * HadoopFlow must be created through a {@link cascading.flow.hadoop.HadoopFlowConnector} instance.
+ * HadoopFlow must be created through a {@link cascading.flow.tez.Hadoop2TezFlowConnector} instance.
  * <p/>
  * If classpath paths are provided on the {@link cascading.flow.FlowDef}, the Hadoop distributed cache mechanism will be used
  * to augment the remote classpath.
@@ -57,12 +55,10 @@ import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
  * Any path elements that are relative will be uploaded to HDFS, and the HDFS URI will be used on the JobConf. Note
  * all paths are added as "files" to the JobConf, not archives, so they aren't needlessly uncompressed cluster side.
  *
- * @see cascading.flow.hadoop.HadoopFlowConnector
+ * @see cascading.flow.tez.Hadoop2TezFlowConnector
  */
 public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
   {
-  private static final Logger LOG = LoggerFactory.getLogger( Hadoop2TezFlow.class );
-
   /** Field hdfsShutdown */
   private static Thread hdfsShutdown = null;
   /** Field shutdownHook */

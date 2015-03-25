@@ -26,8 +26,8 @@ import java.util.Set;
 
 import cascading.flow.hadoop.planner.HadoopPlanner;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.PlannerInfo;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +51,8 @@ public class Hadoop2MR1Planner extends HadoopPlanner
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hadoop2MR1Planner.class );
+
+  public static final String PLATFORM_NAME = "hadoop2-mr1";
 
   /**
    * Method copyJobConf adds the given JobConf values to the given properties object. Use this method to pass
@@ -89,6 +91,12 @@ public class Hadoop2MR1Planner extends HadoopPlanner
           configuration.set( entry.getKey().toString(), entry.getValue().toString() );
         }
       }
+    }
+
+  @Override
+  public PlannerInfo getPlannerInfo( String registryName )
+    {
+    return new PlannerInfo( getClass().getSimpleName(), PLATFORM_NAME, registryName );
     }
 
   @Override

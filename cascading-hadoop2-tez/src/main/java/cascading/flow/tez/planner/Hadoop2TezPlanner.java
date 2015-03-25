@@ -31,6 +31,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
@@ -59,6 +60,8 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hadoop2TezPlanner.class );
+
+  public static final String PLATFORM_NAME = "hadoop2-tez";
 
   /** Field defaultConfiguration */
   private TezConfiguration defaultConfiguration;
@@ -98,6 +101,12 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
           jobConf.set( entry.getKey().toString(), entry.getValue().toString() );
         }
       }
+    }
+
+  @Override
+  public PlannerInfo getPlannerInfo( String registryName )
+    {
+    return new PlannerInfo( getClass().getSimpleName(), PLATFORM_NAME, registryName );
     }
 
   @Override

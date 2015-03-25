@@ -32,6 +32,7 @@ import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
@@ -68,6 +69,8 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( HadoopPlanner.class );
+
+  public static final String PLATFORM_NAME = "hadoop";
 
   /** Field jobConf */
   private JobConf defaultJobConf;
@@ -126,6 +129,12 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
           jobConf.set( entry.getKey().toString(), entry.getValue().toString() );
         }
       }
+    }
+
+  @Override
+  public PlannerInfo getPlannerInfo( String registryName )
+    {
+    return new PlannerInfo( getClass().getSimpleName(), PLATFORM_NAME, registryName );
     }
 
   @Override

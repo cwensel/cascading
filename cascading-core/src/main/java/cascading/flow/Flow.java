@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.management.UnitOfWork;
 import cascading.stats.FlowStats;
@@ -101,6 +102,20 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   void cleanup();
 
   /**
+   * Returns any meta-data about the planner that created this Flow instance.
+   *
+   * @return an instance of PlannerInfo
+   */
+  PlannerInfo getPlannerInfo();
+
+  /**
+   * Returns any meta-data about the underlying platform this Flow instance will run against.
+   *
+   * @return an instance of PlatformInfo
+   */
+  PlatformInfo getPlatformInfo();
+
+  /**
    * Method getConfig returns the internal configuration object.
    * <p/>
    * Any changes to this object will not be reflected in child steps. See {@link cascading.flow.FlowConnector} for setting
@@ -127,6 +142,12 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    */
   Map<Object, Object> getConfigAsProperties();
 
+  /**
+   * Returns the String property associated with the given key from the current Configuration instance.
+   *
+   * @param key of type String
+   * @return the String value
+   */
   String getProperty( String key );
 
   /**
@@ -482,11 +503,19 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    */
   void writeStepsDOT( String filename );
 
+  /**
+   * Returns the parent Cascade ID that owns this Flow instance.
+   *
+   * @return of type String
+   */
   String getCascadeID();
 
+  /**
+   * Returns the run ID given when this Flow instance was defined in the FlowDef.
+   *
+   * @return of type String
+   */
   String getRunID();
-
-  PlatformInfo getPlatformInfo();
 
   /**
    * Method jobsAreLocal returns true if all jobs are executed in-process as a single map and reduce task.

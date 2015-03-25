@@ -145,6 +145,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   public abstract Config getDefaultConfig();
 
+  public abstract PlannerInfo getPlannerInfo( String name );
+
   public abstract PlatformInfo getPlatformInfo();
 
   public void initialize( FlowConnector flowConnector, Map<Object, Object> properties )
@@ -192,6 +194,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       traceWriter.writeTracePlan( null, "2-final-flow-element-graph", finalFlowElementGraph );
       traceWriter.writeTracePlan( null, "3-final-flow-step-graph", flowStepGraph );
       traceWriter.writeTracePlanSteps( "4-final-flow-steps", flowStepGraph );
+
+      flow.setPlannerInfo( getPlannerInfo( ruleResult.getRegistry().getName() ) );
 
       flow.initialize( finalFlowElementGraph, flowStepGraph );
 

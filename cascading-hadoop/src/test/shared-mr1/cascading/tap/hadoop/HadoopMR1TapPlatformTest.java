@@ -66,6 +66,8 @@ public class HadoopMR1TapPlatformTest extends PlatformTestCase implements Serial
     // set the combine flag
     conf.setBoolean( HfsProps.COMBINE_INPUT_FILES, true );
 
+    conf.set( "cascading.flow.platform", "hadoop" ); // only supported on mr based platforms
+
     // test the input format and the split
     source.sourceConfInit( process, conf );
 

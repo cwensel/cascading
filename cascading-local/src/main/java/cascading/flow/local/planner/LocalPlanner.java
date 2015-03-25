@@ -27,6 +27,7 @@ import cascading.flow.FlowStep;
 import cascading.flow.local.LocalFlow;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
@@ -38,6 +39,8 @@ import cascading.util.Version;
  */
 public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
   {
+  public static final String PLATFORM_NAME = "local";
+
   public LocalPlanner()
     {
     }
@@ -46,6 +49,12 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
   public Properties getDefaultConfig()
     {
     return null;
+    }
+
+  @Override
+  public PlannerInfo getPlannerInfo( String registryName )
+    {
+    return new PlannerInfo( getClass().getSimpleName(), PLATFORM_NAME, registryName );
     }
 
   @Override

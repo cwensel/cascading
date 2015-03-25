@@ -44,6 +44,7 @@ import cascading.cascade.Cascade;
 import cascading.flow.planner.BaseFlowNode;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
+import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowStepGraph;
@@ -83,6 +84,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   private static final Logger LOG = LoggerFactory.getLogger( Flow.class ); // wrapped by ProcessLogger interface methods
   private static final int LOG_FLOW_NAME_MAX = 25;
 
+  private PlannerInfo plannerInfo;
   private PlatformInfo platformInfo;
 
   /** Field id */
@@ -202,6 +204,18 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     retrieveSinkFields();
     }
 
+  public void setPlannerInfo( PlannerInfo plannerInfo )
+    {
+    this.plannerInfo = plannerInfo;
+    }
+
+  @Override
+  public PlannerInfo getPlannerInfo()
+    {
+    return plannerInfo;
+    }
+
+  @Override
   public PlatformInfo getPlatformInfo()
     {
     return platformInfo;
@@ -209,6 +223,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   public void initialize( FlowElementGraph pipeGraph, FlowStepGraph flowStepGraph )
     {
+    addPlannerProperties();
     this.pipeGraph = pipeGraph;
     this.flowStepGraph = flowStepGraph;
 
@@ -297,6 +312,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     AppProps.setApplicationID( properties );
     PropertyUtil.setProperty( properties, "cascading.app.name", makeAppName( properties ) );
     PropertyUtil.setProperty( properties, "cascading.app.version", makeAppVersion( properties ) );
+    }
+
+  protected void addPlannerProperties()
+    {
+    setConfigProperty( getConfig(), "cascading.flow.planner", getPlannerInfo().name );
+    setConfigProperty( getConfig(), "cascading.flow.platform", getPlannerInfo().platform );
+    setConfigProperty( getConfig(), "cascading.flow.registry", getPlannerInfo().registry );
     }
 
   private String makeAppName( Map<Object, Object> properties )

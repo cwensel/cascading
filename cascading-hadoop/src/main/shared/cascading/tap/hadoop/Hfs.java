@@ -96,11 +96,14 @@ import org.slf4j.LoggerFactory;
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
  * in the exact same path.
  * <p/>
- * Hfs can optionally combine multiple small files (or a series of small "blocks") into larger "splits". This reduces
- * the number of resulting map tasks created by Hadoop and can improve application performance.
+ * When using a MapReduce planner, Hfs can optionally combine multiple small files (or a series of small "blocks") into
+ * larger "splits". This reduces the number of resulting map tasks created by Hadoop and can improve application
+ * performance.
  * <p/>
  * This is enabled by calling {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}. By default, merging
  * or combining splits into large ones is disabled.
+ * <p/>
+ * Apache Tez planner does not require this setting, it is supported by default and enabled by the application manager.
  */
 public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> implements FileType<Configuration>
   {
@@ -140,12 +143,25 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
 
   protected static boolean getUseCombinedInput( Configuration conf )
     {
-    return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES, false );
+    String platform = conf.get( "cascading.flow.platform", "" );
+    boolean combineEnabled = conf.getBoolean( "cascading.hadoop.hfs.combine.files", false );
+
+    // only supported by these platforms
+    if( platform.equals( "hadoop" ) || platform.equals( "hadoop2-mr1" ) )
+      return combineEnabled;
+
+    if( combineEnabled && !Boolean.getBoolean( "cascading.hadoop.hfs.combine.files.warned" ) )
+      {
+      LOG.warn( "'cascading.hadoop.hfs.combine.files' has been set to true, but is unsupported by this platform: {}, will be ignored to prevent failures", platform );
+      System.setProperty( "cascading.hadoop.hfs.combine.files.warned", "true" );
+      }
+
+    return false;
     }
 
   protected static boolean getCombinedInputSafeMode( Configuration conf )
     {
-    return conf.getBoolean( HfsProps.COMBINE_INPUT_FILES_SAFE_MODE, true );
+    return conf.getBoolean( "cascading.hadoop.hfs.combine.safemode", true );
     }
 
   protected Hfs()
@@ -693,7 +709,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       this.conf = conf;
 
       // set the aliased property value, if zero, the super class will look up the hadoop property
-      setMaxSplitSize( conf.getLong( HfsProps.COMBINE_INPUT_FILES_SIZE_MAX, 0 ) );
+      setMaxSplitSize( conf.getLong( "cascading.hadoop.hfs.combine.max.size", 0 ) );
       }
 
     @Override
