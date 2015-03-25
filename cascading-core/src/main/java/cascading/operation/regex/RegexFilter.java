@@ -34,15 +34,17 @@ import cascading.operation.FilterCall;
  * By default, Tuples that match the given pattern are kept, and Tuples that do not
  * match are filtered out. This can be changed by setting removeMatch to true.
  * <p/>
- * Also, by default, the whole Tuple is matched against the given patternString (tab delimited). If matchEachElement
- * is set to true, the pattern is applied to each Tuple value individually.
+ * Also, by default, the whole Tuple is matched against the given patternString (tab delimited, unless otherwise
+ * specified). If matchEachElement is set to true, the pattern is applied to each Tuple value individually.
  * <p/>
- * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
+ * This operation uses {@link java.util.regex.Matcher} internally, specifically the method
+ * {@link java.util.regex.Matcher#find()}.
  * <p/>
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
  * <p/>
- * Any Object value will be coerced to a String type via its {@code toString()} method.
+ * Any Object value will be coerced to a String type via any provided {@link cascading.tuple.type.CoercibleType} on
+ * the argument selector or via its {@code toString()} method.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
@@ -68,12 +70,39 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
    * Constructor RegexFilter creates a new RegexFilter instance.
    *
    * @param patternString of type String
+   * @param delimiter     of type String
+   */
+  @ConstructorProperties({"patternString", "delimiter"})
+  public RegexFilter( String patternString, String delimiter )
+    {
+    super( patternString, delimiter );
+    this.matchEachElement = false;
+    }
+
+  /**
+   * Constructor RegexFilter creates a new RegexFilter instance.
+   *
+   * @param patternString of type String
    * @param removeMatch   of type boolean
    */
   @ConstructorProperties({"patternString", "removeMatch"})
   public RegexFilter( String patternString, boolean removeMatch )
     {
     super( patternString, removeMatch );
+    this.matchEachElement = false;
+    }
+
+  /**
+   * Constructor RegexFilter creates a new RegexFilter instance.
+   *
+   * @param patternString of type String
+   * @param removeMatch   of type boolean
+   * @param delimiter     of type String
+   */
+  @ConstructorProperties({"patternString", "removeMatch", "delimiter"})
+  public RegexFilter( String patternString, boolean removeMatch, String delimiter )
+    {
+    super( patternString, removeMatch, delimiter );
     this.matchEachElement = false;
 
     }
@@ -87,6 +116,19 @@ public class RegexFilter extends RegexMatcher implements Filter<Matcher>
   public RegexFilter( String patternString, boolean removeMatch, boolean matchEachElement )
     {
     super( patternString, removeMatch );
+    this.matchEachElement = matchEachElement;
+    }
+
+  /**
+   * @param patternString    of type String
+   * @param removeMatch      of type boolean, set to true if a match should be filtered
+   * @param matchEachElement of type boolean, set to true if each element should be matched individually
+   * @param delimiter        of type String
+   */
+  @ConstructorProperties({"patternString", "removeMatch", "matchEachElement", "delimiter"})
+  public RegexFilter( String patternString, boolean removeMatch, boolean matchEachElement, String delimiter )
+    {
+    super( patternString, removeMatch, delimiter );
     this.matchEachElement = matchEachElement;
     }
 

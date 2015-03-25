@@ -41,7 +41,8 @@ import cascading.tuple.TupleEntry;
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
  * <p/>
- * Any Object value will be coerced to a String type via its {@code toString()} method.
+ * Any Object value will be coerced to a String type via any provided {@link cascading.tuple.type.CoercibleType} on
+ * the argument selector or via its {@code toString()} method.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern

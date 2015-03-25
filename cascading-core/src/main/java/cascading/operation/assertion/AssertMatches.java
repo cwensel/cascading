@@ -29,12 +29,12 @@ import cascading.operation.PlannerLevel;
 import cascading.operation.ValueAssertion;
 import cascading.operation.ValueAssertionCall;
 import cascading.operation.regex.RegexMatcher;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 /**
  * Class AssertMatches matches the given regular expression patternString against the whole argument
- * {@link cascading.tuple.Tuple} by joining each individual element of the Tuple with a tab character (\t).
+ * {@link cascading.tuple.Tuple} by joining each individual element of the Tuple with a tab character (\t) unless
+ * otherwise specified.
  * See {@link AssertMatchesAll} if you need to match the patternString regex against each individual tuple element.
  * <p/>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
@@ -42,7 +42,8 @@ import cascading.tuple.TupleEntry;
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
  * <p/>
- * Any Object value will be coerced to a String type via its {@code toString()} method.
+ * Any Object value will be coerced to a String type via any provided {@link cascading.tuple.type.CoercibleType} on
+ * the argument selector or via its {@code toString()} method.
  *
  * @see java.util.regex.Matcher
  * @see java.util.regex.Pattern
@@ -67,12 +68,37 @@ public class AssertMatches extends RegexMatcher implements ValueAssertion<Matche
    * Constructor AssertMatches creates a new AssertMatches instance.
    *
    * @param patternString of type String
+   * @param delimiter     of type String
+   */
+  @ConstructorProperties({"patternString", "delimiter"})
+  public AssertMatches( String patternString, String delimiter )
+    {
+    super( patternString, false, delimiter );
+    }
+
+  /**
+   * Constructor AssertMatches creates a new AssertMatches instance.
+   *
+   * @param patternString of type String
    * @param negateMatch   of type boolean
    */
   @ConstructorProperties({"patternString", "negateMatch"})
   public AssertMatches( String patternString, boolean negateMatch )
     {
     super( patternString, negateMatch );
+    }
+
+  /**
+   * Constructor AssertMatches creates a new AssertMatches instance.
+   *
+   * @param patternString of type String
+   * @param negateMatch   of type boolean
+   * @param delimiter     of type String
+   */
+  @ConstructorProperties({"patternString", "negateMatch", "delimiter"})
+  public AssertMatches( String patternString, boolean negateMatch, String delimiter )
+    {
+    super( patternString, negateMatch, delimiter );
     }
 
   @Override

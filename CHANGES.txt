@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Update c.o.r.RegexMatcher and sub-classes to honor type coercions, allows for custom value delimiter.
+
   Updated jgrapht to 0.9.1 so that all internal graphs can be backed by a j.u.IdentityHashMap.
 
   Fixed issue where the Hadoop o.a.h.m.OutputFormat would be ignored during job configuration as configured by a custom

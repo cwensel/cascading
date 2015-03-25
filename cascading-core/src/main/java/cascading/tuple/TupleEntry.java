@@ -28,8 +28,6 @@ import java.util.Iterator;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 import cascading.util.ForeverValueIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class TupleEntry allows a {@link Tuple} instance and its declaring {@link Fields} instance to be used as a single object.
@@ -54,8 +52,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TupleEntry
   {
-  private static final Logger LOG = LoggerFactory.getLogger( TupleEntry.class );
-
   private static final CoercibleType[] EMPTY_COERCIONS = new CoercibleType[ 0 ];
   private static final ForeverValueIterator<CoercibleType> OBJECT_ITERATOR = new ForeverValueIterator<CoercibleType>( Coercions.OBJECT );
 

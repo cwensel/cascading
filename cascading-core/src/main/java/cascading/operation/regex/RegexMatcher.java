@@ -26,8 +26,8 @@ import java.util.regex.Matcher;
 import cascading.flow.FlowProcess;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +44,28 @@ public class RegexMatcher extends RegexOperation<Matcher>
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( RegexMatcher.class );
 
-  /** Field removeMatch */
+  public static final String DEFAULT_DELIM = "\t";
+
   protected final boolean negateMatch;
+  protected final String delimiter;
 
   @ConstructorProperties({"patternString"})
   protected RegexMatcher( String patternString )
     {
     super( patternString );
     this.negateMatch = false;
+    this.delimiter = DEFAULT_DELIM;
+    }
+
+  @ConstructorProperties({"patternString", "delimiter"})
+  protected RegexMatcher( String patternString, String delimiter )
+    {
+    super( patternString );
+    this.negateMatch = false;
+    this.delimiter = delimiter;
+
+    if( this.delimiter == null )
+      throw new IllegalArgumentException( "delimiter may not be null" );
     }
 
   @ConstructorProperties({"patternString", "negateMatch"})
@@ -59,6 +73,18 @@ public class RegexMatcher extends RegexOperation<Matcher>
     {
     super( patternString );
     this.negateMatch = negateMatch;
+    this.delimiter = DEFAULT_DELIM;
+    }
+
+  @ConstructorProperties({"patternString", "negateMatch", "delimiter"})
+  protected RegexMatcher( String patternString, boolean negateMatch, String delimiter )
+    {
+    super( patternString );
+    this.negateMatch = negateMatch;
+    this.delimiter = delimiter;
+
+    if( this.delimiter == null )
+      throw new IllegalArgumentException( "delimiter may not be null" );
     }
 
   @ConstructorProperties({"fieldDeclaration", "patternString"})
@@ -66,6 +92,20 @@ public class RegexMatcher extends RegexOperation<Matcher>
     {
     super( ANY, fieldDeclaration, patternString );
     this.negateMatch = false;
+    this.delimiter = DEFAULT_DELIM;
+
+    verify();
+    }
+
+  @ConstructorProperties({"fieldDeclaration", "patternString", "delimiter"})
+  protected RegexMatcher( Fields fieldDeclaration, String patternString, String delimiter )
+    {
+    super( ANY, fieldDeclaration, patternString );
+    this.negateMatch = false;
+    this.delimiter = delimiter;
+
+    if( this.delimiter == null )
+      throw new IllegalArgumentException( "delimiter may not be null" );
 
     verify();
     }
@@ -75,13 +115,32 @@ public class RegexMatcher extends RegexOperation<Matcher>
     {
     super( ANY, fieldDeclaration, patternString );
     this.negateMatch = negateMatch;
+    this.delimiter = DEFAULT_DELIM;
 
     verify();
     }
 
-  public boolean isNegateMatch()
+  @ConstructorProperties({"fieldDeclaration", "patternString", "negateMatch", "delimiter"})
+  protected RegexMatcher( Fields fieldDeclaration, String patternString, boolean negateMatch, String delimiter )
+    {
+    super( ANY, fieldDeclaration, patternString );
+    this.negateMatch = negateMatch;
+    this.delimiter = delimiter;
+
+    if( this.delimiter == null )
+      throw new IllegalArgumentException( "delimiter may not be null" );
+
+    verify();
+    }
+
+  public final boolean isNegateMatch()
     {
     return negateMatch;
+    }
+
+  public final String getDelimiter()
+    {
+    return delimiter;
     }
 
   private void verify()
@@ -98,16 +157,10 @@ public class RegexMatcher extends RegexOperation<Matcher>
 
   protected boolean matchWholeTuple( Matcher matcher, TupleEntry input )
     {
-    return matchWholeTuple( matcher, input.getTuple() );
-    }
+    Iterable<String> iterable = input.asIterableOf( String.class );
+    String join = Util.join( iterable, delimiter, false );
 
-  /**
-   * @deprecated use {@link #matchWholeTuple(java.util.regex.Matcher, cascading.tuple.TupleEntry)}
-   */
-  @Deprecated
-  protected boolean matchWholeTuple( Matcher matcher, Tuple input )
-    {
-    matcher.reset( input.toString( "\t", false ) );
+    matcher.reset( join );
 
     boolean matchFound = matcher.find();
 
@@ -119,36 +172,21 @@ public class RegexMatcher extends RegexOperation<Matcher>
 
   protected boolean matchEachElement( Matcher matcher, TupleEntry input )
     {
-    return matchEachElement( matcher, input.getTuple() );
-    }
-
-  /**
-   * @deprecated use {@link #matchEachElementPos(java.util.regex.Matcher, cascading.tuple.TupleEntry)}
-   */
-  @Deprecated
-  protected boolean matchEachElement( Matcher matcher, Tuple input )
-    {
     return matchEachElementPos( matcher, input ) != -1;
     }
 
   protected int matchEachElementPos( Matcher matcher, TupleEntry input )
     {
-    return matchEachElementPos( matcher, input.getTuple() );
-    }
-
-  /**
-   * @deprecated use {@link #matchEachElementPos(java.util.regex.Matcher, cascading.tuple.TupleEntry)}
-   */
-  @Deprecated
-  protected int matchEachElementPos( Matcher matcher, Tuple input )
-    {
     int pos = 0;
-    for( Object value : input )
+
+    for( int i = 0; i < input.size(); i++ )
       {
+      String value = input.getString( i );
+
       if( value == null )
         value = "";
 
-      matcher.reset( value.toString() );
+      matcher.reset( value );
 
       boolean matchFound = matcher.find();
 
@@ -179,7 +217,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
     if( negateMatch != that.negateMatch )
       return false;
 
-    return true;
+    return !( delimiter != null ? !delimiter.equals( that.delimiter ) : that.delimiter != null );
     }
 
   @Override
@@ -187,6 +225,7 @@ public class RegexMatcher extends RegexOperation<Matcher>
     {
     int result = super.hashCode();
     result = 31 * result + ( negateMatch ? 1 : 0 );
+    result = 31 * result + ( delimiter != null ? delimiter.hashCode() : 0 );
     return result;
     }
   }
