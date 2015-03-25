@@ -38,7 +38,7 @@ import cascading.flow.planner.graph.FlowElementGraph;
 /**
  *
  */
-public class FlowNodeGraph extends ProcessGraph<FlowNode>
+public class FlowNodeGraph extends BaseProcessGraph<FlowNode>
   {
   public static final FlowNodeComparator FLOW_NODE_COMPARATOR = new FlowNodeComparator();
 

@@ -43,7 +43,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
-import cascading.flow.planner.process.ProcessGraph;
+import cascading.flow.planner.process.ProcessEdge;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.flow.tez.planner.Hadoop2TezFlowStepJob;
 import cascading.management.state.ClientState;
@@ -189,9 +189,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       vertexMap.put( flowNode, vertex );
       }
 
-    LinkedList<ProcessGraph.ProcessEdge> processedEdges = new LinkedList<>();
+    LinkedList<ProcessEdge> processedEdges = new LinkedList<>();
 
-    for( ProcessGraph.ProcessEdge processEdge : nodeGraph.edgeSet() )
+    for( ProcessEdge processEdge : nodeGraph.edgeSet() )
       {
       if( processedEdges.contains( processEdge ) )
         continue;
@@ -244,7 +244,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     return dag;
     }
 
-  private EdgeProperty createEdgeProperty( TezConfiguration config, ProcessGraph.ProcessEdge processEdge )
+  private EdgeProperty createEdgeProperty( TezConfiguration config, ProcessEdge processEdge )
     {
     FlowElement flowElement = processEdge.getFlowElement();
 
@@ -542,14 +542,14 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
   private void addInputOutputMapping( JobConf conf, FlowNode flowNode )
     {
     FlowNodeGraph flowNodeGraph = getFlowNodeGraph();
-    Set<ProcessGraph.ProcessEdge> incomingEdges = flowNodeGraph.incomingEdgesOf( flowNode );
+    Set<ProcessEdge> incomingEdges = flowNodeGraph.incomingEdgesOf( flowNode );
 
-    for( ProcessGraph.ProcessEdge processEdge : incomingEdges )
+    for( ProcessEdge processEdge : incomingEdges )
       conf.set( "cascading.node.source." + processEdge.getID(), flowNodeGraph.getEdgeSource( processEdge ).getID() );
 
-    Set<ProcessGraph.ProcessEdge> outgoingEdges = flowNodeGraph.outgoingEdgesOf( flowNode );
+    Set<ProcessEdge> outgoingEdges = flowNodeGraph.outgoingEdgesOf( flowNode );
 
-    for( ProcessGraph.ProcessEdge processEdge : outgoingEdges )
+    for( ProcessEdge processEdge : outgoingEdges )
       conf.set( "cascading.node.sink." + processEdge.getID(), flowNodeGraph.getEdgeTarget( processEdge ).getID() );
     }
 
@@ -816,7 +816,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     EdgeProperty.DataSourceType sourceType;
     EdgeProperty.SchedulingType schedulingType;
 
-    private EdgeValues( TezConfiguration config, ProcessGraph.ProcessEdge processEdge )
+    private EdgeValues( TezConfiguration config, ProcessEdge processEdge )
       {
       this.config = config;
       this.flowElement = processEdge.getFlowElement();

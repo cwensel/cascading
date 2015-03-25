@@ -29,7 +29,7 @@ import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
 
 /**
- *
+ * Enum Extent provides simple markers for the head and tail of an {@link ElementGraph} {@link FlowElement} graph.
  */
 public enum Extent implements FlowElement
   {

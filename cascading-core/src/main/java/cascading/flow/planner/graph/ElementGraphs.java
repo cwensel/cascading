@@ -83,11 +83,16 @@ import static cascading.util.Util.narrowSet;
 import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
- *
+ * Class ElementGraphs maintaines a collection of operations that can be performed on an {@link ElementGraph}.
  */
 public class ElementGraphs
   {
   private static final Logger LOG = LoggerFactory.getLogger( ElementGraphs.class );
+
+  // not for instantiation
+  private ElementGraphs()
+    {
+    }
 
   public static <V, E> int hashCodeIgnoreAnnotations( Graph<V, E> graph )
     {

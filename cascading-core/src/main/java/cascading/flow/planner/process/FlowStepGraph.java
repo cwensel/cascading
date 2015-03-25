@@ -30,7 +30,7 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 
-public class FlowStepGraph extends ProcessGraph<FlowStep>
+public class FlowStepGraph extends BaseProcessGraph<FlowStep>
   {
   public FlowStepGraph()
     {
