@@ -75,6 +75,8 @@ public class TestStringComparator implements Hasher<String>, StreamComparator<Bu
   @Override
   public int hashCode( String value )
     {
+    if( value == null )
+      return 0;
     return value.hashCode();
     }
   }

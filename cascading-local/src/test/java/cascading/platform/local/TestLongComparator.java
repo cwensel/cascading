@@ -50,6 +50,8 @@ public class TestLongComparator implements Hasher<Long>, Comparator<Long>, Seria
   @Override
   public int hashCode( Long value )
     {
+    if( value == null )
+      return 0;
     return value.hashCode();
     }
   }

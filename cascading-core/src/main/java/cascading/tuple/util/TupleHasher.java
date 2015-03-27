@@ -130,6 +130,8 @@ public class TupleHasher implements Serializable
     @Override
     public int hashCode( Object value )
       {
+      if( value == null )
+        return 0;
       return value.hashCode();
       }
     }
@@ -178,10 +180,8 @@ public class TupleHasher implements Serializable
       for( int i = 0; i < elements.size(); i++ )
         {
         Object element = elements.get( i );
-        int hashCode = 0;
 
-        if( element != null )
-          hashCode = hashers[ i % hashers.length ].hashCode( element );
+        int hashCode = hashers[ i % hashers.length ].hashCode( element );
 
         hash = Murmur3.mixH1( hash, Murmur3.mixK1( hashCode ) );
 

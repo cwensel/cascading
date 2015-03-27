@@ -911,6 +911,9 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     @Override
     public int hashCode( Comparable value )
       {
+      if( value == null )
+        return 0;
+
       return value.toString().toLowerCase().hashCode();
       }
     }

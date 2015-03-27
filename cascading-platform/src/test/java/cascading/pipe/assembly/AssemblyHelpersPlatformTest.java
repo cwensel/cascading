@@ -31,12 +31,10 @@ import java.util.regex.Pattern;
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascades;
 import cascading.flow.Flow;
-import cascading.flow.FlowDef;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.operation.AssertionLevel;
 import cascading.operation.BaseOperation;
-import cascading.operation.Debug;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
@@ -54,7 +52,6 @@ import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
-import data.InputData;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -854,12 +851,17 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       @Override
       public int hashCode( Object value )
         {
+        if( value == null )
+          return 0;
+
         // using a fabricated hashCode
         long offset = 2166136261L;
         long prime = 16777619L;
         long hash = offset;
+
         for( byte b : value.toString().getBytes() )
           hash = ( hash ^ b ) * prime;
+
         return (int) hash;
         }
 

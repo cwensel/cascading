@@ -75,6 +75,8 @@ public class TestLongComparator implements Hasher<Long>, StreamComparator<Buffer
   @Override
   public int hashCode( Long value )
     {
+    if( value == null )
+      return 0;
     return value.hashCode();
     }
   }

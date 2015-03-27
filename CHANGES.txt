@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Updated HashFunction in c.t.u.TupleHasher to pass null values to implementations of c.t.Hasher. All custom
+  implementations must be null safe as of now.
+
   Update c.o.r.RegexMatcher and sub-classes to honor type coercions, allows for custom value delimiter.
 
   Updated jgrapht to 0.9.1 so that all internal graphs can be backed by a j.u.IdentityHashMap.

@@ -27,13 +27,15 @@ package cascading.tuple;
  * If a Comparator is used to compare two types during grouping, its likely the {@code hashCode} value between
  * the two objects will not be consistent. This allows to objects being equal to hash to the same bucket (reducer)
  * during partitioning.
+ * <p/>
+ * As of Cascading 3.0 null values will be passed to implementations of the Hasher interface.
  */
 public interface Hasher<V>
   {
   /**
    * Return the hashCode of the given value.
    *
-   * @param value will never be null
+   * @param value may be null
    * @return int hashCode of given value
    */
   int hashCode( V value );

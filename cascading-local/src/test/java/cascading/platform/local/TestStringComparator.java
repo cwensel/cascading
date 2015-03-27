@@ -50,6 +50,8 @@ public class TestStringComparator implements Hasher<String>, Comparator<String>,
   @Override
   public int hashCode( String value )
     {
+    if( value == null )
+      return 0;
     return value.hashCode();
     }
   }
