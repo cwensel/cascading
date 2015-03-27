@@ -22,6 +22,7 @@ package cascading.flow.tez;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.planner.process.ProcessEdge;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.flow.tez.planner.Hadoop2TezFlowStepJob;
+import cascading.flow.tez.util.TezUtil;
 import cascading.management.state.ClientState;
 import cascading.pipe.Boundary;
 import cascading.pipe.CoGroup;
@@ -74,6 +76,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.yarn.api.records.LocalResource;
+import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.tez.common.TezUtils;
 import org.apache.tez.dag.api.DAG;
 import org.apache.tez.dag.api.DataSinkDescriptor;
@@ -104,6 +107,8 @@ import org.slf4j.LoggerFactory;
 import static cascading.flow.hadoop.util.HadoopUtil.addComparators;
 import static cascading.flow.hadoop.util.HadoopUtil.serializeBase64;
 import static cascading.flow.tez.util.TezUtil.addToClassPath;
+import static cascading.tap.hadoop.DistCacheTap.CASCADING_LOCAL_RESOURCES;
+import static cascading.tap.hadoop.DistCacheTap.CASCADING_REMOTE_RESOURCES;
 import static java.util.Collections.singletonList;
 import static org.apache.hadoop.yarn.api.records.LocalResourceType.FILE;
 import static org.apache.hadoop.yarn.api.records.LocalResourceType.PATTERN;
@@ -115,9 +120,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
   {
   private static final Logger LOG = LoggerFactory.getLogger( Hadoop2TezFlowStep.class );
 
-  private Map<String, LocalResource> localResources;
-  private Map<Path, Path> syncPaths;
-  private Map<String, String> environment;
+  private Map<String, LocalResource> allLocalResources = new HashMap<>();
+  private Map<Path, Path> syncPaths = new HashMap<>();
+  private Map<String, String> environment = new HashMap<>();
 
   public Hadoop2TezFlowStep( ElementGraph elementGraph, FlowNodeGraph flowNodeGraph )
     {
@@ -144,19 +149,29 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     String flowStagingPath = ( (Hadoop2TezFlow) getFlow() ).getFlowStagingPath();
     List<String> classPath = ( (Hadoop2TezFlow) getFlow() ).getClassPath();
 
-    localResources = new HashMap<>();
-    syncPaths = addToClassPath( stepConf, flowStagingPath, classPath, FILE, localResources, environment );
+    // is updated in addToClassPath method
+    Map<String, LocalResource> dagResources = new HashMap<>();
 
-    environment = new HashMap<>();
+    if( !classPath.isEmpty() )
+      {
+      // jars in the root will be in the remote CLASSPATH, no need to add to the environment
+      Map<Path, Path> dagClassPath = addToClassPath( stepConf, flowStagingPath, null, classPath, FILE, dagResources, null );
+
+      syncPaths.putAll( dagClassPath );
+      }
+
     String appJarPath = stepConf.get( AppProps.APP_JAR_PATH );
 
     if( appJarPath != null )
       {
+      // the PATTERN represents the insides of the app jar, those elements must be added to the remote CLASSPATH
       List<String> classpath = singletonList( appJarPath );
-      Map<Path, Path> pathMap = addToClassPath( stepConf, flowStagingPath, classpath, PATTERN, localResources, environment );
+      Map<Path, Path> pathMap = addToClassPath( stepConf, flowStagingPath, null, classpath, PATTERN, dagResources, environment );
 
       syncPaths.putAll( pathMap );
       }
+
+    allLocalResources.putAll( dagResources );
 
     return stepConf;
     }
@@ -175,7 +190,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     Map<FlowNode, Vertex> vertexMap = new HashMap<>();
     DAG dag = DAG.create( getStepDisplayName( initializedConfig.getInt( "cascading.display.id.truncate", Util.ID_LENGTH ) ) );
 
-    dag.addTaskLocalFiles( localResources );
+    dag.addTaskLocalFiles( allLocalResources );
 
     Iterator<FlowNode> iterator = nodeGraph.getOrderedTopologicalIterator(); // ordering of nodes for consistent remote debugging
 
@@ -413,7 +428,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     conf.setBoolean( "mapred.used.genericoptionsparser", true );
 
-    Map<FlowElement, Configuration> sourceConfigs = initFromSources( flowNode, flowProcess, conf );
+    Map<String, LocalResource> taskLocalResources = new HashMap<>();
+
+    Map<FlowElement, Configuration> sourceConfigs = initFromSources( flowNode, flowProcess, conf, taskLocalResources );
     Map<FlowElement, Configuration> sinkConfigs = initFromSinks( flowNode, flowProcess, conf );
 
     initFromTraps( flowNode, flowProcess, conf );
@@ -431,6 +448,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       throw new FlowException( getName(), "the default number of gather partitions must be set, see cascading.flow.FlowRuntimeProps" );
 
     Vertex vertex = newVertex( flowNode, conf, parallelism );
+
+    if( !taskLocalResources.isEmpty() )
+      vertex.addTaskLocalFiles( taskLocalResources );
 
     for( FlowElement flowElement : sourceConfigs.keySet() )
       {
@@ -553,7 +573,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       conf.set( "cascading.node.sink." + processEdge.getID(), flowNodeGraph.getEdgeTarget( processEdge ).getID() );
     }
 
-  protected Map<FlowElement, Configuration> initFromSources( FlowNode flowNode, FlowProcess<TezConfiguration> flowProcess, Configuration conf )
+  protected Map<FlowElement, Configuration> initFromSources( FlowNode flowNode, FlowProcess<TezConfiguration> flowProcess,
+                                                             Configuration conf, Map<String, LocalResource> taskLocalResources )
     {
     Set<? extends FlowElement> accumulatedSources = flowNode.getSourceElements( StreamMode.Accumulated );
 
@@ -568,6 +589,20 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
           throw new IllegalStateException( "tap may not have null identifier: " + tap.toString() );
 
         tap.sourceConfInit( flowProcess, current );
+
+        Collection<String> paths = current.getStringCollection( CASCADING_LOCAL_RESOURCES + Tap.id( tap ) );
+
+        if( !paths.isEmpty() )
+          {
+          String flowStagingPath = ( (Hadoop2TezFlow) getFlow() ).getFlowStagingPath();
+          String resourceSubPath = Tap.id( tap );
+          Map<Path, Path> pathMap = TezUtil.addToClassPath( current, flowStagingPath, resourceSubPath, paths, LocalResourceType.FILE, taskLocalResources, null );
+
+          current.setStrings( CASCADING_REMOTE_RESOURCES + Tap.id( tap ), taskLocalResources.keySet().toArray( new String[ taskLocalResources.size() ] ) );
+
+          allLocalResources.putAll( taskLocalResources );
+          syncPaths.putAll( pathMap );
+          }
 
         Map<String, String> map = flowProcess.diffConfigIntoMap( new TezConfiguration( conf ), new TezConfiguration( current ) );
         conf.set( "cascading.node.accumulated.source.conf." + Tap.id( tap ), pack( map, conf ) );
@@ -589,6 +624,10 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       {
       JobConf current = new JobConf( conf );
 
+      String id = FlowElements.id( element );
+
+      current.set( "cascading.node.source", id );
+
       if( element instanceof Tap )
         {
         Tap tap = (Tap) element;
@@ -600,10 +639,6 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
         setLocalMode( conf, current, tap );
         }
-
-      String id = FlowElements.id( element );
-
-      current.set( "cascading.node.source", id );
 
       configs.put( element, current );
       }
@@ -717,7 +752,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     for( Map.Entry<String, Long> entry : timestamps.entrySet() )
       {
-      LocalResource localResource = localResources.get( entry.getKey() );
+      LocalResource localResource = allLocalResources.get( entry.getKey() );
 
       if( localResource != null )
         localResource.setTimestamp( entry.getValue() );

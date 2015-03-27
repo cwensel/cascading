@@ -22,9 +22,9 @@ package cascading.flow.tez.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -59,6 +59,7 @@ import org.apache.tez.runtime.api.MergedLogicalInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.flow.hadoop.util.HadoopUtil.getCommonPaths;
 import static org.apache.hadoop.yarn.api.ApplicationConstants.CLASS_PATH_SEPARATOR;
 import static org.apache.hadoop.yarn.api.ApplicationConstants.Environment.CLASSPATH;
 import static org.apache.hadoop.yarn.api.ApplicationConstants.Environment.PWD;
@@ -211,7 +212,9 @@ public class TezUtil
       configuration.set( MultiInputSplit.CASCADING_SOURCE_PATH, path.toString() );
     }
 
-  public static Map<Path, Path> addToClassPath( Configuration config, String stagingRoot, List<String> classpath, LocalResourceType resourceType, Map<String, LocalResource> localResources, Map<String, String> environment )
+  public static Map<Path, Path> addToClassPath( Configuration config, String stagingRoot, String resourceSubPath, Collection<String> classpath,
+                                                LocalResourceType resourceType, Map<String, LocalResource> localResources,
+                                                Map<String, String> environment )
     {
     if( classpath == null )
       return null;
@@ -220,7 +223,7 @@ public class TezUtil
     Map<String, Path> localPaths = new HashMap<>();
     Map<String, Path> remotePaths = new HashMap<>();
 
-    HadoopUtil.resolvePaths( config, classpath, stagingRoot, localPaths, remotePaths );
+    HadoopUtil.resolvePaths( config, classpath, stagingRoot, resourceSubPath, localPaths, remotePaths );
 
     try
       {
@@ -255,7 +258,7 @@ public class TezUtil
       throw new FlowException( "unable to set remote resource paths", exception );
       }
 
-    return HadoopUtil.getCommonPaths( localPaths, remotePaths );
+    return getCommonPaths( localPaths, remotePaths );
     }
 
   protected static void addResource( Map<String, LocalResource> localResources, Map<String, String> environment, String fileName, FileStatus stats, Path fullPath, LocalResourceType type ) throws IOException

@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -517,7 +518,7 @@ public class HadoopUtil
     Map<String, Path> localPaths = new HashMap<String, Path>();
     Map<String, Path> remotePaths = new HashMap<String, Path>();
 
-    resolvePaths( config, classpath, null, localPaths, remotePaths );
+    resolvePaths( config, classpath, null, null, localPaths, remotePaths );
 
     try
       {
@@ -668,12 +669,15 @@ public class HadoopUtil
     return copyPaths;
     }
 
-  public static void resolvePaths( Configuration config, List<String> classpath, String remoteRoot, Map<String, Path> localPaths, Map<String, Path> remotePaths )
+  public static void resolvePaths( Configuration config, Collection<String> classpath, String remoteRoot, String resourceSubPath, Map<String, Path> localPaths, Map<String, Path> remotePaths )
     {
     FileSystem defaultFS = getDefaultFS( config );
     FileSystem localFS = getLocalFS( config );
 
     Path remoteRootPath = new Path( remoteRoot == null ? "./.staging" : remoteRoot );
+
+    if( resourceSubPath != null )
+      remoteRootPath = new Path( remoteRootPath, resourceSubPath );
 
     remoteRootPath = defaultFS.makeQualified( remoteRootPath );
 
@@ -692,8 +696,13 @@ public class HadoopUtil
         if( !exists( localFS, localPath ) )
           throw new FlowException( "path not found: " + localPath );
 
-        localPaths.put( localPath.getName(), localPath );
-        remotePaths.put( localPath.getName(), defaultFS.makeQualified( new Path( remoteRootPath, path.getName() ) ) );
+        String name = localPath.getName();
+
+        if( resourceSubPath != null )
+          name = resourceSubPath + "/" + name;
+
+        localPaths.put( name, localPath );
+        remotePaths.put( name, defaultFS.makeQualified( new Path( remoteRootPath, path.getName() ) ) );
         }
       else if( localFS.equals( getFileSystem( config, path ) ) )
         {
@@ -702,7 +711,12 @@ public class HadoopUtil
 
         Path localPath = localFS.makeQualified( path );
 
-        localPaths.put( localPath.getName(), localPath );
+        String name = localPath.getName();
+
+        if( resourceSubPath != null )
+          name = resourceSubPath + "/" + name;
+
+        localPaths.put( name, localPath );
         }
       else
         {
@@ -711,7 +725,12 @@ public class HadoopUtil
 
         Path defaultPath = defaultFS.makeQualified( path );
 
-        remotePaths.put( defaultPath.getName(), defaultPath );
+        String name = defaultPath.getName();
+
+        if( resourceSubPath != null )
+          name = resourceSubPath + "/" + name;
+
+        remotePaths.put( name, defaultPath );
         }
       }
     }
