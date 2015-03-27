@@ -1,6 +1,9 @@
 Cascading Change Log
 
 2.7.0 [unreleased]
+  
+  Fixed issue where c.f.h.HadoopFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
+  implementations (backport from wip-3.0 at 5e0493a).
 
   Added c.t.Tap#prepareResourceForRead() and c.t.Tap#prepareResourceForWrite() methods to allow for client side tap
   resource initialization.

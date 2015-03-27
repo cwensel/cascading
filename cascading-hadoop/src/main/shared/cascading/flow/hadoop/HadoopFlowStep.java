@@ -63,6 +63,7 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputFormat;
 
 import static cascading.flow.hadoop.util.HadoopUtil.serializeBase64;
 import static cascading.flow.hadoop.util.HadoopUtil.writeStateToDistCache;
@@ -452,7 +453,19 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     if( getSink() != null )
       getSink().sinkConfInit( flowProcess, conf );
 
-    if( FileOutputFormat.getOutputPath( conf ) == null )
+    Class<? extends OutputFormat> outputFormat = conf.getClass( "mapred.output.format.class", null, OutputFormat.class );
+    boolean isFileOutputFormat = false;
+
+    if( outputFormat != null )
+      isFileOutputFormat = FileOutputFormat.class.isAssignableFrom( outputFormat );
+
+    Path outputPath = FileOutputFormat.getOutputPath( conf );
+
+    // if no output path is set, we need to substitute an alternative if the OutputFormat is file based
+    // PartitionTap won't set the output, but will set an OutputFormat
+    // MultiSinkTap won't set the output or set the OutputFormat
+    // Non file based OutputFormats don't have an output path, but do have an OutputFormat set (JDBCTap..)
+    if( outputPath == null && ( isFileOutputFormat || outputFormat == null ) )
       tempSink = new TempHfs( conf, "tmp:/" + new Path( getSink().getIdentifier() ).toUri().getPath(), true );
 
     // tempSink exists because sink is writeDirect
