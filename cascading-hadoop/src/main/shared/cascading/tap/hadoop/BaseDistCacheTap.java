@@ -57,7 +57,9 @@ public abstract class BaseDistCacheTap extends DecoratorTap<Void, Configuration,
   @Override
   public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
     {
-    if( HadoopUtil.isLocal( conf ) || Tap.id( this ).equals( conf.get( "cascading.node.source" ) ) )
+    if( HadoopUtil.isLocal( conf ) ||
+      Tap.id( this ).equals( conf.get( "cascading.node.source" ) ) ||
+      Tap.id( this ).equals( conf.get( "cascading.step.source" ) ) )
       {
       LOG.info( "can't use distributed cache. reading '{}' from hdfs", super.getIdentifier() );
       super.sourceConfInit( process, conf );
