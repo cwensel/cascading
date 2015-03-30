@@ -23,23 +23,22 @@ package cascading.flow.planner.graph;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMaskSubgraph;
 import org.jgrapht.graph.MaskFunctor;
+
+import static cascading.flow.planner.graph.ElementGraphs.directed;
 
 /**
  *
  */
-public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope> implements ElementGraph
+public class ElementMaskSubGraph extends BaseElementGraph implements ElementGraph
   {
-  private DirectedGraph<FlowElement, Scope> elementGraph;
+  private ElementGraph elementGraph;
   private FlowElementMaskFunctor mask;
 
   private static class FlowElementMaskFunctor implements MaskFunctor<FlowElement, Scope>
@@ -74,17 +73,17 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
       }
     }
 
-  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElement... maskedFlowElements )
+  public ElementMaskSubGraph( ElementGraph elementGraph, FlowElement... maskedFlowElements )
     {
     this( elementGraph, new FlowElementMaskFunctor( Arrays.asList( maskedFlowElements ) ) );
     }
 
-  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, Collection<FlowElement> maskedFlowElements )
+  public ElementMaskSubGraph( ElementGraph elementGraph, Collection<FlowElement> maskedFlowElements )
     {
     this( elementGraph, new FlowElementMaskFunctor( maskedFlowElements ) );
     }
 
-  public ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, Collection<FlowElement> maskedFlowElements, Collection<Scope> maskedScopes )
+  public ElementMaskSubGraph( ElementGraph elementGraph, Collection<FlowElement> maskedFlowElements, Collection<Scope> maskedScopes )
     {
     this( elementGraph, new FlowElementMaskFunctor( maskedFlowElements, maskedScopes ) );
     }
@@ -94,40 +93,25 @@ public class ElementMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope
     this( graph.elementGraph, graph.mask );
     }
 
-  protected ElementMaskSubGraph( DirectedGraph<FlowElement, Scope> elementGraph, FlowElementMaskFunctor flowElementMaskFunctor )
+  protected ElementMaskSubGraph( ElementGraph elementGraph, FlowElementMaskFunctor flowElementMaskFunctor )
     {
-    super( elementGraph, flowElementMaskFunctor );
+    this.graph = new DirectedMaskSubGraph( directed( elementGraph ), flowElementMaskFunctor );
 
     this.elementGraph = elementGraph;
     this.mask = flowElementMaskFunctor;
     }
 
   @Override
-  public ElementGraph copyGraph()
+  public ElementGraph copyElementGraph()
     {
-    return new ElementMaskSubGraph( this );
+    return new ElementMaskSubGraph( ElementMaskSubGraph.this );
     }
 
-  @Override
-  public void writeDOT( String filename )
+  private class DirectedMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope>
     {
-    boolean success = ElementGraphs.printElementGraph( filename, this, null );
-
-    if( success )
-      Util.writePDF( filename );
-    }
-
-  @Override
-  public boolean equals( Object object )
-    {
-    return ElementGraphs.equals( this, (Graph) object );
-    }
-
-  @Override
-  public int hashCode()
-    {
-    int result = super.hashCode();
-    result = 31 * result; // parity with AnnotatedGraph types
-    return result;
+    public DirectedMaskSubGraph( DirectedGraph<FlowElement, Scope> base, MaskFunctor<FlowElement, Scope> mask )
+      {
+      super( base, mask );
+      }
     }
   }

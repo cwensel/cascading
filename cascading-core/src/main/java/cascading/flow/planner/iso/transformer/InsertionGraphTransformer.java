@@ -29,7 +29,6 @@ import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
-import org.jgrapht.Graphs;
 
 /**
  *
@@ -129,7 +128,7 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
 
         case BeforeEachEdge:
 
-          List<FlowElement> predecessors = Graphs.predecessorListOf( graph, flowElement );
+          List<FlowElement> predecessors = graph.predecessorListOf( flowElement );
 
           for( FlowElement predecessor : predecessors )
             ElementGraphs.insertFlowElementAfter( graph, predecessor, elementFactory.create( graph, predecessor ) );
@@ -138,7 +137,7 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
 
         case AfterEachEdge:
 
-          List<FlowElement> successors = Graphs.successorListOf( graph, flowElement );
+          List<FlowElement> successors = graph.successorListOf( flowElement );
 
           for( FlowElement successor : successors )
             ElementGraphs.insertFlowElementBefore( graph, successor, elementFactory.create( graph, successor ) );

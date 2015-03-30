@@ -98,7 +98,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   private List<SafeFlowStepListener> listeners;
 
   /** Field graph */
-  private final ElementGraph graph;
+  private final ElementGraph elementGraph;
 
   private FlowNodeGraph flowNodeGraph;
 
@@ -125,14 +125,14 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     setName( name );
     this.ordinal = ordinal;
 
-    this.graph = null;
+    this.elementGraph = null;
     this.flowNodeGraph = null;
     }
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
     {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
-    this.graph = elementStepGraph;
+    this.elementGraph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
     configure();
@@ -141,10 +141,10 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   protected void configure()
     {
     // todo: remove once FlowMapper/FlowReducer aren't reliant
-    ElementGraphs.addSources( this, graph, flowNodeGraph.getSourceTaps() );
-    ElementGraphs.addSinks( this, graph, flowNodeGraph.getSinkTaps() );
+    ElementGraphs.addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
+    ElementGraphs.addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
 
-    addGroups( findAllGroups( graph ) );
+    addGroups( findAllGroups( elementGraph ) );
 
     traps.putAll( flowNodeGraph.getTrapsMap() );
     }
@@ -282,18 +282,18 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public ElementGraph getElementGraph()
     {
-    return graph;
+    return elementGraph;
     }
 
   @Override
   public ElementGraph getMaskedElementGraph()
     {
-    return new ElementMaskSubGraph( graph, Extent.head, Extent.tail );
+    return new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
     }
 
   protected EnumMultiMap getAnnotations()
     {
-    return ( (AnnotatedGraph) graph ).getAnnotations();
+    return ( (AnnotatedGraph) elementGraph ).getAnnotations();
     }
 
   @Override
@@ -618,11 +618,6 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   public FlowElement getNextFlowElement( Scope scope )
     {
     return getElementGraph().getEdgeTarget( scope );
-    }
-
-  public TopologicalOrderIterator<FlowElement, Scope> getTopologicalOrderIterator()
-    {
-    return new TopologicalOrderIterator<FlowElement, Scope>( graph );
     }
 
   public Collection<Operation> getAllOperations()

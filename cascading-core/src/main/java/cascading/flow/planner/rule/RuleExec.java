@@ -142,7 +142,7 @@ public class RuleExec
 
     FlowElementGraph elementGraph = ruleResult.getAssemblyGraph();
 
-    elementGraph = (FlowElementGraph) elementGraph.copyGraph();
+    elementGraph = (FlowElementGraph) elementGraph.copyElementGraph();
 
     elementGraph.resolveFields();
 

@@ -153,7 +153,7 @@ public class RuleResult
     {
     this.initialAssembly = initialAssembly;
 
-    setLevelResults( ProcessLevel.Assembly, initialAssembly, initialAssembly.copyGraph() );
+    setLevelResults( ProcessLevel.Assembly, initialAssembly, initialAssembly.copyElementGraph() );
     }
 
   public void setLevelResults( ProcessLevel level, Map<ElementGraph, List<? extends ElementGraph>> results )

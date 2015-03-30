@@ -26,6 +26,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
 
+import static cascading.flow.planner.graph.ElementGraphs.directed;
 import static cascading.flow.planner.graph.Extent.head;
 import static cascading.flow.planner.graph.Extent.tail;
 
@@ -36,7 +37,7 @@ public class BoundedElementMultiGraph extends ElementMultiGraph
   {
   public BoundedElementMultiGraph( ElementGraph parentElementGraph, ElementGraph subElementGraph, EnumMultiMap annotations )
     {
-    copyFrom( subElementGraph );
+    graph = new DirectedMultiGraph( directed( subElementGraph ) );
 
     addParentAnnotations( parentElementGraph );
 
@@ -45,12 +46,8 @@ public class BoundedElementMultiGraph extends ElementMultiGraph
     bindHeadAndTail( parentElementGraph, subElementGraph );
     }
 
-  public BoundedElementMultiGraph( ElementGraph elementGraph )
-    {
-    super( elementGraph );
-    }
-
-  private void addParentAnnotations( ElementGraph parentElementGraph )
+  @Override
+  protected void addParentAnnotations( ElementGraph parentElementGraph )
     {
     if( !( parentElementGraph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) parentElementGraph ).hasAnnotations() )
       return;

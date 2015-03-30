@@ -24,101 +24,60 @@ import java.util.IdentityHashMap;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.util.EnumMultiMap;
-import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMultigraph;
+
+import static cascading.flow.planner.graph.ElementGraphs.directed;
 
 /**
  *
  */
-public class ElementMultiGraph extends DirectedMultigraph<FlowElement, Scope> implements ElementGraph, AnnotatedGraph
+public class ElementMultiGraph extends BaseAnnotatedElementGraph implements ElementGraph, AnnotatedGraph
   {
-  protected EnumMultiMap annotations;
-
-  public ElementMultiGraph( DirectedGraph<FlowElement, Scope> parent )
-    {
-    this();
-
-    copyFrom( parent );
-
-    if( parent instanceof AnnotatedGraph && ( ( (AnnotatedGraph) parent ) ).hasAnnotations() )
-      this.getAnnotations().addAll( ( (AnnotatedGraph) parent ).getAnnotations() );
-    }
-
-  protected void copyFrom( DirectedGraph<FlowElement, Scope> parent )
-    {
-    // safe to assume there are no unconnected vertices
-    for( Scope edge : parent.edgeSet() )
-      {
-      FlowElement s = parent.getEdgeSource( edge );
-      FlowElement t = parent.getEdgeTarget( edge );
-      addVertex( s );
-      addVertex( t );
-      addEdge( s, t, edge );
-      }
-    }
-
-  public ElementMultiGraph( ElementGraph parent, EnumMultiMap annotations )
-    {
-    this( parent );
-
-    this.getAnnotations().addAll( annotations );
-    }
-
   public ElementMultiGraph()
     {
-    super( Scope.class );
+    graph = new DirectedMultiGraph();
     }
 
-  @Override
-  protected DirectedSpecifics createDirectedSpecifics()
+  public ElementMultiGraph( ElementGraph parent )
     {
-    return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
+    graph = new DirectedMultiGraph( directed( parent ) );
+
+    addParentAnnotations( parent );
     }
 
   @Override
-  public ElementGraph copyGraph()
+  public ElementGraph copyElementGraph()
     {
     return new ElementMultiGraph( this );
     }
 
-  @Override
-  public void writeDOT( String filename )
+  protected class DirectedMultiGraph extends DirectedMultigraph<FlowElement, Scope>
     {
-    boolean success = ElementGraphs.printElementGraph( filename, this, null );
+    public DirectedMultiGraph()
+      {
+      super( Scope.class );
+      }
 
-    if( success )
-      Util.writePDF( filename );
-    }
+    public DirectedMultiGraph( DirectedGraph<FlowElement, Scope> parent )
+      {
+      this();
 
-  @Override
-  public boolean hasAnnotations()
-    {
-    return annotations != null && !annotations.isEmpty();
-    }
+      // safe to assume there are no unconnected vertices
+      for( Scope edge : parent.edgeSet() )
+        {
+        FlowElement s = parent.getEdgeSource( edge );
+        FlowElement t = parent.getEdgeTarget( edge );
+        addVertex( s );
+        addVertex( t );
+        addEdge( s, t, edge );
+        }
+      }
 
-  @Override
-  public EnumMultiMap getAnnotations()
-    {
-    if( annotations == null )
-      annotations = new EnumMultiMap();
-
-    return annotations;
-    }
-
-  @Override
-  public boolean equals( Object object )
-    {
-    return ElementGraphs.equals( this, (Graph) object );
-    }
-
-  @Override
-  public int hashCode()
-    {
-    int result = super.hashCode();
-    result = 31 * result + ( annotations != null ? annotations.hashCode() : 0 );
-    return result;
+    @Override
+    protected DirectedSpecifics createDirectedSpecifics()
+      {
+      return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
+      }
     }
   }

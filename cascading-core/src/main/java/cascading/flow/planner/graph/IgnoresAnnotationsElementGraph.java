@@ -20,8 +20,6 @@
 
 package cascading.flow.planner.graph;
 
-import org.jgrapht.Graph;
-
 /**
  *
  */
@@ -35,7 +33,7 @@ public class IgnoresAnnotationsElementGraph extends DecoratedElementGraph
   @Override
   public boolean equals( Object obj )
     {
-    return ElementGraphs.equalsIgnoreAnnotations( this, (Graph) obj );
+    return ElementGraphs.equalsIgnoreAnnotations( this, (ElementGraph) obj );
     }
 
   @Override

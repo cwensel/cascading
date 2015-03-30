@@ -269,7 +269,7 @@ class State
 
     List<Scope> scopes = elementGraph.getAllEdgesList( v3, v4 );
 
-    Collection<Scope> results = areCompatibleEdges( plannerContext, elementGraph.getDelegate(), matchers, scopes );
+    Collection<Scope> results = areCompatibleEdges( plannerContext, elementGraph.getElementGraph(), matchers, scopes );
 
     if( LOG.isDebugEnabled() && results != null )
       {
@@ -390,7 +390,7 @@ class State
     else if( finderContext.isExcluded( flowElement ) || finderContext.isIgnored( flowElement ) )
       result = false;
     else
-      result = expression.applies( plannerContext, elementGraph.getDelegate(), flowElement );
+      result = expression.applies( plannerContext, elementGraph.getElementGraph(), flowElement );
 
     if( LOG.isDebugEnabled() && result )
       LOG.debug( "compatible nodes: {} with {}", flowElement, expression );
@@ -460,7 +460,6 @@ class State
           new1++;
         }
       }
-
 
     // Check the 'out' edges of node2
     for( int other2 : elementGraph.getSuccessors( node2 ) )

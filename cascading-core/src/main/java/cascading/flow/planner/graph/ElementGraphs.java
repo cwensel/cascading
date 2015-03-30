@@ -64,6 +64,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.BiconnectivityInspector;
+import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.ext.ComponentAttributeProvider;
@@ -94,6 +95,19 @@ public class ElementGraphs
     {
     }
 
+  public static DirectedGraph<FlowElement, Scope> directed( ElementGraph elementGraph )
+    {
+    if( elementGraph instanceof DecoratedElementGraph )
+      return directed( ( (DecoratedElementGraph) elementGraph ).getDecorated() );
+
+    return ( (BaseElementGraph) elementGraph ).graph;
+    }
+
+  public static int hashCodeIgnoreAnnotations( ElementGraph elementGraph )
+    {
+    return hashCodeIgnoreAnnotations( directed( elementGraph ) );
+    }
+
   public static <V, E> int hashCodeIgnoreAnnotations( Graph<V, E> graph )
     {
     int hash = graph.vertexSet().hashCode();
@@ -119,6 +133,11 @@ public class ElementGraphs
       }
 
     return hash;
+    }
+
+  public static boolean equalsIgnoreAnnotations( ElementGraph lhs, ElementGraph rhs )
+    {
+    return equalsIgnoreAnnotations( directed( lhs ), directed( rhs ) );
     }
 
   public static <V, E> boolean equalsIgnoreAnnotations( Graph<V, E> lhs, Graph<V, E> rhs )
@@ -155,7 +174,7 @@ public class ElementGraphs
     return true;
     }
 
-  public static <V, E> boolean equals( Graph<V, E> lhs, Graph<V, E> rhs )
+  public static <V, E> boolean equals( ElementGraph lhs, ElementGraph rhs )
     {
     if( !equalsIgnoreAnnotations( lhs, rhs ) )
       return false;
@@ -180,22 +199,19 @@ public class ElementGraphs
 
   public static TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator( ElementGraph graph )
     {
-    return new TopologicalOrderIterator<>( graph );
+    return new TopologicalOrderIterator<>( directed( graph ) );
     }
 
   public static TopologicalOrderIterator<FlowElement, Scope> getReverseTopologicalIterator( ElementGraph graph )
     {
-    return new TopologicalOrderIterator<>( new EdgeReversedGraph<>( graph ) );
+    return new TopologicalOrderIterator<>( new EdgeReversedGraph<>( directed( graph ) ) );
     }
 
-  /**
-   * Method getAllShortestPathsBetween ...
-   *
-   * @param graph
-   * @param from  of type FlowElement
-   * @param to    of type FlowElement
-   * @return List<GraphPath<FlowElement, Scope>>
-   */
+  public static List<GraphPath<FlowElement, Scope>> getAllShortestPathsBetween( ElementGraph graph, FlowElement from, FlowElement to )
+    {
+    return getAllShortestPathsBetween( directed( graph ), from, to );
+    }
+
   public static <V, E> List<GraphPath<V, E>> getAllShortestPathsBetween( DirectedGraph<V, E> graph, V from, V to )
     {
     List<GraphPath<V, E>> paths = new KShortestPaths<>( graph, from, Integer.MAX_VALUE ).getPaths( to );
@@ -216,7 +232,7 @@ public class ElementGraphs
    */
   public static List<GraphPath<FlowElement, Scope>> getAllDirectPathsBetween( ElementGraph graph, FlowElement from, FlowElement to )
     {
-    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( graph, from, to );
+    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( directed( graph ), from, to );
     List<GraphPath<FlowElement, Scope>> results = new ArrayList<>( paths );
 
     for( GraphPath<FlowElement, Scope> path : paths )
@@ -317,7 +333,7 @@ public class ElementGraphs
 
   public static ElementSubGraph asSubGraph2( ElementGraph elementGraph, ElementGraph contractedGraph )
     {
-    return new ElementSubGraph( elementGraph, findClosureViaBiConnected( elementGraph, contractedGraph ) );
+    return new ElementSubGraph( elementGraph, findClosureViaBiConnected( directed( elementGraph ), directed( contractedGraph ) ) );
     }
 
   public static <V, E> Set<V> findClosureViaBiConnected( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
@@ -364,7 +380,7 @@ public class ElementGraphs
     if( elementGraph.containsVertex( Extent.head ) )
       elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-    Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( elementGraph, contractedGraph, excludes );
+    Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( directed( elementGraph ), directed( contractedGraph ), excludes );
     Set<FlowElement> vertices = pair.getLhs();
     Set<Scope> excludeEdges = pair.getRhs();
 
@@ -467,7 +483,7 @@ public class ElementGraphs
 
   public static ElementSubGraph asSubGraphKS( ElementGraph elementGraph, ElementGraph contractedGraph )
     {
-    return new ElementSubGraph( elementGraph, findClosureViaKShortest( elementGraph, contractedGraph ) );
+    return new ElementSubGraph( elementGraph, findClosureViaKShortest( directed( elementGraph ), directed( contractedGraph ) ) );
     }
 
   public static <V, E> Set<V> findClosureViaKShortest( DirectedGraph<V, E> elementGraph, DirectedGraph<V, E> contractedGraph )
@@ -594,7 +610,7 @@ public class ElementGraphs
 
       DOTProcessGraphWriter graphWriter = new DOTProcessGraphWriter(
         new IntegerNameProvider<Pair<ElementGraph, FlowElement>>(),
-        new FlowElementVertexNameProvider( graph, null ),
+        new FlowElementVertexNameProvider( directed( graph ), null ),
         new ScopeEdgeNameProvider(),
         new VertexAttributeProvider(), new EdgeAttributeProvider(),
         new ProcessGraphNameProvider(), new ProcessGraphLabelProvider()
@@ -680,7 +696,7 @@ public class ElementGraphs
   public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
     {
     if( elementGraph.containsVertex( Extent.head ) )
-      return narrowSet( type, Graphs.successorListOf( elementGraph, Extent.head ) );
+      return narrowSet( type, elementGraph.successorListOf( Extent.head ) );
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Head ) ),
@@ -693,7 +709,7 @@ public class ElementGraphs
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
     {
     if( elementGraph.containsVertex( Extent.tail ) )
-      return narrowSet( type, Graphs.predecessorListOf( elementGraph, Extent.tail ) );
+      return narrowSet( type, elementGraph.predecessorListOf( Extent.tail ) );
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Tail ) ),
@@ -882,6 +898,14 @@ public class ElementGraphs
 
       current = element;
       }
+    }
+
+  /**
+   * Returns the number of edges found on the shortest distance between the lhs and rhs.
+   */
+  public static int shortestDistance( ElementGraph graph, FlowElement lhs, FlowElement rhs )
+    {
+    return DijkstraShortestPath.findPathBetween( directed( graph ), lhs, rhs ).size();
     }
 
   private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>

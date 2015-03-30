@@ -101,14 +101,14 @@ public class ExpressionGraph
     }
 
   private final SearchOrder searchOrder;
-  private final DirectedMultigraph<ElementExpression, ScopeExpression> delegate;
+  private final DirectedMultigraph<ElementExpression, ScopeExpression> graph;
 
   private boolean allowNonRecursiveMatching;
 
   public ExpressionGraph()
     {
     this.searchOrder = SearchOrder.ReverseTopological;
-    this.delegate = new DirectedMultigraph( new ClassBasedEdgeFactory( PathScopeExpression.class ) );
+    this.graph = new DirectedMultigraph( new ClassBasedEdgeFactory( PathScopeExpression.class ) );
     this.allowNonRecursiveMatching = true;
     }
 
@@ -138,13 +138,13 @@ public class ExpressionGraph
   public ExpressionGraph( SearchOrder searchOrder, boolean allowNonRecursiveMatching )
     {
     this.searchOrder = searchOrder;
-    this.delegate = new DirectedMultigraph( new ClassBasedEdgeFactory( PathScopeExpression.class ) );
+    this.graph = new DirectedMultigraph( new ClassBasedEdgeFactory( PathScopeExpression.class ) );
     this.allowNonRecursiveMatching = allowNonRecursiveMatching;
     }
 
-  public DirectedMultigraph<ElementExpression, ScopeExpression> getDelegate()
+  public DirectedMultigraph<ElementExpression, ScopeExpression> getGraph()
     {
-    return delegate;
+    return graph;
     }
 
   public SearchOrder getSearchOrder()
@@ -155,8 +155,8 @@ public class ExpressionGraph
   public boolean supportsNonRecursiveMatch()
     {
     return allowNonRecursiveMatching && !searchOrder.isReversed() && // if reversed is requested, the transform must be recursive
-      getDelegate().vertexSet().size() == 1 &&
-      Util.getFirst( getDelegate().vertexSet() ).getCapture() == ElementCapture.Primary;
+      getGraph().vertexSet().size() == 1 &&
+      Util.getFirst( getGraph().vertexSet() ).getCapture() == ElementCapture.Primary;
     }
 
   public ExpressionGraph arcs( ElementExpression... matchers )
@@ -165,10 +165,10 @@ public class ExpressionGraph
 
     for( ElementExpression matcher : matchers )
       {
-      delegate.addVertex( matcher );
+      graph.addVertex( matcher );
 
       if( lhs != null )
-        delegate.addEdge( lhs, matcher );
+        graph.addEdge( lhs, matcher );
 
       lhs = matcher;
       }
@@ -178,11 +178,11 @@ public class ExpressionGraph
 
   public ExpressionGraph arc( ElementExpression lhsMatcher, ScopeExpression scopeMatcher, ElementExpression rhsMatcher )
     {
-    delegate.addVertex( lhsMatcher );
-    delegate.addVertex( rhsMatcher );
+    graph.addVertex( lhsMatcher );
+    graph.addVertex( rhsMatcher );
 
     // can never re-use edges, must be wrapped
-    delegate.addEdge( lhsMatcher, rhsMatcher, new DelegateScopeExpression( scopeMatcher ) );
+    graph.addEdge( lhsMatcher, rhsMatcher, new DelegateScopeExpression( scopeMatcher ) );
 
     return this;
     }
@@ -198,7 +198,7 @@ public class ExpressionGraph
 
       Writer writer = new FileWriter( filename );
 
-      new DOTExporter( new IntegerNameProvider(), new StringNameProvider(), new StringEdgeNameProvider() ).export( writer, getDelegate() );
+      new DOTExporter( new IntegerNameProvider(), new StringNameProvider(), new StringEdgeNameProvider() ).export( writer, getGraph() );
 
       writer.close();
 

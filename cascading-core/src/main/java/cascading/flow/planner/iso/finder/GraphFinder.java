@@ -34,6 +34,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
@@ -50,7 +51,7 @@ public class GraphFinder
   {
   ExpressionGraph matchExpression;
 
-  public GraphFinder( ExpressionGraph matchExpression, ElementCapture... captures )
+  public GraphFinder( ExpressionGraph matchExpression )
     {
     if( matchExpression == null )
       throw new IllegalArgumentException( "expressionGraph may not be null" );
@@ -97,7 +98,7 @@ public class GraphFinder
 
   public Match findAllMatches( PlannerContext plannerContext, ElementGraph elementGraph, Set<FlowElement> exclusions )
     {
-    Set<ElementExpression> elementExpressions = matchExpression.getDelegate().vertexSet();
+    Set<ElementExpression> elementExpressions = matchExpression.getGraph().vertexSet();
 
     if( elementExpressions.size() != 1 )
       throw new IllegalStateException( "may not search multiple matches against multi-node expression: " + matchExpression );
@@ -110,7 +111,7 @@ public class GraphFinder
     Set<FlowElement> foundElements = new LinkedHashSet<>();
 
     // no evidence elementGraph.vertexSet().iterator(); is faster without modifying jgrapht
-    Iterator<FlowElement> iterator = SearchOrder.getNodeIterator( matchExpression.getSearchOrder(), elementGraph );
+    Iterator<FlowElement> iterator = SearchOrder.getNodeIterator( matchExpression.getSearchOrder(), ElementGraphs.directed( elementGraph ) );
 
     while( iterator.hasNext() )
       {
@@ -209,7 +210,7 @@ public class GraphFinder
     {
     Map<ScopeExpression, Set<Scope>> edgeMapping = new HashMap<>();
 
-    DirectedMultigraph<ElementExpression, ScopeExpression> delegate = matchExpression.getDelegate();
+    DirectedMultigraph<ElementExpression, ScopeExpression> delegate = matchExpression.getGraph();
     for( ScopeExpression scopeExpression : delegate.edgeSet() )
       {
       ElementExpression lhs = delegate.getEdgeSource( scopeExpression );
@@ -244,7 +245,7 @@ public class GraphFinder
 
   protected Map<ElementExpression, FlowElement> findMapping( FinderContext finderContext, PlannerContext plannerContext, ElementGraph elementGraph )
     {
-    State state = new State( finderContext, plannerContext, matchExpression.getSearchOrder(), matchExpression.getDelegate(), elementGraph );
+    State state = new State( finderContext, plannerContext, matchExpression.getSearchOrder(), matchExpression.getGraph(), elementGraph );
 
     Map<Integer, Integer> vertexMap = new LinkedHashMap<>();
 

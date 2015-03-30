@@ -62,7 +62,6 @@ import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.jgrapht.Graphs;
 
 /**
  *
@@ -96,7 +95,7 @@ public abstract class NodeStreamGraph extends StreamGraph
 
   protected void handleDuct( FlowElement lhsElement, Duct lhsDuct )
     {
-    List<FlowElement> successors = Graphs.successorListOf( elementGraph, lhsElement );
+    List<FlowElement> successors = elementGraph.successorListOf( lhsElement );
 
     if( successors.contains( Extent.tail ) )
       addTail( lhsDuct );
@@ -111,8 +110,8 @@ public abstract class NodeStreamGraph extends StreamGraph
       if( rhsElement instanceof Extent )
         continue;
 
-      boolean isSink = Graphs.successorListOf( elementGraph, rhsElement ).contains( Extent.tail );
-      boolean isSource = Graphs.predecessorListOf( elementGraph, rhsElement ).contains( Extent.head );
+      boolean isSink = elementGraph.successorListOf( rhsElement ).contains( Extent.tail );
+      boolean isSource = elementGraph.predecessorListOf( rhsElement ).contains( Extent.head );
 
       IORole role = IORole.pass;
 

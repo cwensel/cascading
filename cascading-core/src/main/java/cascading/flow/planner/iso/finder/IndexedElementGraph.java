@@ -23,14 +23,24 @@ package cascading.flow.planner.iso.finder;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
+import org.jgrapht.DirectedGraph;
 
 /**
  *
  */
-class IndexedElementGraph extends IndexedGraph<ElementGraph, FlowElement, Scope>
+class IndexedElementGraph extends IndexedGraph<DirectedGraph<FlowElement, Scope>, FlowElement, Scope>
   {
+  private final ElementGraph elementGraph;
+
   public IndexedElementGraph( SearchOrder searchOrder, ElementGraph elementGraph )
     {
-    super( searchOrder, elementGraph );
+    super( searchOrder, ElementGraphs.directed( elementGraph ) );
+    this.elementGraph = elementGraph;
+    }
+
+  public ElementGraph getElementGraph()
+    {
+    return elementGraph;
     }
   }

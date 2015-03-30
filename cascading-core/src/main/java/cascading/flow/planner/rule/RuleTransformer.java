@@ -80,7 +80,7 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
     {
     Transformed<ElementGraph> result = new Transformed<>( plannerContext, this, rootGraph );
 
-    ElementGraph graphCopy = rootGraph.copyGraph();
+    ElementGraph graphCopy = rootGraph.copyElementGraph();
 
     Transformed<ElementGraph> transformed = graphTransformer.transform( plannerContext, graphCopy );
 

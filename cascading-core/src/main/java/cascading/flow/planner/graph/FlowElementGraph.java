@@ -41,7 +41,6 @@ import cascading.tap.Tap;
 import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.Graphs;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -55,7 +54,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
 
   /** Field resolved */
   private boolean resolved;
-
+  /** Field platformInfo */
   private PlatformInfo platformInfo;
   /** Field sources */
   private Map<String, Tap> sources;
@@ -86,8 +85,8 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     if( flowElementGraph.annotations != null )
       this.annotations = new EnumMultiMap( flowElementGraph.annotations );
 
-    Graphs.addAllVertices( this, flowElementGraph.vertexSet() );
-    Graphs.addAllEdges( this, flowElementGraph, flowElementGraph.edgeSet() );
+    Graphs.addAllVertices( this.graph, flowElementGraph.vertexSet() );
+    Graphs.addAllEdges( this.graph, flowElementGraph.graph, flowElementGraph.edgeSet() );
     }
 
   public FlowElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
@@ -231,15 +230,10 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
       }
     }
 
-  /**
-   * Method copyGraph returns a partial copy of the current ElementGraph. Only Vertices and Edges are copied.
-   *
-   * @return ElementGraph
-   */
-  public FlowElementGraph copyElementGraph()
+  protected FlowElementGraph shallowCopyElementGraph()
     {
     FlowElementGraph copy = new FlowElementGraph();
-    Graphs.addGraph( copy, this );
+    Graphs.addGraph( copy.graph, this.graph );
 
     copy.traps = new HashMap<String, Tap>( this.traps );
 
@@ -397,7 +391,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
    */
   public TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator()
     {
-    return new TopologicalOrderIterator<>( this );
+    return new TopologicalOrderIterator<>( this.graph );
     }
 
   /**
@@ -407,12 +401,12 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
    */
   public DepthFirstIterator<FlowElement, Scope> getDepthFirstIterator()
     {
-    return new DepthFirstIterator<>( this, Extent.head );
+    return new DepthFirstIterator<>( this.graph, Extent.head );
     }
 
-  private SimpleDirectedGraph<FlowElement, Scope> copyWithTraps()
+  private BaseElementGraph copyWithTraps()
     {
-    FlowElementGraph copy = this.copyElementGraph();
+    FlowElementGraph copy = shallowCopyElementGraph();
 
     copy.addTrapsToGraph();
 
@@ -456,7 +450,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
   @Override
   public void writeDOT( String filename )
     {
-    boolean success = ElementGraphs.printElementGraph( filename, this.copyWithTraps(), platformInfo );
+    boolean success = ElementGraphs.printElementGraph( filename, this.copyWithTraps().graph, platformInfo );
 
     if( success )
       Util.writePDF( filename );
@@ -484,7 +478,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     Set<Scope> incomingScopes = incomingEdgesOf( source );
     Set<Scope> outgoingScopes = outgoingEdgesOf( source );
 
-    List<FlowElement> flowElements = Graphs.successorListOf( this, source );
+    List<FlowElement> flowElements = successorListOf( source );
 
     if( flowElements.size() == 0 )
       throw new IllegalStateException( "unable to find next elements in pipeline from: " + source.toString() );
@@ -509,7 +503,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     }
 
   @Override
-  public ElementGraph copyGraph()
+  public ElementGraph copyElementGraph()
     {
     return new FlowElementGraph( this );
     }

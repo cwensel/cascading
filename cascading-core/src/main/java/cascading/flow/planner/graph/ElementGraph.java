@@ -21,12 +21,12 @@
 package cascading.flow.planner.graph;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.pipe.Pipe;
-import org.jgrapht.DirectedGraph;
 
 /**
  * Interface ElementGraph holds a directed acyclic graph of {@link FlowElement} instances.
@@ -61,7 +61,7 @@ import org.jgrapht.DirectedGraph;
  * @see ElementMaskSubGraph
  * @see ElementGraphs
  */
-public interface ElementGraph extends DirectedGraph<FlowElement, Scope>
+public interface ElementGraph //extends DirectedGraph<FlowElement, Scope>
   {
   Set<Scope> getAllEdges( FlowElement lhs, FlowElement rhs );
 
@@ -109,7 +109,11 @@ public interface ElementGraph extends DirectedGraph<FlowElement, Scope>
 
   Set<Scope> outgoingEdgesOf( FlowElement flowElement );
 
-  ElementGraph copyGraph();
+  List<FlowElement> predecessorListOf( FlowElement flowElement );
+
+  List<FlowElement> successorListOf( FlowElement flowElement );
+
+  ElementGraph copyElementGraph();
 
   void writeDOT( String filename );
   }

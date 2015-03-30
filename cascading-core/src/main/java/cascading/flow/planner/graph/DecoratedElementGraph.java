@@ -21,11 +21,11 @@
 package cascading.flow.planner.graph;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import org.jgrapht.EdgeFactory;
 
 /**
  *
@@ -45,9 +45,9 @@ public class DecoratedElementGraph implements ElementGraph
     }
 
   @Override
-  public ElementGraph copyGraph()
+  public ElementGraph copyElementGraph()
     {
-    return decorated.copyGraph();
+    return decorated.copyElementGraph();
     }
 
   @Override
@@ -81,6 +81,18 @@ public class DecoratedElementGraph implements ElementGraph
     }
 
   @Override
+  public List<FlowElement> predecessorListOf( FlowElement flowElement )
+    {
+    return decorated.predecessorListOf( flowElement );
+    }
+
+  @Override
+  public List<FlowElement> successorListOf( FlowElement flowElement )
+    {
+    return decorated.successorListOf( flowElement );
+    }
+
+  @Override
   public Set<Scope> getAllEdges( FlowElement sourceVertex, FlowElement targetVertex )
     {
     return decorated.getAllEdges( sourceVertex, targetVertex );
@@ -90,12 +102,6 @@ public class DecoratedElementGraph implements ElementGraph
   public Scope getEdge( FlowElement sourceVertex, FlowElement targetVertex )
     {
     return decorated.getEdge( sourceVertex, targetVertex );
-    }
-
-  @Override
-  public EdgeFactory<FlowElement, Scope> getEdgeFactory()
-    {
-    return decorated.getEdgeFactory();
     }
 
   @Override
@@ -198,11 +204,5 @@ public class DecoratedElementGraph implements ElementGraph
   public FlowElement getEdgeTarget( Scope scope )
     {
     return decorated.getEdgeTarget( scope );
-    }
-
-  @Override
-  public double getEdgeWeight( Scope scope )
-    {
-    return decorated.getEdgeWeight( scope );
     }
   }

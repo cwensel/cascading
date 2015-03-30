@@ -39,7 +39,7 @@ import cascading.flow.FlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.Scope;
-import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.operation.AssertionLevel;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -69,7 +69,6 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import org.jgrapht.alg.DijkstraShortestPath;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -143,11 +142,11 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 0, mapDist );
+    int mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 1, mapDist );
 
-    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
-    assertEquals( "not equal: reduceDist", 1, reduceDist );
+    int reduceDist = ElementGraphs.shortestDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
+    assertEquals( "not equal: reduceDist", 2, reduceDist );
     }
 
   @Test
@@ -175,11 +174,11 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 2, mapDist );
+    int mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 3, mapDist );
 
-    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
-    assertEquals( "not equal: reduceDist", 1, reduceDist );
+    int reduceDist = ElementGraphs.shortestDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
+    assertEquals( "not equal: reduceDist", 2, reduceDist );
     }
 
   @Test
@@ -209,13 +208,13 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.sink", step.getSink() );
 
     Iterator<Tap> iterator = step.getSourceTaps().iterator();
-    int mapDist = countDistance( step.getElementGraph(), iterator.next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 0, mapDist );
-    mapDist = countDistance( step.getElementGraph(), iterator.next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 0, mapDist );
+    int mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), iterator.next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 1, mapDist );
+    mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), iterator.next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 1, mapDist );
 
-    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
-    assertEquals( "not equal: reduceDist", 0, reduceDist );
+    int reduceDist = ElementGraphs.shortestDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
+    assertEquals( "not equal: reduceDist", 1, reduceDist );
     }
 
   @Test
@@ -246,11 +245,11 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 0, mapDist );
+    int mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 1, mapDist );
 
-    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
-    assertEquals( "not equal: reduceDist", 1, reduceDist );
+    int reduceDist = ElementGraphs.shortestDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
+    assertEquals( "not equal: reduceDist", 2, reduceDist );
     }
 
   @Test
@@ -281,11 +280,11 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 0, mapDist );
+    int mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 1, mapDist );
 
-    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
-    assertEquals( "not equal: reduceDist", 1, reduceDist );
+    int reduceDist = ElementGraphs.shortestDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
+    assertEquals( "not equal: reduceDist", 2, reduceDist );
     }
 
   @Test
@@ -1554,11 +1553,11 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     assertNotNull( "null: step.groupBy", step.getGroup() );
     assertNotNull( "null: step.sink", step.getSink() );
 
-    int mapDist = countDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
-    assertEquals( "not equal: mapDist", 0, mapDist );
+    int mapDist = ElementGraphs.shortestDistance( step.getElementGraph(), (FlowElement) step.getSourceTaps().iterator().next(), step.getGroup() );
+    assertEquals( "not equal: mapDist", 1, mapDist );
 
-    int reduceDist = countDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
-    assertEquals( "not equal: reduceDist", 1, reduceDist );
+    int reduceDist = ElementGraphs.shortestDistance( step.getElementGraph(), step.getGroup(), step.getSink() );
+    assertEquals( "not equal: reduceDist", 2, reduceDist );
     }
 
   @Test
@@ -1804,11 +1803,6 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     catch( Exception exception )
       {
       }
-    }
-
-  private int countDistance( ElementGraph graph, FlowElement lhs, FlowElement rhs )
-    {
-    return DijkstraShortestPath.findPathBetween( graph, lhs, rhs ).size() - 1;
     }
 
   @Test

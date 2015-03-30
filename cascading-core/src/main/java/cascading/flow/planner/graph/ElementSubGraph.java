@@ -22,17 +22,19 @@ package cascading.flow.planner.graph;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.util.Util;
-import org.jgrapht.Graph;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DirectedSubgraph;
+
+import static cascading.flow.planner.graph.ElementGraphs.directed;
 
 /**
  *
  */
-public class ElementSubGraph extends DirectedSubgraph<FlowElement, Scope> implements ElementGraph
+public class ElementSubGraph extends BaseElementGraph implements ElementGraph
   {
   private final ElementGraph elementGraph;
   private final Collection<FlowElement> flowElements;
@@ -40,16 +42,16 @@ public class ElementSubGraph extends DirectedSubgraph<FlowElement, Scope> implem
 
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements, Collection<Scope> scopes )
     {
-    super( elementGraph, new HashSet<>( flowElements ), new HashSet<>( scopes ) );
+    this.graph = new DirectedSubGraph( directed( elementGraph ), new HashSet<>( flowElements ), new HashSet<>( scopes ) );
 
     this.elementGraph = elementGraph;
     this.flowElements = flowElements;
-    this.scopes = null;
+    this.scopes = scopes;
     }
 
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements )
     {
-    super( elementGraph, new HashSet<>( flowElements ), null );
+    this.graph = new DirectedSubGraph( directed( elementGraph ), new HashSet<>( flowElements ), null );
 
     this.elementGraph = elementGraph;
     this.flowElements = flowElements;
@@ -62,31 +64,16 @@ public class ElementSubGraph extends DirectedSubgraph<FlowElement, Scope> implem
     }
 
   @Override
-  public ElementGraph copyGraph()
+  public ElementGraph copyElementGraph()
     {
     return new ElementSubGraph( this );
     }
 
-  @Override
-  public void writeDOT( String filename )
+  private class DirectedSubGraph extends DirectedSubgraph<FlowElement, Scope>
     {
-    boolean success = ElementGraphs.printElementGraph( filename, this, null );
-
-    if( success )
-      Util.writePDF( filename );
-    }
-
-  @Override
-  public boolean equals( Object object )
-    {
-    return ElementGraphs.equals( this, (Graph) object );
-    }
-
-  @Override
-  public int hashCode()
-    {
-    int result = super.hashCode();
-    result = 31 * result; // parity with AnnotatedGraph types
-    return result;
+    public DirectedSubGraph( DirectedGraph<FlowElement, Scope> base, Set<FlowElement> vertexSubset, Set<Scope> edgeSubset )
+      {
+      super( base, vertexSubset, edgeSubset );
+      }
     }
   }
