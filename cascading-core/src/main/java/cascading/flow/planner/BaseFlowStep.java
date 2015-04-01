@@ -684,7 +684,6 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   protected void fireOnCompleted()
     {
-
     if( hasListeners() )
       {
       if( isDebugEnabled() )

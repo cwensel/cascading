@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,10 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
@@ -49,6 +45,7 @@ import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
 import cascading.flow.FlowSkipStrategy;
+import cascading.flow.Flows;
 import cascading.management.CascadingServices;
 import cascading.management.UnitOfWork;
 import cascading.management.UnitOfWorkExecutorStrategy;
@@ -1054,6 +1051,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
               logInfo( "skipping flow: " + flow.getName() );
 
             flow.getFlowStats().markSkipped();
+            Flows.fireOnCompleted( flow );
 
             return null;
             }

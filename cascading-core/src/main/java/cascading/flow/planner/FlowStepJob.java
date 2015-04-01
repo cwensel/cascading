@@ -338,19 +338,25 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     }
 
-  private synchronized void markRunning()
-    {
-    flowStepStats.markRunning();
-
-    markFlowRunning();
-    }
-
   private synchronized void markSkipped()
     {
     if( flowStepStats.isFinished() )
       return;
 
-    flowStepStats.markSkipped();
+    try
+      {
+      flowStepStats.markSkipped();
+      flowStep.fireOnCompleted();
+      }
+    finally
+      {
+      markFlowRunning(); // move to running before marking failed
+      }
+    }
+
+  private synchronized void markRunning()
+    {
+    flowStepStats.markRunning();
 
     markFlowRunning();
     }

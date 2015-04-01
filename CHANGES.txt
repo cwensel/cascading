@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Updated c.c.Cascade and c.f.Flow implementations to fire c.f.FlowListener and c.f.FlowStepListener when a c.f.Flow
+  or c.f.FlowStep are marked skipped.
+
   Updated HashFunction in c.t.u.TupleHasher to pass null values to implementations of c.t.Hasher. All custom
   implementations must be null safe as of now.
 

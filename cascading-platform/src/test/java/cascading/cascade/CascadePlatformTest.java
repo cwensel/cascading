@@ -22,16 +22,17 @@ package cascading.cascade;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
+import cascading.flow.CountingFlowListener;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowSkipStrategy;
+import cascading.flow.Flows;
 import cascading.flow.LockingFlowListener;
 import cascading.flow.planner.FlowStepJob;
 import cascading.operation.BaseOperation;
@@ -281,11 +282,13 @@ public class CascadePlatformTest extends PlatformTestCase
     Flow third = thirdFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
 
+    CountingFlowListener flowListener = new CountingFlowListener();
+    second.addListener( flowListener );
+
     Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
 
     cascade.setFlowSkipStrategy( new FlowSkipStrategy()
     {
-
     public boolean skipFlow( Flow flow ) throws IOException
       {
       return true;
@@ -296,6 +299,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     cascade.complete();
 
+    assertEquals( 1, flowListener.skipped );
     assertFalse( "file exists", fourth.getSink().resourceExists( fourth.getConfig() ) );
     }
 
@@ -335,12 +339,12 @@ public class CascadePlatformTest extends PlatformTestCase
       if( getPlatform().isMapReduce() || getPlatform().isDAG() )
         Thread.sleep( 1000 );
 
-      Map<String, Callable<Throwable>> map = LockingFlowListener.getJobsMap( first );
+      Map<String, FlowStepJob> map = Flows.getJobsMap( first );
 
       if( map == null || map.values().size() == 0 )
         continue;
 
-      FlowStepJob flowStepJob = (FlowStepJob) map.values().iterator().next();
+      FlowStepJob flowStepJob = map.values().iterator().next();
 
       if( flowStepJob.isStarted() )
         break;

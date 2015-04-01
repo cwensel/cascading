@@ -87,4 +87,10 @@ public final class Flows
     {
     return new FlowDef( flowDef, sources, sinks, traps, checkpoints );
     }
+
+  public static void fireOnCompleted( Flow flow )
+    {
+    if( flow instanceof BaseFlow )
+      ( (BaseFlow) flow ).fireOnCompleted();
+    }
   }

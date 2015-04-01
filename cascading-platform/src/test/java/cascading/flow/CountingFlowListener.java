@@ -20,40 +20,70 @@
 
 package cascading.flow;
 
-import java.util.concurrent.Semaphore;
+import cascading.stats.CascadingStats;
 
 /**
  *
  */
-public class LockingFlowListener implements FlowListener
+public class CountingFlowListener implements FlowListener
   {
-  public Semaphore started = new Semaphore( 0 );
-  public Semaphore stopped = new Semaphore( 0 );
-  public Semaphore completed = new Semaphore( 0 );
-  public Semaphore thrown = new Semaphore( 0 );
+  public int started = 0;
+  public int stopping = 0;
+  public int completed = 0;
+  public int successful = 0;
+  public int failed = 0;
+  public int stopped = 0;
+  public int skipped = 0;
+  public int thrown = 0;
 
-  public LockingFlowListener()
-    {
-    }
-
+  @Override
   public void onStarting( Flow flow )
     {
-    started.release();
+    started++;
     }
 
+  @Override
   public void onStopping( Flow flow )
     {
-    stopped.release();
+    stopping++;
     }
 
+  @Override
   public void onCompleted( Flow flow )
     {
-    completed.release();
+    completed++;
+
+    CascadingStats.Status status = flow.getFlowStats().getStatus();
+
+    switch( status )
+      {
+      case PENDING:
+        break;
+      case SKIPPED:
+        skipped++;
+        break;
+      case STARTED:
+        break;
+      case SUBMITTED:
+        break;
+      case RUNNING:
+        break;
+      case SUCCESSFUL:
+        successful++;
+        break;
+      case STOPPED:
+        stopped++;
+        break;
+      case FAILED:
+        failed++;
+        break;
+      }
     }
 
+  @Override
   public boolean onThrowable( Flow flow, Throwable throwable )
     {
-    thrown.release();
+    thrown++;
     return false;
     }
   }
