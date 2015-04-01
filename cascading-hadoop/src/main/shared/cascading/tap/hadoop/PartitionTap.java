@@ -22,16 +22,23 @@ package cascading.tap.hadoop;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import cascading.flow.FlowProcess;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
+import cascading.tap.hadoop.io.CombineInputPartitionTupleEntryIterator;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.hadoop.io.MultiInputSplit;
 import cascading.tap.hadoop.io.TapOutputCollector;
 import cascading.tap.partition.BasePartitionTap;
 import cascading.tap.partition.Partition;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntryIterableChainIterator;
+import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
 import org.apache.hadoop.fs.Path;
@@ -195,6 +202,41 @@ public class PartitionTap extends BasePartitionTap<JobConf, RecordReader, Output
     catch( IOException exception )
       {
       throw new TapException( "unable to retrieve child partitions", exception );
+      }
+    }
+
+  @Override
+  public TupleEntryIterator openForRead( FlowProcess<JobConf> flowProcess, RecordReader input ) throws IOException
+    {
+    if( flowProcess.getBooleanProperty( HfsProps.COMBINE_INPUT_FILES, false ) )
+      return new CombinePartitionIterator( flowProcess, input );
+
+    return super.openForRead( flowProcess, input );
+    }
+
+  private class CombinePartitionIterator extends TupleEntryIterableChainIterator
+    {
+    public CombinePartitionIterator( final FlowProcess<JobConf> flowProcess, RecordReader input ) throws IOException
+      {
+      super( getSourceFields() );
+
+      List<Iterator<Tuple>> iterators = new ArrayList<Iterator<Tuple>>();
+
+      if( input == null )
+        throw new IOException( "input cannot be null" );
+
+      String identifier = parent.getFullIdentifier( flowProcess );
+
+      iterators.add( createPartitionEntryIterator( flowProcess, input, identifier ) );
+
+      reset( iterators );
+      }
+
+    private CombineInputPartitionTupleEntryIterator createPartitionEntryIterator( FlowProcess<JobConf> flowProcess, RecordReader input, String parentIdentifier ) throws IOException
+      {
+      TupleEntrySchemeIterator schemeIterator = createTupleEntrySchemeIterator( flowProcess, parent, null, input );
+
+      return new CombineInputPartitionTupleEntryIterator( flowProcess, getSourceFields(), partition, parentIdentifier, schemeIterator );
       }
     }
   }

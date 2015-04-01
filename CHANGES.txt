@@ -1,7 +1,9 @@
 Cascading Change Log
 
 2.7.0 [unreleased]
-  
+
+  Added support for o.a.h.m.l.CombineFileInputFormat in the Hadoop specific c.t.h.PartitionTap implementation.
+
   Fixed issue where c.f.h.HadoopFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
   implementations (backport from wip-3.0 at 5e0493a).
 
