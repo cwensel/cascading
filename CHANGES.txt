@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Updated all c.f.p.g.ElementGraph implementations to use internal graphs backed by a j.u.IdentityHashMap. This is an
+  intermediate solution against JGraphT 0.9.0 until 0.9.1 is released.
+
   Updated c.c.Cascade and c.f.Flow implementations to fire c.f.FlowListener and c.f.FlowStepListener when a c.f.Flow
   or c.f.FlowStep are marked skipped.
 
@@ -9,8 +12,6 @@ Cascading Change Log
   implementations must be null safe as of now.
 
   Update c.o.r.RegexMatcher and sub-classes to honor type coercions, allows for custom value delimiter.
-
-  Updated jgrapht to 0.9.1 so that all internal graphs can be backed by a j.u.IdentityHashMap.
 
   Fixed issue where the Hadoop o.a.h.m.OutputFormat would be ignored during job configuration as configured by a custom
   c.s.Scheme that was not a o.a.h.m.FileOutputFormat sub-class. In such cases a o.a.h.m.l.NullOutputFormat would be

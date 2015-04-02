@@ -76,9 +76,6 @@ allprojects {
     mavenCentral()
     maven { url = 'http://conjars.org/repo/' }
     maven { url = 'https://repository.apache.org/content/repositories/releases/' }
-
-    // allows use of jgrapht snapshots
-    maven { url = 'http://oss.sonatype.org/content/repositories/snapshots' }
   }
 }
 

@@ -20,8 +20,6 @@
 
 package cascading.flow.planner.graph;
 
-import java.util.IdentityHashMap;
-
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
@@ -71,6 +69,8 @@ public class ElementDirectedGraph extends BaseAnnotatedElementGraph implements A
     public DirectedGraph()
       {
       super( Scope.class );
+
+      ElementGraphs.injectIdentityMap( this );
       }
 
     public DirectedGraph( org.jgrapht.DirectedGraph<FlowElement, Scope> parent )
@@ -80,9 +80,11 @@ public class ElementDirectedGraph extends BaseAnnotatedElementGraph implements A
       Graphs.addGraph( this, parent );
       }
 
-    protected DirectedSpecifics createDirectedSpecifics()
-      {
-      return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
-      }
+// todo: enable when jgrapht 0.9.1 is released
+//    @Override
+//    protected DirectedSpecifics createDirectedSpecifics()
+//      {
+//      return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
+//      }
     }
   }

@@ -1164,6 +1164,20 @@ public class Util
       }
     }
 
+  public static <R> boolean setInstanceFieldIfExistsSafe( Object target, String fieldName, R value )
+    {
+    try
+      {
+      setInstanceFieldIfExists( target, fieldName, value );
+      }
+    catch( Exception exception )
+      {
+      return false;
+      }
+
+    return true;
+    }
+
   public static <R> void setInstanceFieldIfExists( Object target, String fieldName, R value )
     {
     try

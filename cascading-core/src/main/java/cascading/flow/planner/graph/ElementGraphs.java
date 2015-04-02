@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -71,6 +72,7 @@ import org.jgrapht.ext.ComponentAttributeProvider;
 import org.jgrapht.ext.EdgeNameProvider;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
+import org.jgrapht.graph.AbstractGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
@@ -1028,4 +1030,21 @@ public class ElementGraphs
       }
     }
 
+  static void injectIdentityMap( AbstractGraph graph )
+    {
+    // this overcomes jgrapht 0.9.0 using a LinkedHashMap vs an IdentityHashMap
+    // vertex not found errors will be thrown if this fails
+    Object specifics = Util.returnInstanceFieldIfExistsSafe( graph, "specifics" );
+
+    if( specifics == null )
+      {
+      LOG.warn( "unable to get jgrapht Specifics for identity map injection, may be using an incompatible jgrapht version" );
+      return;
+      }
+
+    boolean success = Util.setInstanceFieldIfExistsSafe( specifics, "vertexMapDirected", new IdentityHashMap<>() );
+
+    if( !success )
+      LOG.warn( "unable to set IdentityHashMap on jgrapht Specifics, may be using an incompatible jgrapht version" );
+    }
   }
