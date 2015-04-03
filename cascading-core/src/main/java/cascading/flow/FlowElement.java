@@ -61,11 +61,15 @@ public interface FlowElement extends Serializable
 
   boolean isEquivalentTo( FlowElement element );
 
-  ConfigDef getStepConfigDef();
-
-  boolean hasStepConfigDef();
-
   ConfigDef getConfigDef();
 
   boolean hasConfigDef();
+
+  ConfigDef getNodeConfigDef();
+
+  boolean hasNodeConfigDef();
+
+  ConfigDef getStepConfigDef();
+
+  boolean hasStepConfigDef();
   }

@@ -380,7 +380,7 @@ public class ElementGraphs
   public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph, Set<FlowElement> excludes )
     {
     if( elementGraph.containsVertex( Extent.head ) )
-      elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+      elementGraph = asExtentMaskedSubGraph( elementGraph );
 
     Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( directed( elementGraph ), directed( contractedGraph ), excludes );
     Set<FlowElement> vertices = pair.getLhs();
@@ -390,6 +390,11 @@ public class ElementGraphs
     scopes.removeAll( excludeEdges );
 
     return new ElementSubGraph( elementGraph, vertices, scopes );
+    }
+
+  public static ElementMaskSubGraph asExtentMaskedSubGraph( ElementGraph elementGraph )
+    {
+    return new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
     }
 
   public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )

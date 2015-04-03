@@ -343,6 +343,18 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
     }
 
   @Override
+  public ConfigDef getNodeConfigDef()
+    {
+    return original.getNodeConfigDef();
+    }
+
+  @Override
+  public boolean hasNodeConfigDef()
+    {
+    return original.hasNodeConfigDef();
+    }
+
+  @Override
   public ConfigDef getStepConfigDef()
     {
     return original.getStepConfigDef();

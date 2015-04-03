@@ -173,6 +173,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     allLocalResources.putAll( dagResources );
 
+    initFromStepConfigDef( stepConf );
+
     return stepConf;
     }
 
@@ -435,7 +437,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     initFromTraps( flowNode, flowProcess, conf );
 
-    initFromProcessConfigDef( flowNode, conf );
+    initFromNodeConfigDef( flowNode, conf );
 
     // force step to local mode if any tap is local
     setLocalMode( initializedConfig, conf, null );
@@ -677,9 +679,14 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     return configs;
     }
 
-  private void initFromProcessConfigDef( FlowNode flowNode, Configuration conf )
+  private void initFromNodeConfigDef( FlowNode flowNode, Configuration conf )
     {
-    initConfFromProcessConfigDef( flowNode.getElementGraph(), new ConfigurationSetter( conf ) );
+    initConfFromNodeConfigDef( flowNode.getElementGraph(), new ConfigurationSetter( conf ) );
+    }
+
+  private void initFromStepConfigDef( Configuration conf )
+    {
+    initConfFromStepConfigDef( new ConfigurationSetter( conf ) );
     }
 
   protected void initFromTraps( FlowNode flowNode, FlowProcess<? extends Configuration> flowProcess, Configuration conf )

@@ -76,8 +76,8 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   SinkMode sinkMode = SinkMode.KEEP;
 
   private ConfigDef configDef;
-
-  private ConfigDef processConfigDef;
+  private ConfigDef nodeConfigDef;
+  private ConfigDef stepConfigDef;
 
   /** Field id */
   private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
@@ -655,6 +655,38 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
    * <p/>
+   * Any properties set on the nodeConfigDef will not show up in any Flow configuration, but will show up in
+   * the current process {@link cascading.flow.FlowNode} (in Apache Tez the Vertex configuration). Any value set in the
+   * nodeConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
+   * </p>
+   * Use this method to tweak properties in the process node this tap instance is planned into.
+   *
+   * @return an instance of ConfigDef
+   */
+  @Override
+  public ConfigDef getNodeConfigDef()
+    {
+    if( nodeConfigDef == null )
+      nodeConfigDef = new ConfigDef();
+
+    return nodeConfigDef;
+    }
+
+  /**
+   * Returns {@code true} if there are properties in the nodeConfigDef instance.
+   *
+   * @return true if there are nodeConfigDef properties
+   */
+  @Override
+  public boolean hasNodeConfigDef()
+    {
+    return nodeConfigDef != null && !nodeConfigDef.isEmpty();
+    }
+
+  /**
+   * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
+   * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
+   * <p/>
    * Any properties set on the stepConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
    * stepConfigDef will be overridden by the tap local {@code #getConfigDef} instance.
@@ -669,21 +701,21 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   @Override
   public ConfigDef getStepConfigDef()
     {
-    if( processConfigDef == null )
-      processConfigDef = new ConfigDef();
+    if( stepConfigDef == null )
+      stepConfigDef = new ConfigDef();
 
-    return processConfigDef;
+    return stepConfigDef;
     }
 
   /**
-   * Returns {@code true} if there are properties in the processConfigDef instance.
+   * Returns {@code true} if there are properties in the stepConfigDef instance.
    *
-   * @return true if there are processConfigDef properties
+   * @return true if there are stepConfigDef properties
    */
   @Override
   public boolean hasStepConfigDef()
     {
-    return processConfigDef != null && !processConfigDef.isEmpty();
+    return stepConfigDef != null && !stepConfigDef.isEmpty();
     }
 
   @Override

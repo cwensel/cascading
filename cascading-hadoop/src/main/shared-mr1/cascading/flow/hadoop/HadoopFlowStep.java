@@ -108,7 +108,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     initFromTraps( flowProcess, conf );
 
-    initFromProcessConfigDef( conf );
+    initFromStepConfigDef( conf );
 
     int numSinkParts = getSink().getScheme().getNumSinkParts();
 
@@ -366,9 +366,9 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     MultiInputFormat.addInputFormat( conf, streamedJobs ); //must come last
     }
 
-  private void initFromProcessConfigDef( final JobConf conf )
+  private void initFromStepConfigDef( final JobConf conf )
     {
-    initConfFromProcessConfigDef( getElementGraph(), new ConfigurationSetter( conf ) );
+    initConfFromStepConfigDef( new ConfigurationSetter( conf ) );
     }
 
   /**

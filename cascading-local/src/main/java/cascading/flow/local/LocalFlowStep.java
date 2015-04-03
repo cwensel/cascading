@@ -34,6 +34,7 @@ import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.management.state.ClientState;
 import cascading.property.ConfigDef;
 import cascading.tap.Tap;
+import cascading.util.Util;
 
 /** Class LocalFlowStep is the local mode implementation of {@link cascading.flow.FlowStep}. */
 public class LocalFlowStep extends BaseFlowStep<Properties>
@@ -55,7 +56,8 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     initTaps( flowProcess, currentProperties, getSinkTaps(), true );
     initTaps( flowProcess, currentProperties, getTraps(), true );
 
-    initFromProcessConfigDef( currentProperties );
+    initFromStepConfigDef( currentProperties );
+    initFromNodeConfigDef( currentProperties );
 
     return currentProperties;
     }
@@ -77,9 +79,14 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
       }
     }
 
-  private void initFromProcessConfigDef( final Properties properties )
+  private void initFromNodeConfigDef( final Properties properties )
     {
-    initConfFromProcessConfigDef( getElementGraph(), getSetterFor( properties ) );
+    initConfFromNodeConfigDef( Util.getFirst( getFlowNodeGraph().vertexSet() ).getElementGraph(), getSetterFor( properties ) );
+    }
+
+  private void initFromStepConfigDef( final Properties properties )
+    {
+    initConfFromStepConfigDef( getSetterFor( properties ) );
     }
 
   private ConfigDef.Setter getSetterFor( final Properties properties )

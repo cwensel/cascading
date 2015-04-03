@@ -54,6 +54,7 @@ import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
+import cascading.pipe.SubAssembly;
 import cascading.property.ConfigDef;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
@@ -775,12 +776,64 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   protected abstract FlowStepJob createFlowStepJob( ClientState clientState, FlowProcess<Config> flowProcess, Config initializedStepConfig );
 
-  protected void initConfFromProcessConfigDef( ElementGraph elementGraph, ConfigDef.Setter setter )
+  protected void initConfFromNodeConfigDef( ElementGraph nodeElementGraph, ConfigDef.Setter setter )
     {
+    nodeElementGraph = ElementGraphs.asExtentMaskedSubGraph( nodeElementGraph );
+
+    ElementGraph stepElementGraph = ElementGraphs.asExtentMaskedSubGraph( getElementGraph() );
+
     // applies each mode in order, topologically
     for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
       {
-      TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( elementGraph );
+      TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( nodeElementGraph );
+
+      while( iterator.hasNext() )
+        {
+        FlowElement element = iterator.next();
+
+        while( element != null )
+          {
+          // intentionally skip any element that spans downstream nodes, like a GroupBy
+          // this way GroupBy is applied on the inbound side (where partitioning happens)
+          // not the outbound side.
+          // parent sub-assemblies (like Unique) will be applied if they have leading Pipes to the current spanning Pipe
+          if( elementSpansDownStream( stepElementGraph, nodeElementGraph, element ) )
+            {
+            element = null;
+            continue;
+            }
+
+          if( element.hasNodeConfigDef() )
+            element.getNodeConfigDef().apply( mode, setter );
+
+          // walk up the sub-assembly parent hierarchy
+          if( element instanceof Pipe )
+            element = ( (Pipe) element ).getParent();
+          else
+            element = null;
+          }
+        }
+      }
+    }
+
+  private boolean elementSpansDownStream( ElementGraph stepElementGraph, ElementGraph nodeElementGraph, FlowElement element )
+    {
+    boolean spansNodes = !( element instanceof SubAssembly );
+
+    if( spansNodes )
+      spansNodes = nodeElementGraph.outDegreeOf( element ) == 0 && stepElementGraph.outDegreeOf( element ) > 0;
+
+    return spansNodes;
+    }
+
+  protected void initConfFromStepConfigDef( ConfigDef.Setter setter )
+    {
+    ElementGraph stepElementGraph = ElementGraphs.asExtentMaskedSubGraph( getElementGraph() );
+
+    // applies each mode in order, topologically
+    for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
+      {
+      TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( stepElementGraph );
 
       while( iterator.hasNext() )
         {
@@ -791,6 +844,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
           if( element.hasStepConfigDef() )
             element.getStepConfigDef().apply( mode, setter );
 
+          // walk up the sub-assembly parent hierarchy
           if( element instanceof Pipe )
             element = ( (Pipe) element ).getParent();
           else

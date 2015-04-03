@@ -24,7 +24,6 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import cascading.pipe.Pipe;
 import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
 
@@ -68,6 +67,18 @@ public enum Extent implements FlowElement
 
   @Override
   public boolean hasStepConfigDef()
+    {
+    return false;
+    }
+
+  @Override
+  public ConfigDef getNodeConfigDef()
+    {
+    return null;
+    }
+
+  @Override
+  public boolean hasNodeConfigDef()
     {
     return false;
     }

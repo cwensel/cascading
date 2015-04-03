@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Added support for node level c.p.ConfigDef properties on both c.p.Pipe and c.t.Tap instances. Only the Tez platform
+  is supported as there are no Map/Reduce independent node configurations on the MR platforms.
+
   Updated all c.f.p.g.ElementGraph implementations to use internal graphs backed by a j.u.IdentityHashMap. This is an
   intermediate solution against JGraphT 0.9.0 until 0.9.1 is released.
 

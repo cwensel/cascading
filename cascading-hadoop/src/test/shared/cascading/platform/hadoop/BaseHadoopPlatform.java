@@ -238,7 +238,7 @@ public abstract class BaseHadoopPlatform<Config extends Configuration> extends T
   @Override
   public Scheme getTestConfigDefScheme()
     {
-    return new HadoopConfigDefScheme( new Fields( "line" ) );
+    return new HadoopConfigDefScheme( new Fields( "line" ), isDAG() );
     }
 
   @Override

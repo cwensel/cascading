@@ -37,9 +37,13 @@ import org.apache.hadoop.mapred.RecordReader;
  */
 public class HadoopConfigDefScheme extends cascading.scheme.hadoop.TextLine
   {
-  public HadoopConfigDefScheme( Fields sourceFields )
+  private final boolean supportsNodeConfig;
+
+  public HadoopConfigDefScheme( Fields sourceFields, boolean supportsNodeConfig )
     {
     super( sourceFields );
+
+    this.supportsNodeConfig = supportsNodeConfig;
     }
 
   @Override
@@ -72,6 +76,9 @@ public class HadoopConfigDefScheme extends cascading.scheme.hadoop.TextLine
       throw new RuntimeException( "not default value" );
 
     if( !"source-replace".equals( flowProcess.getProperty( "replace" ) ) )
+      throw new RuntimeException( "not replaced value" );
+
+    if( supportsNodeConfig && !"node-replace".equals( flowProcess.getProperty( "default-node" ) ) )
       throw new RuntimeException( "not replaced value" );
 
     flowProcess = ( (FlowProcessWrapper) flowProcess ).getDelegate();

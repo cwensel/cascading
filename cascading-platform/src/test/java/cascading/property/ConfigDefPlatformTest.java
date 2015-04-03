@@ -56,9 +56,13 @@ public class ConfigDefPlatformTest extends PlatformTestCase
 
   public static class IterateInsert extends BaseOperation implements Function
     {
-    public IterateInsert( Fields fieldDeclaration )
+    private final boolean supportsNodeConfig;
+
+    public IterateInsert( Fields fieldDeclaration, boolean supportsNodeConfig )
       {
       super( fieldDeclaration );
+
+      this.supportsNodeConfig = supportsNodeConfig;
       }
 
     @Override
@@ -71,6 +75,9 @@ public class ConfigDefPlatformTest extends PlatformTestCase
         throw new RuntimeException( "not default value" );
 
       if( !"pipe-replace".equals( flowProcess.getProperty( "replace" ) ) )
+        throw new RuntimeException( "not replaced value" );
+
+      if( supportsNodeConfig && !"node-replace".equals( flowProcess.getProperty( "default-node" ) ) )
         throw new RuntimeException( "not replaced value" );
 
       flowProcess = ( (FlowProcessWrapper) flowProcess ).getDelegate();
@@ -103,7 +110,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new IterateInsert( new Fields( "value" ) ), Fields.ALL );
+    pipe = new Each( pipe, new IterateInsert( new Fields( "value" ), getPlatform().isDAG() ), Fields.ALL );
 
     pipe.getConfigDef().setProperty( Mode.DEFAULT, "default", "pipe-default" );
 
@@ -113,8 +120,12 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     pipe.getConfigDef().setProperty( Mode.DEFAULT, "replace", "pipe-default" );
     pipe.getConfigDef().setProperty( Mode.REPLACE, "replace", "pipe-replace" );
 
+    pipe.getNodeConfigDef().setProperty( Mode.REPLACE, "default-node", "node-replace" );
+
     pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
     pipe.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+
+    pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "default-node", "process-default" );
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "configdef" ), SinkMode.REPLACE );
 
@@ -145,8 +156,12 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     source.getConfigDef().setProperty( Mode.DEFAULT, "replace", "source-default" );
     source.getConfigDef().setProperty( Mode.REPLACE, "replace", "source-replace" );
 
+    source.getNodeConfigDef().setProperty( Mode.REPLACE, "default-node", "node-replace" );
+
     source.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
     source.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+
+    source.getStepConfigDef().setProperty( Mode.DEFAULT, "default-node", "process-default" );
 
     Pipe pipe = new Pipe( "test" );
 
@@ -186,8 +201,12 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     sink.getConfigDef().setProperty( Mode.DEFAULT, "replace", "sink-default" );
     sink.getConfigDef().setProperty( Mode.REPLACE, "replace", "sink-replace" );
 
+    sink.getNodeConfigDef().setProperty( Mode.REPLACE, "default-node", "node-replace" );
+
     sink.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
     sink.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+
+    sink.getStepConfigDef().setProperty( Mode.DEFAULT, "default-node", "process-default" );
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -198,11 +217,11 @@ public class ConfigDefPlatformTest extends PlatformTestCase
 
   public static class ConfigSubAssembly extends SubAssembly
     {
-    public ConfigSubAssembly( Pipe pipe )
+    public ConfigSubAssembly( Pipe pipe, boolean supportsNodeConfig )
       {
       super( pipe );
 
-      pipe = new Each( pipe, new IterateInsert( new Fields( "value" ) ), Fields.ALL );
+      pipe = new Each( pipe, new IterateInsert( new Fields( "value" ), supportsNodeConfig ), Fields.ALL );
 
       setTails( pipe );
       }
@@ -217,7 +236,7 @@ public class ConfigDefPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new ConfigSubAssembly( pipe );
+    pipe = new ConfigSubAssembly( pipe, getPlatform().isDAG() );
 
     pipe.getConfigDef().setProperty( Mode.DEFAULT, "default", "pipe-default" );
 
@@ -227,8 +246,12 @@ public class ConfigDefPlatformTest extends PlatformTestCase
     pipe.getConfigDef().setProperty( Mode.DEFAULT, "replace", "pipe-default" );
     pipe.getConfigDef().setProperty( Mode.REPLACE, "replace", "pipe-replace" );
 
+    pipe.getNodeConfigDef().setProperty( Mode.REPLACE, "default-node", "node-replace" );
+
     pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "replace", "process-default" );
     pipe.getStepConfigDef().setProperty( Mode.REPLACE, "replace", "process-replace" );
+
+    pipe.getStepConfigDef().setProperty( Mode.DEFAULT, "default-node", "process-default" );
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "subassembly-configdef" ), SinkMode.REPLACE );
 

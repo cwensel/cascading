@@ -73,6 +73,8 @@ public class Pipe implements FlowElement, Serializable, Traceable
 
   protected ConfigDef stepConfigDef;
 
+  protected ConfigDef nodeConfigDef;
+
   /** Field id */
   private final String id = Util.createUniqueID(); // 3.0 planner relies on this being consistent
   /** Field trace */
@@ -307,6 +309,44 @@ public class Pipe implements FlowElement, Serializable, Traceable
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
    * <p/>
+   * Any properties set on the nodeConfigDef will not show up in any Flow configuration, but will show up in
+   * the current process {@link cascading.flow.FlowNode} (in Apache Tez the Vertex configuration). Any value set in the
+   * nodeConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
+   * </p>
+   * Use this method to tweak properties in the process node this pipe instance is planned into. In the case of the
+   * Apache Tez platform, when set on a {@link GroupBy} instance, the number of gather partitions can be modified.
+   * <p/>
+   * In the case of any Pipe that spans FlowNode boundaries, like GroupBy and CoGroup may on some platforms,
+   * any ConfigDef properties will be applied to the downstream FlowNode. That is, if a GroupBy is the source
+   * to a node, any node ConfigDef properties will be applied. If the GroupBy encountered when applying properties
+   * is on the sink side of a node, the properties will be ignored.
+   *
+   * @return an instance of ConfigDef
+   */
+  @Override
+  public ConfigDef getNodeConfigDef()
+    {
+    if( nodeConfigDef == null )
+      nodeConfigDef = new ConfigDef();
+
+    return nodeConfigDef;
+    }
+
+  /**
+   * Returns {@code true} if there are properties in the nodeConfigDef instance.
+   *
+   * @return true if there are nodeConfigDef properties
+   */
+  @Override
+  public boolean hasNodeConfigDef()
+    {
+    return nodeConfigDef != null && !nodeConfigDef.isEmpty();
+    }
+
+  /**
+   * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
+   * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
+   * <p/>
    * Any properties set on the stepConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
    * stepConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
@@ -326,9 +366,9 @@ public class Pipe implements FlowElement, Serializable, Traceable
     }
 
   /**
-   * Returns {@code true} if there are properties in the processConfigDef instance.
+   * Returns {@code true} if there are properties in the stepConfigDef instance.
    *
-   * @return true if there are processConfigDef properties
+   * @return true if there are stepConfigDef properties
    */
   @Override
   public boolean hasStepConfigDef()
