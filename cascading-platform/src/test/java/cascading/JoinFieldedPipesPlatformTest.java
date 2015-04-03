@@ -32,6 +32,8 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowStep;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.operation.Aggregator;
 import cascading.operation.Function;
 import cascading.operation.Identity;
@@ -40,6 +42,7 @@ import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -1982,5 +1985,172 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     Collections.sort( expected );
 
     assertEquals( expected, values );
+    }
+
+  /**
+   * Under tez, this can result in the HashJoin being duplicated across nodes for each split after the HashJoin
+   * BoundaryBalanceJoinSplitTransformer inserts a Boundary at the split, preventing duplication of the path
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testJoinSplit() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+    getPlatform().copyFromLocal( inputFileRhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( "lhs", getPlatform().getTextFile( inputFileLhs ) )
+      .addSource( "rhs", getPlatform().getTextFile( inputFileRhs ) )
+      .addSink( "lhsSink", getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "lhs" ), SinkMode.REPLACE ) )
+      .addSink( "rhsSink", getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "rhs" ), SinkMode.REPLACE ) );
+
+    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+
+    Pipe join = new HashJoin( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+
+    Pipe pipeLhs = new Each( new Pipe( "lhsSink", join ), new Identity() );
+    Pipe pipeRhs = new Each( new Pipe( "rhsSink", join ), new Identity() );
+
+    flowDef
+      .addTail( pipeLhs )
+      .addTail( pipeRhs );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 37, null );
+
+    List<Tuple> values = asList( flow, flowDef.getSinks().get( "lhsSink" ) );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tB" ) ) );
+
+    values = asList( flow, flowDef.getSinks().get( "rhsSink" ) );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tB" ) ) );
+    }
+
+  /**
+   * catches a situation where BottomUpJoinedBoundariesNodePartitioner may capture an invalid HashJoin sub-graph
+   * if the in-bound Boundary is split upon.
+   */
+  @Test
+  public void testSameSourceJoinSplitIntoJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+    getPlatform().copyFromLocal( inputFileRhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( "lhs", getPlatform().getTextFile( inputFileLhs ) )
+      .addSource( "rhs", getPlatform().getTextFile( inputFileLhs ) )
+      .addSource( "joinSecond", getPlatform().getTextFile( inputFileRhs ) )
+      .addSink( "lhsSink", getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "lhs" ), SinkMode.REPLACE ) )
+      .addSink( "rhsSink", getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "rhs" ), SinkMode.REPLACE ) );
+
+    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+
+    Pipe joinFirst = new HashJoin( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+
+    Pipe pipeLhs = new Each( new Pipe( "lhsSink", joinFirst ), new Identity() );
+
+    Pipe joinSecond = new Each( "joinSecond", new Fields( "line" ), new RegexSplitter( new Fields( "numRHSSecond", "charRHSSecond" ), " " ) );
+
+    joinSecond = new HashJoin( joinFirst, new Fields( "numLHS" ), joinSecond, new Fields( "numRHSSecond" ) );
+
+    Pipe pipeRhs = new Each( new Pipe( "rhsSink", joinSecond ), new Identity() );
+
+    flowDef
+      .addTail( pipeLhs )
+      .addTail( pipeRhs );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    List<Tuple> values = asList( flow, flowDef.getSinks().get( "lhsSink" ) );
+
+    assertEquals( 37, values.size() );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tb" ) ) );
+
+    values = asList( flow, flowDef.getSinks().get( "rhsSink" ) );
+
+    assertEquals( 109, values.size() );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tb\t1\tB" ) ) );
+    }
+
+  /**
+   * checks that a split after a HashJoin does not result in the HashJoin execution being duplicated across
+   * multiple nodes, one for each branch in the split.
+   */
+  @Test
+  public void testJoinSplitBeforeJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+    getPlatform().copyFromLocal( inputFileRhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( "lhs", getPlatform().getTextFile( inputFileLhs ) )
+      .addSource( "rhs", getPlatform().getTextFile( inputFileRhs ) )
+      .addSource( "joinSecond", getPlatform().getTextFile( inputFileRhs ) )
+      .addSink( "lhsSink", getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "lhs" ), SinkMode.REPLACE ) )
+      .addSink( "rhsSink", getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "rhs" ), SinkMode.REPLACE ) );
+
+    Pipe pipeLower = new Each( "lhs", new Fields( "line" ), new RegexSplitter( new Fields( "numLHS", "charLHS" ), " " ) );
+    Pipe pipeUpper = new Each( "rhs", new Fields( "line" ), new RegexSplitter( new Fields( "numRHS", "charRHS" ), " " ) );
+
+    pipeUpper = new Checkpoint( pipeUpper );
+
+    HashJoin hashJoin = new HashJoin( pipeLower, new Fields( "numLHS" ), pipeUpper, new Fields( "numRHS" ), new InnerJoin() );
+
+    Pipe joinFirst = hashJoin;
+
+    joinFirst = new Each( joinFirst, new Identity() );
+
+    Pipe pipeLhs = new Each( new Pipe( "lhsSink", joinFirst ), new Identity() );
+
+    pipeLhs = new GroupBy( pipeLhs, new Fields( "numLHS" ) );
+
+    joinFirst = new Each( new Pipe( "lhsSplit", joinFirst ), new Identity() );
+
+    Pipe joinSecond = new Each( "joinSecond", new Fields( "line" ), new RegexSplitter( new Fields( "numRHSSecond", "charRHSSecond" ), " " ) );
+
+    joinSecond = new CoGroup( joinFirst, new Fields( "numLHS" ), joinSecond, new Fields( "numRHSSecond" ) );
+
+    Pipe pipeRhs = new Each( new Pipe( "rhsSink", joinSecond ), new Identity() );
+
+    flowDef
+      .addTail( pipeLhs )
+      .addTail( pipeRhs );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    if( getPlatform().isDAG() )
+      {
+      FlowStep flowStep = (FlowStep) flow.getFlowSteps().get( 0 );
+      List<ElementGraph> elementGraphs = flowStep.getFlowNodeGraph().getElementGraphs( hashJoin );
+
+      assertEquals( 1, elementGraphs.size() );
+      }
+
+    flow.complete();
+
+    List<Tuple> values = asList( flow, flowDef.getSinks().get( "lhsSink" ) );
+
+    assertEquals( 37, values.size() );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tB" ) ) );
+
+    values = asList( flow, flowDef.getSinks().get( "rhsSink" ) );
+
+    assertEquals( 109, values.size() );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tA\t1\tA" ) ) );
+    assertTrue( values.contains( new Tuple( "1\ta\t1\tB\t1\tB" ) ) );
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,37 +23,35 @@ package cascading.flow.tez.planner.rule.expressiongraph;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
-import cascading.flow.planner.iso.finder.SearchOrder;
+import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression;
-import cascading.pipe.Boundary;
-import cascading.pipe.Group;
-import cascading.pipe.Merge;
-import cascading.tap.Tap;
-
-import static cascading.flow.planner.iso.expression.OrElementExpression.or;
+import cascading.flow.planner.rule.expressiongraph.SyncPipeExpressionGraph;
+import cascading.pipe.HashJoin;
+import cascading.pipe.Pipe;
 
 /**
  *
  */
-public class BottomUpNoSplitConsecutiveBoundariesExpressionGraph extends ExpressionGraph
+public class BalanceJoinSplitExpression extends RuleExpression
   {
-  public BottomUpNoSplitConsecutiveBoundariesExpressionGraph()
+  public static final FlowElementExpression SHARED_JOIN = new FlowElementExpression( HashJoin.class );
+
+  public BalanceJoinSplitExpression()
     {
-    super( SearchOrder.ReverseTopological );
+    super(
+      new SyncPipeExpressionGraph(),
 
-    this.arc(
-      or(
-        new FlowElementExpression( Boundary.class, TypeExpression.Topo.LinearOut ), // not possible to split on a boundary in Tez currently
-        new FlowElementExpression( Tap.class, TypeExpression.Topo.LinearOut ),
-        new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut ),
-        new FlowElementExpression( Merge.class, TypeExpression.Topo.LinearOut )
-      ),
+      // in order to capture out degree in sub-graph, we need to capture at least two successors
+      new ExpressionGraph()
+        .arcs( SHARED_JOIN, new BoundariesElementExpression() )
+        .arcs( SHARED_JOIN, new BoundariesElementExpression() ),
 
-      PathScopeExpression.ANY,
-
-      new BoundariesElementExpression( ElementCapture.Primary )
+      // sub-graph to match has out degree captured above
+      new ExpressionGraph()
+        .arcs(
+          new FlowElementExpression( ElementCapture.Primary, Pipe.class, TypeExpression.Topo.SplitOnly )
+        )
     );
     }
   }

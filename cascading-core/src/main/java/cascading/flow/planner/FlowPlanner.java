@@ -408,7 +408,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
             throw new PlannerException( tail, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
           if( tailNames.contains( tailName ) && !tails.contains( tail ) )
-//            LOG.warn( "duplicate tail name found: '{}'", tailName );
             throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
           tailNames.add( tailName );
@@ -423,7 +422,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
           throw new PlannerException( pipe, "pipe name not found in either sink or source map: '" + tailName + "'" );
 
         if( tailNames.contains( tailName ) && !tails.contains( pipe ) )
-//          LOG.warn( "duplicate tail name found: '{}'", tailName );
           throw new PlannerException( pipe, "duplicate tail name found: " + tailName );
 
         tailNames.add( tailName );
@@ -431,7 +429,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
         }
       }
 
-//    Set<String> allTailNames = new HashSet<String>( tailNames );
     tailNames.removeAll( flowDef.getSinks().keySet() );
     Set<String> remainingSinks = new HashSet<String>( flowDef.getSinks().keySet() );
     remainingSinks.removeAll( tailNames );
@@ -462,7 +459,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
         if( headNames.contains( headName ) && !heads.contains( head ) )
           LOG.warn( "duplicate head name found, not an error but heads should have unique names: '{}'", headName );
-//          throw new PlannerException( pipe, "duplicate head name found: " + headName );
 
         headNames.add( headName );
         heads.add( head );
@@ -556,7 +552,21 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
    * If there are rules for a given {@link cascading.flow.planner.rule.ProcessLevel} on the current platform
    * there must be sub-graphs partitioned at that level.
    */
-  public void verifyResult( RuleResult ruleResult )
+  public Exception verifyResult( RuleResult ruleResult )
+    {
+    try
+      {
+      verifyResultInternal( ruleResult );
+      }
+    catch( Exception exception )
+      {
+      return exception;
+      }
+
+    return null;
+    }
+
+  protected void verifyResultInternal( RuleResult ruleResult )
     {
     Set<ProcessLevel> processLevels = ruleResult.getRegistry().getProcessLevels();
 

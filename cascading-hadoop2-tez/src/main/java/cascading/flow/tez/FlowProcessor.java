@@ -131,7 +131,7 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
     streamGraph.prepare(); // starts inputs
 
     // wait for shuffle
-    waitForInputsRead( inputMap );
+    waitForInputsReady( inputMap );
 
     // user code begins executing from here
     long processBeginTime = System.currentTimeMillis();
@@ -185,7 +185,7 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
       }
     }
 
-  protected void waitForInputsRead( Map<String, LogicalInput> inputMap ) throws InterruptedException
+  protected void waitForInputsReady( Map<String, LogicalInput> inputMap ) throws InterruptedException
     {
     long beginInputReady = System.currentTimeMillis();
 

@@ -51,7 +51,7 @@ public class BottomUpConsecutiveBoundariesExpressionGraph extends ExpressionGrap
     FlowElementExpression shared = new FlowElementExpression( ElementCapture.Secondary, HashJoin.class );
 
     this.arc(
-      or( new FlowElementExpression( Boundary.class, TypeExpression.Topo.LinearOut ),
+      or( new FlowElementExpression( Boundary.class ),
         new FlowElementExpression( Tap.class ),
         new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut ), new FlowElementExpression( Merge.class, TypeExpression.Topo.LinearOut ) ),
 

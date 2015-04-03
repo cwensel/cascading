@@ -147,13 +147,18 @@ public class RuleSetExec
     traceWriter.writeTracePlan( registryName, "completed-flow-element-graph", ruleResult.getAssemblyGraph() );
     traceWriter.writeStats( plannerContext, ruleResult );
 
-    if( ruleResult.isSuccess() )
-      flowPlanner.verifyResult( ruleResult );
+    Exception plannerException;
 
-    Exception plannerException = ruleResult.getPlannerException();
+    if( ruleResult.isSuccess() )
+      plannerException = flowPlanner.verifyResult( ruleResult );
+    else
+      plannerException = ruleResult.getPlannerException();
 
     if( plannerException != null && plannerException instanceof PlannerException && ( (PlannerException) plannerException ).getElementGraph() != null )
       traceWriter.writeTracePlan( registryName, "failed-source-element-graph", ( (PlannerException) plannerException ).getElementGraph() );
+
+    if( ruleResult.isSuccess() && plannerException != null )
+      rethrow( plannerException );
 
     return ruleResult;
     }
