@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.FlowElements;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.Scope;
@@ -392,9 +393,21 @@ public class ElementGraphs
     return new ElementSubGraph( elementGraph, vertices, scopes );
     }
 
-  public static ElementMaskSubGraph asExtentMaskedSubGraph( ElementGraph elementGraph )
+  /**
+   * Returns a new ElementGraph (a MaskedSubGraph) of the given ElementGraph that will not contain the {@link Extent}
+   * head or tail instances.
+   * <p/>
+   * If the given ElementGraph does not contain head or tail, it will be returned unchanged.
+   *
+   * @param elementGraph
+   * @return
+   */
+  public static ElementGraph asExtentMaskedSubGraph( ElementGraph elementGraph )
     {
-    return new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+    if( elementGraph.containsVertex( Extent.head ) || elementGraph.containsVertex( Extent.tail ) )
+      return new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
+
+    return elementGraph;
     }
 
   public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
@@ -958,6 +971,8 @@ public class ElementGraphs
         label = ( (Pipe) object ).print( scope ).replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1|$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1|$2" );
         }
 
+      label = label.replaceFirst( "([^|]+)\\|(.*)", "$1 : " + getID( object ) + "|$2" ); // insert id
+
       label = "{" + label.replaceAll( "\\{", "\\\\{" ).replaceAll( "\\}", "\\\\}" ).replaceAll( ">", "\\\\>" ) + "}";
 
       if( !( graph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) graph ).hasAnnotations() )
@@ -969,6 +984,11 @@ public class ElementGraphs
         label += "|{" + Util.join( annotations, "|" ) + "}";
 
       return label;
+      }
+
+    protected String getID( FlowElement object )
+      {
+      return FlowElements.id( object ).substring( 0, 5 );
       }
     }
 

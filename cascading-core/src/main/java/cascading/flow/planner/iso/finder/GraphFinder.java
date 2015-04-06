@@ -34,7 +34,6 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
-import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
@@ -43,6 +42,8 @@ import cascading.util.EnumMultiMap;
 import cascading.util.Pair;
 import cascading.util.Util;
 import org.jgrapht.graph.DirectedMultigraph;
+
+import static cascading.flow.planner.graph.ElementGraphs.directed;
 
 /**
  *
@@ -111,7 +112,7 @@ public class GraphFinder
     Set<FlowElement> foundElements = new LinkedHashSet<>();
 
     // no evidence elementGraph.vertexSet().iterator(); is faster without modifying jgrapht
-    Iterator<FlowElement> iterator = SearchOrder.getNodeIterator( matchExpression.getSearchOrder(), ElementGraphs.directed( elementGraph ) );
+    Iterator<FlowElement> iterator = SearchOrder.getNodeIterator( matchExpression.getSearchOrder(), directed( elementGraph ) );
 
     while( iterator.hasNext() )
       {

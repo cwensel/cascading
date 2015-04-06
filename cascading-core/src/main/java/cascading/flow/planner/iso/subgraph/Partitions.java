@@ -29,6 +29,7 @@ import java.util.Map;
 import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.GraphResult;
+import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.flow.planner.iso.subgraph.partitioner.ExpressionGraphPartitioner;
 import cascading.flow.planner.rule.RulePartitioner;
@@ -120,11 +121,15 @@ public class Partitions extends GraphResult
       {
       ExpressionGraphPartitioner expressionGraphPartitioner = (ExpressionGraphPartitioner) graphPartitioner;
 
-      if( expressionGraphPartitioner.getContractionGraph() != null )
-        expressionGraphPartitioner.getContractionGraph().writeDOT( new File( path, makeFileName( count++, "contraction-graph" ) ).toString() );
+      ExpressionGraph contractionGraph = expressionGraphPartitioner.getContractionGraph();
 
-      if( expressionGraphPartitioner.getExpressionGraph() != null )
-        expressionGraphPartitioner.getExpressionGraph().writeDOT( new File( path, makeFileName( count++, "expression-graph" ) ).toString() );
+      if( contractionGraph != null )
+        contractionGraph.writeDOT( new File( path, makeFileName( count++, "contraction-graph", contractionGraph ) ).toString() );
+
+      ExpressionGraph expressionGraph = expressionGraphPartitioner.getExpressionGraph();
+
+      if( expressionGraph != null )
+        expressionGraph.writeDOT( new File( path, makeFileName( count++, "expression-graph", expressionGraph ) ).toString() );
       }
 
     if( contractedGraph != null )
@@ -147,6 +152,11 @@ public class Partitions extends GraphResult
   private String makeFileName( int ordinal, String name )
     {
     return String.format( "%02d-%s.dot", ordinal, name );
+    }
+
+  private String makeFileName( int ordinal, String name, Object type )
+    {
+    return String.format( "%02d-%s-%s.dot", ordinal, name, type.getClass().getSimpleName() );
     }
 
   private String makeFileName( int order, int ordinal, String name )

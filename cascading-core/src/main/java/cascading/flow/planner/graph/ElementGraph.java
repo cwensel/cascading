@@ -61,7 +61,7 @@ import cascading.pipe.Pipe;
  * @see ElementMaskSubGraph
  * @see ElementGraphs
  */
-public interface ElementGraph //extends DirectedGraph<FlowElement, Scope>
+public interface ElementGraph
   {
   Set<Scope> getAllEdges( FlowElement lhs, FlowElement rhs );
 

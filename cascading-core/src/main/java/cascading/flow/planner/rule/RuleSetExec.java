@@ -50,7 +50,7 @@ public class RuleSetExec
   {
   public static final int MAX_CONCURRENT_PLANNERS = 5;
   public static final int DEFAULT_TIMEOUT = 10 * 60;
-  public static final Comparator<RuleResult> DEFAULT_RESULT_COMPARATOR = new Comparator<RuleResult>()
+  public static final Comparator<RuleResult> DEFAULT_PLAN_COMPARATOR = new Comparator<RuleResult>()
   {
   @Override
   public int compare( RuleResult lhs, RuleResult rhs )
@@ -61,6 +61,12 @@ public class RuleSetExec
       return c;
 
     return lhs.getNumNodes() - rhs.getNumNodes();
+    }
+
+  @Override
+  public String toString()
+    {
+    return "default comparator: selects plan with fewest steps and fewest nodes";
     }
   };
 
@@ -96,7 +102,7 @@ public class RuleSetExec
     if( registrySet.getPlanComparator() != null )
       return registrySet.getPlanComparator();
 
-    return DEFAULT_RESULT_COMPARATOR;
+    return DEFAULT_PLAN_COMPARATOR;
     }
 
   protected Comparator<RuleResult> getOrderComparator()
@@ -142,7 +148,7 @@ public class RuleSetExec
 
     RuleResult ruleResult = ruleExec.exec( plannerContext, flowElementGraph );
 
-    getFlowLogger().logInfo( "executed rule registry: {}, completed in: {}", registryName, formatDurationFromMillis( ruleResult.getDuration() ) );
+    getFlowLogger().logInfo( "executed rule registry: {}, completed as: {}, in: {}", registryName, ruleResult.getResultStatus(), formatDurationFromMillis( ruleResult.getDuration() ) );
 
     traceWriter.writeTracePlan( registryName, "completed-flow-element-graph", ruleResult.getAssemblyGraph() );
     traceWriter.writeStats( plannerContext, ruleResult );
@@ -152,7 +158,7 @@ public class RuleSetExec
     if( ruleResult.isSuccess() )
       plannerException = flowPlanner.verifyResult( ruleResult );
     else
-      plannerException = ruleResult.getPlannerException();
+      plannerException = ruleResult.getPlannerException(); // will be re-thrown below
 
     if( plannerException != null && plannerException instanceof PlannerException && ( (PlannerException) plannerException ).getElementGraph() != null )
       traceWriter.writeTracePlan( registryName, "failed-source-element-graph", ( (PlannerException) plannerException ).getElementGraph() );
@@ -208,9 +214,9 @@ public class RuleSetExec
       if( !futures.isEmpty() )
         {
         if( timedOut )
-          getFlowLogger().logWarn( "planner cancelling long running registries past timeout period: {}", formatDurationFromMillis( registrySet.getPlannerTimeoutSec() * 1000 ) );
+          getFlowLogger().logWarn( "planner cancelling long running registries past timeout period: {}, see RuleRegistrySet#setPlannerTimeoutSec() to change timeout", formatDurationFromMillis( registrySet.getPlannerTimeoutSec() * 1000 ) );
         else
-          getFlowLogger().logInfo( "planner cancelling remaining running registries: {}, successful: {}", futures.size(), success.size() );
+          getFlowLogger().logInfo( "first registry completed, planner cancelling remaining running registries: {}, successful: {}", futures.size(), success.size() );
 
         for( Future<RuleResult> current : futures )
           current.cancel( true );
@@ -257,7 +263,10 @@ public class RuleSetExec
 
     RuleResult ruleResult = success.get( 0 );
 
-    getFlowLogger().logInfo( "rule registry: {}, result was selected", ruleResult.getRegistry().getName() );
+    if( registrySet.getSelect() == RuleRegistrySet.Select.FIRST )
+      getFlowLogger().logInfo( "rule registry: {}, result was selected as first successful", ruleResult.getRegistry().getName() );
+    else if( registrySet.getSelect() == RuleRegistrySet.Select.COMPARED )
+      getFlowLogger().logInfo( "rule registry: {}, result was selected using: \'{}\'", ruleResult.getRegistry().getName(), getPlanComparator().toString() );
 
     return ruleResult;
     }
@@ -270,7 +279,7 @@ public class RuleSetExec
     for( RuleResult ruleResult : unsupported )
       getFlowLogger().logInfo( "rule registry: {}, does not support assembly", ruleResult.getRegistry().getName() );
 
-    if( !registrySet.isIgnoreFailed() || success.isEmpty() && illegal.isEmpty() )
+    if( !registrySet.isIgnoreFailed() || success.isEmpty() && illegal.isEmpty() && interrupted.isEmpty() )
       rethrow( unsupported.get( 0 ).getPlannerException() );
     }
 

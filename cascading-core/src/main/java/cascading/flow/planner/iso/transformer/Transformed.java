@@ -149,20 +149,24 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     int count = 0;
 
     if( expressionGraph != null )
-      expressionGraph.writeDOT( new File( path, "expression-graph.dot" ).toString() );
+      {
+      String fileName = String.format( "expression-graph-%s.dot", expressionGraph.getClass().getSimpleName() );
+      expressionGraph.writeDOT( new File( path, fileName ).toString() );
+      }
 
     for( int i = 0; i < getChildTransforms().size(); i++ )
       {
       Transformed transformed = getChildTransforms().get( i );
       String name = transformed.getTransformerName();
-      transformed.writeDOTs( path + "/child-" + i + "-" + name + "/" );
+      String pathName = String.format( "%s/child-%d-%s/", path, i, name );
+      transformed.writeDOTs( pathName );
       }
 
     count = writeBeginGraph( path, count );
 
     for( ElementGraph recursion : getRecursions() )
       {
-      String name = recursion.getClass().getSimpleName();//.replaceAll( "(.*)ElementGraph$", "$1" );
+      String name = recursion.getClass().getSimpleName();
       recursion.writeDOT( new File( path, makeFileName( count++, name, "recursion" ) ).toString() );
       }
 

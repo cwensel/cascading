@@ -44,7 +44,7 @@ import java.util.LinkedList;
  * If no planner executions complete successfully within the timeout period, an exception will be thrown.
  * <p/>
  * If there are multiple successful completions, the default cost comparator,
- * {@link cascading.flow.planner.rule.RuleSetExec#DEFAULT_RESULT_COMPARATOR}, will be applied to find the lower
+ * {@link cascading.flow.planner.rule.RuleSetExec#DEFAULT_PLAN_COMPARATOR}, will be applied to find the lower
  * cost plan. Use {@link #setPlanComparator(java.util.Comparator)} to override.
  * <p/>
  * If all plans have equivalent costs, the plan corresponding to the first most RuleRegistry, as given to the
@@ -69,15 +69,25 @@ public class RuleRegistrySet
   int plannerTimeoutSec = RuleSetExec.DEFAULT_TIMEOUT;
   boolean ignoreFailed = true;
   Select select = Select.COMPARED;
-  Comparator<RuleResult> planComparator = RuleSetExec.DEFAULT_RESULT_COMPARATOR;
+  Comparator<RuleResult> planComparator = RuleSetExec.DEFAULT_PLAN_COMPARATOR;
 
   LinkedList<RuleRegistry> ruleRegistries = new LinkedList<>(); // preserve order, no duplicates
 
+  /**
+   * Instantiates a new Rule Registry Set.
+   *
+   * @param ruleRegistries the rule registries
+   */
   public RuleRegistrySet( RuleRegistry... ruleRegistries )
     {
     this( Arrays.asList( ruleRegistries ) );
     }
 
+  /**
+   * Instantiates a new Rule Registry Set.
+   *
+   * @param ruleRegistries the rule registries
+   */
   public RuleRegistrySet( Collection<RuleRegistry> ruleRegistries )
     {
     this.ruleRegistries.addAll( ruleRegistries );
@@ -89,43 +99,96 @@ public class RuleRegistrySet
       }
     }
 
+  /**
+   * Gets planner timeout, in seconds.
+   *
+   * @return the planner timeout sec
+   */
   public int getPlannerTimeoutSec()
     {
     return plannerTimeoutSec;
     }
 
+  /**
+   * Sets planner timeout, in seconds.
+   * <p/>
+   * Extremely large assemblies may take longer than the default timeout. This allows for increasing
+   * that timeout period when necessary.
+   *
+   * @param plannerTimeoutSec the planner timeout sec
+   */
   public void setPlannerTimeoutSec( int plannerTimeoutSec )
     {
     this.plannerTimeoutSec = plannerTimeoutSec;
     }
 
+  /**
+   * When true, failures during planning will be ignored unless no registries are successful. When false,
+   * any failure will cause the planner to fail.
+   *
+   * @return type boolean
+   */
   public boolean isIgnoreFailed()
     {
     return ignoreFailed;
     }
 
+  /**
+   * Sets ignore failed setting. The default is {@code true}.
+   * <p/>
+   * When {@code true}, failures during planning will be ignored unless no registries are successful. When {@code false},
+   * any failure will cause the planner to fail.
+   *
+   * @param ignoreFailed {@code true} if any failures should be ignored, the default
+   */
   public void setIgnoreFailed( boolean ignoreFailed )
     {
     this.ignoreFailed = ignoreFailed;
     }
 
+  /**
+   * Returns the result selection type.
+   *
+   * @return the selection type
+   */
   public Select getSelect()
     {
     return select;
     }
 
+  /**
+   * Sets the result selection type.
+   *
+   * @param select the selection type
+   */
   public void setSelect( Select select )
     {
+    if( select == null )
+      throw new IllegalArgumentException( "select may not be null" );
+
     this.select = select;
     }
 
+  /**
+   * Returns planner comparator.
+   *
+   * @return the planner result comparator
+   */
   public Comparator<RuleResult> getPlanComparator()
     {
     return planComparator;
     }
 
+  /**
+   * Sets planner result comparator, used only if {@link #getSelect()} is {@link Select#COMPARED}.
+   *
+   * @param planComparator the plan comparator
+   */
   public void setPlanComparator( Comparator planComparator )
     {
+    if( planComparator == null )
+      throw new IllegalArgumentException( "planComparator may not be null" );
+
     this.planComparator = planComparator;
     }
 

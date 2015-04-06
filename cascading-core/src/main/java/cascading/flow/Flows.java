@@ -40,9 +40,9 @@ public final class Flows
     return ( (BaseFlow) flow ).getJobsMap();
     }
 
-  public static FlowElementGraph getPipeGraphFrom( Flow flow )
+  public static FlowElementGraph getFlowElementGraphFrom( Flow flow )
     {
-    return ( (BaseFlow) flow ).getPipeGraph();
+    return ( (BaseFlow) flow ).getFlowElementGraph();
     }
 
   public static FlowStepGraph getStepGraphFrom( Flow flow )

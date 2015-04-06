@@ -46,60 +46,6 @@ public class ExpressionGraph
   {
   private static final Logger LOG = LoggerFactory.getLogger( ExpressionGraph.class );
 
-  public static ScopeExpression unwind( ScopeExpression scopeExpression )
-    {
-    if( scopeExpression instanceof DelegateScopeExpression )
-      return ( (DelegateScopeExpression) scopeExpression ).delegate;
-
-    return scopeExpression;
-    }
-
-  private static class DelegateScopeExpression extends ScopeExpression
-    {
-    ScopeExpression delegate;
-
-    protected DelegateScopeExpression( ScopeExpression delegate )
-      {
-      this.delegate = delegate;
-      }
-
-    @Override
-    public boolean acceptsAll()
-      {
-      return delegate.acceptsAll();
-      }
-
-    @Override
-    public boolean appliesToAllPaths()
-      {
-      return delegate.appliesToAllPaths();
-      }
-
-    @Override
-    public boolean appliesToAnyPath()
-      {
-      return delegate.appliesToAnyPath();
-      }
-
-    @Override
-    public boolean appliesToEachPath()
-      {
-      return delegate.appliesToEachPath();
-      }
-
-    @Override
-    public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, Scope scope )
-      {
-      return delegate.applies( plannerContext, elementGraph, scope );
-      }
-
-    @Override
-    public String toString()
-      {
-      return delegate.toString();
-      }
-    }
-
   private final SearchOrder searchOrder;
   private final DirectedMultigraph<ElementExpression, ScopeExpression> graph;
 
@@ -154,7 +100,7 @@ public class ExpressionGraph
 
   public boolean supportsNonRecursiveMatch()
     {
-    return allowNonRecursiveMatching && !searchOrder.isReversed() && // if reversed is requested, the transform must be recursive
+    return allowNonRecursiveMatching &&
       getGraph().vertexSet().size() == 1 &&
       Util.getFirst( getGraph().vertexSet() ).getCapture() == ElementCapture.Primary;
     }
@@ -207,6 +153,60 @@ public class ExpressionGraph
     catch( IOException exception )
       {
       LOG.error( "failed printing expression graph to: {}, with exception: {}", filename, exception );
+      }
+    }
+
+  public static ScopeExpression unwind( ScopeExpression scopeExpression )
+    {
+    if( scopeExpression instanceof DelegateScopeExpression )
+      return ( (DelegateScopeExpression) scopeExpression ).delegate;
+
+    return scopeExpression;
+    }
+
+  private static class DelegateScopeExpression extends ScopeExpression
+    {
+    ScopeExpression delegate;
+
+    protected DelegateScopeExpression( ScopeExpression delegate )
+      {
+      this.delegate = delegate;
+      }
+
+    @Override
+    public boolean acceptsAll()
+      {
+      return delegate.acceptsAll();
+      }
+
+    @Override
+    public boolean appliesToAllPaths()
+      {
+      return delegate.appliesToAllPaths();
+      }
+
+    @Override
+    public boolean appliesToAnyPath()
+      {
+      return delegate.appliesToAnyPath();
+      }
+
+    @Override
+    public boolean appliesToEachPath()
+      {
+      return delegate.appliesToEachPath();
+      }
+
+    @Override
+    public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, Scope scope )
+      {
+      return delegate.applies( plannerContext, elementGraph, scope );
+      }
+
+    @Override
+    public String toString()
+      {
+      return delegate.toString();
       }
     }
   }

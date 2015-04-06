@@ -126,7 +126,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   protected boolean stop;
 
   /** Field pipeGraph */
-  private FlowElementGraph pipeGraph; // only used for documentation purposes
+  private FlowElementGraph flowElementGraph; // only used for documentation purposes
 
   private transient CascadingServices cascadingServices;
 
@@ -221,10 +221,10 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     return platformInfo;
     }
 
-  public void initialize( FlowElementGraph pipeGraph, FlowStepGraph flowStepGraph )
+  public void initialize( FlowElementGraph flowElementGraph, FlowStepGraph flowStepGraph )
     {
     addPlannerProperties();
-    this.pipeGraph = pipeGraph;
+    this.flowElementGraph = flowElementGraph;
     this.flowStepGraph = flowStepGraph;
 
     initSteps();
@@ -442,9 +442,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     this.submitPriority = submitPriority;
     }
 
-  FlowElementGraph getPipeGraph()
+  FlowElementGraph getFlowElementGraph()
     {
-    return pipeGraph;
+    return flowElementGraph;
     }
 
   FlowStepGraph getFlowStepGraph()
@@ -1480,10 +1480,10 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   @Override
   public void writeDOT( String filename )
     {
-    if( pipeGraph == null )
+    if( flowElementGraph == null )
       throw new UnsupportedOperationException( "this flow instance cannot write a DOT file" );
 
-    pipeGraph.writeDOT( filename );
+    flowElementGraph.writeDOT( filename );
     }
 
   @Override
