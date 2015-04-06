@@ -30,6 +30,7 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DirectedSubgraph;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
+import static cascading.util.Util.createIdentitySet;
 
 /**
  *
@@ -42,7 +43,7 @@ public class ElementSubGraph extends BaseElementGraph implements ElementGraph
 
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements, Collection<Scope> scopes )
     {
-    this.graph = new DirectedSubGraph( directed( elementGraph ), new HashSet<>( flowElements ), new HashSet<>( scopes ) );
+    this.graph = new DirectedSubGraph( directed( elementGraph ), createIdentitySet( flowElements ), createIdentitySet( scopes ) );
 
     this.elementGraph = elementGraph;
     this.flowElements = flowElements;

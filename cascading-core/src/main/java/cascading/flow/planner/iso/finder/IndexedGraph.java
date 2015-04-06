@@ -56,12 +56,11 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
     {
     super( graph );
     this.searchOrder = searchOrder;
-    delegate = graph;
-
-    index = new Object[ vertexSet().size() ];
-    count = -1;
-    iterator = getIterator( searchOrder );
-    reverse = new IdentityHashMap<>( index.length );
+    this.delegate = graph;
+    this.index = new Object[ vertexSet().size() ];
+    this.count = -1;
+    this.iterator = getIterator( searchOrder );
+    this.reverse = new IdentityHashMap<>( index.length );
     }
 
   public Graph getDelegate()

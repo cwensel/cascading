@@ -32,6 +32,7 @@ import org.jgrapht.graph.DirectedMaskSubgraph;
 import org.jgrapht.graph.MaskFunctor;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
+import static cascading.util.Util.createIdentitySet;
 
 /**
  *
@@ -43,7 +44,7 @@ public class ElementMaskSubGraph extends BaseElementGraph implements ElementGrap
 
   private static class FlowElementMaskFunctor implements MaskFunctor<FlowElement, Scope>
     {
-    Set<FlowElement> maskedElements = new HashSet<>();
+    Set<FlowElement> maskedElements = createIdentitySet();
     Set<Scope> maskedScopes = new HashSet<>();
 
     public FlowElementMaskFunctor( Collection<FlowElement> flowElements, Collection<Scope> scopes )

@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -101,6 +102,21 @@ public class Util
       dupes |= to.put( entry.getValue(), entry.getKey() ) != null;
 
     return dupes;
+    }
+
+  public static <V> Set<V> createIdentitySet()
+    {
+    return Collections.<V>newSetFromMap( new IdentityHashMap() );
+    }
+
+  public static <V> Set<V> createIdentitySet( Collection<V> collection )
+    {
+    Set<V> identitySet = createIdentitySet();
+
+    if( collection != null )
+      identitySet.addAll( collection );
+
+    return identitySet;
     }
 
   public static <V> V getFirst( Collection<V> collection )
