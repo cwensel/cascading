@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,13 +23,10 @@ package cascading.flow.tez.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.rule.RuleExpression;
-import cascading.flow.planner.rule.expressiongraph.SplicePipeExpressionGraph;
 import cascading.flow.tez.planner.rule.expressiongraph.NoSpliceTapExpressionGraph;
 import cascading.pipe.Group;
-import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 

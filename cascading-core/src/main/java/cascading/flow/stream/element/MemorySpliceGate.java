@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2014 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -29,9 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import cascading.CascadingException;
 import cascading.flow.FlowProcess;
-import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.graph.StreamGraph;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
