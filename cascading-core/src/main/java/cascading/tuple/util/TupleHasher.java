@@ -184,8 +184,8 @@ public class TupleHasher implements Serializable
         int hashCode = hashers[ i % hashers.length ].hashCode( element );
 
         hash = Murmur3.mixH1( hash, Murmur3.mixK1( hashCode ) );
-
         }
+
       return Murmur3.fmix( hash, elements.size() );
       }
     }

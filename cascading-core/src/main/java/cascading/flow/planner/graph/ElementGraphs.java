@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -54,10 +53,12 @@ import cascading.flow.planner.process.ProcessGraph;
 import cascading.flow.planner.process.ProcessModel;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
+import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import cascading.util.DOTProcessGraphWriter;
+import cascading.util.Murmur3;
 import cascading.util.Pair;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -65,7 +66,6 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.BiconnectivityInspector;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.alg.KShortestPaths;
@@ -76,7 +76,6 @@ import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.AbstractGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.jgrapht.util.TypeUtil;
 import org.slf4j.Logger;
@@ -87,7 +86,7 @@ import static cascading.util.Util.narrowSet;
 import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
- * Class ElementGraphs maintaines a collection of operations that can be performed on an {@link ElementGraph}.
+ * Class ElementGraphs maintains a collection of operations that can be performed on an {@link ElementGraph}.
  */
 public class ElementGraphs
   {
@@ -122,10 +121,7 @@ public class ElementGraphs
       int source = graph.getEdgeSource( e ).hashCode();
       int target = graph.getEdgeTarget( e ).hashCode();
 
-      // see http://en.wikipedia.org/wiki/Pairing_function (VK);
-      int pairing =
-        ( ( source + target )
-          * ( source + target + 1 ) / 2 ) + target;
+      int pairing = pair( source, target );
 
       part = ( 27 * part ) + pairing;
 
@@ -166,8 +162,7 @@ public class ElementGraphs
       if( !rhsGraph.containsEdge( e ) )
         return false;
 
-      if( !rhsGraph.getEdgeSource( e ).equals( source )
-        || !rhsGraph.getEdgeTarget( e ).equals( target ) )
+      if( !rhsGraph.getEdgeSource( e ).equals( source ) || !rhsGraph.getEdgeTarget( e ).equals( target ) )
         return false;
 
       if( Math.abs( lhsGraph.getEdgeWeight( e ) - rhsGraph.getEdgeWeight( e ) ) > 10e-7 )
@@ -177,7 +172,7 @@ public class ElementGraphs
     return true;
     }
 
-  public static <V, E> boolean equals( ElementGraph lhs, ElementGraph rhs )
+  public static boolean equals( ElementGraph lhs, ElementGraph rhs )
     {
     if( !equalsIgnoreAnnotations( lhs, rhs ) )
       return false;
@@ -198,6 +193,69 @@ public class ElementGraphs
       return true;
 
     return lhsAnnotated.getAnnotations().equals( rhsAnnotated.getAnnotations() );
+    }
+
+  public static String canonicalHash( ElementGraph graph )
+    {
+    return canonicalHash( directed( graph ) );
+    }
+
+  public static String canonicalHash( Graph<FlowElement, Scope> graph )
+    {
+    int hash = Murmur3.SEED;
+
+    int edges = 0;
+    boolean hasExtents = false;
+
+    for( Scope e : graph.edgeSet() )
+      {
+      FlowElement edgeSource = graph.getEdgeSource( e );
+      FlowElement edgeTarget = graph.getEdgeTarget( e );
+
+      // simpler to ignore extents here
+      if( edgeSource instanceof Extent || edgeTarget instanceof Extent )
+        {
+        hasExtents = true;
+        continue;
+        }
+
+      int source = hash( edgeSource );
+      int target = hash( edgeTarget );
+      int pairing = pair( source, target );
+
+      hash += pairing; // don't make edge traversal order significant
+      edges++;
+      }
+
+    int vertexes = graph.vertexSet().size() - ( hasExtents ? 2 : 0 );
+
+    hash = Murmur3.fmix( hash, vertexes * edges );
+
+    return Util.getHex( Util.intToByteArray( hash ) );
+    }
+
+  private static int hash( FlowElement flowElement )
+    {
+    int lhs = flowElement.getClass().getName().hashCode();
+    int rhs = 0;
+
+    if( flowElement instanceof Operator )
+      rhs = ( (Operator) flowElement ).getOperation().getClass().getName().hashCode();
+    else if( flowElement instanceof Tap )
+      rhs = ( (Tap) flowElement ).getIdentifier().hashCode();
+    else if( flowElement instanceof Splice )
+      rhs = ( (Splice) flowElement ).getJoiner().getClass().getName().hashCode() + 31 * ( (Splice) flowElement ).getNumSelfJoins();
+
+    return pair( lhs, rhs );
+    }
+
+  protected static int pair( int lhs, int rhs )
+    {
+    if( rhs == 0 )
+      return lhs;
+
+    // see http://en.wikipedia.org/wiki/Pairing_function
+    return ( ( lhs + rhs ) * ( lhs + rhs + 1 ) / 2 ) + rhs;
     }
 
   public static TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator( ElementGraph graph )
@@ -225,163 +283,9 @@ public class ElementGraphs
     return paths;
     }
 
-  /**
-   * All paths that lead from to to without crossing a Tap/Group boundary
-   *
-   * @param graph
-   * @param from
-   * @param to
-   * @return of type List
-   */
-  public static List<GraphPath<FlowElement, Scope>> getAllDirectPathsBetween( ElementGraph graph, FlowElement from, FlowElement to )
-    {
-    List<GraphPath<FlowElement, Scope>> paths = getAllShortestPathsBetween( directed( graph ), from, to );
-    List<GraphPath<FlowElement, Scope>> results = new ArrayList<>( paths );
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      List<FlowElement> pathVertexList = Graphs.getPathVertexList( path );
-
-      for( int i = 1; i < pathVertexList.size() - 1; i++ ) // skip the from and to, its a Tap or Group
-        {
-        FlowElement flowElement = pathVertexList.get( i );
-
-        if( flowElement instanceof Tap || flowElement instanceof Group )
-          {
-          results.remove( path );
-          break;
-          }
-        }
-      }
-
-    return results;
-    }
-
-  /**
-   * for every incoming stream to the splice, gets the count of paths.
-   * <p/>
-   * covers the case where a source may cross multiple joins to the current join and still land
-   * on the lhs or rhs.
-   *
-   * @param graph
-   * @param from
-   * @param to
-   * @return of type Map
-   */
-  public static Map<Integer, Integer> countOrderedDirectPathsBetween( ElementGraph graph, FlowElement from, Splice to )
-    {
-    return countOrderedDirectPathsBetween( graph, from, to, false );
-    }
-
-  public static Map<Integer, Integer> countOrderedDirectPathsBetween( ElementGraph graph, FlowElement from, Splice to, boolean skipTaps )
-    {
-    List<GraphPath<FlowElement, Scope>> paths = getAllDirectPathsBetween( graph, from, to );
-
-    Map<Integer, Integer> results = new HashMap<Integer, Integer>();
-
-    for( GraphPath<FlowElement, Scope> path : paths )
-      {
-      if( skipTaps && hasIntermediateTap( path, from ) )
-        continue;
-
-      pathPositionInto( results, path, to );
-      }
-
-    return results;
-    }
-
-  public static boolean isBothAccumulatedAndStreamedPath( Map<Integer, Integer> pathCounts )
-    {
-    return pathCounts.size() > 1 && pathCounts.containsKey( 0 );
-    }
-
-  public static boolean isOnlyStreamedPath( Map<Integer, Integer> pathCounts )
-    {
-    return pathCounts.size() == 1 && pathCounts.containsKey( 0 );
-    }
-
-  public static boolean isOnlyAccumulatedPath( Map<Integer, Integer> pathCounts )
-    {
-    return pathCounts.size() >= 1 && !pathCounts.containsKey( 0 );
-    }
-
-  private static boolean hasIntermediateTap( GraphPath<FlowElement, Scope> path, FlowElement from )
-    {
-    List<FlowElement> flowElements = Graphs.getPathVertexList( path );
-
-    for( FlowElement flowElement : flowElements )
-      {
-      if( flowElement instanceof Tap && flowElement != from )
-        return true;
-      }
-
-    return false;
-    }
-
-  private static Map<Integer, Integer> pathPositionInto( Map<Integer, Integer> results, GraphPath<FlowElement, Scope> path, Splice to )
-    {
-    List<Scope> scopes = path.getEdgeList();
-
-    Scope lastScope = scopes.get( scopes.size() - 1 );
-
-    Integer pos = to.getPipePos().get( lastScope.getName() );
-
-    if( results.containsKey( pos ) )
-      results.put( pos, results.get( pos ) + 1 );
-    else
-      results.put( pos, 1 );
-
-    return results;
-    }
-
-  public static ElementSubGraph asSubGraph2( ElementGraph elementGraph, ElementGraph contractedGraph )
-    {
-    return new ElementSubGraph( elementGraph, findClosureViaBiConnected( directed( elementGraph ), directed( contractedGraph ) ) );
-    }
-
-  public static <V, E> Set<V> findClosureViaBiConnected( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted )
-    {
-    SimpleGraph<V, E> biConnected = (SimpleGraph<V, E>) new SimpleGraph<>( Object.class );
-
-    Graphs.addGraph( biConnected, full );
-    Graphs.addGraph( biConnected, contracted );
-
-    BiconnectivityInspector inspector = new BiconnectivityInspector( biConnected );
-
-    LinkedList<Set<V>> components = new LinkedList( inspector.getBiconnectedVertexComponents() );
-
-    if( components.isEmpty() )
-      throw new IllegalStateException( "no components" );
-
-    Set<V> vertices = new HashSet<>( contracted.vertexSet() );
-
-    for( E edge : contracted.edgeSet() )
-      {
-      V edgeSource = contracted.getEdgeSource( edge );
-      V edgeTarget = contracted.getEdgeTarget( edge );
-
-      ListIterator<Set<V>> iterator = components.listIterator();
-      while( iterator.hasNext() )
-        {
-        Set<V> set = iterator.next();
-        if( set.contains( edgeSource ) && set.contains( edgeTarget ) )
-          {
-          iterator.remove();
-          vertices.addAll( set );
-          }
-        }
-      }
-
-    if( vertices.isEmpty() )
-      throw new IllegalStateException( "no vertices" );
-
-    return vertices;
-    }
-
   public static ElementSubGraph asSubGraph( ElementGraph elementGraph, ElementGraph contractedGraph, Set<FlowElement> excludes )
     {
-    if( elementGraph.containsVertex( Extent.head ) )
-      elementGraph = asExtentMaskedSubGraph( elementGraph );
+    elementGraph = asExtentMaskedSubGraph( elementGraph ); // returns same instance if not bounded
 
     Pair<Set<FlowElement>, Set<Scope>> pair = findClosureViaFloydWarshall( directed( elementGraph ), directed( contractedGraph ), excludes );
     Set<FlowElement> vertices = pair.getLhs();
@@ -499,43 +403,6 @@ public class ElementGraphs
   private static <V, E> boolean isBetween( FloydWarshallShortestPaths<V, E> paths, V edgeSource, V edgeTarget, V vertex )
     {
     return paths.shortestDistance( edgeSource, vertex ) != POSITIVE_INFINITY && paths.shortestDistance( vertex, edgeTarget ) != POSITIVE_INFINITY;
-    }
-
-  public static ElementSubGraph asSubGraphKS( ElementGraph elementGraph, ElementGraph contractedGraph )
-    {
-    return new ElementSubGraph( elementGraph, findClosureViaKShortest( directed( elementGraph ), directed( contractedGraph ) ) );
-    }
-
-  public static <V, E> Set<V> findClosureViaKShortest( DirectedGraph<V, E> elementGraph, DirectedGraph<V, E> contractedGraph )
-    {
-    // this is bad news, shortest paths is non-linear
-
-    Set<V> allVertices = new HashSet<>( contractedGraph.vertexSet() ); // if no edges, we have the vertices
-    Set<E> edges = contractedGraph.edgeSet();
-
-    for( E edge : edges )
-      {
-      V lhs = contractedGraph.getEdgeSource( edge );
-      V rhs = contractedGraph.getEdgeTarget( edge );
-
-      Set<V> otherVertices = new HashSet<>( contractedGraph.vertexSet() );
-
-      otherVertices.remove( lhs );
-      otherVertices.remove( rhs );
-
-      List<GraphPath<V, E>> between = getAllShortestPathsBetween( elementGraph, lhs, rhs );
-
-      for( GraphPath<V, E> graphPath : between )
-        {
-        List<V> pathVertices = Graphs.getPathVertexList( graphPath );
-
-        // do not include a path if it crosses a distinguished element from the contracted graph
-        if( Collections.disjoint( pathVertices, otherVertices ) )
-          allVertices.addAll( pathVertices );
-        }
-      }
-
-    return allVertices;
     }
 
   public static void removeAndContract( ElementGraph elementGraph, FlowElement flowElement )
@@ -948,6 +815,8 @@ public class ElementGraphs
         if( object == Extent.tail )
           return result;
 
+        result = result + "|hash: " + canonicalHash( graph );
+
         String versionString = Version.getRelease();
 
         if( platformInfo != null )
@@ -1051,7 +920,9 @@ public class ElementGraphs
     @Override
     public String getVertexName( ProcessModel processModel )
       {
-      return "ordinal: " + processModel.getOrdinal() + "\\nid: " + processModel.getID();
+      return "ordinal: " + processModel.getOrdinal() +
+        "\\nid: " + processModel.getID() +
+        "\\nhash: " + canonicalHash( processModel.getElementGraph() );
       }
     }
 

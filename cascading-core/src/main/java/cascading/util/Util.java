@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -228,7 +227,7 @@ public class Util
       }
     }
 
-  private static String getHex( byte[] bytes )
+  public static String getHex( byte[] bytes )
     {
     if( bytes == null )
       return null;
@@ -239,6 +238,30 @@ public class Util
       hex.append( HEXES.charAt( ( b & 0xF0 ) >> 4 ) ).append( HEXES.charAt( b & 0x0F ) );
 
     return hex.toString();
+    }
+
+  public static byte[] longToByteArray( long value )
+    {
+    return new byte[]{
+      (byte) ( value >> 56 ),
+      (byte) ( value >> 48 ),
+      (byte) ( value >> 40 ),
+      (byte) ( value >> 32 ),
+      (byte) ( value >> 24 ),
+      (byte) ( value >> 16 ),
+      (byte) ( value >> 8 ),
+      (byte) value
+    };
+    }
+
+  public static byte[] intToByteArray( int value )
+    {
+    return new byte[]{
+      (byte) ( value >> 24 ),
+      (byte) ( value >> 16 ),
+      (byte) ( value >> 8 ),
+      (byte) value
+    };
     }
 
   public static <T> T[] copy( T[] source )
@@ -549,22 +572,6 @@ public class Util
       return string;
 
     return String.format( "%s...", string.subSequence( 0, maxSize - 3 ) );
-    }
-
-  public static String printGraph( SimpleDirectedGraph graph )
-    {
-    StringWriter writer = new StringWriter();
-
-    printGraph( writer, graph );
-
-    return writer.toString();
-    }
-
-  public static void printGraph( PrintStream out, SimpleDirectedGraph graph )
-    {
-    PrintWriter printWriter = new PrintWriter( out );
-
-    printGraph( printWriter, graph );
     }
 
   public static void printGraph( String filename, SimpleDirectedGraph graph )

@@ -56,6 +56,7 @@ import cascading.util.ProcessLogger;
 import cascading.util.Util;
 import cascading.util.Version;
 
+import static cascading.flow.planner.graph.ElementGraphs.canonicalHash;
 import static cascading.property.PropertyUtil.getStringProperty;
 
 public class TraceWriter
@@ -260,30 +261,30 @@ public class TraceWriter
     return FileSystems.getDefault().getPath( path, flowName );
     }
 
-  public void writeTracePlan( String registryName, String fileName, ElementGraph flowElementGraph )
+  public void writeTracePlan( String registryName, String fileName, ElementGraph elementGraph )
     {
     Path path = getPlanTracePath();
 
     if( path == null )
       return;
 
-    if( flowElementGraph == null )
+    if( elementGraph == null )
       {
-      processLogger.logInfo( "cannot write trace element plan, flowElementGraph is null" );
+      processLogger.logInfo( "cannot write trace element plan, elementGraph is null" );
       return;
       }
 
     if( registryName != null )
       path = path.resolve( registryName );
 
-    Path filePath = path.resolve( String.format( "%s.dot", fileName ) );
+    Path filePath = path.resolve( String.format( "%s-%s.dot", fileName, canonicalHash( elementGraph ) ) );
     File file = filePath.toFile();
 
     processLogger.logInfo( "writing trace element plan: {}", file );
 
     String filename = file.toString();
 
-    flowElementGraph.writeDOT( filename );
+    elementGraph.writeDOT( filename );
     }
 
   public void writeTracePlan( String registryName, String fileName, FlowStepGraph stepGraph )
@@ -333,9 +334,8 @@ public class TraceWriter
 
     int stepOrdinal = flowStep.getOrdinal();
     Path rootPath = path.resolve( directoryName );
-    String stepGraphName = String.format( "%s/%04d-step-sub-graph.dot", rootPath, stepOrdinal );
-
     ElementGraph stepSubGraph = flowStep.getElementGraph();
+    String stepGraphName = String.format( "%s/%04d-step-sub-graph-%s.dot", rootPath, stepOrdinal, canonicalHash( stepSubGraph ) );
 
     stepSubGraph.writeDOT( stepGraphName );
 
@@ -356,7 +356,7 @@ public class TraceWriter
       FlowNode flowNode = iterator.next();
       ElementGraph nodeGraph = flowNode.getElementGraph();
       int nodeOrdinal = flowNode.getOrdinal();
-      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph.dot", rootPath, stepOrdinal, nodeOrdinal );
+      String nodeGraphName = String.format( "%s/%04d-%04d-step-node-sub-graph-%s.dot", rootPath, stepOrdinal, nodeOrdinal, canonicalHash( nodeGraph ) );
 
       nodeGraph.writeDOT( nodeGraphName );
 

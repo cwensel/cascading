@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import cascading.CascadingException;
+import cascading.flow.FlowElements;
 import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowSession;
@@ -112,13 +113,13 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
       streamedHead = streamGraph.getStreamedHead();
 
       for( Duct head : allHeads )
-        LOG.info( "sourcing from: {} streamed: {}", ( (ElementDuct) head ).getFlowElement(), head == streamedHead );
+        LOG.info( "sourcing from: {} streamed: {}, id: {}", ( (ElementDuct) head ).getFlowElement(), head == streamedHead, FlowElements.id( ( (ElementDuct) head ).getFlowElement() ) );
 
       for( Duct tail : streamGraph.getTails() )
-        LOG.info( "sinking to: {}", ( (ElementDuct) tail ).getFlowElement() );
+        LOG.info( "sinking to: {}, id: {}", ( (ElementDuct) tail ).getFlowElement(), FlowElements.id( ( (ElementDuct) tail ).getFlowElement() ) );
 
       for( Tap trap : flowNode.getTraps() )
-        LOG.info( "trapping to: {}", trap );
+        LOG.info( "trapping to: {}, id: {}", trap, FlowElements.id( trap ) );
       }
     catch( Throwable throwable )
       {
