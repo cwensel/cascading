@@ -116,8 +116,8 @@ public class DOTProcessGraphWriter
 
   protected Set<FlowElement> getIdentityElements( ProcessGraph<? extends ProcessModel> processGraph )
     {
-    Set<FlowElement> identityElements;
-    identityElements = new HashSet<>();
+    Set<FlowElement> identityElements = new HashSet<>();
+
     // force identity nodes to be visualized
     for( ElementGraph elementGraph : processGraph.getIdentityElementGraphs() )
       {
@@ -143,6 +143,7 @@ public class DOTProcessGraphWriter
     // forces tap to be within a node
     spanElements.removeAll( processGraph.getSourceTaps() );
     spanElements.removeAll( processGraph.getSinkTaps() );
+
     return spanElements;
     }
 

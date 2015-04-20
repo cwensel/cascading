@@ -4,22 +4,14 @@ Thanks for using Cascading.
 
 ## Cascading 3.0
 
-_This repo branch is an early release WIP for Cascading 3.0._
-
-3.0 includes a few major changes and additions: 
+Cascading 3.0 includes a few major changes and additions from prior releases: 
 
 * Complete re-write of the platform query planner and improvements to the planner API
-* Addition of Apache Tez as a runtime platform
+* Addition of Apache Tez as a supported runtime platform
 * Changes to the Tap/Scheme generic type signatures to support portability
 
 These changes hope to simplify the creation of new bindings to new platform implementations and to improve the
 performance of resulting applications.
-
-On the last point, we ask that users please spend time running their existing applications against 3.0 WIP
-releases and to open issues along with tests via pull requests against
-[https://github.com/cwensel/cascading](https://github.com/cwensel/cascading).
-
-See below for more info on submitting issues.
 
 ## General Information:
 
@@ -40,8 +32,9 @@ The project includes six Cascading jar files:
 These class jars, along with, tests, source and javadoc jars, are all available via the
 [Conjars.org](http://conjars.org) Maven repository.
 
-Hadoop 1.x mode is where the Cascading application should run on a Hadoop *MapReduce* cluster. Hadoop 2.x MR1 is the 
-same but for Hadoop 2.x releases.
+Hadoop 1.x mode is where the Cascading application should run on a Hadoop *MapReduce* cluster. 
+
+Hadoop 2.x MR1 is the same as above but for Hadoop 2.x releases.
 
 Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster. 
 
@@ -60,13 +53,14 @@ Or download the [Cascading SDK](http://cascading.org/sdk/) which includes pre-bu
 
 Of note are two top level projects:
 
-* [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC with Cascading
-* [Pattern](http://cascading.org/pattern/) - Machine Learning and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
+* [Fluid](http://www.cascading.org/fluid/) - A fluent API for Cascading that is compatible with the default API.
+* [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC on Cascading
+* [Pattern](http://cascading.org/pattern/) - Machine Learning scoring and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
 
 And new languages:
 
-* [Scalding](https://github.com/twitter/scalding) - A Scala based DSL
-* [Cascalog](http://cascalog.org) - A Clojure based DSL
+* [Scalding](http://cascading.org/projects/scalding/) - A Scala based DSL
+* [Cascalog](http://cascading.org/projects/cascalog/) - A Clojure based DSL
 
 ## Versioning
 
@@ -136,15 +130,9 @@ Optionally, for stand alone applications, statistics and tracing can be enabled 
 * `cascading.planner.plan.path` - basic planner information
 * `cascading.planner.plan.transforms.path` - detailed information for each rule
 
-## Reporting issues
+## Contributing and Reporting Issues
 
-To report an issue, first ping the [Cascading User mailing list](http://cascading.org/support/) with any questions.
-
-If unresolved, look for a comparable test in the `cascading-platform` sub-project, reproduce your issue, then issue
-a pull request with the failing test added to one of the existing suites.
-
-If you wish to allow your test code to be added to the Cascading test suite, please sign and return this
-[contributor agreement](http://files.concurrentinc.com/agreements/Concurrent_Contributor_Agreement.doc).
+See __CONTRIBUTING.md__ at https://github.com/Cascading/cascading.
 
 ## Using with Maven/Ivy
 
@@ -157,6 +145,7 @@ You can find the latest public and WIP (work in progress) releases here:
 *  http://conjars.org/cascading/cascading-local
 *  http://conjars.org/cascading/cascading-hadoop
 *  http://conjars.org/cascading/cascading-hadoop2-mr1
+*  http://conjars.org/cascading/cascading-hadoop2-tez
 *  http://conjars.org/cascading/cascading-xml
 
 When creating tests, make sure to add any of the relevant above dependencies to your `test` scope or equivalent
@@ -172,8 +161,8 @@ dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
 
-Note that `cascading-hadoop` and `cascading-hadoop2-mr1` has a `provided` dependency on the Hadoop jars so that it
-won't get sucked into any application packaging as a dependency, typically.
+Note that `cascading-hadoop`, `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the 
+Hadoop jars so that it won't get sucked into any application packaging as a dependency, typically.
 
 ## Building and IDE Integration
 

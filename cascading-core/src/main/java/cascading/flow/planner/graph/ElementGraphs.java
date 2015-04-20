@@ -242,7 +242,7 @@ public class ElementGraphs
     if( flowElement instanceof Operator )
       rhs = ( (Operator) flowElement ).getOperation().getClass().getName().hashCode();
     else if( flowElement instanceof Tap )
-      rhs = ( (Tap) flowElement ).getIdentifier().hashCode();
+      rhs = ( (Tap) flowElement ).getScheme().getClass().getName().hashCode();
     else if( flowElement instanceof Splice )
       rhs = ( (Splice) flowElement ).getJoiner().getClass().getName().hashCode() + 31 * ( (Splice) flowElement ).getNumSelfJoins();
 

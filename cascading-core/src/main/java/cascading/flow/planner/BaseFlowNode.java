@@ -137,12 +137,6 @@ public class BaseFlowNode implements Serializable, FlowNode
     }
 
   @Override
-  public ElementGraph getMaskedElementGraph()
-    {
-    return new ElementMaskSubGraph( nodeSubGraph, Extent.head, Extent.tail );
-    }
-
-  @Override
   public Set<String> getSourceElementNames()
     {
     Set<String> results = new HashSet<>();

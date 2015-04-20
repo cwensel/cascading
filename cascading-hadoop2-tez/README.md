@@ -1,6 +1,6 @@
 # Cascading on Apache Tez
 
-Support for Cascading on Apache Tez is part of the Cascading 3.0 WIP (work in progress) releases. 
+Support for Cascading on Apache Tez is now a part of Cascading 3.0. 
 
 We are making this release available so interested parties can begin testing Tez deployments against existing 
 Cascading applications.

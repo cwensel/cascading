@@ -286,12 +286,6 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     return elementGraph;
     }
 
-  @Override
-  public ElementGraph getMaskedElementGraph()
-    {
-    return new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
-    }
-
   protected EnumMultiMap getAnnotations()
     {
     return ( (AnnotatedGraph) elementGraph ).getAnnotations();

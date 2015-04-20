@@ -24,6 +24,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.util.Util;
 
 /**
@@ -33,7 +34,7 @@ public class ProcessModels
   {
   public static boolean isIdentity( ProcessModel process, Class<? extends FlowElement> excludingType )
     {
-    ElementGraph elementGraph = process.getMaskedElementGraph();
+    ElementGraph elementGraph = ElementGraphs.asExtentMaskedSubGraph( process.getElementGraph() );
 
     Set<? extends FlowElement> sourceElements = Util.narrowSet( excludingType, process.getSourceElements(), false );
     Set<? extends FlowElement> sinkElements = Util.narrowSet( excludingType, process.getSinkElements(), false );
@@ -43,7 +44,8 @@ public class ProcessModels
 
   public static boolean isIdentity( ProcessModel process )
     {
-    ElementGraph elementGraph = process.getMaskedElementGraph();
+    ElementGraph elementGraph = ElementGraphs.asExtentMaskedSubGraph( process.getElementGraph() );
+
     Set<FlowElement> sourceElements = process.getSourceElements();
     Set<FlowElement> sinkElements = process.getSinkElements();
 

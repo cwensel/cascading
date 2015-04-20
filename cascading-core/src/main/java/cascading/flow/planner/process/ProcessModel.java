@@ -55,11 +55,4 @@ public interface ProcessModel
   Map<String, Tap> getTrapMap();
 
   ElementGraph getElementGraph();
-
-  /**
-   * Hides Extents in Graph.
-   *
-   * @return
-   */
-  ElementGraph getMaskedElementGraph();
   }
