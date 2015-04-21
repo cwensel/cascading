@@ -18,14 +18,36 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.process;
 
+import cascading.flow.FlowProcess;
+import cascading.flow.planner.BaseFlowStep;
+import cascading.flow.planner.FlowStepJob;
+import cascading.management.state.ClientState;
 import riffle.process.scheduler.ProcessWrapper;
 
-public class ProcessFlowStep extends HadoopFlowStep
+public class ProcessFlowStep extends BaseFlowStep
   {
   public ProcessFlowStep( ProcessWrapper processWrapper, int counter )
     {
     super( processWrapper.toString(), counter );
+    }
+
+  @Override
+  public Object createInitializedConfig( FlowProcess flowProcess, Object parentConfig )
+    {
+    return null;
+    }
+
+  @Override
+  public void clean( Object object )
+    {
+
+    }
+
+  @Override
+  protected FlowStepJob createFlowStepJob( ClientState clientState, FlowProcess flowProcess, Object initializedStepConfig )
+    {
+    return null;
     }
   }

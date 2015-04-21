@@ -37,6 +37,7 @@ import cascading.tap.hadoop.io.HttpFileSystem;
 import cascading.util.ShutdownUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import riffle.process.ProcessConfiguration;
 
 import static cascading.flow.FlowProps.MAX_CONCURRENT_STEPS;
 import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
@@ -138,6 +139,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     return defaultConfig == null ? new JobConf() : HadoopUtil.copyJobConf( defaultConfig );
     }
 
+  @ProcessConfiguration
   @Override
   public JobConf getConfig()
     {

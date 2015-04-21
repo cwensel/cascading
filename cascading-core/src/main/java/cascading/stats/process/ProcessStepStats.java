@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.stats.process;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.process.ProcessFlowStep;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStepStats;
 

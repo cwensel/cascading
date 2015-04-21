@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.stats.process;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +28,7 @@ import java.util.List;
 
 import cascading.CascadingException;
 import cascading.flow.Flow;
+import cascading.flow.process.ProcessFlowStep;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowStats;
 import cascading.stats.FlowStepStats;
@@ -78,8 +79,7 @@ public class ProcessFlowStats extends FlowStats
       if( !processWrapper.hasChildren() )
         {
         if( processWrapper.hasCounters() )
-          return Arrays.<FlowStepStats>asList(
-            new ProcessStepStats( clientState, processWrapper.getCounters(), new ProcessFlowStep( processWrapper, 1 ) ) );
+          return Arrays.<FlowStepStats>asList( new ProcessStepStats( clientState, processWrapper.getCounters(), new ProcessFlowStep( processWrapper, 1 ) ) );
         else
           return Collections.emptyList();
         }

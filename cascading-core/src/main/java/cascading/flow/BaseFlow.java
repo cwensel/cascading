@@ -753,14 +753,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   @Override
   public boolean areSourcesNewer( long sinkModified ) throws IOException
     {
-    Config confCopy = getConfigCopy();
+    Config config = getConfig();
     Iterator<Tap> values = sources.values().iterator();
 
     long sourceModified = 0;
 
     try
       {
-      sourceModified = Util.getSourceModified( confCopy, values, sinkModified );
+      sourceModified = Util.getSourceModified( config, values, sinkModified );
 
       if( sinkModified < sourceModified )
         return true;
@@ -777,7 +777,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   @Override
   public long getSinkModified() throws IOException
     {
-    long sinkModified = Util.getSinkModified( getConfigCopy(), sinks.values() );
+    long sinkModified = Util.getSinkModified( getConfig(), sinks.values() );
 
     if( LOG.isInfoEnabled() )
       {

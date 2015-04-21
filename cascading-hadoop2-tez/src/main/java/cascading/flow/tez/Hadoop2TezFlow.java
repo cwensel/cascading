@@ -40,6 +40,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.tez.common.counters.TaskCounter;
 import org.apache.tez.dag.api.TezConfiguration;
+import riffle.process.ProcessConfiguration;
 
 import static cascading.flow.FlowProps.MAX_CONCURRENT_STEPS;
 import static cascading.flow.FlowProps.PRESERVE_TEMPORARY_FILES;
@@ -156,6 +157,7 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
     return defaultConfig == null ? new TezConfiguration() : new TezConfiguration( defaultConfig );
     }
 
+  @ProcessConfiguration
   @Override
   public TezConfiguration getConfig()
     {

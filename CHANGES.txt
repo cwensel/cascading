@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Updated c.f.h.ProcessFlow and related classes to be independent of the Hadoop platforms. The class has been moved to
+  c.f.p.ProcessFlow.
+
   Added ability to specify counters to be logged cluster side when a slice has completed executing. See the
   c.f.FlowRuntimeProps class.
 

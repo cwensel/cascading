@@ -144,7 +144,7 @@ public class PropertyUtil
     if( !( properties instanceof Properties ) )
       return properties;
 
-    Map<Object, Object> map = new HashMap<Object, Object>();
+    Map<Object, Object> map = new HashMap<>();
     Properties props = (Properties) properties;
 
     for( String property : props.stringPropertyNames() )

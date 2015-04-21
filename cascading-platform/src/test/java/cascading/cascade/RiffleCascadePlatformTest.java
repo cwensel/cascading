@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.cascade.hadoop;
+package cascading.cascade;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,23 +28,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.PlatformTestCase;
-import cascading.cascade.Cascade;
-import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
 import cascading.flow.FlowListener;
 import cascading.flow.LockingFlowListener;
-import cascading.flow.hadoop.ProcessFlow;
+import cascading.flow.process.ProcessFlow;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.operation.text.FieldJoiner;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.stats.FlowStats;
-import cascading.flow.hadoop.ProcessStepStats;
+import cascading.stats.process.ProcessStepStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
@@ -53,6 +52,7 @@ import riffle.process.DependencyIncoming;
 import riffle.process.DependencyOutgoing;
 import riffle.process.ProcessChildren;
 import riffle.process.ProcessComplete;
+import riffle.process.ProcessConfiguration;
 import riffle.process.ProcessCounters;
 import riffle.process.ProcessStart;
 import riffle.process.ProcessStop;
@@ -64,7 +64,7 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
   {
   public RiffleCascadePlatformTest()
     {
-    super( true );
+    super( false );
     }
 
   private Flow firstFlow( String path )
@@ -360,6 +360,12 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
         crash();
       }
 
+    @ProcessConfiguration
+    public Object getConfiguration()
+      {
+      return new Properties();
+      }
+
     @DependencyOutgoing
     public Collection getOutgoing()
       {
@@ -455,6 +461,11 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
       return Collections.unmodifiableCollection( Arrays.asList( source ) );
       }
 
+    @ProcessConfiguration
+    public Object getConfiguration()
+      {
+      return new Properties();
+      }
     }
 
   @riffle.process.Process
@@ -509,6 +520,11 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
       {
       return Collections.unmodifiableCollection( Arrays.asList( source ) );
       }
-    }
 
+    @ProcessConfiguration
+    public Object getConfiguration()
+      {
+      return new Properties();
+      }
+    }
   }

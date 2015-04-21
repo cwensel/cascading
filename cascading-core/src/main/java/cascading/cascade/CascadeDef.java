@@ -97,7 +97,7 @@ public class CascadeDef extends UnitOfWorkDef<CascadeDef>
 
     for( Tap sink : sinks )
       {
-      String fullIdentifier = sink.getFullIdentifier( flow.getConfigCopy() );
+      String fullIdentifier = sink.getFullIdentifier( flow.getConfig() );
 
       for( Flow existingFlow : flows.values() )
         {
@@ -105,7 +105,7 @@ public class CascadeDef extends UnitOfWorkDef<CascadeDef>
 
         for( Tap existingSink : existingSinks )
           {
-          if( fullIdentifier.equals( existingSink.getFullIdentifier( flow.getConfigCopy() ) ) )
+          if( fullIdentifier.equals( existingSink.getFullIdentifier( existingFlow.getConfig() ) ) )
             throw new CascadeException( "the flow: " + flow.getName() + ", has a sink identifier: " + fullIdentifier + ", in common with the flow: " + existingFlow.getName() );
           }
         }

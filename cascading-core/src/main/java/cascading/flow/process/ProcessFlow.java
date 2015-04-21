@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop;
+package cascading.flow.process;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
@@ -28,15 +28,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import cascading.flow.BaseFlow;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
-import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.PlatformInfo;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
+import cascading.stats.process.ProcessFlowStats;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Version;
 import riffle.process.scheduler.ProcessException;
 import riffle.process.scheduler.ProcessWrapper;
 
@@ -47,17 +50,18 @@ import riffle.process.scheduler.ProcessWrapper;
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
  * <p/>
- * Though this class sub-classes {@link HadoopFlow}, it does not support all the methods available or features.
  * <p/>
  * Currently {@link cascading.flow.FlowListener}s are supported but the
  * {@link cascading.flow.FlowListener#onThrowable(cascading.flow.Flow, Throwable)} event is not.
  */
-public class ProcessFlow<P> extends HadoopFlow
+public class ProcessFlow<Process, Config> extends BaseFlow<Config>
   {
   /** Field process */
-  private final P process;
+  private final Process process;
   /** Field processWrapper */
   private final ProcessWrapper processWrapper;
+  /** Configuration object */
+  private Config config;
 
   private boolean isStarted = false; // only used for event handling
 
@@ -68,7 +72,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param process of type JobConf
    */
   @ConstructorProperties({"name", "process"})
-  public ProcessFlow( String name, P process )
+  public ProcessFlow( String name, Process process )
     {
     this( new Properties(), name, process );
     }
@@ -81,7 +85,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param process    of type P
    */
   @ConstructorProperties({"properties", "name", "process"})
-  public ProcessFlow( Map<Object, Object> properties, String name, P process )
+  public ProcessFlow( Map<Object, Object> properties, String name, Process process )
     {
     this( properties, name, process, null );
     }
@@ -95,13 +99,14 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param flowDescriptor pf type LinkedHashMap<String, String>
    */
   @ConstructorProperties({"properties", "name", "process", "flowDescriptor"})
-  public ProcessFlow( Map<Object, Object> properties, String name, P process, Map<String, String> flowDescriptor )
+  public ProcessFlow( Map<Object, Object> properties, String name, Process process, Map<String, String> flowDescriptor )
     {
-    super( HadoopUtil.getPlatformInfo(), properties, null, name, flowDescriptor );
+    super( new PlatformInfo( "process", "Concurrent, Inc.", Version.getRelease() ), properties, null, name, flowDescriptor );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
     setName( name );
     setTapFromProcess();
+    initProcessConfig();
     initStats();
     }
 
@@ -135,9 +140,78 @@ public class ProcessFlow<P> extends HadoopFlow
    *
    * @return the process (type P) of this ProcessFlow object.
    */
-  public P getProcess()
+  public Process getProcess()
     {
     return process;
+    }
+
+  @Override
+  protected void initConfig( Map<Object, Object> properties, Config parentConfig )
+    {
+
+    }
+
+  private void initProcessConfig()
+    {
+    try
+      {
+      config = (Config) processWrapper.getConfiguration();
+      }
+    catch( ProcessException exception )
+      {
+      if( exception.getCause() instanceof RuntimeException )
+        throw (RuntimeException) exception.getCause();
+
+      throw new FlowException( "could not get configuration from process", exception.getCause() );
+      }
+    }
+
+  @Override
+  protected void setConfigProperty( Config properties, Object key, Object value )
+    {
+
+    }
+
+  @Override
+  protected Config newConfig( Config defaultConfig )
+    {
+    return null;
+    }
+
+  @Override
+  public Config getConfig()
+    {
+    return config;
+    }
+
+  @Override
+  public Config getConfigCopy()
+    {
+    return null;
+    }
+
+  @Override
+  public Map<Object, Object> getConfigAsProperties()
+    {
+    return null;
+    }
+
+  @Override
+  public String getProperty( String key )
+    {
+    return null;
+    }
+
+  @Override
+  public FlowProcess<Config> getFlowProcess()
+    {
+    return FlowProcess.NULL;
+    }
+
+  @Override
+  public boolean stepsAreLocal()
+    {
+    return true;
     }
 
   @Override
@@ -179,6 +253,21 @@ public class ProcessFlow<P> extends HadoopFlow
     }
 
   @Override
+  protected void internalStart()
+    {
+    try
+      {
+      deleteSinksIfReplace();
+      deleteTrapsIfReplace();
+      deleteCheckpointsIfReplace();
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to delete sinks", exception );
+      }
+    }
+
+  @Override
   public void stop()
     {
     try
@@ -199,6 +288,12 @@ public class ProcessFlow<P> extends HadoopFlow
 
       throw new FlowException( "could not call stop on process", throwable.getCause() );
       }
+    }
+
+  @Override
+  protected void internalClean( boolean stop )
+    {
+
     }
 
   @Override
@@ -247,6 +342,18 @@ public class ProcessFlow<P> extends HadoopFlow
       }
     }
 
+  @Override
+  protected int getMaxNumParallelSteps()
+    {
+    return 1;
+    }
+
+  @Override
+  protected void internalShutdown()
+    {
+
+    }
+
   private Map<String, Tap> createSources( ProcessWrapper processParent )
     {
     try
@@ -290,6 +397,7 @@ public class ProcessFlow<P> extends HadoopFlow
       else
         taps.put( path.toString(), new ProcessTap( new NullScheme(), path.toString() ) );
       }
+
     return taps;
     }
 
@@ -344,7 +452,7 @@ public class ProcessFlow<P> extends HadoopFlow
   /**
    *
    */
-  static class ProcessTap extends Tap
+  static class ProcessTap<Config> extends Tap<Config, Object, Object>
     {
     private final String token;
 
@@ -361,37 +469,43 @@ public class ProcessFlow<P> extends HadoopFlow
       }
 
     @Override
-    public TupleEntryIterator openForRead( FlowProcess flowProcess, Object input ) throws IOException
+    public String getFullIdentifier( Config conf )
+      {
+      return getIdentifier();
+      }
+
+    @Override
+    public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Object input ) throws IOException
       {
       return null;
       }
 
     @Override
-    public TupleEntryCollector openForWrite( FlowProcess flowProcess, Object output ) throws IOException
+    public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess, Object output ) throws IOException
       {
       return null;
       }
 
     @Override
-    public boolean createResource( Object conf ) throws IOException
+    public boolean createResource( Config conf ) throws IOException
       {
       return false;
       }
 
     @Override
-    public boolean deleteResource( Object conf ) throws IOException
+    public boolean deleteResource( Config conf ) throws IOException
       {
       return false;
       }
 
     @Override
-    public boolean resourceExists( Object conf ) throws IOException
+    public boolean resourceExists( Config conf ) throws IOException
       {
       return false;
       }
 
     @Override
-    public long getModifiedTime( Object conf ) throws IOException
+    public long getModifiedTime( Config conf ) throws IOException
       {
       return 0;
       }

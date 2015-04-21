@@ -33,6 +33,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.PlatformInfo;
+import riffle.process.ProcessConfiguration;
 
 /**
  * Class LocalFlow is the local mode specific implementation of a {@link cascading.flow.Flow}.
@@ -73,6 +74,7 @@ public class LocalFlow extends BaseFlow<Properties>
     return defaultConfig == null ? new Properties() : new Properties( defaultConfig );
     }
 
+  @ProcessConfiguration
   @Override
   public Properties getConfig()
     {
