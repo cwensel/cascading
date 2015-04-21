@@ -20,9 +20,16 @@
 
 package cascading.flow;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.property.Props;
+import cascading.util.Util;
 
 /**
  * Class FlowRuntimeProps is a fluent helper class for setting {@link Flow} specific runtime properties through
@@ -36,6 +43,7 @@ import cascading.property.Props;
  * <ul>
  * <li>gather partitions - number of slices (partitions) to gather keys within each {@link cascading.flow.FlowNode}.
  * In MapReduce this is the number of reducers. In Tez DAG this is the scatter gather parallelization.</li>
+ * <li>log counters - counter names to log to INFO when a cluster side slice completes.</li>
  * </ul>
  * <p/>
  * Note, if the num of gather partitions is not set, the Flow may fail during planning or setup, depending on the
@@ -44,8 +52,10 @@ import cascading.property.Props;
 public class FlowRuntimeProps extends Props
   {
   public static final String GATHER_PARTITIONS = "cascading.flow.runtime.gather.partitions.num";
+  public static final String LOG_COUNTERS = "cascading.flow.runtime.log.counters";
 
   int gatherPartitions = 0;
+  Set<String> logCounters = new LinkedHashSet<>();
 
   public static FlowRuntimeProps flowRuntimeProps()
     {
@@ -83,9 +93,44 @@ public class FlowRuntimeProps extends Props
     return this;
     }
 
+  /**
+   * Method addLogCounter adds a new counter to be logged when a cluster side slice completes.
+   * <p/>
+   * The given counters will be logged using the default cluster side logging mechanism.
+   *
+   * @param counter the Enum counter to log
+   * @return this
+   */
+  public FlowRuntimeProps addLogCounter( Enum counter )
+    {
+    addLogCounter( counter.getDeclaringClass().getName(), counter.name() );
+
+    return this;
+    }
+
+  /**
+   * Method addLogCounter adds a new counter to be logged when a cluster side slice completes.
+   * <p/>
+   * The given counters will be logged using the default cluster side logging mechanism.
+   *
+   * @param group   the String counter group to log
+   * @param counter the String counter name to log
+   * @return this
+   */
+  public FlowRuntimeProps addLogCounter( String group, String counter )
+    {
+    logCounters.add( group + ":" + counter );
+
+    return this;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
-    properties.setProperty( GATHER_PARTITIONS, Integer.toString( gatherPartitions ) );
+    if( gatherPartitions > 0 )
+      properties.setProperty( GATHER_PARTITIONS, Integer.toString( gatherPartitions ) );
+
+    if( !logCounters.isEmpty() )
+      properties.setProperty( LOG_COUNTERS, Util.join( logCounters, "," ) );
     }
   }

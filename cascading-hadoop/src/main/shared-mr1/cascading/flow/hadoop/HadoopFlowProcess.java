@@ -254,6 +254,18 @@ public class HadoopFlowProcess extends FlowProcess<JobConf> implements MapRed
     }
 
   @Override
+  public long getCounterValue( Enum counter )
+    {
+    return getReporter().getCounter( counter ).getValue();
+    }
+
+  @Override
+  public long getCounterValue( String group, String counter )
+    {
+    return getReporter().getCounter( group, counter ).getValue();
+    }
+
+  @Override
   public void setStatus( String status )
     {
     getReporter().setStatus( status );

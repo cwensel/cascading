@@ -20,6 +20,10 @@
 
 package cascading.util;
 
+import cascading.flow.FlowProcess;
+import cascading.flow.FlowRuntimeProps;
+import org.slf4j.Logger;
+
 /**
  *
  */
@@ -43,5 +47,32 @@ public class LogUtil
 
     Util.invokeInstanceMethod( loggerObject, "setLevel",
       new Object[]{levelObject}, new Class[]{levelObject.getClass()} );
+    }
+
+  public static void logMemory( Logger logger, String message )
+    {
+    Runtime runtime = Runtime.getRuntime();
+    long freeMem = runtime.freeMemory() / 1024 / 1024;
+    long maxMem = runtime.maxMemory() / 1024 / 1024;
+    long totalMem = runtime.totalMemory() / 1024 / 1024;
+
+    logger.info( message + " (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+    }
+
+  public static void logCounters( Logger logger, String message, FlowProcess flowProcess )
+    {
+    String counters = flowProcess.getStringProperty( FlowRuntimeProps.LOG_COUNTERS );
+
+    if( counters == null )
+      return;
+
+    String[] split = counters.split( "," );
+
+    for( String value : split )
+      {
+      String counter[] = value.split( ":" );
+
+      logger.info( "{} {}.{}={}", message, counter[ 0 ], counter[ 1 ], flowProcess.getCounterValue( counter[ 0 ], counter[ 1 ] ) );
+      }
     }
   }

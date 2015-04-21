@@ -184,7 +184,7 @@ public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration> impleme
   @Override
   public void keepAlive()
     {
-//    context.
+    // unsupported
     }
 
   @Override
@@ -202,16 +202,36 @@ public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration> impleme
     }
 
   @Override
+  public long getCounterValue( Enum counter )
+    {
+    if( context == null )
+      return 0;
+
+    return context.getCounters().findCounter( counter ).getValue();
+    }
+
+  @Override
+  public long getCounterValue( String group, String counter )
+    {
+    if( context == null )
+      return 0;
+
+    return context.getCounters().findCounter( group, counter ).getValue();
+    }
+
+  @Override
   public void setStatus( String status )
     {
-//    getReporter().setStatus( status );
+    // unsupported
     }
 
   @Override
   public boolean isCounterStatusInitialized()
     {
-//    return getReporter() != null;
-    return false;
+    if( context == null )
+      return false;
+
+    return context.getCounters() != null;
     }
 
   @Override

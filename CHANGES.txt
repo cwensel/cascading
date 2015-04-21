@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Added ability to specify counters to be logged cluster side when a slice has completed executing. See the
+  c.f.FlowRuntimeProps class.
+
   Update build to support Gradle 2.3 by removing use of deprecated 1.x features/apis.
 
   Updated jgrapht to 0.9.1 so that all internal graphs can be backed by a j.u.IdentityHashMap.

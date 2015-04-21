@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.local.stream.graph.LocalStepStreamGraph;
@@ -38,6 +39,9 @@ import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.LogUtil.logCounters;
+import static cascading.util.LogUtil.logMemory;
+
 /**
  *
  */
@@ -45,25 +49,27 @@ public class LocalStepRunner implements Callable<Throwable>
   {
   private static final Logger LOG = LoggerFactory.getLogger( LocalStepRunner.class );
 
-  private final FlowProcess<Properties> flowProcess;
+  private final FlowProcess<Properties> currentProcess;
 
   private boolean complete = false;
   private boolean successful = false;
 
+  private final FlowNode flowNode;
   private final StreamGraph streamGraph;
   private final Collection<Duct> heads;
   private Throwable throwable = null;
 
   public LocalStepRunner( FlowProcess<Properties> flowProcess, LocalFlowStep step )
     {
-    this.flowProcess = flowProcess;
-    this.streamGraph = new LocalStepStreamGraph( this.flowProcess, step, Util.getFirst( step.getFlowNodeGraph().vertexSet() ) );
+    this.currentProcess = flowProcess;
+    this.flowNode = Util.getFirst( step.getFlowNodeGraph().vertexSet() );
+    this.streamGraph = new LocalStepStreamGraph( this.currentProcess, step, flowNode );
     this.heads = streamGraph.getHeads();
     }
 
   public FlowProcess<Properties> getFlowProcess()
     {
-    return flowProcess;
+    return currentProcess;
     }
 
   public boolean isComplete()
@@ -91,6 +97,8 @@ public class LocalStepRunner implements Callable<Throwable>
       try
         {
         streamGraph.prepare();
+
+        logMemory( LOG, "flow node id: " + flowNode.getID() + ", mem on start" );
         }
       catch( Throwable currentThrowable )
         {
@@ -162,6 +170,10 @@ public class LocalStepRunner implements Callable<Throwable>
 
         successful = false;
         }
+
+      String message = "flow node id: " + flowNode.getID();
+      logMemory( LOG, message + ", mem on close" );
+      logCounters( LOG, message + ", counter:", currentProcess );
       }
     }
 

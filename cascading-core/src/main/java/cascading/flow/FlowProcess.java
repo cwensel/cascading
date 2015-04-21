@@ -89,6 +89,18 @@ public abstract class FlowProcess<Config>
       {
       }
 
+    @Override
+    public long getCounterValue( Enum counter )
+      {
+      return 0;
+      }
+
+    @Override
+    public long getCounterValue( String group, String counter )
+      {
+      return 0;
+      }
+
     public void setStatus( String status )
       {
       }
@@ -390,6 +402,25 @@ public abstract class FlowProcess<Config>
    * @param amount  of type int
    */
   public abstract void increment( String group, String counter, long amount );
+
+  /**
+   * Method getCounterValue is used to retrieve a counter value.
+   * <p/>
+   * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
+   *
+   * @param counter of type Enum
+   */
+  public abstract long getCounterValue( Enum counter );
+
+  /**
+   * Method getCounterValue is used to retrieve a counter value.
+   * <p/>
+   * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
+   *
+   * @param group   of type String
+   * @param counter of type String
+   */
+  public abstract long getCounterValue( String group, String counter );
 
   /**
    * Method setStatus is used to set the status of the current operation.

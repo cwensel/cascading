@@ -239,9 +239,9 @@ public class ElementGraphs
     int lhs = flowElement.getClass().getName().hashCode();
     int rhs = 0;
 
-    if( flowElement instanceof Operator )
+    if( flowElement instanceof Operator && ( (Operator) flowElement ).getOperation() != null )
       rhs = ( (Operator) flowElement ).getOperation().getClass().getName().hashCode();
-    else if( flowElement instanceof Tap )
+    else if( flowElement instanceof Tap && ( (Tap) flowElement ).getScheme() != null )
       rhs = ( (Tap) flowElement ).getScheme().getClass().getName().hashCode();
     else if( flowElement instanceof Splice )
       rhs = ( (Splice) flowElement ).getJoiner().getClass().getName().hashCode() + 31 * ( (Splice) flowElement ).getNumSelfJoins();

@@ -125,6 +125,18 @@ public class LimitFilterTest extends CascadingTestCase
       }
 
     @Override
+    public long getCounterValue( Enum counter )
+      {
+      return 0;
+      }
+
+    @Override
+    public long getCounterValue( String group, String counter )
+      {
+      return 0;
+      }
+
+    @Override
     public void setStatus( String status )
       {
       }

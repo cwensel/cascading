@@ -126,6 +126,18 @@ public class FlowProcessWrapper<Config> extends FlowProcess<Config>
     }
 
   @Override
+  public long getCounterValue( Enum counter )
+    {
+    return delegate.getCounterValue( counter );
+    }
+
+  @Override
+  public long getCounterValue( String group, String counter )
+    {
+    return delegate.getCounterValue( group, counter );
+    }
+
+  @Override
   public void setStatus( String status )
     {
     delegate.setStatus( status );

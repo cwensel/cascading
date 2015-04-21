@@ -136,6 +136,18 @@ public class LocalFlowProcess extends FlowProcess<Properties>
     }
 
   @Override
+  public long getCounterValue( Enum counter )
+    {
+    return stepStats.getCounterValue( counter );
+    }
+
+  @Override
+  public long getCounterValue( String group, String counter )
+    {
+    return stepStats.getCounterValue( group, counter );
+    }
+
+  @Override
   public void setStatus( String status )
     {
 

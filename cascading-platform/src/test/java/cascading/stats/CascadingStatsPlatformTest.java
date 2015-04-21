@@ -18,12 +18,17 @@
  * limitations under the License.
  */
 
-package cascading.stats.local;
+package cascading.stats;
+
+import java.util.Map;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
 import cascading.cascade.CascadeConnector;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.flow.FlowRuntimeProps;
+import cascading.flow.SliceCounters;
 import cascading.operation.regex.RegexParser;
 import cascading.operation.state.Counter;
 import cascading.pipe.Each;
@@ -72,8 +77,16 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
     Tap sink1 = getPlatform().getTextFile( getOutputPath( "flowstats1" ), SinkMode.REPLACE );
     Tap sink2 = getPlatform().getTextFile( getOutputPath( "flowstats2" ), SinkMode.REPLACE );
 
-    Flow flow1 = getPlatform().getFlowConnector().connect( "stats1 test", source, sink1, pipe );
-    Flow flow2 = getPlatform().getFlowConnector().connect( "stats2 test", source, sink2, pipe );
+    Map<Object, Object> properties = getProperties();
+
+    properties = FlowRuntimeProps.flowRuntimeProps()
+      .addLogCounter( SliceCounters.Tuples_Read )
+      .buildProperties( properties );
+
+    FlowConnector flowConnector = getPlatform().getFlowConnector( properties );
+
+    Flow flow1 = flowConnector.connect( "stats1 test", source, sink1, pipe );
+    Flow flow2 = flowConnector.connect( "stats2 test", source, sink2, pipe );
 
     Cascade cascade = new CascadeConnector().connect( flow1, flow2 );
 
@@ -83,14 +96,6 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
 
     assertNotNull( cascadeStats.getID() );
 
-    // unsure why this has changed
-//    if( getPlatform() instanceof HadoopPlatform )
-//      {
-//      Collection<String> counterGroups = cascadeStats.getCounterGroups();
-//      assertEquals( getPlatform().isUseCluster() ? 5 : 4, counterGroups.size() );
-//      }
-
-    assertEquals( 1, cascadeStats.getCounterGroupsMatching( "cascading\\.stats\\..*" ).size() );
     assertEquals( 2, cascadeStats.getCountersFor( TestEnum.class.getName() ).size() );
     assertEquals( 2, cascadeStats.getCountersFor( TestEnum.class ).size() );
     assertEquals( 40, cascadeStats.getCounterValue( TestEnum.FIRST ) );

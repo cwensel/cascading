@@ -48,14 +48,16 @@ import org.slf4j.LoggerFactory;
 
 import static cascading.flow.hadoop.util.HadoopMRUtil.readStateFromDistCache;
 import static cascading.flow.hadoop.util.HadoopUtil.deserializeBase64;
+import static cascading.util.LogUtil.logCounters;
+import static cascading.util.LogUtil.logMemory;
 
 /** Class FlowMapper is the Hadoop Mapper implementation. */
 public class FlowMapper implements MapRunnable
   {
   private static final Logger LOG = LoggerFactory.getLogger( FlowMapper.class );
 
+  private FlowNode flowNode;
   private HadoopMapStreamGraph streamGraph;
-  /** Field currentProcess */
   private HadoopFlowProcess currentProcess;
 
   /** Constructor FlowMapper creates a new FlowMapper instance. */
@@ -80,11 +82,13 @@ public class FlowMapper implements MapRunnable
       if( mapNodeState == null )
         mapNodeState = readStateFromDistCache( jobConf, jobConf.get( FlowStep.CASCADING_FLOW_STEP_ID ), "map" );
 
-      FlowNode node = deserializeBase64( mapNodeState, jobConf, BaseFlowNode.class );
+      flowNode = deserializeBase64( mapNodeState, jobConf, BaseFlowNode.class );
 
-      Tap source = Flows.getTapForID( node.getSourceTaps(), jobConf.get( "cascading.step.source" ) );
+      LOG.info( "flow node id: {}, ordinal: {}", flowNode.getID(), flowNode.getOrdinal() );
 
-      streamGraph = new HadoopMapStreamGraph( currentProcess, node, source );
+      Tap source = Flows.getTapForID( flowNode.getSourceTaps(), jobConf.get( "cascading.step.source" ) );
+
+      streamGraph = new HadoopMapStreamGraph( currentProcess, flowNode, source );
 
       for( Duct head : streamGraph.getHeads() )
         LOG.info( "sourcing from: " + ( (ElementDuct) head ).getFlowElement() );
@@ -92,8 +96,10 @@ public class FlowMapper implements MapRunnable
       for( Duct tail : streamGraph.getTails() )
         LOG.info( "sinking to: " + ( (ElementDuct) tail ).getFlowElement() );
 
-      for( Tap trap : node.getTraps() )
+      for( Tap trap : flowNode.getTraps() )
         LOG.info( "trapping to: " + trap );
+
+      logMemory( LOG, "flow node id: " + flowNode.getID() + ", mem on start" );
       }
     catch( Throwable throwable )
       {
@@ -166,6 +172,10 @@ public class FlowMapper implements MapRunnable
 
         currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
         currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+
+        String message = "flow node id: " + flowNode.getID();
+        logMemory( LOG, message + ", mem on close" );
+        logCounters( LOG, message + ", counter:", currentProcess );
         }
       }
     }

@@ -53,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.flow.hadoop.util.HadoopUtil.deserializeBase64;
+import static cascading.util.LogUtil.logCounters;
+import static cascading.util.LogUtil.logMemory;
 
 /**
  *
@@ -86,9 +88,9 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
 
       flowNode = deserializeBase64( configuration.getRaw( FlowNode.CASCADING_FLOW_NODE ), configuration, BaseFlowNode.class );
 
-      LOG.info( "flow node ordinal: {}, tez vertex name: {}", flowNode.getOrdinal(), flowNode.getID() );
+      LOG.info( "flow node id: {}, ordinal: {}", flowNode.getID(), flowNode.getOrdinal() );
 
-      logMemory( "mem on start" );
+      logMemory( LOG, "flow node id: " + flowNode.getID() + ", mem on start" );
       }
     catch( Throwable throwable )
       {
@@ -153,7 +155,7 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
             {
             ( (InputSource) next ).run( null );
 
-            logMemory( "mem after accumulating source: " + ( (ElementDuct) next ).getFlowElement() + ", " );
+            logMemory( LOG, "mem after accumulating source: " + ( (ElementDuct) next ).getFlowElement() + ", " );
             }
           }
 
@@ -204,16 +206,8 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
   @Override
   public void close() throws Exception
     {
-    logMemory( "mem on close" );
-    }
-
-  protected void logMemory( String message )
-    {
-    Runtime runtime = Runtime.getRuntime();
-    long freeMem = runtime.freeMemory() / 1024 / 1024;
-    long maxMem = runtime.maxMemory() / 1024 / 1024;
-    long totalMem = runtime.totalMemory() / 1024 / 1024;
-
-    LOG.info( message + " (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+    String message = "flow node id: " + flowNode.getID();
+    logMemory( LOG, message + ", mem on close" );
+    logCounters( LOG, message + ", counter:", currentProcess );
     }
   }
