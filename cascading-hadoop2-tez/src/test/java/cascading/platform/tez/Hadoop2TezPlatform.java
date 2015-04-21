@@ -315,10 +315,17 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
       Class<?> target = Util.loadClass( "org.apache.hadoop.yarn.server.timeline.TimelineStore" );
       Class<?> type = Util.loadClass( "org.apache.hadoop.yarn.server.timeline.MemoryTimelineStore" );
 
-      // hadoop 2.5 has the above classes, but this one is also necessary for the timeline service with acls to function.
-      Util.loadClass( "org.apache.hadoop.yarn.api.records.timeline.TimelineDomain" );
-
       configuration.setClass( YarnConfiguration.TIMELINE_SERVICE_STORE, type, target );
+
+      try
+        {
+        // hadoop 2.5 has the above classes, but this one is also necessary for the timeline service with acls to function.
+        Util.loadClass( "org.apache.hadoop.yarn.api.records.timeline.TimelineDomain" );
+        }
+      catch( CascadingException exception )
+        {
+        configuration.setBoolean( TezConfiguration.TEZ_AM_ALLOW_DISABLED_TIMELINE_DOMAINS, true );
+        }
 
       return true;
       }
