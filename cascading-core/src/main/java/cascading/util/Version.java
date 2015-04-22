@@ -155,10 +155,7 @@ public class Version
       return properties;
 
     if( resources.size() > 1 )
-      {
-      LOG.warn( "found multiple 'cascading/version.properties' files on the CLASSPATH. Please check your dependencies: {}", Util.join( resources, "," ) );
-      return properties;
-      }
+      LOG.warn( "found multiple 'cascading/version.properties' files on the CLASSPATH. Please check your dependencies: {}, using first returned", Util.join( resources, "," ) );
 
     InputStream stream = resources.get( 0 ).openStream();
 
