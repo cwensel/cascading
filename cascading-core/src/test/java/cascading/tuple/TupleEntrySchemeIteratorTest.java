@@ -20,11 +20,7 @@
 
 package cascading.tuple;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
-
-import org.junit.Test;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
@@ -33,6 +29,9 @@ import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
 import cascading.util.CloseableIterator;
 import cascading.util.SingleValueCloseableIterator;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class TupleEntrySchemeIteratorTest
   {

@@ -34,8 +34,6 @@ import cascading.operation.state.Counter;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.stats.CascadeStats;
-import cascading.stats.FlowStats;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;

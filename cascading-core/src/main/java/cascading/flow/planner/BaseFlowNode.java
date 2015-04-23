@@ -35,7 +35,6 @@ import cascading.flow.FlowStep;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
-import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.stream.annotations.StreamMode;
