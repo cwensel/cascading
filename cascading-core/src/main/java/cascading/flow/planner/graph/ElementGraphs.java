@@ -456,7 +456,7 @@ public class ElementGraphs
     elementGraph.removeVertex( flowElement );
     }
 
-  public static boolean printElementGraph( String filename, final DirectedGraph<FlowElement, Scope> graph, final PlatformInfo platformInfo )
+  public static boolean printElementGraph( String filename, final ElementGraph graph, final PlatformInfo platformInfo )
     {
     try
       {
@@ -467,7 +467,7 @@ public class ElementGraphs
 
       Writer writer = new FileWriter( filename );
 
-      Util.writeDOT( writer, graph,
+      Util.writeDOT( writer, ElementGraphs.directed( graph ),
         new IntegerNameProvider<FlowElement>(),
         new FlowElementVertexNameProvider( graph, platformInfo ),
         new ScopeEdgeNameProvider(),
@@ -497,7 +497,7 @@ public class ElementGraphs
 
       DOTProcessGraphWriter graphWriter = new DOTProcessGraphWriter(
         new IntegerNameProvider<Pair<ElementGraph, FlowElement>>(),
-        new FlowElementVertexNameProvider( directed( graph ), null ),
+        new FlowElementVertexNameProvider( graph, null ),
         new ScopeEdgeNameProvider(),
         new VertexAttributeProvider(), new EdgeAttributeProvider(),
         new ProcessGraphNameProvider(), new ProcessGraphLabelProvider()
@@ -797,12 +797,12 @@ public class ElementGraphs
 
   private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>
     {
-    private final DirectedGraph<FlowElement, Scope> graph;
+    private final ElementGraph elementGraph;
     private final PlatformInfo platformInfo;
 
-    public FlowElementVertexNameProvider( DirectedGraph<FlowElement, Scope> graph, PlatformInfo platformInfo )
+    public FlowElementVertexNameProvider( ElementGraph elementGraph, PlatformInfo platformInfo )
       {
-      this.graph = graph;
+      this.elementGraph = elementGraph;
       this.platformInfo = platformInfo;
       }
 
@@ -815,7 +815,7 @@ public class ElementGraphs
         if( object == Extent.tail )
           return result;
 
-        result = result + "|hash: " + canonicalHash( graph );
+        result = result + "|hash: " + canonicalHash( elementGraph );
 
         String versionString = Version.getRelease();
 
@@ -827,7 +827,7 @@ public class ElementGraphs
 
       String label;
 
-      Iterator<Scope> iterator = graph.outgoingEdgesOf( object ).iterator();
+      Iterator<Scope> iterator = elementGraph.outgoingEdgesOf( object ).iterator();
 
       if( object instanceof Tap || !iterator.hasNext() )
         {
@@ -844,10 +844,10 @@ public class ElementGraphs
 
       label = "{" + label.replaceAll( "\\{", "\\\\{" ).replaceAll( "\\}", "\\\\}" ).replaceAll( ">", "\\\\>" ) + "}";
 
-      if( !( graph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) graph ).hasAnnotations() )
+      if( !( elementGraph instanceof AnnotatedGraph ) || !( (AnnotatedGraph) elementGraph ).hasAnnotations() )
         return label;
 
-      Set<Enum> annotations = ( (AnnotatedGraph) graph ).getAnnotations().getKeysFor( object );
+      Set<Enum> annotations = ( (AnnotatedGraph) elementGraph ).getAnnotations().getKeysFor( object );
 
       if( !annotations.isEmpty() )
         label += "|{" + Util.join( annotations, "|" ) + "}";

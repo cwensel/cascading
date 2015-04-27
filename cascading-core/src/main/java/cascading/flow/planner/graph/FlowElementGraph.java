@@ -450,7 +450,7 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
   @Override
   public void writeDOT( String filename )
     {
-    boolean success = ElementGraphs.printElementGraph( filename, this.copyWithTraps().graph, platformInfo );
+    boolean success = ElementGraphs.printElementGraph( filename, this.copyWithTraps(), platformInfo );
 
     if( success )
       Util.writePDF( filename );

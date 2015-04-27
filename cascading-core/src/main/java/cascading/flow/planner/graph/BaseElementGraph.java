@@ -177,7 +177,7 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
   @Override
   public void writeDOT( String filename )
     {
-    boolean success = ElementGraphs.printElementGraph( filename, this.graph, null );
+    boolean success = ElementGraphs.printElementGraph( filename, this, null );
 
     if( success )
       Util.writePDF( filename );

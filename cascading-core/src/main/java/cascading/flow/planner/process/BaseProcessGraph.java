@@ -36,11 +36,13 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.Extent;
 import cascading.pipe.Group;
 import cascading.tap.Tap;
+import cascading.util.EnumMultiMap;
 import cascading.util.Util;
 import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.VertexNameProvider;
@@ -274,6 +276,21 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
       results.addAll( process.getSinkElements() );
 
     return results;
+    }
+
+  public EnumMultiMap<FlowElement> getAnnotations()
+    {
+    EnumMultiMap<FlowElement> annotations = new EnumMultiMap<>();
+
+    for( Process process : vertexSet() )
+      {
+      ElementGraph elementGraph = process.getElementGraph();
+
+      if( elementGraph instanceof AnnotatedGraph )
+        annotations.addAll( ( (AnnotatedGraph) elementGraph ).getAnnotations() );
+      }
+
+    return annotations;
     }
 
   /**

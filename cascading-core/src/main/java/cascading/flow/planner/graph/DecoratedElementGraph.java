@@ -26,6 +26,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
+import cascading.util.Util;
 
 /**
  *
@@ -53,7 +54,10 @@ public class DecoratedElementGraph implements ElementGraph
   @Override
   public void writeDOT( String filename )
     {
-    decorated.writeDOT( filename );
+    boolean success = ElementGraphs.printElementGraph( filename, this, null );
+
+    if( success )
+      Util.writePDF( filename );
     }
 
   @Override
@@ -204,5 +208,19 @@ public class DecoratedElementGraph implements ElementGraph
   public FlowElement getEdgeTarget( Scope scope )
     {
     return decorated.getEdgeTarget( scope );
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    return ElementGraphs.equals( this, (ElementGraph) object );
+    }
+
+  @Override
+  public int hashCode()
+    {
+    int result = decorated.hashCode();
+    result = 31 * result; // parity with AnnotatedGraph types
+    return result;
     }
   }

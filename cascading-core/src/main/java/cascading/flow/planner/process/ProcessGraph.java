@@ -32,6 +32,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.tap.Tap;
+import cascading.util.EnumMultiMap;
 import org.jgrapht.DirectedGraph;
 
 /**
@@ -118,6 +119,8 @@ public interface ProcessGraph<Process extends ProcessModel> extends Serializable
   Set<FlowElement> getAllSourceElements();
 
   Set<FlowElement> getAllSinkElements();
+
+  EnumMultiMap<FlowElement> getAnnotations();
 
   Set<FlowElement> getDuplicatedElements( ElementGraph elementGraph );
 

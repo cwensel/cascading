@@ -26,27 +26,30 @@ import cascading.util.EnumMultiMap;
 /**
  *
  */
-public abstract class BaseAnnotatedElementGraph extends BaseElementGraph implements AnnotatedGraph
+public class AnnotatedDecoratedElementGraph extends DecoratedElementGraph implements AnnotatedGraph
   {
-  protected EnumMultiMap<FlowElement> annotations;
+  private final EnumMultiMap<FlowElement> annotations;
 
+  public AnnotatedDecoratedElementGraph( ElementGraph decorated, EnumMultiMap<FlowElement> annotations )
+    {
+    super( decorated );
+
+    if( annotations == null )
+      throw new IllegalArgumentException( "annotations are required" );
+
+    this.annotations = annotations;
+    }
+
+  @Override
   public boolean hasAnnotations()
     {
     return annotations != null && !annotations.isEmpty();
     }
 
+  @Override
   public EnumMultiMap<FlowElement> getAnnotations()
     {
-    if( annotations == null )
-      annotations = new EnumMultiMap<>();
-
     return annotations;
-    }
-
-  protected void addParentAnnotations( ElementGraph parent )
-    {
-    if( parent instanceof AnnotatedGraph && ( ( (AnnotatedGraph) parent ) ).hasAnnotations() )
-      getAnnotations().addAll( ( (AnnotatedGraph) parent ).getAnnotations() );
     }
 
   @Override

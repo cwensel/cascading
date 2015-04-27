@@ -24,11 +24,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.graph.AnnotatedDecoratedElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.util.EnumMultiMap;
 
 public class FlowStepGraph extends BaseProcessGraph<FlowStep>
   {
@@ -60,6 +63,13 @@ public class FlowStepGraph extends BaseProcessGraph<FlowStep>
       {
       List<? extends ElementGraph> nodeSubGraphs = nodeSubGraphsMap.get( stepSubGraph );
       FlowNodeGraph flowNodeGraph = createFlowNodeGraph( flowPlanner, flowElementGraph, pipelineSubGraphsMap, nodeSubGraphs );
+
+      EnumMultiMap<FlowElement> annotations = flowNodeGraph.getAnnotations();
+
+      // pull up annotations
+      if( !annotations.isEmpty() )
+        stepSubGraph = new AnnotatedDecoratedElementGraph( stepSubGraph, annotations );
+
       FlowStep flowStep = flowPlanner.createFlowStep( stepSubGraph, flowNodeGraph );
 
       addVertex( flowStep );
