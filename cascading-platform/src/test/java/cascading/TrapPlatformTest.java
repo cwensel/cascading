@@ -362,6 +362,7 @@ public class TrapPlatformTest extends PlatformTestCase
     // compensate for running in cluster mode
     getPlatform().setNumMapTasks( properties, 1 );
     getPlatform().setNumReduceTasks( properties, 1 );
+    getPlatform().setNumGatherPartitionTasks( properties, 1 );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( "trap test", source, sink, trap, pipe );
 

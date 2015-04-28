@@ -106,10 +106,12 @@ public class TapOutputCollector implements OutputCollector, Closeable
       Hadoop18TapUtil.setupJob( conf );
       Hadoop18TapUtil.setupTask( conf );
 
+      int partition = conf.getInt( "mapred.task.partition", conf.getInt( "mapreduce.task.partition", 0 ) );
+
       if( prefix != null )
-        filename = String.format( filenamePattern, prefix, "/", conf.getInt( "mapred.task.partition", 0 ), sequence );
+        filename = String.format( filenamePattern, prefix, "/", partition, sequence );
       else
-        filename = String.format( filenamePattern, "", "", conf.getInt( "mapred.task.partition", 0 ), sequence );
+        filename = String.format( filenamePattern, "", "", partition, sequence );
       }
 
     LOG.info( "creating path: {}", filename );

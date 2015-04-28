@@ -64,10 +64,14 @@ public class Hadoop18TapUtil
     if( getFSSafe( conf, outputPath ) == null )
       return;
 
-    if( conf.get( "mapred.task.id" ) == null ) // need to stuff a fake id
+    String taskID = conf.get( "mapred.task.id", conf.get( "mapreduce.task.id" ) );
+
+    if( taskID == null ) // need to stuff a fake id
       {
-      String mapper = conf.getBoolean( "mapred.task.is.map", true ) ? "m" : "r";
-      conf.set( "mapred.task.id", String.format( "attempt_%012d_0000_%s_000000_0", (int) Math.rint( System.currentTimeMillis() ), mapper ) );
+      String mapper = conf.getBoolean( "mapred.task.is.map", conf.getBoolean( "mapreduce.task.is.map", true ) ) ? "m" : "r";
+      String value = String.format( "attempt_%012d_0000_%s_000000_0", (int) Math.rint( System.currentTimeMillis() ), mapper );
+      conf.set( "mapred.task.id", value );
+      conf.set( "mapreduce.task.id", value );
       }
 
     makeTempPath( conf );
@@ -96,7 +100,7 @@ public class Hadoop18TapUtil
     if( fs == null )
       return;
 
-    String taskId = conf.get( "mapred.task.id" );
+    String taskId = conf.get( "mapred.task.id", conf.get( "mapreduce.task.id" ) );
 
     LOG.info( "setting up task: '{}' - {}", taskId, workpath );
 
@@ -153,7 +157,7 @@ public class Hadoop18TapUtil
     if( integer.decrementAndGet() != 0 )
       return;
 
-    String taskId = conf.get( "mapred.task.id" );
+    String taskId = conf.get( "mapred.task.id", conf.get( "mapreduce.task.id" ) );
 
     LOG.info( "committing task: '{}' - {}", taskId, taskOutputPath );
 
@@ -242,7 +246,7 @@ public class Hadoop18TapUtil
 
   private static Path getTaskOutputPath( Configuration conf )
     {
-    String taskId = conf.get( "mapred.task.id" );
+    String taskId = conf.get( "mapred.task.id", conf.get( "mapreduce.task.id" ) );
 
     Path p = new Path( FileOutputFormat.getOutputPath( asJobConfInstance( conf ) ), TEMPORARY_PATH + Path.SEPARATOR + "_" + taskId );
 
@@ -280,7 +284,7 @@ public class Hadoop18TapUtil
 
   private static void moveTaskOutputs( Configuration conf, FileSystem fs, Path jobOutputDir, Path taskOutput ) throws IOException
     {
-    String taskId = conf.get( "mapred.task.id" );
+    String taskId = conf.get( "mapred.task.id", conf.get( "mapreduce.task.id" ) );
 
     if( fs.isFile( taskOutput ) )
       {

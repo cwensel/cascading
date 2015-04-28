@@ -56,7 +56,7 @@ public class TezStatsPlatformTest extends PlatformTestCase
 
   public TezStatsPlatformTest()
     {
-    super( true );
+    super( true, 1, 4 );
     }
 
   @Test
@@ -125,7 +125,6 @@ public class TezStatsPlatformTest extends PlatformTestCase
     TezStepStats stats1 = (TezStepStats) flowStats1.getFlowStepStats().get( 0 );
 
     assertNotNull( stats1.getID() );
-//      assertNotNull( stats1.getJobID() );
 
     if( getPlatform().isUseCluster() )
       {
@@ -137,15 +136,17 @@ public class TezStatsPlatformTest extends PlatformTestCase
 
       assertEquals( 3, flowNodeStats.size() );
 
-      FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-      FlowNodeStats reducerNode = flowNodeStats.get( 1 );
+      FlowNodeStats node1 = flowNodeStats.get( 0 );
+      FlowNodeStats node2 = flowNodeStats.get( 1 );
+      FlowNodeStats node3 = flowNodeStats.get( 2 );
 
-      assertEquals( 1, mapperNode.getChildren().size() );
-      assertEquals( 1, reducerNode.getChildren().size() );
+      assertEquals( 1, node1.getChildren().size() );
+      assertEquals( 4, node2.getChildren().size() );
+      assertEquals( 4, node3.getChildren().size() );
 
       boolean foundCounter = false;
 
-      Collection<FlowSliceStats> children = reducerNode.getChildren();
+      Collection<FlowSliceStats> children = node2.getChildren();
       for( FlowSliceStats flowSliceStats : children )
         {
         TezSliceStats sliceStats = (TezSliceStats) flowSliceStats;
@@ -163,10 +164,19 @@ public class TezStatsPlatformTest extends PlatformTestCase
     TezStepStats stats2 = (TezStepStats) flowStats2.getFlowStepStats().get( 0 );
 
     assertNotNull( stats2.getID() );
-//      assertNotNull( stats2.getJobID() );
 
-    // todo: enable when tasks are captured
-//      if( getPlatform().isUseCluster() )
-//        assertEquals( 5, stats2.getTaskStats().size() );
+    if( getPlatform().isUseCluster() )
+      {
+      List<FlowNodeStats> flowNodeStats = stats2.getFlowNodeStats();
+      assertEquals( 3, flowNodeStats.size() );
+
+      FlowNodeStats node1 = flowNodeStats.get( 0 );
+      FlowNodeStats node2 = flowNodeStats.get( 1 );
+      FlowNodeStats node3 = flowNodeStats.get( 2 );
+
+      assertEquals( 1, node1.getChildren().size() );
+      assertEquals( 4, node2.getChildren().size() );
+      assertEquals( 4, node3.getChildren().size() );
+      }
     }
   }

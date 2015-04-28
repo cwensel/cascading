@@ -138,7 +138,7 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   protected FlowStepJob<Properties> createFlowStepJob( ClientState clientState, FlowProcess<Properties> flowProcess, Properties initializedStepConfig )
     {
     // localize a flow process
-    flowProcess = new LocalFlowProcess( flowProcess.getCurrentSession(), initializedStepConfig );
+    flowProcess = flowProcess.copyWith( initializedStepConfig );
 
     return new LocalFlowStepJob( clientState, (LocalFlowProcess) flowProcess, this );
     }

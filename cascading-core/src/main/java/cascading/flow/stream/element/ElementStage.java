@@ -124,7 +124,7 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
 
     // close if top of stack
     if( next == null )
-      TrapHandler.closeTraps();
+      flowProcess.closeTrapCollectors();
     }
 
   protected void handleReThrowableException( String message, Throwable throwable )

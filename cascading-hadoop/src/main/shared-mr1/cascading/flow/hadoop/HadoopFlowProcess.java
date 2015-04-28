@@ -103,7 +103,7 @@ public class HadoopFlowProcess extends FlowProcess<JobConf> implements MapRed
 
   public HadoopFlowProcess( HadoopFlowProcess flowProcess, JobConf jobConf )
     {
-    super( flowProcess.getCurrentSession() );
+    super( flowProcess );
     this.jobConf = jobConf;
     this.isMapper = flowProcess.isMapper();
     this.reporter = flowProcess.getReporter();

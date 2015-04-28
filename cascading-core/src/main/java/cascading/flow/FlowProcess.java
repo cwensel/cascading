@@ -23,8 +23,10 @@ package cascading.flow;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
+import cascading.flow.stream.duct.DuctException;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
@@ -170,8 +172,8 @@ public abstract class FlowProcess<Config>
       }
     }
 
-  /** Field currentSession */
   private FlowSession currentSession = FlowSession.NULL;
+  private Map<Tap, TupleEntryCollector> trapCollectors;
 
   protected FlowProcess()
     {
@@ -182,7 +184,22 @@ public abstract class FlowProcess<Config>
     setCurrentSession( currentSession );
     }
 
-  public abstract FlowProcess<? extends Config> copyWith( Config config );
+  /**
+   * Copy constructor.
+   * <p/>
+   * Shares the underlying trap collector collection across copies to avoid a static collection.
+   *
+   * @param flowProcess
+   */
+  protected FlowProcess( FlowProcess<Config> flowProcess )
+    {
+    setCurrentSession( flowProcess.getCurrentSession() );
+
+    // lazy initialize trap collectors collection and share across copies
+    this.trapCollectors = flowProcess.getTrapCollectors();
+    }
+
+  public abstract FlowProcess<Config> copyWith( Config config );
 
   /**
    * Method getID() returns the current
@@ -478,4 +495,61 @@ public abstract class FlowProcess<Config>
   public abstract <C> Map<String, String> diffConfigIntoMap( C defaultConfig, C updatedConfig );
 
   public abstract Config mergeMapIntoConfig( Config defaultConfig, Map<String, String> map );
+
+  /**
+   * Method getTrapCollectorFor will return a new {@link TupleEntryCollector} if one hasn't previously
+   * been created for the given trap Tap.
+   *
+   * @param trap
+   * @return TupleEntryCollector
+   */
+  public TupleEntryCollector getTrapCollectorFor( Tap trap )
+    {
+    Map<Tap, TupleEntryCollector> trapCollectors = getTrapCollectors();
+
+    TupleEntryCollector trapCollector = trapCollectors.get( trap );
+
+    if( trapCollector == null )
+      {
+      try
+        {
+        trapCollector = openTrapForWrite( trap );
+        trapCollectors.put( trap, trapCollector );
+        }
+      catch( IOException exception )
+        {
+        throw new DuctException( exception );
+        }
+      }
+
+    return trapCollector;
+    }
+
+  protected synchronized Map<Tap, TupleEntryCollector> getTrapCollectors()
+    {
+    if( trapCollectors == null )
+      trapCollectors = Collections.synchronizedMap( new HashMap<Tap, TupleEntryCollector>() );
+
+    return trapCollectors;
+    }
+
+  public synchronized void closeTrapCollectors()
+    {
+    if( trapCollectors == null )
+      return;
+
+    for( TupleEntryCollector trapCollector : trapCollectors.values() )
+      {
+      try
+        {
+        trapCollector.close();
+        }
+      catch( Exception exception )
+        {
+        // do nothing
+        }
+      }
+
+    trapCollectors.clear();
+    }
   }

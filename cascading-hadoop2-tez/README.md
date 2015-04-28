@@ -138,7 +138,7 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 
     > jps | grep DAGApp | cut -f1 -d" " | xargs kill -9; jps | grep TezChild | cut -f1 -d" " | xargs kill -9
     
-* To prevent deadlocks in local mode, "tez.am.inline.task.execution.max-tasks" is set to 2 contrary to comments.
+* To prevent deadlocks in local mode, "tez.am.inline.task.execution.max-tasks" is set to 3 in the platform test suite.
 
 * Contrary to GroupVertex, there is no obvious API for binding multiple vertices as a single output. Subsequently, some
   splits are written twice.

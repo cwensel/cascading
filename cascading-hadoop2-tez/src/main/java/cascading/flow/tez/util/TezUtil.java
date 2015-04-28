@@ -40,6 +40,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobContext;
+import org.apache.hadoop.mapred.TaskAttemptID;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
@@ -56,6 +58,7 @@ import org.apache.tez.runtime.api.AbstractLogicalOutput;
 import org.apache.tez.runtime.api.LogicalInput;
 import org.apache.tez.runtime.api.LogicalOutput;
 import org.apache.tez.runtime.api.MergedLogicalInput;
+import org.apache.tez.runtime.api.ProcessorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -308,5 +311,18 @@ public class TezUtil
       }
 
     localResources.put( fileName, resource );
+    }
+
+  public static void setMRProperties( ProcessorContext context, Configuration config, boolean isMapperOutput )
+    {
+    TaskAttemptID taskAttemptId = org.apache.tez.mapreduce.hadoop.mapreduce.TaskAttemptContextImpl
+      .createMockTaskAttemptID( context.getApplicationId().getClusterTimestamp(),
+        context.getTaskVertexIndex(), context.getApplicationId().getId(),
+        context.getTaskIndex(), context.getTaskAttemptNumber(), isMapperOutput );
+
+    config.set( JobContext.TASK_ATTEMPT_ID, taskAttemptId.toString() );
+    config.set( JobContext.TASK_ID, taskAttemptId.getTaskID().toString() );
+    config.setBoolean( JobContext.TASK_ISMAP, isMapperOutput );
+    config.setInt( JobContext.TASK_PARTITION, taskAttemptId.getTaskID().getId() );
     }
   }

@@ -39,6 +39,7 @@ import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.element.ElementDuct;
 import cascading.flow.stream.element.InputSource;
 import cascading.flow.tez.stream.graph.Hadoop2TezStreamGraph;
+import cascading.flow.tez.util.TezUtil;
 import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.tez.common.TezUtils;
@@ -77,6 +78,8 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
   public void initialize() throws Exception
     {
     configuration = new TezConfiguration( TezUtils.createConfFromUserPayload( getContext().getUserPayload() ) );
+
+    TezUtil.setMRProperties( getContext(), configuration, true );
 
     try
       {
@@ -192,9 +195,11 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
     {
     long beginInputReady = System.currentTimeMillis();
 
-    getContext().waitForAllInputsReady( new HashSet<Input>( inputMap.values() ) );
+    HashSet<Input> inputs = new HashSet<Input>( inputMap.values() );
 
-    LOG.info( "all inputs ready in: {}", Util.formatDurationHMSms( System.currentTimeMillis() - beginInputReady ) );
+    getContext().waitForAllInputsReady( inputs );
+
+    LOG.info( "flow node id: {}, all {} inputs ready in: {}", flowNode.getID(), inputs.size(), Util.formatDurationHMSms( System.currentTimeMillis() - beginInputReady ) );
     }
 
   @Override

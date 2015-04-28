@@ -47,9 +47,13 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
   protected HadoopGroupByClosure closure;
   protected OutputCollector collector;
 
+  private final boolean isBufferJoin;
+
   public HadoopGroupGate( FlowProcess flowProcess, Splice splice, IORole role )
     {
     super( flowProcess, splice, role );
+
+    isBufferJoin = splice.getJoiner() instanceof BufferJoin;
     }
 
   @Override
@@ -127,7 +131,7 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
     closure.reset( key, values );
 
     // Buffer is using JoinerClosure directly
-    if( !( splice.getJoiner() instanceof BufferJoin ) )
+    if( !isBufferJoin )
       tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
     else
       tupleEntryIterator.reset( values );

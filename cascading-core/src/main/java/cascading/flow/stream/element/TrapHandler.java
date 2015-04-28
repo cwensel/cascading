@@ -20,10 +20,6 @@
 
 package cascading.flow.stream.element;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
@@ -48,8 +44,6 @@ public class TrapHandler
   {
   private static final Logger LOG = LoggerFactory.getLogger( TrapHandler.class );
 
-  static final Map<Tap, TupleEntryCollector> trapCollectors = new HashMap<Tap, TupleEntryCollector>();
-
   final FlowProcess flowProcess;
   final FlowElement flowElement;
   final String elementTrace;
@@ -67,43 +61,6 @@ public class TrapHandler
 
   Fields diagnosticFields = Fields.UNKNOWN;
   TupleEntry diagnosticEntry;
-
-  static TupleEntryCollector getTrapCollector( Tap trap, FlowProcess flowProcess )
-    {
-    TupleEntryCollector trapCollector = trapCollectors.get( trap );
-
-    if( trapCollector == null )
-      {
-      try
-        {
-        trapCollector = flowProcess.openTrapForWrite( trap );
-        trapCollectors.put( trap, trapCollector );
-        }
-      catch( IOException exception )
-        {
-        throw new DuctException( exception );
-        }
-      }
-
-    return trapCollector;
-    }
-
-  static synchronized void closeTraps()
-    {
-    for( TupleEntryCollector trapCollector : trapCollectors.values() )
-      {
-      try
-        {
-        trapCollector.close();
-        }
-      catch( Exception exception )
-        {
-        // do nothing
-        }
-      }
-
-    trapCollectors.clear();
-    }
 
   public TrapHandler( FlowProcess flowProcess )
     {
@@ -179,7 +136,7 @@ public class TrapHandler
     if( trap == null )
       handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
 
-    TupleEntryCollector trapCollector = getTrapCollector( trap, flowProcess );
+    TupleEntryCollector trapCollector = flowProcess.getTrapCollectorFor( trap );
 
     TupleEntry payload;
 

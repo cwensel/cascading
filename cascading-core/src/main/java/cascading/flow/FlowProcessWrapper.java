@@ -196,4 +196,16 @@ public class FlowProcessWrapper<Config> extends FlowProcess<Config>
     {
     return delegate.mergeMapIntoConfig( defaultConfig, map );
     }
+
+  @Override
+  public TupleEntryCollector getTrapCollectorFor( Tap trap )
+    {
+    return delegate.getTrapCollectorFor( trap );
+    }
+
+  @Override
+  public synchronized void closeTrapCollectors()
+    {
+    delegate.closeTrapCollectors();
+    }
   }

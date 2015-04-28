@@ -58,7 +58,7 @@ public class LocalFlowProcess extends FlowProcess<Properties>
 
   public LocalFlowProcess( LocalFlowProcess flowProcess, Properties properties )
     {
-    super( flowProcess.getCurrentSession() );
+    super( flowProcess );
     this.config = properties;
     this.stepStats = flowProcess.stepStats;
     }
@@ -186,7 +186,7 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public FlowProcess copyWith( Properties object )
     {
-    return new LocalFlowProcess( object );
+    return new LocalFlowProcess( this, object );
     }
 
   @Override

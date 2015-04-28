@@ -48,6 +48,7 @@ import riffle.process.ProcessConfiguration;
 public class LocalFlow extends BaseFlow<Properties>
   {
   private Properties config;
+  private FlowProcess<Properties> flowProcess;
 
   public LocalFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Properties config, FlowDef flowDef )
     {
@@ -60,6 +61,7 @@ public class LocalFlow extends BaseFlow<Properties>
   protected void initConfig( Map<Object, Object> properties, Properties parentConfig )
     {
     this.config = createConfig( properties, parentConfig );
+    this.flowProcess = new LocalFlowProcess( getFlowSession(), config );
     }
 
   @Override
@@ -102,7 +104,7 @@ public class LocalFlow extends BaseFlow<Properties>
   @Override
   public FlowProcess<Properties> getFlowProcess()
     {
-    return new LocalFlowProcess( getFlowSession(), config );
+    return flowProcess;
     }
 
   @Override

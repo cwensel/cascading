@@ -78,7 +78,7 @@ public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration> impleme
 
   public Hadoop2TezFlowProcess( Hadoop2TezFlowProcess flowProcess, TezConfiguration configuration )
     {
-    super( flowProcess.getCurrentSession() );
+    super( flowProcess );
     this.context = flowProcess.context;
     this.configuration = configuration;
     }

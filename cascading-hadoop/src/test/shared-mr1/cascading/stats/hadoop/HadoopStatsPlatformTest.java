@@ -171,9 +171,6 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
     assertNotNull( stats2.getID() );
     assertNotNull( stats2.getProcessStepID() );
 
-//      assertEquals( 2, stats2.getNumMapTasks() );
-//      assertEquals( 1, stats2.getNumReducerTasks() );
-
     if( getPlatform().isUseCluster() )
       {
       List<FlowNodeStats> flowNodeStats = stats2.getFlowNodeStats();

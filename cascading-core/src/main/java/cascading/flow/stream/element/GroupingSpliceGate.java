@@ -333,7 +333,7 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
 
     // close if top of stack
     if( next == null )
-      TrapHandler.closeTraps();
+      flowProcess.closeTrapCollectors();
     }
 
   private boolean areNullsEqual()
