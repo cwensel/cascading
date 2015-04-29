@@ -50,13 +50,24 @@ public class SecondarySortKeyValuesReader extends KeyValuesReader
   @Override
   public boolean next() throws IOException
     {
+    // next for forwarding to the next key
+    // so we must keep iterating across keys in the parent until we find a new
+    // grouping key without its accompanied sort values
+
     if( parent != null && isNewKey )
       {
       isNewKey = false; // allow next next() to advance underlying iterator
       return true;
       }
 
-    return advance();
+    boolean advanced = advance();
+
+    while( !isNewKey && advanced )
+      advanced = advance();
+
+    isNewKey = false;
+
+    return advanced;
     }
 
   protected boolean advance() throws IOException

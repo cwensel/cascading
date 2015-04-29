@@ -21,13 +21,16 @@
 package cascading;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.operation.Function;
 import cascading.operation.Insert;
 import cascading.operation.aggregator.Count;
+import cascading.operation.buffer.FirstNBuffer;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -250,5 +253,78 @@ public class BufferPipesPlatformTest extends PlatformTestCase
       assertTrue( exception.getMessage().contains( "Fields.NONE" ) );
 //      exception.printStackTrace();
       }
+    }
+
+  @Test
+  public void testFirstNBuffer() throws Exception
+    {
+    Set<Tuple> expected = new HashSet<>();
+
+    expected.add( new Tuple( "1", "a" ) );
+    expected.add( new Tuple( "2", "b" ) );
+    expected.add( new Tuple( "3", "c" ) );
+    expected.add( new Tuple( "4", "b" ) );
+    expected.add( new Tuple( "5", "a" ) );
+
+    runFirstNBuffer( expected, false, false );
+    }
+
+  @Test
+  public void testFirstNBufferForward() throws Exception
+    {
+    Set<Tuple> expected = new HashSet<>();
+
+    expected.add( new Tuple( "1", "a" ) );
+    expected.add( new Tuple( "2", "b" ) );
+    expected.add( new Tuple( "3", "c" ) );
+    expected.add( new Tuple( "4", "b" ) );
+    expected.add( new Tuple( "5", "a" ) );
+
+    runFirstNBuffer( expected, true, false );
+    }
+
+  @Test
+  public void testFirstNBufferReverse() throws Exception
+    {
+    Set<Tuple> expected = new HashSet<>();
+
+    expected.add( new Tuple( "1", "c" ) );
+    expected.add( new Tuple( "2", "d" ) );
+    expected.add( new Tuple( "3", "c" ) );
+    expected.add( new Tuple( "4", "d" ) );
+    expected.add( new Tuple( "5", "e" ) );
+
+    runFirstNBuffer( expected, true, true );
+    }
+
+  /**
+   * this family of tests verify an iterator can be abandoned mid iteration without affecting posterior aggregations
+   */
+  protected void runFirstNBuffer( Set<Tuple> expected, boolean secondarySort, boolean reverseOrder ) throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "lower" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "lower" ), "\t", getOutputPath( "firstn" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    if( !secondarySort )
+      pipe = new GroupBy( pipe, new Fields( "num" ) );
+    else
+      pipe = new GroupBy( pipe, new Fields( "num" ), new Fields( "lower" ), reverseOrder );
+
+    pipe = new Every( pipe, Fields.VALUES, new FirstNBuffer( Fields.ARGS, 1 ), Fields.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> results = getSinkAsList( flow );
+
+    expected.removeAll( results );
+    assertTrue( expected.isEmpty() );
     }
   }
