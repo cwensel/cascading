@@ -23,6 +23,12 @@ package cascading.stats.hadoop;
 import cascading.flow.hadoop.HadoopFlowStep;
 import riffle.process.scheduler.ProcessWrapper;
 
+/**
+ * Class representing a step in a ProcessFlow.
+ *
+ * @deprecated ProcessFlowStep will be decoupled from Hadoop and moved to a different package in Cascading 3.0.
+ */
+@Deprecated
 public class ProcessFlowStep extends HadoopFlowStep
   {
   public ProcessFlowStep( ProcessWrapper processWrapper, int counter )

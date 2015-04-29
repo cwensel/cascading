@@ -31,7 +31,10 @@ import cascading.stats.FlowStepStats;
 
 /**
  * ProcessStepStats is an implementation of FlowStepStats used in non-hadoop based flows like ProcessFlow.
+ *
+ * @deprecated ProcessStepStats will be moved to a different package in Cascading 3.0.
  */
+@Deprecated
 public class ProcessStepStats extends FlowStepStats
   {
   /**

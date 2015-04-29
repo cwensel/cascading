@@ -1,6 +1,8 @@
 Cascading Change Log
 
 2.7.0 [unreleased]
+ 
+  Deprecated c.f.h.ProcessFlow and related classes, which will be moved to a different package in Cascading 3.0.
 
   Fixed issue where trap c.t.Tap#commitResource() would not get called if c.f.Flow#complete() was not called.
 

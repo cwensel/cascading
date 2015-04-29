@@ -37,7 +37,10 @@ import riffle.process.scheduler.ProcessWrapper;
 /**
  * ProcessFlowStats is a sub-class of FlowStats which can fetch counters from a ProcessWrapper and hook them into the
  * stats mechanism of Cascading.
+ *
+ * @deprecated ProcessFlowStats will be moved to a different package in Cascading 3.0.
  */
+@Deprecated
 public class ProcessFlowStats extends FlowStats
   {
   /** The ProcessWrapper having the actual counters. */

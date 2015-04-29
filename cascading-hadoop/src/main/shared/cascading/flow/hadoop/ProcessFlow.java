@@ -52,7 +52,10 @@ import riffle.process.scheduler.ProcessWrapper;
  * <p/>
  * Currently {@link cascading.flow.FlowListener}s are supported but the
  * {@link cascading.flow.FlowListener#onThrowable(cascading.flow.Flow, Throwable)} event is not.
+ *
+ * @deprecated ProcessFlow will be decoupled from Hadoop and moved to a different package in Cascading 3.0.
  */
+@Deprecated
 public class ProcessFlow<P> extends HadoopFlow
   {
   /** Field process */
@@ -68,7 +71,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param name    of type String
    * @param process of type JobConf
    */
-  @ConstructorProperties( {"name", "process"} )
+  @ConstructorProperties({"name", "process"})
   public ProcessFlow( String name, P process )
     {
     this( new Properties(), name, process );
@@ -81,7 +84,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param name       of type String
    * @param process    of type P
    */
-  @ConstructorProperties( {"properties", "name", "process"} )
+  @ConstructorProperties({"properties", "name", "process"})
   public ProcessFlow( Map<Object, Object> properties, String name, P process )
     {
     this( properties, name, process, null );
@@ -95,7 +98,7 @@ public class ProcessFlow<P> extends HadoopFlow
    * @param process        of type P
    * @param flowDescriptor pf type LinkedHashMap<String, String>
    */
-  @ConstructorProperties( {"properties", "name", "process", "flowDescriptor"} )
+  @ConstructorProperties({"properties", "name", "process", "flowDescriptor"})
   public ProcessFlow( Map<Object, Object> properties, String name, P process, Map<String, String> flowDescriptor )
     {
     super( HadoopUtil.getPlatformInfo(), properties, null, name, flowDescriptor );
