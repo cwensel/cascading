@@ -61,7 +61,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
   private FlowNode flowNode;
   private HadoopReduceStreamGraph streamGraph;
   private HadoopFlowProcess currentProcess;
-  private TimedIterator timedIterator;
+  private TimedIterator<Tuple>[] timedIterators;
 
   private boolean calledPrepare = false;
   private HadoopGroupGate group;
@@ -85,7 +85,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
       currentProcess = new HadoopFlowProcess( new FlowSession(), jobConf, false );
 
-      timedIterator = new TimedIterator( currentProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read );
+      timedIterators = TimedIterator.iterators( new TimedIterator<Tuple>( currentProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read ) );
 
       String reduceNodeState = jobConf.getRaw( "cascading.flow.step.node.reduce" );
 
@@ -127,7 +127,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
     currentProcess.setReporter( reporter );
     currentProcess.setOutputCollector( output );
 
-    timedIterator.reset( values ); // allows us to count read tuples
+    timedIterators[ 0 ].reset( values ); // allows us to count read tuples
 
     if( !calledPrepare )
       {
@@ -143,7 +143,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
     try
       {
-      group.accept( (Tuple) key, timedIterator );
+      group.accept( (Tuple) key, timedIterators );
       }
     catch( OutOfMemoryError error )
       {

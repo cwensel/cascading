@@ -70,8 +70,6 @@ public class TezCoGroupGate extends TezGroupGate
   @Override
   protected Throwable reduce() throws Exception
     {
-    Throwable localThrowable = null;
-
     try
       {
       start( this );
@@ -104,7 +102,7 @@ public class TezCoGroupGate extends TezGroupGate
       return throwable;
       }
 
-    return localThrowable;
+    return null;
     }
 
   private SortedListMultiMap<Integer, KeyValuesReader> getKeyValuesReaders() throws Exception

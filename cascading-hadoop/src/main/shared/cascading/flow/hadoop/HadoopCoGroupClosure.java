@@ -162,7 +162,7 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
     }
 
   @Override
-  public void reset( Tuple grouping, Iterator<Tuple>... values )
+  public void reset( Tuple grouping, Iterator<Tuple>[] values )
     {
     super.reset( grouping, values );
 

@@ -35,7 +35,19 @@ public class TupleEntryChainIterator extends TupleEntryIterator
   Iterator<Tuple>[] iterators;
   int currentIterator = 0;
 
-  public TupleEntryChainIterator( Fields fields, Iterator<Tuple>... iterators )
+  public TupleEntryChainIterator( Fields fields )
+    {
+    super( fields );
+    this.iterators = new Iterator[ 1 ];
+    }
+
+  public TupleEntryChainIterator( Fields fields, Iterator<Tuple> iterator )
+    {
+    this( fields );
+    this.iterators[ 0 ] = iterator;
+    }
+
+  public TupleEntryChainIterator( Fields fields, Iterator<Tuple>[] iterators )
     {
     super( fields );
     this.iterators = iterators;
@@ -61,7 +73,13 @@ public class TupleEntryChainIterator extends TupleEntryIterator
     return iterators.length != currentIterator && hasNext();
     }
 
-  public void reset( Iterator<Tuple>... iterators )
+  public void reset( Iterator<Tuple> iterator )
+    {
+    this.currentIterator = 0;
+    this.iterators[ 0 ] = iterator;
+    }
+
+  public void reset( Iterator<Tuple>[] iterators )
     {
     this.currentIterator = 0;
     this.iterators = iterators;

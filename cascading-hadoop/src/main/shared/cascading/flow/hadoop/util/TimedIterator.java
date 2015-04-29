@@ -37,6 +37,11 @@ public class TimedIterator<V> implements CloseableIterator<V>
   private final Enum countCounter;
   private final int ordinal;
 
+  public static <V> TimedIterator<V>[] iterators( TimedIterator<V>... iterators )
+    {
+    return iterators;
+    }
+
   Iterator<V> iterator;
 
   public TimedIterator( FlowProcess flowProcess, Enum durationCounter, Enum countCounter )

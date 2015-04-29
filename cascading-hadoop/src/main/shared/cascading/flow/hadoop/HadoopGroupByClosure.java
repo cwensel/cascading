@@ -127,7 +127,7 @@ public class HadoopGroupByClosure extends JoinerClosure
     };
     }
 
-  public void reset( Tuple grouping, Iterator<Tuple>... values )
+  public void reset( Tuple grouping, Iterator<Tuple>[] values )
     {
     this.grouping = grouping;
     this.values = values;

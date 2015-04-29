@@ -124,7 +124,7 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
       super.complete( previous );
     }
 
-  public void accept( Tuple key, Iterator<Tuple>... values )
+  public void accept( Tuple key, Iterator<Tuple>[] values )
     {
     key = unwrapGrouping( key );
 

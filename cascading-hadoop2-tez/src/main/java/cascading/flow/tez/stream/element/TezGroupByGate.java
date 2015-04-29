@@ -46,7 +46,7 @@ public class TezGroupByGate extends TezGroupGate
   {
   private static final Logger LOG = LoggerFactory.getLogger( TezGroupByGate.class );
 
-  protected TimedIterator<Tuple> timedIterator;
+  protected TimedIterator[] timedIterators;
 
   public TezGroupByGate( FlowProcess flowProcess, GroupBy groupBy, IORole role, LogicalOutput logicalOutput )
     {
@@ -57,13 +57,11 @@ public class TezGroupByGate extends TezGroupGate
     {
     super( flowProcess, groupBy, role, logicalInputs );
 
-    this.timedIterator = new TimedIterator<>( flowProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read );
+    this.timedIterators = TimedIterator.iterators( new TimedIterator<>( flowProcess, SliceCounters.Read_Duration, SliceCounters.Tuples_Read ) );
     }
 
   protected Throwable reduce() throws Exception
     {
-    Throwable localThrowable = null;
-
     try
       {
       start( this );
@@ -81,9 +79,9 @@ public class TezGroupByGate extends TezGroupGate
         Tuple currentKey = (Tuple) reader.getCurrentKey(); // if secondary sorting, is a TuplePair
         Iterable currentValues = reader.getCurrentValues();
 
-        timedIterator.reset( currentValues );
+        timedIterators[ 0 ].reset( currentValues );
 
-        accept( currentKey, timedIterator ); // will unwrap the TuplePair
+        accept( currentKey, timedIterators ); // will unwrap the TuplePair
         }
 
       complete( this );
@@ -96,7 +94,7 @@ public class TezGroupByGate extends TezGroupGate
       return throwable;
       }
 
-    return localThrowable;
+    return null;
     }
 
   @Override
