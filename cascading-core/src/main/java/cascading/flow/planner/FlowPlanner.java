@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import cascading.flow.AssemblyPlanner;
 import cascading.flow.BaseFlow;
@@ -568,7 +569,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   protected void verifyResultInternal( RuleResult ruleResult )
     {
-    Set<ProcessLevel> processLevels = ruleResult.getRegistry().getProcessLevels();
+    Set<ProcessLevel> processLevels = getReverseOrderedProcessLevels( ruleResult );
 
     for( ProcessLevel processLevel : processLevels )
       {
@@ -813,4 +814,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     }
 
   protected abstract Tap makeTempTap( String prefix, String name );
+
+  private Set<ProcessLevel> getReverseOrderedProcessLevels( RuleResult ruleResult )
+    {
+    Set<ProcessLevel> ordered = new TreeSet<>( Collections.reverseOrder() );
+
+    ordered.addAll( ruleResult.getRegistry().getProcessLevels() );
+
+    return ordered;
+    }
   }
