@@ -47,6 +47,11 @@ public interface AggregatorCall<C> extends OperationCall<C>
    * Returns {@link TupleEntry} of argument values.
    * <p/>
    * Will return {@code null} unless called in {@link Aggregator#aggregate(cascading.flow.FlowProcess, AggregatorCall)}.
+   * <p/>
+   * Note that the returned TupleEntry should not be cached (stored in a Collection), nor should the underlying Tuple
+   * instance. Where possible Cascading will re-use both TupleEntry and Tuple instances.
+   * <p/>
+   * To get a safe copy that can be cached, use {@link TupleEntry#getTupleCopy()}.
    *
    * @return TupleEntry
    */
