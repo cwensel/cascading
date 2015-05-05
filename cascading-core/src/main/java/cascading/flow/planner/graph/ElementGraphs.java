@@ -81,8 +81,7 @@ import org.jgrapht.util.TypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.util.Util.getFirst;
-import static cascading.util.Util.narrowSet;
+import static cascading.util.Util.*;
 import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
@@ -642,7 +641,7 @@ public class ElementGraphs
 
   private static Set<FlowElement> getAllVertices( SubGraphIterator iterator )
     {
-    Set<FlowElement> vertices = new HashSet<>();
+    Set<FlowElement> vertices = createIdentitySet();
 
     while( iterator.hasNext() )
       vertices.addAll( iterator.next().vertexSet() );

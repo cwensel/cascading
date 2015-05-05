@@ -67,6 +67,7 @@ import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.*;
 import static java.util.Arrays.asList;
 
 /**
@@ -435,7 +436,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     remainingSinks.removeAll( tailNames );
 
     if( tailNames.size() != 0 )
-      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + Util.join( Util.quote( tailNames, "'" ), ", " ) + "], remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
+      throw new PlannerException( "not all tail pipes bound to sink taps, remaining tail pipe names: [" + join( quote( tailNames, "'" ), ", " ) + "], remaining sink tap names: [" + join( quote( remainingSinks, "'" ), ", " ) + "]" );
 
     // unlike heads, pipes can input to another pipe and simultaneously be a sink
     // so there is no way to know all the intentional tails, so they aren't listed below in the exception
@@ -443,7 +444,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     remainingSinks.removeAll( asList( Pipe.names( flowTails ) ) );
 
     if( remainingSinks.size() != 0 )
-      throw new PlannerException( "not all sink taps bound to tail pipes, remaining sink tap names: [" + Util.join( Util.quote( remainingSinks, "'" ), ", " ) + "]" );
+      throw new PlannerException( "not all sink taps bound to tail pipes, remaining sink tap names: [" + join( quote( remainingSinks, "'" ), ", " ) + "]" );
 
     // handle heads
     Set<Pipe> heads = new HashSet<Pipe>();
@@ -472,13 +473,13 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     remainingSources.removeAll( headNames );
 
     if( headNames.size() != 0 )
-      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "], remaining source tap names: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "]" );
+      throw new PlannerException( "not all head pipes bound to source taps, remaining head pipe names: [" + join( quote( headNames, "'" ), ", " ) + "], remaining source tap names: [" + join( quote( remainingSources, "'" ), ", " ) + "]" );
 
     remainingSources = new HashSet<String>( flowDef.getSources().keySet() );
     remainingSources.removeAll( allHeadNames );
 
     if( remainingSources.size() != 0 )
-      throw new PlannerException( "not all source taps bound to head pipes, remaining source tap names: [" + Util.join( Util.quote( remainingSources, "'" ), ", " ) + "], remaining head pipe names: [" + Util.join( Util.quote( headNames, "'" ), ", " ) + "]" );
+      throw new PlannerException( "not all source taps bound to head pipes, remaining source tap names: [" + join( quote( remainingSources, "'" ), ", " ) + "], remaining head pipe names: [" + join( quote( headNames, "'" ), ", " ) + "]" );
 
     }
 
@@ -573,6 +574,8 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
     for( ProcessLevel processLevel : processLevels )
       {
+      String registryName = ruleResult.getRegistry().getName();
+
       switch( processLevel )
         {
         case Assembly:
@@ -580,7 +583,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
           FlowElementGraph finalFlowElementGraph = ruleResult.getAssemblyGraph();
 
           if( finalFlowElementGraph.vertexSet().isEmpty() )
-            throw new PlannerException( "final assembly graph is empty: " + ruleResult.getRegistry().getName() );
+            throw new PlannerException( "final assembly graph is empty: " + registryName );
 
           break;
 
@@ -589,30 +592,36 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
           Map<ElementGraph, List<? extends ElementGraph>> assemblyToSteps = ruleResult.getAssemblyToStepGraphMap();
 
           if( assemblyToSteps.isEmpty() )
-            throw new PlannerException( "no steps partitioned: " + ruleResult.getRegistry().getName() );
+            throw new PlannerException( "no steps partitioned: " + registryName );
 
           for( ElementGraph assembly : assemblyToSteps.keySet() )
             {
             List<? extends ElementGraph> steps = assemblyToSteps.get( assembly );
 
             if( steps.isEmpty() )
-              throw new PlannerException( "no steps partitioned from assembly: " + ruleResult.getRegistry().getName(), assembly );
+              throw new PlannerException( "no steps partitioned from assembly: " + registryName, assembly );
 
             Set<ElementGraph> stepSet = new HashSet<>( steps.size() );
 
             for( ElementGraph step : steps )
               {
               if( !stepSet.add( step ) )
-                throw new PlannerException( "found duplicate step in flow: " + ruleResult.getRegistry().getName(), step );
+                throw new PlannerException( "found duplicate step in flow: " + registryName, step );
               }
 
-            Set<FlowElement> elements = new HashSet<>();
+            Set<FlowElement> elements = createIdentitySet();
 
             for( ElementGraph step : steps )
               elements.addAll( step.vertexSet() );
 
-            if( elements.size() < assembly.vertexSet().size() )
-              throw new PlannerException( "union of steps have fewer elements than parent assembly: " + ruleResult.getRegistry().getName(), assembly );
+            int diff = assembly.vertexSet().size() - elements.size();
+
+            if( diff > 0 )
+              {
+              Set<FlowElement> missing = differenceIdentity( assembly.vertexSet(), elements );
+              String message = "union of steps have " + diff + " fewer elements than parent assembly: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              throw new PlannerException( message, assembly );
+              }
             }
 
           break;
@@ -622,30 +631,36 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
           Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
 
           if( stepToNodes.isEmpty() )
-            throw new PlannerException( "no nodes partitioned: " + ruleResult.getRegistry().getName() );
+            throw new PlannerException( "no nodes partitioned: " + registryName );
 
           for( ElementGraph step : stepToNodes.keySet() )
             {
             List<? extends ElementGraph> nodes = stepToNodes.get( step );
 
             if( nodes.isEmpty() )
-              throw new PlannerException( "no nodes partitioned from step: " + ruleResult.getRegistry().getName(), step );
+              throw new PlannerException( "no nodes partitioned from step: " + registryName, step );
 
             Set<ElementGraph> nodesSet = new HashSet<>( nodes.size() );
 
             for( ElementGraph node : nodes )
               {
               if( !nodesSet.add( node ) )
-                throw new PlannerException( "found duplicate node in step: " + ruleResult.getRegistry().getName(), node );
+                throw new PlannerException( "found duplicate node in step: " + registryName, node );
               }
 
-            Set<FlowElement> elements = new HashSet<>();
+            Set<FlowElement> elements = createIdentitySet();
 
             for( ElementGraph node : nodes )
               elements.addAll( node.vertexSet() );
 
-            if( elements.size() < step.vertexSet().size() )
-              throw new PlannerException( "union of nodes have fewer elements than parent step: " + ruleResult.getRegistry().getName(), step );
+            int diff = step.vertexSet().size() - elements.size();
+
+            if( diff > 0 )
+              {
+              Set<FlowElement> missing = differenceIdentity( step.vertexSet(), elements );
+              String message = "union of nodes have " + diff + " fewer elements than parent step: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              throw new PlannerException( message, step );
+              }
             }
 
           break;
@@ -656,30 +671,36 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
           Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
 
           if( nodeToPipeline.isEmpty() )
-            throw new PlannerException( "no pipelines partitioned: " + ruleResult.getRegistry().getName() );
+            throw new PlannerException( "no pipelines partitioned: " + registryName );
 
           for( ElementGraph node : nodeToPipeline.keySet() )
             {
             List<? extends ElementGraph> pipelines = nodeToPipeline.get( node );
 
             if( pipelines.isEmpty() )
-              throw new PlannerException( "no pipelines partitioned from node: " + ruleResult.getRegistry().getName(), node );
+              throw new PlannerException( "no pipelines partitioned from node: " + registryName, node );
 
             Set<ElementGraph> pipelineSet = new HashSet<>( pipelines.size() );
 
             for( ElementGraph pipeline : pipelines )
               {
               if( !pipelineSet.add( pipeline ) )
-                throw new PlannerException( "found duplicate pipeline in node: " + ruleResult.getRegistry().getName(), pipeline );
+                throw new PlannerException( "found duplicate pipeline in node: " + registryName, pipeline );
               }
 
-            Set<FlowElement> elements = new HashSet<>();
+            Set<FlowElement> elements = createIdentitySet();
 
             for( ElementGraph pipeline : pipelines )
               elements.addAll( pipeline.vertexSet() );
 
-            if( elements.size() < node.vertexSet().size() )
-              throw new PlannerException( "union of pipelines have fewer elements than parent node: " + ruleResult.getRegistry().getName(), node );
+            int diff = node.vertexSet().size() - elements.size();
+
+            if( diff > 0 )
+              {
+              Set<FlowElement> missing = differenceIdentity( node.vertexSet(), elements );
+              String message = "union of pipelines have " + diff + " fewer elements than parent node: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              throw new PlannerException( message, node );
+              }
             }
 
           break;

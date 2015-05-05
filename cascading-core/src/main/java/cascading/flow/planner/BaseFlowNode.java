@@ -43,6 +43,8 @@ import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.util.Util;
 
+import static cascading.util.Util.createIdentitySet;
+
 /**
  *
  */
@@ -382,13 +384,13 @@ public class BaseFlowNode implements Serializable, FlowNode
     if( pipelineGraphs == null || pipelineGraphs.isEmpty() )
       return;
 
-    Set<FlowElement> allElements = new HashSet<>( nodeSubGraph.vertexSet() );
+    Set<FlowElement> allElements = createIdentitySet( nodeSubGraph.vertexSet() );
 
     for( ElementGraph pipelineGraph : pipelineGraphs )
       allElements.removeAll( pipelineGraph.vertexSet() );
 
     if( !allElements.isEmpty() )
-      throw new IllegalStateException( "union of pipeline graphs for flow node are missing elements: " + Util.join( allElements ) );
+      throw new IllegalStateException( "union of pipeline graphs for flow node are missing elements: " + Util.join( allElements, ", " ) );
     }
 
   private void createPipelineMap()
@@ -469,7 +471,7 @@ public class BaseFlowNode implements Serializable, FlowNode
     if( pipelineGraphs.isEmpty() )
       return ( (AnnotatedGraph) getElementGraph() ).getAnnotations().getValues( annotation );
 
-    Set<FlowElement> results = new HashSet<>();
+    Set<FlowElement> results = createIdentitySet();
 
     for( ElementGraph pipelineGraph : pipelineGraphs )
       results.addAll( ( (AnnotatedGraph) pipelineGraph ).getAnnotations().getValues( annotation ) );

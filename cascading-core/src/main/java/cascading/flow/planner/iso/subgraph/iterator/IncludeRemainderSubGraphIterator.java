@@ -38,6 +38,7 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
 
 import static cascading.flow.planner.graph.ElementGraphs.*;
+import static cascading.util.Util.createIdentitySet;
 
 /**
  *
@@ -46,7 +47,7 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
   {
   SubGraphIterator parentIterator;
 
-  Set<FlowElement> maskedElements = new HashSet<>();
+  Set<FlowElement> maskedElements = createIdentitySet();
   Set<Scope> maskedScopes = new HashSet<>();
 
   {

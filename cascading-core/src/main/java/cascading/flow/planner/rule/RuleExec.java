@@ -21,7 +21,6 @@
 package cascading.flow.planner.rule;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,6 +46,7 @@ import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.util.EnumMultiMap;
 import cascading.util.ProcessLogger;
 
+import static cascading.util.Util.createIdentitySet;
 import static cascading.util.Util.formatDurationFromMillis;
 import static java.lang.String.format;
 
@@ -458,7 +458,7 @@ public class RuleExec
     if( elementGraphs == null )
       return null;
 
-    Set<FlowElement> exclusions = new HashSet<>();
+    Set<FlowElement> exclusions = createIdentitySet();
 
     for( ElementGraph elementGraph : elementGraphs )
       {

@@ -184,6 +184,15 @@ public class Util
     return false;
     }
 
+  public static <T> Set<T> differenceIdentity( Set<T> lhs, Set<T> rhs )
+    {
+    Set<T> diff = createIdentitySet( lhs );
+
+    diff.removeAll( rhs );
+
+    return diff;
+    }
+
   public static synchronized String createUniqueIDWhichStartsWithAChar()
     {
     String value;

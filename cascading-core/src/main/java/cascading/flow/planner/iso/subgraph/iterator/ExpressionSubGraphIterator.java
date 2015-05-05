@@ -41,6 +41,7 @@ import cascading.flow.planner.iso.transformer.Transformed;
 import cascading.util.EnumMultiMap;
 
 import static cascading.flow.planner.graph.ElementGraphs.asSubGraph;
+import static cascading.util.Util.createIdentitySet;
 
 /**
  *
@@ -53,7 +54,7 @@ public class ExpressionSubGraphIterator implements SubGraphIterator
   private ContractedTransformer contractedTransformer;
   private GraphFinder graphFinder;
 
-  private Set<FlowElement> elementExcludes = new HashSet<>();
+  private Set<FlowElement> elementExcludes = createIdentitySet();
   private ElementGraph contractedGraph;
   private Transformed<ElementGraph> contractedTransformed;
 

@@ -51,6 +51,8 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.createIdentitySet;
+
 /**
  *
  */
@@ -59,8 +61,8 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( BaseProcessGraph.class );
 
-  protected Set<FlowElement> sourceElements = new HashSet<>();
-  protected Set<FlowElement> sinkElements = new HashSet<>();
+  protected Set<FlowElement> sourceElements = createIdentitySet();
+  protected Set<FlowElement> sinkElements = createIdentitySet();
   private Set<Tap> sourceTaps;
   private Set<Tap> sinkTaps;
   protected Map<String, Tap> trapsMap = new HashMap<>();
@@ -259,7 +261,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   @Override
   public Set<FlowElement> getAllSourceElements()
     {
-    Set<FlowElement> results = new HashSet<>();
+    Set<FlowElement> results = createIdentitySet();
 
     for( Process process : vertexSet() )
       results.addAll( process.getSourceElements() );
@@ -270,7 +272,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   @Override
   public Set<FlowElement> getAllSinkElements()
     {
-    Set<FlowElement> results = new HashSet<>();
+    Set<FlowElement> results = createIdentitySet();
 
     for( Process process : vertexSet() )
       results.addAll( process.getSinkElements() );
@@ -302,7 +304,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   @Override
   public Set<FlowElement> getDuplicatedElements( ElementGraph elementGraph )
     {
-    Set<FlowElement> results = new HashSet<>();
+    Set<FlowElement> results = createIdentitySet();
 
     for( FlowElement flowElement : elementGraph.vertexSet() )
       {
@@ -321,7 +323,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   @Override
   public Set<ElementGraph> getIdentityElementGraphs()
     {
-    Set<ElementGraph> results = new HashSet<>();
+    Set<ElementGraph> results = createIdentitySet();
 
     for( Process process : getIdentityProcesses() )
       results.add( process.getElementGraph() );

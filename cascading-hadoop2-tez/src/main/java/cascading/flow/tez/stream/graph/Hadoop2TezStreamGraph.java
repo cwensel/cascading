@@ -143,7 +143,7 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
       sourceElements.removeAll( accumulated );
 
       if( sourceElements.size() != 1 )
-        throw new IllegalStateException( "too many input source keys, got: " + Util.join( sourceElements ) );
+        throw new IllegalStateException( "too many input source keys, got: " + Util.join( sourceElements, ", " ) );
 
       streamedSource = Util.getFirst( sourceElements );
       }

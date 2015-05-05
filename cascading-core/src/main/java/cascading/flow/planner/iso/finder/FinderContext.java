@@ -26,6 +26,8 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 
+import static cascading.util.Util.createIdentitySet;
+
 /**
  *
  */
@@ -49,7 +51,7 @@ class FinderContext
   public Set<FlowElement> getExcludedElements()
     {
     if( excludedElements == null )
-      excludedElements = new HashSet<>();
+      excludedElements = createIdentitySet();
 
     return excludedElements;
     }
@@ -62,7 +64,7 @@ class FinderContext
   public Set<FlowElement> getRequiredElements()
     {
     if( requiredElements == null )
-      requiredElements = new HashSet<>();
+      requiredElements = createIdentitySet();
 
     return requiredElements;
     }
@@ -75,7 +77,7 @@ class FinderContext
   public Set<FlowElement> getMatchedElements()
     {
     if( foundElements == null )
-      foundElements = new HashSet<>();
+      foundElements = createIdentitySet();
 
     return foundElements;
     }
@@ -91,7 +93,7 @@ class FinderContext
   public Set<FlowElement> getIgnoredElements()
     {
     if( ignoredElements == null )
-      ignoredElements = new HashSet<>();
+      ignoredElements = createIdentitySet();
 
     return ignoredElements;
     }

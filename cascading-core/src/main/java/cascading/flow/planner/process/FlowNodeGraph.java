@@ -22,7 +22,6 @@ package cascading.flow.planner.process;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,8 @@ import cascading.flow.planner.BaseFlowNode;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
+
+import static cascading.util.Util.createIdentitySet;
 
 /**
  *
@@ -110,7 +111,7 @@ public class FlowNodeGraph extends BaseProcessGraph<FlowNode>
 
   public Set<FlowElement> getFlowElementsFor( Enum annotation )
     {
-    Set<FlowElement> results = new HashSet<>();
+    Set<FlowElement> results = createIdentitySet();
 
     for( FlowNode flowNode : vertexSet() )
       results.addAll( flowNode.getFlowElementsFor( annotation ) );
