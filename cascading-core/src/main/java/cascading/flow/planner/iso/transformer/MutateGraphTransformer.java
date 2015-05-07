@@ -41,10 +41,12 @@ public abstract class MutateGraphTransformer extends RecursiveGraphTransformer<E
     {
     super( filter );
     this.graphTransformer = graphTransformer;
+    }
 
-    // the graphTransformer must be re-applied to find subsequent matches in sub-graphs
-    if( this.graphTransformer != null )
-      this.findAllPrimaries = false;
+  @Override
+  protected boolean requiresRecursiveSearch()
+    {
+    return graphTransformer != null || super.requiresRecursiveSearch();
     }
 
   @Override

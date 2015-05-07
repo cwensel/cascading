@@ -42,9 +42,11 @@ import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.util.ProcessLogger;
+import cascading.util.Util;
 
 import static cascading.util.Util.formatDurationFromMillis;
 import static java.util.Collections.synchronizedList;
+import static java.util.Collections.synchronizedSet;
 
 public class RuleSetExec
   {
@@ -77,6 +79,7 @@ public class RuleSetExec
   private FlowDef flowDef;
   private FlowElementGraph flowElementGraph;
 
+  Set<Callable> running;
   List<RuleResult> success;
   List<RuleResult> unsupported;
   List<RuleResult> illegal;
@@ -120,6 +123,7 @@ public class RuleSetExec
 
   public RuleResult exec()
     {
+    running = synchronizedSet( new HashSet<Callable>() );
     success = synchronizedList( new ArrayList<RuleResult>() );
     unsupported = synchronizedList( new ArrayList<RuleResult>() );
     illegal = synchronizedList( new ArrayList<RuleResult>() );
@@ -220,6 +224,14 @@ public class RuleSetExec
 
         for( Future<RuleResult> current : futures )
           current.cancel( true );
+
+        int timeout = 0;
+
+        while( !running.isEmpty() && timeout < 60 )
+          {
+          Util.safeSleep( 500 );
+          timeout++;
+          }
         }
       }
     catch( InterruptedException exception )
@@ -317,7 +329,16 @@ public class RuleSetExec
     @Override
     public RuleResult call() throws Exception
       {
-      return execPlannerFor( ruleRegistry );
+      running.add( this );
+
+      try
+        {
+        return execPlannerFor( ruleRegistry );
+        }
+      finally
+        {
+        running.remove( this );
+        }
       }
     };
     }
@@ -348,6 +369,9 @@ public class RuleSetExec
 
   private void rethrow( Throwable throwable )
     {
+    if( throwable instanceof Error )
+      throw (Error) throwable;
+
     if( throwable instanceof RuntimeException )
       throw (RuntimeException) throwable;
 

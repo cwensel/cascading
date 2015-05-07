@@ -40,9 +40,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
 
   private final GraphFinder finder;
   private final ExpressionGraph expressionGraph;
-
-  // if true, prevents a sub-graph match after a contraction
-  protected boolean findAllPrimaries;
+  private final boolean findAllPrimaries;
 
   protected RecursiveGraphTransformer( ExpressionGraph expressionGraph )
     {
@@ -90,7 +88,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
       processLogger.logDebug( "performing match within: {}, using recursion: {}", this.getClass().getSimpleName(), !findAllPrimaries );
 
     // for trivial cases, disable recursion and capture all primaries initially
-    // only if prepareForMatch isn't finding subsequent sub-graphs via graph contractions
+    // if prepareForMatch returns a sub-graph, find all matches in the sub-graph, but we do not exit the recursion
     if( findAllPrimaries )
       match = finder.findAllMatches( transformed.getPlannerContext(), prepared, exclusions );
     else
@@ -112,10 +110,21 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
 
     transformed.addRecursionTransform( graph );
 
-    if( findAllPrimaries )
+    if( !requiresRecursiveSearch() )
       return graph;
 
     return transform( processLogger, transformed, graph, ++depth );
+    }
+
+  /**
+   * By default, prepareForMatch returns the same graph, but sub-classes may return a sub-graph, one of many
+   * requiring sub-sequent matches.
+   * <p/>
+   * if we are searching the whole graph, there is no need to perform a recursion against the new transformed graph
+   */
+  protected boolean requiresRecursiveSearch()
+    {
+    return !findAllPrimaries;
     }
 
   protected Set<FlowElement> addExclusions( E graph )

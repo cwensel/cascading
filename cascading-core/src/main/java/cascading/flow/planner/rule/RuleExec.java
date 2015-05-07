@@ -367,6 +367,7 @@ public class RuleExec
       for( ElementGraph child : children )
         {
         Asserted asserted;
+
         try
           {
           asserted = asserter.assertion( plannerContext, child );
@@ -437,7 +438,6 @@ public class RuleExec
       return elementGraph;
 
     // the results are sub-graphs of the elementGraph, so guaranteed to exist in graph
-
     AnnotatedGraph resultGraph = new ElementDirectedGraph( elementGraph );
 
     for( ElementGraph result : priorResults )

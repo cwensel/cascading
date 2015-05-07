@@ -21,7 +21,6 @@
 package cascading.flow.planner.graph;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
@@ -38,25 +37,15 @@ import static cascading.util.Util.createIdentitySet;
 public class ElementSubGraph extends BaseElementGraph implements ElementGraph
   {
   private final ElementGraph elementGraph;
-  private final Collection<FlowElement> flowElements;
-  private final Collection<Scope> scopes;
+  private final Set<FlowElement> flowElements;
+  private final Set<Scope> scopes;
 
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements, Collection<Scope> scopes )
     {
-    this.graph = new DirectedSubGraph( directed( elementGraph ), createIdentitySet( flowElements ), createIdentitySet( scopes ) );
-
+    this.flowElements = createIdentitySet( flowElements );
+    this.scopes = createIdentitySet( scopes );
+    this.graph = new DirectedSubGraph( directed( elementGraph ), this.flowElements, this.scopes );
     this.elementGraph = elementGraph;
-    this.flowElements = flowElements;
-    this.scopes = scopes;
-    }
-
-  public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements )
-    {
-    this.graph = new DirectedSubGraph( directed( elementGraph ), new HashSet<>( flowElements ), null );
-
-    this.elementGraph = elementGraph;
-    this.flowElements = flowElements;
-    this.scopes = null;
     }
 
   public ElementSubGraph( ElementSubGraph graph )
