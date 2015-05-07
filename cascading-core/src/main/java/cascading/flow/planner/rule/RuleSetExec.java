@@ -300,11 +300,11 @@ public class RuleSetExec
     if( interrupted.isEmpty() )
       return;
 
-    if( interrupted.size() == registrySet.size() )
-      throw new PlannerException( "planner registry timeout exceeded for all registries: " + formatDurationFromMillis( registrySet.getPlannerTimeoutSec() * 1000 ) );
-
     for( RuleResult ruleResult : interrupted )
       getFlowLogger().logInfo( "rule registry: {}, planned longer than default duration, was cancelled", ruleResult.getRegistry().getName() );
+
+    if( interrupted.size() == registrySet.size() )
+      throw new PlannerException( "planner registry timeout exceeded for all registries: " + formatDurationFromMillis( registrySet.getPlannerTimeoutSec() * 1000 ) );
 
     if( !registrySet.isIgnoreFailed() || success.isEmpty() )
       rethrow( interrupted.get( 0 ).getPlannerException() );
