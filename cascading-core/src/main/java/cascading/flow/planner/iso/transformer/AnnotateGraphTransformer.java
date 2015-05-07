@@ -52,6 +52,10 @@ public class AnnotateGraphTransformer extends RecursiveGraphTransformer<ElementG
     super( match );
     this.annotation = annotation;
     this.graphTransformer = graphTransformer;
+
+    // the graphTransformer must be re-applied to find subsequent matches in sub-graphs
+    if( this.graphTransformer != null )
+      this.findAllPrimaries = false;
     }
 
   @Override

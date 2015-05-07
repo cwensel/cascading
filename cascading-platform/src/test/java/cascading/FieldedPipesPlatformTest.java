@@ -722,6 +722,50 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testSplitMultiple() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    // 46 192
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+    Tap sinkLeft = getPlatform().getTextFile( getOutputPath( "left" ), SinkMode.REPLACE );
+    Tap sinkRightLeft = getPlatform().getTextFile( getOutputPath( "rightleft" ), SinkMode.REPLACE );
+    Tap sinkRightRight = getPlatform().getTextFile( getOutputPath( "rightright" ), SinkMode.REPLACE );
+
+    Pipe head = new Pipe( "split" );
+
+    head = new Each( head, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    head = new GroupBy( head, new Fields( "ip" ) );
+
+    head = new Every( head, new Fields( "ip" ), new Count(), new Fields( "ip", "count" ) );
+
+    head = new Each( head, new Fields( "ip" ), new RegexFilter( "^68.*" ) );
+
+    Pipe left = new Each( new Pipe( "left", head ), new Fields( "ip" ), new RegexFilter( ".*46.*" ) );
+
+    Pipe right = new Each( new Pipe( "right", head ), new Fields( "ip" ), new RegexFilter( ".*102.*" ) );
+
+    right = new GroupBy( right, new Fields( "ip" ) );
+
+    Pipe rightLeft = new Each( new Pipe( "rightLeft", right ), new Fields( "ip" ), new Identity() );
+
+    Pipe rightRight = new Each( new Pipe( "rightRight", right ), new Fields( "ip" ), new Identity() );
+
+    Map sources = Cascades.tapsMap( "split", source );
+    Map sinks = Cascades.tapsMap( Pipe.pipes( left, rightLeft, rightRight ), Tap.taps( sinkLeft, sinkRightLeft, sinkRightRight ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, left, rightLeft, rightRight );
+
+    flow.complete();
+
+    validateLength( flow, 1, "left" );
+    validateLength( flow, 1, "rightLeft" );
+    validateLength( flow, 1, "rightRight" );
+    }
+
+  @Test
   public void testConcatenation() throws Exception
     {
     getPlatform().copyFromLocal( inputFileLower );

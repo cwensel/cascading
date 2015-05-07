@@ -614,12 +614,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
             for( ElementGraph step : steps )
               elements.addAll( step.vertexSet() );
 
-            int diff = assembly.vertexSet().size() - elements.size();
+            Set<FlowElement> missing = differenceIdentity( assembly.vertexSet(), elements );
 
-            if( diff > 0 )
+            if( !missing.isEmpty() )
               {
-              Set<FlowElement> missing = differenceIdentity( assembly.vertexSet(), elements );
-              String message = "union of steps have " + diff + " fewer elements than parent assembly: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              String message = "union of steps have " + missing.size() + " fewer elements than parent assembly: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
               throw new PlannerException( message, assembly );
               }
             }
@@ -653,12 +652,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
             for( ElementGraph node : nodes )
               elements.addAll( node.vertexSet() );
 
-            int diff = step.vertexSet().size() - elements.size();
+            Set<FlowElement> missing = differenceIdentity( step.vertexSet(), elements );
 
-            if( diff > 0 )
+            if( !missing.isEmpty() )
               {
-              Set<FlowElement> missing = differenceIdentity( step.vertexSet(), elements );
-              String message = "union of nodes have " + diff + " fewer elements than parent step: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              String message = "union of nodes have " + missing.size() + " fewer elements than parent step: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
               throw new PlannerException( message, step );
               }
             }
@@ -693,12 +691,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
             for( ElementGraph pipeline : pipelines )
               elements.addAll( pipeline.vertexSet() );
 
-            int diff = node.vertexSet().size() - elements.size();
+            Set<FlowElement> missing = differenceIdentity( node.vertexSet(), elements );
 
-            if( diff > 0 )
+            if( !missing.isEmpty() )
               {
-              Set<FlowElement> missing = differenceIdentity( node.vertexSet(), elements );
-              String message = "union of pipelines have " + diff + " fewer elements than parent node: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              String message = "union of pipelines have " + missing.size() + " fewer elements than parent node: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
               throw new PlannerException( message, node );
               }
             }

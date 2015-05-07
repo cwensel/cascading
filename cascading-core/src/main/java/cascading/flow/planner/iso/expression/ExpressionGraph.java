@@ -105,6 +105,13 @@ public class ExpressionGraph
       Util.getFirst( getGraph().vertexSet() ).getCapture() == ElementCapture.Primary;
     }
 
+  public ExpressionGraph setAllowNonRecursiveMatching( boolean allowNonRecursiveMatching )
+    {
+    this.allowNonRecursiveMatching = allowNonRecursiveMatching;
+
+    return this;
+    }
+
   public ExpressionGraph arcs( ElementExpression... matchers )
     {
     ElementExpression lhs = null;

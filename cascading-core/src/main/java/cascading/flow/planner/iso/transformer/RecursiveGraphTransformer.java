@@ -30,20 +30,19 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
 import cascading.util.ProcessLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends GraphTransformer<E, E>
   {
-  private static final Logger LOG = LoggerFactory.getLogger( RecursiveGraphTransformer.class );
   public static final int TRANSFORM_RECURSION_DEPTH_MAX = 1000;
 
   private final GraphFinder finder;
   private final ExpressionGraph expressionGraph;
-  private final boolean findAllPrimaries;
+
+  // if true, prevents a sub-graph match after a contraction
+  protected boolean findAllPrimaries;
 
   protected RecursiveGraphTransformer( ExpressionGraph expressionGraph )
     {
@@ -91,6 +90,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
       processLogger.logDebug( "performing match within: {}, using recursion: {}", this.getClass().getSimpleName(), !findAllPrimaries );
 
     // for trivial cases, disable recursion and capture all primaries initially
+    // only if prepareForMatch isn't finding subsequent sub-graphs via graph contractions
     if( findAllPrimaries )
       match = finder.findAllMatches( transformed.getPlannerContext(), prepared, exclusions );
     else
