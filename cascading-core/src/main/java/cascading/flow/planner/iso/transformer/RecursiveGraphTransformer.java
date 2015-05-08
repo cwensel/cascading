@@ -36,7 +36,20 @@ import cascading.util.ProcessLogger;
  */
 public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends GraphTransformer<E, E>
   {
-  public static final int TRANSFORM_RECURSION_DEPTH_MAX = 1000;
+  /**
+   * Graphs must be transformed iteratively. In order to offset rules that may cause a loop, the recursion depth
+   * must be tracked.
+   * <p/>
+   * Some complex graphs may require a very deep search, so this value may need to be increased.
+   * <p/>
+   * During debugging, the depth may need to be shallow so that the trace logs can be written to disk before an
+   * OOME causes the planner to exit.
+   * <p/>
+   * This property may be either set at the planner ){@link cascading.flow.FlowConnector} or system level
+   * {@link System#getProperties()}.
+   */
+  public static final String TRANSFORM_RECURSION_DEPTH_MAX = "cascading.planner.transformer.recursion.depth.max";
+  public static final int DEFAULT_TRANSFORM_RECURSION_DEPTH_MAX = 1000;
 
   private final GraphFinder finder;
   private final ExpressionGraph expressionGraph;
@@ -52,20 +65,22 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
   @Override
   public Transformed<E> transform( PlannerContext plannerContext, E rootGraph )
     {
+    int maxDepth = plannerContext.getIntProperty( TRANSFORM_RECURSION_DEPTH_MAX, DEFAULT_TRANSFORM_RECURSION_DEPTH_MAX );
+
     Transformed<E> transformed = new Transformed<>( plannerContext, this, expressionGraph, rootGraph );
 
-    E result = transform( plannerContext.getLogger(), transformed, rootGraph, 0 );
+    E result = transform( plannerContext.getLogger(), transformed, rootGraph, maxDepth, 0 );
 
     transformed.setEndGraph( result );
 
     return transformed;
     }
 
-  protected E transform( ProcessLogger processLogger, Transformed<E> transformed, E graph, int depth )
+  protected E transform( ProcessLogger processLogger, Transformed<E> transformed, E graph, int maxDepth, int currentDepth )
     {
-    if( depth == TRANSFORM_RECURSION_DEPTH_MAX )
+    if( currentDepth == maxDepth )
       {
-      processLogger.logInfo( "!!! transform recursion ending, reached depth: {}", depth );
+      processLogger.logInfo( "!!! transform recursion ending, reached depth: {}", currentDepth );
       return graph;
       }
 
@@ -113,7 +128,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     if( !requiresRecursiveSearch() )
       return graph;
 
-    return transform( processLogger, transformed, graph, ++depth );
+    return transform( processLogger, transformed, graph, maxDepth, ++currentDepth );
     }
 
   /**

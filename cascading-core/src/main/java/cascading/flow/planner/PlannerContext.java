@@ -22,12 +22,14 @@ package cascading.flow.planner;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.planner.iso.transformer.ElementFactory;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.operation.PlannerLevel;
+import cascading.property.PropertyUtil;
 import cascading.util.ProcessLogger;
 
 /**
@@ -42,9 +44,11 @@ public class PlannerContext
   FlowDef flowDef;
   Flow flow;
   boolean isTransformTracingEnabled = false;
+  private Map properties;
 
   public PlannerContext()
     {
+    this.properties = new Properties();
     }
 
   public PlannerContext( RuleRegistry ruleRegistry )
@@ -59,6 +63,21 @@ public class PlannerContext
     this.flowDef = flowDef;
     this.flow = flow;
     this.isTransformTracingEnabled = isTransformTracingEnabled;
+
+    if( flowPlanner != null )
+      this.properties = flowPlanner.getDefaultProperties();
+    else
+      this.properties = new Properties();
+    }
+
+  public String getStringProperty( String property )
+    {
+    return PropertyUtil.getStringProperty( System.getProperties(), properties, property );
+    }
+
+  public int getIntProperty( String property, int defaultValue )
+    {
+    return PropertyUtil.getIntProperty( System.getProperties(), properties, property, defaultValue );
     }
 
   public RuleRegistry getRuleRegistry()
