@@ -20,7 +20,7 @@
 
 dependencies {
   compile group: 'thirdparty', name: 'jgrapht-jdk1.6', version: '0.8.1'
-  compile group: 'riffle', name: 'riffle', version: '1.0.0-wip-17'
+  compile group: 'riffle', name: 'riffle', version: '1.0.0'
   compile group: 'org.codehaus.janino', name: 'janino', version: '2.7.5'
 
   // this prevents a transitive dependency until it is required downstream
