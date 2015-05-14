@@ -32,15 +32,16 @@ There are a number of projects based on Cascading available. Visit the
 
 Or download the [Cascading SDK](http://cascading.org/sdk/) which includes pre-built binaries.
 
-Of note are two top level projects:
+Of note are three top level projects:
 
+* [Fluid](http://cascading.org/fluid/) - An alternative fluent API for Cascading 
 * [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC with Cascading
 * [Pattern](http://cascading.org/pattern/) - Machine Learning and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
 
 And new languages:
 
-* [Scalding](https://github.com/twitter/scalding) - A Scala based DSL
-* [Cascalog](http://cascalog.org) - A Clojure based DSL
+* [Scalding](http://cascading.org/projects/scalding/) - A Scala based DSL
+* [Cascalog](http://cascading.org/projects/cascalog/) - A Clojure based DSL
 
 ## Versioning
 
@@ -59,10 +60,10 @@ The source, working branches, and tags for all WIP releases can be found here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 Or downloaded from here:
-[http://concurrentinc.com/downloads/](http://concurrentinc.com/downloads/)
+[http://www.cascading.org/wip/](http://cascading.org/wip/)
 
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
-available from the cascading.org site.
+available from the [http://cascading.org/downloads/](http://cascading.org/downloads/) page.
 
 ## Reporting issues
 
@@ -116,7 +117,7 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading requires Gradle to build.
+Cascading requires Gradle 1.x to build.
 
 To use an IDE like IntelliJ, run the following to create IntelliJ project files:
 
