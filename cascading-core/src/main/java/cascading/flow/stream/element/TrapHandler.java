@@ -23,6 +23,7 @@ package cascading.flow.stream.element;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
+import cascading.flow.stream.TrapException;
 import cascading.flow.stream.duct.DuctException;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
@@ -133,6 +134,9 @@ public class TrapHandler
     if( cause instanceof OutOfMemoryError )
       handleReThrowableException( "caught OutOfMemoryException, will not trap, rethrowing", cause );
 
+    if( cause instanceof TrapException )
+      handleReThrowableException( "unable to write trap data, will not trap, rethrowing", cause );
+
     if( trap == null )
       handleReThrowableException( "caught Throwable, no trap available, rethrowing", throwable );
 
@@ -159,7 +163,14 @@ public class TrapHandler
     if( diagnostics != TupleEntry.NULL ) // prepend diagnostics, payload is variable
       payload = diagnostics.appendNew( payload );
 
-    trapCollector.add( payload );
+    try
+      {
+      trapCollector.add( payload );
+      }
+    catch( Throwable current )
+      {
+      throw new TrapException( "could not write to trap: " + trap.getIdentifier(), current );
+      }
 
     flowProcess.increment( StepCounters.Tuples_Trapped, 1 );
 

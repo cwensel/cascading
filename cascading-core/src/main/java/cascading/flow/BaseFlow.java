@@ -966,28 +966,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       {
       thread = null;
       throwable = null;
-
-      try
-        {
-        commitTraps();
-
-        if( hasListeners() )
-          {
-          for( SafeFlowListener safeFlowListener : getListeners() )
-            safeFlowListener.throwable = null;
-          }
-        }
-      finally
-        {
-        flowStats.cleanup();
-        }
       }
     }
 
   private void commitTraps()
     {
     // commit all the traps, don't fail on an error
-
     for( Tap tap : traps.values() )
       {
       try
@@ -1231,6 +1215,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
         flowStats.markSuccessful();
 
       internalClean( stop ); // cleaning temp taps may be determined by success/failure
+
+      commitTraps();
 
       try
         {

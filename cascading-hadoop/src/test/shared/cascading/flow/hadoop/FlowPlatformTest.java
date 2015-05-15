@@ -476,4 +476,35 @@ public class FlowPlatformTest extends PlatformTestCase
     assertEquals( "testname", flow.getProperty( AppProps.APP_NAME ) );
     assertEquals( "1.2.3", flow.getProperty( AppProps.APP_VERSION ) );
     }
+
+  @Test
+  public void testStartWithoutComplete() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap sourceLower = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    // using null pos so all fields are written
+    Tap sink = new Hfs( new TextLine(), getOutputPath( "withoutcomplete" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+
+    Flow flow = getPlatform().getFlowConnector( getProperties() ).connect( sources, sink, pipeLower );
+
+    LockingFlowListener listener = new LockingFlowListener();
+
+    flow.addListener( listener );
+
+    flow.start();
+
+    assertTrue( listener.completed.tryAcquire( 90, TimeUnit.SECONDS ) );
+    }
   }

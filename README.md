@@ -51,7 +51,7 @@ There are a number of projects based on Cascading available. Visit the
 
 Or download the [Cascading SDK](http://cascading.org/sdk/) which includes pre-built binaries.
 
-Of note are two top level projects:
+Of note are three top level projects:
 
 * [Fluid](http://www.cascading.org/fluid/) - A fluent API for Cascading that is compatible with the default API.
 * [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC on Cascading
@@ -93,7 +93,7 @@ Or downloaded from here:
 [http://cascading.org/wip/](http://cascading.org/wip/)
 
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
-available as a stable release from the cascading.org download page.
+available from the [http://cascading.org/downloads/](http://cascading.org/downloads/) page.
 
 ## Writing and Running Tests
 

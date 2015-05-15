@@ -14,3 +14,7 @@ javadoc
 *.iws
 .gradle
 target
+.classpath
+.project
+.metadata
+.settings/

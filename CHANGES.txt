@@ -59,7 +59,24 @@ Cascading Change Log
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
 
-2.7.0 [unreleased]
+2.7.0
+
+  Updated Riffle to 1.0.0.
+
+  Deprecated c.f.h.ProcessFlow and related classes, which will be moved to a different package in Cascading 3.0.
+
+  Fixed issue where trap c.t.Tap#commitResource() would not get called if c.f.Flow#complete() was not called.
+
+  Added support for o.a.h.m.l.CombineFileInputFormat in the Hadoop specific c.t.h.PartitionTap implementation.
+
+  Fixed issue where c.f.h.HadoopFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
+  implementations (backport from wip-3.0 at 5e0493a).
+
+  Added c.t.Tap#prepareResourceForRead() and c.t.Tap#prepareResourceForWrite() methods to allow for client side tap
+  resource initialization.
+
+  Fixed issue where a failure to open or write a trap would pass the throwable up to the prior trap. Failures on trap
+  io will now result in a c.f.Flow failure.
 
   Fixed issue where c.t.TupleEntry#setTuple( Tuple tuple ) and c.t.TupleEntry#setCanonicalTuple( Tuple tuple ) would
   cause an NPE if given an null argument.

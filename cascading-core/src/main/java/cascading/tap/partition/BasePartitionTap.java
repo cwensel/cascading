@@ -356,6 +356,18 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     }
 
   @Override
+  public boolean prepareResourceForRead( Config conf ) throws IOException
+    {
+    return parent.prepareResourceForRead( conf );
+    }
+
+  @Override
+  public boolean prepareResourceForWrite( Config conf ) throws IOException
+    {
+    return parent.prepareResourceForWrite( conf );
+    }
+
+  @Override
   public boolean commitResource( Config conf ) throws IOException
     {
     return parent.commitResource( conf );

@@ -515,7 +515,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
     for( String name : flowDef.getCheckpoints().keySet() )
       {
       if( !names.contains( name ) )
-        throw new PlannerException( "checkpoint name not found in assembly: '" + name + "'" );
+        throw new PlannerException( "named checkpoint declared in FlowDef, but no named branch found in pipe assembly: '" + name + "'" );
 
       Set<Pipe> pipes = new HashSet<Pipe>( asList( Pipe.named( name, flowTails ) ) );
 
@@ -528,10 +528,10 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
         }
 
       if( count == 0 )
-        throw new PlannerException( "no checkpoint with name found in assembly: '" + name + "'" );
+        throw new PlannerException( "no checkpoint pipe with branch name found in pipe assembly: '" + name + "'" );
 
       if( count > 1 )
-        throw new PlannerException( "more than one checkpoint with name found in assembly: '" + name + "'" );
+        throw new PlannerException( "more than one checkpoint pipe with branch name found in pipe assembly: '" + name + "'" );
       }
     }
 
@@ -723,7 +723,10 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
-      String message = String.format( "[%s] could not build flow from assembly: [%s]", Util.truncate( flowDef.getName(), 25 ), cause.getMessage() );
+      String message = String.format( "[%s] could not build flow from assembly", Util.truncate( flowDef.getName(), 25 ) );
+
+      if( cause.getMessage() != null )
+        message = String.format( "%s: [%s]", message, cause.getMessage() );
 
       if( cause instanceof OperatorException )
         return new PlannerException( message, cause, flowElementGraph );
@@ -737,7 +740,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       {
       // captures pipegraph for debugging
       // forward message in case cause or trace is lost
-      String message = String.format( "[%s] could not build flow from assembly: [%s]", Util.truncate( flowDef.getName(), 25 ), exception.getMessage() );
+      String message = String.format( "[%s] could not build flow from assembly", Util.truncate( flowDef.getName(), 25 ) );
+
+      if( exception.getMessage() != null )
+        message = String.format( "%s: [%s]", message, exception.getMessage() );
+
       return new PlannerException( message, exception, flowElementGraph );
       }
     }

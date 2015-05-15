@@ -18,22 +18,17 @@
  * limitations under the License.
  */
 
-package cascading.operation;
+package cascading.flow.stream;
 
-import cascading.tuple.TupleEntry;
+import cascading.flow.stream.duct.DuctException;
 
-/** Interface FilterCall provides access to the current {@link Filter} invocation arguments. */
-public interface FilterCall<C> extends OperationCall<C>
+/**
+ * TrapException is a pass through exception allowing trap io failures to propagate past upstream traps.
+ */
+public class TrapException extends DuctException
   {
-  /**
-   * Returns {@link TupleEntry} of argument values.
-   * <p/>
-   * Note that the returned TupleEntry should not be cached (stored in a Collection), nor should the underlying Tuple
-   * instance. Where possible Cascading will re-use both TupleEntry and Tuple instances.
-   * <p/>
-   * To get a safe copy that can be cached, use {@link TupleEntry#getTupleCopy()}.
-   *
-   * @return TupleEntry
-   */
-  TupleEntry getArguments();
+  public TrapException( String message, Throwable throwable )
+    {
+    super( message, throwable );
+    }
   }

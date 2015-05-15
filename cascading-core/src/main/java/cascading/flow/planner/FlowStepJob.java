@@ -160,20 +160,28 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
           return;
           }
 
-        flowStepStats.markStarted();
+        markStarted();
         }
 
       blockOnPredecessors();
 
-      applyFlowStepConfStrategy();
+      prepareResources(); // throws Throwable to skip next steps
+
+      applyFlowStepConfStrategy(); // prepare resources beforehand
 
       blockOnJob();
       }
     catch( Throwable throwable )
       {
       this.throwable = throwable; // store first, in case throwable leaks out of dumpDebugInfo
+
       dumpDebugInfo();
-      this.flowStep.fireOnThrowable( throwable );
+
+      if( !flowStepStats.isFinished() )
+        {
+        flowStepStats.markFailed( this.throwable );
+        flowStep.fireOnThrowable( this.throwable );
+        }
       }
     finally
       {
@@ -182,6 +190,27 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
 
     internalCleanup();
+    }
+
+  private void prepareResources() throws Throwable
+    {
+    if( stop ) // true if a predecessor failed
+      return;
+
+    Throwable throwable = flowStep.prepareResources();
+
+    if( throwable != null )
+      throw throwable;
+    }
+
+  private synchronized boolean markStarted()
+    {
+    if( flowStepStats.isFinished() ) // if stopped, return
+      return false;
+
+    flowStepStats.markStarted();
+
+    return true;
     }
 
   private void applyFlowStepConfStrategy()
@@ -240,21 +269,21 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       dumpDebugInfo();
 
       if( !isRemoteExecution() )
-        throwable = new FlowException( "local step failed: " + stepName, getThrowable() );
+        this.throwable = new FlowException( "local step failed: " + stepName, getThrowable() );
       else
-        throwable = new FlowException( "step failed: " + stepName + ", step id: " + getStepStats().getID() + ", job id: " + internalJobId() + ", please see cluster logs for failure messages" );
+        this.throwable = new FlowException( "step failed: " + stepName + ", step id: " + getStepStats().getID() + ", job id: " + internalJobId() + ", please see cluster logs for failure messages" );
       }
     else
       {
       if( internalNonBlockingIsSuccessful() && !flowStepStats.isFinished() )
         {
-        throwable = flowStep.commitSinks();
+        this.throwable = flowStep.commitSinks();
 
-        if( throwable != null )
+        if( this.throwable != null )
           {
-          flowStepStats.markFailed( throwable );
+          flowStepStats.markFailed( this.throwable );
           updateNodesStatus();
-          flowStep.fireOnThrowable( throwable );
+          flowStep.fireOnThrowable( this.throwable );
           }
         else
           {

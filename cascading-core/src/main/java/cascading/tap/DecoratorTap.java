@@ -253,6 +253,18 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
     }
 
   @Override
+  public boolean prepareResourceForRead( Config conf ) throws IOException
+    {
+    return original.prepareResourceForRead( conf );
+    }
+
+  @Override
+  public boolean prepareResourceForWrite( Config conf ) throws IOException
+    {
+    return original.prepareResourceForWrite( conf );
+    }
+
+  @Override
   public boolean commitResource( Config conf ) throws IOException
     {
     return original.commitResource( conf );

@@ -410,7 +410,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       }
     catch( Exception exception )
       {
-      exception.printStackTrace();
+//      exception.printStackTrace();
       // success
       }
     }
@@ -667,5 +667,125 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     collector.add( new Tuple( 1, "1" ) );
 
     collector.close();
+    }
+
+  @Test
+  public void testPrepareResource() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    final int[] readCount = {0};
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache )
+    {
+    @Override
+    public boolean prepareResourceForRead( Configuration conf ) throws IOException
+      {
+      readCount[ 0 ] = readCount[ 0 ] + 1;
+      return true;
+      }
+    };
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    final int[] writeCount = {0};
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "preparetap" ), SinkMode.REPLACE )
+    {
+    @Override
+    public boolean prepareResourceForWrite( Configuration conf ) throws IOException
+      {
+      writeCount[ 0 ] = writeCount[ 0 ] + 1;
+      return true;
+      }
+    };
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    assertEquals( 1, readCount[ 0 ] );
+    assertEquals( 1, writeCount[ 0 ] );
+    validateLength( flow, 8, null );
+    }
+
+  @Test
+  public void testPrepareResourceForReadFails() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache )
+    {
+    @Override
+    public boolean prepareResourceForRead( Configuration conf ) throws IOException
+      {
+      throw new IOException( "failed intentionally" );
+      }
+    };
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "preparereadtapfail" ), SinkMode.REPLACE );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    try
+      {
+      flow.complete();
+      fail();
+      }
+    catch( Exception exception )
+      {
+//      exception.printStackTrace();
+      // success
+      }
+    }
+
+  @Test
+  public void testPrepareResourceForWriteFails() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileApache );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+
+    pipe = new GroupBy( pipe, new Fields( "ip" ) );
+
+    pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+
+    Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "preparewritetapfail" ), SinkMode.REPLACE )
+    {
+    @Override
+    public boolean prepareResourceForWrite( Configuration conf ) throws IOException
+      {
+      throw new IOException( "failed intentionally" );
+      }
+    };
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    try
+      {
+      flow.complete();
+      fail();
+      }
+    catch( Exception exception )
+      {
+//      exception.printStackTrace();
+      // success
+      }
     }
   }

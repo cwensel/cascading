@@ -45,6 +45,11 @@ public interface BufferCall<C> extends OperationCall<C>
    * {@link cascading.pipe.joiner.BufferJoin} as the {@link cascading.pipe.joiner.Joiner}.
    * <p/>
    * See {@link #getJoinerClosure()}.
+   * <p/>
+   * Note that the returned TupleEntry should not be cached (stored in a Collection), nor should the underlying Tuple
+   * instance. Where possible Cascading will re-use both TupleEntry and Tuple instances.
+   * <p/>
+   * To get a safe copy that can be cached, use {@link TupleEntry#getTupleCopy()}.
    *
    * @return Iterator<TupleEntry>
    */
@@ -88,7 +93,8 @@ public interface BufferCall<C> extends OperationCall<C>
    * Returns the current instance of a {@link JoinerClosure}, if any. This allows a Buffer to implement its own join
    * strategy against the incoming tuple streams.
    * <p/>
-   * The return value is always {@code null} unless the declared fields on the {@link cascading.pipe.CoGroup} are {@link Fields#NONE}.
+   * The return value is always {@code null} unless the declared fields on the {@link cascading.pipe.CoGroup} are
+   * {@link Fields#NONE}.
    * <p/>
    * Note this method is provided as a means to bypass some of the Cascading internals in order to improve the
    * implementations (performance or maintainability) behind some algorithms.
@@ -98,5 +104,5 @@ public interface BufferCall<C> extends OperationCall<C>
    *
    * @return JoinerClosure
    */
-  public JoinerClosure getJoinerClosure();
+  JoinerClosure getJoinerClosure();
   }
