@@ -22,7 +22,7 @@ You cannot have both `cascading-hadoop2-mr1` and `cascading-hadoop2-tez` in your
 Both c.t.Tap and c.s.Scheme implementations will work with both MapReduce and Tez platforms, though custom Tap/Scheme
 implementations may need to be updated to work against Cascading 3.0.
 
-This release has been tested and built against Tez 0.6.0. Currently all applicable tests pass against the Tez platform.
+This release has been tested and built against Tez 0.7.0. Currently all applicable tests pass against the Tez platform.
 
 See below for notes and issues against this release.
 
@@ -72,10 +72,14 @@ onto HDFS for use by YARN.
 | 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/          |
 | 0.6.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ |
 | 0.6.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop26/ |
+| 0.7.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ |
+| 0.7.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop26/ |
 
-To copy Tez 0.6.0 to HDFS, execute:
+To copy Tez 0.7.0 to HDFS, execute:
 
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ /apps/tez-0.6.0
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ /apps/tez-0.7.0
+
+If using Hadoop 2.4.x, you must also set 'tez.allow.disabled.timeline-domains=true'.
 
 ## Running on Amazon EMR
 
@@ -86,7 +90,7 @@ Note this will require starting your Hadoop cluster with specific settings, and 
 Before getting started, these project may help: 
   
   * [BASH EMR](https://github.com/cwensel/bash-emr)
-  * [EMR Ruby Client](https://aws.amazon.com/developertools/2264)
+  * [AWS Client](http://aws.amazon.com/cli/)
 
 First, re-configure Hadoop via this bootstrap action (these are the EMR client commandline args necessary):
 
@@ -108,10 +112,10 @@ Next shell into where you are running your Hadoop jobs, then:
     hdfs dfs -mkdir -p /apps/
     hdfs dfs -chmod -R 777 /apps/
      
-    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ tez-0.6.0
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ /apps/tez-0.6.0
+    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ tez-0.7.0
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ /apps/tez-0.7.0
      
-    export HADOOP_CLASSPATH=~/tez-0.6.0/*:~/tez-0.6.0/lib/*:$HADOOP_CLASSPATH
+    export HADOOP_CLASSPATH=~/tez-0.7.0/*:~/tez-0.7.0/lib/*:$HADOOP_CLASSPATH
 
 See above for other available Tez versions.     
      
@@ -121,7 +125,7 @@ You also need to start the YARN History Server (not on by default in EMR):
 
 Then to execute your application you nee to make sure these properties are set on the Hadoop2TezFlowConnector:
  
-     tez.lib.uris=${fs.default.name}/apps/tez-0.6.0,${fs.default.name}/apps/tez-0.6.0/lib/
+     tez.lib.uris=${fs.default.name}/apps/tez-0.7.0,${fs.default.name}/apps/tez-0.7.0/lib/
      yarn.timeline-service.hostname=$HOSTNAME
      io.compression.codecs=org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.SnappyCodec
      mapred.output.committer.class=org.apache.hadoop.mapred.FileOutputCommitter
@@ -156,6 +160,3 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
   applications above).
 
 * Currently no way to algorithmically set node parallelization.
-
-* Tests ignore parallelization settings, otherwise both local mode and mini cluster modes deadlock.
-    

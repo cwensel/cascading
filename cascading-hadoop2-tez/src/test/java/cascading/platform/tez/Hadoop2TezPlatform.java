@@ -270,6 +270,7 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
         Class<?> type = Util.loadClass( "org.apache.hadoop.yarn.server.applicationhistoryservice.timeline.MemoryTimelineStore" );
 
         configuration.setClass( YarnConfiguration.TIMELINE_SERVICE_STORE, type, target );
+        configuration.setBoolean( TezConfiguration.TEZ_AM_ALLOW_DISABLED_TIMELINE_DOMAINS, true );
 
         return true;
         }
