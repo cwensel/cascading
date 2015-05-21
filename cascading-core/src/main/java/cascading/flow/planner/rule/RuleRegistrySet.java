@@ -184,7 +184,7 @@ public class RuleRegistrySet
    *
    * @param planComparator the plan comparator
    */
-  public void setPlanComparator( Comparator planComparator )
+  public void setPlanComparator( Comparator<RuleResult> planComparator )
     {
     if( planComparator == null )
       throw new IllegalArgumentException( "planComparator may not be null" );
