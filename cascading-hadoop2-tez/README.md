@@ -2,13 +2,6 @@
 
 Support for Cascading on Apache Tez is now a part of Cascading 3.0. 
 
-We are making this release available so interested parties can begin testing Tez deployments against existing 
-Cascading applications.
-
-WIP builds can be downloaded directly from http://www.cascading.org/wip/
-
-Alternately, all binaries are available through the [Conjars.org](http://conjars.org) Maven repository.
-
 ## Using
 
 To use Tez as an alternative platform:
@@ -62,22 +55,26 @@ Tap name provided to the FlowDef.
 Unfortunately Apache Tez does not release with downloadable binaries. And as of 0.6.0, the set of binaries that work
 on a given Hadoop revision are slightly different.
 
-As a convenience, we are providing the full build for each supported version of Tez. Of which can be easily copied down
+As a convenience, we are providing the build for each supported version of Tez. Of which can be easily copied down
 onto HDFS for use by YARN.
 
-| Tez Version | Hadoop Version | Bucket + Path                                                 |
-|-------------|----------------|---------------------------------------------------------------|
-| 0.5.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.0/          |
-| 0.5.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.1/          |
-| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/          |
-| 0.6.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop24/ |
-| 0.6.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.0-hadoop26/ |
-| 0.7.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ |
-| 0.7.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop26/ |
+| Tez Version | Hadoop Version | Bucket + Path                                                               |
+|-------------|----------------|-----------------------------------------------------------------------------|
+| 0.5.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.0/                        |
+| 0.5.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.1/                        |
+| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/                        |
+| 0.6.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz |
+| 0.6.1       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop26.tar.gz |
+| 0.7.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz |
+| 0.7.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop26.tar.gz |
+
+For up to date notes on the available YARN apps, see: http://files.cascading.org/third-party/yarn/apps/NOTES.txt 
 
 To copy Tez 0.7.0 to HDFS, execute:
 
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ /apps/tez-0.7.0
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz /apps/
+
+Since the _minimal_ jar is being use, ensure 'tez.use.cluster.hadoop-libs=true'. 
 
 If using Hadoop 2.4.x, you must also set 'tez.allow.disabled.timeline-domains=true'.
 
@@ -112,9 +109,12 @@ Next shell into where you are running your Hadoop jobs, then:
     hdfs dfs -mkdir -p /apps/
     hdfs dfs -chmod -R 777 /apps/
      
-    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ tez-0.7.0
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-hadoop24/ /apps/tez-0.7.0
+    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz /apps/
      
+    mkdir tez-0.7.0
+    tar -xzf tez-0.7.0-minimal-hadoop24.tar.gz -C tez-0.7.0
+
     export HADOOP_CLASSPATH=~/tez-0.7.0/*:~/tez-0.7.0/lib/*:$HADOOP_CLASSPATH
 
 See above for other available Tez versions.     
@@ -125,7 +125,8 @@ You also need to start the YARN History Server (not on by default in EMR):
 
 Then to execute your application you nee to make sure these properties are set on the Hadoop2TezFlowConnector:
  
-     tez.lib.uris=${fs.default.name}/apps/tez-0.7.0,${fs.default.name}/apps/tez-0.7.0/lib/
+     tez.lib.uris=${fs.default.name}/apps/tez-0.7.0-minimal-hadoop24.tar.gz
+     tez.use.cluster.hadoop-libs=true
      yarn.timeline-service.hostname=$HOSTNAME
      io.compression.codecs=org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.SnappyCodec
      mapred.output.committer.class=org.apache.hadoop.mapred.FileOutputCommitter
@@ -159,4 +160,4 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 * There is no Vertex 'parallelization' default in Tez, FlowRuntimeProps must be called per application (see sample 
   applications above).
 
-* Currently no way to algorithmically set node parallelization.
+* Currently no way to algorithmically set node parallelization during runtime.

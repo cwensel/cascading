@@ -60,7 +60,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
   public static final String TIMELINE_FETCH_LIMIT = "cascading.stats.timeline.fetch.limit";
   public static final int DEFAULT_FETCH_LIMIT = 500;
 
-  public static enum Kind
+  public enum Kind
     {
       SPLIT, PARTITIONED
     }
@@ -201,7 +201,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     if( count == 0 )
       allTasksAreFinished = true;
 
-    LOG.info( "updated {} slices in: {}", count, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
+    LOG.info( "node: {}, updated {} slices in: {}", getID(), count, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
 
     return sliceStatsMap.size() == getTotalTaskCount();
     }
@@ -249,16 +249,19 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
         updateSliceWith( sliceStats, taskStatus );
         }
 
-      continueIterating = added + updated != 0;
+      if( added == 0 && updated == 1 ) // if paginating, at least retrieve 1 task
+        continueIterating = false;
+      else
+        continueIterating = added + updated != 0;
 
       if( !continueIterating )
-        LOG.info( "no slices retrieved in iteration: {}, with fetch size: {}, ending fetch", ++iteration, fetchLimit );
+        LOG.info( "node: {}, no new slices retrieved in iteration: {}, with fetch size: {}, ending fetch", getID(), ++iteration, fetchLimit );
       else
-        LOG.info( "added new {}, updated {} slices in iteration: {}, with fetch size: {}", added, updated, ++iteration, fetchLimit );
+        LOG.info( "node: {}, added new {}, updated {} slices in iteration: {}, with fetch size: {}", getID(), added, updated, ++iteration, fetchLimit );
       }
 
     int total = sliceStatsMap.size();
-    LOG.info( "added {} new slices, total fetched: {}, with missing: {} in: {}", total - startSize, total, getTotalTaskCount() - total, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
+    LOG.info( "node: {}, added {} new slices, total fetched: {}, with missing: {} in: {}", getID(), total - startSize, total, getTotalTaskCount() - total, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
 
     return total == getTotalTaskCount();
     }

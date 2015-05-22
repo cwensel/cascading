@@ -132,7 +132,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
       prepareEnsureStagingDir( workingConf );
 
-      tezClient = TezClient.create( flowStep.getName(), workingConf, false );
+      tezClient = TezClient.create( flowStep.getName(), workingConf );
 
       tezClient.start();
 
