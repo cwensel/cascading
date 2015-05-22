@@ -86,8 +86,10 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
   @Override
   public String getVertexID( String vertexName ) throws IOException, TezException
     {
+    // the filter 'vertexName' is in the 'otherinfo' field, so it must be requested, otherwise timeline server throws
+    // an NPE. to be safe, we include both fields in the result
     String format = "%s/%s?primaryFilter=%s:%s&secondaryFilter=vertexName:%s&fields=%s";
-    String url = String.format( format, baseUri, TEZ_VERTEX_ID, TEZ_DAG_ID, dagId, vertexName, "primaryfilters" );
+    String url = String.format( format, baseUri, TEZ_VERTEX_ID, TEZ_DAG_ID, dagId, vertexName, FILTER_BY_FIELDS );
 
     JSONObject jsonRoot = getJsonRootEntity( url );
     JSONArray entitiesNode = jsonRoot.optJSONArray( ENTITIES );
