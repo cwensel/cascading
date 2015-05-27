@@ -99,7 +99,7 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
 
     try
       {
-      return getRemoveJsonObject( entitiesNode, 0, true ).getString( ENTITY );
+      return getJsonObject( entitiesNode, 0 ).getString( ENTITY );
       }
     catch( JSONException exception )
       {
@@ -129,17 +129,18 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
 
     return new Iterator<TaskStatus>()
     {
+    int index = 0;
+
     @Override
     public boolean hasNext()
       {
-      return entitiesNode.length() != 0;
+      return entitiesNode.length() != index;
       }
 
     @Override
     public TaskStatus next()
       {
-      // remove for gc as we accumulate a replacement SliceStats instance
-      return parseTaskStatus( getRemoveJsonObject( entitiesNode, 0, true ) );
+      return parseTaskStatus( getJsonObject( entitiesNode, index++ ) );
       }
 
     @Override
@@ -231,6 +232,7 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
       }
     }
 
+  // remove is unsupported in jettision on hadoop 24
   protected JSONObject getRemoveJsonObject( JSONArray entitiesNode, int index, boolean doRemove )
     {
     try
@@ -241,6 +243,18 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
         entitiesNode.remove( jsonObject );
 
       return jsonObject;
+      }
+    catch( JSONException exception )
+      {
+      throw new CascadingException( exception );
+      }
+    }
+
+  protected JSONObject getJsonObject( JSONArray entitiesNode, int index )
+    {
+    try
+      {
+      return entitiesNode.getJSONObject( index );
       }
     catch( JSONException exception )
       {
