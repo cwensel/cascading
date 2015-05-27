@@ -66,8 +66,8 @@ And new languages:
 
 Cascading stable releases are always of the form `x.y.z`, where `z` is the current maintenance release.
 
-`x.y.z` releases are maintenance releases. No public incompatible API changes will be made, but in an effort to fix bugs, 
-remediation may entail throwing new Exceptions.
+`x.y.z` releases are maintenance releases. No public incompatible API changes will be made, but in an effort to fix 
+bugs, remediation may entail throwing new Exceptions.
 
 `x.y` releases are minor releases. New features are added. No public incompatible API changes will be made on the
 core processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be 
@@ -124,7 +124,8 @@ If you are on Mac OS X and have installed GraphViz, dot files can be converted t
     
     -Dutil.dot.to.pdf.enabled=true
 
-Optionally, for stand alone applications, statistics and tracing can be enabled selectively with the following properties:
+Optionally, for stand alone applications, statistics and tracing can be enabled selectively with the following
+properties:
 
 * `cascading.planner.stats.path` - outputs detailed statistics on time spent by the planner
 * `cascading.planner.plan.path` - basic planner information
@@ -196,16 +197,16 @@ Similarly for Eclipse:
 First confirm you are using a supported version of Apache Hadoop by checking the
 [Compatibility](http://cascading.org/support/compatibility/) page.
 
-To use Cascading with Hadoop, we suggest stuffing `cascading-core`, `cascading-hadoop`, (optionally) `cascading-xml`
-jar files and all third-party libs into the `lib` folder of your job jar and executing your job via
-`$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
+To use Cascading with Hadoop, we suggest stuffing `cascading-core`, `cascading-hadoop2-mr1`, 
+(optionally) `cascading-xml` jar files and all third-party libs into the `lib` folder of your job jar and executing 
+your job via `$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
 
 For example, your job jar would look like this (via: `jar -t your.jar`)
 
 ```bash
 /<all your class and resource files>
 /lib/cascading-core-x.y.z.jar
-/lib/cascading-hadoop-x.y.z.jar
+/lib/cascading-hadoop2-mr1-x.y.z.jar
 /lib/cascading-xml-x.y.z.jar
 /lib/<cascading third-party jar files>
 ```
