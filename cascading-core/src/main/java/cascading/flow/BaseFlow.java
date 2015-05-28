@@ -977,7 +977,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       try
         {
         if( !tap.commitResource( getConfig() ) )
-          logError( "unable to commit trap: " + tap.getFullIdentifier( getConfig() ), null );
+          logError( "unable to commit trap: " + tap.getFullIdentifier( getConfig() ) );
         }
       catch( IOException exception )
         {
@@ -1455,6 +1455,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   public void logWarn( String message, Object... arguments )
     {
     LOG.warn( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, arguments );
+    }
+
+  @Override
+  public void logError( String message, Object... arguments )
+    {
+    LOG.error( "[" + Util.truncate( getName(), LOG_FLOW_NAME_MAX ) + "] " + message, arguments );
     }
 
   @Override

@@ -70,6 +70,12 @@ public interface ProcessLogger
     }
 
   @Override
+  public void logError( String message, Object... arguments )
+    {
+
+    }
+
+  @Override
   public void logError( String message, Throwable throwable )
     {
 
@@ -89,6 +95,8 @@ public interface ProcessLogger
   void logWarn( String message, Object... arguments );
 
   void logWarn( String message, Throwable throwable );
+
+  void logError( String message, Object... arguments );
 
   void logError( String message, Throwable throwable );
   }

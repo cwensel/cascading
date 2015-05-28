@@ -35,16 +35,12 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapred.TaskID;
 import org.apache.hadoop.mapred.TaskReport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<String, Map<String, Long>>>
   {
-  private static final Logger LOG = LoggerFactory.getLogger( HadoopNodeStats.class );
-
   private Map<TaskID, String> sliceIDCache = new HashMap<TaskID, String>( 4999 ); // caching for ids
 
   private HadoopStepStats parentStepStats;
@@ -97,7 +93,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to retrieve slice stats via task reports", exception );
+      getProcessLogger().logWarn( "unable to retrieve slice stats via task reports", exception );
       }
 
     return false;
@@ -113,7 +109,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
 
         if( taskReport == null )
           {
-          LOG.warn( "found empty task report" );
+          getProcessLogger().logWarn( "found empty task report" );
           continue;
           }
 

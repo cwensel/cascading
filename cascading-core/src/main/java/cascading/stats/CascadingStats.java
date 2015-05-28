@@ -28,8 +28,7 @@ import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.management.state.ClientState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cascading.util.ProcessLogger;
 
 /**
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of
@@ -68,8 +67,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class CascadingStats<Child> implements ProvidesCounters, Serializable
   {
-  private static final Logger LOG = LoggerFactory.getLogger( CascadingStats.class );
-
   public static final String STATS_STORE_INTERVAL = "cascading.stats.store.interval";
 
   /**
@@ -646,10 +643,12 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
         }
       catch( Throwable throwable )
         {
-        LOG.warn( "error during listener notification, continuing with remaining listener notification", throwable );
+        getProcessLogger().logWarn( "error during listener notification, continuing with remaining listener notification", throwable );
         }
       }
     }
+
+  protected abstract ProcessLogger getProcessLogger();
 
   protected String getStatsString()
     {

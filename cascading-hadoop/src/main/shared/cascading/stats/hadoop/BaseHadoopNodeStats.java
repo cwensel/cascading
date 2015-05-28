@@ -29,16 +29,12 @@ import cascading.flow.FlowNode;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowSliceStats;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeStats
   {
-  private static final Logger LOG = LoggerFactory.getLogger( BaseHadoopNodeStats.class );
-
   protected final Map<String, FlowSliceStats> sliceStatsMap = new LinkedHashMap<>();
   protected CounterCache<JobStatus, Counters> counterCache;
 
@@ -143,7 +139,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     boolean success = captureChildDetailInternal();
 
     if( success )
-      LOG.info( "captured remote node statistic details" );
+      getProcessLogger().logDebug( "captured remote node statistic details" );
 
     hasCapturedFinalDetail = finished && success;
     }
@@ -182,7 +178,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
       }
     catch( Exception exception )
       {
-      LOG.error( "unable to record node stats", exception );
+      getProcessLogger().logError( "unable to record node stats", exception );
       }
     }
   }

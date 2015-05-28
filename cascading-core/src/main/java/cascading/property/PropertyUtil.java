@@ -27,7 +27,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
-import cascading.util.Util;
 
 import static cascading.util.Util.isEmpty;
 
@@ -37,6 +36,11 @@ public class PropertyUtil
   public static String getProperty( Map<Object, Object> properties, String property )
     {
     return getProperty( properties, property, (String) null );
+    }
+
+  public static int getIntProperty( Map<Object, Object> properties, String property, int defaultValue )
+    {
+    return getIntProperty( System.getProperties(), properties, property, defaultValue );
     }
 
   public static int getIntProperty( Properties defaultProperties, Map<Object, Object> properties, String property, int defaultValue )
@@ -52,6 +56,11 @@ public class PropertyUtil
       return defaultValue;
 
     return Integer.parseInt( result );
+    }
+
+  public static String getStringProperty( Map<Object, Object> properties, String property )
+    {
+    return getStringProperty( System.getProperties(), properties, property );
     }
 
   public static String getStringProperty( Properties defaultProperties, Map<Object, Object> properties, String property )

@@ -28,6 +28,7 @@ import java.util.Set;
 
 import cascading.cascade.Cascade;
 import cascading.management.state.ClientState;
+import cascading.util.ProcessLogger;
 
 /** Class CascadeStats collects {@link Cascade} specific statistics. */
 public class CascadeStats extends CascadingStats<FlowStats>
@@ -40,6 +41,12 @@ public class CascadeStats extends CascadingStats<FlowStats>
     {
     super( cascade.getName(), clientState );
     this.cascade = cascade;
+    }
+
+  @Override
+  protected ProcessLogger getProcessLogger()
+    {
+    return cascade;
     }
 
   @Override

@@ -28,6 +28,7 @@ import java.util.Map;
 
 import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
+import cascading.util.ProcessLogger;
 
 /** Class FlowStepStats collects {@link cascading.flow.FlowStep} specific statistics. */
 public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
@@ -39,6 +40,15 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     {
     super( flowStep.getName(), clientState );
     this.flowStep = flowStep;
+    }
+
+  @Override
+  protected ProcessLogger getProcessLogger()
+    {
+    if( flowStep != null && flowStep instanceof ProcessLogger )
+      return (ProcessLogger) flowStep;
+
+    return ProcessLogger.NULL;
     }
 
   @Override

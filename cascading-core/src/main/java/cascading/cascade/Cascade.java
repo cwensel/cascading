@@ -53,6 +53,7 @@ import cascading.management.UnitOfWorkSpawnStrategy;
 import cascading.management.state.ClientState;
 import cascading.stats.CascadeStats;
 import cascading.tap.Tap;
+import cascading.util.ProcessLogger;
 import cascading.util.ShutdownUtil;
 import cascading.util.Util;
 import cascading.util.Version;
@@ -96,7 +97,7 @@ import static cascading.property.PropertyUtil.getProperty;
  * @see cascading.flow.Flow
  * @see cascading.flow.FlowSkipStrategy
  */
-public class Cascade implements UnitOfWork<CascadeStats>
+public class Cascade implements UnitOfWork<CascadeStats>, ProcessLogger
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Cascade.class );
@@ -256,7 +257,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onCompleted event: " + getListeners().size() );
 
       for( CascadeListener cascadeListener : getListeners() )
@@ -268,7 +269,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onThrowable event: " + getListeners().size() );
 
       boolean isHandled = false;
@@ -285,7 +286,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStopping event: " + getListeners().size() );
 
       for( CascadeListener cascadeListener : getListeners() )
@@ -297,7 +298,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStarting event: " + getListeners().size() );
 
       for( CascadeListener cascadeListener : getListeners() )
@@ -768,7 +769,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
       if( runFlowsLocal )
         numThreads = 1;
 
-      if( LOG.isInfoEnabled() )
+      if( isInfoEnabled() )
         {
         logInfo( " parallel execution of flows is enabled: " + ( numThreads != 1 ) );
         logInfo( " executing total flows: " + jobsMap.size() );
@@ -973,7 +974,7 @@ public class Cascade implements UnitOfWork<CascadeStats>
       }
     catch( IOException exception )
       {
-      LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
+      logError( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
     }
 
@@ -983,22 +984,56 @@ public class Cascade implements UnitOfWork<CascadeStats>
     return getName();
     }
 
-  private void logDebug( String message )
+  @Override
+  public boolean isInfoEnabled()
     {
-    LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    return LOG.isInfoEnabled();
     }
 
-  private void logInfo( String message )
+  @Override
+  public boolean isDebugEnabled()
     {
-    LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    return LOG.isDebugEnabled();
     }
 
-  private void logWarn( String message )
+  @Override
+  public void logInfo( String message, Object... arguments )
     {
-    logWarn( message, null );
+    LOG.info( "[" + Util.truncate( getName(), 25 ) + "] " + message, arguments );
     }
 
-  private void logWarn( String message, Throwable throwable )
+  @Override
+  public void logDebug( String message, Object... arguments )
+    {
+    LOG.debug( "[" + Util.truncate( getName(), 25 ) + "] " + message, arguments );
+    }
+
+  @Override
+  public void logWarn( String message )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message );
+    }
+
+  @Override
+  public void logWarn( String message, Throwable throwable )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
+    }
+
+  @Override
+  public void logWarn( String message, Object... arguments )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, arguments );
+    }
+
+  @Override
+  public void logError( String message, Object... arguments )
+    {
+    LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, arguments );
+    }
+
+  @Override
+  public void logError( String message, Throwable throwable )
     {
     LOG.warn( "[" + Util.truncate( getName(), 25 ) + "] " + message, throwable );
     }

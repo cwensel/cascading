@@ -30,6 +30,7 @@ import java.util.Set;
 import cascading.flow.Flow;
 import cascading.management.state.ClientState;
 import cascading.property.AppProps;
+import cascading.util.ProcessLogger;
 
 /** Class FlowStats collects {@link cascading.flow.Flow} specific statistics. */
 public class FlowStats extends CascadingStats<FlowStepStats>
@@ -41,6 +42,15 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     super( flow.getName(), clientState );
     this.flow = flow;
+    }
+
+  @Override
+  protected ProcessLogger getProcessLogger()
+    {
+    if( flow != null && flow instanceof ProcessLogger )
+      return (ProcessLogger) flow;
+
+    return ProcessLogger.NULL;
     }
 
   public Map<Object, Object> getFlowProperties()

@@ -41,6 +41,7 @@ import cascading.flow.stream.annotations.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
+import cascading.util.ProcessLogger;
 import cascading.util.Util;
 
 import static cascading.util.Util.createIdentitySet;
@@ -48,7 +49,7 @@ import static cascading.util.Util.createIdentitySet;
 /**
  *
  */
-public class BaseFlowNode implements Serializable, FlowNode
+public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
   {
   private final String id;
   private int ordinal;
@@ -477,5 +478,67 @@ public class BaseFlowNode implements Serializable, FlowNode
       results.addAll( ( (AnnotatedGraph) pipelineGraph ).getAnnotations().getValues( annotation ) );
 
     return results;
+    }
+
+  private ProcessLogger getLogger()
+    {
+    if( flowStep != null && flowStep instanceof ProcessLogger )
+      return (ProcessLogger) flowStep;
+
+    return ProcessLogger.NULL;
+    }
+
+  @Override
+  public boolean isInfoEnabled()
+    {
+    return getLogger().isInfoEnabled();
+    }
+
+  @Override
+  public boolean isDebugEnabled()
+    {
+    return getLogger().isDebugEnabled();
+    }
+
+  @Override
+  public void logInfo( String message, Object... arguments )
+    {
+    getLogger().logInfo( message, arguments );
+    }
+
+  @Override
+  public void logDebug( String message, Object... arguments )
+    {
+    getLogger().logDebug( message, arguments );
+    }
+
+  @Override
+  public void logWarn( String message )
+    {
+    getLogger().logWarn( message );
+    }
+
+  @Override
+  public void logWarn( String message, Object... arguments )
+    {
+    getLogger().logWarn( message, arguments );
+    }
+
+  @Override
+  public void logWarn( String message, Throwable throwable )
+    {
+    getLogger().logWarn( message, throwable );
+    }
+
+  @Override
+  public void logError( String message, Object... arguments )
+    {
+    getLogger().logError( message, arguments );
+    }
+
+  @Override
+  public void logError( String message, Throwable throwable )
+    {
+    getLogger().logError( message, throwable );
     }
   }

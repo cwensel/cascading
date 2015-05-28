@@ -125,7 +125,7 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
     if( entitiesNode == null )
       throw new CascadingException( "failed to get vertex task statuses from timeline server" );
 
-    LOG.info( "retrieved {} tasks", entitiesNode.length() );
+    LOG.debug( "vertex: {}, retrieved {} tasks", vertexID, entitiesNode.length() );
 
     return new Iterator<TaskStatus>()
     {
@@ -232,7 +232,7 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
       }
     }
 
-  // remove is unsupported in jettision on hadoop 24
+  // remove is unsupported in jettison on hadoop 24
   protected JSONObject getRemoveJsonObject( JSONArray entitiesNode, int index, boolean doRemove )
     {
     try

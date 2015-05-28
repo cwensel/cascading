@@ -532,7 +532,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
         {
         String message = String.format( "unable to prepare tap for %s: %s", forWrite ? "write" : "read", tap.getFullIdentifier( getConfig() ) );
 
-        logError( message, null );
+        logError( message );
 
         throwable = new FlowException( message );
         }
@@ -574,7 +574,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
         {
         String message = "unable to commit sink: " + tap.getFullIdentifier( getConfig() );
 
-        logError( message, null );
+        logError( message );
 
         throwable = new FlowException( message );
         }
@@ -601,7 +601,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
         {
         String message = "unable to rollback sink: " + tap.getFullIdentifier( getConfig() );
 
-        logError( message, null );
+        logError( message );
 
         throwable = new FlowException( message );
         }
@@ -944,49 +944,63 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public final boolean isInfoEnabled()
     {
-    return ( (ProcessLogger) flow ).isInfoEnabled();
+    return getLogger().isInfoEnabled();
+    }
+
+  private ProcessLogger getLogger()
+    {
+    if( flow != null && flow instanceof ProcessLogger )
+      return (ProcessLogger) flow;
+
+    return ProcessLogger.NULL;
     }
 
   @Override
   public final boolean isDebugEnabled()
     {
-    return ( (ProcessLogger) flow ).isDebugEnabled();
+    return ( getLogger() ).isDebugEnabled();
     }
 
   @Override
   public void logDebug( String message, Object... arguments )
     {
-    ( (ProcessLogger) flow ).logDebug( message, arguments );
+    getLogger().logDebug( message, arguments );
     }
 
   @Override
   public void logInfo( String message, Object... arguments )
     {
-    ( (ProcessLogger) flow ).logInfo( message, arguments );
+    getLogger().logInfo( message, arguments );
     }
 
   @Override
   public void logWarn( String message )
     {
-    ( (ProcessLogger) flow ).logWarn( message );
+    getLogger().logWarn( message );
     }
 
   @Override
   public void logWarn( String message, Throwable throwable )
     {
-    ( (ProcessLogger) flow ).logWarn( message, throwable );
+    getLogger().logWarn( message, throwable );
     }
 
   @Override
   public void logWarn( String message, Object... arguments )
     {
-    ( (ProcessLogger) flow ).logWarn( message, arguments );
+    getLogger().logWarn( message, arguments );
+    }
+
+  @Override
+  public void logError( String message, Object... arguments )
+    {
+    getLogger().logError( message, arguments );
     }
 
   @Override
   public void logError( String message, Throwable throwable )
     {
-    ( (ProcessLogger) flow ).logError( message, throwable );
+    getLogger().logError( message, throwable );
     }
 
   /**

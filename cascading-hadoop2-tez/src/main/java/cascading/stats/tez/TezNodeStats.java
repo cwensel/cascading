@@ -57,8 +57,15 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
   {
   private static final Logger LOG = LoggerFactory.getLogger( TezNodeStats.class );
 
+  /**
+   * Sets the fetch limit from the timeline server. May be set as a System property.
+   */
   public static final String TIMELINE_FETCH_LIMIT = "cascading.stats.timeline.fetch.limit";
   public static final int DEFAULT_FETCH_LIMIT = 500;
+
+  private static int fetchLimit = -1;
+
+  private transient String prefixID; // cached sub-string
 
   public enum Kind
     {
@@ -67,7 +74,6 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
   private TezStepStats parentStepStats;
   private Kind kind;
-  private final int fetchLimit;
 
   private String vertexID;
   private int totalTaskCount;
@@ -77,13 +83,29 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
   private int runningTaskCount;
   private boolean allTasksAreFinished;
 
+  private static void setFetchLimit( Configuration configuration )
+    {
+    if( fetchLimit > -1 )
+      return;
+
+    fetchLimit = PropertyUtil.getIntProperty( HadoopUtil.createProperties( configuration ), TIMELINE_FETCH_LIMIT, DEFAULT_FETCH_LIMIT );
+
+    if( fetchLimit < 2 )
+      {
+      LOG.warn( "property: {}, was set to: {}, may not be less than 2, setting to 2", TIMELINE_FETCH_LIMIT, fetchLimit );
+      fetchLimit = 2;
+      }
+    }
+
   protected TezNodeStats( final TezStepStats parentStepStats, FlowNode flowNode, ClientState clientState, Configuration configuration )
     {
     super( flowNode, clientState );
 
+    setFetchLimit( configuration );
+
     this.parentStepStats = parentStepStats;
     this.kind = flowNode.getSourceElements( StreamMode.Streamed ).isEmpty() ? Kind.PARTITIONED : Kind.SPLIT;
-    this.fetchLimit = PropertyUtil.getProperty( HadoopUtil.createProperties( configuration ), TIMELINE_FETCH_LIMIT, DEFAULT_FETCH_LIMIT );
+
     this.counterCache = new TezCounterCache<DAGClient>( this, configuration )
     {
     @Override
@@ -102,7 +124,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       TezCounters vertexCounters = vertexStatus.getVertexCounters();
 
       if( vertexCounters == null )
-        LOG.warn( "could not retrieve vertex counters for: {}, in stats status: {}, and vertex state: {}", getID(), getStatus(), vertexStatus.getState() );
+        logWarn( "could not retrieve vertex counters in stats status: {}, and vertex state: {}", getStatus(), vertexStatus.getState() );
 
       return vertexCounters;
       }
@@ -120,7 +142,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       }
     catch( IOException | TezException exception )
       {
-      LOG.warn( "unable to get vertex id for: {}", getID(), exception );
+      logWarn( "unable to get vertex id", exception );
       }
 
     return vertexID;
@@ -201,7 +223,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     if( count == 0 )
       allTasksAreFinished = true;
 
-    LOG.info( "node: {}, updated {} slices in: {}", getID(), count, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
+    logInfo( "updated {} slices in: {}", count, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
 
     return sliceStatsMap.size() == getTotalTaskCount();
     }
@@ -249,19 +271,26 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
         updateSliceWith( sliceStats, taskStatus );
         }
 
-      if( added == 0 && updated == 1 ) // if paginating, at least retrieve 1 task
+      int retrieved = added + updated;
+
+      if( added == 0 && updated == 1 ) // if paginating, will have at least retrieved 1 task
         continueIterating = false;
       else
-        continueIterating = added + updated != 0;
+        continueIterating = retrieved != 0;
 
-      if( !continueIterating )
-        LOG.info( "node: {}, no new slices retrieved in iteration: {}, with fetch size: {}, ending fetch", getID(), ++iteration, fetchLimit );
-      else
-        LOG.info( "node: {}, added new {}, updated {} slices in iteration: {}, with fetch size: {}", getID(), added, updated, ++iteration, fetchLimit );
+      if( continueIterating )
+        logInfo( "iteration retrieved: {}, added {}, updated {} slices in iteration: {}, fetch limit: {}", retrieved, added, updated, ++iteration, fetchLimit );
       }
 
     int total = sliceStatsMap.size();
-    LOG.info( "node: {}, added {} new slices, total fetched: {}, with missing: {} in: {}", getID(), total - startSize, total, getTotalTaskCount() - total, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
+    int added = total - startSize;
+    int remaining = getTotalTaskCount() - total;
+    String duration = formatDurationFromMillis( System.currentTimeMillis() - startTime );
+
+    if( iteration == 0 && total == 0 )
+      logInfo( "no slices stats available yet, expecting: {}", remaining );
+    else
+      logInfo( "added {} slices, in iterations: {}, with duration: {}, total fetched: {}, remaining: {}", added, iteration, duration, total, remaining );
 
     return total == getTotalTaskCount();
     }
@@ -283,7 +312,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       }
     catch( TezException exception )
       {
-      LOG.warn( "unable to get slice stat from timeline server for id: {}", taskID, exception );
+      logWarn( "unable to get slice stat from timeline server for task id: {}", taskID, exception );
       }
 
     return null;
@@ -297,7 +326,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
       if( vertexID == null )
         {
-        LOG.warn( "unable to get slice stats from timeline server, did not retrieve valid vertex id for vertex name: {}", getID() );
+        logWarn( "unable to get slice stats from timeline server, did not retrieve valid vertex id for vertex name: {}", getID() );
         return null;
         }
 
@@ -305,7 +334,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       }
     catch( IOException | TezException exception )
       {
-      LOG.warn( "unable to get slice stats from timeline server", exception );
+      logWarn( "unable to get slice stats from timeline server", exception );
       }
 
     return null;
@@ -321,7 +350,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     int total = sliceStatsMap.size();
 
     if( total == 0 ) // yet to be initialized
-      LOG.warn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, task level counters cannot be retrieved" );
+      logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, task level counters cannot be retrieved" );
 
     for( int i = total; i < totalTaskCount; i++ )
       {
@@ -349,7 +378,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     List<String> diagnostics = vertexStatus.getDiagnostics();
 
     for( String diagnostic : diagnostics )
-      LOG.info( "vertex diagnostics: {}", diagnostic );
+      logInfo( "vertex diagnostics: {}", diagnostic );
 
     return true;
     }
@@ -387,7 +416,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       }
     catch( IOException | TezException exception )
       {
-      LOG.warn( "unable to get vertex status", exception );
+      logWarn( "unable to get vertex status for: {}", getID(), exception );
       }
 
     if( vertexStatus == null )
@@ -402,5 +431,28 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     killedTaskCount = progress.getKilledTaskCount();
 
     return vertexStatus;
+    }
+
+  protected void logInfo( String message, Object... arguments )
+    {
+    getProcessLogger().logInfo( getPrefix() + message, arguments );
+    }
+
+  protected void logDebug( String message, Object... arguments )
+    {
+    getProcessLogger().logDebug( getPrefix() + message, arguments );
+    }
+
+  protected void logWarn( String message, Object... arguments )
+    {
+    getProcessLogger().logWarn( getPrefix() + message, arguments );
+    }
+
+  private String getPrefix()
+    {
+    if( prefixID == null )
+      prefixID = "[" + getID().substring( 0, 5 ) + "] ";
+
+    return prefixID;
     }
   }
