@@ -29,8 +29,6 @@ import cascading.cascade.planner.IdentifierGraph;
 import cascading.flow.Flow;
 import cascading.tap.Tap;
 import cascading.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static cascading.cascade.CascadeDef.cascadeDef;
 
@@ -58,9 +56,6 @@ import static cascading.cascade.CascadeDef.cascadeDef;
  */
 public class CascadeConnector
   {
-  /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( CascadeConnector.class );
-
   /** Field properties */
   private Map<Object, Object> properties;
 
@@ -139,7 +134,7 @@ public class CascadeConnector
     IdentifierGraph identifierGraph = new IdentifierGraph( cascadeDef.getFlowsArray() );
     FlowGraph flowGraph = new FlowGraph( identifierGraph );
 
-    return new Cascade( cascadeDef, properties, flowGraph, identifierGraph );
+    return new BaseCascade( cascadeDef, properties, flowGraph, identifierGraph );
     }
 
   private String makeName( Flow[] flows )

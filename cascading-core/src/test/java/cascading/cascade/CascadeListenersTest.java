@@ -33,7 +33,7 @@ public class CascadeListenersTest extends TestCase
 
   public void testListeners()
     {
-    Cascade cascade = new Cascade();
+    Cascade cascade = new BaseCascade();
 
     CascadeListener listener = new CascadeListener()
     {

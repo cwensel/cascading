@@ -97,11 +97,11 @@ public class Cascades
 
   public static FlowGraph getFlowGraphFrom( Cascade cascade )
     {
-    return cascade.getFlowGraph();
+    return ( (BaseCascade) cascade ).getFlowGraph();
     }
 
   public static IdentifierGraph getTapGraphFrom( Cascade cascade )
     {
-    return cascade.getIdentifierGraph();
+    return ( (BaseCascade) cascade ).getIdentifierGraph();
     }
   }

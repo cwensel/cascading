@@ -46,7 +46,10 @@ public class CascadeStats extends CascadingStats<FlowStats>
   @Override
   protected ProcessLogger getProcessLogger()
     {
-    return cascade;
+    if( cascade != null && cascade instanceof ProcessLogger )
+      return (ProcessLogger) cascade;
+
+    return ProcessLogger.NULL;
     }
 
   @Override
