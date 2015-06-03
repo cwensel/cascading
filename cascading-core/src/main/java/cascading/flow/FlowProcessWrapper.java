@@ -174,6 +174,12 @@ public class FlowProcessWrapper<Config> extends FlowProcess<Config>
     }
 
   @Override
+  public Config getConfig()
+    {
+    return delegate.getConfig();
+    }
+
+  @Override
   public Config getConfigCopy()
     {
     return delegate.getConfigCopy();

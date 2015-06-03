@@ -172,6 +172,12 @@ public class LimitFilterTest extends CascadingTestCase
       }
 
     @Override
+    public Object getConfig()
+      {
+      return null;
+      }
+
+    @Override
     public Object getConfigCopy()
       {
       return null;

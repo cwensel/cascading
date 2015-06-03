@@ -79,7 +79,7 @@ public abstract class BaseDistCacheTap extends DecoratorTap<Void, Configuration,
   public TupleEntryIterator openForRead( FlowProcess<? extends Configuration> flowProcess, RecordReader input ) throws IOException
     {
     // always read via Hadoop FileSystem if in standalone/local mode, or if an RecordReader is provided
-    if( HadoopUtil.isLocal( flowProcess.getConfigCopy() ) || input != null )
+    if( HadoopUtil.isLocal( flowProcess.getConfig() ) || input != null )
       {
       LOG.info( "delegating to parent" );
       return super.openForRead( flowProcess, input );
@@ -95,7 +95,7 @@ public abstract class BaseDistCacheTap extends DecoratorTap<Void, Configuration,
 
     if( isSimpleGlob() )
       {
-      FileSystem fs = FileSystem.get( flowProcess.getConfigCopy() );
+      FileSystem fs = FileSystem.get( flowProcess.getConfig() );
       FileStatus[] statuses = fs.globStatus( getHfs().getPath() );
 
       for( FileStatus status : statuses )

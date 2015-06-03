@@ -111,17 +111,6 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     }
 
   @Override
-  public long getSize( Properties conf ) throws IOException
-    {
-    File file = new File( getIdentifier() );
-
-    if( file.isDirectory() )
-      return 0;
-
-    return file.length();
-    }
-
-  @Override
   public boolean createResource( Properties conf ) throws IOException
     {
     File parentFile = new File( getIdentifier() ).getParentFile();
@@ -154,15 +143,33 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     }
 
   @Override
+  public boolean isDirectory( FlowProcess<? extends Properties> flowProcess ) throws IOException
+    {
+    return isDirectory( flowProcess.getConfig() );
+    }
+
+  @Override
   public boolean isDirectory( Properties conf ) throws IOException
     {
     return new File( getIdentifier() ).isDirectory();
     }
 
   @Override
+  public String[] getChildIdentifiers( FlowProcess<? extends Properties> flowProcess ) throws IOException
+    {
+    return getChildIdentifiers( flowProcess.getConfig() );
+    }
+
+  @Override
   public String[] getChildIdentifiers( Properties conf ) throws IOException
     {
     return getChildIdentifiers( conf, 1, false );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( FlowProcess<? extends Properties> flowProcess, int depth, boolean fullyQualified ) throws IOException
+    {
+    return getChildIdentifiers( flowProcess.getConfig(), depth, fullyQualified );
     }
 
   @Override
@@ -184,6 +191,23 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
       allPaths[ i ] = fullyQualifyIdentifier( allPaths[ i ] );
 
     return allPaths;
+    }
+
+  @Override
+  public long getSize( FlowProcess<? extends Properties> flowProcess ) throws IOException
+    {
+    return getSize( flowProcess.getConfig() );
+    }
+
+  @Override
+  public long getSize( Properties conf ) throws IOException
+    {
+    File file = new File( getIdentifier() );
+
+    if( file.isDirectory() )
+      return 0;
+
+    return file.length();
     }
 
   private boolean getChildPaths( Set<String> results, String identifier, int depth )

@@ -126,6 +126,12 @@ public class HadoopFlowProcess extends FlowProcess<JobConf> implements MapRed
     }
 
   @Override
+  public JobConf getConfig()
+    {
+    return jobConf;
+    }
+
+  @Override
   public JobConf getConfigCopy()
     {
     return HadoopUtil.copyJobConf( jobConf );

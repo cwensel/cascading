@@ -148,6 +148,12 @@ public abstract class FlowProcess<Config>
       }
 
     @Override
+    public Object getConfig()
+      {
+      return null;
+      }
+
+    @Override
     public Object getConfigCopy()
       {
       return null;
@@ -487,6 +493,15 @@ public abstract class FlowProcess<Config>
   public abstract TupleEntryCollector openTrapForWrite( Tap trap ) throws IOException;
 
   public abstract TupleEntryCollector openSystemIntermediateForWrite() throws IOException;
+
+  /**
+   * Method getConfig returns the actual instance of the underlying configuration instance.
+   * <p/>
+   * This instance should not be modified or cached, see {@link #getConfigCopy()} for a modifiable instance.
+   *
+   * @return an instance of the configuration
+   */
+  public abstract Config getConfig();
 
   public abstract Config getConfigCopy();
 

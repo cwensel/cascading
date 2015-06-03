@@ -310,7 +310,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
    */
   public String[] getChildPartitionIdentifiers( FlowProcess<? extends Config> flowProcess, boolean fullyQualified ) throws IOException
     {
-    return ( (FileType) parent ).getChildIdentifiers( flowProcess.getConfigCopy(), partition.getPathDepth(), fullyQualified );
+    return ( (FileType) parent ).getChildIdentifiers( flowProcess.getConfig(), partition.getPathDepth(), fullyQualified );
     }
 
   @Override

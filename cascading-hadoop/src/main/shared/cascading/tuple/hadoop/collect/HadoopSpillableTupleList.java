@@ -76,7 +76,7 @@ public class HadoopSpillableTupleList extends SpillableTupleList
     if( flowProcess instanceof FlowProcessWrapper )
       flowProcess = ( (FlowProcessWrapper) flowProcess ).getDelegate();
 
-    return ReflectionUtils.newInstance( codecClass, flowProcess.getConfigCopy() );
+    return ReflectionUtils.newInstance( codecClass, flowProcess.getConfig() );
     }
 
   /**

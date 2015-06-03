@@ -99,7 +99,7 @@ public class LocalStepStreamGraph extends NodeStreamGraph
 
   private LocalFlowProcess tapFlowProcess( Tap tap )
     {
-    Properties defaultProperties = ( (LocalFlowProcess) flowProcess ).getConfigCopy();
+    Properties defaultProperties = ( (LocalFlowProcess) flowProcess ).getConfig();
     Properties tapProperties = step.getPropertiesMap().get( tap );
 
     tapProperties = PropertyUtil.createProperties( tapProperties, defaultProperties );

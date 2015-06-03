@@ -110,6 +110,12 @@ public class Hadoop2TezFlowProcess extends FlowProcess<TezConfiguration> impleme
     }
 
   @Override
+  public TezConfiguration getConfig()
+    {
+    return configuration;
+    }
+
+  @Override
   public TezConfiguration getConfigCopy()
     {
     return new TezConfiguration( configuration );

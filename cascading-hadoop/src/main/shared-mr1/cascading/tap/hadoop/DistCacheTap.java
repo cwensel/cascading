@@ -52,7 +52,7 @@ public class DistCacheTap extends BaseDistCacheTap
   @Override
   protected Path[] getLocalCacheFiles( FlowProcess<? extends Configuration> flowProcess ) throws IOException
     {
-    return DistributedCache.getLocalCacheFiles( flowProcess.getConfigCopy() );
+    return DistributedCache.getLocalCacheFiles( flowProcess.getConfig() );
     }
 
   @Override

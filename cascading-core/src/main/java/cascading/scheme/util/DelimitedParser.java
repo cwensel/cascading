@@ -291,7 +291,7 @@ public class DelimitedParser implements Serializable
 
     try
       {
-      if( !tap.resourceExists( flowProcess.getConfigCopy() ) )
+      if( !tap.resourceExists( flowProcess ) )
         throw new TapException( "unable to read fields from tap: " + tap + ", does not exist" );
 
       iterator = tap.openForRead( flowProcess );

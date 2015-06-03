@@ -22,9 +22,21 @@ package cascading.tap.type;
 
 import java.io.IOException;
 
+import cascading.flow.FlowProcess;
+
 /** Interface FileType marks specific platform {@link cascading.tap.Tap} classes as representing a file like interface. */
 public interface FileType<Config>
   {
+  /**
+   * Method isDirectory returns true if the underlying resource represents a directory or folder instead
+   * of an individual file.
+   *
+   * @param flowProcess
+   * @return boolean
+   * @throws java.io.IOException
+   */
+  boolean isDirectory( FlowProcess<? extends Config> flowProcess ) throws IOException;
+
   /**
    * Method isDirectory returns true if the underlying resource represents a directory or folder instead
    * of an individual file.
@@ -40,13 +52,35 @@ public interface FileType<Config>
    * <p/>
    * This method will skip Hadoop log directories ({@code _log}).
    *
+   * @param flowProcess
+   * @return String[]
+   * @throws java.io.IOException
+   */
+  String[] getChildIdentifiers( FlowProcess<? extends Config> flowProcess ) throws IOException;
+
+  /**
+   * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
+   * <p/>
+   * This method will skip Hadoop log directories ({@code _log}).
+   *
    * @param conf of JobConf
    * @return String[]
    * @throws java.io.IOException
    */
   String[] getChildIdentifiers( Config conf ) throws IOException;
 
+  String[] getChildIdentifiers( FlowProcess<? extends Config> flowProcess, int depth, boolean fullyQualified ) throws IOException;
+
   String[] getChildIdentifiers( Config conf, int depth, boolean fullyQualified ) throws IOException;
+
+  /**
+   * Method getSize returns the size of the file referenced by this tap.
+   *
+   * @param flowProcess
+   * @return The size of the file reference by this tap.
+   * @throws java.io.IOException
+   */
+  long getSize( FlowProcess<? extends Config> flowProcess ) throws IOException;
 
   /**
    * Method getSize returns the size of the file referenced by this tap.

@@ -492,6 +492,11 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     return true;
     }
 
+  public boolean deleteChildResource( FlowProcess<? extends Configuration> flowProcess, String childIdentifier ) throws IOException
+    {
+    return deleteChildResource( flowProcess.getConfig(), childIdentifier );
+    }
+
   public boolean deleteChildResource( Configuration conf, String childIdentifier ) throws IOException
     {
     Path childPath = new Path( childIdentifier ).makeQualified( getFileSystem( conf ) );
@@ -513,14 +518,24 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     }
 
   @Override
+  public boolean isDirectory( FlowProcess<? extends Configuration> flowProcess ) throws IOException
+    {
+    return isDirectory( flowProcess.getConfig() );
+    }
+
+  @Override
   public boolean isDirectory( Configuration conf ) throws IOException
     {
     if( !resourceExists( conf ) )
-      {
       return false;
-      }
 
     return getFileSystem( conf ).getFileStatus( getPath() ).isDir();
+    }
+
+  @Override
+  public long getSize( FlowProcess<? extends Configuration> flowProcess ) throws IOException
+    {
+    return getSize( flowProcess.getConfig() );
     }
 
   @Override
@@ -535,6 +550,18 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       return 0;
 
     return getFileSystem( conf ).getFileStatus( getPath() ).getLen();
+    }
+
+  /**
+   * Method getBlockSize returns the {@code blocksize} specified by the underlying file system for this resource.
+   *
+   * @param flowProcess
+   * @return long
+   * @throws IOException when
+   */
+  public long getBlockSize( FlowProcess<? extends Configuration> flowProcess ) throws IOException
+    {
+    return getBlockSize( flowProcess.getConfig() );
     }
 
   /**
@@ -561,6 +588,19 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
    * Method getReplication returns the {@code replication} specified by the underlying file system for
    * this resource.
    *
+   * @param flowProcess
+   * @return int
+   * @throws IOException when
+   */
+  public int getReplication( FlowProcess<? extends Configuration> flowProcess ) throws IOException
+    {
+    return getReplication( flowProcess.getConfig() );
+    }
+
+  /**
+   * Method getReplication returns the {@code replication} specified by the underlying file system for
+   * this resource.
+   *
    * @param conf of JobConf
    * @return int
    * @throws IOException when
@@ -579,9 +619,21 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     }
 
   @Override
+  public String[] getChildIdentifiers( FlowProcess<? extends Configuration> flowProcess ) throws IOException
+    {
+    return getChildIdentifiers( flowProcess.getConfig(), 1, false );
+    }
+
+  @Override
   public String[] getChildIdentifiers( Configuration conf ) throws IOException
     {
     return getChildIdentifiers( conf, 1, false );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( FlowProcess<? extends Configuration> flowProcess, int depth, boolean fullyQualified ) throws IOException
+    {
+    return getChildIdentifiers( flowProcess.getConfig(), depth, fullyQualified );
     }
 
   @Override
@@ -691,6 +743,14 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       return;
 
     statuses = getFileSystem( conf ).listStatus( getPath() );
+    }
+
+  /**
+   * Method resetFileStatuses removes the status cache, if any.
+   */
+  public void resetFileStatuses()
+    {
+    statuses = null;
     }
 
   /** Combined input format that uses the underlying individual input format to combine multiple files into a single split. */

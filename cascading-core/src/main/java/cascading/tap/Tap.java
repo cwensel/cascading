@@ -307,7 +307,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public TupleEntryCollector openForWrite( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     if( isReplace() )
-      deleteResource( flowProcess.getConfigCopy() );
+      deleteResource( flowProcess );
 
     return openForWrite( flowProcess, null );
     }
@@ -407,7 +407,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public String getFullIdentifier( FlowProcess<? extends Config> flowProcess )
     {
-    return getFullIdentifier( flowProcess.getConfigCopy() );
+    return getFullIdentifier( flowProcess.getConfig() );
     }
 
   /**
@@ -430,7 +430,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public boolean createResource( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
-    return createResource( flowProcess.getConfigCopy() );
+    return createResource( flowProcess.getConfig() );
     }
 
   /**
@@ -451,7 +451,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public boolean deleteResource( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
-    return deleteResource( flowProcess.getConfigCopy() );
+    return deleteResource( flowProcess.getConfig() );
     }
 
   /**
@@ -554,7 +554,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public boolean resourceExists( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
-    return resourceExists( flowProcess.getConfigCopy() );
+    return resourceExists( flowProcess.getConfig() );
     }
 
   /**
@@ -575,7 +575,7 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
    */
   public long getModifiedTime( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
-    return getModifiedTime( flowProcess.getConfigCopy() );
+    return getModifiedTime( flowProcess.getConfig() );
     }
 
   /**
