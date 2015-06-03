@@ -15,7 +15,7 @@ You cannot have both `cascading-hadoop2-mr1` and `cascading-hadoop2-tez` in your
 Both c.t.Tap and c.s.Scheme implementations will work with both MapReduce and Tez platforms, though custom Tap/Scheme
 implementations may need to be updated to work against Cascading 3.0.
 
-This release has been tested and built against Tez 0.7.0. Currently all applicable tests pass against the Tez platform.
+This release has been tested and built against Tez 0.6.1. Currently all applicable tests pass against the Tez platform.
 
 See below for notes and issues against this release.
 
@@ -58,21 +58,23 @@ on a given Hadoop revision are slightly different.
 As a convenience, we are providing the build for each supported version of Tez. Of which can be easily copied down
 onto HDFS for use by YARN.
 
-| Tez Version | Hadoop Version | Bucket + Path                                                               |
-|-------------|----------------|-----------------------------------------------------------------------------|
-| 0.5.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.0/                        |
-| 0.5.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.1/                        |
-| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/                        |
-| 0.6.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz |
-| 0.6.1       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop26.tar.gz |
-| 0.7.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz |
-| 0.7.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop26.tar.gz |
+| Tez Version | Hadoop Version | Bucket + Path                                                               | Stable |
+|-------------|----------------|-----------------------------------------------------------------------------|--------|
+| 0.5.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.0/                        |        |
+| 0.5.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.1/                        |        |
+| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/                        |   X    |
+| 0.6.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz |   X    |
+| 0.6.1       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop26.tar.gz |   X    |
+| 0.7.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz |   *    |
+| 0.7.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop26.tar.gz |   *    |
+
+* See known issues below. 
 
 For up to date notes on the available YARN apps, see: http://files.cascading.org/third-party/yarn/apps/NOTES.txt 
 
-To copy Tez 0.7.0 to HDFS, execute:
+To copy Tez 0.6.1 to HDFS, execute:
 
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz /apps/
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz /apps/
 
 Since the _minimal_ jar is being use, ensure 'tez.use.cluster.hadoop-libs=true'. 
 
@@ -109,13 +111,13 @@ Next shell into where you are running your Hadoop jobs, then:
     hdfs dfs -mkdir -p /apps/
     hdfs dfs -chmod -R 777 /apps/
      
-    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz /apps/
+    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz /apps/
      
-    mkdir tez-0.7.0
-    tar -xzf tez-0.7.0-minimal-hadoop24.tar.gz -C tez-0.7.0
+    mkdir tez-0.6.1
+    tar -xzf tez-0.6.1-minimal-hadoop24.tar.gz -C tez-0.6.1
 
-    export HADOOP_CLASSPATH=~/tez-0.7.0/*:~/tez-0.7.0/lib/*:$HADOOP_CLASSPATH
+    export HADOOP_CLASSPATH=~/tez-0.6.1/*:~/tez-0.6.1/lib/*:$HADOOP_CLASSPATH
 
 See above for other available Tez versions.     
      
@@ -125,7 +127,7 @@ You also need to start the YARN History Server (not on by default in EMR):
 
 Then to execute your application you nee to make sure these properties are set on the Hadoop2TezFlowConnector:
  
-     tez.lib.uris=${fs.default.name}/apps/tez-0.7.0-minimal-hadoop24.tar.gz
+     tez.lib.uris=${fs.default.name}/apps/tez-0.6.1-minimal-hadoop24.tar.gz
      tez.use.cluster.hadoop-libs=true
      yarn.timeline-service.hostname=$HOSTNAME
      io.compression.codecs=org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.SnappyCodec
@@ -135,7 +137,10 @@ The last two lines provide missing EMR parameters. May be unnecessary on a local
 
 ## Notes and Known Issues
 
-Some notes and issues with running Cascading on Apache Tez. JIRA issues will be noted when created.
+Some notes and issues with running Cascading on Apache Tez. JIRA issues will be noted when created. 
+
+* Tez 0.7.0 is unstable causing both random hangs in tests, and the default sorter fails on large partitions, see
+  TEZ-2475 & TEZ-2505
 
 * YARN timeline server (ATS) is required for task level counters, this will be required when Driven is supported.
 
@@ -143,8 +148,6 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
 
     > jps | grep DAGApp | cut -f1 -d" " | xargs kill -9; jps | grep TezChild | cut -f1 -d" " | xargs kill -9
     
-* To prevent deadlocks in local mode, "tez.am.inline.task.execution.max-tasks" is set to 3 in the platform test suite.
-
 * Contrary to GroupVertex, there is no obvious API for binding multiple vertices as a single output. Subsequently, some
   splits are written twice.
     
