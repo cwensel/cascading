@@ -52,6 +52,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import cascading.CascadingException;
@@ -951,6 +958,35 @@ public class Util
       }
 
     return exceptionClasses;
+    }
+
+  public static Boolean submitWithTimeout( Callable<Boolean> task, int timeout, TimeUnit timeUnit ) throws Exception
+    {
+    ExecutorService executor = Executors.newFixedThreadPool( 1 );
+
+    Future<Boolean> future = executor.submit( task );
+
+    executor.shutdown();
+
+    try
+      {
+      return future.get( timeout, timeUnit );
+      }
+    catch( TimeoutException exception )
+      {
+      future.cancel( true );
+      }
+    catch( ExecutionException exception )
+      {
+      Throwable cause = exception.getCause();
+
+      if( cause instanceof RuntimeException )
+        throw (RuntimeException) cause;
+
+      throw (Exception) cause;
+      }
+
+    return null;
     }
 
   public interface RetryOperator<T>

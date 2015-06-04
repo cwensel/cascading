@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -368,7 +370,25 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       if( tezClient == null )
         return;
 
-      tezClient.stop(); // will shutdown the session
+      if( isRemoteExecution() )
+        {
+        tezClient.stop(); // will shutdown the session
+        return;
+        }
+
+      // the Tez LocalClient will frequently hang on #stop(), this causes tests to never complete
+      Boolean result = Util.submitWithTimeout( new Callable<Boolean>()
+      {
+      @Override
+      public Boolean call() throws Exception
+        {
+        tezClient.stop();
+        return true;
+        }
+      }, 5, TimeUnit.MINUTES );
+
+      if( result == null || !result )
+        flowStep.logWarn( "tezClient#stop() timed out after 5 minutes, cancelling call, continuing" );
       }
     catch( Exception exception )
       {
