@@ -20,6 +20,7 @@
 
 package cascading.flow;
 
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.planner.process.FlowNodeGraph;
@@ -76,6 +77,14 @@ public interface FlowStep<Config> extends ProcessModel
    * @return the current initialized configuration
    */
   Config getConfig();
+
+  /**
+   * Method getConfigAsProperties converts the internal configuration object into a {@link java.util.Map} of
+   * key value pairs.
+   *
+   * @return a Map of key/value pairs, may return an empty collection if unsupported
+   */
+  Map<Object, Object> getConfigAsProperties();
 
   /**
    * Method getStepDisplayName returns the stepDisplayName of this FlowStep object.

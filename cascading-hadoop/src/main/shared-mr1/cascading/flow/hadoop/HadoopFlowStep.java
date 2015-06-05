@@ -84,6 +84,12 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     super( elementGraph, flowNodeGraph );
     }
 
+  @Override
+  public Map<Object, Object> getConfigAsProperties()
+    {
+    return HadoopUtil.createProperties( getConfig() );
+    }
+
   public JobConf createInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
     JobConf conf = parentConfig == null ? new JobConf() : HadoopUtil.copyJobConf( parentConfig );

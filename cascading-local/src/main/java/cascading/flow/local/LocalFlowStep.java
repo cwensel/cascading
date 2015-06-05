@@ -48,6 +48,12 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
     }
 
   @Override
+  public Map<Object, Object> getConfigAsProperties()
+    {
+    return getConfig();
+    }
+
+  @Override
   public Properties createInitializedConfig( FlowProcess<Properties> flowProcess, Properties parentConfig )
     {
     Properties currentProperties = parentConfig == null ? new Properties() : new Properties( parentConfig );

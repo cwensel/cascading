@@ -130,6 +130,12 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     }
 
   @Override
+  public Map<Object, Object> getConfigAsProperties()
+    {
+    return HadoopUtil.createProperties( getConfig() );
+    }
+
+  @Override
   public TezConfiguration createInitializedConfig( FlowProcess<TezConfiguration> flowProcess, TezConfiguration parentConfig )
     {
     TezConfiguration stepConf = parentConfig == null ? new TezConfiguration() : new TezConfiguration( parentConfig );

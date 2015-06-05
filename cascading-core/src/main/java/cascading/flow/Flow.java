@@ -135,7 +135,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   Config getConfigCopy();
 
   /**
-   * Method getConfiAsProperties converts the internal configuration object into a {@link java.util.Map} of
+   * Method getConfigAsProperties converts the internal configuration object into a {@link java.util.Map} of
    * key value pairs.
    *
    * @return a Map of key/value pairs

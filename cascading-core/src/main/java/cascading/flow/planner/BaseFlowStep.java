@@ -215,6 +215,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     return flowStepConf;
     }
 
+  @Override
+  public Map<Object, Object> getConfigAsProperties()
+    {
+    return Collections.emptyMap();
+    }
+
   /**
    * Set the initialized flowStepConf Config instance
    *

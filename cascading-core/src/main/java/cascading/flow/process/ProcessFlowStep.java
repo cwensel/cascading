@@ -20,6 +20,9 @@
 
 package cascading.flow.process;
 
+import java.util.Collections;
+import java.util.Map;
+
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
@@ -31,6 +34,12 @@ public class ProcessFlowStep extends BaseFlowStep
   public ProcessFlowStep( ProcessWrapper processWrapper, int counter )
     {
     super( processWrapper.toString(), counter );
+    }
+
+  @Override
+  public Map<Object, Object> getConfigAsProperties()
+    {
+    return Collections.emptyMap();
     }
 
   @Override

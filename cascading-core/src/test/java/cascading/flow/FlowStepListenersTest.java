@@ -20,6 +20,8 @@
 
 package cascading.flow;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.planner.BaseFlowStep;
@@ -57,6 +59,12 @@ public class FlowStepListenersTest extends TestCase
     protected FlowStepJob createFlowStepJob( ClientState clientState, FlowProcess fp, Object initializedStepConfig )
       {
       return null;
+      }
+
+    @Override
+    public Map<Object, Object> getConfigAsProperties()
+      {
+      return Collections.emptyMap();
       }
 
     @Override
