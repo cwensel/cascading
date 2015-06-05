@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.0 [unreleased]
 
+  Updated Apache Hadoop 2 based sub-projects to 2.6.0.
+
   Updated c.f.h.ProcessFlow and related classes to be independent of the Hadoop platforms. The class has been moved to
   c.f.p.ProcessFlow.
 
