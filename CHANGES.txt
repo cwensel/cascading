@@ -1,5 +1,7 @@
 Cascading Change Log
 
+3.0.1 [unreleased]
+
 3.0.0
 
   Updated Apache Hadoop 2 based sub-projects to 2.6.0.
