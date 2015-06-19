@@ -20,6 +20,7 @@
 
 package cascading.flow.tez;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,8 +111,8 @@ import static cascading.flow.tez.util.TezUtil.addToClassPath;
 import static cascading.tap.hadoop.DistCacheTap.CASCADING_LOCAL_RESOURCES;
 import static cascading.tap.hadoop.DistCacheTap.CASCADING_REMOTE_RESOURCES;
 import static java.util.Collections.singletonList;
+import static org.apache.hadoop.yarn.api.records.LocalResourceType.ARCHIVE;
 import static org.apache.hadoop.yarn.api.records.LocalResourceType.FILE;
-import static org.apache.hadoop.yarn.api.records.LocalResourceType.PATTERN;
 
 /**
  *
@@ -172,9 +173,14 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       {
       // the PATTERN represents the insides of the app jar, those elements must be added to the remote CLASSPATH
       List<String> classpath = singletonList( appJarPath );
-      Map<Path, Path> pathMap = addToClassPath( stepConf, flowStagingPath, null, classpath, PATTERN, dagResources, environment );
+      Map<Path, Path> pathMap = addToClassPath( stepConf, flowStagingPath, null, classpath, ARCHIVE, dagResources, environment );
 
       syncPaths.putAll( pathMap );
+
+      // AM does not support environments like containers do, so the classpath has to be passed via configuration.
+      String fileName = new File( appJarPath ).getName();
+      stepConf.set( TezConfiguration.TEZ_CLUSTER_ADDITIONAL_CLASSPATH_PREFIX,
+        "$PWD/" + fileName + "/:$PWD/" + fileName + "/classes/:$PWD/" + fileName + "/lib/*:" );
       }
 
     allLocalResources.putAll( dagResources );
@@ -847,6 +853,11 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       {
       return -1;
       }
+    }
+
+  public Map<String, LocalResource> getAllLocalResources()
+    {
+    return allLocalResources;
     }
 
   private static class EdgeValues

@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.1 [unreleased]
 
+  Fixed issue in c.f.t.p.Hadoop2TezFlowStepJob where the LocalResources were not passed to the AppMaster correctly
+  causing ClassNotFoundException during split calculation for custom InputFormats.
+
 3.0.0
 
   Updated Apache Hadoop 2 based sub-projects to 2.6.0.

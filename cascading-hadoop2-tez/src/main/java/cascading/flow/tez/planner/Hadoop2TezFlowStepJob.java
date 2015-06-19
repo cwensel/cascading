@@ -32,6 +32,7 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.tez.Hadoop2TezFlow;
+import cascading.flow.tez.Hadoop2TezFlowStep;
 import cascading.management.state.ClientState;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStepStats;
@@ -134,7 +135,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
       prepareEnsureStagingDir( workingConf );
 
-      tezClient = TezClient.create( flowStep.getName(), workingConf );
+      tezClient = TezClient.create( flowStep.getName(), workingConf, ( (Hadoop2TezFlowStep) flowStep).getAllLocalResources(), null );
 
       tezClient.start();
 
