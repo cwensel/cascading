@@ -1,5 +1,7 @@
 Cascading Change Log
 
+3.1.0 [unreleased]
+
 3.0.1
 
   Fixed issue in c.f.t.p.Hadoop2TezFlowStepJob where the LocalResources were not passed to the AppMaster correctly
