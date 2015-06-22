@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import cascading.property.Props;
+import cascading.tuple.Tuple;
 import cascading.util.Util;
 
 /**
@@ -40,10 +41,16 @@ import cascading.util.Util;
 public class TupleSerializationProps extends Props
   {
   public static final String SERIALIZATION_TOKENS = "cascading.serialization.tokens";
+  public static final String SERIALIZATION_COMPARISON_BITWISE_PREVENT = "cascading.serialization.comparison.bitwise.prevent";
+  public static final String IGNORE_TYPES = "cascading.serialization.types.ignored";
+  public static final String REQUIRE_TYPES = "cascading.serialization.types.required";
   public static final String HADOOP_IO_SERIALIZATIONS = "io.serializations";
 
   Map<Integer, String> serializationTokens = new LinkedHashMap<Integer, String>();
   List<String> hadoopSerializations = new ArrayList<String>();
+  Boolean ignoreTypes;
+  Boolean requireTypes;
+  Boolean preventBitWiseComparisons;
 
   /**
    * Adds the given token and className pair as a serialization token property. During object serialization and deserialization,
@@ -196,6 +203,78 @@ public class TupleSerializationProps extends Props
     return this;
     }
 
+  public Boolean getIgnoreTypes()
+    {
+    return ignoreTypes;
+    }
+
+  /**
+   * Method setIgnoreTypes forces the {@link TupleSerialization} class to ignore any and all
+   * declared types causing the serialization to write each type or {@link SerializationToken}
+   * per {@link Tuple} element.
+   * <p/>
+   * This disables the declared type optimizations.
+   * <p/>
+   * See {@link #setRequireTypes(Boolean)} to force a failure if field type information is missing.
+   *
+   * @param ignoreTypes
+   * @return
+   */
+  public TupleSerializationProps setIgnoreTypes( Boolean ignoreTypes )
+    {
+    this.ignoreTypes = ignoreTypes;
+
+    return this;
+    }
+
+  public Boolean getRequireTypes()
+    {
+    return requireTypes;
+    }
+
+  /**
+   * Method setRequireTypes forces {@link TupleSerialization} to fail if field types are not declared.
+   * <p/>
+   * This ensures the field type optimizations are leveraged.
+   * <p/>
+   * See {@link #setIgnoreTypes(Boolean)} to force field type information to be discarded.
+   *
+   * @param requireTypes
+   * @return
+   */
+  public TupleSerializationProps setRequireTypes( Boolean requireTypes )
+    {
+    this.requireTypes = requireTypes;
+
+    return this;
+    }
+
+  /**
+   * Method preventBitWiseComparison will enable/disable bitwise comparisons of grouping keys
+   * during ordered partitioning ({@link cascading.pipe.GroupBy} and {@link cascading.pipe.CoGroup}).
+   * <p/>
+   * If natural ordering of grouping/join keys is required, disable bit wise comparisons. They are enabled
+   * by default (subject to the below conditions).
+   * <p/>
+   * Bit wise comparisons will only apply if the {@link cascading.tuple.Fields} used in the grouping/join are
+   * declared and no custom {@link java.util.Comparator} instances are provided on the grouping/key Fields, or
+   * no secondary sorting is being performed on a GroupBy.
+   *
+   * @param preventBitWiseComparisons set to true to disable bit wise comparisons
+   * @return this
+   */
+  public TupleSerializationProps preventBitWiseComparison( boolean preventBitWiseComparisons )
+    {
+    this.preventBitWiseComparisons = preventBitWiseComparisons;
+
+    return this;
+    }
+
+  public boolean getPreventBitWiseComparisons()
+    {
+    return preventBitWiseComparisons;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -204,5 +283,14 @@ public class TupleSerializationProps extends Props
 
     for( String hadoopSerialization : hadoopSerializations )
       addSerialization( properties, hadoopSerialization );
+
+    if( ignoreTypes != null )
+      properties.put( IGNORE_TYPES, ignoreTypes.toString() );
+
+    if( requireTypes != null )
+      properties.put( REQUIRE_TYPES, requireTypes.toString() );
+
+    if( preventBitWiseComparisons != null )
+      properties.put( SERIALIZATION_COMPARISON_BITWISE_PREVENT, preventBitWiseComparisons.toString() );
     }
   }

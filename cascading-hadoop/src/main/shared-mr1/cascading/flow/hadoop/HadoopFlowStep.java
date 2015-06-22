@@ -21,12 +21,14 @@
 package cascading.flow.hadoop;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import cascading.CascadingException;
+import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
@@ -39,12 +41,14 @@ import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.ProcessEdge;
 import cascading.management.state.ClientState;
+import cascading.pipe.CoGroup;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.io.MultiInputFormat;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.hadoop.util.TempHfs;
-import cascading.tuple.Tuple;
+import cascading.tuple.Fields;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.hadoop.util.CoGroupingComparator;
 import cascading.tuple.hadoop.util.CoGroupingPartitioner;
@@ -56,8 +60,12 @@ import cascading.tuple.hadoop.util.IndexTupleCoGroupingComparator;
 import cascading.tuple.hadoop.util.ReverseGroupingSortingComparator;
 import cascading.tuple.hadoop.util.ReverseTupleComparator;
 import cascading.tuple.hadoop.util.TupleComparator;
-import cascading.tuple.io.IndexTuple;
+import cascading.tuple.io.KeyIndexTuple;
+import cascading.tuple.io.KeyTuple;
 import cascading.tuple.io.TuplePair;
+import cascading.tuple.io.ValueIndexTuple;
+import cascading.tuple.io.ValueTuple;
+import cascading.util.ProcessLogger;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -66,8 +74,7 @@ import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputFormat;
 
-import static cascading.flow.hadoop.util.HadoopUtil.addComparators;
-import static cascading.flow.hadoop.util.HadoopUtil.pack;
+import static cascading.flow.hadoop.util.HadoopUtil.*;
 
 /**
  *
@@ -99,8 +106,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     conf.setJobName( getStepDisplayName( conf.getInt( "cascading.display.id.truncate", Util.ID_LENGTH ) ) );
 
-    conf.setOutputKeyClass( Tuple.class );
-    conf.setOutputValueClass( Tuple.class );
+    conf.setOutputKeyClass( KeyTuple.class );
+    conf.setOutputValueClass( ValueTuple.class );
 
     conf.setMapRunnerClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
@@ -141,6 +148,8 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     conf.setOutputKeyComparatorClass( TupleComparator.class );
 
+    ProcessEdge processEdge = Util.getFirst( getFlowNodeGraph().edgeSet() );
+
     if( getGroup() == null )
       {
       conf.setNumReduceTasks( 0 ); // disable reducers
@@ -148,24 +157,26 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     else
       {
       // must set map output defaults when performing a reduce
-      conf.setMapOutputKeyClass( Tuple.class );
-      conf.setMapOutputValueClass( Tuple.class );
+      conf.setMapOutputKeyClass( KeyTuple.class );
+      conf.setMapOutputValueClass( ValueTuple.class );
       conf.setPartitionerClass( GroupingPartitioner.class );
 
       // handles the case the groupby sort should be reversed
       if( getGroup().isSortReversed() )
         conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
 
-      addComparators( conf, "cascading.group.comparator", getGroup().getKeySelectors(), this, getGroup() );
+      Integer ordinal = (Integer) Util.getFirst( processEdge.getIncomingOrdinals() );
+
+      addComparators( conf, "cascading.group.comparator", getGroup().getKeySelectors(), (Fields) processEdge.getResolvedKeyFields().get( ordinal ) );
 
       if( getGroup().isGroupBy() )
-        addComparators( conf, "cascading.sort.comparator", getGroup().getSortingSelectors(), this, getGroup() );
+        addComparators( conf, "cascading.sort.comparator", getGroup().getSortingSelectors(), (Fields) processEdge.getResolvedSortFields().get( ordinal ) );
 
       if( !getGroup().isGroupBy() )
         {
         conf.setPartitionerClass( CoGroupingPartitioner.class );
-        conf.setMapOutputKeyClass( IndexTuple.class ); // allows groups to be sorted by index
-        conf.setMapOutputValueClass( IndexTuple.class );
+        conf.setMapOutputKeyClass( KeyIndexTuple.class ); // allows groups to be sorted by index
+        conf.setMapOutputValueClass( ValueIndexTuple.class );
         conf.setOutputKeyComparatorClass( IndexTupleCoGroupingComparator.class ); // sorts by group, then by index
         conf.setOutputValueGroupingComparator( CoGroupingComparator.class );
         }
@@ -183,6 +194,16 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         // no need to supply a reverse comparator, only equality is checked
         conf.setOutputValueGroupingComparator( GroupingComparator.class );
         }
+      }
+
+    // if we write type information into the stream, we can perform comparisons in indexed tuples
+    // thus, if the edge is a CoGroup and they keys are not common types, force writing of type information
+    if( processEdge != null && ifCoGroupAndKeysHaveCommonTypes( this, processEdge.getFlowElement(), processEdge.getResolvedKeyFields() ) )
+      {
+      conf.set( "cascading.node.ordinals", Util.join( processEdge.getIncomingOrdinals(), "," ) );
+      addFields( conf, "cascading.node.key.fields", processEdge.getResolvedKeyFields() );
+      addFields( conf, "cascading.node.sort.fields", processEdge.getResolvedSortFields() );
+      addFields( conf, "cascading.node.value.fields", processEdge.getResolvedValueFields() );
       }
 
     // perform last so init above will pass to tasks
@@ -222,6 +243,32 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
 
     return conf;
+    }
+
+  private static boolean ifCoGroupAndKeysHaveCommonTypes( ProcessLogger processLogger, FlowElement flowElement, Map<Integer, Fields> resolvedKeyFields )
+    {
+    if( !( flowElement instanceof CoGroup ) )
+      return true;
+
+    if( resolvedKeyFields == null || resolvedKeyFields.size() < 2 )
+      return true;
+
+    Iterator<Map.Entry<Integer, Fields>> iterator = resolvedKeyFields.entrySet().iterator();
+
+    Fields fields = iterator.next().getValue();
+
+    while( iterator.hasNext() )
+      {
+      Fields next = iterator.next().getValue();
+
+      if( !Arrays.equals( fields.getTypesClasses(), next.getTypesClasses() ) )
+        {
+        processLogger.logWarn( "unable to perform: {}, on mismatched join types and optimize serialization with type exclusion, fields: {} & {}", flowElement, fields, next );
+        return false;
+        }
+      }
+
+    return true;
     }
 
   public boolean isHadoopLocalMode( JobConf conf )

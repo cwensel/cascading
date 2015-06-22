@@ -38,6 +38,9 @@ import cascading.pipe.Splice;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.io.KeyTuple;
+import cascading.tuple.io.ValueTuple;
+import cascading.tuple.util.Resettable1;
 import cascading.util.SortedListMultiMap;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -59,6 +62,8 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
 
   private MeasuredOutputCollector collector;
   private TupleEntry valueEntry;
+
+  private final Resettable1<Tuple> keyTuple = new KeyTuple();
 
   public TezMergeGate( FlowProcess flowProcess, Splice splice, IORole role, Collection<LogicalOutput> logicalOutputs )
     {
@@ -147,7 +152,9 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
     {
     try
       {
-      collector.collect( incomingEntry.getTuple(), Tuple.NULL );
+      keyTuple.reset( incomingEntry.getTuple() );
+
+      collector.collect( keyTuple, ValueTuple.NULL );
       flowProcess.increment( SliceCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )

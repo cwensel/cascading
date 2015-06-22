@@ -40,6 +40,11 @@ import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.Tuples;
+import cascading.tuple.io.KeyTuple;
+import cascading.tuple.io.TuplePair;
+import cascading.tuple.io.ValueTuple;
+import cascading.tuple.util.Resettable1;
+import cascading.tuple.util.Resettable2;
 import cascading.tuple.util.TupleBuilder;
 import cascading.tuple.util.TupleHasher;
 import org.slf4j.Logger;
@@ -54,6 +59,8 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
   {
   private static final Logger LOG = LoggerFactory.getLogger( GroupingSpliceGate.class );
 
+  // incoming ducts have a unique ordinal into the splice, so we cannot store the ordinal directly on the
+  // previous duct
   protected Map<Duct, Integer> ordinalMap;
 
   protected Fields[] keyFields;
@@ -69,6 +76,13 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
   protected TupleBuilder[] valuesBuilder;
   protected TupleBuilder[] sortBuilder;
 
+  // as sink
+  protected Tuple keyTuple; // alias for groupTuple or groupSortTuple
+  protected Resettable1<Tuple> groupTuple;
+  protected Resettable2<Tuple, Tuple> groupSortTuple;
+  protected Resettable1<Tuple> valueTuple;
+
+  // as source
   protected Grouping<TupleEntry, TupleEntryIterator> grouping;
   protected TupleEntry keyEntry;
   protected TupleEntryChainIterator tupleEntryIterator;
@@ -251,7 +265,17 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
       }
 
     if( role == IORole.sink )
+      {
+      if( sortFields == null )
+        groupTuple = new KeyTuple();
+      else
+        groupSortTuple = new TuplePair();
+
+      keyTuple = (Tuple) ( sortFields == null ? groupTuple : groupSortTuple );
+      valueTuple = new ValueTuple();
+
       return;
+      }
 
     keyEntry = new TupleEntry( outgoingScope.getOutGroupingFields(), true );
     tupleEntryIterator = new TupleEntryChainIterator( outgoingScope.getOutValuesFields() );

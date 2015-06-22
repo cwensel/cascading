@@ -21,19 +21,37 @@
 package cascading.tuple.hadoop.io;
 
 import java.io.IOException;
+import java.util.Map;
 
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.io.IndexTuple;
 
-public class IndexTupleSerializer extends BaseSerializer<IndexTuple>
+public class IndexTupleSerializer<T extends IndexTuple> extends BaseSerializer<T>
   {
+  protected Map<Integer, Class[]> typeMap;
+
   public IndexTupleSerializer( TupleSerialization.SerializationElementWriter elementWriter )
     {
     super( elementWriter );
     }
 
-  public void serialize( IndexTuple indexTuple ) throws IOException
+  public void serialize( T tuple ) throws IOException
     {
-    outputStream.writeIndexTuple( indexTuple );
+    outputStream.writeIntInternal( tuple.getIndex() );
+
+    Class[] types = getTypesFor( tuple.getIndex() );
+
+    if( types == null )
+      outputStream.writeUnTyped( tuple.getTuple() );
+    else
+      outputStream.writeTyped( types, tuple.getTuple() );
+    }
+
+  protected Class[] getTypesFor( int ordinal )
+    {
+    if( typeMap == null )
+      return null;
+
+    return typeMap.get( ordinal );
     }
   }

@@ -38,6 +38,9 @@ import cascading.pipe.Pipe;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.tuple.io.KeyTuple;
+import cascading.tuple.io.ValueTuple;
+import cascading.tuple.util.Resettable1;
 import cascading.util.Util;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.tez.runtime.api.LogicalInput;
@@ -58,6 +61,8 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
 
   private MeasuredOutputCollector collector;
   private TupleEntry valueEntry;
+
+  private final Resettable1<Tuple> keyTuple = new KeyTuple();
 
   public TezBoundaryStage( FlowProcess flowProcess, Boundary boundary, IORole role, Collection<LogicalOutput> logicalOutputs )
     {
@@ -140,7 +145,11 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
     {
     try
       {
-      collector.collect( incomingEntry.getTuple(), Tuple.NULL );
+      Tuple tuple = incomingEntry.getTuple();
+
+      keyTuple.reset( tuple );
+
+      collector.collect( keyTuple, ValueTuple.NULL );
       flowProcess.increment( SliceCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )

@@ -23,17 +23,44 @@ package cascading.tuple.hadoop.io;
 import java.io.IOException;
 
 import cascading.tuple.hadoop.TupleSerialization;
+import cascading.tuple.io.TupleOutputStream;
 import cascading.tuple.io.TuplePair;
 
 public class TuplePairSerializer extends BaseSerializer<TuplePair>
   {
+  private final TupleOutputStream.TupleElementWriter[] keyWriters;
+  private final TupleOutputStream.TupleElementWriter[] sortWriters;
+
   public TuplePairSerializer( TupleSerialization.SerializationElementWriter elementWriter )
     {
     super( elementWriter );
+
+    Class[] keyClasses = elementWriter.getTupleSerialization().getKeyTypes();
+    Class[] sortClasses = elementWriter.getTupleSerialization().getSortTypes();
+
+    if( elementWriter.getTupleSerialization().areTypesRequired() )
+      {
+      if( keyClasses == null )
+        throw new IllegalStateException( "types are required to perform serialization, grouping declared fields: " + elementWriter.getTupleSerialization().getKeyFields() );
+
+      if( sortClasses == null )
+        throw new IllegalStateException( "types are required to perform serialization, sorting declared fields: " + elementWriter.getTupleSerialization().getSortFields() );
+      }
+
+    keyWriters = HadoopTupleOutputStream.getWritersFor( elementWriter, keyClasses );
+    sortWriters = HadoopTupleOutputStream.getWritersFor( elementWriter, sortClasses );
     }
 
   public void serialize( TuplePair tuple ) throws IOException
     {
-    outputStream.writeTuplePair( tuple );
+    if( keyWriters == null )
+      outputStream.writeUnTyped( tuple.getLhs() );
+    else
+      outputStream.writeWith( keyWriters, tuple.getLhs() );
+
+    if( sortWriters == null )
+      outputStream.writeUnTyped( tuple.getRhs() );
+    else
+      outputStream.writeWith( sortWriters, tuple.getRhs() );
     }
   }

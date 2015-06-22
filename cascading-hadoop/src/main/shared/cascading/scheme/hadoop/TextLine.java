@@ -87,7 +87,7 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
   /** Field DEFAULT_SOURCE_FIELDS */
-  public static final Fields DEFAULT_SOURCE_FIELDS = new Fields( "offset", "line" );
+  public static final Fields DEFAULT_SOURCE_FIELDS = new Fields( "offset", "line" ).applyTypes( Long.TYPE, String.class );
 
   /** Field sinkCompression */
   Compress sinkCompression = Compress.DISABLE;

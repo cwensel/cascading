@@ -29,7 +29,6 @@ import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.HadoopCoGroupClosure;
 import cascading.flow.hadoop.util.TimedIterator;
-import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.DuctException;
 import cascading.flow.stream.graph.IORole;
 import cascading.flow.tez.TezCoGroupClosure;
@@ -185,12 +184,6 @@ public class TezCoGroupGate extends TezGroupGate
   protected HadoopCoGroupClosure createClosure()
     {
     return new TezCoGroupClosure( flowProcess, splice.getNumSelfJoins(), keyFields, valuesFields );
-    }
-
-  @Override
-  protected void wrapGroupingAndCollect( Duct previous, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException
-    {
-    collector.collect( groupKey, valuesTuple );
     }
 
   @Override

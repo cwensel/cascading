@@ -123,7 +123,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    */
-  static enum Kind
+  enum Kind
     {
       NONE, ALL, GROUP, VALUES, ARGS, RESULTS, UNKNOWN, REPLACE, SWAP
     }
@@ -206,7 +206,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     fields.fields = expand( size, 0 );
 
     for( Comparable field : fields )
-      fields.applyType( field, type );
+      fields = fields.applyType( field, type );
 
     return fields;
     }

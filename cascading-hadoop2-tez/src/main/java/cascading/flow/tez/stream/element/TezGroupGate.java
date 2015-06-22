@@ -23,10 +23,12 @@ package cascading.flow.tez.stream.element;
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
+import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.element.InputSource;
 import cascading.flow.stream.graph.IORole;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
+import cascading.tuple.Tuple;
 import cascading.util.SortedListMultiMap;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.tez.runtime.api.LogicalInput;
@@ -116,6 +118,12 @@ public abstract class TezGroupGate extends HadoopGroupGate implements InputSourc
     }
 
   protected abstract Throwable reduce() throws Exception;
+
+  @Override
+  protected void wrapGroupingAndCollect( Duct previous, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException
+    {
+    collector.collect( groupKey, valuesTuple );
+    }
 
   @Override
   protected OutputCollector createOutputCollector()

@@ -38,15 +38,28 @@ import org.apache.hadoop.io.RawComparator;
 /** Class DeserializerComparator is the base class for all Cascading comparator classes. */
 public abstract class DeserializerComparator<T> extends Configured implements RawComparator<T>
   {
-  final BufferedInputStream lhsBuffer = new BufferedInputStream();
-  final BufferedInputStream rhsBuffer = new BufferedInputStream();
+  protected BufferedInputStream lhsBuffer;
+  protected BufferedInputStream rhsBuffer;
 
-  TupleSerialization tupleSerialization;
+  protected TupleSerialization tupleSerialization;
 
-  HadoopTupleInputStream lhsStream;
-  HadoopTupleInputStream rhsStream;
+  protected HadoopTupleInputStream lhsStream;
+  protected HadoopTupleInputStream rhsStream;
 
-  Comparator[] groupComparators;
+  protected Class[] keyTypes;
+  protected Comparator[] groupComparators;
+
+  boolean hasConfiguredComparators = false; //
+
+  protected boolean canPerformRawComparisons()
+    {
+    return false;
+    }
+
+  protected boolean performRawComparison()
+    {
+    return canPerformRawComparisons() && keyTypes != null && !hasConfiguredComparators;
+    }
 
   @Override
   public void setConf( Configuration conf )
@@ -58,12 +71,25 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     tupleSerialization = new TupleSerialization( conf );
 
-    // get new readers so deserializers don't compete for the buffer
-    lhsStream = new HadoopTupleInputStream( lhsBuffer, tupleSerialization.getElementReader() );
-    rhsStream = new HadoopTupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
+    keyTypes = tupleSerialization.getKeyTypes();
 
     groupComparators = deserializeComparatorsFor( "cascading.group.comparator" );
-    groupComparators = delegatingComparatorsFor( groupComparators );
+    groupComparators = delegatingComparatorsFor( keyTypes, groupComparators );
+
+    if( performRawComparison() )
+      return;
+
+    lhsBuffer = new BufferedInputStream();
+    rhsBuffer = new BufferedInputStream();
+
+    // get new readers so deserializers don't compete for the buffer
+    lhsStream = getHadoopTupleInputStream( lhsBuffer, tupleSerialization.getElementReader() );
+    rhsStream = getHadoopTupleInputStream( rhsBuffer, tupleSerialization.getElementReader() );
+    }
+
+  protected HadoopTupleInputStream getHadoopTupleInputStream( BufferedInputStream lhsBuffer, TupleSerialization.SerializationElementReader elementReader )
+    {
+    return new HadoopTupleInputStream( lhsBuffer, elementReader );
     }
 
   Comparator[] deserializeComparatorsFor( String name )
@@ -93,24 +119,44 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
       }
     }
 
-  Comparator[] delegatingComparatorsFor( Comparator[] fieldComparators )
+  Comparator[] delegatingComparatorsFor( Class[] types, Comparator[] fieldComparators )
     {
     Comparator[] comparators = new Comparator[ fieldComparators.length ];
 
     for( int i = 0; i < comparators.length; i++ )
       {
-      if( fieldComparators[ i ] instanceof StreamComparator )
-        comparators[ i ] = new TupleElementStreamComparator( (StreamComparator) fieldComparators[ i ] );
-      else if( fieldComparators[ i ] != null )
-        comparators[ i ] = new TupleElementComparator( fieldComparators[ i ] );
+      if( types != null )
+        {
+        Class type = types[ i ];
+
+        if( fieldComparators[ i ] != null )
+          comparators[ i ] = fieldComparators[ i ]; // provided on selector
+        else
+          comparators[ i ] = tupleSerialization.getComparator( type ); // provided via Serialization or conf, may return null
+
+        if( comparators[ i ] != null )
+          hasConfiguredComparators = true;
+
+        if( comparators[ i ] instanceof StreamComparator )
+          comparators[ i ] = new TypedTupleElementStreamComparator( type, (StreamComparator) comparators[ i ] );
+        else
+          comparators[ i ] = new TypedTupleElementComparator( type, comparators[ i ] );
+        }
       else
-        comparators[ i ] = new DelegatingTupleElementComparator( tupleSerialization );
+        {
+        if( fieldComparators[ i ] instanceof StreamComparator )
+          comparators[ i ] = new TupleElementStreamComparator( (StreamComparator) fieldComparators[ i ] );
+        else if( fieldComparators[ i ] != null )
+          comparators[ i ] = new TupleElementComparator( fieldComparators[ i ] );
+        else
+          comparators[ i ] = new DelegatingTupleElementComparator( tupleSerialization ); // lazy lookup
+        }
       }
 
     return comparators;
     }
 
-  final int compareTuples( Comparator[] comparators, Tuple lhs, Tuple rhs )
+  protected final int compareTuples( Comparator[] comparators, Tuple lhs, Tuple rhs )
     {
     int lhsLen = lhs.size();
     int rhsLen = rhs.size();
@@ -142,7 +188,37 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
     return 0;
     }
 
-  final int compareTuples( Comparator[] comparators ) throws IOException
+  protected final int compareTuples( Class[] types, Comparator[] comparators ) throws IOException
+    {
+    if( types == null )
+      return compareUnTypedTuples( comparators );
+    else
+      return compareTypedTuples( types, comparators );
+    }
+
+  final int compareTypedTuples( Class[] types, Comparator[] comparators ) throws IOException
+    {
+    int c;
+
+    for( int i = 0; i < types.length; i++ )
+      {
+      try
+        {
+        c = ( (StreamComparator) comparators[ i % comparators.length ] ).compare( lhsStream, rhsStream );
+        }
+      catch( Exception exception )
+        {
+        throw new CascadingException( "unable to compare stream elements in position: " + i, exception );
+        }
+
+      if( c != 0 )
+        return c;
+      }
+
+    return 0;
+    }
+
+  final int compareUnTypedTuples( Comparator[] comparators ) throws IOException
     {
     int lhsLen = lhsStream.getNumElements();
     int rhsLen = rhsStream.getNumElements();
@@ -154,7 +230,6 @@ public abstract class DeserializerComparator<T> extends Configured implements Ra
 
     for( int i = 0; i < lhsLen; i++ )
       {
-      // hack to support comparators array length of 1
       try
         {
         c = ( (StreamComparator) comparators[ i % comparators.length ] ).compare( lhsStream, rhsStream );

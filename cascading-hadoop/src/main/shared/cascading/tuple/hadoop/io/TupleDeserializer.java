@@ -39,4 +39,10 @@ public class TupleDeserializer extends BaseDeserializer<Tuple>
 
     return inputStream.readTuple( tuple );
     }
+
+  @Override
+  protected Tuple createTuple()
+    {
+    return null; // unused
+    }
   }

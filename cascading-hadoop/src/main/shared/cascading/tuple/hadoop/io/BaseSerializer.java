@@ -23,26 +23,52 @@ package cascading.tuple.hadoop.io;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.io.TupleOutputStream;
 import org.apache.hadoop.io.serializer.Serializer;
 
-abstract class BaseSerializer<T> implements Serializer<T>
+abstract class BaseSerializer<T extends Tuple> implements Serializer<T>
   {
   private final TupleSerialization.SerializationElementWriter elementWriter;
-  TupleOutputStream outputStream;
+  private TupleOutputStream.TupleElementWriter[] writers;
+
+  HadoopTupleOutputStream outputStream;
 
   protected BaseSerializer( TupleSerialization.SerializationElementWriter elementWriter )
     {
     this.elementWriter = elementWriter;
     }
 
+  protected void setWriters( Fields fields )
+    {
+    Class[] classes = fields == null ? null : elementWriter.getTupleSerialization().getTypesFor( fields );
+
+    if( elementWriter.getTupleSerialization().areTypesRequired() )
+      {
+      if( classes == null )
+        throw new IllegalStateException( "types are required to perform serialization, declared fields: " + fields );
+      }
+
+    writers = HadoopTupleOutputStream.getWritersFor( elementWriter, classes );
+    }
+
   public void open( OutputStream out )
     {
-    if( out instanceof TupleOutputStream )
-      outputStream = (TupleOutputStream) out;
+    if( out instanceof HadoopTupleOutputStream )
+      outputStream = (HadoopTupleOutputStream) out;
     else
       outputStream = new HadoopTupleOutputStream( out, elementWriter );
+    }
+
+  @Override
+  public void serialize( T tuple ) throws IOException
+    {
+    if( writers == null )
+      outputStream.writeUnTyped( tuple );
+    else
+      outputStream.writeWith( writers, tuple );
     }
 
   public void close() throws IOException

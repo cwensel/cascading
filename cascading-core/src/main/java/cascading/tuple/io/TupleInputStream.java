@@ -41,9 +41,16 @@ public abstract class TupleInputStream extends DataInputStream
   /** Field elementReader */
   protected final ElementReader elementReader;
 
+  public interface TupleElementReader<T extends TupleInputStream>
+    {
+    Object read( T stream ) throws IOException;
+    }
+
   public interface ElementReader
     {
     Object read( int token, DataInputStream inputStream ) throws IOException;
+
+    Object read( Class type, DataInputStream inputStream ) throws IOException;
 
     Comparator getComparatorFor( int type, DataInputStream inputStream ) throws IOException;
 
@@ -64,10 +71,49 @@ public abstract class TupleInputStream extends DataInputStream
 
   public Tuple readTuple() throws IOException
     {
-    return readTuple( new Tuple() );
+    Tuple tuple = new Tuple();
+
+    return readTuple( tuple );
     }
 
-  public Tuple readTuple( Tuple tuple ) throws IOException
+  public <T extends Tuple> T readWith( TupleElementReader[] readers, T tuple ) throws IOException
+    {
+    List<Object> elements = Tuple.elements( tuple );
+
+    elements.clear();
+
+    for( int i = 0; i < readers.length; i++ )
+      {
+      Object element = readers[ i ].read( this );
+
+      elements.add( element );
+      }
+
+    return tuple;
+    }
+
+  public <T extends Tuple> T readTuple( T tuple ) throws IOException
+    {
+    return readUnTyped( tuple );
+    }
+
+  public <T extends Tuple> T readTyped( Class[] classes, T tuple ) throws IOException
+    {
+    List<Object> elements = Tuple.elements( tuple );
+
+    elements.clear();
+
+    for( int i = 0; i < classes.length; i++ )
+      {
+      Class type = classes[ i ];
+
+      elements.add( readType( type ) );
+      }
+
+    return tuple;
+    }
+
+  public <T extends Tuple> T readUnTyped( T tuple ) throws IOException
     {
     List<Object> elements = Tuple.elements( tuple );
 
@@ -106,9 +152,11 @@ public abstract class TupleInputStream extends DataInputStream
     return readIndexTuple( new IndexTuple() );
     }
 
-  public abstract IndexTuple readIndexTuple( IndexTuple indexTuple ) throws IOException;
+  public abstract IndexTuple readIndexTuple( IndexTuple tuple ) throws IOException;
 
   protected abstract Object readType( int type ) throws IOException;
+
+  public abstract Object readType( Class type ) throws IOException;
 
   public Comparator getComparatorFor( int type ) throws IOException
     {

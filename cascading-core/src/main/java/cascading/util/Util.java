@@ -133,6 +133,27 @@ public class Util
     return collection.iterator().next();
     }
 
+  public static <V> V getFirst( Iterator<V> iterator )
+    {
+    if( iterator == null || !iterator.hasNext() )
+      return null;
+
+    return iterator.next();
+    }
+
+  public static <V> V getLast( Iterator<V> iterator )
+    {
+    if( iterator == null || !iterator.hasNext() )
+      return null;
+
+    V v = iterator.next();
+
+    while( iterator.hasNext() )
+      v = iterator.next();
+
+    return v;
+    }
+
   public static <N extends Number> N max( Collection<N> collection )
     {
     return new TreeSet<>( collection ).first();
@@ -470,9 +491,12 @@ public class Util
 
   public static <T> List<T> split( Class<T> type, String delim, String values )
     {
-    String[] split = values.split( delim );
-
     List<T> results = new ArrayList<>();
+
+    if( values == null )
+      return results;
+
+    String[] split = values.split( delim );
 
     for( String value : split )
       results.add( Coercions.<T>coerce( value, type ) );

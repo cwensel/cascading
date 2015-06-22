@@ -18,38 +18,24 @@
  * limitations under the License.
  */
 
-package cascading.tuple.hadoop.util;
+package cascading.tuple.hadoop.io;
 
-import java.io.IOException;
+import cascading.tuple.hadoop.TupleSerialization;
+import cascading.tuple.io.ValueTuple;
 
-import cascading.CascadingException;
-import cascading.tuple.Tuple;
-import org.apache.hadoop.conf.Configurable;
-
-public class TupleComparator extends DeserializerComparator<Tuple> implements Configurable
+public class ValueTupleDeserializer extends BaseDeserializer<ValueTuple>
   {
-  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
-    {
-    try
-      {
-      lhsBuffer.reset( b1, s1, l1 );
-      rhsBuffer.reset( b2, s2, l2 );
 
-      return compareTuples( groupComparators );
-      }
-    catch( IOException exception )
-      {
-      throw new CascadingException( exception );
-      }
-    finally
-      {
-      lhsBuffer.clear();
-      rhsBuffer.clear();
-      }
+  public ValueTupleDeserializer( TupleSerialization.SerializationElementReader elementReader )
+    {
+    super( elementReader );
+
+    setReaders( elementReader.getTupleSerialization().getMaskedValueFields() );
     }
 
-  public int compare( Tuple lhs, Tuple rhs )
+  @Override
+  protected ValueTuple createTuple()
     {
-    return compareTuples( groupComparators, lhs, rhs );
+    return new ValueTuple();
     }
   }

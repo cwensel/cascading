@@ -899,6 +899,35 @@ public class HadoopUtil
       }
     }
 
+  public static void addFields( Configuration conf, String property, Map<Integer, Fields> fields )
+    {
+    if( fields == null || fields.isEmpty() )
+      return;
+
+    Map<String, Fields> toPack = new HashMap<>();
+
+    for( Map.Entry<Integer, Fields> entry : fields.entrySet() )
+      toPack.put( entry.getKey().toString(), entry.getValue() );
+
+    conf.set( property, pack( toPack, conf ) );
+    }
+
+  public static Map<Integer, Fields> getFields( Configuration conf, String property ) throws IOException
+    {
+    String value = conf.getRaw( property );
+
+    if( value == null || value.isEmpty() )
+      return Collections.emptyMap();
+
+    Map<String, Fields> map = deserializeBase64( value, conf, Map.class, true );
+    Map<Integer, Fields> result = new HashMap<>();
+
+    for( Map.Entry<String, Fields> entry : map.entrySet() )
+      result.put( Integer.parseInt( entry.getKey() ), entry.getValue() );
+
+    return result;
+    }
+
   public static void addComparators( Configuration conf, String property, Map<String, Fields> map, BaseFlowStep flowStep, Group group )
     {
     Iterator<Fields> fieldsIterator = map.values().iterator();
@@ -921,5 +950,27 @@ public class HadoopUtil
 
     if( fields.size() != 0 ) // allows fields.UNKNOWN to be used
       conf.setInt( property + ".size", fields.size() );
+    }
+
+  public static void addComparators( Configuration conf, String property, Map<String, Fields> map, Fields resolvedFields )
+    {
+    Iterator<Fields> fieldsIterator = map.values().iterator();
+
+    if( !fieldsIterator.hasNext() )
+      return;
+
+    while( fieldsIterator.hasNext() )
+      {
+      Fields fields = fieldsIterator.next();
+
+      if( fields.hasComparators() )
+        {
+        conf.set( property, pack( fields, conf ) );
+        return;
+        }
+      }
+
+    if( resolvedFields.size() != 0 ) // allows fields.UNKNOWN to be used
+      conf.setInt( property + ".size", resolvedFields.size() );
     }
   }

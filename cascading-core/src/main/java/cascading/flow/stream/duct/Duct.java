@@ -28,6 +28,7 @@ import cascading.flow.stream.graph.StreamGraph;
 public abstract class Duct<Incoming, Outgoing>
   {
   protected Duct<Outgoing, ?> next;
+  protected Integer ordinal;
 
   Duct()
     {

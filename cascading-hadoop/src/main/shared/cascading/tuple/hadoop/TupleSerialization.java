@@ -29,25 +29,40 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProps;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.tuple.Comparison;
+import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleException;
 import cascading.tuple.hadoop.io.HadoopTupleOutputStream;
 import cascading.tuple.hadoop.io.IndexTupleDeserializer;
 import cascading.tuple.hadoop.io.IndexTupleSerializer;
+import cascading.tuple.hadoop.io.KeyIndexTupleDeserializer;
+import cascading.tuple.hadoop.io.KeyIndexTupleSerializer;
+import cascading.tuple.hadoop.io.KeyTupleDeserializer;
+import cascading.tuple.hadoop.io.KeyTupleSerializer;
 import cascading.tuple.hadoop.io.TupleDeserializer;
 import cascading.tuple.hadoop.io.TuplePairDeserializer;
 import cascading.tuple.hadoop.io.TuplePairSerializer;
 import cascading.tuple.hadoop.io.TupleSerializer;
+import cascading.tuple.hadoop.io.ValueIndexTupleDeserializer;
+import cascading.tuple.hadoop.io.ValueIndexTupleSerializer;
+import cascading.tuple.hadoop.io.ValueTupleDeserializer;
+import cascading.tuple.hadoop.io.ValueTupleSerializer;
 import cascading.tuple.io.IndexTuple;
+import cascading.tuple.io.KeyIndexTuple;
+import cascading.tuple.io.KeyTuple;
 import cascading.tuple.io.TupleInputStream;
 import cascading.tuple.io.TupleOutputStream;
 import cascading.tuple.io.TuplePair;
+import cascading.tuple.io.ValueIndexTuple;
+import cascading.tuple.io.ValueTuple;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -83,6 +98,7 @@ import static cascading.tuple.hadoop.TupleSerializationProps.HADOOP_IO_SERIALIZA
   classNames = {"org.apache.hadoop.io.BytesWritable"})
 public class TupleSerialization extends Configured implements Serialization
   {
+
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TupleSerialization.class );
 
@@ -99,6 +115,19 @@ public class TupleSerialization extends Configured implements Serialization
   private HashMap<String, Integer> classesTokensMap;
   /** Field tokenMapSize */
   private long tokensSize = 0;
+
+  List<Integer> ordinals;
+
+  Map<Integer, Fields> keyFieldsMap;
+  Map<Integer, Fields> sortFieldsMap;
+  Map<Integer, Fields> valueFieldsMap;
+
+  Fields keyFields;
+  Fields sortFields;
+  Fields valueFields;
+
+  Boolean typesRequired; // for testing purposes
+  Boolean typesIgnored; // for testing purposes
 
   static String getSerializationTokens( Configuration jobConf )
     {
@@ -235,6 +264,32 @@ public class TupleSerialization extends Configured implements Serialization
     return super.getConf();
     }
 
+  public boolean areTypesIgnored()
+    {
+    if( typesIgnored == null )
+      {
+      typesIgnored = getConf().getBoolean( TupleSerializationProps.IGNORE_TYPES, false );
+
+      if( typesIgnored )
+        LOG.info( "types are being ignored during serialization" );
+      }
+
+    return typesIgnored;
+    }
+
+  public boolean areTypesRequired()
+    {
+    if( typesRequired == null )
+      {
+      typesRequired = getConf().getBoolean( TupleSerializationProps.REQUIRE_TYPES, false );
+
+      if( typesRequired )
+        LOG.info( "types are being enforced during serialization" );
+      }
+
+    return typesRequired;
+    }
+
   SerializationFactory getSerializationFactory()
     {
     if( serializationFactory == null )
@@ -243,14 +298,158 @@ public class TupleSerialization extends Configured implements Serialization
     return serializationFactory;
     }
 
+  public Fields getKeyFields()
+    {
+    if( keyFields == null && getFirstOrdinal() != null )
+      keyFields = getKeyFieldsMap().get( getFirstOrdinal() );
+
+    return keyFields;
+    }
+
+  public Class[] getKeyTypes()
+    {
+    Fields fields = getKeyFields();
+
+    return getTypesFor( fields );
+    }
+
+  public Class[] getTypesFor( Fields fields )
+    {
+    if( areTypesIgnored() || fields == null )
+      return null;
+
+    return fields.getTypesClasses();
+    }
+
+  public Fields getSortFields()
+    {
+    if( sortFields == null && getFirstOrdinal() != null )
+      sortFields = getSortFieldsMap().get( getFirstOrdinal() );
+
+    return sortFields;
+    }
+
+  public Class[] getSortTypes()
+    {
+    return getTypesFor( getSortFields() );
+    }
+
+  public Fields getValueFields()
+    {
+    if( valueFields == null && getFirstOrdinal() != null )
+      valueFields = getValueFieldsMap().get( getFirstOrdinal() );
+
+    return valueFields;
+    }
+
+  public Fields getMaskedValueFields()
+    {
+    return maskVoid( getValueFields(), getKeyFields() );
+    }
+
+  public Class[] getValueTypes()
+    {
+    return getTypesFor( getValueFields() );
+    }
+
+  public Map<Integer, Class[]> getKeyTypeMap()
+    {
+    if( areTypesIgnored() || getKeyFieldsMap() == null )
+      return Collections.emptyMap();
+
+    Map<Integer, Class[]> map = new HashMap<>();
+
+    for( Map.Entry<Integer, Fields> entry : getKeyFieldsMap().entrySet() )
+      map.put( entry.getKey(), entry.getValue().getTypesClasses() );
+
+    return map;
+    }
+
+  public Map<Integer, Class[]> getValueTypeMap()
+    {
+    if( areTypesIgnored() || getValueFieldsMap() == null )
+      return Collections.emptyMap();
+
+    Map<Integer, Class[]> map = new HashMap<>();
+
+    for( Map.Entry<Integer, Fields> entry : getValueFieldsMap().entrySet() )
+      map.put( entry.getKey(), entry.getValue().getTypesClasses() );
+
+    return map;
+    }
+
+  public Map<Integer, Class[]> getMaskedValueTypeMap()
+    {
+    if( areTypesIgnored() || getValueFieldsMap() == null )
+      return Collections.emptyMap();
+
+    Map<Integer, Fields> keyFieldsMap = getKeyFieldsMap();
+
+    if( keyFieldsMap == null || keyFieldsMap.isEmpty() )
+      return getValueTypeMap();
+
+    Map<Integer, Class[]> map = new HashMap<>();
+
+    for( Map.Entry<Integer, Fields> entry : getValueFieldsMap().entrySet() )
+      {
+      Integer ordinal = entry.getKey();
+      Fields valueFields = entry.getValue();
+      Fields keyFields = keyFieldsMap.get( ordinal );
+
+      map.put( ordinal, maskVoid( valueFields, keyFields ).getTypesClasses() );
+      }
+
+    return map;
+    }
+
+  public List<Integer> getOrdinals()
+    {
+    if( ordinals == null )
+      ordinals = Util.split( Integer.class, ",", getConf().get( "cascading.node.ordinals" ) );
+
+    return ordinals;
+    }
+
+  public Integer getFirstOrdinal()
+    {
+    if( getOrdinals().isEmpty() )
+      return null;
+
+    return Util.getFirst( getOrdinals() );
+    }
+
+  public Map<Integer, Fields> getKeyFieldsMap()
+    {
+    if( keyFieldsMap == null )
+      keyFieldsMap = getFields( getConf(), "cascading.node.key.fields" );
+
+    return keyFieldsMap;
+    }
+
+  public Map<Integer, Fields> getSortFieldsMap()
+    {
+    if( sortFields == null )
+      sortFieldsMap = getFields( getConf(), "cascading.node.sort.fields" );
+
+    return sortFieldsMap;
+    }
+
+  public Map<Integer, Fields> getValueFieldsMap()
+    {
+    if( valueFieldsMap == null )
+      valueFieldsMap = getFields( getConf(), "cascading.node.value.fields" );
+
+    return valueFieldsMap;
+    }
+
   /** Must be called before {@link #getClassNameFor(int)} and {@link #getTokenFor(String)} methods. */
   void initTokenMaps()
     {
     if( tokenClassesMap != null )
       return;
 
-    tokenClassesMap = new HashMap<Integer, String>();
-    classesTokensMap = new HashMap<String, Integer>();
+    tokenClassesMap = new HashMap<>();
+    classesTokensMap = new HashMap<>();
 
     String tokenProperty = getSerializationTokens( getConf() );
 
@@ -337,6 +536,8 @@ public class TupleSerialization extends Configured implements Serialization
    */
   final String getClassNameFor( int token )
     {
+    initTokenMaps();
+
     if( tokensSize == 0 )
       return null;
 
@@ -356,6 +557,8 @@ public class TupleSerialization extends Configured implements Serialization
    */
   final Integer getTokenFor( String className )
     {
+    initTokenMaps();
+
     if( tokensSize == 0 )
       return null;
 
@@ -426,6 +629,16 @@ public class TupleSerialization extends Configured implements Serialization
       }
     }
 
+  KeyTupleDeserializer getKeyTupleDeserializer()
+    {
+    return new KeyTupleDeserializer( getElementReader() );
+    }
+
+  ValueTupleDeserializer getValueTupleDeserializer()
+    {
+    return new ValueTupleDeserializer( getElementReader() );
+    }
+
   TuplePairDeserializer getTuplePairDeserializer()
     {
     return new TuplePairDeserializer( getElementReader() );
@@ -446,9 +659,29 @@ public class TupleSerialization extends Configured implements Serialization
     return new TupleDeserializer( getElementReader() );
     }
 
+  private KeyTupleSerializer getKeyTupleSerializer()
+    {
+    return new KeyTupleSerializer( getElementWriter() );
+    }
+
+  private ValueTupleSerializer getValueTupleSerializer()
+    {
+    return new ValueTupleSerializer( getElementWriter() );
+    }
+
   private TuplePairSerializer getTuplePairSerializer()
     {
     return new TuplePairSerializer( getElementWriter() );
+    }
+
+  KeyIndexTupleDeserializer getKeyIndexTupleDeserializer()
+    {
+    return new KeyIndexTupleDeserializer( getElementReader() );
+    }
+
+  ValueIndexTupleDeserializer getValueIndexTupleDeserializer()
+    {
+    return new ValueIndexTupleDeserializer( getElementReader() );
     }
 
   IndexTupleDeserializer getIndexTupleDeserializer()
@@ -471,6 +704,16 @@ public class TupleSerialization extends Configured implements Serialization
     return new TupleSerializer( getElementWriter() );
     }
 
+  private KeyIndexTupleSerializer getKeyIndexTupleSerializer()
+    {
+    return new KeyIndexTupleSerializer( getElementWriter() );
+    }
+
+  private ValueIndexTupleSerializer getValueIndexTupleSerializer()
+    {
+    return new ValueIndexTupleSerializer( getElementWriter() );
+    }
+
   private IndexTupleSerializer getIndexTupleSerializer()
     {
     return new IndexTupleSerializer( getElementWriter() );
@@ -484,7 +727,10 @@ public class TupleSerialization extends Configured implements Serialization
    */
   public boolean accept( Class c )
     {
-    return Tuple.class == c || TuplePair.class == c || IndexTuple.class == c;
+    return Tuple.class == c ||
+      KeyTuple.class == c || ValueTuple.class == c ||
+      KeyIndexTuple.class == c || ValueIndexTuple.class == c ||
+      TuplePair.class == c || IndexTuple.class == c;
     }
 
   /**
@@ -497,6 +743,14 @@ public class TupleSerialization extends Configured implements Serialization
     {
     if( c == Tuple.class )
       return getTupleDeserializer();
+    else if( c == KeyTuple.class )
+      return getKeyTupleDeserializer();
+    else if( c == ValueTuple.class )
+      return getValueTupleDeserializer();
+    else if( c == KeyIndexTuple.class )
+      return getKeyIndexTupleDeserializer();
+    else if( c == ValueIndexTuple.class )
+      return getValueIndexTupleDeserializer();
     else if( c == TuplePair.class )
       return getTuplePairDeserializer();
     else if( c == IndexTuple.class )
@@ -515,6 +769,14 @@ public class TupleSerialization extends Configured implements Serialization
     {
     if( c == Tuple.class )
       return getTupleSerializer();
+    else if( c == KeyTuple.class )
+      return getKeyTupleSerializer();
+    else if( c == ValueTuple.class )
+      return getValueTupleSerializer();
+    else if( c == KeyIndexTuple.class )
+      return getKeyIndexTupleSerializer();
+    else if( c == ValueIndexTuple.class )
+      return getValueIndexTupleSerializer();
     else if( c == TuplePair.class )
       return getTuplePairSerializer();
     else if( c == IndexTuple.class )
@@ -547,6 +809,32 @@ public class TupleSerialization extends Configured implements Serialization
     return type;
     }
 
+  public static Map<Integer, Fields> getFields( Configuration conf, String property )
+    {
+    try
+      {
+      return HadoopUtil.getFields( conf, property );
+      }
+    catch( IOException exception )
+      {
+      LOG.warn( "unable to get fields for: " + property );
+
+      return Collections.emptyMap();
+      }
+    }
+
+  private static Fields maskVoid( Fields fields, Fields mask )
+    {
+    if( mask == null || !fields.hasTypes() || !mask.hasTypes() )
+      return fields;
+
+    Fields voidedKey = mask.applyTypes( Fields.size( mask.size(), Void.class ) );
+
+    fields = fields.applyTypes( voidedKey );
+
+    return fields;
+    }
+
   public static class SerializationElementReader implements TupleInputStream.ElementReader
     {
     /** Field LOG */
@@ -566,8 +854,11 @@ public class TupleSerialization extends Configured implements Serialization
     public SerializationElementReader( TupleSerialization tupleSerialization )
       {
       this.tupleSerialization = tupleSerialization;
+      }
 
-      tupleSerialization.initTokenMaps();
+    public TupleSerialization getTupleSerialization()
+      {
+      return tupleSerialization;
       }
 
     public Object read( int token, DataInputStream inputStream ) throws IOException
@@ -585,6 +876,28 @@ public class TupleSerialization extends Configured implements Serialization
       catch( IOException exception )
         {
         LOG.error( "failed deserializing token: " + token + " with classname: " + className, exception );
+
+        throw exception;
+        }
+
+      return object;
+      }
+
+    public Object read( Class type, DataInputStream inputStream ) throws IOException
+      {
+      String className = type.getName();
+      Deserializer deserializer = getDeserializerFor( inputStream, className );
+
+      Object foundObject = null;
+      Object object;
+
+      try
+        {
+        object = deserializer.deserialize( foundObject );
+        }
+      catch( IOException exception )
+        {
+        LOG.error( "failed deserializing: " + className, exception );
 
         throw exception;
         }
@@ -669,8 +982,11 @@ public class TupleSerialization extends Configured implements Serialization
     public SerializationElementWriter( TupleSerialization tupleSerialization )
       {
       this.tupleSerialization = tupleSerialization;
+      }
 
-      tupleSerialization.initTokenMaps();
+    public TupleSerialization getTupleSerialization()
+      {
+      return tupleSerialization;
       }
 
     public void write( DataOutputStream outputStream, Object object ) throws IOException
@@ -691,6 +1007,22 @@ public class TupleSerialization extends Configured implements Serialization
         WritableUtils.writeVInt( outputStream, token );
         }
 
+      Serializer serializer = getSerializer( outputStream, type );
+
+      try
+        {
+        serializer.serialize( object );
+        }
+      catch( IOException exception )
+        {
+        LOG.error( "failed serializing token: " + token + " with classname: " + className, exception );
+
+        throw exception;
+        }
+      }
+
+    private Serializer getSerializer( DataOutputStream outputStream, Class<?> type ) throws IOException
+      {
       Serializer serializer = serializers.get( type );
 
       if( serializer == null )
@@ -700,13 +1032,20 @@ public class TupleSerialization extends Configured implements Serialization
         serializers.put( type, serializer );
         }
 
+      return serializer;
+      }
+
+    public void write( DataOutputStream outputStream, Class<?> type, Object object ) throws IOException
+      {
+      Serializer serializer = getSerializer( outputStream, type );
+
       try
         {
         serializer.serialize( object );
         }
       catch( IOException exception )
         {
-        LOG.error( "failed serializing token: " + token + " with classname: " + className, exception );
+        LOG.error( "failed serializing type: " + type.getName(), exception );
 
         throw exception;
         }

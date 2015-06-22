@@ -2,6 +2,10 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated Hadoop, Hadoop2, and Tez serialization and comparator frameworks to fully leverage declared field type
+  information to reduce serialized data and perform bitwise equality comparisons. See c.t.h.TupleSerializationProps to
+  disable bitwise comparisons.
+
 3.0.1
 
   Fixed issue in c.f.t.p.Hadoop2TezFlowStepJob where the LocalResources were not passed to the AppMaster correctly

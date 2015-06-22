@@ -21,22 +21,48 @@
 package cascading.tuple.hadoop.io;
 
 import java.io.IOException;
+import java.util.Map;
 
+import cascading.tuple.Tuple;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.io.IndexTuple;
 
-public class IndexTupleDeserializer extends BaseDeserializer<IndexTuple>
+public class IndexTupleDeserializer<T extends IndexTuple> extends BaseDeserializer<T>
   {
+  protected Map<Integer, Class[]> typeMap;
+
   public IndexTupleDeserializer( TupleSerialization.SerializationElementReader elementReader )
     {
     super( elementReader );
     }
 
-  public IndexTuple deserialize( IndexTuple indexTuple ) throws IOException
+  public T deserialize( IndexTuple tuple ) throws IOException
     {
-    if( indexTuple == null )
-      return inputStream.readIndexTuple();
+    if( tuple == null )
+      tuple = createTuple();
 
-    return inputStream.readIndexTuple( indexTuple );
+    int ordinal = inputStream.readVInt();
+    tuple.setIndex( ordinal );
+
+    Class[] types = getTypesFor( ordinal );
+
+    // in both cases, we need to fill a new Tuple instance
+    if( types == null )
+      tuple.setTuple( inputStream.readUnTyped( new Tuple() ) );
+    else
+      tuple.setTuple( inputStream.readTyped( types, new Tuple() ) );
+
+    return (T) tuple;
+    }
+
+  @Override
+  protected T createTuple()
+    {
+    return (T) new IndexTuple();
+    }
+
+  protected Class[] getTypesFor( int ordinal )
+    {
+    return null;
     }
   }

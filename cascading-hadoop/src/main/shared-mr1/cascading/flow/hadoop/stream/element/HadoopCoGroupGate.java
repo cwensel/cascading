@@ -30,6 +30,8 @@ import cascading.flow.stream.graph.StreamGraph;
 import cascading.pipe.CoGroup;
 import cascading.tuple.Tuple;
 import cascading.tuple.io.IndexTuple;
+import cascading.tuple.io.KeyIndexTuple;
+import cascading.tuple.io.ValueIndexTuple;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -37,6 +39,9 @@ import org.apache.hadoop.mapred.OutputCollector;
  */
 public class HadoopCoGroupGate extends HadoopGroupGate
   {
+  IndexTuple keyTuple = new KeyIndexTuple();
+  IndexTuple valueTuple = new ValueIndexTuple();
+
   public HadoopCoGroupGate( FlowProcess flowProcess, CoGroup coGroup, IORole role )
     {
     super( flowProcess, coGroup, role );
@@ -59,7 +64,13 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     {
     Integer ordinal = ordinalMap.get( previous );
 
-    collector.collect( new IndexTuple( ordinal, groupKey ), new IndexTuple( ordinal, valuesTuple ) );
+    keyTuple.setIndex( ordinal );
+    keyTuple.setTuple( groupKey );
+
+    valueTuple.setIndex( ordinal );
+    valueTuple.setTuple( valuesTuple );
+
+    collector.collect( keyTuple, valueTuple );
     }
 
   @Override

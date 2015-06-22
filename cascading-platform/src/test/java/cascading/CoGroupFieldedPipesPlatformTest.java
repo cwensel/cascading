@@ -369,8 +369,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     getPlatform().copyFromLocal( inputFileLower );
     getPlatform().copyFromLocal( inputFileUpper );
 
-    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
-    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ).applyTypes( Long.TYPE, String.class ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ).applyTypes( Long.TYPE, String.class ), inputFileUpper );
 
     Map sources = new HashMap();
 
@@ -379,7 +379,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "afterevery" ), SinkMode.REPLACE );
 
-    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ).applyTypes( String.class, String.class ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
@@ -391,7 +391,11 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+    Map<Object, Object> properties = getPlatform().getProperties();
+
+    properties.put( "cascading.serialization.types.required", "true" );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 
     flow.complete();
 
@@ -1364,8 +1368,8 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "cogroupgroupby" ), SinkMode.REPLACE );
 
-    Function splitterLower = new RegexSplitter( new Fields( "numA", "lower" ), " " );
-    Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ), " " );
+    Function splitterLower = new RegexSplitter( new Fields( "numA", "lower" ).applyTypes( String.class, String.class ), " " );
+    Function splitterUpper = new RegexSplitter( new Fields( "numB", "upper" ).applyTypes( String.class, String.class ), " " );
 
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitterLower );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitterUpper );
@@ -1374,7 +1378,11 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     Pipe groupby = new GroupBy( cogroup, new Fields( "numA" ) );
 
-    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, groupby );
+    Map<Object, Object> properties = getPlatform().getProperties();
+
+    properties.put( "cascading.serialization.types.required", "true" );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, groupby );
 
     flow.complete();
 

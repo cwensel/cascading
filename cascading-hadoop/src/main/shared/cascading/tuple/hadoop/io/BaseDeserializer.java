@@ -23,27 +23,57 @@ package cascading.tuple.hadoop.io;
 import java.io.IOException;
 import java.io.InputStream;
 
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.io.TupleInputStream;
 import org.apache.hadoop.io.serializer.Deserializer;
 
-abstract class BaseDeserializer<T> implements Deserializer<T>
+abstract class BaseDeserializer<T extends Tuple> implements Deserializer<T>
   {
-  TupleInputStream inputStream;
   private final TupleSerialization.SerializationElementReader elementReader;
+  private TupleInputStream.TupleElementReader[] readers;
+
+  HadoopTupleInputStream inputStream;
 
   protected BaseDeserializer( TupleSerialization.SerializationElementReader elementReader )
     {
     this.elementReader = elementReader;
     }
 
+  protected void setReaders( Fields fields )
+    {
+    Class[] classes = fields == null ? null : elementReader.getTupleSerialization().getTypesFor( fields );
+
+    if( elementReader.getTupleSerialization().areTypesRequired() )
+      {
+      if( classes == null )
+        throw new IllegalStateException( "types are required to perform serialization, declared fields: " + fields );
+      }
+
+    readers = HadoopTupleInputStream.getReadersFor( elementReader, classes );
+    }
+
   public void open( InputStream in )
     {
-    if( in instanceof TupleInputStream )
-      inputStream = (TupleInputStream) in;
+    if( in instanceof HadoopTupleInputStream )
+      inputStream = (HadoopTupleInputStream) in;
     else
       inputStream = new HadoopTupleInputStream( in, elementReader );
     }
+
+  public T deserialize( T tuple ) throws IOException
+    {
+    if( tuple == null )
+      tuple = createTuple();
+
+    if( readers == null )
+      return inputStream.readUnTyped( tuple );
+    else
+      return inputStream.readWith( readers, tuple );
+    }
+
+  protected abstract T createTuple();
 
   public void close() throws IOException
     {

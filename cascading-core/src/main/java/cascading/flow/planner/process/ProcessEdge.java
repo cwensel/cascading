@@ -22,14 +22,18 @@ package cascading.flow.planner.process;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowElements;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.tuple.Fields;
+import cascading.util.Util;
 
 /**
  *
@@ -39,29 +43,72 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
   FlowElement flowElement;
   Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
   Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
+
+  Map<Integer, Fields> resolvedKeyFields;
+  Map<Integer, Fields> resolvedSortFields;
+  Map<Integer, Fields> resolvedValueFields;
+
   Set<Enum> sinkAnnotations = Collections.emptySet();
   Set<Enum> sourceAnnotations = Collections.emptySet();
 
   public ProcessEdge( Process sourceProcess, FlowElement flowElement, Process sinkProcess )
     {
+    this( sourceProcess.getElementGraph(), flowElement, sinkProcess.getElementGraph() );
+    }
+
+  public ProcessEdge( ElementGraph sourceElementGraph, FlowElement flowElement, ElementGraph sinkElementGraph )
+    {
     this.flowElement = flowElement;
-
-    ElementGraph sinkElementGraph = sinkProcess.getElementGraph();
-    ElementGraph sourceElementGraph = sourceProcess.getElementGraph();
-
-    this.incomingOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
     this.outgoingOrdinals = createOrdinals( sourceElementGraph.outgoingEdgesOf( flowElement ) );
+    this.incomingOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
 
-    if( sinkElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sinkElementGraph ).hasAnnotations() )
-      this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
+    setResolvedFields( sourceElementGraph, flowElement, sinkElementGraph );
 
     if( sourceElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sourceElementGraph ).hasAnnotations() )
       this.sourceAnnotations = ( (AnnotatedGraph) sourceElementGraph ).getAnnotations().getKeysFor( flowElement );
+
+    if( sinkElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sinkElementGraph ).hasAnnotations() )
+      this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
+    }
+
+  private void setResolvedFields( ElementGraph sourceElementGraph, FlowElement flowElement, ElementGraph sinkElementGraph )
+    {
+    Set<Scope> outgoingScopes = sourceElementGraph.outgoingEdgesOf( flowElement ); // resolved fields
+    Scope resolvedScope = Util.getFirst( outgoingScopes ); // only need first
+
+    Set<Scope> incomingScopes = sinkElementGraph.incomingEdgesOf( flowElement );
+
+    resolvedKeyFields = new HashMap<>();
+    resolvedSortFields = new HashMap<>();
+    resolvedValueFields = new HashMap<>();
+
+    for( Scope incomingScope : incomingScopes )
+      {
+      int ordinal = incomingScope.getOrdinal();
+
+      if( resolvedScope.getKeySelectors() != null )
+        {
+        Fields value = resolvedScope.getKeySelectors().get( incomingScope.getName() );
+
+        if( value != null )
+          resolvedKeyFields.put( ordinal, value );
+        }
+
+      if( resolvedScope.getSortingSelectors() != null )
+        {
+        Fields value = resolvedScope.getSortingSelectors().get( incomingScope.getName() );
+
+        if( value != null )
+          resolvedSortFields.put( ordinal, value );
+        }
+
+      resolvedValueFields.put( ordinal, incomingScope.getIncomingSpliceFields() );
+      }
     }
 
   private Set<Integer> createOrdinals( Set<Scope> scopes )
     {
-    Set<Integer> ordinals = new HashSet<>();
+    Set<Integer> ordinals = new TreeSet<>();
 
     for( Scope scope : scopes )
       ordinals.add( scope.getOrdinal() );
@@ -87,6 +134,21 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
   public Set<Integer> getOutgoingOrdinals()
     {
     return outgoingOrdinals;
+    }
+
+  public Map<Integer, Fields> getResolvedKeyFields()
+    {
+    return resolvedKeyFields;
+    }
+
+  public Map<Integer, Fields> getResolvedSortFields()
+    {
+    return resolvedSortFields;
+    }
+
+  public Map<Integer, Fields> getResolvedValueFields()
+    {
+    return resolvedValueFields;
     }
 
   public Set<Enum> getSinkAnnotations()
