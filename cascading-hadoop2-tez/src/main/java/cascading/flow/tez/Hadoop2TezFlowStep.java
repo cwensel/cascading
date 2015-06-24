@@ -107,9 +107,7 @@ import org.apache.tez.runtime.library.output.UnorderedPartitionedKVOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.hadoop.util.HadoopUtil.addComparators;
-import static cascading.flow.hadoop.util.HadoopUtil.addFields;
-import static cascading.flow.hadoop.util.HadoopUtil.serializeBase64;
+import static cascading.flow.hadoop.util.HadoopUtil.*;
 import static cascading.flow.tez.util.TezUtil.addToClassPath;
 import static cascading.tap.hadoop.DistCacheTap.CASCADING_LOCAL_RESOURCES;
 import static cascading.tap.hadoop.DistCacheTap.CASCADING_REMOTE_RESOURCES;
@@ -493,6 +491,10 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       // unfortunately we cannot just load the input format and set it on the builder with also pulling all other
       // values out of the configuration.
       MRInput.MRInputConfigBuilder configBuilder = MRInput.createConfigBuilder( sourceConf, null );
+
+      // the default in Tez is true, this overrides
+      if( conf.get( FlowRuntimeProps.COMBINE_SPLITS ) != null )
+        configBuilder.groupSplits( conf.getBoolean( FlowRuntimeProps.COMBINE_SPLITS, true ) );
 
       // grouping splits loses file name info, breaking partition tap default impl
       if( flowElement instanceof PartitionTap ) // todo: generify

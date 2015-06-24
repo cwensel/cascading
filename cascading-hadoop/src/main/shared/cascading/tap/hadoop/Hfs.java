@@ -29,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowRuntimeProps;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
@@ -143,12 +144,24 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
 
   protected static boolean getUseCombinedInput( Configuration conf )
     {
-    String platform = conf.get( "cascading.flow.platform", "" );
     boolean combineEnabled = conf.getBoolean( "cascading.hadoop.hfs.combine.files", false );
+
+    if( conf.get( FlowRuntimeProps.COMBINE_SPLITS ) == null && !combineEnabled )
+      return false;
+
+    if( !combineEnabled ) // enable if set in FlowRuntimeProps
+      combineEnabled = conf.getBoolean( FlowRuntimeProps.COMBINE_SPLITS, false );
+
+    String platform = conf.get( "cascading.flow.platform", "" );
 
     // only supported by these platforms
     if( platform.equals( "hadoop" ) || platform.equals( "hadoop2-mr1" ) )
       return combineEnabled;
+
+    // we are on a platform that supports combining, just not through the combiner
+    // do not enable it here locally
+    if( conf.get( FlowRuntimeProps.COMBINE_SPLITS ) != null )
+      return false;
 
     if( combineEnabled && !Boolean.getBoolean( "cascading.hadoop.hfs.combine.files.warned" ) )
       {
