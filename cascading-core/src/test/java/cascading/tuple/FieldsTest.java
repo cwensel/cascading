@@ -1059,6 +1059,30 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
     }
 
+  @Test
+  public void testFieldApply()
+    {
+    Fields fieldA = new Fields( String.class, Integer.TYPE );
+
+    Fields appended = fieldA.applyFields( "a", "b" );
+
+    assertEquals( "not equal: ", 2, appended.size() );
+    assertEquals( "not equal: ", "a", appended.get( 0 ) );
+    assertEquals( "not equal: ", "b", appended.get( 1 ) );
+
+    assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
+
+    appended = fieldA.applyFields( 0, 1 );
+
+    assertEquals( "not equal: ", 2, appended.size() );
+    assertEquals( "not equal: ", 0, appended.get( 0 ) );
+    assertEquals( "not equal: ", 1, appended.get( 1 ) );
+
+    assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
+    }
+
   public void testMergeWithSelectors()
     {
     Fields f1 = new Fields( "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" );

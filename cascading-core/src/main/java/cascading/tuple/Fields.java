@@ -183,6 +183,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields fields = new Fields();
 
+    fields.kind = null;
     fields.fields = expand( size, 0 );
 
     return fields;
@@ -203,6 +204,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields fields = new Fields();
 
+    fields.kind = null;
     fields.fields = expand( size, 0 );
 
     for( Comparable field : fields )
@@ -391,7 +393,8 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     {
     Fields fields = new Fields();
 
-    fields.isOrdered = false;
+    fields.kind = null;
+    fields.isOrdered = startPos == 0;
     fields.fields = expand( size, startPos );
 
     return fields;
@@ -603,19 +606,19 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return fields;
     }
 
-  private Fields()
-    {
-    }
-
   /**
    * Constructor Fields creates a new Fields instance.
    *
    * @param kind of type Kind
    */
-  @SuppressWarnings({"SameParameterValue"})
   protected Fields( Kind kind )
     {
     this.kind = kind;
+    }
+
+  public Fields()
+    {
+    this.kind = Kind.NONE;
     }
 
   /**
@@ -632,11 +635,13 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       this.fields = validate( fields );
     }
 
+  @ConstructorProperties({"field", "type"})
   public Fields( Comparable field, Type type )
     {
     this( names( field ), types( type ) );
     }
 
+  @ConstructorProperties({"fields", "types"})
   public Fields( Comparable[] fields, Type[] types )
     {
     this( fields );
@@ -651,6 +656,26 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
       this.types = copyTypes( types, this.fields.length );
       }
+    }
+
+  @ConstructorProperties({"types"})
+  public Fields( Type... types )
+    {
+    if( types.length == 0 )
+      {
+      this.kind = Kind.NONE;
+      return;
+      }
+
+    this.fields = expand( types.length, 0 );
+
+    if( this.fields.length != types.length )
+      throw new IllegalArgumentException( "given types array must be same length as fields" );
+
+    if( Util.containsNull( types ) )
+      throw new IllegalArgumentException( "given types array contains null" );
+
+    this.types = copyTypes( types, this.fields.length );
     }
 
   /**
@@ -1582,6 +1607,30 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   public final int size()
     {
     return fields.length;
+    }
+
+  /**
+   * Method applyFields returns a new Fields instance with the given field names, replacing any existing type
+   * information within the new instance.
+   * <p/>
+   * The Comparable array must be the same length as the number for fields in this instance.
+   *
+   * @param fields the field names of this Fields object.
+   * @return returns a new instance of Fields with this instances types and the given field names
+   */
+  public Fields applyFields( Comparable... fields )
+    {
+    Fields result = new Fields( fields );
+
+    if( types == null )
+      return result;
+
+    if( types.length != result.size() )
+      throw new IllegalArgumentException( "given number of field names must match current fields size" );
+
+    result.types = copyTypes( types, types.length ); // make copy as Class[] could be passed in
+
+    return result;
     }
 
   /**

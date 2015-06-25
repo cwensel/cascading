@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated c.t.Fields to provide a constructor accepting type information, and a method #applyFields() to update
+  field names.
+
   Added support for configuring split combining across supported platforms through the c.f.FlowRuntimeProps
   "cascading.flow.runtime.splits.combine" property. If enabled, will induce c.t.h.Hfs to enable combined files
   support on the MapReduce platforms.
