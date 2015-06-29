@@ -800,7 +800,15 @@ public class HadoopUtil
       return tezLocal.equals( "true" );
 
     // hadoop 1.0: use the old property to determine the local mode
-    return conf.get( "mapred.job.tracker" ).equals( "local" );
+    String hadoop1 = conf.get( "mapred.job.tracker" );
+
+    if( hadoop1 == null )
+      {
+      LOG.warn( "could not successfully test if Hadoop based platform is in standalone/local mode, no valid properties set, returning false - tests for: mapreduce.framework.name, tez.local.mode, and mapred.job.tracker" );
+      return false;
+      }
+
+    return hadoop1.equals( "local" );
     }
 
   public static boolean isYARN( Configuration conf )
