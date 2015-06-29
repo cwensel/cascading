@@ -173,8 +173,9 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     // so we can't call recordStats/recordChildStats
     try
       {
-      for( Map.Entry<String, FlowSliceStats> entry : sliceStatsMap.entrySet() )
-        clientState.record( entry.getKey(), entry.getValue() );
+      // must use the local ID as the stored id, not task id
+      for( FlowSliceStats value : sliceStatsMap.values() )
+        clientState.record( value.getID(), value );
       }
     catch( Exception exception )
       {

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import cascading.flow.FlowNode;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import static cascading.stats.tez.util.TezStatsUtil.STATUS_GET_COUNTERS;
 import static cascading.util.Util.formatDurationFromMillis;
+import static cascading.util.Util.isEmpty;
 
 /**
  *
@@ -300,8 +302,8 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     if( taskStatus == null )
       return;
 
-    sliceStats.setStatus( getStatusForTaskStatus( taskStatus.getStatus() ) );
-    sliceStats.setCounters( taskStatus.getCounters() );
+    sliceStats.setStatus( getStatusForTaskStatus( taskStatus.getStatus() ) ); // ignores nulls
+    sliceStats.setCounters( taskStatus.getCounters() ); // ignores nulls
     }
 
   private TaskStatus getTaskStatusFor( TimelineClient timelineClient, String taskID )
@@ -383,8 +385,11 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     return true;
     }
 
-  private Status getStatusForTaskStatus( String status )
+  private Status getStatusForTaskStatus( @Nullable String status )
     {
+    if( isEmpty( status ) )
+      return null;
+
     TaskState state = TaskState.valueOf( status );
 
     switch( state )

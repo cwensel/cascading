@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue with NPE when retrieving Tez task status from timeline server.
+
 3.0.1
 
   Fixed issue in c.f.t.p.Hadoop2TezFlowStepJob where the LocalResources were not passed to the AppMaster correctly
