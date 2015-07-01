@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 
+import cascading.CascadingException;
 import cascading.flow.FlowNode;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.stream.annotations.StreamMode;
@@ -142,7 +143,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       {
       vertexID = ( (TimelineClient) dagClient ).getVertexID( getID() );
       }
-    catch( IOException | TezException exception )
+    catch( IOException | CascadingException | TezException exception )
       {
       logWarn( "unable to get vertex id", exception );
       }
@@ -334,7 +335,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
       return timelineClient.getVertexChildren( vertexID, fetchLimit, startTaskID );
       }
-    catch( IOException | TezException exception )
+    catch( IOException | CascadingException | TezException exception )
       {
       logWarn( "unable to get slice stats from timeline server", exception );
       }
