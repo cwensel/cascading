@@ -281,6 +281,9 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public FlowStepStats getFlowStepStats()
     {
+    if( flowStepJob == null )
+      return null;
+
     return flowStepJob.getStepStats();
     }
 
