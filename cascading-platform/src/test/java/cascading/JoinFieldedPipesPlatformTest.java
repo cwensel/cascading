@@ -2153,4 +2153,44 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "1\ta\t1\tB\t1\tB" ) ) );
     }
+
+  @Test
+  public void testGroupBySplitGroupByJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "sink" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeFirst = new Pipe( "first" );
+    pipeFirst = new Each( pipeFirst, new Fields( "line" ), splitter );
+    pipeFirst = new GroupBy( pipeFirst, new Fields( "num" ) );
+    pipeFirst = new Every( pipeFirst, new Fields( "char" ), new First( new Fields( "firstFirst" ) ), Fields.ALL );
+
+    Pipe pipeSecond = new Pipe( "second", pipeFirst );
+    pipeSecond = new Each( pipeSecond, new Identity() );
+    pipeSecond = new GroupBy( pipeSecond, new Fields( "num" ) );
+    pipeSecond = new Every( pipeSecond, new Fields( "firstFirst" ), new First( new Fields( "secondFirst" ) ), Fields.ALL );
+    pipeSecond = new GroupBy( pipeSecond, new Fields( "num" ) );
+    pipeSecond = new Every( pipeSecond, new Fields( "secondFirst" ), new First( new Fields( "thirdFirst" ) ), Fields.ALL );
+
+    Pipe splice = new HashJoin( pipeFirst, new Fields( "num" ), pipeSecond, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
+    assertTrue( values.contains( new Tuple( "3\tc\t3\tc" ) ) );
+    assertTrue( values.contains( new Tuple( "4\td\t4\td" ) ) );
+    assertTrue( values.contains( new Tuple( "5\te\t5\te" ) ) );
+    }
   }

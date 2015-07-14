@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue on Apache Tez where a split before and subsequent splicing back into a c.p.HashJoin could create an
+  invalid plan.
+
   Fixed issue with c.t.u.TupleHasher#ObjectHasher not being serializable.
 
   Fixed issue where an unreachable YARN timeline server could cause the application to fail.
