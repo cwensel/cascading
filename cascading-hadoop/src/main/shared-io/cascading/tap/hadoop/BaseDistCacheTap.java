@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseDistCacheTap extends DecoratorTap<Void, Configuration, RecordReader, OutputCollector>
   {
   /** logger. */
-  private static final Logger LOG = LoggerFactory.getLogger( DistCacheTap.class );
+  private static final Logger LOG = LoggerFactory.getLogger( BaseDistCacheTap.class );
 
   public BaseDistCacheTap( Tap<Configuration, RecordReader, OutputCollector> original )
     {

@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Created cascading-hadoop2-io sub-project to isolate Hadoop 2.x HDFS and serialization dependencies and updated
+  cascading-hadoop2-mr1 and cascading-hadoop2-tez to depend on cascading-hadoop2-io.
+
   Updated c.t.Fields to provide a constructor accepting type information, and a method #applyFields() to update
   field names.
 

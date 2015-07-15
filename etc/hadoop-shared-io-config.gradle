@@ -18,13 +18,16 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+sourceSets {
+  main {
+    java {
+      srcDirs += 'src/main/shared-io'
+    }
+  }
 
-rootProject.name = 'cascading'
+  test {
+    java {
+      srcDirs += 'src/test/shared-io'
+    }
+  }
+}

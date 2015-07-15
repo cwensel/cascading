@@ -51,7 +51,6 @@ import org.apache.hadoop.io.serializer.Serializer;
 @SerializationToken(tokens = {126}, classNames = {"[B"})
 public class BytesSerialization extends Configured implements Comparison<byte[]>, Serialization<byte[]>
   {
-
   public static class RawBytesDeserializer implements Deserializer<byte[]>
     {
     private DataInputStream in;

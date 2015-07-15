@@ -53,7 +53,6 @@ import cascading.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
@@ -501,56 +500,6 @@ public class HadoopUtil
     String version = attributes.getValue( "Implementation-Version" );
 
     return new PlatformInfo( "Hadoop", vendor, version );
-    }
-
-  /**
-   * Add to class path.
-   *
-   * @param config    the config
-   * @param classpath the classpath
-   */
-  public static Map<Path, Path> addToClassPath( Configuration config, List<String> classpath )
-    {
-    if( classpath == null )
-      return null;
-
-    // given to fully qualified
-    Map<String, Path> localPaths = new HashMap<String, Path>();
-    Map<String, Path> remotePaths = new HashMap<String, Path>();
-
-    resolvePaths( config, classpath, null, null, localPaths, remotePaths );
-
-    try
-      {
-      LocalFileSystem localFS = getLocalFS( config );
-
-      for( String path : localPaths.keySet() )
-        {
-        // only add local if no remote
-        if( remotePaths.containsKey( path ) )
-          continue;
-
-        Path artifact = localPaths.get( path );
-
-        DistributedCache.addFileToClassPath( artifact.makeQualified( localFS ), config );
-        }
-
-      FileSystem defaultFS = getDefaultFS( config );
-
-      for( String path : remotePaths.keySet() )
-        {
-        // always add remote
-        Path artifact = remotePaths.get( path );
-
-        DistributedCache.addFileToClassPath( artifact.makeQualified( defaultFS ), config );
-        }
-      }
-    catch( IOException exception )
-      {
-      throw new FlowException( "unable to set distributed cache paths", exception );
-      }
-
-    return getCommonPaths( localPaths, remotePaths );
     }
 
   /**

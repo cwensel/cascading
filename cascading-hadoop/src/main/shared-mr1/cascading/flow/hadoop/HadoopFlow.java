@@ -29,6 +29,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
+import cascading.flow.hadoop.util.HadoopMRUtil;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
@@ -120,7 +121,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
     jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
     jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
 
-    syncPaths = HadoopUtil.addToClassPath( jobConf, getClassPath() );
+    syncPaths = HadoopMRUtil.addToClassPath( jobConf, getClassPath() );
     }
 
   @Override

@@ -22,6 +22,9 @@ package cascading.flow.hadoop.util;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import cascading.flow.FlowException;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -34,7 +37,10 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.Util;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
@@ -128,5 +134,55 @@ public class HadoopMRUtil
         LOG.warn( "error closing state path reader", exception );
         }
       }
+    }
+
+  /**
+   * Add to class path.
+   *
+   * @param config    the config
+   * @param classpath the classpath
+   */
+  public static Map<Path, Path> addToClassPath( Configuration config, List<String> classpath )
+    {
+    if( classpath == null )
+      return null;
+
+    // given to fully qualified
+    Map<String, Path> localPaths = new HashMap<String, Path>();
+    Map<String, Path> remotePaths = new HashMap<String, Path>();
+
+    HadoopUtil.resolvePaths( config, classpath, null, null, localPaths, remotePaths );
+
+    try
+      {
+      LocalFileSystem localFS = HadoopUtil.getLocalFS( config );
+
+      for( String path : localPaths.keySet() )
+        {
+        // only add local if no remote
+        if( remotePaths.containsKey( path ) )
+          continue;
+
+        Path artifact = localPaths.get( path );
+
+        DistributedCache.addFileToClassPath( artifact.makeQualified( localFS ), config );
+        }
+
+      FileSystem defaultFS = HadoopUtil.getDefaultFS( config );
+
+      for( String path : remotePaths.keySet() )
+        {
+        // always add remote
+        Path artifact = remotePaths.get( path );
+
+        DistributedCache.addFileToClassPath( artifact.makeQualified( defaultFS ), config );
+        }
+      }
+    catch( IOException exception )
+      {
+      throw new FlowException( "unable to set distributed cache paths", exception );
+      }
+
+    return HadoopUtil.getCommonPaths( localPaths, remotePaths );
     }
   }
