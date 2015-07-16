@@ -233,18 +233,6 @@ public class ValueAssertionsTest extends CascadingTestCase
     }
 
   @Test
-  public void testExpression()
-    {
-    ValueAssertion assertion = new AssertExpression( "$0 == 1", int.class );
-
-    assertPass( assertion, getEntry( new Tuple( 1 ) ) );
-    assertFail( assertion, getEntry( new Tuple( (Comparable) null ) ) );
-
-    assertPass( assertion, getEntry( new Tuple( "1", 0 ) ) );
-    assertFail( assertion, getEntry( new Tuple( "0", null ) ) );
-    }
-
-  @Test
   public void testTupleEquals()
     {
     ValueAssertion assertion = new AssertSizeEquals( 1 );

@@ -21,6 +21,7 @@
 dependencies {
 
   compile project( ':cascading-core' )
+  compile project( ':cascading-expression' )
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
   testCompile group: 'commons-io', name: 'commons-io', version: '2.1'

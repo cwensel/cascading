@@ -2,6 +2,10 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Created cascading-expression sub-project to isolate all 'expression' operations based on Janino and it isolate
+  the Janino dependency. A dependency to cascading-expression must be added to projects that depend on the isolated
+  classes.
+
   Created cascading-hadoop2-io sub-project to isolate Hadoop 2.x HDFS and serialization dependencies and updated
   cascading-hadoop2-mr1 and cascading-hadoop2-tez to depend on cascading-hadoop2-io.
 

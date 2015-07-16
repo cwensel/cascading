@@ -18,14 +18,22 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-expression'
-include 'cascading-local'
-include 'cascading-hadoop'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-platform'
+dependencies {
+  compile project( ':cascading-core' )
 
-rootProject.name = 'cascading'
+  compile group: 'org.codehaus.janino', name: 'janino', version: '2.7.6'
+
+  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+
+  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+}
+
+javadoc {
+  configure( options ) {
+    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString()
+
+//    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+  }
+}
+
+platformTest.enabled = false
