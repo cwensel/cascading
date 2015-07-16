@@ -65,6 +65,9 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
 
   private boolean isStarted = false; // only used for event handling
 
+  /** flow related properties */
+  private Map<Object, Object> properties;
+
   /**
    * Constructor ProcessFlow creates a new ProcessFlow instance.
    *
@@ -104,6 +107,8 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
     super( new PlatformInfo( "process", "Concurrent, Inc.", Version.getRelease() ), properties, null, name, flowDescriptor );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
+    this.properties = properties;
+
     setName( name );
     setTapFromProcess();
     initProcessConfig();
@@ -193,7 +198,12 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
   @Override
   public Map<Object, Object> getConfigAsProperties()
     {
-    return null;
+    Map<Object, Object> props = new HashMap<>();
+
+    if( properties != null )
+      props.putAll( this.properties );
+
+    return props;
     }
 
   @Override
