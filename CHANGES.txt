@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue where c.s.FlowStepStats#getProcessStatusURL() always returned null for Apache MapReduce and Tez platforms.
+
   Fixed issue on Apache Tez where a split before and subsequent splicing back into a c.p.HashJoin could create an
   invalid plan.
 

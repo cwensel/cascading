@@ -177,6 +177,16 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
       }
     }
 
+  @Override
+  public String getProcessStatusURL()
+    {
+    return getStatusURL();
+    }
+
+  /**
+   * @deprecated see {@link #getProcessStatusURL()}
+   */
+  @Deprecated
   public String getStatusURL()
     {
     Job runningJob = getJob( getJobStatusClient() );
@@ -185,11 +195,6 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
       return null;
 
     return runningJob.getTrackingURL();
-    }
-
-  private boolean stepHasReducers()
-    {
-    return getFlowStep().getNumFlowNodes() > 1;
     }
 
   /** Method captureDetail captures statistics task details and completion events. */

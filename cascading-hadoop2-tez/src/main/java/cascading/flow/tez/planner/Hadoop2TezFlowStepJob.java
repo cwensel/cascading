@@ -114,6 +114,12 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       }
 
     @Override
+    public String getProcessStatusURL()
+      {
+      return TezStatsUtil.getTrackingURL( tezClient, dagClient );
+      }
+
+    @Override
     public String getProcessStepID()
       {
       return dagId;
@@ -135,7 +141,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
       prepareEnsureStagingDir( workingConf );
 
-      tezClient = TezClient.create( flowStep.getName(), workingConf, ( (Hadoop2TezFlowStep) flowStep).getAllLocalResources(), null );
+      tezClient = TezClient.create( flowStep.getName(), workingConf, ( (Hadoop2TezFlowStep) flowStep ).getAllLocalResources(), null );
 
       tezClient.start();
 
