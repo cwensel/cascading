@@ -2,9 +2,9 @@
 
 Thanks for using Cascading.
 
-## Cascading 3.0
+## Cascading 3.1
 
-Cascading 3.0 includes a few major changes and additions from prior releases: 
+Cascading 3.1 includes a few major changes and additions from prior releases: 
 
 * Complete re-write of the platform query planner and improvements to the planner API
 * Addition of Apache Tez as a supported runtime platform
@@ -20,12 +20,14 @@ For project documentation and community support, visit: [cascading.org](http://c
 To download a pre-built distribution, visit [http://cascading.org/downloads/](http://cascading.org/downloads/),
 or use Maven (described below).
 
-The project includes six Cascading jar files:
+The project includes eight Cascading jar files:
 
 * `cascading-core-x.y.z.jar`          - all Cascading Core class files
 * `cascading-xml-x.y.z.jar`           - all Cascading XML operations class files
+* `cascading-expression-x.y.z.jar`    - all Cascading Janino expression operations class files
 * `cascading-local-x.y.z.jar`         - all Cascading Local in-memory mode class files
 * `cascading-hadoop-x.y.z.jar`        - all Cascading Hadoop 1.x MapReduce mode class files
+* `cascading-hadoop2-io-x.y.z.jar`    - all Cascading Hadoop 2.x HDFS and IO related class files
 * `cascading-hadoop2-mr1-x.y.z.jar`   - all Cascading Hadoop 2.x MapReduce mode class files
 * `cascading-hadoop2-tez-x.y.z.jar`   - all Cascading Hadoop 2.x Tez mode class files
 
@@ -53,7 +55,7 @@ Or download the [Cascading SDK](http://cascading.org/sdk/) which includes pre-bu
 
 Of note are three top level projects:
 
-* [Fluid](http://www.cascading.org/fluid/) - A fluent API for Cascading that is compatible with the default API.
+* [Fluid](http://cascading.org/fluid/) - A fluent API for Cascading that is compatible with the default API.
 * [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC on Cascading
 * [Pattern](http://cascading.org/pattern/) - Machine Learning scoring and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
 
@@ -145,9 +147,11 @@ You can find the latest public and WIP (work in progress) releases here:
 *  http://conjars.org/cascading/cascading-core
 *  http://conjars.org/cascading/cascading-local
 *  http://conjars.org/cascading/cascading-hadoop
+*  http://conjars.org/cascading/cascading-hadoop2-io
 *  http://conjars.org/cascading/cascading-hadoop2-mr1
 *  http://conjars.org/cascading/cascading-hadoop2-tez
 *  http://conjars.org/cascading/cascading-xml
+*  http://conjars.org/cascading/cascading-expression
 
 When creating tests, make sure to add any of the relevant above dependencies to your `test` scope or equivalent
 configuration along with the `cascading-platform` dependency.
@@ -206,6 +210,7 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 ```bash
 /<all your class and resource files>
 /lib/cascading-core-x.y.z.jar
+/lib/cascading-hadoop2-io-x.y.z.jar
 /lib/cascading-hadoop2-mr1-x.y.z.jar
 /lib/cascading-xml-x.y.z.jar
 /lib/<cascading third-party jar files>
