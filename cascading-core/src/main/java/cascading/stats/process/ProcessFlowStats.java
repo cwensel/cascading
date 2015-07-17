@@ -86,6 +86,7 @@ public class ProcessFlowStats extends FlowStats
 
       List<FlowStepStats> childStepStats = new ArrayList<FlowStepStats>();
       int counter = 0;
+
       for( Object process : processWrapper.getChildren() )
         {
         ProcessWrapper childWrapper = new ProcessWrapper( process );
@@ -99,6 +100,7 @@ public class ProcessFlowStats extends FlowStats
           childStepStats.add( processStepStats );
           }
         }
+
       return childStepStats;
       }
     catch( ProcessException exception )

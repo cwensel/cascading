@@ -76,6 +76,7 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
   private final CascadingStats.Status parentStatus;
   private CascadingStats.Status status;
   private String taskID;
+  private long lastFetch = -1;
   private Map<String, Map<String, Long>> counters = Collections.emptyMap();
 
   private Map<Integer, FlowSliceAttempt> attempts = new HashMap<>();
@@ -175,6 +176,17 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
     {
     if( counters != null )
       this.counters = counters;
+    }
+
+  public void setLastFetch( long lastFetch )
+    {
+    this.lastFetch = lastFetch;
+    }
+
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    return lastFetch;
     }
 
   @Override

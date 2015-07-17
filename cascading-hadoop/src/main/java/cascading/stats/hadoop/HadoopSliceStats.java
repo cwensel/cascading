@@ -113,15 +113,17 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
   private Kind kind;
   private TaskReport taskReport;
   private Map<String, Map<String, Long>> counters;
+  private long lastFetch = -1;
 
   private Map<Integer, FlowSliceAttempt> attempts = new HashMap<>();
 
-  HadoopSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport )
+  HadoopSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport, long lastFetch )
     {
     this.parentStatus = parentStatus;
     this.id = id;
     this.kind = kind;
     this.taskReport = taskReport;
+    this.lastFetch = lastFetch;
     }
 
   @Override
@@ -250,6 +252,17 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
       for( Counters.Counter counter : group )
         values.put( counter.getName(), counter.getCounter() );
       }
+    }
+
+  public void setLastFetch( long lastFetch )
+    {
+    this.lastFetch = lastFetch;
+    }
+
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    return lastFetch;
     }
 
   @Override

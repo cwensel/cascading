@@ -55,6 +55,12 @@ public class LocalStepStats extends FlowStepStats
     }
 
   @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    return System.currentTimeMillis();
+    }
+
+  @Override
   public Collection<String> getCounterGroups()
     {
     synchronized( counters )

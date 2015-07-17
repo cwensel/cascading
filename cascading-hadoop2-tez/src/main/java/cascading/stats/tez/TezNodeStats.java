@@ -23,6 +23,7 @@ package cascading.stats.tez;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -218,7 +219,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
       TaskStatus taskStatus = getTaskStatusFor( timelineClient, sliceStats.getProcessSliceID() );
 
-      updateSliceWith( (TezSliceStats) sliceStats, taskStatus );
+      updateSliceWith( (TezSliceStats) sliceStats, taskStatus, System.currentTimeMillis() );
 
       count++;
       }
@@ -241,6 +242,8 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
     while( continueIterating && sliceStatsMap.size() != getTotalTaskCount() )
       {
+      long lastFetch = System.currentTimeMillis();
+
       // we will see the same tasks twice as we paginate
       Iterator<TaskStatus> vertexChildren = getTaskStatusIterator( timelineClient, fromTaskId );
 
@@ -271,7 +274,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
           updated++;
           }
 
-        updateSliceWith( sliceStats, taskStatus );
+        updateSliceWith( sliceStats, taskStatus, lastFetch );
         }
 
       int retrieved = added + updated;
@@ -298,13 +301,19 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     return total == getTotalTaskCount();
     }
 
-  private void updateSliceWith( TezSliceStats sliceStats, TaskStatus taskStatus )
+  private void updateSliceWith( TezSliceStats sliceStats, TaskStatus taskStatus, long lastFetch )
     {
     if( taskStatus == null )
       return;
 
     sliceStats.setStatus( getStatusForTaskStatus( taskStatus.getStatus() ) ); // ignores nulls
-    sliceStats.setCounters( taskStatus.getCounters() ); // ignores nulls
+
+    Map<String, Map<String, Long>> counters = taskStatus.getCounters();
+
+    sliceStats.setCounters( counters ); // ignores nulls
+
+    if( counters != null )
+      sliceStats.setLastFetch( lastFetch );
     }
 
   private TaskStatus getTaskStatusFor( TimelineClient timelineClient, String taskID )

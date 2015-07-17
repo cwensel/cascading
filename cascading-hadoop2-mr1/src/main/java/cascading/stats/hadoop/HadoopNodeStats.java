@@ -138,6 +138,8 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
 
   protected void addTaskStats( TaskReport[] taskReports, boolean skipLast )
     {
+    long lastFetch = System.currentTimeMillis();
+
     synchronized( sliceStatsMap )
       {
       for( int i = 0; i < taskReports.length - ( skipLast ? 1 : 0 ); i++ )
@@ -151,7 +153,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
           }
 
         String id = getSliceIDFor( taskReport.getTaskID() );
-        sliceStatsMap.put( id, new HadoopSliceStats( id, getParentStatus(), kind, taskReport ) );
+        sliceStatsMap.put( id, new HadoopSliceStats( id, getParentStatus(), kind, taskReport, lastFetch ) );
         }
       }
     }

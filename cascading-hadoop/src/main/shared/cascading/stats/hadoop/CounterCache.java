@@ -76,7 +76,7 @@ public abstract class CounterCache<JobStatus, Counters>
   private boolean hasCapturedFinalCounters;
   private boolean hasAvailableCounters = true;
   private Counters cachedCounters = null;
-  private long lastFetch = 0;
+  private long lastFetch = -1;
   private boolean warnedStale = false;
 
   protected int maxFetchAttempts;
@@ -90,6 +90,11 @@ public abstract class CounterCache<JobStatus, Counters>
     this.timeout = configuration.getInt( COUNTER_TIMEOUT_PROPERTY, DEFAULT_TIMEOUT_TIMEOUT_SEC );
     this.maxFetchAttempts = configuration.getInt( COUNTER_FETCH_RETRIES_PROPERTY, DEFAULT_FETCH_RETRIES );
     this.maxAge = configuration.getInt( COUNTER_MAX_AGE_PROPERTY, DEFAULT_CACHED_AGE_MAX );
+    }
+
+  public long getLastSuccessfulFetch()
+    {
+    return lastFetch;
     }
 
   protected abstract JobStatus getJobStatusClient();

@@ -117,6 +117,17 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     }
 
   @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    long max = -1;
+
+    for( FlowStepStats flowStepStats : getFlowStepStats() )
+      max = Math.max( max, flowStepStats.getLastSuccessfulCounterFetchTime() );
+
+    return max;
+    }
+
+  @Override
   public Collection<String> getCounterGroups()
     {
     Set<String> results = new HashSet<String>();
