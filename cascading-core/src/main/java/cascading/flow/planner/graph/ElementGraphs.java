@@ -475,7 +475,7 @@ public class ElementGraphs
       writer.close();
       return true;
       }
-    catch( IOException exception )
+    catch( NullPointerException | IOException exception )
       {
       LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
@@ -563,6 +563,26 @@ public class ElementGraphs
 
       graph.addEdge( target, flowElement, scope ); // add scope back
       }
+    }
+
+  public static void insertFlowElementBetweenEdge( ElementGraph elementGraph, Scope previousEdge, FlowElement newElement )
+    {
+    FlowElement previousElement = elementGraph.getEdgeSource( previousEdge );
+    FlowElement nextElement = elementGraph.getEdgeTarget( previousEdge );
+
+    elementGraph.addVertex( newElement );
+
+    // add edge between previous and new
+    elementGraph.addEdge( previousElement, newElement, new Scope( previousEdge ) );
+
+    // add edge between new and next
+    Scope scope = new Scope( previousEdge );
+
+    scope.setOrdinal( previousEdge.getOrdinal() );
+    elementGraph.addEdge( newElement, nextElement, scope );
+
+    // remove previous edge
+    elementGraph.removeEdge( previousElement, nextElement );
     }
 
   public static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )

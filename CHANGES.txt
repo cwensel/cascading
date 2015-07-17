@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fixed c.f.p.i.t.InsertionGraphTransformer to properly place insertions.
+
   Created cascading-expression sub-project to isolate all 'expression' operations based on Janino and it isolate
   the Janino dependency. A dependency to cascading-expression must be added to projects that depend on the isolated
   classes.
