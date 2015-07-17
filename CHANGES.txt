@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated c.f.t.p.r.t.BoundaryBalanceGroupSplitHashJoinTransformer to insert After and not AfterEachEdge.
+
   Fixed c.f.p.i.t.InsertionGraphTransformer to properly place insertions.
 
   Created cascading-expression sub-project to isolate all 'expression' operations based on Janino and it isolate
