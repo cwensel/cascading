@@ -38,9 +38,9 @@ import cascading.flow.planner.process.ProcessGraph;
 import cascading.flow.planner.process.ProcessModel;
 import cascading.flow.planner.process.ProcessModels;
 import cascading.tap.Tap;
-import org.jgrapht.ext.ComponentAttributeProvider;
-import org.jgrapht.ext.EdgeNameProvider;
-import org.jgrapht.ext.VertexNameProvider;
+import cascading.util.jgrapht.ComponentAttributeProvider;
+import cascading.util.jgrapht.EdgeNameProvider;
+import cascading.util.jgrapht.VertexNameProvider;
 
 /**
  * This class is a derivative of the JGraphT DOTExporter, with numerous enhancements but with

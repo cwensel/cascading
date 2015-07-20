@@ -33,12 +33,11 @@ import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.tap.Tap;
 import cascading.util.EnumMultiMap;
-import org.jgrapht.DirectedGraph;
 
 /**
  *
  */
-public interface ProcessGraph<Process extends ProcessModel> extends Serializable, DirectedGraph<Process, ProcessEdge>
+public interface ProcessGraph<Process extends ProcessModel> extends Serializable
   {
   boolean addVertex( Process process );
 

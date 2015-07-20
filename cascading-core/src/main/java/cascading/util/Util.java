@@ -26,8 +26,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -62,19 +60,16 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import cascading.CascadingException;
-import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
-import cascading.flow.planner.Scope;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tuple.coerce.Coercions;
+import cascading.util.jgrapht.ComponentAttributeProvider;
+import cascading.util.jgrapht.DOTExporter;
+import cascading.util.jgrapht.EdgeNameProvider;
+import cascading.util.jgrapht.IntegerNameProvider;
+import cascading.util.jgrapht.VertexNameProvider;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.ext.ComponentAttributeProvider;
-import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.ext.EdgeNameProvider;
-import org.jgrapht.ext.IntegerNameProvider;
-import org.jgrapht.ext.MatrixExporter;
-import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -637,11 +632,6 @@ public class Util
     );
 
     dot.export( writer, graph );
-    }
-
-  public static void printMatrix( PrintStream out, SimpleDirectedGraph<FlowElement, Scope> graph )
-    {
-    new MatrixExporter().exportAdjacencyMatrix( new PrintWriter( out ), graph );
     }
 
   /**

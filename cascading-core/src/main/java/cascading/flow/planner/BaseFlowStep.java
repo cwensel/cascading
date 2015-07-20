@@ -59,7 +59,6 @@ import cascading.tap.Tap;
 import cascading.util.EnumMultiMap;
 import cascading.util.ProcessLogger;
 import cascading.util.Util;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import static cascading.flow.planner.graph.ElementGraphs.findAllGroups;
 
@@ -848,7 +847,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     // applies each mode in order, topologically
     for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
       {
-      TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( nodeElementGraph );
+      Iterator<FlowElement> iterator = ElementGraphs.getTopologicalIterator( nodeElementGraph );
 
       while( iterator.hasNext() )
         {
@@ -896,7 +895,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     // applies each mode in order, topologically
     for( ConfigDef.Mode mode : ConfigDef.Mode.values() )
       {
-      TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( stepElementGraph );
+      Iterator<FlowElement> iterator = ElementGraphs.getTopologicalIterator( stepElementGraph );
 
       while( iterator.hasNext() )
         {
