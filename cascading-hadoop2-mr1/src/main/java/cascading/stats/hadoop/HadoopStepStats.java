@@ -49,6 +49,9 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
 
   protected static Job getJob( RunningJob runningJob )
     {
+    if( runningJob == null ) // if null, job hasn't been submitted
+      return null;
+
     Job job = Util.returnInstanceFieldIfExistsSafe( runningJob, "job" );
 
     if( job == null )
