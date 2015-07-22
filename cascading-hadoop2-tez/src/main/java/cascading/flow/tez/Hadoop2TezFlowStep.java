@@ -470,6 +470,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     if( parallelism == 0 )
       throw new FlowException( getName(), "the default number of gather partitions must be set, see cascading.flow.FlowRuntimeProps" );
 
+    flowNode.addProcessAnnotation( FlowRuntimeProps.GATHER_PARTITIONS, Integer.toString( parallelism ) );
+
     Vertex vertex = newVertex( flowNode, conf, parallelism );
 
     if( !taskLocalResources.isEmpty() )
@@ -536,6 +538,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     addRemoteDebug( flowNode, vertex );
     addRemoteProfiling( flowNode, vertex );
+
+    if( vertex.getTaskLaunchCmdOpts() != null )
+      flowNode.addProcessAnnotation( TezConfiguration.TEZ_TASK_LAUNCH_CMD_OPTS, vertex.getTaskLaunchCmdOpts() );
 
     return vertex;
     }

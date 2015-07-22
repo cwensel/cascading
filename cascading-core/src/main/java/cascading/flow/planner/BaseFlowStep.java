@@ -88,9 +88,9 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   /** Field name */
   String name;
-  /** Field id */
   private String id;
   private int ordinal;
+  private Map<String, String> processAnnotations;
 
   /** Field step listeners */
   private List<SafeFlowStepListener> listeners;
@@ -176,6 +176,33 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
       throw new IllegalArgumentException( "step name may not be null or empty" );
 
     this.name = name;
+    }
+
+  @Override
+  public Map<String, String> getProcessAnnotations()
+    {
+    if( processAnnotations == null )
+      return Collections.emptyMap();
+
+    return Collections.unmodifiableMap( processAnnotations );
+    }
+
+  @Override
+  public void addProcessAnnotation( Enum annotation )
+    {
+    if( annotation == null )
+      return;
+
+    addProcessAnnotation( annotation.getDeclaringClass().getName(), annotation.name() );
+    }
+
+  @Override
+  public void addProcessAnnotation( String key, String value )
+    {
+    if( processAnnotations == null )
+      processAnnotations = new HashMap<>();
+
+    processAnnotations.put( key, value );
     }
 
   public void setFlow( Flow<Config> flow )

@@ -98,7 +98,7 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
     if( edgeAnnotations == null )
       return Collections.emptyMap();
 
-    return edgeAnnotations;
+    return Collections.unmodifiableMap( edgeAnnotations );
     }
 
   public void addEdgeAnnotation( Enum annotation )

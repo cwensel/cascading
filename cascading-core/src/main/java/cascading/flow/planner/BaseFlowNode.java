@@ -54,6 +54,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
   private final String id;
   private int ordinal;
   private String name;
+  private Map<String, String> processAnnotations;
 
   private transient FlowStep flowStep;
 
@@ -119,6 +120,33 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
   public String getName()
     {
     return name;
+    }
+
+  @Override
+  public Map<String, String> getProcessAnnotations()
+    {
+    if( processAnnotations == null )
+      return Collections.emptyMap();
+
+    return Collections.unmodifiableMap( processAnnotations );
+    }
+
+  @Override
+  public void addProcessAnnotation( Enum annotation )
+    {
+    if( annotation == null )
+      return;
+
+    addProcessAnnotation( annotation.getDeclaringClass().getName(), annotation.name() );
+    }
+
+  @Override
+  public void addProcessAnnotation( String key, String value )
+    {
+    if( processAnnotations == null )
+      processAnnotations = new HashMap<>();
+
+    processAnnotations.put( key, value );
     }
 
   public void setFlowStep( FlowStep flowStep )

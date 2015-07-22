@@ -198,8 +198,14 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     Iterator<FlowNode> iterator = getFlowNodeGraph().getTopologicalIterator();
 
-    String mapState = pack( iterator.next(), conf );
-    String reduceState = pack( iterator.hasNext() ? iterator.next() : null, conf );
+    FlowNode mapperNode = iterator.next();
+    FlowNode reducerNode = iterator.hasNext() ? iterator.next() : null;
+
+    if( reducerNode != null )
+      reducerNode.addProcessAnnotation( FlowRuntimeProps.GATHER_PARTITIONS, Integer.toString( conf.getNumReduceTasks() ) );
+
+    String mapState = pack( mapperNode, conf );
+    String reduceState = pack( reducerNode, conf );
 
     // hadoop 20.2 doesn't like dist cache when using local mode
     int maxSize = Short.MAX_VALUE;
