@@ -22,7 +22,9 @@ package cascading.flow.planner.process;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
@@ -30,21 +32,28 @@ import cascading.flow.FlowElements;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.util.Util;
 
 /**
  *
  */
 public class ProcessEdge<Process extends ProcessModel> implements Serializable
   {
+  String id;
+  String sourceProcessID;
+  String sinkProcessID;
   FlowElement flowElement;
   Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
   Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
   Set<Enum> sinkAnnotations = Collections.emptySet();
   Set<Enum> sourceAnnotations = Collections.emptySet();
+  Map<String, String> edgeAnnotations;
 
   public ProcessEdge( Process sourceProcess, FlowElement flowElement, Process sinkProcess )
     {
     this.flowElement = flowElement;
+    this.sourceProcessID = sourceProcess.getID();
+    this.sinkProcessID = sinkProcess.getID();
 
     ElementGraph sinkElementGraph = sinkProcess.getElementGraph();
     ElementGraph sourceElementGraph = sourceProcess.getElementGraph();
@@ -57,6 +66,55 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
 
     if( sourceElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sourceElementGraph ).hasAnnotations() )
       this.sourceAnnotations = ( (AnnotatedGraph) sourceElementGraph ).getAnnotations().getKeysFor( flowElement );
+    }
+
+  public String getID()
+    {
+    if( id == null ) // make it lazy
+      id = Util.createUniqueID();
+
+    return id;
+    }
+
+  public String getSourceProcessID()
+    {
+    return sourceProcessID;
+    }
+
+  public String getSinkProcessID()
+    {
+    return sinkProcessID;
+    }
+
+  /**
+   * Returns any edge annotations, or an empty immutable Map.
+   * <p/>
+   * Use {@link #addEdgeAnnotation(String, String)} to add edge annotations.
+   *
+   * @return
+   */
+  public Map<String, String> getEdgeAnnotations()
+    {
+    if( edgeAnnotations == null )
+      return Collections.emptyMap();
+
+    return edgeAnnotations;
+    }
+
+  public void addEdgeAnnotation( Enum annotation )
+    {
+    if( annotation == null )
+      return;
+
+    addEdgeAnnotation( annotation.getDeclaringClass().getName(), annotation.name() );
+    }
+
+  public void addEdgeAnnotation( String key, String value )
+    {
+    if( edgeAnnotations == null )
+      edgeAnnotations = new HashMap<>();
+
+    edgeAnnotations.put( key, value );
     }
 
   private Set<Integer> createOrdinals( Set<Scope> scopes )
@@ -74,7 +132,7 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
     return flowElement;
     }
 
-  public String getID()
+  public String getFlowElementID()
     {
     return FlowElements.id( flowElement );
     }

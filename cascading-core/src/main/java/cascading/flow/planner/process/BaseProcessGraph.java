@@ -97,10 +97,10 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
         sourceElements.removeAll( sinkProcess.getSinkElements() );
         sinkElements.removeAll( sourceProcess.getSourceElements() );
 
-        for( Object sink : sinkProcess.getSinkElements() )
+        for( Object sink : sourceProcess.getSinkElements() )
           {
-          if( sourceProcess.getSourceElements().contains( sink ) )
-            addEdge( sinkProcess, sourceProcess, new ProcessEdge<>( sourceProcess, (FlowElement) sink, sinkProcess ) );
+          if( sinkProcess.getSourceElements().contains( sink ) )
+            addEdge( sourceProcess, sinkProcess, new ProcessEdge<>( sinkProcess, (FlowElement) sink, sourceProcess ) );
           }
         }
       }

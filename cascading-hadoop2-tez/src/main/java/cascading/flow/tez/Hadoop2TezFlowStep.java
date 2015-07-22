@@ -298,7 +298,16 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     else
       throw new IllegalStateException( "unsupported flow element: " + flowElement.getClass().getCanonicalName() );
 
+    applyEdgeAnnotations( processEdge, edgeValues );
+
     return createEdgeProperty( edgeValues );
+    }
+
+  private void applyEdgeAnnotations( ProcessEdge processEdge, EdgeValues edgeValues )
+    {
+    processEdge.addEdgeAnnotation( edgeValues.movementType );
+    processEdge.addEdgeAnnotation( edgeValues.sourceType );
+    processEdge.addEdgeAnnotation( edgeValues.schedulingType );
     }
 
   private EdgeValues applyBoundaryMerge( EdgeValues edgeValues )
@@ -579,12 +588,12 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     Set<ProcessEdge> incomingEdges = flowNodeGraph.incomingEdgesOf( flowNode );
 
     for( ProcessEdge processEdge : incomingEdges )
-      conf.set( "cascading.node.source." + processEdge.getID(), flowNodeGraph.getEdgeSource( processEdge ).getID() );
+      conf.set( "cascading.node.source." + processEdge.getFlowElementID(), processEdge.getSinkProcessID() );
 
     Set<ProcessEdge> outgoingEdges = flowNodeGraph.outgoingEdgesOf( flowNode );
 
     for( ProcessEdge processEdge : outgoingEdges )
-      conf.set( "cascading.node.sink." + processEdge.getID(), flowNodeGraph.getEdgeTarget( processEdge ).getID() );
+      conf.set( "cascading.node.sink." + processEdge.getFlowElementID(), processEdge.getSourceProcessID() );
     }
 
   protected Map<FlowElement, Configuration> initFromSources( FlowNode flowNode, FlowProcess<TezConfiguration> flowProcess,
