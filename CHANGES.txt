@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
+
   Updated build to exclude jgrapht-ext, further isolation of jgrapht apis to support reliable shading.
 
   Fixed issue where c.f.p.ProcessFlow would not propagate the application name, version, tags, etc to the management
