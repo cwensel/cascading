@@ -1,5 +1,7 @@
 Cascading Change Log
 
+2.7.1 [unreleased]
+
 2.7.0
 
   Updated Riffle to 1.0.0.
