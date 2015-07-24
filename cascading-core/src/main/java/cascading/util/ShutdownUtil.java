@@ -21,7 +21,8 @@
 package cascading.util;
 
 import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public class ShutdownUtil
     public abstract void execute();
     }
 
-  private static PriorityQueue<Hook> queue = new PriorityQueue<Hook>( 20, new Comparator<Hook>()
+  private static Queue<Hook> queue = new PriorityBlockingQueue<Hook>( 20, new Comparator<Hook>()
   {
   @Override
   public int compare( Hook lhs, Hook rhs )
@@ -102,6 +103,10 @@ public class ShutdownUtil
         try
           {
           hook = queue.poll();
+
+          // may get removed while shutdown is executing
+          if( hook == null )
+            continue;
 
           hook.execute();
           }

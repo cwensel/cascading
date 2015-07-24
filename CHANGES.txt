@@ -2,6 +2,8 @@ Cascading Change Log
 
 2.7.1 [unreleased]
 
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
+
 2.7.0
 
   Updated Riffle to 1.0.0.
