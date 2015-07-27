@@ -135,6 +135,12 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     }
 
   @Override
+  public FlowSliceStats getChildWith( String id )
+    {
+    return sliceStatsMap.get( id );
+    }
+
+  @Override
   public final synchronized void captureDetail( Type depth )
     {
     boolean finished = isFinished();

@@ -96,11 +96,20 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
         // outer edge sources and sinks to this graph
         sourceElements.removeAll( sinkProcess.getSinkElements() );
         sinkElements.removeAll( sourceProcess.getSourceElements() );
+        }
+      }
 
-        for( Object sink : sourceProcess.getSinkElements() )
+    for( Process sinkProcess : vertexSet() )
+      {
+      for( Process sourceProcess : vertexSet() )
+        {
+        if( sourceProcess == sinkProcess )
+          continue;
+
+        for( Object intermediate : sourceProcess.getSinkElements() )
           {
-          if( sinkProcess.getSourceElements().contains( sink ) )
-            addEdge( sourceProcess, sinkProcess, new ProcessEdge<>( sinkProcess, (FlowElement) sink, sourceProcess ) );
+          if( sinkProcess.getSourceElements().contains( intermediate ) )
+            addEdge( sourceProcess, sinkProcess, new ProcessEdge<>( sourceProcess, (FlowElement) intermediate, sinkProcess ) );
           }
         }
       }

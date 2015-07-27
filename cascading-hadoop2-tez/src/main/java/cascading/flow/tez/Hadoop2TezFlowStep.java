@@ -291,7 +291,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     if( flowElement instanceof Group )
       applyGroup( edgeValues );
-    else if( ( flowElement instanceof Boundary || flowElement instanceof Merge ) && processEdge.getSourceAnnotations().contains( StreamMode.Accumulated ) )
+    else if( ( flowElement instanceof Boundary || flowElement instanceof Merge ) && processEdge.getSinkAnnotations().contains( StreamMode.Accumulated ) )
       applyBoundaryMergeAccumulated( edgeValues );
     else if( flowElement instanceof Boundary || flowElement instanceof Merge )
       applyBoundaryMerge( edgeValues );
@@ -593,12 +593,12 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     Set<ProcessEdge> incomingEdges = flowNodeGraph.incomingEdgesOf( flowNode );
 
     for( ProcessEdge processEdge : incomingEdges )
-      conf.set( "cascading.node.source." + processEdge.getFlowElementID(), processEdge.getSinkProcessID() );
+      conf.set( "cascading.node.source." + processEdge.getFlowElementID(), processEdge.getSourceProcessID() );
 
     Set<ProcessEdge> outgoingEdges = flowNodeGraph.outgoingEdgesOf( flowNode );
 
     for( ProcessEdge processEdge : outgoingEdges )
-      conf.set( "cascading.node.sink." + processEdge.getFlowElementID(), processEdge.getSourceProcessID() );
+      conf.set( "cascading.node.sink." + processEdge.getFlowElementID(), processEdge.getSinkProcessID() );
     }
 
   protected Map<FlowElement, Configuration> initFromSources( FlowNode flowNode, FlowProcess<TezConfiguration> flowProcess,
@@ -893,7 +893,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       {
       this.config = config;
       this.flowElement = processEdge.getFlowElement();
-      this.ordinals = processEdge.getIncomingOrdinals();
+      this.ordinals = processEdge.getSourceProvidedOrdinals();
       }
 
     public FlowElement getFlowElement()

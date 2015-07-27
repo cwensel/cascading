@@ -617,6 +617,14 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
    */
   public abstract Collection<Child> getChildren();
 
+  /**
+   * Method getChildWith returns a child stats instance with the given ID value.
+   *
+   * @param id the id of a child instance
+   * @return the child stats instance or null if not found
+   */
+  public abstract Child getChildWith( String id );
+
   public synchronized void addListener( StatsListener statsListener )
     {
     if( listeners == null )

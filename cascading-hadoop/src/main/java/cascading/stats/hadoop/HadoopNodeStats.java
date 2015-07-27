@@ -64,6 +64,15 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
     this.counterCache = new HadoopNodeCounterCache( this, configuration );
     }
 
+  @Override
+  public String getKind()
+    {
+    if( kind == null )
+      return null;
+
+    return kind.name();
+    }
+
   private Status getParentStatus()
     {
     return parentStepStats.getStatus();

@@ -21,6 +21,7 @@
 package cascading.stats.tez;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import cascading.stats.FlowSliceStats;
 import cascading.stats.hadoop.BaseHadoopNodeStats;
 import cascading.stats.tez.util.TaskStatus;
 import cascading.stats.tez.util.TimelineClient;
+import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -108,7 +110,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     setFetchLimit( configuration );
 
     this.parentStepStats = parentStepStats;
-    this.kind = flowNode.getSourceElements( StreamMode.Streamed ).isEmpty() ? Kind.PARTITIONED : Kind.SPLIT;
+    this.kind = getStreamedTaps( flowNode ).isEmpty() ? Kind.PARTITIONED : Kind.SPLIT;
 
     this.counterCache = new TezCounterCache<DAGClient>( this, configuration )
     {
@@ -133,6 +135,27 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       return vertexCounters;
       }
     };
+    }
+
+  /**
+   * Current rule sets do not guarantee setting Streamed annotation, but do for Accumulated
+   */
+  private Set<Tap> getStreamedTaps( FlowNode flowNode )
+    {
+    Set<Tap> taps = new HashSet<>( flowNode.getSourceTaps() );
+
+    taps.remove( flowNode.getSourceElements( StreamMode.Accumulated ) );
+
+    return taps;
+    }
+
+  @Override
+  public String getKind()
+    {
+    if( kind == null )
+      return null;
+
+    return kind.name();
     }
 
   private String retrieveVertexID( DAGClient dagClient )

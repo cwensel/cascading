@@ -35,6 +35,8 @@ public abstract class FlowNodeStats extends CascadingStats<FlowSliceStats>
     this.flowNode = flowNode;
     }
 
+  public abstract String getKind();
+
   @Override
   protected ProcessLogger getProcessLogger()
     {

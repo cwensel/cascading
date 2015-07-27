@@ -43,8 +43,8 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
   String sourceProcessID;
   String sinkProcessID;
   FlowElement flowElement;
-  Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
-  Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
+  Set<Integer> sourceProvidedOrdinals;
+  Set<Integer> sinkExpectedOrdinals;
   Set<Enum> sinkAnnotations = Collections.emptySet();
   Set<Enum> sourceAnnotations = Collections.emptySet();
   Map<String, String> edgeAnnotations;
@@ -55,17 +55,23 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
     this.sourceProcessID = sourceProcess.getID();
     this.sinkProcessID = sinkProcess.getID();
 
-    ElementGraph sinkElementGraph = sinkProcess.getElementGraph();
     ElementGraph sourceElementGraph = sourceProcess.getElementGraph();
+    ElementGraph sinkElementGraph = sinkProcess.getElementGraph();
 
-    this.incomingOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
-    this.outgoingOrdinals = createOrdinals( sourceElementGraph.outgoingEdgesOf( flowElement ) );
+    // for both set of ordinals, we only care about the edges entering the flowElement
+    // the source may only provide a subset of the paths expected by the sink
 
-    if( sinkElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sinkElementGraph ).hasAnnotations() )
-      this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
+    // all ordinals the source process provides
+    this.sourceProvidedOrdinals = createOrdinals( sourceElementGraph.incomingEdgesOf( flowElement ) );
+
+    // all ordinals the sink process expects
+    this.sinkExpectedOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
 
     if( sourceElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sourceElementGraph ).hasAnnotations() )
       this.sourceAnnotations = ( (AnnotatedGraph) sourceElementGraph ).getAnnotations().getKeysFor( flowElement );
+
+    if( sinkElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sinkElementGraph ).hasAnnotations() )
+      this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
     }
 
   public String getID()
@@ -137,14 +143,14 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
     return FlowElements.id( flowElement );
     }
 
-  public Set<Integer> getIncomingOrdinals()
+  public Set<Integer> getSinkExpectedOrdinals()
     {
-    return incomingOrdinals;
+    return sinkExpectedOrdinals;
     }
 
-  public Set<Integer> getOutgoingOrdinals()
+  public Set<Integer> getSourceProvidedOrdinals()
     {
-    return outgoingOrdinals;
+    return sourceProvidedOrdinals;
     }
 
   public Set<Enum> getSinkAnnotations()

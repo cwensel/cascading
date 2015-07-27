@@ -21,7 +21,6 @@
 package cascading.stats.hadoop;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
@@ -69,17 +68,29 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
 
     BaseFlowStep<JobConf> step = (BaseFlowStep<JobConf>) flowStep;
 
-    Iterator<FlowNode> iterator = step.getFlowNodeGraph().getTopologicalIterator();
-
-    mapperNodeStats = new HadoopNodeStats( this, getConfig(), HadoopSliceStats.Kind.MAPPER, iterator.next(), clientState );
-
-    addNodeStats( mapperNodeStats );
-
-    if( iterator.hasNext() )
+    // don't rely on the iterator topological sort to identify mapper or reducer
+    for( FlowNode current : step.getFlowNodeGraph().vertexSet() )
       {
-      reducerNodeStats = new HadoopNodeStats( this, getConfig(), HadoopSliceStats.Kind.REDUCER, iterator.next(), clientState );
-      addNodeStats( reducerNodeStats );
+      if( step.getFlowNodeGraph().inDegreeOf( current ) == 0 )
+        {
+        if( mapperNodeStats != null )
+          throw new IllegalStateException( "mapper node already found" );
+
+        mapperNodeStats = new HadoopNodeStats( this, getConfig(), HadoopSliceStats.Kind.MAPPER, current, clientState );
+        addNodeStats( mapperNodeStats );
+        }
+      else
+        {
+        if( reducerNodeStats != null )
+          throw new IllegalStateException( "reducer node already found" );
+
+        reducerNodeStats = new HadoopNodeStats( this, getConfig(), HadoopSliceStats.Kind.REDUCER, current, clientState );
+        addNodeStats( reducerNodeStats );
+        }
       }
+
+    if( mapperNodeStats == null )
+      throw new IllegalStateException( "mapper node not found" );
 
     counterCache = new HadoopStepCounterCache( this, (Configuration) getConfig() )
     {
