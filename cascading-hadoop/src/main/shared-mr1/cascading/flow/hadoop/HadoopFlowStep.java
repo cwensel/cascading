@@ -165,7 +165,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       if( getGroup().isSortReversed() )
         conf.setOutputKeyComparatorClass( ReverseTupleComparator.class );
 
-      Integer ordinal = (Integer) Util.getFirst( processEdge.getIncomingOrdinals() );
+      Integer ordinal = (Integer) Util.getFirst( processEdge.getSinkExpectedOrdinals() );
 
       addComparators( conf, "cascading.group.comparator", getGroup().getKeySelectors(), (Fields) processEdge.getResolvedKeyFields().get( ordinal ) );
 
@@ -200,7 +200,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     // thus, if the edge is a CoGroup and they keys are not common types, force writing of type information
     if( processEdge != null && ifCoGroupAndKeysHaveCommonTypes( this, processEdge.getFlowElement(), processEdge.getResolvedKeyFields() ) )
       {
-      conf.set( "cascading.node.ordinals", Util.join( processEdge.getIncomingOrdinals(), "," ) );
+      conf.set( "cascading.node.ordinals", Util.join( processEdge.getSinkExpectedOrdinals(), "," ) );
       addFields( conf, "cascading.node.key.fields", processEdge.getResolvedKeyFields() );
       addFields( conf, "cascading.node.sort.fields", processEdge.getResolvedSortFields() );
       addFields( conf, "cascading.node.value.fields", processEdge.getResolvedValueFields() );
@@ -219,8 +219,14 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
     Iterator<FlowNode> iterator = getFlowNodeGraph().getTopologicalIterator();
 
-    String mapState = pack( iterator.next(), conf );
-    String reduceState = pack( iterator.hasNext() ? iterator.next() : null, conf );
+    FlowNode mapperNode = iterator.next();
+    FlowNode reducerNode = iterator.hasNext() ? iterator.next() : null;
+
+    if( reducerNode != null )
+      reducerNode.addProcessAnnotation( FlowRuntimeProps.GATHER_PARTITIONS, Integer.toString( conf.getNumReduceTasks() ) );
+
+    String mapState = pack( mapperNode, conf );
+    String reduceState = pack( reducerNode, conf );
 
     // hadoop 20.2 doesn't like dist cache when using local mode
     int maxSize = Short.MAX_VALUE;

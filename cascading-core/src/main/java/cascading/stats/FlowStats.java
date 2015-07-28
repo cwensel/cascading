@@ -23,6 +23,7 @@ package cascading.stats;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,7 @@ import cascading.util.ProcessLogger;
 public class FlowStats extends CascadingStats<FlowStepStats>
   {
   final Flow flow;
-  final List<FlowStepStats> flowStepStatsList = new ArrayList<>();
+  final Map<String, FlowStepStats> flowStepStatsMap = new LinkedHashMap<>(); // retains topological order
 
   public FlowStats( Flow flow, ClientState clientState )
     {
@@ -93,7 +94,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
 
   public void addStepStats( FlowStepStats flowStepStats )
     {
-    flowStepStatsList.add( flowStepStats );
+    flowStepStatsMap.put( flowStepStats.getID(), flowStepStats );
     }
 
   /**
@@ -103,7 +104,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
    */
   public List<FlowStepStats> getFlowStepStats()
     {
-    return flowStepStatsList;
+    return new ArrayList<>( flowStepStatsMap.values() );
     }
 
   /**
@@ -113,7 +114,18 @@ public class FlowStats extends CascadingStats<FlowStepStats>
    */
   public int getStepsCount()
     {
-    return flowStepStatsList.size();
+    return flowStepStatsMap.size();
+    }
+
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    long max = -1;
+
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
+      max = Math.max( max, flowStepStats.getLastSuccessfulCounterFetchTime() );
+
+    return max;
     }
 
   @Override
@@ -121,7 +133,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStepStats flowStepStats : getFlowStepStats() )
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
       results.addAll( flowStepStats.getCounterGroups() );
 
     return results;
@@ -132,7 +144,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStepStats flowStepStats : getFlowStepStats() )
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
       results.addAll( flowStepStats.getCounterGroupsMatching( regex ) );
 
     return results;
@@ -143,7 +155,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStepStats flowStepStats : getFlowStepStats() )
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
       results.addAll( flowStepStats.getCountersFor( group ) );
 
     return results;
@@ -154,7 +166,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     long value = 0;
 
-    for( FlowStepStats flowStepStats : getFlowStepStats() )
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
       value += flowStepStats.getCounterValue( counter );
 
     return value;
@@ -165,7 +177,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     {
     long value = 0;
 
-    for( FlowStepStats flowStepStats : getFlowStepStats() )
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
       value += flowStepStats.getCounterValue( group, counter );
 
     return value;
@@ -177,14 +189,20 @@ public class FlowStats extends CascadingStats<FlowStepStats>
     if( !getType().isChild( depth ) )
       return;
 
-    for( FlowStepStats flowStepStats : flowStepStatsList )
+    for( FlowStepStats flowStepStats : flowStepStatsMap.values() )
       flowStepStats.captureDetail( depth );
     }
 
   @Override
   public Collection<FlowStepStats> getChildren()
     {
-    return getFlowStepStats();
+    return flowStepStatsMap.values();
+    }
+
+  @Override
+  public FlowStepStats getChildWith( String id )
+    {
+    return flowStepStatsMap.get( id );
     }
 
   @Override

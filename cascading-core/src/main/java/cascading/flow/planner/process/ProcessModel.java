@@ -40,6 +40,21 @@ public interface ProcessModel
 
   String getName();
 
+  /**
+   * Method getProcessAnnotations returns an immutable Map of platform specific annotations or meta-data
+   * that describe the current model type.
+   * <p/>
+   * Use {@link #addProcessAnnotation(Enum)} or {@link #addProcessAnnotation(String, String)} to insert
+   * annotations or meta-data.
+   *
+   * @return an immutable Map
+   */
+  Map<String, String> getProcessAnnotations();
+
+  void addProcessAnnotation( Enum annotation );
+
+  void addProcessAnnotation( String key, String value );
+
   Collection<Group> getGroups();
 
   Set<Tap> getSourceTaps();

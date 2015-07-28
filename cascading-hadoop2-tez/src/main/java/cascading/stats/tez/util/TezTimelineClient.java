@@ -57,18 +57,25 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
   private static final String FILTER_BY_FIELDS = "primaryfilters,otherinfo";
 
   private final String dagId;
+  private final FrameworkClient frameworkClient;
   private final DAGClient dagClient;
 
   public TezTimelineClient( ApplicationId appId, String dagId, TezConfiguration conf, FrameworkClient frameworkClient, DAGClient dagClient ) throws TezException
     {
     super( appId, dagId, conf, frameworkClient );
     this.dagId = dagId;
+    this.frameworkClient = frameworkClient;
     this.dagClient = dagClient;
     }
 
   public DAGClient getDAGClient()
     {
     return dagClient;
+    }
+
+  public FrameworkClient getFrameworkClient()
+    {
+    return frameworkClient;
     }
 
   @Override

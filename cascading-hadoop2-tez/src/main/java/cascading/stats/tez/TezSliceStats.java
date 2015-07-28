@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 import cascading.stats.CascadingStats;
 import cascading.stats.FlowSliceStats;
@@ -75,6 +76,7 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
   private final CascadingStats.Status parentStatus;
   private CascadingStats.Status status;
   private String taskID;
+  private long lastFetch = -1;
   private Map<String, Map<String, Long>> counters = Collections.emptyMap();
 
   private Map<Integer, FlowSliceAttempt> attempts = new HashMap<>();
@@ -110,9 +112,10 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
     return parentStatus;
     }
 
-  protected void setStatus( CascadingStats.Status status )
+  protected void setStatus( @Nullable CascadingStats.Status status )
     {
-    this.status = status;
+    if( status != null )
+      this.status = status;
     }
 
   @Override
@@ -169,10 +172,21 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
     return attempts;
     }
 
-  public void setCounters( Map<String, Map<String, Long>> counters )
+  public void setCounters( @Nullable Map<String, Map<String, Long>> counters )
     {
     if( counters != null )
       this.counters = counters;
+    }
+
+  public void setLastFetch( long lastFetch )
+    {
+    this.lastFetch = lastFetch;
+    }
+
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    return lastFetch;
     }
 
   @Override

@@ -48,6 +48,14 @@ dependencies {
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
 }
 
+configurations.all {
+  resolutionStrategy {
+
+    if( !hadoop2Version.startsWith( '2.4' )  )
+      force 'com.google.guava:guava:11.0.2'
+  }
+}
+
 test {
 
   delete( "target" ) // hardcoded path in hadoop2

@@ -27,8 +27,11 @@ import java.util.Set;
 import cascading.CascadingException;
 import cascading.util.Util;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.tez.client.FrameworkClient;
+import org.apache.tez.client.TezClient;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.dag.api.TezException;
 import org.apache.tez.dag.api.client.DAGClient;
@@ -136,5 +139,44 @@ public class TezStatsUtil
       }
 
     return null;
+    }
+
+  public static String getTrackingURL( TezClient tezClient, DAGClient dagClient )
+    {
+    if( tezClient == null || dagClient == null )
+      return null;
+
+    try
+      {
+      ApplicationId applicationId = tezClient.getAppMasterApplicationId();
+      FrameworkClient frameworkClient = getFrameworkClient( dagClient );
+
+      if( frameworkClient == null )
+        {
+        LOG.info( "unable to get framework client" );
+        return null;
+        }
+
+      ApplicationReport report = frameworkClient.getApplicationReport( applicationId );
+
+      if( report != null )
+        return report.getTrackingUrl();
+
+      }
+    catch( YarnException | IOException exception )
+      {
+      LOG.info( "unable to get tracking url" );
+      LOG.debug( "exception retrieving application report", exception );
+      }
+
+    return null;
+    }
+
+  private static FrameworkClient getFrameworkClient( DAGClient dagClient )
+    {
+    if( dagClient instanceof TezTimelineClient )
+      return ( (TezTimelineClient) dagClient ).getFrameworkClient();
+
+    return Util.returnInstanceFieldIfExistsSafe( dagClient, "frameworkClient" );
     }
   }

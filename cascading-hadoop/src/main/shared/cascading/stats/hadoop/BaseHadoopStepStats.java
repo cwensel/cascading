@@ -51,6 +51,15 @@ public abstract class BaseHadoopStepStats<JobStatusClient, Counters> extends Flo
    */
   public abstract JobStatusClient getJobStatusClient();
 
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    if( counterCache != null )
+      return counterCache.getLastSuccessfulFetch();
+
+    return -1;
+    }
+
   /**
    * Method getCounterGroups returns all of the Hadoop counter groups.
    *

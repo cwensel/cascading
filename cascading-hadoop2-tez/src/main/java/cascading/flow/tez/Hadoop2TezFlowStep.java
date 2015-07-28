@@ -293,14 +293,23 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     if( flowElement instanceof Group )
       applyGroup( edgeValues );
-    else if( ( flowElement instanceof Boundary || flowElement instanceof Merge ) && processEdge.getSourceAnnotations().contains( StreamMode.Accumulated ) )
+    else if( ( flowElement instanceof Boundary || flowElement instanceof Merge ) && processEdge.getSinkAnnotations().contains( StreamMode.Accumulated ) )
       applyBoundaryMergeAccumulated( edgeValues );
     else if( flowElement instanceof Boundary || flowElement instanceof Merge )
       applyBoundaryMerge( edgeValues );
     else
       throw new IllegalStateException( "unsupported flow element: " + flowElement.getClass().getCanonicalName() );
 
+    applyEdgeAnnotations( processEdge, edgeValues );
+
     return createEdgeProperty( edgeValues );
+    }
+
+  private void applyEdgeAnnotations( ProcessEdge processEdge, EdgeValues edgeValues )
+    {
+    processEdge.addEdgeAnnotation( edgeValues.movementType );
+    processEdge.addEdgeAnnotation( edgeValues.sourceType );
+    processEdge.addEdgeAnnotation( edgeValues.schedulingType );
     }
 
   private EdgeValues applyBoundaryMerge( EdgeValues edgeValues )
@@ -472,6 +481,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     if( parallelism == 0 )
       throw new FlowException( getName(), "the default number of gather partitions must be set, see cascading.flow.FlowRuntimeProps" );
 
+    flowNode.addProcessAnnotation( FlowRuntimeProps.GATHER_PARTITIONS, Integer.toString( parallelism ) );
+
     Vertex vertex = newVertex( flowNode, conf, parallelism );
 
     if( !taskLocalResources.isEmpty() )
@@ -543,6 +554,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     addRemoteDebug( flowNode, vertex );
     addRemoteProfiling( flowNode, vertex );
 
+    if( vertex.getTaskLaunchCmdOpts() != null )
+      flowNode.addProcessAnnotation( TezConfiguration.TEZ_TASK_LAUNCH_CMD_OPTS, vertex.getTaskLaunchCmdOpts() );
+
     return vertex;
     }
 
@@ -594,12 +608,12 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     Set<ProcessEdge> incomingEdges = flowNodeGraph.incomingEdgesOf( flowNode );
 
     for( ProcessEdge processEdge : incomingEdges )
-      conf.set( "cascading.node.source." + processEdge.getID(), flowNodeGraph.getEdgeSource( processEdge ).getID() );
+      conf.set( "cascading.node.source." + processEdge.getFlowElementID(), processEdge.getSourceProcessID() );
 
     Set<ProcessEdge> outgoingEdges = flowNodeGraph.outgoingEdgesOf( flowNode );
 
     for( ProcessEdge processEdge : outgoingEdges )
-      conf.set( "cascading.node.sink." + processEdge.getID(), flowNodeGraph.getEdgeTarget( processEdge ).getID() );
+      conf.set( "cascading.node.sink." + processEdge.getFlowElementID(), processEdge.getSinkProcessID() );
     }
 
   protected Map<FlowElement, Configuration> initFromSources( FlowNode flowNode, FlowProcess<TezConfiguration> flowProcess,
@@ -898,7 +912,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       {
       this.config = config;
       this.flowElement = processEdge.getFlowElement();
-      this.ordinals = processEdge.getIncomingOrdinals();
+      this.ordinals = processEdge.getSourceProvidedOrdinals();
 
       this.resolvedKeyFieldsMap = processEdge.getResolvedKeyFields();
       this.resolvedSortFieldsMap = processEdge.getResolvedSortFields();

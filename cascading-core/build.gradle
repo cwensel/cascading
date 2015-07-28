@@ -20,7 +20,6 @@
 
 dependencies {
   compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.1'
-  compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.1'
   compile group: 'riffle', name: 'riffle', version: '1.0.0'
 
   // this prevents a transitive dependency until it is required downstream

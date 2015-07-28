@@ -62,6 +62,10 @@ import cascading.util.Murmur3;
 import cascading.util.Pair;
 import cascading.util.Util;
 import cascading.util.Version;
+import cascading.util.jgrapht.ComponentAttributeProvider;
+import cascading.util.jgrapht.EdgeNameProvider;
+import cascading.util.jgrapht.IntegerNameProvider;
+import cascading.util.jgrapht.VertexNameProvider;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
@@ -69,10 +73,6 @@ import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.alg.KShortestPaths;
-import org.jgrapht.ext.ComponentAttributeProvider;
-import org.jgrapht.ext.EdgeNameProvider;
-import org.jgrapht.ext.IntegerNameProvider;
-import org.jgrapht.ext.VertexNameProvider;
 import org.jgrapht.graph.AbstractGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -257,12 +257,12 @@ public class ElementGraphs
     return ( ( lhs + rhs ) * ( lhs + rhs + 1 ) / 2 ) + rhs;
     }
 
-  public static TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator( ElementGraph graph )
+  public static Iterator<FlowElement> getTopologicalIterator( ElementGraph graph )
     {
     return new TopologicalOrderIterator<>( directed( graph ) );
     }
 
-  public static TopologicalOrderIterator<FlowElement, Scope> getReverseTopologicalIterator( ElementGraph graph )
+  public static Iterator<FlowElement> getReverseTopologicalIterator( ElementGraph graph )
     {
     return new TopologicalOrderIterator<>( new EdgeReversedGraph<>( directed( graph ) ) );
     }

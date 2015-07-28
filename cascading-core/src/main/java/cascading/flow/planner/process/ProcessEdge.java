@@ -40,9 +40,13 @@ import cascading.util.Util;
  */
 public class ProcessEdge<Process extends ProcessModel> implements Serializable
   {
+  String id;
+  String sourceProcessID;
+  String sinkProcessID;
   FlowElement flowElement;
-  Set<Integer> outgoingOrdinals; // ordinals entering this edge exiting the source process
-  Set<Integer> incomingOrdinals; // ordinals exiting the edge into the sink process
+
+  Set<Integer> sourceProvidedOrdinals;
+  Set<Integer> sinkExpectedOrdinals;
 
   Map<Integer, Fields> resolvedKeyFields;
   Map<Integer, Fields> resolvedSortFields;
@@ -51,16 +55,28 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
   Set<Enum> sinkAnnotations = Collections.emptySet();
   Set<Enum> sourceAnnotations = Collections.emptySet();
 
+  Map<String, String> edgeAnnotations;
+
   public ProcessEdge( Process sourceProcess, FlowElement flowElement, Process sinkProcess )
     {
     this( sourceProcess.getElementGraph(), flowElement, sinkProcess.getElementGraph() );
+
+    this.sourceProcessID = sourceProcess.getID();
+    this.sinkProcessID = sinkProcess.getID();
     }
 
   public ProcessEdge( ElementGraph sourceElementGraph, FlowElement flowElement, ElementGraph sinkElementGraph )
     {
     this.flowElement = flowElement;
-    this.outgoingOrdinals = createOrdinals( sourceElementGraph.outgoingEdgesOf( flowElement ) );
-    this.incomingOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
+
+    // for both set of ordinals, we only care about the edges entering the flowElement
+    // the source may only provide a subset of the paths expected by the sink
+
+    // all ordinals the source process provides
+    this.sourceProvidedOrdinals = createOrdinals( sourceElementGraph.incomingEdgesOf( flowElement ) );
+
+    // all ordinals the sink process expects
+    this.sinkExpectedOrdinals = createOrdinals( sinkElementGraph.incomingEdgesOf( flowElement ) );
 
     setResolvedFields( sourceElementGraph, flowElement, sinkElementGraph );
 
@@ -69,6 +85,24 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
 
     if( sinkElementGraph instanceof AnnotatedGraph && ( (AnnotatedGraph) sinkElementGraph ).hasAnnotations() )
       this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
+    }
+
+  public String getID()
+    {
+    if( id == null ) // make it lazy
+      id = Util.createUniqueID();
+
+    return id;
+    }
+
+  public String getSourceProcessID()
+    {
+    return sourceProcessID;
+    }
+
+  public String getSinkProcessID()
+    {
+    return sinkProcessID;
     }
 
   private void setResolvedFields( ElementGraph sourceElementGraph, FlowElement flowElement, ElementGraph sinkElementGraph )
@@ -106,6 +140,37 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
       }
     }
 
+  /**
+   * Returns any edge annotations, or an empty immutable Map.
+   * <p/>
+   * Use {@link #addEdgeAnnotation(String, String)} to add edge annotations.
+   *
+   * @return
+   */
+  public Map<String, String> getEdgeAnnotations()
+    {
+    if( edgeAnnotations == null )
+      return Collections.emptyMap();
+
+    return Collections.unmodifiableMap( edgeAnnotations );
+    }
+
+  public void addEdgeAnnotation( Enum annotation )
+    {
+    if( annotation == null )
+      return;
+
+    addEdgeAnnotation( annotation.getDeclaringClass().getName(), annotation.name() );
+    }
+
+  public void addEdgeAnnotation( String key, String value )
+    {
+    if( edgeAnnotations == null )
+      edgeAnnotations = new HashMap<>();
+
+    edgeAnnotations.put( key, value );
+    }
+
   private Set<Integer> createOrdinals( Set<Scope> scopes )
     {
     Set<Integer> ordinals = new TreeSet<>();
@@ -121,19 +186,19 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
     return flowElement;
     }
 
-  public String getID()
+  public String getFlowElementID()
     {
     return FlowElements.id( flowElement );
     }
 
-  public Set<Integer> getIncomingOrdinals()
+  public Set<Integer> getSinkExpectedOrdinals()
     {
-    return incomingOrdinals;
+    return sinkExpectedOrdinals;
     }
 
-  public Set<Integer> getOutgoingOrdinals()
+  public Set<Integer> getSourceProvidedOrdinals()
     {
-    return outgoingOrdinals;
+    return sourceProvidedOrdinals;
     }
 
   public Map<Integer, Fields> getResolvedKeyFields()

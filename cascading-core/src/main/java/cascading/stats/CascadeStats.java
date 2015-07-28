@@ -22,8 +22,8 @@ package cascading.stats;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.cascade.Cascade;
@@ -35,7 +35,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
   {
   private Cascade cascade;
   /** Field flowStatsList */
-  final List<FlowStats> flowStatsList = new LinkedList<FlowStats>(); // maintain order
+  final Map<String, FlowStats> flowStatsMap = new LinkedHashMap<>(); // maintain order
 
   public CascadeStats( Cascade cascade, ClientState clientState )
     {
@@ -82,7 +82,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
    */
   public void addFlowStats( FlowStats flowStats )
     {
-    flowStatsList.add( flowStats );
+    flowStatsMap.put( flowStats.getID(), flowStats );
     }
 
   /**
@@ -92,7 +92,18 @@ public class CascadeStats extends CascadingStats<FlowStats>
    */
   public int getFlowCount()
     {
-    return flowStatsList.size();
+    return flowStatsMap.size();
+    }
+
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    long max = -1;
+
+    for( FlowStats flowStats : flowStatsMap.values() )
+      max = Math.max( max, flowStats.getLastSuccessfulCounterFetchTime() );
+
+    return max;
     }
 
   @Override
@@ -100,7 +111,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats flowStats : flowStatsMap.values() )
       results.addAll( flowStats.getCounterGroups() );
 
     return results;
@@ -111,7 +122,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats flowStats : flowStatsMap.values() )
       results.addAll( flowStats.getCounterGroupsMatching( regex ) );
 
     return results;
@@ -122,7 +133,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
     {
     Set<String> results = new HashSet<String>();
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats flowStats : flowStatsMap.values() )
       results.addAll( flowStats.getCountersFor( group ) );
 
     return results;
@@ -133,7 +144,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
     {
     long value = 0;
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats flowStats : flowStatsMap.values() )
       value += flowStats.getCounterValue( counter );
 
     return value;
@@ -144,7 +155,7 @@ public class CascadeStats extends CascadingStats<FlowStats>
     {
     long value = 0;
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats flowStats : flowStatsMap.values() )
       value += flowStats.getCounterValue( group, counter );
 
     return value;
@@ -156,19 +167,25 @@ public class CascadeStats extends CascadingStats<FlowStats>
     if( !getType().isChild( depth ) )
       return;
 
-    for( FlowStats flowStats : flowStatsList )
+    for( FlowStats flowStats : flowStatsMap.values() )
       flowStats.captureDetail( depth );
     }
 
   @Override
   public Collection<FlowStats> getChildren()
     {
-    return flowStatsList;
+    return flowStatsMap.values();
+    }
+
+  @Override
+  public FlowStats getChildWith( String id )
+    {
+    return flowStatsMap.get( id );
     }
 
   @Override
   public String toString()
     {
-    return "Cascade{" + "flowStatsList=" + flowStatsList + '}';
+    return "Cascade{" + "flowStatsList=" + flowStatsMap.values() + '}';
     }
   }

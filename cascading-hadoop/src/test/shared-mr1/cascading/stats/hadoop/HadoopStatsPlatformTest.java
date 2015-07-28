@@ -21,7 +21,9 @@
 package cascading.stats.hadoop;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
@@ -150,13 +152,18 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
 
       assertEquals( 2, flowNodeStats.size() );
 
-      FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-      FlowNodeStats reducerNode = flowNodeStats.get( 1 );
+      Map<String, FlowNodeStats> statsMap = new HashMap<>();
 
-      assertEquals( 4, mapperNode.getChildren().size() );
-      assertEquals( 1, reducerNode.getChildren().size() );
+      statsMap.put( flowNodeStats.get( 0 ).getKind(), flowNodeStats.get( 0 ) );
+      statsMap.put( flowNodeStats.get( 1 ).getKind(), flowNodeStats.get( 1 ) );
 
-      Collection<FlowSliceStats> children = reducerNode.getChildren();
+      assertNotNull( statsMap.get( "MAPPER" ) );
+      assertNotNull( statsMap.get( "REDUCER" ) );
+
+      assertEquals( 4, statsMap.get( "MAPPER" ).getChildren().size() );
+      assertEquals( 1, statsMap.get( "REDUCER" ).getChildren().size() );
+
+      Collection<FlowSliceStats> children = statsMap.get( "REDUCER" ).getChildren();
       for( FlowSliceStats flowSliceStats : children )
         {
         HadoopSliceStats hadoopSliceStats = (HadoopSliceStats) flowSliceStats;
@@ -176,11 +183,16 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
       List<FlowNodeStats> flowNodeStats = stats2.getFlowNodeStats();
       assertEquals( 2, flowNodeStats.size() );
 
-      FlowNodeStats mapperNode = flowNodeStats.get( 0 );
-      FlowNodeStats reducerNode = flowNodeStats.get( 1 );
+      Map<String, FlowNodeStats> statsMap = new HashMap<>();
 
-      assertEquals( 4, mapperNode.getChildren().size() );
-      assertEquals( 1, reducerNode.getChildren().size() );
+      statsMap.put( flowNodeStats.get( 0 ).getKind(), flowNodeStats.get( 0 ) );
+      statsMap.put( flowNodeStats.get( 1 ).getKind(), flowNodeStats.get( 1 ) );
+
+      assertNotNull( statsMap.get( "MAPPER" ) );
+      assertNotNull( statsMap.get( "REDUCER" ) );
+
+      assertEquals( 4, statsMap.get( "MAPPER" ).getChildren().size() );
+      assertEquals( 1, statsMap.get( "REDUCER" ).getChildren().size() );
       }
     }
   }

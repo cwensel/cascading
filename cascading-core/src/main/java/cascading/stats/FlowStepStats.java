@@ -100,6 +100,12 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     }
 
   @Override
+  public FlowNodeStats getChildWith( String id )
+    {
+    return flowNodeStatsMap.get( id );
+    }
+
+  @Override
   public synchronized void recordInfo()
     {
     clientState.recordFlowStep( flowStep );

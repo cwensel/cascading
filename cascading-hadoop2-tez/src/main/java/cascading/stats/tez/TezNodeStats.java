@@ -21,10 +21,14 @@
 package cascading.stats.tez;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 
+import cascading.CascadingException;
 import cascading.flow.FlowNode;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.stream.annotations.StreamMode;
@@ -34,6 +38,7 @@ import cascading.stats.FlowSliceStats;
 import cascading.stats.hadoop.BaseHadoopNodeStats;
 import cascading.stats.tez.util.TaskStatus;
 import cascading.stats.tez.util.TimelineClient;
+import cascading.tap.Tap;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -49,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import static cascading.stats.tez.util.TezStatsUtil.STATUS_GET_COUNTERS;
 import static cascading.util.Util.formatDurationFromMillis;
+import static cascading.util.Util.isEmpty;
 
 /**
  *
@@ -104,7 +110,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     setFetchLimit( configuration );
 
     this.parentStepStats = parentStepStats;
-    this.kind = flowNode.getSourceElements( StreamMode.Streamed ).isEmpty() ? Kind.PARTITIONED : Kind.SPLIT;
+    this.kind = getStreamedTaps( flowNode ).isEmpty() ? Kind.PARTITIONED : Kind.SPLIT;
 
     this.counterCache = new TezCounterCache<DAGClient>( this, configuration )
     {
@@ -131,6 +137,27 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     };
     }
 
+  /**
+   * Current rule sets do not guarantee setting Streamed annotation, but do for Accumulated
+   */
+  private Set<Tap> getStreamedTaps( FlowNode flowNode )
+    {
+    Set<Tap> taps = new HashSet<>( flowNode.getSourceTaps() );
+
+    taps.remove( flowNode.getSourceElements( StreamMode.Accumulated ) );
+
+    return taps;
+    }
+
+  @Override
+  public String getKind()
+    {
+    if( kind == null )
+      return null;
+
+    return kind.name();
+    }
+
   private String retrieveVertexID( DAGClient dagClient )
     {
     if( vertexID != null || !( dagClient instanceof TimelineClient ) )
@@ -140,7 +167,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       {
       vertexID = ( (TimelineClient) dagClient ).getVertexID( getID() );
       }
-    catch( IOException | TezException exception )
+    catch( IOException | CascadingException | TezException exception )
       {
       logWarn( "unable to get vertex id", exception );
       }
@@ -215,7 +242,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
       TaskStatus taskStatus = getTaskStatusFor( timelineClient, sliceStats.getProcessSliceID() );
 
-      updateSliceWith( (TezSliceStats) sliceStats, taskStatus );
+      updateSliceWith( (TezSliceStats) sliceStats, taskStatus, System.currentTimeMillis() );
 
       count++;
       }
@@ -238,6 +265,8 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
     while( continueIterating && sliceStatsMap.size() != getTotalTaskCount() )
       {
+      long lastFetch = System.currentTimeMillis();
+
       // we will see the same tasks twice as we paginate
       Iterator<TaskStatus> vertexChildren = getTaskStatusIterator( timelineClient, fromTaskId );
 
@@ -268,7 +297,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
           updated++;
           }
 
-        updateSliceWith( sliceStats, taskStatus );
+        updateSliceWith( sliceStats, taskStatus, lastFetch );
         }
 
       int retrieved = added + updated;
@@ -295,13 +324,19 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     return total == getTotalTaskCount();
     }
 
-  private void updateSliceWith( TezSliceStats sliceStats, TaskStatus taskStatus )
+  private void updateSliceWith( TezSliceStats sliceStats, TaskStatus taskStatus, long lastFetch )
     {
     if( taskStatus == null )
       return;
 
-    sliceStats.setStatus( getStatusForTaskStatus( taskStatus.getStatus() ) );
-    sliceStats.setCounters( taskStatus.getCounters() );
+    sliceStats.setStatus( getStatusForTaskStatus( taskStatus.getStatus() ) ); // ignores nulls
+
+    Map<String, Map<String, Long>> counters = taskStatus.getCounters();
+
+    sliceStats.setCounters( counters ); // ignores nulls
+
+    if( counters != null )
+      sliceStats.setLastFetch( lastFetch );
     }
 
   private TaskStatus getTaskStatusFor( TimelineClient timelineClient, String taskID )
@@ -332,7 +367,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
       return timelineClient.getVertexChildren( vertexID, fetchLimit, startTaskID );
       }
-    catch( IOException | TezException exception )
+    catch( IOException | CascadingException | TezException exception )
       {
       logWarn( "unable to get slice stats from timeline server", exception );
       }
@@ -383,8 +418,11 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     return true;
     }
 
-  private Status getStatusForTaskStatus( String status )
+  private Status getStatusForTaskStatus( @Nullable String status )
     {
+    if( isEmpty( status ) )
+      return null;
+
     TaskState state = TaskState.valueOf( status );
 
     switch( state )

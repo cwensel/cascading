@@ -24,6 +24,28 @@ Cascading Change Log
   information to reduce serialized data and perform bitwise equality comparisons. See c.t.h.TupleSerializationProps to
   disable bitwise comparisons.
 
+3.0.2 [unreleased]
+
+  Fixed issue where c.s.FlowNodeStats node kind could be mislabeled.
+
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
+
+  Updated build to exclude jgrapht-ext, further isolation of jgrapht apis to support reliable shading.
+
+  Fixed issue where c.f.p.ProcessFlow would not propagate the application name, version, tags, etc to the management
+  services.
+
+  Fixed issue where c.s.FlowStepStats#getProcessStatusURL() always returned null for Apache MapReduce and Tez platforms.
+
+  Fixed issue on Apache Tez where a split before and subsequent splicing back into a c.p.HashJoin could create an
+  invalid plan.
+
+  Fixed issue with c.t.u.TupleHasher#ObjectHasher not being serializable.
+
+  Fixed issue where an unreachable YARN timeline server could cause the application to fail.
+
+  Fixed issue with NPE when retrieving Tez task status from timeline server.
+
 3.0.1
 
   Fixed issue in c.f.t.p.Hadoop2TezFlowStepJob where the LocalResources were not passed to the AppMaster correctly

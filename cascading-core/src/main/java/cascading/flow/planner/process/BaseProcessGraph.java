@@ -44,8 +44,8 @@ import cascading.pipe.Group;
 import cascading.tap.Tap;
 import cascading.util.EnumMultiMap;
 import cascading.util.Util;
-import org.jgrapht.ext.IntegerNameProvider;
-import org.jgrapht.ext.VertexNameProvider;
+import cascading.util.jgrapht.IntegerNameProvider;
+import cascading.util.jgrapht.VertexNameProvider;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
@@ -56,10 +56,12 @@ import static cascading.util.Util.createIdentitySet;
 /**
  *
  */
-public abstract class BaseProcessGraph<Process extends ProcessModel> extends SimpleDirectedGraph<Process, ProcessEdge> implements ProcessGraph<Process>
+public abstract class BaseProcessGraph<Process extends ProcessModel> implements ProcessGraph<Process>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( BaseProcessGraph.class );
+
+  final SimpleDirectedGraph<Process, ProcessEdge> graph;
 
   protected Set<FlowElement> sourceElements = createIdentitySet();
   protected Set<FlowElement> sinkElements = createIdentitySet();
@@ -69,7 +71,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
 
   public BaseProcessGraph()
     {
-    super( ProcessEdge.class );
+    graph = new SimpleDirectedGraph( ProcessEdge.class );
     }
 
   @Override
@@ -79,7 +81,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
     sinkElements.addAll( process.getSinkElements() );
     trapsMap.putAll( process.getTrapMap() );
 
-    return super.addVertex( process );
+    return graph.addVertex( process );
     }
 
   protected void bindEdges()
@@ -94,11 +96,20 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
         // outer edge sources and sinks to this graph
         sourceElements.removeAll( sinkProcess.getSinkElements() );
         sinkElements.removeAll( sourceProcess.getSourceElements() );
+        }
+      }
 
-        for( Object sink : sinkProcess.getSinkElements() )
+    for( Process sinkProcess : vertexSet() )
+      {
+      for( Process sourceProcess : vertexSet() )
+        {
+        if( sourceProcess == sinkProcess )
+          continue;
+
+        for( Object intermediate : sourceProcess.getSinkElements() )
           {
-          if( sourceProcess.getSourceElements().contains( sink ) )
-            addEdge( sinkProcess, sourceProcess, new ProcessEdge<>( sourceProcess, (FlowElement) sink, sinkProcess ) );
+          if( sinkProcess.getSourceElements().contains( intermediate ) )
+            addEdge( sourceProcess, sinkProcess, new ProcessEdge<>( sourceProcess, (FlowElement) intermediate, sinkProcess ) );
           }
         }
       }
@@ -173,7 +184,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   @Override
   public Iterator<Process> getOrderedTopologicalIterator( Comparator<Process> comparator )
     {
-    return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, comparator ) );
+    return new TopologicalOrderIterator<>( graph, new PriorityQueue<>( 10, comparator ) );
     }
 
   @Override
@@ -369,7 +380,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
       {
       Writer writer = new FileWriter( filename );
 
-      Util.writeDOT( writer, this, new IntegerNameProvider<Process>(), new VertexNameProvider<Process>()
+      Util.writeDOT( writer, graph, new IntegerNameProvider<Process>(), new VertexNameProvider<Process>()
       {
       public String getVertexName( Process process )
         {
@@ -417,5 +428,120 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> extends Sim
   public void writeDOTNested( String filename, ElementGraph graph )
     {
     ElementGraphs.printProcessGraph( filename, graph, this );
+    }
+
+  public boolean containsEdge( Process sourceVertex, Process targetVertex )
+    {
+    return graph.containsEdge( sourceVertex, targetVertex );
+    }
+
+  public boolean removeAllEdges( Collection<? extends ProcessEdge> edges )
+    {
+    return graph.removeAllEdges( edges );
+    }
+
+  public Set<ProcessEdge> removeAllEdges( Process sourceVertex, Process targetVertex )
+    {
+    return graph.removeAllEdges( sourceVertex, targetVertex );
+    }
+
+  public boolean removeAllVertices( Collection<? extends Process> vertices )
+    {
+    return graph.removeAllVertices( vertices );
+    }
+
+  public Set<ProcessEdge> getAllEdges( Process sourceVertex, Process targetVertex )
+    {
+    return graph.getAllEdges( sourceVertex, targetVertex );
+    }
+
+  public ProcessEdge getEdge( Process sourceVertex, Process targetVertex )
+    {
+    return graph.getEdge( sourceVertex, targetVertex );
+    }
+
+  public ProcessEdge addEdge( Process sourceVertex, Process targetVertex )
+    {
+    return graph.addEdge( sourceVertex, targetVertex );
+    }
+
+  public boolean addEdge( Process sourceVertex, Process targetVertex, ProcessEdge processEdge )
+    {
+    return graph.addEdge( sourceVertex, targetVertex, processEdge );
+    }
+
+  public Process getEdgeSource( ProcessEdge processEdge )
+    {
+    return graph.getEdgeSource( processEdge );
+    }
+
+  public Process getEdgeTarget( ProcessEdge processEdge )
+    {
+    return graph.getEdgeTarget( processEdge );
+    }
+
+  public boolean containsEdge( ProcessEdge processEdge )
+    {
+    return graph.containsEdge( processEdge );
+    }
+
+  public boolean containsVertex( Process process )
+    {
+    return graph.containsVertex( process );
+    }
+
+  public Set<ProcessEdge> edgeSet()
+    {
+    return graph.edgeSet();
+    }
+
+  public Set<ProcessEdge> edgesOf( Process vertex )
+    {
+    return graph.edgesOf( vertex );
+    }
+
+  public int inDegreeOf( Process vertex )
+    {
+    return graph.inDegreeOf( vertex );
+    }
+
+  public Set<ProcessEdge> incomingEdgesOf( Process vertex )
+    {
+    return graph.incomingEdgesOf( vertex );
+    }
+
+  public int outDegreeOf( Process vertex )
+    {
+    return graph.outDegreeOf( vertex );
+    }
+
+  public Set<ProcessEdge> outgoingEdgesOf( Process vertex )
+    {
+    return graph.outgoingEdgesOf( vertex );
+    }
+
+  public ProcessEdge removeEdge( Process sourceVertex, Process targetVertex )
+    {
+    return graph.removeEdge( sourceVertex, targetVertex );
+    }
+
+  public boolean removeEdge( ProcessEdge processEdge )
+    {
+    return graph.removeEdge( processEdge );
+    }
+
+  public boolean removeVertex( Process process )
+    {
+    return graph.removeVertex( process );
+    }
+
+  public Set<Process> vertexSet()
+    {
+    return graph.vertexSet();
+    }
+
+  public double getEdgeWeight( ProcessEdge processEdge )
+    {
+    return graph.getEdgeWeight( processEdge );
     }
   }

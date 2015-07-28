@@ -22,6 +22,7 @@ package cascading.flow.planner.iso.finder;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,6 @@ import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.util.EnumMultiMap;
 import cascading.util.Util;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
  *
@@ -123,7 +123,7 @@ public class Match
       throw new IllegalStateException( "duplicates found in mapping" );
 
     // returns a Set ordered topologically by the matched graph. retains this first, this second ordering for simple cases
-    TopologicalOrderIterator<FlowElement, Scope> iterator = ElementGraphs.getTopologicalIterator( getMatchedGraph() );
+    Iterator<FlowElement> iterator = ElementGraphs.getTopologicalIterator( getMatchedGraph() );
 
     while( iterator.hasNext() )
       {

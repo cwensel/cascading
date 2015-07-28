@@ -125,13 +125,14 @@ public class TupleHasher implements Serializable
     return hashFunction;
     }
 
-  private static class ObjectHasher implements Hasher<Object>
+  private static class ObjectHasher implements Hasher<Object>, Serializable
     {
     @Override
     public int hashCode( Object value )
       {
       if( value == null )
         return 0;
+
       return value.hashCode();
       }
     }

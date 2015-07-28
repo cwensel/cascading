@@ -39,6 +39,7 @@ public class ProcessStepStats extends FlowStepStats
    * The counters of the step as a Map.
    */
   private final Map<String, Map<String, Long>> counters;
+  private final long lastFetch;
 
   /**
    * Constructs a new ProcessStepStats instance.
@@ -51,6 +52,8 @@ public class ProcessStepStats extends FlowStepStats
     {
     super( step, clientState );
     this.counters = counters;
+
+    lastFetch = this.counters != null ? System.currentTimeMillis() : -1;
     }
 
   @Override
@@ -63,6 +66,12 @@ public class ProcessStepStats extends FlowStepStats
   public String getProcessStepID()
     {
     return null;
+    }
+
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    return lastFetch;
     }
 
   @Override

@@ -48,6 +48,7 @@ import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowStepGraph;
+import cascading.flow.planner.process.ProcessGraphs;
 import cascading.management.CascadingServices;
 import cascading.management.UnitOfWorkExecutorStrategy;
 import cascading.management.UnitOfWorkSpawnStrategy;
@@ -75,7 +76,6 @@ import riffle.process.ProcessStart;
 import riffle.process.ProcessStop;
 
 import static cascading.util.Util.formatDurationFromMillis;
-import static org.jgrapht.Graphs.predecessorListOf;
 
 @riffle.process.Process
 public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
@@ -1292,7 +1292,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
       List<FlowStepJob<Config>> predecessors = new ArrayList<FlowStepJob<Config>>();
 
-      for( Object flowStep : predecessorListOf( flowStepGraph, step ) )
+      for( Object flowStep : ProcessGraphs.predecessorListOf( flowStepGraph, step ) )
         predecessors.add( jobsMap.get( ( (FlowStep) flowStep ).getName() ) );
 
       flowStepJob.setPredecessors( predecessors );

@@ -51,6 +51,15 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     super( flowNode, clientState );
     }
 
+  @Override
+  public long getLastSuccessfulCounterFetchTime()
+    {
+    if( counterCache != null )
+      return counterCache.getLastSuccessfulFetch();
+
+    return -1;
+    }
+
   /**
    * Method getCounterGroups returns all of the Hadoop counter groups.
    *
@@ -126,6 +135,12 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     }
 
   @Override
+  public FlowSliceStats getChildWith( String id )
+    {
+    return sliceStatsMap.get( id );
+    }
+
+  @Override
   public final synchronized void captureDetail( Type depth )
     {
     boolean finished = isFinished();
@@ -173,8 +188,9 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     // so we can't call recordStats/recordChildStats
     try
       {
-      for( Map.Entry<String, FlowSliceStats> entry : sliceStatsMap.entrySet() )
-        clientState.record( entry.getKey(), entry.getValue() );
+      // must use the local ID as the stored id, not task id
+      for( FlowSliceStats value : sliceStatsMap.values() )
+        clientState.record( value.getID(), value );
       }
     catch( Exception exception )
       {
