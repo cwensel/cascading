@@ -71,8 +71,6 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
   private static int fetchLimit = -1;
 
-  private transient String prefixID; // cached sub-string
-
   public enum Kind
     {
       SPLIT, PARTITIONED
@@ -87,7 +85,6 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
   private int failedTaskCount;
   private int killedTaskCount;
   private int runningTaskCount;
-  private boolean allTasksAreFinished;
 
   private static void setFetchLimit( Configuration configuration )
     {
@@ -203,6 +200,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
   @Override
   protected boolean captureChildDetailInternal()
     {
+    if( allChildrenFinished )
+      return true;
+
     DAGClient dagClient = parentStepStats.getJobStatusClient();
 
     if( dagClient == null )
@@ -220,6 +220,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     {
     updateProgress( (DAGClient) timelineClient, null ); // get latest task counts
 
+    if( getTotalTaskCount() == 0 ) // nothing to do - try again later
+      return false;
+
     if( sliceStatsMap.size() == getTotalTaskCount() )
       return updateAllTasks( timelineClient );
 
@@ -228,7 +231,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
   private boolean updateAllTasks( TimelineClient timelineClient )
     {
-    if( allTasksAreFinished )
+    if( allChildrenFinished )
       return true;
 
     long startTime = System.currentTimeMillis();
@@ -248,7 +251,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       }
 
     if( count == 0 )
-      allTasksAreFinished = true;
+      allChildrenFinished = true;
 
     logInfo( "updated {} slices in: {}", count, formatDurationFromMillis( System.currentTimeMillis() - startTime ) );
 
@@ -262,6 +265,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     int startSize = sliceStatsMap.size();
     int iteration = 0;
     boolean continueIterating = true;
+    boolean retrievedAreFinished = true;
 
     while( continueIterating && sliceStatsMap.size() != getTotalTaskCount() )
       {
@@ -298,6 +302,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
           }
 
         updateSliceWith( sliceStats, taskStatus, lastFetch );
+
+        if( !sliceStats.getStatus().isFinished() )
+          retrievedAreFinished = false;
         }
 
       int retrieved = added + updated;
@@ -315,6 +322,9 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     int added = total - startSize;
     int remaining = getTotalTaskCount() - total;
     String duration = formatDurationFromMillis( System.currentTimeMillis() - startTime );
+
+    if( total == getTotalTaskCount() && retrievedAreFinished )
+      allChildrenFinished = true;
 
     if( iteration == 0 && total == 0 )
       logInfo( "no slices stats available yet, expecting: {}", remaining );
@@ -379,7 +389,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     {
     VertexStatus vertexStatus = updateProgress( dagClient, STATUS_GET_COUNTERS );
 
-    if( vertexStatus == null )
+    if( vertexStatus == null || getTotalTaskCount() == 0 )
       return false;
 
     int total = sliceStatsMap.size();
@@ -469,28 +479,5 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     killedTaskCount = progress.getKilledTaskCount();
 
     return vertexStatus;
-    }
-
-  protected void logInfo( String message, Object... arguments )
-    {
-    getProcessLogger().logInfo( getPrefix() + message, arguments );
-    }
-
-  protected void logDebug( String message, Object... arguments )
-    {
-    getProcessLogger().logDebug( getPrefix() + message, arguments );
-    }
-
-  protected void logWarn( String message, Object... arguments )
-    {
-    getProcessLogger().logWarn( getPrefix() + message, arguments );
-    }
-
-  private String getPrefix()
-    {
-    if( prefixID == null )
-      prefixID = "[" + getID().substring( 0, 5 ) + "] ";
-
-    return prefixID;
     }
   }

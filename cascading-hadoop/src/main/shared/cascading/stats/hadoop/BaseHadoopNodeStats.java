@@ -38,6 +38,8 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
   protected final Map<String, FlowSliceStats> sliceStatsMap = new LinkedHashMap<>();
   protected CounterCache<JobStatus, Counters> counterCache;
 
+  protected boolean allChildrenFinished;
+
   private boolean hasCapturedFinalDetail;
 
   /**
@@ -58,6 +60,11 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
       return counterCache.getLastSuccessfulFetch();
 
     return -1;
+    }
+
+  public boolean isAllChildrenFinished()
+    {
+    return allChildrenFinished;
     }
 
   /**
@@ -154,9 +161,12 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     boolean success = captureChildDetailInternal();
 
     if( success )
-      getProcessLogger().logDebug( "captured remote node statistic details" );
+      logDebug( "captured remote node statistic details" );
 
-    hasCapturedFinalDetail = finished && success;
+    if( allChildrenFinished )
+      logInfo( "all children are in finished state" );
+
+    hasCapturedFinalDetail = finished && success && allChildrenFinished;
     }
 
   /**
@@ -194,7 +204,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
       }
     catch( Exception exception )
       {
-      getProcessLogger().logError( "unable to record node stats", exception );
+      logError( "unable to record node stats", exception );
       }
     }
   }

@@ -111,6 +111,8 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
       }
     }
 
+  private transient String prefixID; // cached sub-string
+
   /** Field name */
   final String name;
   protected final ClientState clientState;
@@ -651,7 +653,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
         }
       catch( Throwable throwable )
         {
-        getProcessLogger().logWarn( "error during listener notification, continuing with remaining listener notification", throwable );
+        logWarn( "error during listener notification, continuing with remaining listener notification", throwable );
         }
       }
     }
@@ -672,5 +674,38 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   public String toString()
     {
     return "Cascading{" + getStatsString() + '}';
+    }
+
+  protected void logInfo( String message, Object... arguments )
+    {
+    getProcessLogger().logInfo( getPrefix() + message, arguments );
+    }
+
+  protected void logDebug( String message, Object... arguments )
+    {
+    getProcessLogger().logDebug( getPrefix() + message, arguments );
+    }
+
+  protected void logWarn( String message, Object... arguments )
+    {
+    getProcessLogger().logWarn( getPrefix() + message, arguments );
+    }
+
+  protected void logError( String message, Object... arguments )
+    {
+    getProcessLogger().logError( getPrefix() + message, arguments );
+    }
+
+  protected void logError( String message, Throwable throwable )
+    {
+    getProcessLogger().logError( getPrefix() + message, throwable );
+    }
+
+  private String getPrefix()
+    {
+    if( prefixID == null )
+      prefixID = getType().name().toLowerCase() + "[" + getID().substring( 0, 5 ) + "] ";
+
+    return prefixID;
     }
   }

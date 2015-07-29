@@ -144,6 +144,10 @@ public class TezStatsPlatformTest extends PlatformTestCase
       assertEquals( 4, node2.getChildren().size() );
       assertEquals( 4, node3.getChildren().size() );
 
+      assertTrue( ( (TezNodeStats) node1 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node2 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node3 ).isAllChildrenFinished() );
+
       boolean foundCounter = false;
 
       Collection<FlowSliceStats> children = node2.getChildren();
@@ -177,6 +181,10 @@ public class TezStatsPlatformTest extends PlatformTestCase
       assertEquals( 1, node1.getChildren().size() );
       assertEquals( 4, node2.getChildren().size() );
       assertEquals( 4, node3.getChildren().size() );
+
+      assertTrue( ( (TezNodeStats) node1 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node2 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node3 ).isAllChildrenFinished() );
       }
     }
   }

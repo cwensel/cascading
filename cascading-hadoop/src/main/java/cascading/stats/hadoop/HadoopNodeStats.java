@@ -102,7 +102,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
       }
     catch( IOException exception )
       {
-      getProcessLogger().logWarn( "unable to retrieve slice stats via task reports", exception );
+      logWarn( "unable to retrieve slice stats via task reports", exception );
       }
 
     return false;
@@ -111,6 +111,7 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
   protected void addTaskStats( TaskReport[] taskReports, boolean skipLast )
     {
     long lastFetch = System.currentTimeMillis();
+    boolean fetchedAreFinished = true;
 
     synchronized( sliceStatsMap )
       {
@@ -120,14 +121,20 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
 
         if( taskReport == null )
           {
-          getProcessLogger().logWarn( "found empty task report" );
+          logWarn( "found empty task report" );
           continue;
           }
 
         String id = getSliceIDFor( taskReport.getTaskID() );
-        sliceStatsMap.put( id, new HadoopSliceStats( id, getParentStatus(), kind, taskReport, lastFetch ) );
+        HadoopSliceStats sliceStats = new HadoopSliceStats( id, getParentStatus(), kind, taskReport, lastFetch );
+        sliceStatsMap.put( id, sliceStats );
+
+        if( !sliceStats.getStatus().isFinished() )
+          fetchedAreFinished = false;
         }
       }
+
+    allChildrenFinished = fetchedAreFinished;
     }
 
   protected void addAttempt( TaskCompletionEvent event )

@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue where child stats detail retrieval may not fetch final state of children.
+
   Fixed issue where c.s.FlowNodeStats node kind could be mislabeled.
 
   Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
