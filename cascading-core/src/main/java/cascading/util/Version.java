@@ -24,9 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,8 +157,7 @@ public class Version
     if( resources.isEmpty() )
       return properties;
 
-    if( resources.size() > 1 )
-      LOG.warn( "found multiple 'cascading/version.properties' files on the CLASSPATH. Please check your dependencies: {}, using first returned", Util.join( resources, "," ) );
+    warnOnDuplicate( resources );
 
     InputStream stream = resources.get( 0 ).openStream();
 
@@ -186,5 +188,40 @@ public class Version
       }
 
     return properties;
+    }
+
+  /**
+   * A shaded jar will have multiple version.properties, e.g.
+   * <pre>
+   * file:/mnt/var/lib/hadoop/tmp/hadoop-unjar7817209360894770970/cascading/version.properties
+   * jar:file:/mnt/single-load/./load-hadoop2-tez-20150729.jar!/cascading/version.properties
+   * </pre>
+   * <p/>
+   * only warn if there are duplicates within a protocol, not across since we should only be seeing file: and jar:
+   */
+  private static void warnOnDuplicate( List<URL> resources )
+    {
+    if( resources.size() == 1 )
+      return;
+
+    Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+
+    for( URL resource : resources )
+      {
+      String protocol = resource.getProtocol();
+
+      if( !map.containsKey( protocol ) )
+        map.put( protocol, new HashSet<String>() );
+
+      map.get( protocol ).add( resource.toString() );
+      }
+
+    for( String key : map.keySet() )
+      {
+      Set<String> values = map.get( key );
+
+      if( values.size() > 1 )
+        LOG.warn( "found multiple 'cascading/version.properties' files on the CLASSPATH. Please check your dependencies: {}, using first returned", Util.join( values, "," ) );
+      }
     }
   }
