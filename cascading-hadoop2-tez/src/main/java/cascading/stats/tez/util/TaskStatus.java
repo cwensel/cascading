@@ -29,6 +29,10 @@ public class TaskStatus
   {
   String taskID;
   String status;
+  long scheduledTime;
+  long startTime;
+  long endTime;
+  String successfulAttemptID;
   Map<String, Map<String, Long>> counters;
   private String diagnostics;
 
@@ -37,10 +41,14 @@ public class TaskStatus
     this.taskID = taskID;
     }
 
-  public TaskStatus( String taskID, String status, Map<String, Map<String, Long>> counters, String diagnostics )
+  public TaskStatus( String taskID, String status, long scheduledTime, long startTime, long endTime, String successfulAttemptID, Map<String, Map<String, Long>> counters, String diagnostics )
     {
     this.taskID = taskID;
     this.status = status;
+    this.scheduledTime = scheduledTime;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.successfulAttemptID = successfulAttemptID;
     this.counters = counters;
     this.diagnostics = diagnostics;
     }
@@ -53,6 +61,26 @@ public class TaskStatus
   public String getStatus()
     {
     return status;
+    }
+
+  public long getScheduledTime()
+    {
+    return scheduledTime;
+    }
+
+  public long getStartTime()
+    {
+    return startTime;
+    }
+
+  public long getEndTime()
+    {
+    return endTime;
+    }
+
+  public String getSuccessfulAttemptID()
+    {
+    return successfulAttemptID;
     }
 
   public Map<String, Map<String, Long>> getCounters()

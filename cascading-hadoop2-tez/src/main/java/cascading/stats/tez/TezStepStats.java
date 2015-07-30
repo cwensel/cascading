@@ -83,9 +83,9 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGClient, TezCou
 
   /** Method captureDetail captures statistics task details and completion events. */
   @Override
-  public synchronized void captureDetail( Type depth )
+  public void captureDetail( Type depth )
     {
-    if( !getType().isChild( depth ) )
+    if( !getType().isChild( depth ) || !isDetailStale() )
       return;
 
     DAGClient dagClient = getJobStatusClient();
@@ -93,7 +93,15 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGClient, TezCou
     if( dagClient == null )
       return;
 
-    for( FlowNodeStats flowNodeStats : getFlowNodeStatsMap().values() )
-      flowNodeStats.captureDetail( depth );
+    synchronized( this )
+      {
+      if( !isDetailStale() )
+        return;
+
+      for( FlowNodeStats flowNodeStats : getFlowNodeStatsMap().values() )
+        flowNodeStats.captureDetail( depth );
+
+      markDetailCaptured();
+      }
     }
   }

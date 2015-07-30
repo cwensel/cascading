@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import cascading.flow.Flow;
 import cascading.management.state.ClientState;
@@ -134,6 +135,8 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   long finishedTime;
   /** Field throwable */
   Throwable throwable;
+
+  AtomicLong lastCaptureDetail = new AtomicLong( 0 );
 
   protected CascadingStats( String name, ClientState clientState )
     {
@@ -612,6 +615,21 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   public abstract void captureDetail( Type depth );
 
   /**
+   * For rate limiting access to the backend.
+   * <p/>
+   * Currently used at the Step and below.
+   */
+  protected boolean isDetailStale()
+    {
+    return ( System.currentTimeMillis() - lastCaptureDetail.get() ) > 500;
+    }
+
+  protected void markDetailCaptured()
+    {
+    lastCaptureDetail.set( System.currentTimeMillis() );
+    }
+
+  /**
    * Method getChildren returns any relevant child statistics instances. They may not be of type CascadingStats, but
    * instead platform specific.
    *
@@ -704,7 +722,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   private String getPrefix()
     {
     if( prefixID == null )
-      prefixID = getType().name().toLowerCase() + "[" + getID().substring( 0, 5 ) + "] ";
+      prefixID = "[" + getType().name().toLowerCase() + ":" + getID().substring( 0, 5 ) + "] ";
 
     return prefixID;
     }

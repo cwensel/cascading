@@ -99,18 +99,21 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     DAGClient timelineClient = null;
 
     @Override
-    public synchronized DAGClient getJobStatusClient()
+    public DAGClient getJobStatusClient()
       {
       if( timelineClient != null )
         return timelineClient;
 
-      if( isTimelineServiceEnabled( jobConfiguration ) )
-        timelineClient = TezStatsUtil.createTimelineClient( dagClient ); // may return null
+      synchronized( this )
+        {
+        if( isTimelineServiceEnabled( jobConfiguration ) )
+          timelineClient = TezStatsUtil.createTimelineClient( dagClient ); // may return null
 
-      if( timelineClient == null )
-        timelineClient = dagClient;
+        if( timelineClient == null )
+          timelineClient = dagClient;
 
-      return timelineClient;
+        return timelineClient;
+        }
       }
 
     @Override

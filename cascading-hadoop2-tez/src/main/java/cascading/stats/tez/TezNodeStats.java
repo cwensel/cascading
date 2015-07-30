@@ -340,6 +340,11 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       return;
 
     sliceStats.setStatus( getStatusForTaskStatus( taskStatus.getStatus() ) ); // ignores nulls
+    sliceStats.setSubmitTime( taskStatus.getScheduledTime() );
+    sliceStats.setStartTime( taskStatus.getStartTime() );
+    sliceStats.setFinishTime( taskStatus.getEndTime() );
+    sliceStats.setDiagnostics( taskStatus.getDiagnostics() );
+    sliceStats.setSuccessfulAttemptID( taskStatus.getSuccessfulAttemptID() );
 
     Map<String, Map<String, Long>> counters = taskStatus.getCounters();
 

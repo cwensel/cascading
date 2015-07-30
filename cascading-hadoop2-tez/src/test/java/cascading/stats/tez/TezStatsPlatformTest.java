@@ -153,6 +153,15 @@ public class TezStatsPlatformTest extends PlatformTestCase
       Collection<FlowSliceStats> children = node2.getChildren();
       for( FlowSliceStats flowSliceStats : children )
         {
+        assertNotSame( -1, flowSliceStats.getProcessStartTime() );
+        assertNotSame( -1, flowSliceStats.getProcessSubmitTime() );
+        assertNotSame( -1, flowSliceStats.getProcessRunTime() );
+        assertNotSame( -1, flowSliceStats.getProcessFinishTime() );
+
+        assertTrue( flowSliceStats.getProcessStartTime() <= flowSliceStats.getProcessSubmitTime() );
+        assertTrue( flowSliceStats.getProcessSubmitTime() <= flowSliceStats.getProcessRunTime() );
+        assertTrue( flowSliceStats.getProcessRunTime() < flowSliceStats.getProcessFinishTime() );
+
         TezSliceStats sliceStats = (TezSliceStats) flowSliceStats;
 
         if( sliceStats.getCounters().containsKey( TestEnum.FIRST.getDeclaringClass().getName() ) )

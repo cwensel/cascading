@@ -179,6 +179,10 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
       String taskID = jsonRoot.optString( ATSConstants.ENTITY );
       JSONObject otherInfoNode = jsonRoot.getJSONObject( ATSConstants.OTHER_INFO );
       String status = otherInfoNode.optString( ATSConstants.STATUS );
+      long scheduledTime = otherInfoNode.optLong( ATSConstants.SCHEDULED_TIME, -1 );
+      long startTime = otherInfoNode.optLong( ATSConstants.START_TIME, -1 ); // actual attempt launch time
+      long endTime = otherInfoNode.optLong( ATSConstants.FINISH_TIME, -1 ); // endTime
+      String successfulAttemptID = otherInfoNode.optString( ATSConstants.SUCCESSFUL_ATTEMPT_ID );
       String diagnostics = otherInfoNode.optString( ATSConstants.DIAGNOSTICS );
 
       if( status.equals( "" ) )
@@ -187,7 +191,7 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
       JSONObject countersNode = otherInfoNode.optJSONObject( ATSConstants.COUNTERS );
       Map<String, Map<String, Long>> counters = parseDagCounters( countersNode );
 
-      return new TaskStatus( taskID, status, counters, diagnostics );
+      return new TaskStatus( taskID, status, scheduledTime, startTime, endTime, successfulAttemptID, counters, diagnostics );
       }
     catch( JSONException exception )
       {

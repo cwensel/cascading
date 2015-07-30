@@ -32,6 +32,8 @@ import cascading.stats.ProvidesCounters;
 
 public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements ProvidesCounters
   {
+  private static final String LINE_SEPARATOR = System.getProperty( "line.separator" );
+
   public static class TezAttempt extends FlowSliceAttempt
     {
     @Override
@@ -75,6 +77,12 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
   private TezNodeStats.Kind kind;
   private final CascadingStats.Status parentStatus;
   private CascadingStats.Status status;
+  private long submitTime;
+  private long startTime;
+  private long finishTime;
+  private String successfulAttemptID;
+  private String diagnostics;
+
   private String taskID;
   private long lastFetch = -1;
   private Map<String, Map<String, Long>> counters = Collections.emptyMap();
@@ -89,6 +97,26 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
     this.taskID = taskID;
     }
 
+  public void setSubmitTime( long submitTime )
+    {
+    this.submitTime = submitTime;
+    }
+
+  public void setStartTime( long startTime )
+    {
+    this.startTime = startTime;
+    }
+
+  public void setFinishTime( long finishTime )
+    {
+    this.finishTime = finishTime;
+    }
+
+  public void setSuccessfulAttemptID( String successfulAttemptID )
+    {
+    this.successfulAttemptID = successfulAttemptID;
+    }
+
   @Override
   public String getID()
     {
@@ -98,13 +126,24 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
   @Override
   public long getProcessStartTime()
     {
-    return 0;
+    return submitTime; // start and submit are the same
+    }
+
+  @Override
+  public long getProcessRunTime()
+    {
+    return startTime; // when the slice began running
     }
 
   @Override
   public long getProcessFinishTime()
     {
-    return 0;
+    return finishTime; // when the slice completed running
+    }
+
+  public void setDiagnostics( String diagnostics )
+    {
+    this.diagnostics = diagnostics;
     }
 
   public CascadingStats.Status getParentStatus()
@@ -132,15 +171,15 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
 
   public String[] getDiagnostics()
     {
-    return new String[ 0 ];
+    if( diagnostics == null )
+      return new String[ 0 ];
+
+    return diagnostics.split( LINE_SEPARATOR ); // how tez packs the diags
     }
 
   @Override
   public Map<String, Map<String, Long>> getCounters()
     {
-    if( counters == null )
-      setCounters( null );
-
     return counters;
     }
 
