@@ -85,7 +85,7 @@ public class TezBoundaryStage extends BoundaryStage<TupleEntry, TupleEntry> impl
     super.initialize();
 
     Scope outgoingScope = Util.getFirst( outgoingScopes );
-    valueEntry = new TupleEntry( outgoingScope.getOutValuesFields(), true );
+    valueEntry = new TupleEntry( outgoingScope.getIncomingFunctionPassThroughFields(), true );
     }
 
   @Override

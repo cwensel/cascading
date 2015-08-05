@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue when resolving Fields through a Boundary when immediately following grouping operations.
+
   Fixed issues concerning detailed stats retrieval robustness for both MapReduce and Tez platforms.
 
   Fixed issue where child stats detail retrieval may not fetch final state of children.
