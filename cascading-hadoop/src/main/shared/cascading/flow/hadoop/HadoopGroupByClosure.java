@@ -79,6 +79,22 @@ public class HadoopGroupByClosure extends JoinerClosure
 
     private TupleBuilder makeBuilder( final Fields valueField, final Fields joinField )
       {
+      if( valueField.isUnknown() && joinField.hasRelativePos() )
+        return new TupleBuilder()
+        {
+        @Override
+        public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+          {
+          Fields fields = joinFields[ cleanPos ];
+
+          fields = Fields.size( valueTuple.size() ).select( fields );
+
+          valueTuple.set( valueFields[ cleanPos ], fields, groupTuple );
+
+          return valueTuple;
+          }
+        };
+
       if( valueField.isUnknown() || joinField.isNone() )
         return new TupleBuilder()
         {

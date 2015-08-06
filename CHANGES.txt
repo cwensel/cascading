@@ -2,6 +2,9 @@ Cascading Change Log
 
 2.7.1 [unreleased]
 
+  Fixed issue where c.p.GroupBy or c.p.CoGroup would fail if attempting to group or join incoming Fields.UNKNOWN
+  tuple streams using relative positions in the grouping fields selectors.
+
   Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
 
 2.7.0
