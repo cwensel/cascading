@@ -57,6 +57,16 @@ public interface FlowStep<Config> extends ProcessModel
    */
   String getName();
 
+  /**
+   * Returns an immutable map of properties giving more details about the FlowStep object.
+   * <p/>
+   * FlowStep descriptions provide meta-data to monitoring systems describing the workload a given FlowStep represents.
+   * For known description types, see {@link FlowStepDescriptors}.
+   *
+   * @return Map<String,String>
+   */
+  Map<String, String> getFlowStepDescriptor();
+
   Flow<Config> getFlow();
 
   String getFlowID();

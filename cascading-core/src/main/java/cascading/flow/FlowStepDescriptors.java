@@ -21,18 +21,24 @@
 package cascading.flow;
 
 /**
- * Constants to be used as key in {@link Flow#getFlowDescriptor()}.
+ * Constants to be used as key in {@link FlowStep#getFlowStepDescriptor}.
  * <p/>
- * See also {@link FlowStepDescriptors}.
+ * See also {@link FlowDescriptors}.
  */
-public interface FlowDescriptors
+public interface FlowStepDescriptors
   {
   /** String that can be used as a record separator. */
   String VALUE_SEPARATOR = "\u001E";
 
-  /** Denotes a collection  of statements like SQL or similar. */
-  String STATEMENTS = "statements";
-
-  /** Briefly describes the current Flow * */
+  /** Briefly describes the current FlowStep * */
   String DESCRIPTION = "description";
+
+  /** Id of the FlowStep in an external system * */
+  String EXTERNAL_ID = "external_id";
+
+  /** Name of the FlowStep in an external system * */
+  String EXTERNAL_NAME = "external_name";
+
+  /** URL of the FlowStep in an external system * */
+  String EXTERNAL_URL = "external_url";
   }

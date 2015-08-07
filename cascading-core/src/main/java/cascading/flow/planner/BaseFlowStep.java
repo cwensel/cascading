@@ -116,8 +116,16 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   private transient FlowStepJob<Config> flowStepJob;
 
+  /** optional metadata about the FlowStep */
+  private Map<String, String> flowStepDescriptor = Collections.emptyMap();
+
   // for testing
   protected BaseFlowStep( String name, int ordinal )
+    {
+    this( name, ordinal, null );
+    }
+
+  protected BaseFlowStep( String name, int ordinal, Map<String, String> flowStepDescriptor )
     {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     setName( name );
@@ -125,13 +133,24 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
     this.elementGraph = null;
     this.flowNodeGraph = null;
+
+    if( flowStepDescriptor != null )
+      this.flowStepDescriptor = flowStepDescriptor;
     }
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
     {
+    this( elementStepGraph, flowNodeGraph, null );
+    }
+
+  protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph, Map<String, String> flowStepDescriptor )
+    {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.elementGraph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
+
+    if( flowStepDescriptor != null )
+      this.flowStepDescriptor = flowStepDescriptor;
 
     configure();
     }
@@ -176,6 +195,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
       throw new IllegalArgumentException( "step name may not be null or empty" );
 
     this.name = name;
+    }
+
+  @Override
+  public Map<String, String> getFlowStepDescriptor()
+    {
+    return Collections.unmodifiableMap( flowStepDescriptor );
     }
 
   @Override
