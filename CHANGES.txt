@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Updated c.f.h.MapReduceFlow to accept properties and c.f.FlowDescriptors values map.
+
   Fixed issue when resolving Fields through a Boundary when immediately following grouping operations.
 
   Fixed issues concerning detailed stats retrieval robustness for both MapReduce and Tez platforms.
