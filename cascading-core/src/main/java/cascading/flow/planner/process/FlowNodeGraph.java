@@ -69,6 +69,10 @@ public class FlowNodeGraph extends BaseProcessGraph<FlowNode>
       }
     }
 
+  public FlowNodeGraph()
+    {
+    }
+
   public FlowNodeGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs )
     {
     this( flowPlanner, flowElementGraph, nodeSubGraphs, Collections.<ElementGraph, List<? extends ElementGraph>>emptyMap() );

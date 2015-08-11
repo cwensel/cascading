@@ -58,13 +58,14 @@ configurations {
 allprojects {
 
   apply plugin: 'idea'
+  apply plugin: 'eclipse'
   apply plugin: 'provided-base'
 
   repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = 'http://conjars.org/repo/' }
-    maven { url = 'https://repository.apache.org/content/repositories/releases/' }
+    maven {url = 'http://conjars.org/repo/'}
+    maven {url = 'https://repository.apache.org/content/repositories/releases/'}
   }
 }
 
@@ -108,9 +109,9 @@ subprojects {
       encoding = "UTF8"
       bottom = copyright
       links = [
-              'http://docs.oracle.com/javase/7/docs/api/',
-              'http://dist.codehaus.org/janino/javadoc/',
-              'http://junit.sourceforge.net/javadoc/'
+        'http://docs.oracle.com/javase/7/docs/api/',
+        'http://dist.codehaus.org/janino/javadoc/',
+        'http://junit.sourceforge.net/javadoc/'
       ]
     }
   }
@@ -163,10 +164,10 @@ subprojects {
 
     copy {
       into "${distDir}/lib/${archivesBaseName}"
-      from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll { dep ->
+      from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll {dep ->
         !dep.name.contains( 'cascading' )
-      }.collect { dep ->
-        dep.moduleArtifacts.collect { it.file }
+      }.collect {dep ->
+        dep.moduleArtifacts.collect {it.file}
       } )
     }
 
@@ -203,9 +204,9 @@ subprojects {
     }
     // make sure test dependencies come first, so that maven isn't getting
     // confused, when reading the generated pom
-    [install.repositories.mavenInstaller, deployer]*.pom*.whenConfigured { pom ->
-      def scopeOrder = [test: 1, runtime: 2, provided: 3, compile: 4].withDefault { 100 }
-      pom.dependencies = pom.dependencies.sort { scopeOrder[ it.scope ] }
+    [install.repositories.mavenInstaller, deployer]*.pom*.whenConfigured {pom ->
+      def scopeOrder = [test: 1, runtime: 2, provided: 3, compile: 4].withDefault {100}
+      pom.dependencies = pom.dependencies.sort {scopeOrder[ it.scope ]}
     }
   }
 }
@@ -221,7 +222,7 @@ task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:bui
   from "${distDir}/javadoc/"
   into "${s3UploadDocs.source}/javadoc"
 
-  filter { line ->
+  filter {line ->
     line.replaceAll( "</body>", "${analytics}\n</body>" )
   }
 }
@@ -276,10 +277,10 @@ buildLatestMeta << {
 
   latestPropertiesPath = new File( destination, 'latest.properties' )
   latestPropertiesPath.write( "cascading.release.version=${releaseVersion}\n" +
-          "cascading.release.major=${majorVersion}\n" +
-          "cascading.release.minor=${minorVersion}\n" +
-          "cascading.release.build=${buildNumber}\n" +
-          "cascading.release.commit=${currentCommit}\n" +
-          "cascading.release.tag=${releaseTag}"
+    "cascading.release.major=${majorVersion}\n" +
+    "cascading.release.minor=${minorVersion}\n" +
+    "cascading.release.build=${buildNumber}\n" +
+    "cascading.release.commit=${currentCommit}\n" +
+    "cascading.release.tag=${releaseTag}"
   )
 }

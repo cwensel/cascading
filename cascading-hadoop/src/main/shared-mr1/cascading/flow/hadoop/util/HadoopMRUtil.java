@@ -129,4 +129,9 @@ public class HadoopMRUtil
         }
       }
     }
+
+  public static boolean hasReducer( JobConf jobConf )
+    {
+    return jobConf.getReducerClass() != null;
+    }
   }
