@@ -135,6 +135,8 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   long finishedTime;
   /** Field throwable */
   Throwable throwable;
+  /** Field throwableTrace */
+  String[] throwableTrace;
 
   AtomicLong lastCaptureDetail = new AtomicLong( 0 );
 
@@ -183,6 +185,18 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   public Throwable getThrowable()
     {
     return throwable;
+    }
+
+  /**
+   * Method getThrowableTrace returns the throwableTrace of this CascadingStats object.
+   * <p/>
+   * Will return null if not set.
+   *
+   * @return the throwableTrace (type String[]) of this CascadingStats object.
+   */
+  public String[] getThrowableTrace()
+    {
+    return throwableTrace;
     }
 
   /**
@@ -445,10 +459,33 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
 
   /**
    * Method markFailed sets the status to {@link Status#FAILED}.
+   */
+  public void markFailed()
+    {
+    markFailed( null, null );
+    }
+
+  /**
+   * Method markFailed sets the status to {@link Status#FAILED}.
    *
    * @param throwable of type Throwable
    */
   public synchronized void markFailed( Throwable throwable )
+    {
+    markFailed( throwable, null );
+    }
+
+  /**
+   * Method markFailed sets the status to {@link Status#FAILED}.
+   *
+   * @param throwableTrace of type String[]
+   */
+  public synchronized void markFailed( String[] throwableTrace )
+    {
+    markFailed( null, throwableTrace );
+    }
+
+  protected synchronized void markFailed( Throwable throwable, String[] throwableTrace )
     {
     if( status != Status.STARTED && status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.FAILED + ", is already " + status );
@@ -457,6 +494,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
     status = Status.FAILED;
     markFinishedTime();
     this.throwable = throwable;
+    this.throwableTrace = throwableTrace;
 
     fireListeners( priorStatus, status );
 

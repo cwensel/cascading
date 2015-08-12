@@ -23,6 +23,7 @@ package cascading.flow.tez.planner;
 import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -156,6 +157,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       }
     catch( TezException exception )
       {
+      this.throwable = exception;
       throw new CascadingException( exception );
       }
     }
@@ -183,6 +185,8 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
       if( state == null )
         return;
 
+      List<String> diagnostics = null;
+
       switch( state )
         {
         case NEW:
@@ -209,7 +213,13 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
           if( !flowNodeStats.isRunning() )
             flowNodeStats.markRunning();
 
-          flowNodeStats.markFailed( null ); // todo: lookup failure
+          diagnostics = vertexStatus.getDiagnostics();
+
+          if( diagnostics == null || diagnostics.isEmpty() )
+            flowNodeStats.markFailed( throwable );
+          else
+            flowNodeStats.markFailed( diagnostics.toArray( new String[ diagnostics.size() ] ) );
+
           break;
 
         case KILLED:
@@ -223,7 +233,13 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
           if( !flowNodeStats.isRunning() )
             flowNodeStats.markRunning();
 
-          flowNodeStats.markFailed( null ); // todo: lookup failure
+          diagnostics = vertexStatus.getDiagnostics();
+
+          if( diagnostics == null || diagnostics.isEmpty() )
+            flowNodeStats.markFailed( throwable );
+          else
+            flowNodeStats.markFailed( diagnostics.toArray( new String[ diagnostics.size() ] ) );
+
           break;
 
         case TERMINATING:
@@ -420,7 +436,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   @Override
   protected Throwable getThrowable()
     {
-    return null;
+    return throwable;
     }
 
   protected String internalJobId()
