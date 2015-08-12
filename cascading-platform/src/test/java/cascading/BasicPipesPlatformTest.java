@@ -207,6 +207,29 @@ public class BasicPipesPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testSimpleRelativeUnknown() throws Exception
+    {
+    copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getDelimitedFile( Fields.UNKNOWN, " ", inputFileLower );
+    Tap sink = getPlatform().getTextFile( getOutputPath( "simplerelativeunknown" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    pipe = new GroupBy( pipe, new Fields( -1 ) );
+
+    Aggregator counter = new Count();
+
+    pipe = new Every( pipe, new Fields( 0 ), counter, new Fields( 0, 1 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+    }
+
+  @Test
   public void testCoGroup() throws Exception
     {
     copyFromLocal( inputFileLower );
@@ -228,6 +251,39 @@ public class BasicPipesPlatformTest extends PlatformTestCase
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( 1 ), splitter, Fields.RESULTS );
 
     Pipe splice = new CoGroup( pipeLower, new Fields( 0 ), pipeUpper, new Fields( 0 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    List<Tuple> results = getSinkAsList( flow );
+
+    assertTrue( results.contains( new Tuple( "1\ta\t1\tA" ) ) );
+    assertTrue( results.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+  @Test
+  public void testCoGroupRelativeUnknown() throws Exception
+    {
+    copyFromLocal( inputFileLower );
+
+    Tap sourceLower = getPlatform().getDelimitedFile( Fields.UNKNOWN, " ", inputFileLower );
+    Tap sourceUpper = getPlatform().getDelimitedFile( Fields.UNKNOWN, " ", inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    // using null pos so all fields are written
+    Tap sink = getPlatform().getTextFile( Fields.size( 1 ), getOutputPath( "complexcogrouprelativeunknown" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Pipe( "lower" );
+    Pipe pipeUpper = new Pipe( "upper" );
+
+    Pipe splice = new CoGroup( pipeLower, new Fields( -2 ), pipeUpper, new Fields( -2 ) );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 

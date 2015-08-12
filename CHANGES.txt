@@ -100,6 +100,13 @@ Cascading Change Log
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
 
+2.7.1
+
+  Fixed issue where c.p.GroupBy or c.p.CoGroup would fail if attempting to group or join incoming Fields.UNKNOWN
+  tuple streams using relative positions in the grouping fields selectors.
+
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
+
 2.7.0
 
   Updated Riffle to 1.0.0.

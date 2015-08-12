@@ -885,6 +885,22 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return thisPos;
     }
 
+  /**
+   * Method hasRelativePos returns true if any ordinal position is relative (< 0)
+   *
+   * @return true if any ordinal position is relative (< 0)
+   */
+  public boolean hasRelativePos()
+    {
+    for( int i : getPos() )
+      {
+      if( i < 0 )
+        return true;
+      }
+
+    return false;
+    }
+
   private int[] makeThisPos()
     {
     int[] pos = new int[ size() ];
