@@ -1,6 +1,6 @@
 Cascading Change Log
 
-2.7.1 [unreleased]
+2.7.1
 
   Fixed issue where c.p.GroupBy or c.p.CoGroup would fail if attempting to group or join incoming Fields.UNKNOWN
   tuple streams using relative positions in the grouping fields selectors.
