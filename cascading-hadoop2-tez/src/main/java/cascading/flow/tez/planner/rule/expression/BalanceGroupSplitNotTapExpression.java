@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.expression;
+package cascading.flow.tez.planner.rule.expression;
 
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
@@ -37,19 +37,19 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 /**
  *
  */
-public class BalanceGroupSplitExpression extends RuleExpression
+public class BalanceGroupSplitNotTapExpression extends RuleExpression
   {
   public static final FlowElementExpression SHARED_GROUP = new FlowElementExpression( Group.class );
 
-  public BalanceGroupSplitExpression()
+  public BalanceGroupSplitNotTapExpression()
     {
     super(
       new SyncPipeExpressionGraph(),
 
       // in order to capture out degree in sub-graph, we need to capture at least two successors
       new ExpressionGraph()
-        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ) ) )
-        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ) ) ),
+        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ) ) )
+        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ) ) ),
 
       // sub-graph to match has out degree captured above
       new ExpressionGraph()
