@@ -166,6 +166,15 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
       Collection<FlowSliceStats> children = statsMap.get( "REDUCER" ).getChildren();
       for( FlowSliceStats flowSliceStats : children )
         {
+        assertNotSame( -1, flowSliceStats.getProcessStartTime() );
+        assertNotSame( -1, flowSliceStats.getProcessSubmitTime() );
+        assertNotSame( -1, flowSliceStats.getProcessRunTime() );
+        assertNotSame( -1, flowSliceStats.getProcessFinishTime() );
+
+        assertTrue( flowSliceStats.getProcessStartTime() <= flowSliceStats.getProcessSubmitTime() );
+        assertTrue( flowSliceStats.getProcessSubmitTime() <= flowSliceStats.getProcessRunTime() );
+        assertTrue( flowSliceStats.getProcessRunTime() < flowSliceStats.getProcessFinishTime() );
+
         HadoopSliceStats hadoopSliceStats = (HadoopSliceStats) flowSliceStats;
 
         if( hadoopSliceStats.getTaskIDNum() == 0 && hadoopSliceStats.getKind() == HadoopSliceStats.Kind.REDUCER )

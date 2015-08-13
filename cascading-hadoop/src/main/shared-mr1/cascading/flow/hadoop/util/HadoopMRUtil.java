@@ -185,4 +185,9 @@ public class HadoopMRUtil
 
     return HadoopUtil.getCommonPaths( localPaths, remotePaths );
     }
+
+  public static boolean hasReducer( JobConf jobConf )
+    {
+    return jobConf.getReducerClass() != null;
+    }
   }

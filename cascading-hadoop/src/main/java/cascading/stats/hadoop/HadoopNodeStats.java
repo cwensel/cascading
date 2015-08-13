@@ -36,6 +36,8 @@ import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapred.TaskID;
 import org.apache.hadoop.mapred.TaskReport;
 
+import static cascading.util.Util.formatDurationFromMillis;
+
 /**
  *
  */
@@ -81,6 +83,9 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
   @Override
   protected boolean captureChildDetailInternal()
     {
+    if( allChildrenFinished )
+      return true;
+
     JobClient jobClient = parentStepStats.getJobClient();
     RunningJob runningJob = parentStepStats.getJobStatusClient();
 
@@ -96,13 +101,16 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
       else
         taskReports = jobClient.getReduceTaskReports( runningJob.getID() );
 
+      if( taskReports.length == 0 )
+        return false;
+
       addTaskStats( taskReports, false );
 
       return true;
       }
     catch( IOException exception )
       {
-      getProcessLogger().logWarn( "unable to retrieve slice stats via task reports", exception );
+      logWarn( "unable to retrieve slice stats via task reports", exception );
       }
 
     return false;
@@ -110,24 +118,45 @@ public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<Stri
 
   protected void addTaskStats( TaskReport[] taskReports, boolean skipLast )
     {
+    logInfo( "retrieved task reports: {}", taskReports.length );
+
     long lastFetch = System.currentTimeMillis();
+    boolean fetchedAreFinished = true;
 
     synchronized( sliceStatsMap )
       {
+      int added = 0;
+      int updated = 0;
+
       for( int i = 0; i < taskReports.length - ( skipLast ? 1 : 0 ); i++ )
         {
         TaskReport taskReport = taskReports[ i ];
 
         if( taskReport == null )
           {
-          getProcessLogger().logWarn( "found empty task report" );
+          logWarn( "found empty task report" );
           continue;
           }
 
         String id = getSliceIDFor( taskReport.getTaskID() );
-        sliceStatsMap.put( id, new HadoopSliceStats( id, getParentStatus(), kind, taskReport, lastFetch ) );
+        HadoopSliceStats sliceStats = new HadoopSliceStats( id, getParentStatus(), kind, taskReport, lastFetch );
+
+        if( sliceStatsMap.put( id, sliceStats ) != null )
+          updated++;
+        else
+          added++;
+
+        if( !sliceStats.getStatus().isFinished() )
+          fetchedAreFinished = false;
         }
+
+      int total = sliceStatsMap.size();
+      String duration = formatDurationFromMillis( System.currentTimeMillis() - lastFetch );
+
+      logInfo( "added {}, updated: {} slices, with duration: {}, total fetched: {}", added, updated, duration, total );
       }
+
+    allChildrenFinished = taskReports.length != 0 && fetchedAreFinished;
     }
 
   protected void addAttempt( TaskCompletionEvent event )

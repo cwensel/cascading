@@ -258,7 +258,8 @@ public class Tuples
 
   public static Tuple nulledCopy( Fields declarator, Tuple tuple, Fields selector )
     {
-    return tuple.nulledCopy( declarator.getPos( selector, declarator.size() ) );
+    // use tuple.size() in case declarator is UNKNOWN and selector has relative pos
+    return tuple.nulledCopy( declarator.getPos( selector, tuple.size() ) );
     }
 
   public static Tuple setOnEmpty( TupleEntry baseEntry, TupleEntry valuesEntry )

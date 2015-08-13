@@ -20,7 +20,13 @@
 
 package cascading.flow.hadoop;
 
+import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
+import cascading.flow.hadoop.util.HadoopMRUtil;
+import cascading.flow.planner.BaseFlowNode;
+import cascading.flow.planner.graph.BaseElementGraph;
+import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.ProcessEdge;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
 
@@ -30,9 +36,9 @@ public class MapReduceFlowStep extends HadoopFlowStep
   /** Field jobConf */
   private final JobConf jobConf;
 
-  MapReduceFlowStep( String flowName, String stepName, JobConf jobConf, Tap sink )
+  protected MapReduceFlowStep( String flowName, String stepName, JobConf jobConf, Tap sink )
     {
-    super( null, null );
+    super( BaseElementGraph.NULL, createFlowNodeGraph( jobConf ) );
     setName( stepName );
     setFlowName( flowName );
     this.jobConf = jobConf;
@@ -46,5 +52,27 @@ public class MapReduceFlowStep extends HadoopFlowStep
     getSink().sinkConfInit( flowProcess, new JobConf() );
 
     return jobConf;
+    }
+
+  private static FlowNodeGraph createFlowNodeGraph( JobConf jobConf )
+    {
+    FlowNodeGraph flowNodeGraph = new FlowNodeGraph();
+    int nodes = 1;
+    boolean hasReducer = HadoopMRUtil.hasReducer( jobConf );
+
+    if( hasReducer )
+      nodes = 2;
+
+    FlowNode mapperNode = new BaseFlowNode( String.format( "(1/%s)", nodes ), 0 );
+    flowNodeGraph.addVertex( mapperNode );
+
+    if( hasReducer )
+      {
+      FlowNode reducerNode = new BaseFlowNode( "(2/2)", 1 );
+      flowNodeGraph.addVertex( reducerNode );
+      flowNodeGraph.addEdge( mapperNode, reducerNode, new ProcessEdge( mapperNode, reducerNode ) );
+      }
+
+    return flowNodeGraph;
     }
   }

@@ -30,12 +30,22 @@ import cascading.flow.planner.Scope;
 import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
+import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
  *
  */
 public abstract class BaseElementGraph implements ElementGraph, Serializable
   {
+  public static final ElementGraph NULL = new BaseElementGraph( new SimpleDirectedGraph<FlowElement, Scope>( Scope.class ) )
+  {
+  @Override
+  public ElementGraph copyElementGraph()
+    {
+    return null;
+    }
+  };
+
   protected DirectedGraph<FlowElement, Scope> graph;
 
   public BaseElementGraph()

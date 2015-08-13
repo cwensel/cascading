@@ -29,6 +29,17 @@ import java.util.Map;
  * Implementations may optionally implement the {@link cascading.stats.ProvidesCounters} interface.
  * <p/>
  * Provided as an abstract class so that implementations will be resilient to API additions.
+ * <p/>
+ * <p/>
+ * <ul>
+ * <li>pendingTime - when the slice is created</li>
+ * <li>startTime - when the slice was told to begin work</li>
+ * <li>submitTime - when the slice was submitted to a work queue</li>
+ * <li>runTime - when work began</li>
+ * <li>finishedTime - when work ended</li>
+ * </ul>
+ * <p/>
+ * pending is mostly irrelevant and unavailable, start, submit, and runtime are by default synonymous at the slice level
  */
 public abstract class FlowSliceStats<K extends Enum>
   {
@@ -49,7 +60,22 @@ public abstract class FlowSliceStats<K extends Enum>
 
   public abstract String getID();
 
+  public long getProcessPendingTime()
+    {
+    return -1;
+    }
+
   public abstract long getProcessStartTime();
+
+  public long getProcessSubmitTime()
+    {
+    return getProcessStartTime();
+    }
+
+  public long getProcessRunTime()
+    {
+    return getProcessStartTime();
+    }
 
   public abstract long getProcessFinishTime();
 

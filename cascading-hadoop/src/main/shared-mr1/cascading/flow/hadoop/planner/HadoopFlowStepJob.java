@@ -145,7 +145,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       if( JobStatus.SUCCEEDED == jobState )
         flowNodeStats.markSuccessful();
       else if( JobStatus.FAILED == jobState )
-        flowNodeStats.markFailed( null ); // todo: find failure
+        flowNodeStats.markFailed(); // todo: find failure
       }
     catch( IOException exception )
       {

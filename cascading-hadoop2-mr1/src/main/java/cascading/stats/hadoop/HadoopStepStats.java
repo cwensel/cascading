@@ -215,7 +215,7 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
   @Override
   public synchronized void captureDetail( Type depth )
     {
-    if( !getType().isChild( depth ) )
+    if( !getType().isChild( depth ) || !isDetailStale() )
       return;
 
     Job runningJob = getJob( getJobStatusClient() );
@@ -234,7 +234,6 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
 
       while( depth == Type.ATTEMPT )
         {
-        // todo: we may be able to continue where we left off if we retain the count
         TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( count );
 
         if( events.length == 0 )
@@ -243,6 +242,8 @@ public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Co
         addAttemptsToTaskStats( events );
         count += events.length;
         }
+
+      markDetailCaptured();
       }
     catch( IOException exception )
       {

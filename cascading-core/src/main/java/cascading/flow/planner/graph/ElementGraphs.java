@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -98,6 +99,9 @@ public class ElementGraphs
 
   public static DirectedGraph<FlowElement, Scope> directed( ElementGraph elementGraph )
     {
+    if( elementGraph == null )
+      return null;
+
     if( elementGraph instanceof DecoratedElementGraph )
       return directed( ( (DecoratedElementGraph) elementGraph ).getDecorated() );
 
@@ -601,6 +605,9 @@ public class ElementGraphs
 
   public static <F extends FlowElement> Set<F> findSources( ElementGraph elementGraph, Class<F> type )
     {
+    if( elementGraph == null )
+      return Collections.emptySet();
+
     if( elementGraph.containsVertex( Extent.head ) )
       return narrowSet( type, elementGraph.successorListOf( Extent.head ) );
 
@@ -614,6 +621,9 @@ public class ElementGraphs
 
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
     {
+    if( elementGraph == null )
+      return Collections.emptySet();
+
     if( elementGraph.containsVertex( Extent.tail ) )
       return narrowSet( type, elementGraph.predecessorListOf( Extent.tail ) );
 

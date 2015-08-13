@@ -54,6 +54,7 @@ apply from: "etc/s3Upload.gradle"
 allprojects {
 
   apply plugin: 'idea'
+  apply plugin: 'eclipse'
   apply plugin: 'provided-base'
 
   repositories {

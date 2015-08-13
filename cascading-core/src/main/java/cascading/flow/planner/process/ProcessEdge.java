@@ -87,6 +87,12 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
       this.sinkAnnotations = ( (AnnotatedGraph) sinkElementGraph ).getAnnotations().getKeysFor( flowElement );
     }
 
+  public ProcessEdge( Process sourceProcess, Process sinkProcess )
+    {
+    this.sourceProcessID = sourceProcess.getID();
+    this.sinkProcessID = sinkProcess.getID();
+    }
+
   public String getID()
     {
     if( id == null ) // make it lazy

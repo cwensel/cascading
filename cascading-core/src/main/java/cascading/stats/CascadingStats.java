@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import cascading.flow.Flow;
 import cascading.management.state.ClientState;
@@ -111,6 +112,8 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
       }
     }
 
+  private transient String prefixID; // cached sub-string
+
   /** Field name */
   final String name;
   protected final ClientState clientState;
@@ -132,6 +135,10 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   long finishedTime;
   /** Field throwable */
   Throwable throwable;
+  /** Field throwableTrace */
+  String[] throwableTrace;
+
+  AtomicLong lastCaptureDetail = new AtomicLong( 0 );
 
   protected CascadingStats( String name, ClientState clientState )
     {
@@ -178,6 +185,18 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   public Throwable getThrowable()
     {
     return throwable;
+    }
+
+  /**
+   * Method getThrowableTrace returns the throwableTrace of this CascadingStats object.
+   * <p/>
+   * Will return null if not set.
+   *
+   * @return the throwableTrace (type String[]) of this CascadingStats object.
+   */
+  public String[] getThrowableTrace()
+    {
+    return throwableTrace;
     }
 
   /**
@@ -440,10 +459,33 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
 
   /**
    * Method markFailed sets the status to {@link Status#FAILED}.
+   */
+  public void markFailed()
+    {
+    markFailed( null, null );
+    }
+
+  /**
+   * Method markFailed sets the status to {@link Status#FAILED}.
    *
    * @param throwable of type Throwable
    */
   public synchronized void markFailed( Throwable throwable )
+    {
+    markFailed( throwable, null );
+    }
+
+  /**
+   * Method markFailed sets the status to {@link Status#FAILED}.
+   *
+   * @param throwableTrace of type String[]
+   */
+  public synchronized void markFailed( String[] throwableTrace )
+    {
+    markFailed( null, throwableTrace );
+    }
+
+  protected synchronized void markFailed( Throwable throwable, String[] throwableTrace )
     {
     if( status != Status.STARTED && status != Status.RUNNING && status != Status.SUBMITTED )
       throw new IllegalStateException( "may not mark as " + Status.FAILED + ", is already " + status );
@@ -452,6 +494,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
     status = Status.FAILED;
     markFinishedTime();
     this.throwable = throwable;
+    this.throwableTrace = throwableTrace;
 
     fireListeners( priorStatus, status );
 
@@ -610,6 +653,21 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   public abstract void captureDetail( Type depth );
 
   /**
+   * For rate limiting access to the backend.
+   * <p/>
+   * Currently used at the Step and below.
+   */
+  protected boolean isDetailStale()
+    {
+    return ( System.currentTimeMillis() - lastCaptureDetail.get() ) > 500;
+    }
+
+  protected void markDetailCaptured()
+    {
+    lastCaptureDetail.set( System.currentTimeMillis() );
+    }
+
+  /**
    * Method getChildren returns any relevant child statistics instances. They may not be of type CascadingStats, but
    * instead platform specific.
    *
@@ -651,7 +709,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
         }
       catch( Throwable throwable )
         {
-        getProcessLogger().logWarn( "error during listener notification, continuing with remaining listener notification", throwable );
+        logWarn( "error during listener notification, continuing with remaining listener notification", throwable );
         }
       }
     }
@@ -672,5 +730,38 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   public String toString()
     {
     return "Cascading{" + getStatsString() + '}';
+    }
+
+  protected void logInfo( String message, Object... arguments )
+    {
+    getProcessLogger().logInfo( getPrefix() + message, arguments );
+    }
+
+  protected void logDebug( String message, Object... arguments )
+    {
+    getProcessLogger().logDebug( getPrefix() + message, arguments );
+    }
+
+  protected void logWarn( String message, Object... arguments )
+    {
+    getProcessLogger().logWarn( getPrefix() + message, arguments );
+    }
+
+  protected void logError( String message, Object... arguments )
+    {
+    getProcessLogger().logError( getPrefix() + message, arguments );
+    }
+
+  protected void logError( String message, Throwable throwable )
+    {
+    getProcessLogger().logError( getPrefix() + message, throwable );
+    }
+
+  private String getPrefix()
+    {
+    if( prefixID == null )
+      prefixID = "[" + getType().name().toLowerCase() + ":" + getID().substring( 0, 5 ) + "] ";
+
+    return prefixID;
     }
   }

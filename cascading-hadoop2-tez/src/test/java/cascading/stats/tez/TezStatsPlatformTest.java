@@ -144,11 +144,24 @@ public class TezStatsPlatformTest extends PlatformTestCase
       assertEquals( 4, node2.getChildren().size() );
       assertEquals( 4, node3.getChildren().size() );
 
+      assertTrue( ( (TezNodeStats) node1 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node2 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node3 ).isAllChildrenFinished() );
+
       boolean foundCounter = false;
 
       Collection<FlowSliceStats> children = node2.getChildren();
       for( FlowSliceStats flowSliceStats : children )
         {
+        assertNotSame( -1, flowSliceStats.getProcessStartTime() );
+        assertNotSame( -1, flowSliceStats.getProcessSubmitTime() );
+        assertNotSame( -1, flowSliceStats.getProcessRunTime() );
+        assertNotSame( -1, flowSliceStats.getProcessFinishTime() );
+
+        assertTrue( flowSliceStats.getProcessStartTime() <= flowSliceStats.getProcessSubmitTime() );
+        assertTrue( flowSliceStats.getProcessSubmitTime() <= flowSliceStats.getProcessRunTime() );
+        assertTrue( flowSliceStats.getProcessRunTime() < flowSliceStats.getProcessFinishTime() );
+
         TezSliceStats sliceStats = (TezSliceStats) flowSliceStats;
 
         if( sliceStats.getCounters().containsKey( TestEnum.FIRST.getDeclaringClass().getName() ) )
@@ -177,6 +190,10 @@ public class TezStatsPlatformTest extends PlatformTestCase
       assertEquals( 1, node1.getChildren().size() );
       assertEquals( 4, node2.getChildren().size() );
       assertEquals( 4, node3.getChildren().size() );
+
+      assertTrue( ( (TezNodeStats) node1 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node2 ).isAllChildrenFinished() );
+      assertTrue( ( (TezNodeStats) node3 ).isAllChildrenFinished() );
       }
     }
   }

@@ -31,6 +31,18 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue on Apache Tez where diagnostic failure data would not propagate.
+
+  Fixed issue where c.f.h.MapReduceFlow could throw a NPE.
+
+  Updated c.f.h.MapReduceFlow to accept properties and c.f.FlowDescriptors values map.
+
+  Fixed issue when resolving Fields through a Boundary when immediately following grouping operations.
+
+  Fixed issues concerning detailed stats retrieval robustness for both MapReduce and Tez platforms.
+
+  Fixed issue where child stats detail retrieval may not fetch final state of children.
+
   Fixed issue where c.s.FlowNodeStats node kind could be mislabeled.
 
   Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
@@ -116,6 +128,13 @@ Cascading Change Log
 
   Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
   assertions, transforms, and step partitioning.
+
+2.7.1
+
+  Fixed issue where c.p.GroupBy or c.p.CoGroup would fail if attempting to group or join incoming Fields.UNKNOWN
+  tuple streams using relative positions in the grouping fields selectors.
+
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
 
 2.7.0
 

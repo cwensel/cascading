@@ -38,8 +38,6 @@ import static cascading.stats.CascadingStats.Status.*;
 /** Class HadoopTaskStats tracks individual task stats. */
 public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> implements ProvidesCounters
   {
-  private final CascadingStats.Status parentStatus;
-
   public static class HadoopAttempt extends FlowSliceAttempt
     {
     private final TaskCompletionEvent event;
@@ -112,6 +110,7 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
     }
 
   private String id;
+  private CascadingStats.Status parentStatus;
   private Kind kind;
   private TaskReport taskReport;
   private Map<String, Map<String, Long>> counters;
@@ -121,11 +120,20 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
 
   HadoopSliceStats( String id, CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport, long lastFetch )
     {
-    this.parentStatus = parentStatus;
     this.id = id;
+    this.parentStatus = parentStatus;
     this.kind = kind;
     this.taskReport = taskReport;
     this.lastFetch = lastFetch;
+    }
+
+  public void update( CascadingStats.Status parentStatus, Kind kind, TaskReport taskReport, long lastFetch )
+    {
+    this.parentStatus = parentStatus;
+    this.kind = kind;
+    this.taskReport = taskReport;
+    this.lastFetch = lastFetch;
+    this.counters = null; // force recalc of counters
     }
 
   @Override

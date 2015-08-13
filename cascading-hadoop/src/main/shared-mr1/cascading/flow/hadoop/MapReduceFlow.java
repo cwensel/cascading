@@ -109,21 +109,52 @@ public class MapReduceFlow extends HadoopFlow
   @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit"})
   public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit )
     {
-    this( name, jobConf, deleteSinkOnInit, true );
+    this( new Properties(), name, jobConf, null, deleteSinkOnInit, true );
     }
 
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
+   * @param properties       of type Properties
    * @param name             of type String
    * @param jobConf          of type JobConf
    * @param deleteSinkOnInit of type boolean
+   */
+  @ConstructorProperties({"properties", "name", "jobConf", "deleteSinkOnInit"})
+  public MapReduceFlow( Properties properties, String name, JobConf jobConf, boolean deleteSinkOnInit )
+    {
+    this( properties, name, jobConf, null, deleteSinkOnInit, true );
+    }
+
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param properties       of type Properties
+   * @param name             of type String
+   * @param jobConf          of type JobConf
+   * @param flowDescriptor   of type Map<String, String>
+   * @param deleteSinkOnInit of type boolean
+   */
+  @ConstructorProperties({"properties", "name", "jobConf", "flowDescriptor", "deleteSinkOnInit"})
+  public MapReduceFlow( Properties properties, String name, JobConf jobConf, Map<String, String> flowDescriptor, boolean deleteSinkOnInit )
+    {
+    this( properties, name, jobConf, flowDescriptor, deleteSinkOnInit, true );
+    }
+
+  /**
+   * Constructor MapReduceFlow creates a new MapReduceFlow instance.
+   *
+   * @param properties       of type Properties
+   * @param name             of type String
+   * @param jobConf          of type JobConf
+   * @param flowDescriptor   of type Map<String, String>
+   * @param deleteSinkOnInit of type boolean
    * @param stopJobsOnExit   of type boolean
    */
-  @ConstructorProperties({"name", "jobConf", "deleteSinkOnInit", "stopJobsOnExit"})
-  public MapReduceFlow( String name, JobConf jobConf, boolean deleteSinkOnInit, boolean stopJobsOnExit )
+  @ConstructorProperties({"properties", "name", "jobConf", "flowDescriptor", "deleteSinkOnInit", "stopJobsOnExit"})
+  public MapReduceFlow( Properties properties, String name, JobConf jobConf, Map<String, String> flowDescriptor, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
-    super( HadoopUtil.getPlatformInfo(), new Properties(), jobConf, name, null );
+    super( HadoopUtil.getPlatformInfo(), properties, jobConf, name, flowDescriptor );
     this.deleteSinkOnInit = deleteSinkOnInit;
     this.stopJobsOnExit = stopJobsOnExit;
 

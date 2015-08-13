@@ -38,6 +38,8 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
   protected final Map<String, FlowSliceStats> sliceStatsMap = new LinkedHashMap<>();
   protected CounterCache<JobStatus, Counters> counterCache;
 
+  protected boolean allChildrenFinished;
+
   private boolean hasCapturedFinalDetail;
 
   /**
@@ -58,6 +60,11 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
       return counterCache.getLastSuccessfulFetch();
 
     return -1;
+    }
+
+  public boolean isAllChildrenFinished()
+    {
+    return allChildrenFinished;
     }
 
   /**
@@ -141,22 +148,30 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     }
 
   @Override
-  public final synchronized void captureDetail( Type depth )
+  public final void captureDetail( Type depth )
     {
     boolean finished = isFinished();
 
     if( finished && hasCapturedFinalDetail )
       return;
 
-    if( !getType().isChild( depth ) )
-      return;
+    synchronized( this )
+      {
+      if( !getType().isChild( depth ) || !isDetailStale() )
+        return;
 
-    boolean success = captureChildDetailInternal();
+      boolean success = captureChildDetailInternal();
 
-    if( success )
-      getProcessLogger().logDebug( "captured remote node statistic details" );
+      markDetailCaptured(); // always mark to prevent double calls
 
-    hasCapturedFinalDetail = finished && success;
+      if( success )
+        logDebug( "captured remote node statistic details" );
+
+      hasCapturedFinalDetail = finished && success && allChildrenFinished;
+
+      if( allChildrenFinished )
+        logInfo( "all {} children are in finished state, have captured final details: {}", sliceStatsMap.size(), hasCapturedFinalDetail );
+      }
     }
 
   /**
@@ -194,7 +209,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
       }
     catch( Exception exception )
       {
-      getProcessLogger().logError( "unable to record node stats", exception );
+      logError( "unable to record node stats", exception );
       }
     }
   }
