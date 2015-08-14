@@ -21,6 +21,7 @@
 package cascading.tap.hadoop.util;
 
 import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
@@ -29,7 +30,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 /**
  *
  */
-public class MeasuredOutputCollector implements OutputCollector, Closeable
+public class MeasuredOutputCollector implements OutputCollector, Flushable, Closeable
   {
   private final FlowProcess flowProcess;
   private final Enum counter;
@@ -72,6 +73,13 @@ public class MeasuredOutputCollector implements OutputCollector, Closeable
       {
       flowProcess.increment( counter, System.currentTimeMillis() - start );
       }
+    }
+
+  @Override
+  public void flush() throws IOException
+    {
+    if( outputCollector instanceof Flushable )
+      ( (Flushable) outputCollector ).flush();
     }
 
   @Override

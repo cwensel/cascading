@@ -20,22 +20,28 @@
 
 package cascading.flow.tez.stream.element;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 
 import cascading.CascadingException;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.tez.mapreduce.output.MROutput;
 import org.apache.tez.runtime.api.LogicalOutput;
 import org.apache.tez.runtime.library.api.KeyValueWriter;
 
 /**
  *
  */
-class OldOutputCollector implements OutputCollector
+class OldOutputCollector implements OutputCollector, Flushable, Closeable
   {
+  private final LogicalOutput logicalOutput;
   private final KeyValueWriter output;
 
   OldOutputCollector( LogicalOutput logicalOutput )
     {
+    this.logicalOutput = logicalOutput;
+
     try
       {
       this.output = (KeyValueWriter) logicalOutput.getWriter();
@@ -49,5 +55,19 @@ class OldOutputCollector implements OutputCollector
   public void collect( Object key, Object value ) throws IOException
     {
     output.write( key, value );
+    }
+
+  @Override
+  public void flush() throws IOException
+    {
+    if( logicalOutput instanceof MROutput )
+      ( (MROutput) logicalOutput ).flush();
+    }
+
+  @Override
+  public void close() throws IOException
+    {
+    if( logicalOutput instanceof MROutput )
+      ( (MROutput) logicalOutput ).close();
     }
   }
