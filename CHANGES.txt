@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue in c.p.AppProps where getApplicationJarPath would return null when used with a j.u.Properties instance.
+
   Fixed issue that prevented o.a.h.m.OutputCollector sub-classes from properly flushing.
 
   Fixed issue on Apache Tez where diagnostic failure data would not propagate.
