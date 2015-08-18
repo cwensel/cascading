@@ -37,6 +37,7 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 
 import static cascading.flow.FlowProps.JOB_POLLING_INTERVAL;
+import static cascading.stats.CascadingStats.STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION;
 import static cascading.stats.CascadingStats.STATS_STORE_INTERVAL;
 
 /**
@@ -56,6 +57,11 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     return jobConf.getLong( STATS_STORE_INTERVAL, 60 * 1000 );
     }
 
+  private static long getChildDetailsBlockingDuration( JobConf jobConf )
+    {
+    return jobConf.getLong( STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION, 60 * 1000 );
+    }
+
   public static long getJobPollingInterval( JobConf jobConf )
     {
     return jobConf.getLong( JOB_POLLING_INTERVAL, 5000 );
@@ -63,7 +69,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
 
   public HadoopFlowStepJob( ClientState clientState, BaseFlowStep<JobConf> flowStep, JobConf currentConf )
     {
-    super( clientState, currentConf, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
+    super( clientState, currentConf, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ), getChildDetailsBlockingDuration( currentConf ) );
 
     if( flowStep.isDebugEnabled() )
       flowStep.logDebug( "using polling interval: " + pollingInterval );

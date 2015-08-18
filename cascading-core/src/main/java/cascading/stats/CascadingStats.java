@@ -69,6 +69,7 @@ import cascading.util.ProcessLogger;
 public abstract class CascadingStats<Child> implements ProvidesCounters, Serializable
   {
   public static final String STATS_STORE_INTERVAL = "cascading.stats.store.interval";
+  public static final String STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION = "cascading.stats.complete_child_details.block.duration";
 
   /**
    * Method setStatsStoreInterval sets the interval time between store operations against the underlying

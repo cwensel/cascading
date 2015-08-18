@@ -29,6 +29,8 @@ public abstract class FlowNodeStats extends CascadingStats<FlowSliceStats>
   {
   private final FlowNode flowNode;
 
+  protected boolean hasCapturedFinalDetail = false;
+
   protected FlowNodeStats( FlowNode flowNode, ClientState clientState )
     {
     super( flowNode.getName(), clientState );
@@ -81,4 +83,9 @@ public abstract class FlowNodeStats extends CascadingStats<FlowSliceStats>
     }
 
   public abstract void recordChildStats();
+
+  public boolean hasCapturedFinalDetail()
+    {
+    return hasCapturedFinalDetail;
+    }
   }
