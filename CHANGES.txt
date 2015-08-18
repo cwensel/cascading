@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Fixed issue where platform information was not consistently retrieved and reported where possible.
+
   Fixed issue in c.p.AppProps where getApplicationJarPath would return null when used with a j.u.Properties instance.
 
   Fixed issue that prevented o.a.h.m.OutputCollector sub-classes from properly flushing.
