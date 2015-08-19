@@ -48,6 +48,7 @@ import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.tez.dag.api.DAG;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +119,7 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
   @Override
   public PlatformInfo getPlatformInfo()
     {
-    return HadoopUtil.getPlatformInfo();
+    return HadoopUtil.getPlatformInfo( DAG.class, null, "Tez" );
     }
 
   @Override

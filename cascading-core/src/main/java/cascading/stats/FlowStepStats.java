@@ -117,6 +117,19 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     return "Step{" + getStatsString() + '}';
     }
 
+  public boolean hasCapturedFinalDetail()
+    {
+    Collection<FlowNodeStats> values = flowNodeStatsMap.values();
+
+    for( FlowNodeStats nodeStats : values )
+      {
+      if( !nodeStats.getChildren().isEmpty() && !nodeStats.hasCapturedFinalDetail() )
+        return false;
+      }
+
+    return true;
+    }
+
   /**
    * An internal method that will refresh current counters and, if a clientState client is enabled, the child details
    * including node and slice statistics.

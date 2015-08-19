@@ -57,6 +57,7 @@ import org.apache.tez.dag.api.client.StatusGetOpts;
 import org.apache.tez.dag.api.client.VertexStatus;
 
 import static cascading.flow.FlowProps.JOB_POLLING_INTERVAL;
+import static cascading.stats.CascadingStats.STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION;
 import static cascading.stats.CascadingStats.STATS_STORE_INTERVAL;
 
 /**
@@ -78,6 +79,11 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
     return configuration.getLong( STATS_STORE_INTERVAL, 60 * 1000 );
     }
 
+  private static long getChildDetailsBlockingDuration( Configuration configuration )
+    {
+    return configuration.getLong( STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION, 60 * 1000 );
+    }
+
   public static long getJobPollingInterval( Configuration configuration )
     {
     return configuration.getLong( JOB_POLLING_INTERVAL, 5000 );
@@ -85,7 +91,7 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
   public Hadoop2TezFlowStepJob( ClientState clientState, BaseFlowStep<TezConfiguration> flowStep, TezConfiguration currentConf, DAG dag )
     {
-    super( clientState, currentConf, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ) );
+    super( clientState, currentConf, flowStep, getJobPollingInterval( currentConf ), getStoreInterval( currentConf ), getChildDetailsBlockingDuration( currentConf ) );
     this.dag = dag;
 
     if( flowStep.isDebugEnabled() )

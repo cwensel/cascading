@@ -154,7 +154,7 @@ public class MapReduceFlow extends HadoopFlow
   @ConstructorProperties({"properties", "name", "jobConf", "flowDescriptor", "deleteSinkOnInit", "stopJobsOnExit"})
   public MapReduceFlow( Properties properties, String name, JobConf jobConf, Map<String, String> flowDescriptor, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
-    super( HadoopUtil.getPlatformInfo(), properties, jobConf, name, flowDescriptor );
+    super( HadoopUtil.getPlatformInfo( JobConf.class, "org/apache/hadoop", "Hadoop MR" ), properties, jobConf, name, flowDescriptor );
     this.deleteSinkOnInit = deleteSinkOnInit;
     this.stopJobsOnExit = stopJobsOnExit;
 

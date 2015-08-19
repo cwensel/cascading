@@ -146,7 +146,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   @Override
   public PlatformInfo getPlatformInfo()
     {
-    return HadoopUtil.getPlatformInfo();
+    return HadoopUtil.getPlatformInfo( JobConf.class, "org/apache/hadoop", "Hadoop MR" );
     }
 
   @Override

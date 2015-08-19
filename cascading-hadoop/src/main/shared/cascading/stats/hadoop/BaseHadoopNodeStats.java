@@ -40,8 +40,6 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
 
   protected boolean allChildrenFinished;
 
-  private boolean hasCapturedFinalDetail;
-
   /**
    * Constructor CascadingStats creates a new CascadingStats instance.
    *
@@ -152,7 +150,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
     {
     boolean finished = isFinished();
 
-    if( finished && hasCapturedFinalDetail )
+    if( finished && hasCapturedFinalDetail() )
       return;
 
     synchronized( this )
@@ -170,7 +168,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
       hasCapturedFinalDetail = finished && success && allChildrenFinished;
 
       if( allChildrenFinished )
-        logInfo( "all {} children are in finished state, have captured final details: {}", sliceStatsMap.size(), hasCapturedFinalDetail );
+        logInfo( "all {} children are in finished state, have captured final details: {}", sliceStatsMap.size(), hasCapturedFinalDetail() );
       }
     }
 

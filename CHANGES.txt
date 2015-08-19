@@ -34,6 +34,14 @@ Cascading Change Log
 
 3.0.2 [unreleased]
 
+  Updated Apache Tez to 0.6.2 to prevent deadlocks in complex DAGs. Note this release is incompatible with Tez 0.6.1.
+
+  Fixed issue where platform information was not consistently retrieved and reported where possible.
+
+  Fixed issue in c.p.AppProps where getApplicationJarPath would return null when used with a j.u.Properties instance.
+
+  Fixed issue that prevented o.a.h.m.OutputCollector sub-classes from properly flushing.
+
   Fixed issue on Apache Tez where diagnostic failure data would not propagate.
 
   Fixed issue where c.f.h.MapReduceFlow could throw a NPE.

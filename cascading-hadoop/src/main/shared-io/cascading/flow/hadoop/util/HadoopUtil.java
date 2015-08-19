@@ -460,20 +460,31 @@ public class HadoopUtil
   public static PlatformInfo getPlatformInfo()
     {
     if( platformInfo == null )
-      platformInfo = getPlatformInfoInternal();
+      platformInfo = getPlatformInfoInternal( JobConf.class, "org/apache/hadoop", "Hadoop" );
 
     return platformInfo;
     }
 
-  private static PlatformInfo getPlatformInfoInternal()
+  public static PlatformInfo getPlatformInfo( Class type, String attributePath, String platformName )
     {
-    URL url = JobConf.class.getResource( JobConf.class.getSimpleName() + ".class" );
+    if( platformInfo == null )
+      platformInfo = getPlatformInfoInternal( type, attributePath, platformName );
+
+    return platformInfo;
+    }
+
+  private static PlatformInfo getPlatformInfoInternal( Class type, String attributePath, String platformName )
+    {
+    URL url = type.getResource( type.getSimpleName() + ".class" );
 
     if( url == null || !url.toString().startsWith( "jar" ) )
-      return new PlatformInfo( "Hadoop", null, null );
+      return new PlatformInfo( platformName, null, null );
 
     String path = url.toString();
-    String manifestPath = path.substring( 0, path.lastIndexOf( "!" ) + 1 ) + "/META-INF/MANIFEST.MF";
+    path = path.substring( 0, path.lastIndexOf( "!" ) + 1 );
+
+    String manifestPath = path + "/META-INF/MANIFEST.MF";
+    String parsedVersion = Util.findVersion( path.substring( 0, path.length() - 1 ) );
 
     Manifest manifest;
 
@@ -483,23 +494,29 @@ public class HadoopUtil
       }
     catch( IOException exception )
       {
-      LOG.warn( "unable to get manifest from {}", manifestPath, exception );
+      LOG.warn( "unable to get manifest from {}: {}", manifestPath, exception.getMessage() );
 
-      return new PlatformInfo( "Hadoop", null, null );
+      return new PlatformInfo( "Hadoop", null, parsedVersion );
       }
 
-    Attributes attributes = manifest.getAttributes( "org/apache/hadoop" );
+    Attributes attributes = manifest.getAttributes( attributePath );
+
+    if( attributes == null )
+      attributes = manifest.getMainAttributes();
 
     if( attributes == null )
       {
       LOG.debug( "unable to get Hadoop manifest attributes" );
-      return new PlatformInfo( "Hadoop", null, null );
+      return new PlatformInfo( platformName, null, parsedVersion );
       }
 
     String vendor = attributes.getValue( "Implementation-Vendor" );
     String version = attributes.getValue( "Implementation-Version" );
 
-    return new PlatformInfo( "Hadoop", vendor, version );
+    if( Util.isEmpty( version ) )
+      version = parsedVersion;
+
+    return new PlatformInfo( platformName, vendor, version );
     }
 
   /**

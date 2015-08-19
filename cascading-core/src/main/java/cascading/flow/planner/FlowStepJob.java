@@ -56,6 +56,8 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   protected long pollingInterval = 1000;
   /** Field recordStatsInterval */
   protected long statsStoreInterval = 60 * 1000;
+  /** Field waitTillCompletedChildStatsDuration */
+  protected long blockForCompletedChildDetailDuration = 60 * 1000;
   /** Field predecessors */
   protected List<FlowStepJob<Config>> predecessors;
   /** Field latch */
@@ -69,13 +71,14 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   /** Field throwable */
   protected Throwable throwable;
 
-  public FlowStepJob( ClientState clientState, Config jobConfiguration, BaseFlowStep<Config> flowStep, long pollingInterval, long statsStoreInterval )
+  public FlowStepJob( ClientState clientState, Config jobConfiguration, BaseFlowStep<Config> flowStep, long pollingInterval, long statsStoreInterval, long blockForCompletedChildDetailDuration )
     {
     this.jobConfiguration = jobConfiguration;
-    this.flowStep = flowStep;
     this.stepName = flowStep.getName();
     this.pollingInterval = pollingInterval;
     this.statsStoreInterval = statsStoreInterval;
+    this.blockForCompletedChildDetailDuration = blockForCompletedChildDetailDuration;
+    this.flowStep = flowStep;
     this.flowStepStats = createStepStats( clientState );
 
     this.flowStepStats.prepare();
@@ -294,7 +297,22 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         }
       }
 
-    flowStepStats.recordChildStats();
+    long startOfFinalPolling = System.currentTimeMillis();
+
+    while( true )
+      {
+      flowStepStats.recordChildStats();
+
+      if( flowStepStats.hasCapturedFinalDetail() )
+        break;
+
+      if( ( System.currentTimeMillis() - startOfFinalPolling ) >= blockForCompletedChildDetailDuration )
+        break;
+
+      flowStep.logInfo( "did not capture all completed child details, will retry in {}", Util.formatDurationFromMillis( pollingInterval ) );
+
+      sleepForPollingInterval();
+      }
     }
 
   protected abstract boolean isRemoteExecution();

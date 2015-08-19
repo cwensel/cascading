@@ -25,6 +25,8 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import cascading.CascadingException;
+import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.PlatformInfo;
 import cascading.util.Util;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -32,6 +34,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.tez.client.FrameworkClient;
 import org.apache.tez.client.TezClient;
+import org.apache.tez.dag.api.DAG;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.apache.tez.dag.api.TezException;
 import org.apache.tez.dag.api.client.DAGClient;
@@ -52,6 +55,16 @@ public class TezStatsUtil
   static Class<DAGClient> timelineClientClass = null;
 
   public static final String TIMELINE_CLIENT_CLASS = "cascading.stats.tez.util.TezTimelineClient";
+
+  public static String getPlatformVersion()
+    {
+    PlatformInfo tez = HadoopUtil.getPlatformInfo( DAG.class, null, "Tez" );
+
+    if( tez == null || tez.version == null )
+      return "unknown";
+
+    return tez.version;
+    }
 
   private static boolean loadClass()
     {
@@ -134,6 +147,8 @@ public class TezStatsUtil
 
       if( cause instanceof ReflectiveOperationException && cause.getCause() instanceof TezException )
         LOG.warn( "unable to construct timeline server client", cause.getCause() );
+      else if( cause instanceof ReflectiveOperationException && cause.getCause() instanceof NoSuchMethodError )
+        LOG.warn( "unable to construct timeline server client, check for compatible Tez version, current: {}", getPlatformVersion(), cause.getCause() );
       else
         LOG.warn( "unable to construct timeline server client", exception );
       }

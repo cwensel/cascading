@@ -37,6 +37,7 @@ import cascading.property.PropertyUtil;
 import cascading.stats.FlowSliceStats;
 import cascading.stats.hadoop.BaseHadoopNodeStats;
 import cascading.stats.tez.util.TaskStatus;
+import cascading.stats.tez.util.TezStatsUtil;
 import cascading.stats.tez.util.TimelineClient;
 import cascading.tap.Tap;
 import cascading.util.Util;
@@ -400,7 +401,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
     int total = sliceStatsMap.size();
 
     if( total == 0 ) // yet to be initialized
-      logWarn( "'" + YarnConfiguration.TIMELINE_SERVICE_ENABLED + "' is disabled, task level counters cannot be retrieved" );
+      logWarn( "'{}' is disabled, or running an incompatible Tez version: {}, task level counters cannot be retrieved", YarnConfiguration.TIMELINE_SERVICE_ENABLED, TezStatsUtil.getPlatformVersion() );
 
     for( int i = total; i < totalTaskCount; i++ )
       {
@@ -429,6 +430,10 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
     for( String diagnostic : diagnostics )
       logInfo( "vertex diagnostics: {}", diagnostic );
+
+    int finishedTaskCount = succeededTaskCount + failedTaskCount + killedTaskCount;
+
+    allChildrenFinished = totalTaskCount == finishedTaskCount;
 
     return true;
     }

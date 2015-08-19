@@ -62,9 +62,11 @@ onto HDFS for use by YARN.
 |-------------|----------------|-----------------------------------------------------------------------------|--------|
 | 0.5.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.0/                        |        |
 | 0.5.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.1/                        |        |
-| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/                        |   X    |
-| 0.6.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz |   X    |
-| 0.6.1       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop26.tar.gz |   X    |
+| 0.5.3       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.5.3/                        |        |
+| 0.6.1       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz |   *    |
+| 0.6.1       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop26.tar.gz |   *    |
+| 0.6.2       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.2-minimal-hadoop24.tar.gz |   X    |
+| 0.6.2       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.6.2-minimal-hadoop26.tar.gz |   X    |
 | 0.7.0       | 2.4.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop24.tar.gz |   *    |
 | 0.7.0       | 2.6.x          | files.cascading.org/third-party/yarn/apps/tez-0.7.0-minimal-hadoop26.tar.gz |   *    |
 
@@ -72,9 +74,9 @@ onto HDFS for use by YARN.
 
 For up to date notes on the available YARN apps, see: http://files.cascading.org/third-party/yarn/apps/NOTES.txt 
 
-To copy Tez 0.6.1 to HDFS, execute:
+To copy Tez 0.6.2 to HDFS, execute:
 
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz /apps/
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.2-minimal-hadoop24.tar.gz /apps/
 
 Since the _minimal_ jar is being use, ensure 'tez.use.cluster.hadoop-libs=true'. 
 
@@ -111,13 +113,13 @@ Next shell into where you are running your Hadoop jobs, then:
     hdfs dfs -mkdir -p /apps/
     hdfs dfs -chmod -R 777 /apps/
      
-    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz
-    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.1-minimal-hadoop24.tar.gz /apps/
+    hdfs dfs -copyToLocal s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.2-minimal-hadoop24.tar.gz
+    hdfs dfs -cp s3n://files.cascading.org/third-party/yarn/apps/tez-0.6.2-minimal-hadoop24.tar.gz /apps/
      
-    mkdir tez-0.6.1
-    tar -xzf tez-0.6.1-minimal-hadoop24.tar.gz -C tez-0.6.1
+    mkdir tez-0.6.2
+    tar -xzf tez-0.6.2-minimal-hadoop24.tar.gz -C tez-0.6.2
 
-    export HADOOP_CLASSPATH=~/tez-0.6.1/*:~/tez-0.6.1/lib/*:$HADOOP_CLASSPATH
+    export HADOOP_CLASSPATH=~/tez-0.6.2/*:~/tez-0.6.2/lib/*:$HADOOP_CLASSPATH
 
 See above for other available Tez versions.     
      
@@ -127,7 +129,7 @@ You also need to start the YARN History Server (not on by default in EMR):
 
 Then to execute your application you nee to make sure these properties are set on the Hadoop2TezFlowConnector:
  
-     tez.lib.uris=${fs.default.name}/apps/tez-0.6.1-minimal-hadoop24.tar.gz
+     tez.lib.uris=${fs.default.name}/apps/tez-0.6.2-minimal-hadoop24.tar.gz
      tez.use.cluster.hadoop-libs=true
      yarn.timeline-service.hostname=$HOSTNAME
      io.compression.codecs=org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.DefaultCodec,org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.SnappyCodec
@@ -138,6 +140,8 @@ The last two lines provide missing EMR parameters. May be unnecessary on a local
 ## Notes and Known Issues
 
 Some notes and issues with running Cascading on Apache Tez. JIRA issues will be noted when created. 
+
+* Tez 0.6.1 has known deadlock issues with reasonably large dags, 0.6.2 resolves these issues.
 
 * Tez 0.7.0 is unstable causing both random hangs in tests, and the default sorter fails on large partitions, see
   TEZ-2475 & TEZ-2505

@@ -91,7 +91,7 @@ public class AppProps extends Props
   public static void setApplicationJarClass( Map<Object, Object> properties, Class type )
     {
     if( type != null )
-      properties.put( APP_JAR_CLASS, type );
+      PropertyUtil.setProperty( properties, APP_JAR_CLASS, type.getName() );
     }
 
   /**
@@ -102,15 +102,18 @@ public class AppProps extends Props
    */
   public static Class getApplicationJarClass( Map<Object, Object> properties )
     {
-    Class property = PropertyUtil.getProperty( properties, DEP_APP_JAR_CLASS, (Class) null );
+    String className = PropertyUtil.getProperty( properties, DEP_APP_JAR_CLASS, (String) null );
 
-    if( property != null )
+    if( className != null )
       {
       LOG.warn( "using deprecated property: {}, use instead: {}", DEP_APP_JAR_CLASS, APP_JAR_CLASS );
-      return property;
+      return Util.loadClassSafe( className );
       }
 
-    return PropertyUtil.getProperty( properties, APP_JAR_CLASS, (Class) null );
+    className = PropertyUtil.getProperty( properties, APP_JAR_CLASS, (String) null );
+    if( className == null )
+      return null;
+    return Util.loadClassSafe( className );
     }
 
   /**

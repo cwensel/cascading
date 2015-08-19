@@ -290,7 +290,7 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
       }
     catch( NoClassDefFoundError error )
       {
-      PlatformInfo platformInfo = HadoopUtil.getPlatformInfo();
+      PlatformInfo platformInfo = HadoopUtil.getPlatformInfo( JobConf.class, "org/apache/hadoop", "Hadoop MR" );
       String message = "unable to load platform specific class, please verify Hadoop cluster version: '%s', matches the Hadoop platform build dependency and associated FlowConnector, cascading-hadoop or cascading-hadoop2-mr1";
 
       logError( String.format( message, platformInfo.toString() ), error );

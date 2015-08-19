@@ -1130,6 +1130,18 @@ public class Util
       }
     }
 
+  public static Class<?> loadClassSafe( String typeString )
+    {
+    try
+      {
+      return Thread.currentThread().getContextClassLoader().loadClass( typeString );
+      }
+    catch( ClassNotFoundException exception )
+      {
+      return null;
+      }
+    }
+
   public static Object invokeStaticMethod( Class type, String methodName, Object[] parameters, Class[] parameterTypes )
     {
     try
