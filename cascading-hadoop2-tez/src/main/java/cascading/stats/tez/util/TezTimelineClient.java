@@ -62,7 +62,7 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
 
   public TezTimelineClient( ApplicationId appId, String dagId, TezConfiguration conf, FrameworkClient frameworkClient, DAGClient dagClient ) throws TezException
     {
-    super( appId, dagId, conf, frameworkClient );
+    super( appId, dagId, conf, frameworkClient, 5000 );
     this.dagId = dagId;
     this.frameworkClient = frameworkClient;
     this.dagClient = dagClient;

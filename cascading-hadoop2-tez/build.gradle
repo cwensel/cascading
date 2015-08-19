@@ -25,7 +25,7 @@ idea {
 }
 
 ext.hadoop2Version = '2.6.0'
-ext.tezVersion = '0.6.1'
+ext.tezVersion = '0.6.2'
 
 if( System.properties[ 'hadoop2tez.release.final' ] )
   tezVersion = System.properties[ 'hadoop2tez.release.final' ]
@@ -33,7 +33,7 @@ if( System.properties[ 'hadoop2tez.release.final' ] )
 repositories {
 
   if( tezVersion.contains( 'SNAPSHOT' ) )
-    maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+    maven {url = 'https://repository.apache.org/content/repositories/snapshots'}
 }
 
 dependencies {
@@ -74,12 +74,12 @@ dependencies {
 configurations.all {
   resolutionStrategy {
 
-    def versions = ['0.6.0', '0.6.1', '0.7.0']
+    def versions = ['0.6.0', '0.6.1', '0.6.2', '0.7.0']
 
     if( !hadoop2Version.startsWith( '2.4' ) && versions.contains( tezVersion ) )
       force 'com.google.guava:guava:11.0.2'
 
-    eachDependency { def details ->
+    eachDependency {def details ->
       if( details.requested.group == 'org.apache.hadoop' )
         details.useVersion hadoop2Version
     }
