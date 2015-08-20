@@ -116,12 +116,25 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     {
     try
       {
-      if( runningJob == null )
+      if( runningJob == null || flowNodeStats.isFinished() )
         return;
 
-      float progress;
-
       boolean isMapper = flowNodeStats.getOrdinal() == 0;
+      int jobState = runningJob.getJobState();
+
+      if( JobStatus.FAILED == jobState )
+        {
+        flowNodeStats.markFailed();
+        return;
+        }
+
+      if( JobStatus.KILLED == jobState )
+        {
+        flowNodeStats.markStopped();
+        return;
+        }
+
+      float progress;
 
       if( isMapper )
         progress = runningJob.mapProgress();
@@ -137,8 +150,7 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
         return;
         }
 
-      if( !flowNodeStats.isRunning() )
-        flowNodeStats.markRunning();
+      flowNodeStats.markRunning();
 
       if( isMapper && runningJob.reduceProgress() > 0.0F )
         {
@@ -146,12 +158,8 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
         return;
         }
 
-      int jobState = runningJob.getJobState();
-
       if( JobStatus.SUCCEEDED == jobState )
         flowNodeStats.markSuccessful();
-      else if( JobStatus.FAILED == jobState )
-        flowNodeStats.markFailed(); // todo: find failure
       }
     catch( IOException exception )
       {

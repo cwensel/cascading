@@ -32,12 +32,15 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepStrategy;
 import cascading.management.state.ClientState;
+import cascading.stats.CascadingStats;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowStats;
 import cascading.stats.FlowStepStats;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static cascading.util.Util.formatDurationFromMillis;
 
 /**
  *
@@ -83,6 +86,12 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
     this.flowStepStats.prepare();
     this.flowStepStats.markPending();
+
+    for( FlowNodeStats flowNodeStats : this.flowStepStats.getFlowNodeStats() )
+      {
+      flowNodeStats.prepare();
+      flowNodeStats.markPending();
+      }
     }
 
   public Config getConfig()
@@ -189,6 +198,11 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     finally
       {
       latch.countDown();
+
+      // lets free the latch and capture any failure info if exiting via a throwable
+      // remain in this thread to keep client side alive until shutdown
+      finalizeNodeSliceCapture();
+
       flowStepStats.cleanup();
       }
 
@@ -296,23 +310,48 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
           }
         }
       }
+    }
 
+  protected void finalizeNodeSliceCapture()
+    {
     long startOfFinalPolling = System.currentTimeMillis();
+    long lastLog = 0;
+    long retries = 0;
+
+    boolean allNodesFinished;
 
     while( true )
       {
+      allNodesFinished = updateNodesStatus();
+
       flowStepStats.recordChildStats();
 
-      if( flowStepStats.hasCapturedFinalDetail() )
+      if( allNodesFinished && flowStepStats.hasCapturedFinalDetail() )
         break;
 
       if( ( System.currentTimeMillis() - startOfFinalPolling ) >= blockForCompletedChildDetailDuration )
         break;
 
-      flowStep.logInfo( "did not capture all completed child details, will retry in {}", Util.formatDurationFromMillis( pollingInterval ) );
+      if( System.currentTimeMillis() - lastLog > 1000 )
+        {
+        if( !allNodesFinished )
+          flowStep.logInfo( "did not capture all completed node details, will retry in {}, prior retries: {}", formatDurationFromMillis( pollingInterval ), retries );
+        else
+          flowStep.logInfo( "did not capture all completed slice details, will retry in {}, prior retries: {}", formatDurationFromMillis( pollingInterval ), retries );
+
+        lastLog = System.currentTimeMillis();
+        }
+
+      retries++;
 
       sleepForPollingInterval();
       }
+
+    if( !allNodesFinished )
+      flowStep.logWarn( "unable to capture all completed node details or determine final state within configured duration: {}, configure property to increase wait duration: '{}'", formatDurationFromMillis( blockForCompletedChildDetailDuration ), CascadingStats.STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION );
+
+    if( !flowStepStats.hasCapturedFinalDetail() )
+      flowStep.logWarn( "unable to capture all completed slice details within configured duration: {}, configure property to increase wait duration: '{}'", formatDurationFromMillis( blockForCompletedChildDetailDuration ), CascadingStats.STATS_COMPLETE_CHILD_DETAILS_BLOCK_DURATION );
     }
 
   protected abstract boolean isRemoteExecution();
@@ -345,14 +384,14 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       if( stop || internalNonBlockingIsComplete() )
         break;
 
-      sleepForPollingInterval();
-
       if( iterations == count++ )
         {
         count = 0;
         flowStepStats.recordStats();
         flowStepStats.recordChildStats(); // records node and slice stats
         }
+
+      sleepForPollingInterval();
       }
     }
 
@@ -427,8 +466,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
       }
     }
 
-  private void updateNodesStatus()
+  private boolean updateNodesStatus()
     {
+    boolean allFinished = true;
+
     Collection<FlowNodeStats> children = flowStepStats.getFlowNodeStats();
 
     for( FlowNodeStats child : children )
@@ -438,7 +479,11 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
         continue;
 
       updateNodeStatus( child );
+
+      allFinished &= child.isFinished();
       }
+
+    return allFinished;
     }
 
   protected abstract void updateNodeStatus( FlowNodeStats flowNodeStats );

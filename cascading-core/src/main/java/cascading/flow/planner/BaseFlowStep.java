@@ -114,6 +114,8 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   /** Field groups */
   private final List<Group> groups = new ArrayList<Group>();
 
+  protected transient FlowStepStats flowStepStats;
+
   private transient FlowStepJob<Config> flowStepJob;
 
   /** optional metadata about the FlowStep */
@@ -330,12 +332,15 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     }
 
   @Override
+  public void setFlowStepStats( FlowStepStats flowStepStats )
+    {
+    this.flowStepStats = flowStepStats;
+    }
+
+  @Override
   public FlowStepStats getFlowStepStats()
     {
-    if( flowStepJob == null )
-      return null;
-
-    return flowStepJob.getStepStats();
+    return flowStepStats;
     }
 
   @Override

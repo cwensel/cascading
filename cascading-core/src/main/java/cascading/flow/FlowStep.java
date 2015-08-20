@@ -149,6 +149,8 @@ public interface FlowStep<Config> extends ProcessModel
    */
   boolean containsPipeNamed( String pipeName );
 
+  void setFlowStepStats( FlowStepStats flowStepStats );
+
   FlowStepStats getFlowStepStats();
 
   /**

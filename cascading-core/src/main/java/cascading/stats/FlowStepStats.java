@@ -40,6 +40,7 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
     {
     super( flowStep.getName(), clientState );
     this.flowStep = flowStep;
+    this.flowStep.setFlowStepStats( this );
     }
 
   @Override
