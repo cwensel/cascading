@@ -32,7 +32,7 @@ Cascading Change Log
   information to reduce serialized data and perform bitwise equality comparisons. See c.t.h.TupleSerializationProps to
   disable bitwise comparisons.
 
-3.0.2 [unreleased]
+3.0.2
 
   Updated Apache Tez to 0.6.2 to prevent deadlocks in complex DAGs. Note this release is incompatible with Tez 0.6.1.
 
