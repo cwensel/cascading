@@ -55,15 +55,15 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
   /** Field resolved */
   private boolean resolved;
   /** Field platformInfo */
-  private PlatformInfo platformInfo;
+  protected PlatformInfo platformInfo;
   /** Field sources */
-  private Map<String, Tap> sources;
+  protected Map<String, Tap> sources;
   /** Field sinks */
-  private Map<String, Tap> sinks;
+  protected Map<String, Tap> sinks;
   /** Field traps */
-  private Map<String, Tap> traps;
+  protected Map<String, Tap> traps;
   /** Field checkpoints */
-  private Map<String, Tap> checkpoints;
+  protected Map<String, Tap> checkpoints;
   /** Field requireUniqueCheckpoints */
   private boolean requireUniqueCheckpoints;
 

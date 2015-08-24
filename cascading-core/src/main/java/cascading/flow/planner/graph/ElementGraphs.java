@@ -263,6 +263,9 @@ public class ElementGraphs
 
   public static Iterator<FlowElement> getTopologicalIterator( ElementGraph graph )
     {
+    if( graph == null )
+      return Collections.emptyIterator();
+
     return new TopologicalOrderIterator<>( directed( graph ) );
     }
 

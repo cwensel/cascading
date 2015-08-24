@@ -36,12 +36,12 @@ import cascading.stats.FlowSliceStats;
 public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeStats
   {
   protected final Map<String, FlowSliceStats> sliceStatsMap = new LinkedHashMap<>();
-  protected CounterCache<JobStatus, Counters> counterCache;
+  protected HadoopCounterCache<JobStatus, Counters> counterCache;
 
   protected boolean allChildrenFinished;
 
   /**
-   * Constructor CascadingStats creates a new CascadingStats instance.
+   * Constructor BaseHadoopNodeStats creates a new BaseHadoopNodeStats instance.
    *
    * @param flowNode
    * @param clientState

@@ -93,7 +93,11 @@ public interface ProcessGraph<Process extends ProcessModel> extends Serializable
 
   Set<Tap> getSourceTaps();
 
+  Map<String, Tap> getSourceTapsMap();
+
   Set<Tap> getSinkTaps();
+
+  Map<String, Tap> getSinkTapsMap();
 
   Map<String, Tap> getTrapsMap();
 

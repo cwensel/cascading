@@ -27,6 +27,8 @@ import java.util.Objects;
  */
 public class PlannerInfo
   {
+  public static final PlannerInfo NULL = new PlannerInfo( null, null, null );
+
   public final String name;
   public final String platform;
   public final String registry;

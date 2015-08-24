@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.stats.hadoop;
+package cascading.stats;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -35,8 +35,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import cascading.flow.FlowException;
-import cascading.stats.CascadingStats;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,14 +44,17 @@ import static java.lang.System.currentTimeMillis;
 /**
  *
  */
-public abstract class CounterCache<JobStatus, Counters>
+public abstract class CounterCache<Config, JobStatus, Counters>
   {
   public static final String COUNTER_TIMEOUT_PROPERTY = "cascading.counter.timeout.seconds";
   public static final String COUNTER_FETCH_RETRIES_PROPERTY = "cascading.counter.fetch.retries";
   public static final String COUNTER_MAX_AGE_PROPERTY = "cascading.counter.age.max.seconds";
+  public static final String NODE_COUNTER_MAX_AGE_PROPERTY = "cascading.node.counter.age.max.seconds";
+
   public static final int DEFAULT_TIMEOUT_TIMEOUT_SEC = 0; // zero means making the call synchronously
   public static final int DEFAULT_FETCH_RETRIES = 3;
   public static final int DEFAULT_CACHED_AGE_MAX = 0; // rely on client interface caching
+  public static final int DEFAULT_NODE_CACHED_AGE_MAX = 30; // don't re-fetch task reports for 30 seconds
 
   private static final Logger LOG = LoggerFactory.getLogger( CounterCache.class );
 
@@ -84,13 +85,23 @@ public abstract class CounterCache<JobStatus, Counters>
   protected int timeout;
   protected int maxAge;
 
-  protected CounterCache( CascadingStats stats, Configuration configuration )
+  protected final Config configuration;
+
+  protected CounterCache( CascadingStats stats, Config configuration )
     {
     this.stats = stats;
-    this.timeout = configuration.getInt( COUNTER_TIMEOUT_PROPERTY, DEFAULT_TIMEOUT_TIMEOUT_SEC );
-    this.maxFetchAttempts = configuration.getInt( COUNTER_FETCH_RETRIES_PROPERTY, DEFAULT_FETCH_RETRIES );
-    this.maxAge = configuration.getInt( COUNTER_MAX_AGE_PROPERTY, DEFAULT_CACHED_AGE_MAX );
+    this.configuration = configuration;
+
+    this.timeout = getIntProperty( COUNTER_TIMEOUT_PROPERTY, DEFAULT_TIMEOUT_TIMEOUT_SEC );
+    this.maxFetchAttempts = getIntProperty( COUNTER_FETCH_RETRIES_PROPERTY, DEFAULT_FETCH_RETRIES );
+
+    if( stats.getType() == CascadingStats.Type.NODE )
+      this.maxAge = getIntProperty( NODE_COUNTER_MAX_AGE_PROPERTY, DEFAULT_NODE_CACHED_AGE_MAX );
+    else
+      this.maxAge = getIntProperty( COUNTER_MAX_AGE_PROPERTY, DEFAULT_CACHED_AGE_MAX );
     }
+
+  protected abstract int getIntProperty( String property, int defaultValue );
 
   public long getLastSuccessfulFetch()
     {
@@ -171,12 +182,12 @@ public abstract class CounterCache<JobStatus, Counters>
     return getCounterValue( counters, group, counter );
     }
 
-  protected Counters cachedCounters()
+  public Counters cachedCounters()
     {
     return cachedCounters( false );
     }
 
-  protected synchronized Counters cachedCounters( boolean force )
+  public synchronized Counters cachedCounters( boolean force )
     {
     if( !hasAvailableCounters )
       return cachedCounters;

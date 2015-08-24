@@ -22,11 +22,13 @@ package cascading.flow;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.ProcessModel;
+import cascading.stats.FlowNodeStats;
 import cascading.tap.Tap;
 
 /**
@@ -51,6 +53,18 @@ public interface FlowNode extends ProcessModel
   String CASCADING_FLOW_NODE = "cascading.flow.node";
 
   String getID();
+
+  /**
+   * Returns an immutable map of properties giving more details about the FlowNode object.
+   * <p/>
+   * FlowNode descriptions provide meta-data to monitoring systems describing the workload a given FlowNode represents.
+   * For known description types, see {@link FlowNodeDescriptors}.
+   *
+   * @return Map<String,String>
+   */
+  Map<String, String> getFlowNodeDescriptor();
+
+  FlowNodeStats getFlowNodeStats();
 
   FlowStep getFlowStep();
 

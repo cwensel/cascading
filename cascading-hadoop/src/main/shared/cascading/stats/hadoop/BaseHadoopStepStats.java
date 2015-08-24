@@ -37,7 +37,7 @@ public abstract class BaseHadoopStepStats<JobStatusClient, Counters> extends Flo
   {
   private static final Logger LOG = LoggerFactory.getLogger( BaseHadoopStepStats.class );
 
-  protected CounterCache<JobStatusClient, Counters> counterCache;
+  protected HadoopCounterCache<JobStatusClient, Counters> counterCache;
 
   public BaseHadoopStepStats( FlowStep flowStep, ClientState clientState )
     {

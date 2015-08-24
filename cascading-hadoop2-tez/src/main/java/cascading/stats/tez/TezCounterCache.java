@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import cascading.stats.CascadingStats;
-import cascading.stats.hadoop.CounterCache;
+import cascading.stats.hadoop.HadoopCounterCache;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.tez.common.counters.CounterGroup;
 import org.apache.tez.common.counters.TezCounter;
@@ -35,7 +35,7 @@ import org.apache.tez.common.counters.TezCounters;
 /**
  *
  */
-public abstract class TezCounterCache<JobStatus> extends CounterCache<JobStatus, TezCounters>
+public abstract class TezCounterCache<JobStatus> extends HadoopCounterCache<JobStatus, TezCounters>
   {
   protected TezCounterCache( CascadingStats stats, Configuration configuration )
     {

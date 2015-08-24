@@ -71,6 +71,10 @@ public interface ElementGraph
 
   boolean addEdge( FlowElement lhs, FlowElement rhs, Scope scope );
 
+  boolean addHeadVertex( FlowElement flowElement );
+
+  boolean addTailVertex( FlowElement flowElement );
+
   boolean addVertex( FlowElement flowElement );
 
   boolean containsEdge( FlowElement lhs, FlowElement rhs );

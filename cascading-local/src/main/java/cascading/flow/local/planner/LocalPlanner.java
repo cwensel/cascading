@@ -26,11 +26,13 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
 import cascading.flow.local.LocalFlow;
 import cascading.flow.local.LocalFlowStep;
+import cascading.flow.planner.BaseFlowStepFactory;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.FlowStepFactory;
 import cascading.tap.Tap;
 import cascading.util.Version;
 
@@ -69,9 +71,16 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
     }
 
   @Override
-  public FlowStep<Properties> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  public FlowStepFactory<Properties> getFlowStepFactory()
     {
-    return new LocalFlowStep( stepElementGraph, flowNodeGraph );
+    return new BaseFlowStepFactory<Properties>( getFlowNodeFactory() )
+    {
+    @Override
+    public FlowStep<Properties> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+      {
+      return new LocalFlowStep( stepElementGraph, flowNodeGraph );
+      }
+    };
     }
 
   @Override

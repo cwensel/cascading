@@ -39,9 +39,14 @@ public class FlowStepGraph extends BaseProcessGraph<FlowStep>
     {
     }
 
-  public FlowStepGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+  public FlowStepGraph( FlowStepFactory flowStepFactory, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap )
     {
-    buildGraph( flowPlanner, flowElementGraph, nodeSubGraphsMap, pipelineSubGraphsMap );
+    this( flowStepFactory, flowElementGraph, nodeSubGraphsMap, null );
+    }
+
+  public FlowStepGraph( FlowStepFactory flowStepFactory, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+    {
+    buildGraph( flowStepFactory, flowElementGraph, nodeSubGraphsMap, pipelineSubGraphsMap );
 
     Iterator<FlowStep> iterator = getTopologicalIterator();
 
@@ -53,16 +58,16 @@ public class FlowStepGraph extends BaseProcessGraph<FlowStep>
       BaseFlowStep flowStep = (BaseFlowStep) iterator.next();
 
       flowStep.setOrdinal( ordinal++ );
-      flowStep.setName( flowPlanner.makeFlowStepName( flowStep, size, flowStep.getOrdinal() ) );
+      flowStep.setName( flowStepFactory.makeFlowStepName( flowStep, size, flowStep.getOrdinal() ) );
       }
     }
 
-  protected void buildGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+  protected void buildGraph( FlowStepFactory flowStepFactory, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> nodeSubGraphsMap, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
     for( ElementGraph stepSubGraph : nodeSubGraphsMap.keySet() )
       {
       List<? extends ElementGraph> nodeSubGraphs = nodeSubGraphsMap.get( stepSubGraph );
-      FlowNodeGraph flowNodeGraph = createFlowNodeGraph( flowPlanner, flowElementGraph, pipelineSubGraphsMap, nodeSubGraphs );
+      FlowNodeGraph flowNodeGraph = createFlowNodeGraph( flowStepFactory, flowElementGraph, pipelineSubGraphsMap, nodeSubGraphs );
 
       EnumMultiMap<FlowElement> annotations = flowNodeGraph.getAnnotations();
 
@@ -70,7 +75,7 @@ public class FlowStepGraph extends BaseProcessGraph<FlowStep>
       if( !annotations.isEmpty() )
         stepSubGraph = new AnnotatedDecoratedElementGraph( stepSubGraph, annotations );
 
-      FlowStep flowStep = flowPlanner.createFlowStep( stepSubGraph, flowNodeGraph );
+      FlowStep flowStep = flowStepFactory.createFlowStep( stepSubGraph, flowNodeGraph );
 
       addVertex( flowStep );
       }
@@ -78,8 +83,8 @@ public class FlowStepGraph extends BaseProcessGraph<FlowStep>
     bindEdges();
     }
 
-  protected FlowNodeGraph createFlowNodeGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap, List<? extends ElementGraph> nodeSubGraphs )
+  protected FlowNodeGraph createFlowNodeGraph( FlowStepFactory flowStepFactory, FlowElementGraph flowElementGraph, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap, List<? extends ElementGraph> nodeSubGraphs )
     {
-    return new FlowNodeGraph( flowPlanner, flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
+    return new FlowNodeGraph( flowStepFactory.getFlowNodeFactory(), flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
     }
   }

@@ -38,20 +38,15 @@ import org.apache.hadoop.mapred.TaskReport;
 /**
  *
  */
-public class HadoopNodeCounterCache extends CounterCache<FlowNodeStats, Map<String, Map<String, Long>>>
+public class HadoopNodeCounterCache extends HadoopCounterCache<FlowNodeStats, Map<String, Map<String, Long>>>
   {
-  public static final String NODE_COUNTER_MAX_AGE_PROPERTY = "cascading.node.counter.age.max.seconds";
-  public static final int DEFAULT_NODE_CACHED_AGE_MAX = 30; // don't re-fetch task reports for 30 seconds
-
   private FlowNodeStats flowNodeStats;
 
   protected HadoopNodeCounterCache( FlowNodeStats flowNodeStats, Configuration configuration )
     {
     super( flowNodeStats, configuration );
-    this.flowNodeStats = flowNodeStats;
 
-    // age matters here since we are aggregating task reports vs getting a pre-aggregated value at the node level
-    this.maxAge = configuration.getInt( NODE_COUNTER_MAX_AGE_PROPERTY, DEFAULT_NODE_CACHED_AGE_MAX );
+    this.flowNodeStats = flowNodeStats;
     }
 
   @Override

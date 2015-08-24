@@ -26,6 +26,7 @@ import java.util.Map;
 
 import cascading.flow.FlowNode;
 import cascading.management.state.ClientState;
+import cascading.stats.CounterCache;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowSliceStats;
 import cascading.util.Util;

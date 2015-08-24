@@ -36,7 +36,7 @@ import org.apache.hadoop.mapreduce.Counters;
 /**
  *
  */
-public abstract class HadoopStepCounterCache extends CounterCache<RunningJob, Counters>
+public abstract class HadoopStepCounterCache extends HadoopCounterCache<RunningJob, Counters>
   {
   protected HadoopStepCounterCache( CascadingStats stats, Configuration configuration )
     {

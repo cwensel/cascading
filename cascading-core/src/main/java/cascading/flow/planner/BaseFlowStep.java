@@ -121,7 +121,6 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   /** optional metadata about the FlowStep */
   private Map<String, String> flowStepDescriptor = Collections.emptyMap();
 
-  // for testing
   protected BaseFlowStep( String name, int ordinal )
     {
     this( name, ordinal, null );
@@ -129,12 +128,17 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   protected BaseFlowStep( String name, int ordinal, Map<String, String> flowStepDescriptor )
     {
+    this( name, ordinal, null, flowStepDescriptor );
+    }
+
+  protected BaseFlowStep( String name, int ordinal, FlowNodeGraph flowNodeGraph, Map<String, String> flowStepDescriptor )
+    {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     setName( name );
     this.ordinal = ordinal;
 
     this.elementGraph = null;
-    this.flowNodeGraph = null;
+    this.flowNodeGraph = flowNodeGraph;
 
     if( flowStepDescriptor != null )
       this.flowStepDescriptor = flowStepDescriptor;
@@ -865,6 +869,9 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   protected ClientState createClientState( FlowProcess flowProcess )
     {
     CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
+
+    if( services == null )
+      return ClientState.NULL;
 
     return services.createClientState( getID() );
     }

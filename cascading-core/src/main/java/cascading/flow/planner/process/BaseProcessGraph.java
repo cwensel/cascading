@@ -139,6 +139,29 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     }
 
   @Override
+  public Map<String, Tap> getSourceTapsMap()
+    {
+    Map<String, Tap> result = new HashMap<>();
+    Set<Tap> sourceTaps = getSourceTaps();
+
+    for( Tap sourceTap : sourceTaps )
+      {
+      for( Process process : graph.vertexSet() )
+        {
+        if( !process.getSourceTaps().contains( sourceTap ) )
+          continue;
+
+        ElementGraph elementGraph = process.getElementGraph();
+
+        for( Scope scope : elementGraph.outgoingEdgesOf( sourceTap ) )
+          result.put( scope.getName(), sourceTap );
+        }
+      }
+
+    return result;
+    }
+
+  @Override
   public Set<Tap> getSinkTaps()
     {
     if( sinkTaps != null )
@@ -147,6 +170,29 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     sinkTaps = Util.narrowSet( Tap.class, getSinkElements() );
 
     return sinkTaps;
+    }
+
+  @Override
+  public Map<String, Tap> getSinkTapsMap()
+    {
+    Map<String, Tap> result = new HashMap<>();
+    Set<Tap> sinkTaps = getSinkTaps();
+
+    for( Tap sinkTap : sinkTaps )
+      {
+      for( Process process : graph.vertexSet() )
+        {
+        if( !process.getSinkTaps().contains( sinkTap ) )
+          continue;
+
+        ElementGraph elementGraph = process.getElementGraph();
+
+        for( Scope scope : elementGraph.incomingEdgesOf( sinkTap ) )
+          result.put( scope.getName(), sinkTap );
+        }
+      }
+
+    return result;
     }
 
   @Override

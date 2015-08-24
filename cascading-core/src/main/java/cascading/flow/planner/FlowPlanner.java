@@ -36,12 +36,13 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowNode;
 import cascading.flow.FlowStep;
 import cascading.flow.Flows;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
+import cascading.flow.planner.process.FlowNodeFactory;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.FlowStepFactory;
 import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.rule.ProcessLevel;
 import cascading.flow.planner.rule.RuleRegistry;
@@ -190,7 +191,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       Map<ElementGraph, List<? extends ElementGraph>> stepToNodes = ruleResult.getStepToNodeGraphMap();
       Map<ElementGraph, List<? extends ElementGraph>> nodeToPipeline = ruleResult.getNodeToPipelineGraphMap();
 
-      FlowStepGraph flowStepGraph = new FlowStepGraph( this, finalFlowElementGraph, stepToNodes, nodeToPipeline );
+      FlowStepGraph flowStepGraph = new FlowStepGraph( getFlowStepFactory(), finalFlowElementGraph, stepToNodes, nodeToPipeline );
 
       traceWriter.writeFinal( "1-final-flow-registry", ruleResult );
       traceWriter.writeTracePlan( null, "2-final-flow-element-graph", finalFlowElementGraph );
@@ -211,11 +212,11 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   protected abstract F createFlow( FlowDef flowDef );
 
-  public abstract FlowStep<Config> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph );
+  public abstract FlowStepFactory<Config> getFlowStepFactory();
 
-  public FlowNode createFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
+  public FlowNodeFactory getFlowNodeFactory()
     {
-    return new BaseFlowNode( flowElementGraph, nodeSubGraph, pipelineGraphs );
+    return new BaseFlowNodeFactory();
     }
 
   public void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
@@ -814,28 +815,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   protected AssertionLevel getAssertionLevel( FlowDef flowDef )
     {
     return flowDef.getAssertionLevel() == null ? this.defaultAssertionLevel : flowDef.getAssertionLevel();
-    }
-
-  public String makeFlowNodeName( FlowNode flowNode, int size, int ordinal )
-    {
-    return String.format( "(%d/%d)", ordinal + 1, size );
-    }
-
-  public String makeFlowStepName( FlowStep flowStep, int numSteps, int stepNum )
-    {
-    Tap sink = Util.getFirst( flowStep.getSinkTaps() );
-
-    stepNum++; // number more sensical (5/5)
-
-    if( sink == null || sink.isTemporary() )
-      return String.format( "(%d/%d)", stepNum, numSteps );
-
-    String identifier = sink.getIdentifier();
-
-    if( identifier.length() > 25 )
-      identifier = String.format( "...%25s", identifier.substring( identifier.length() - 25 ) );
-
-    return String.format( "(%d/%d) %s", stepNum, numSteps, identifier );
     }
 
   protected abstract Tap makeTempTap( String prefix, String name );

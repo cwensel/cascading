@@ -121,6 +121,18 @@ public class DecoratedElementGraph implements ElementGraph
     }
 
   @Override
+  public boolean addHeadVertex( FlowElement flowElement )
+    {
+    return decorated.addHeadVertex( flowElement );
+    }
+
+  @Override
+  public boolean addTailVertex( FlowElement flowElement )
+    {
+    return decorated.addTailVertex( flowElement );
+    }
+
+  @Override
   public boolean addVertex( FlowElement flowElement )
     {
     return decorated.addVertex( flowElement );
