@@ -29,6 +29,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.ScopedElement;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
 import cascading.management.annotation.PropertySanitizer;
@@ -67,7 +68,7 @@ import cascading.util.Util;
  * {@link cascading.cascade.Cascade}. In that case the {@link #getFullIdentifier(Object)} value is used and the Scheme
  * is ignored.
  */
-public abstract class Tap<Config, Input, Output> implements FlowElement, Serializable, Traceable
+public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowElement, Serializable, Traceable
   {
   /** Field scheme */
   private Scheme<Config, Input, Output, ?, ?> scheme;
@@ -757,23 +758,6 @@ public abstract class Tap<Config, Input, Output> implements FlowElement, Seriali
   public boolean hasStepConfigDef()
     {
     return stepConfigDef != null && !stepConfigDef.isEmpty();
-    }
-
-  @Override
-  public boolean isEquivalentTo( FlowElement element )
-    {
-    if( element == null )
-      return false;
-
-    if( this == element )
-      return true;
-
-    boolean compare = getClass() == element.getClass();
-
-    if( !compare )
-      return false;
-
-    return equals( element );
     }
 
   @Override

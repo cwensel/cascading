@@ -144,7 +144,7 @@ public class RuleExec
 
     elementGraph = (FlowElementGraph) elementGraph.copyElementGraph();
 
-    elementGraph.resolveFields();
+    ScopeResolver.resolveFields( elementGraph );
 
     ruleResult.setLevelResults( ProcessLevel.Assembly, ruleResult.initialAssembly, elementGraph );
     }

@@ -53,14 +53,14 @@ public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outg
     {
     this.splice = splice;
 
-    FlowElement element = splice;
+    Pipe element = splice;
 
     while( element != null )
       {
       if( element.hasConfigDef() )
         flowProcess = new ElementFlowProcess( flowProcess, element.getConfigDef() );
 
-      element = ( (Pipe) element ).getParent();
+      element = element.getParent();
       }
 
     this.flowProcess = flowProcess;

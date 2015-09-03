@@ -28,6 +28,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.ScopedElement;
 import cascading.property.ConfigDef;
 import cascading.tuple.Fields;
 import cascading.util.TraceUtil;
@@ -58,7 +59,7 @@ import static java.util.Arrays.asList;
  * @see HashJoin
  * @see SubAssembly
  */
-public class Pipe implements FlowElement, Serializable, Traceable
+public class Pipe implements ScopedElement, FlowElement, Serializable, Traceable
   {
   /** Field serialVersionUID */
   private static final long serialVersionUID = 1L;
@@ -432,18 +433,6 @@ public class Pipe implements FlowElement, Serializable, Traceable
   Scope getFirst( Set<Scope> incomingScopes )
     {
     return incomingScopes.iterator().next();
-    }
-
-  @Override
-  public boolean isEquivalentTo( FlowElement element )
-    {
-    if( element == null )
-      return false;
-
-    if( this == element )
-      return true;
-
-    return getClass() == element.getClass();
     }
 
   @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})

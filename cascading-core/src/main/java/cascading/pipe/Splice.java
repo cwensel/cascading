@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import cascading.flow.FlowElement;
 import cascading.flow.planner.DeclaresResults;
 import cascading.flow.planner.Scope;
 import cascading.pipe.joiner.BufferJoin;
@@ -1370,25 +1369,6 @@ public class Splice extends Pipe
     for( Pipe pipe : pipes )
       appendableFields.add( scopesMap.get( pipe.getName() ).getIncomingSpliceFields() );
     return appendableFields;
-    }
-
-  @Override
-  public boolean isEquivalentTo( FlowElement element )
-    {
-    boolean equivalentTo = super.isEquivalentTo( element );
-
-    if( !equivalentTo )
-      return equivalentTo;
-
-    Splice splice = (Splice) element;
-
-    if( !keyFieldsMap.equals( splice.keyFieldsMap ) )
-      return false;
-
-    if( !pipes.equals( splice.pipes ) )
-      return false;
-
-    return true;
     }
 
   // OBJECT OVERRIDES

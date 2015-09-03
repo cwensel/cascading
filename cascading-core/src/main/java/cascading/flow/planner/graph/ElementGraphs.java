@@ -861,7 +861,7 @@ public class ElementGraphs
 
       Iterator<Scope> iterator = elementGraph.outgoingEdgesOf( object ).iterator();
 
-      if( object instanceof Tap || !iterator.hasNext() )
+      if( !( object instanceof Pipe ) || !iterator.hasNext() )
         {
         label = object.toString().replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1|$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1|$2" );
         }

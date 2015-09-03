@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import cascading.flow.Flow;
-import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
 import cascading.property.ConfigDef;
@@ -376,12 +375,6 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
   public boolean hasStepConfigDef()
     {
     return original.hasStepConfigDef();
-    }
-
-  @Override
-  public boolean isEquivalentTo( FlowElement element )
-    {
-    return original.isEquivalentTo( element );
     }
 
   @Override

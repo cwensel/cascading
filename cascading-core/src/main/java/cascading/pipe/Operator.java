@@ -22,7 +22,6 @@ package cascading.pipe;
 
 import java.util.Set;
 
-import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.operation.BaseOperation;
 import cascading.operation.Operation;
@@ -395,32 +394,6 @@ public abstract class Operator extends Pipe
     buffer.append( "[" );
     BaseOperation.printOperationInternal( operation, buffer, scope );
     buffer.append( "]" );
-    }
-
-  @Override
-  public boolean isEquivalentTo( FlowElement element )
-    {
-    boolean equivalentTo = super.isEquivalentTo( element );
-
-    if( !equivalentTo )
-      return false;
-
-    Operator operator = (Operator) element;
-
-    equivalentTo = argumentSelector.equals( operator.argumentSelector );
-
-    if( !equivalentTo )
-      return false;
-
-    if( !operation.equals( operator.operation ) )
-      return false;
-
-    equivalentTo = outputSelector.equals( operator.outputSelector );
-
-    if( !equivalentTo )
-      return false;
-
-    return true;
     }
 
   @SuppressWarnings({"RedundantIfStatement"})

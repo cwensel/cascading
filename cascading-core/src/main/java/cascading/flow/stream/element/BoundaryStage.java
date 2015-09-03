@@ -52,14 +52,14 @@ public abstract class BoundaryStage<Incoming, Outgoing> extends Stage<Incoming, 
     {
     this.boundary = boundary;
 
-    FlowElement element = boundary;
+    Pipe element = boundary;
 
     while( element != null )
       {
       if( element.hasConfigDef() )
         flowProcess = new ElementFlowProcess( flowProcess, element.getConfigDef() );
 
-      element = ( (Pipe) element ).getParent();
+      element = element.getParent();
       }
 
     this.flowProcess = flowProcess;

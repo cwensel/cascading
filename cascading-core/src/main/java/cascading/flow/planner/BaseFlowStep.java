@@ -929,8 +929,8 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
             continue;
             }
 
-          if( element.hasNodeConfigDef() )
-            element.getNodeConfigDef().apply( mode, setter );
+          if( element instanceof ScopedElement && ( (ScopedElement) element ).hasNodeConfigDef() )
+            ( (ScopedElement) element ).getNodeConfigDef().apply( mode, setter );
 
           // walk up the sub-assembly parent hierarchy
           if( element instanceof Pipe )
@@ -967,8 +967,8 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
         while( element != null )
           {
-          if( element.hasStepConfigDef() )
-            element.getStepConfigDef().apply( mode, setter );
+          if( element instanceof ScopedElement && ( (ScopedElement) element ).hasStepConfigDef() )
+            ( (ScopedElement) element ).getStepConfigDef().apply( mode, setter );
 
           // walk up the sub-assembly parent hierarchy
           if( element instanceof Pipe )

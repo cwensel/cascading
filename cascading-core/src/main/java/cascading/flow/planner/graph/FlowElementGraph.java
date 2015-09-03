@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -237,6 +236,16 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     copy.traps = new HashMap<String, Tap>( this.traps );
 
     return copy;
+    }
+
+  public boolean isResolved()
+    {
+    return resolved;
+    }
+
+  public void setResolved( boolean resolved )
+    {
+    this.resolved = resolved;
     }
 
   /**
@@ -453,52 +462,6 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
 
     if( success )
       Util.writePDF( filename );
-    }
-
-  /** Method resolveFields performs a breadth first traversal and resolves the tuple fields between each Pipe instance. */
-  public void resolveFields()
-    {
-    if( resolved )
-      throw new IllegalStateException( "element graph already resolved" );
-
-    TopologicalOrderIterator<FlowElement, Scope> iterator = getTopologicalIterator();
-
-    while( iterator.hasNext() )
-      resolveFields( iterator.next() );
-
-    resolved = true;
-    }
-
-  private void resolveFields( FlowElement source )
-    {
-    if( source instanceof Extent )
-      return;
-
-    Set<Scope> incomingScopes = incomingEdgesOf( source );
-    Set<Scope> outgoingScopes = outgoingEdgesOf( source );
-
-    List<FlowElement> flowElements = successorListOf( source );
-
-    if( flowElements.size() == 0 )
-      throw new IllegalStateException( "unable to find next elements in pipeline from: " + source.toString() );
-
-    Scope outgoingScope = source.outgoingScopeFor( incomingScopes );
-
-    if( LOG.isDebugEnabled() && outgoingScope != null )
-      {
-      LOG.debug( "for modifier: " + source );
-      if( outgoingScope.getArgumentsSelector() != null )
-        LOG.debug( "setting outgoing arguments: " + outgoingScope.getArgumentsSelector() );
-      if( outgoingScope.getOperationDeclaredFields() != null )
-        LOG.debug( "setting outgoing declared: " + outgoingScope.getOperationDeclaredFields() );
-      if( outgoingScope.getKeySelectors() != null )
-        LOG.debug( "setting outgoing group: " + outgoingScope.getKeySelectors() );
-      if( outgoingScope.getOutValuesSelector() != null )
-        LOG.debug( "setting outgoing values: " + outgoingScope.getOutValuesSelector() );
-      }
-
-    for( Scope scope : outgoingScopes )
-      scope.copyFields( outgoingScope );
     }
 
   @Override

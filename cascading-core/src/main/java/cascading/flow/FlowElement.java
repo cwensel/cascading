@@ -21,11 +21,6 @@
 package cascading.flow;
 
 import java.io.Serializable;
-import java.util.Set;
-
-import cascading.flow.planner.Scope;
-import cascading.property.ConfigDef;
-import cascading.tuple.Fields;
 
 /**
  * Interface FlowElement is a utility interface used internally to simplify DAG management. It is not intended
@@ -33,43 +28,4 @@ import cascading.tuple.Fields;
  */
 public interface FlowElement extends Serializable
   {
-  /**
-   * Method outgoingScopeFor returns the Scope this FlowElement hands off to the next FlowElement.
-   *
-   * @param incomingScopes of type Set<Scope>
-   * @return Scope
-   */
-  Scope outgoingScopeFor( Set<Scope> incomingScopes );
-
-  /**
-   * Method resolveIncomingOperationArgumentFields returns the Fields outgoing from the previous FlowElement that
-   * are consumable by this FlowElement when preparing Operation arguments.
-   *
-   * @param incomingScope of type Scope
-   * @return Fields
-   */
-  Fields resolveIncomingOperationArgumentFields( Scope incomingScope );
-
-  /**
-   * Method resolveIncomingOperationPassThroughFields returns the Fields outgoing from the previous FlowElement that
-   * are consumable by this FlowElement when preparing the Pipe outgoing tuple.
-   *
-   * @param incomingScope of type Scope
-   * @return Fields
-   */
-  Fields resolveIncomingOperationPassThroughFields( Scope incomingScope );
-
-  boolean isEquivalentTo( FlowElement element );
-
-  ConfigDef getConfigDef();
-
-  boolean hasConfigDef();
-
-  ConfigDef getNodeConfigDef();
-
-  boolean hasNodeConfigDef();
-
-  ConfigDef getStepConfigDef();
-
-  boolean hasStepConfigDef();
   }
