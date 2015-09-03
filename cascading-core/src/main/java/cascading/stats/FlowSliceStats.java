@@ -28,8 +28,7 @@ import java.util.Map;
  * <p/>
  * Implementations may optionally implement the {@link cascading.stats.ProvidesCounters} interface.
  * <p/>
- * Provided as an abstract class so that implementations will be resilient to API additions.
- * <p/>
+ * FlowSliceStats is provided as an abstract class so that implementations will be resilient to API additions.
  * <p/>
  * <ul>
  * <li>pendingTime - when the slice is created</li>
@@ -40,11 +39,21 @@ import java.util.Map;
  * </ul>
  * <p/>
  * pending is mostly irrelevant and unavailable, start, submit, and runtime are by default synonymous at the slice level
+ *
+ * All methods with the word 'process' like {@link #getProcessID()}, refer to the underlying implementations value.
+ * In this example, processID is the task id this slice actually represents, where the id ({@link #getID()} is a local
+ * guid not related to the platform implementation id to guarantee uniqueness.
+ *
  */
 public abstract class FlowSliceStats<K extends Enum>
   {
   public abstract static class FlowSliceAttempt
     {
+    public String getProcessID()
+      {
+      return getProcessAttemptID();
+      }
+
     public abstract String getProcessAttemptID();
 
     public abstract int getEventId();
@@ -83,7 +92,14 @@ public abstract class FlowSliceStats<K extends Enum>
 
   public abstract K getKind();
 
+  public String getProcessID()
+    {
+    return getProcessSliceID();
+    }
+
   public abstract String getProcessSliceID();
+
+  public abstract String getProcessNodeID();
 
   public abstract String getProcessStepID();
 

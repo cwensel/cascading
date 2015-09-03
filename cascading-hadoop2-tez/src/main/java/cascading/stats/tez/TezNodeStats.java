@@ -293,7 +293,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
           {
           added++;
 
-          sliceStats = new TezSliceStats( Util.createUniqueID(), kind, this.getStatus(), fromTaskId );
+          sliceStats = new TezSliceStats( Util.createUniqueID(), kind, getStatus() , vertexID, fromTaskId );
 
           sliceStatsMap.put( sliceStats.getProcessSliceID(), sliceStats );
           }
@@ -405,7 +405,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
     for( int i = total; i < totalTaskCount; i++ )
       {
-      TezSliceStats sliceStats = new TezSliceStats( Util.createUniqueID(), kind, this.getStatus(), null );
+      TezSliceStats sliceStats = new TezSliceStats( Util.createUniqueID(), kind, getStatus(), vertexID, null );
 
       // we don't have the taskId, so we are using the id as the key
       sliceStatsMap.put( sliceStats.getID(), sliceStats );

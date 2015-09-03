@@ -83,10 +83,9 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     this.requireUniqueCheckpoints = flowElementGraph.requireUniqueCheckpoints;
 
     if( flowElementGraph.annotations != null )
-      this.annotations = new EnumMultiMap( flowElementGraph.annotations );
+      this.annotations = new EnumMultiMap<>( flowElementGraph.annotations );
 
-    Graphs.addAllVertices( this.graph, flowElementGraph.vertexSet() );
-    Graphs.addAllEdges( this.graph, flowElementGraph.graph, flowElementGraph.edgeSet() );
+    copyFrom( flowElementGraph );
     }
 
   public FlowElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )

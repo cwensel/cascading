@@ -150,6 +150,12 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
     }
 
   @Override
+  public String getProcessNodeID()
+    {
+    return null;
+    }
+
+  @Override
   public String getProcessStepID()
     {
     return taskReport.getTaskID().getJobID().toString();

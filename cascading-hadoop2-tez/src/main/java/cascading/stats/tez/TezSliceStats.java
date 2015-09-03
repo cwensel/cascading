@@ -83,17 +83,19 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
   private String successfulAttemptID;
   private String diagnostics;
 
+  private String vertexID;
   private String taskID;
   private long lastFetch = -1;
   private Map<String, Map<String, Long>> counters = Collections.emptyMap();
 
   private Map<Integer, FlowSliceAttempt> attempts = new HashMap<>();
 
-  TezSliceStats( String id, TezNodeStats.Kind kind, CascadingStats.Status parentStatus, String taskID )
+  TezSliceStats( String id, TezNodeStats.Kind kind, CascadingStats.Status parentStatus, String vertexID, String taskID )
     {
     this.id = id;
     this.kind = kind;
     this.parentStatus = parentStatus;
+    this.vertexID = vertexID;
     this.taskID = taskID;
     }
 
@@ -186,6 +188,12 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
   public String getProcessSliceID()
     {
     return taskID;
+    }
+
+  @Override
+  public String getProcessNodeID()
+    {
+    return vertexID;
     }
 
   @Override

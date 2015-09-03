@@ -83,7 +83,7 @@ public class CascadingServices
     {
     ClassLoader classLoader = CascadingServices.class.getClassLoader();
 
-    // load all properties from cascading-services.properties
+    // load all properties from cascading-service.properties
     defaultProperties = loadProperties( new Properties(), CASCADING_SERVICES, classLoader );
 
     libraryURL = getLibraryURL();
