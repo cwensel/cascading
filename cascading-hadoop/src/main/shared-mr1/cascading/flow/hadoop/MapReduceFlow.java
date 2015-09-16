@@ -172,11 +172,16 @@ public class MapReduceFlow extends HadoopFlow
     FlowStepGraph flowStepGraph = new FlowStepGraph();
 
     Tap sink = getSinksCollection().iterator().next();
-    FlowStep<JobConf> step = new MapReduceFlowStep( getName(), sink.toString(), jobConf, sink );
+    FlowStep<JobConf> step = createFlowStep( jobConf, sink );
 
     flowStepGraph.addVertex( step );
 
     return flowStepGraph;
+    }
+
+  protected FlowStep<JobConf> createFlowStep( JobConf jobConf, Tap sink )
+    {
+    return new MapReduceFlowStep( getName(), sink.toString(), jobConf, sink );
     }
 
   protected Map<String, Tap> createSources( JobConf jobConf )
