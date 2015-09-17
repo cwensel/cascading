@@ -1677,7 +1677,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
     Fields results = new Fields( fields );
 
-    results.types = this.types == null ? new Type[ size() ] : this.types;
+    results.types = this.types == null ? new Type[ size() ] : copyTypes(this.types, this.types.length);
     results.types[ pos ] = type;
 
     return results;
