@@ -464,11 +464,11 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
         for( int i = 1; i < fields.length; i++ )
           {
           Type[] fieldTypes = fields[ i ].getTypes();
-          if( fieldTypes == null )
-            continue;
-
-          for( int j = 0; j < fieldTypes.length; j++ )
-            fields[ 0 ] = fields[ 0 ].applyType( fields[ i ].get( j ), fieldTypes[ j ] );
+          if ( fieldTypes == null )
+            fields[ 0 ] = fields[ 0 ].applyTypes( ( Type[] ) null );
+          else
+            for ( int j = 0; j < fieldTypes.length; j++ )
+              fields[ 0 ] = fields[ 0 ].applyType( fields[ i ].get( j ), fieldTypes[ j ] );
           }
         }
 
