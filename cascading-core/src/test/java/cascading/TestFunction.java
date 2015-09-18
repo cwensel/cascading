@@ -27,6 +27,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 
 public class TestFunction extends BaseOperation<Integer> implements Function<Integer>
   {
@@ -83,7 +84,24 @@ public class TestFunction extends BaseOperation<Integer> implements Function<Int
       functionCall.setContext( functionCall.getContext() + 1 );
       }
 
-    functionCall.getOutputCollector().add( value );
+    TupleEntry result;
+
+    if( functionCall.getDeclaredFields().isUnknown() )
+      result = new TupleEntry( Fields.size( value.size() ), Tuple.size( value.size() ) );
+    else
+      result = new TupleEntry( functionCall.getDeclaredFields(), Tuple.size( functionCall.getDeclaredFields().size() ) );
+
+    try
+      {
+      result.setCanonicalTuple( value );
+      }
+    catch( Exception exception )
+      {
+      // value is a string, but the the test declared a numeric type
+      result.setCanonicalTuple( Tuple.size( value.size(), -99 ) );
+      }
+
+    functionCall.getOutputCollector().add( result );
     }
 
   protected void throwIntentionalException()
