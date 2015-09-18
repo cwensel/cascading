@@ -20,6 +20,7 @@
 
 package cascading.pipe;
 
+import java.lang.reflect.Type;
 import java.util.Set;
 
 import cascading.flow.planner.Scope;
@@ -282,7 +283,7 @@ public abstract class Operator extends Pipe
       return declaredFields;
 
     if( outputSelector.isArguments() )
-      return argumentFields;
+      return argumentFields.applyTypes( ( Type[] ) null );
 
     if( outputSelector.isGroup() )
       return incomingScope.getOutGroupingFields();
@@ -345,7 +346,7 @@ public abstract class Operator extends Pipe
         throw new OperatorException( this, "during REPLACE both the arguments selector and field declaration must be the same size, arguments: " + arguments.printVerbose() + " declaration: " + fieldDeclaration.printVerbose() );
 
       if( fieldDeclaration.isArguments() ) // there is no type info, so inherit it
-        return arguments;
+        return arguments.applyTypes( ( Type[] ) null );
 
       return arguments.project( fieldDeclaration );
       }
@@ -358,7 +359,7 @@ public abstract class Operator extends Pipe
         return fieldDeclaration;
 
       if( fieldDeclaration.isArguments() )
-        return Fields.asDeclaration( arguments );
+        return Fields.asDeclaration( arguments.applyTypes( ( Type[] ) null ) );
 
       if( fieldDeclaration.isAll() )
         return resolveIncomingOperationPassThroughFields( incomingScope );
