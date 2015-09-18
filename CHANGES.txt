@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.0.3 [unreleased]
 
+  Fixed issues with c.t.Fields#applyType() and c.t.Fields#resolve().
+
   Fixed issue with the Hadoop MapReduce planner that created a malformed plan for a single source split and join pipe
   assembly.
 
