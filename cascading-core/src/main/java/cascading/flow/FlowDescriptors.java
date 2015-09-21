@@ -33,6 +33,9 @@ public interface FlowDescriptors
   /** Denotes a collection  of statements like SQL or similar. */
   String STATEMENTS = "statements";
 
+  /** Denotes the type of statement in the current flow. e.g. SQL, Pig Latin etc. */
+  String STATEMENT_TYPE = "statementtype";
+
   /** Briefly describes the current Flow * */
   String DESCRIPTION = "description";
   }
