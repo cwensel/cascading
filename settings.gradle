@@ -26,6 +26,7 @@ include 'cascading-hadoop'
 include 'cascading-hadoop2-io'
 include 'cascading-hadoop2-mr1'
 include 'cascading-hadoop2-tez'
+include 'cascading-hadoop2-tez-stats'
 include 'cascading-platform'
 
 rootProject.name = 'cascading'

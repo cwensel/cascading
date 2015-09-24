@@ -18,28 +18,26 @@
  * limitations under the License.
  */
 
-package cascading.stats.hadoop;
+package cascading.stats;
 
 import java.util.Collection;
 import java.util.Map;
 
 import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
-import cascading.stats.FlowNodeStats;
-import cascading.stats.FlowStepStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-public abstract class BaseHadoopStepStats<JobStatusClient, Counters> extends FlowStepStats
+public abstract class BaseCachedStepStats<Configuration, JobStatusClient, Counters> extends FlowStepStats
   {
-  private static final Logger LOG = LoggerFactory.getLogger( BaseHadoopStepStats.class );
+  private static final Logger LOG = LoggerFactory.getLogger( BaseCachedStepStats.class );
 
-  protected HadoopCounterCache<JobStatusClient, Counters> counterCache;
+  protected CounterCache<Configuration, JobStatusClient, Counters> counterCache;
 
-  public BaseHadoopStepStats( FlowStep flowStep, ClientState clientState )
+  public BaseCachedStepStats( FlowStep flowStep, ClientState clientState )
     {
     super( flowStep, clientState );
     }

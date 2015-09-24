@@ -231,7 +231,8 @@ task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
 
 task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:build', 'cascading-local:build',
                                              'cascading-hadoop:build', 'cascading-hadoop2-io:build',
-                                             'cascading-hadoop2-mr1:build', 'cascading-hadoop2-tez:build',
+                                             'cascading-hadoop2-mr1:build',
+                                             'cascading-hadoop2-tez:build', 'cascading-hadoop2-tez-stats:build',
                                              'cascading-expression:build', 'cascading-xml:build',
                                              'cascading-platform:build', ':allJavadoc'] ) {
 

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package cascading.stats.hadoop;
+package cascading.stats;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,16 +27,14 @@ import java.util.Map;
 
 import cascading.flow.FlowNode;
 import cascading.management.state.ClientState;
-import cascading.stats.FlowNodeStats;
-import cascading.stats.FlowSliceStats;
 
 /**
  *
  */
-public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeStats
+public abstract class BaseCachedNodeStats<Config, JobStatus, Counters> extends FlowNodeStats
   {
   protected final Map<String, FlowSliceStats> sliceStatsMap = new LinkedHashMap<>();
-  protected HadoopCounterCache<JobStatus, Counters> counterCache;
+  protected CounterCache<Config, JobStatus, Counters> counterCache;
 
   protected boolean allChildrenFinished;
 
@@ -46,7 +44,7 @@ public abstract class BaseHadoopNodeStats<JobStatus, Counters> extends FlowNodeS
    * @param flowNode
    * @param clientState
    */
-  protected BaseHadoopNodeStats( FlowNode flowNode, ClientState clientState )
+  protected BaseCachedNodeStats( FlowNode flowNode, ClientState clientState )
     {
     super( flowNode, clientState );
     }

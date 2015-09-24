@@ -26,8 +26,9 @@ import java.util.Iterator;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowStep;
 import cascading.management.state.ClientState;
+import cascading.stats.BaseCachedStepStats;
+import cascading.stats.CascadingStats;
 import cascading.stats.FlowNodeStats;
-import cascading.stats.hadoop.BaseHadoopStepStats;
 import cascading.stats.tez.util.TezStatsUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.tez.common.counters.TezCounters;
@@ -37,7 +38,7 @@ import org.apache.tez.dag.api.client.DAGStatus;
 /**
  *
  */
-public abstract class TezStepStats extends BaseHadoopStepStats<DAGClient, TezCounters>
+public abstract class TezStepStats extends BaseCachedStepStats<Configuration, DAGClient, TezCounters>
   {
   /**
    * Constructor CascadingStats creates a new CascadingStats instance.
@@ -83,7 +84,7 @@ public abstract class TezStepStats extends BaseHadoopStepStats<DAGClient, TezCou
 
   /** Method captureDetail captures statistics task details and completion events. */
   @Override
-  public void captureDetail( Type depth )
+  public void captureDetail( CascadingStats.Type depth )
     {
     if( !getType().isChild( depth ) || !isDetailStale() )
       return;

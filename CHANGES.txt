@@ -2,7 +2,7 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
-  Added STATEMENT_TYPE to c.f.FlowDescriptors.
+  Created cascading-hadoop2-tez-stats sub-project to isolate Tez/YARN timeline server dependencies.
 
   Fixed issue on Apache Tez where multiple prior splits and subsequent splicing back into a c.p.HashJoin could create an
   invalid plan.

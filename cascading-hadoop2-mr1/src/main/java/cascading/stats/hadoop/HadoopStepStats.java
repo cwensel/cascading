@@ -27,6 +27,7 @@ import cascading.flow.FlowNode;
 import cascading.flow.FlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.management.state.ClientState;
+import cascading.stats.BaseCachedStepStats;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobClient;
@@ -39,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class HadoopStepStats provides Hadoop specific statistics and methods to underlying Hadoop facilities. */
-public abstract class HadoopStepStats extends BaseHadoopStepStats<RunningJob, Counters>
+public abstract class HadoopStepStats extends BaseCachedStepStats<Configuration, RunningJob, Counters>
   {
   private static final Logger LOG = LoggerFactory.getLogger( HadoopStepStats.class );
 

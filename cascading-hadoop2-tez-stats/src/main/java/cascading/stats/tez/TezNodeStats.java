@@ -34,8 +34,9 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.management.state.ClientState;
 import cascading.property.PropertyUtil;
+import cascading.stats.BaseCachedNodeStats;
+import cascading.stats.BaseCachedStepStats;
 import cascading.stats.FlowSliceStats;
-import cascading.stats.hadoop.BaseHadoopNodeStats;
 import cascading.stats.tez.util.TaskStatus;
 import cascading.stats.tez.util.TezStatsUtil;
 import cascading.stats.tez.util.TimelineClient;
@@ -60,7 +61,7 @@ import static cascading.util.Util.isEmpty;
 /**
  *
  */
-public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
+public class TezNodeStats extends BaseCachedNodeStats<Configuration, DAGClient, TezCounters>
   {
   private static final Logger LOG = LoggerFactory.getLogger( TezNodeStats.class );
 
@@ -74,10 +75,10 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
 
   public enum Kind
     {
-      SPLIT, PARTITIONED
+      SPLIT, PARTITIONED, UNKNOWN
     }
 
-  private TezStepStats parentStepStats;
+  private BaseCachedStepStats<Configuration, DAGClient, TezCounters> parentStepStats;
   private Kind kind;
 
   private String vertexID;
@@ -101,7 +102,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
       }
     }
 
-  protected TezNodeStats( final TezStepStats parentStepStats, FlowNode flowNode, ClientState clientState, Configuration configuration )
+  protected TezNodeStats( final BaseCachedStepStats<Configuration, DAGClient, TezCounters> parentStepStats, FlowNode flowNode, ClientState clientState, Configuration configuration )
     {
     super( flowNode, clientState );
 
@@ -293,7 +294,7 @@ public class TezNodeStats extends BaseHadoopNodeStats<DAGClient, TezCounters>
           {
           added++;
 
-          sliceStats = new TezSliceStats( Util.createUniqueID(), kind, getStatus() , vertexID, fromTaskId );
+          sliceStats = new TezSliceStats( Util.createUniqueID(), kind, getStatus(), vertexID, fromTaskId );
 
           sliceStatsMap.put( sliceStats.getProcessSliceID(), sliceStats );
           }
