@@ -204,10 +204,15 @@ public class HadoopFlow extends BaseFlow<JobConf>
       throw new FlowException( "unable to delete sinks", exception );
       }
 
+    registerHadoopShutdownHook();
+    }
+
+  protected void registerHadoopShutdownHook()
+    {
     registerHadoopShutdownHook( this );
     }
 
-  private void copyToDistributedCache()
+  protected void copyToDistributedCache()
     {
     HadoopUtil.syncPaths( jobConf, syncPaths, true );
     }

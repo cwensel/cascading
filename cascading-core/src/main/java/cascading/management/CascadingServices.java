@@ -64,6 +64,7 @@ public class CascadingServices
 
   public static final String CASCADING_SERVICES = "cascading-service.properties";
   public static final String CASCADING_SERVICES_JAR = "cascading.management.service.jar";
+  public static final String CASCADING_SERVICES_JAR_DISABLE = "cascading.management.service.jar.disable";
 
   public static final String DEFAULT_PROPERTIES = "cascading/management/service.properties";
   public static final String CONTAINER_ENABLED = "cascading.management.container.enabled";
@@ -134,6 +135,14 @@ public class CascadingServices
     if( property == null )
       return null;
 
+    String disableJar = defaultProperties.getProperty( CASCADING_SERVICES_JAR_DISABLE, System.getProperty( CASCADING_SERVICES_JAR_DISABLE, "false" ) );
+
+    if( Boolean.valueOf( disableJar ) )
+      {
+      LOG.info( "property '{}' is set, ignoring services jar: {}", CASCADING_SERVICES_JAR_DISABLE, property );
+      return null;
+      }
+
     try
       {
       URI uri = URI.create( property );
@@ -164,7 +173,7 @@ public class CascadingServices
         if( url != null )
           LOG.info( "loading properties: {}, from jar: {}", resource, url );
         else
-          LOG.info( "loading properties: {}", resource );
+          LOG.info( "loading properties: {}, from CLASSPATH", resource );
 
         properties.load( input );
         }

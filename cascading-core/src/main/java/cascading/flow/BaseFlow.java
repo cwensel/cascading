@@ -1282,10 +1282,16 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   private List<Future<Throwable>> spawnJobs( int numThreads ) throws InterruptedException
     {
-    if( stop )
-      return new ArrayList<Future<Throwable>>();
+    if( spawnStrategy == null )
+      {
+      logError( "no spawnStrategy set" );
+      return new ArrayList<>();
+      }
 
-    List<Callable<Throwable>> list = new ArrayList<Callable<Throwable>>();
+    if( stop )
+      return new ArrayList<>();
+
+    List<Callable<Throwable>> list = new ArrayList<>();
 
     for( FlowStepJob<Config> job : jobsMap.values() )
       list.add( job );
@@ -1359,10 +1365,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   protected void handleExecutorShutdown()
     {
+    if( spawnStrategy == null )
+      return;
+
     if( spawnStrategy.isCompleted( this ) )
       return;
 
-    logInfo( "shutting down job executor" );
+    logDebug( "shutting down job executor" );
 
     try
       {
@@ -1373,14 +1382,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       // ignore
       }
 
-    logInfo( "shutdown complete" );
+    logDebug( "shutdown of job executor complete" );
     }
 
   protected void fireOnCompleted()
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onCompleted event: " + getListeners().size() );
 
       for( FlowListener flowListener : getListeners() )
@@ -1398,7 +1407,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onThrowable event: " + getListeners().size() );
 
       boolean isHandled = false;
@@ -1415,7 +1424,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStopping event: " + getListeners().size() );
 
       for( FlowListener flowListener : getListeners() )
@@ -1427,7 +1436,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStarting event: " + getListeners().size() );
 
       for( FlowListener flowListener : getListeners() )
