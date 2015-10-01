@@ -25,6 +25,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.HadoopMRUtil;
 import cascading.flow.planner.BaseFlowNode;
 import cascading.flow.planner.graph.BaseElementGraph;
+import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.planner.process.ProcessEdge;
 import cascading.tap.Tap;
@@ -38,11 +39,17 @@ public class MapReduceFlowStep extends HadoopFlowStep
 
   protected MapReduceFlowStep( String flowName, String stepName, JobConf jobConf, Tap sink )
     {
-    super( BaseElementGraph.NULL, createFlowNodeGraph( jobConf ) );
+    this( flowName, stepName, BaseElementGraph.NULL, createFlowNodeGraph( jobConf ), jobConf );
+
+    addSink( "default", sink );
+    }
+
+  protected MapReduceFlowStep( String flowName, String stepName, ElementGraph elementGraph, FlowNodeGraph flowNodeGraph, JobConf jobConf )
+    {
+    super( elementGraph, flowNodeGraph );
     setName( stepName );
     setFlowName( flowName );
     this.jobConf = jobConf;
-    addSink( "default", sink );
     }
 
   @Override
@@ -54,7 +61,7 @@ public class MapReduceFlowStep extends HadoopFlowStep
     return jobConf;
     }
 
-  private static FlowNodeGraph createFlowNodeGraph( JobConf jobConf )
+  protected static FlowNodeGraph createFlowNodeGraph( JobConf jobConf )
     {
     FlowNodeGraph flowNodeGraph = new FlowNodeGraph();
     int nodes = 1;

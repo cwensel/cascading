@@ -44,5 +44,4 @@ public interface FlowNodeDescriptors
 
   /** URL of the FlowStep in an external system * */
   String EXTERNAL_URL = "external_url";
-
   }
