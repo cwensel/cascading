@@ -129,7 +129,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
   protected void setConfigProperty( JobConf config, Object key, Object value )
     {
     // don't let these objects pass, even though toString is called below.
-    if( value instanceof Class || value instanceof JobConf )
+    if( value instanceof Class || value instanceof JobConf || value == null )
       return;
 
     config.set( key.toString(), value.toString() );

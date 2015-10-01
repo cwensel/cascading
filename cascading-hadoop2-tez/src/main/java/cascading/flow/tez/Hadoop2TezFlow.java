@@ -145,7 +145,7 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
   protected void setConfigProperty( TezConfiguration config, Object key, Object value )
     {
     // don't let these objects pass, even though toString is called below.
-    if( value instanceof Class || value instanceof Configuration )
+    if( value instanceof Class || value instanceof Configuration || value == null )
       return;
 
     config.set( key.toString(), value.toString() );

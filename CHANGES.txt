@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fix for NPE when attempting to set null values on underlying config instance.
+
   Created cascading-hadoop2-tez-stats sub-project to isolate Tez/YARN timeline server dependencies.
 
   Fixed issue on Apache Tez where multiple prior splits and subsequent splicing back into a c.p.HashJoin could create an
