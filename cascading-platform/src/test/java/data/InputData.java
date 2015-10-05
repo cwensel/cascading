@@ -52,6 +52,7 @@ public interface InputData
   String testDelimitedSpecialCharData = inputPath + "delimited-spec-char.txt";
   String testDelimitedExtraField = inputPath + "delimited-extra-field.txt";
   String testDelimitedProblematic = inputPath + "delimited-problematic.txt";
+  String textDelimitedAccount = inputPath + "accounts.txt";
 
   String inputFileComments = inputPath + "comments+lower.txt";
 
@@ -59,4 +60,6 @@ public interface InputData
   String testClasspathJarContents = "apache.10.txt";
 
   String inputFileFirstBy = inputPath + "firstby.txt";
+  
+  
   }
