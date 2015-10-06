@@ -55,9 +55,6 @@ public class MapReduceFlowStep extends HadoopFlowStep
   @Override
   public JobConf createInitializedConfig( FlowProcess<JobConf> flowProcess, JobConf parentConfig )
     {
-    // allow to delete
-    getSink().sinkConfInit( flowProcess, new JobConf() );
-
     return jobConf;
     }
 
