@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated c.m.a.PropertyAnnotation to have default #visibility() of PUBLIC, and added an #optional() property that
+  defaults to true.
+
   Fix for NPE when attempting to set null values on underlying config instance.
 
   Created cascading-hadoop2-tez-stats sub-project to isolate Tez/YARN timeline server dependencies.
