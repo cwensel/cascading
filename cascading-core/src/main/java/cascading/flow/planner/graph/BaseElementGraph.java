@@ -109,6 +109,9 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
     if( !graph.containsVertex( Extent.head ) )
       graph.addVertex( Extent.head );
 
+    if( flowElement == Extent.head )
+      return false;
+
     boolean result = true;
 
     if( !graph.containsVertex( flowElement ) )
@@ -122,6 +125,9 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
     {
     if( !graph.containsVertex( Extent.tail ) )
       graph.addVertex( Extent.tail );
+
+    if( flowElement == Extent.tail )
+      return false;
 
     boolean result = true;
 

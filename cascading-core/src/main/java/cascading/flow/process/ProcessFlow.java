@@ -120,7 +120,15 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
     try
       {
       if( processWrapper.hasCounters() )
-        this.flowStats = new ProcessFlowStats( this, getFlowSession().getCascadingServices().createClientState( getID() ), processWrapper );
+        {
+        flowStats = new ProcessFlowStats( this, getFlowSession().getCascadingServices().createClientState( getID() ), processWrapper );
+        flowStats.prepare();
+        flowStats.markPending();
+        }
+      else
+        {
+        flowStats = createPrepareFlowStats();
+        }
       }
     catch( ProcessException exception )
       {
