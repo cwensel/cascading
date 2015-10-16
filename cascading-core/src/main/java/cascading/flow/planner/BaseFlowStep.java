@@ -467,9 +467,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSourceWith( String identifier )
     {
+    if( Util.isEmpty( identifier ) )
+      return null;
+
     for( Tap tap : sources.keySet() )
       {
-      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+      if( identifier.equalsIgnoreCase( tap.getIdentifier() ) )
         return tap;
       }
 
@@ -479,9 +482,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSinkWith( String identifier )
     {
+    if( Util.isEmpty( identifier ) )
+      return null;
+
     for( Tap tap : sinks.keySet() )
       {
-      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+      if( identifier.equalsIgnoreCase( tap.getIdentifier() ) )
         return tap;
       }
 

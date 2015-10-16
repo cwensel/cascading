@@ -53,6 +53,9 @@ public abstract class BaseFlowStepFactory<Config> implements FlowStepFactory<Con
 
     String identifier = sink.getIdentifier();
 
+    if( Util.isEmpty( identifier ) )
+      return String.format( "(%d/%d)", stepNum, numSteps );
+
     if( identifier.length() > 25 )
       identifier = String.format( "...%25s", identifier.substring( identifier.length() - 25 ) );
 

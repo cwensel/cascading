@@ -32,6 +32,7 @@ import cascading.tap.MultiSourceTap;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -162,6 +163,9 @@ public abstract class BaseDistCacheTap extends DecoratorTap<Void, Configuration,
 
   private boolean isSimpleGlob()
     {
+    if( Util.isEmpty( getHfs().getIdentifier() ) )
+      return false;
+
     return getHfs().getIdentifier().contains( "*" );
     }
 
