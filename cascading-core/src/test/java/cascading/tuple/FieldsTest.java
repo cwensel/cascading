@@ -1057,6 +1057,33 @@ public class FieldsTest extends CascadingTestCase
 
     assertEquals( "not equal: ", String.class, appended.getType( 0 ) );
     assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
+
+    assertEquals( "not equal: ", 2, fieldA.size() );
+    assertEquals( "not equal: ", "a", fieldA.get( 0 ) );
+    assertEquals( "not equal: ", "b", fieldA.get( 1 ) );
+
+    assertEquals( "not equal: ", int.class, fieldA.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, fieldA.getType( 1 ) );
+    }
+
+  @Test
+  public void testApplyType()
+    {
+    Fields fieldA = new Fields( names( "a", "b" ), types( int.class, int.class ) );
+
+    Fields newField = fieldA.applyType( "a", String.class );
+
+    assertEquals( "not equal: ", 2, newField.size() );
+    assertEquals( "not equal: ", "a", newField.get( 0 ) );
+    assertEquals( "not equal: ", "b", newField.get( 1 ) );
+    assertEquals( "not equal: ", String.class, newField.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, newField.getType( 1 ) );
+
+    assertEquals( "not equal: ", 2, fieldA.size() );
+    assertEquals( "not equal: ", "a", fieldA.get( 0 ) );
+    assertEquals( "not equal: ", "b", fieldA.get( 1 ) );
+    assertEquals( "not equal: ", int.class, fieldA.getType( 0 ) );
+    assertEquals( "not equal: ", int.class, fieldA.getType( 1 ) );
     }
 
   public void testMergeWithSelectors()
