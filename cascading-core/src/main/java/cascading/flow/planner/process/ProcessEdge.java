@@ -111,6 +111,16 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
     return sinkProcessID;
     }
 
+  /**
+   * Since this is an edge, we must declare the key and value fields used to connect two models
+   * <p/>
+   * In most cases, the data being streamed is segmented into key and value pairs depending on the
+   * type of communication model used to move the data.
+   * <p/>
+   * under partitioning models, the keys are hashed, and binned into a partition.
+   * <p/>
+   * where data is simply forwarded, all data must be put into the key, and value declared to be empty
+   */
   private void setResolvedFields( ElementGraph sourceElementGraph, FlowElement flowElement, ElementGraph sinkElementGraph )
     {
     Set<Scope> outgoingScopes = sourceElementGraph.outgoingEdgesOf( flowElement ); // resolved fields
@@ -126,7 +136,12 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
       {
       int ordinal = incomingScope.getOrdinal();
 
-      if( resolvedScope.getKeySelectors() != null )
+      // no joining or merging happening
+      if( resolvedScope.getKeySelectors() == null )
+        {
+        resolvedKeyFields.put( ordinal, incomingScope.getIncomingSpliceFields() );
+        }
+      else if( resolvedScope.getKeySelectors() != null )
         {
         Fields value = resolvedScope.getKeySelectors().get( incomingScope.getName() );
 
@@ -142,7 +157,8 @@ public class ProcessEdge<Process extends ProcessModel> implements Serializable
           resolvedSortFields.put( ordinal, value );
         }
 
-      resolvedValueFields.put( ordinal, incomingScope.getIncomingSpliceFields() );
+      if( resolvedScope.getKeySelectors() != null )
+        resolvedValueFields.put( ordinal, incomingScope.getIncomingSpliceFields() );
       }
     }
 

@@ -55,7 +55,7 @@ import static java.util.Arrays.asList;
  */
 public class Splice extends Pipe
   {
-  static enum Kind
+  enum Kind
     {
       GroupBy, CoGroup, Merge, Join
     }

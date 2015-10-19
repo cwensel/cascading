@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fixed issue on Apache Tez that did not create a proper vertex edge on a split in the pipe assembly under some
+  circumstances.
+
   Updated c.m.a.PropertyAnnotation to have default #visibility() of PUBLIC, and added an #optional() property that
   defaults to true.
 
