@@ -235,8 +235,8 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   protected Tap parent;
   /** Field partition */
   protected Partition partition;
-  /** Field filterProxies */
-  protected final List<PartitionTapFilter> filters = new ArrayList<>();
+  /** Field sourcePartitionFilters */
+  protected final List<PartitionTapFilter> sourcePartitionFilters = new ArrayList<>();
   /** Field keepParentOnDelete */
   protected boolean keepParentOnDelete = false;
   /** Field openTapsThreshold */
@@ -320,7 +320,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       fullyQualified
     );
 
-    if( filters.isEmpty() )
+    if( sourcePartitionFilters.isEmpty() )
       return childIdentifiers;
 
     return getFilteredPartitionIdentifiers( flowProcess, childIdentifiers );
@@ -333,7 +333,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
     List<String> filteredIdentifiers = new ArrayList<>( childIdentifiers.length );
 
-    for( PartitionTapFilter filter : filters )
+    for( PartitionTapFilter filter : sourcePartitionFilters )
       filter.prepare( flowProcess );
 
     for( String childIdentifier : childIdentifiers )
@@ -341,7 +341,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       partition.toTuple( childIdentifier.substring( parent.getFullIdentifier( flowProcess ).length() + 1 ), partitionEntry );
 
       boolean isRemove = false;
-      for( PartitionTapFilter filter : filters )
+      for( PartitionTapFilter filter : sourcePartitionFilters )
         {
         if( filter.isRemove( flowProcess, partitionEntry ) )
           {
@@ -354,7 +354,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         filteredIdentifiers.add( childIdentifier );
       }
 
-    for( PartitionTapFilter filter : filters )
+    for( PartitionTapFilter filter : sourcePartitionFilters )
       filter.cleanup( flowProcess );
 
     return filteredIdentifiers.toArray( new String[ filteredIdentifiers.size() ] );
@@ -369,7 +369,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
    * @param argumentSelector field selector that selects Filter arguments from the input Tuple
    * @param filter           Filter to be applied to each input Tuple
    */
-  public void addPartitionFilter( Fields argumentSelector, Filter filter )
+  public void addSourcePartitionFilter( Fields argumentSelector, Filter filter )
     {
     Fields argumentFields;
 
@@ -378,7 +378,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     else
       argumentFields = partition.getPartitionFields().select( argumentSelector );
 
-    filters.add( new PartitionTapFilter( argumentFields, filter ) );
+    sourcePartitionFilters.add( new PartitionTapFilter( argumentFields, filter ) );
     }
 
   @Override
@@ -475,7 +475,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       return false;
     if( partition != null ? !partition.equals( that.partition ) : that.partition != null )
       return false;
-    if( partition != null ? !filters.equals( that.filters ) : that.filters != null )
+    if( partition != null ? !sourcePartitionFilters.equals( that.sourcePartitionFilters ) : that.sourcePartitionFilters != null )
       return false;
 
     return true;
@@ -487,14 +487,14 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     int result = super.hashCode();
     result = 31 * result + ( parent != null ? parent.hashCode() : 0 );
     result = 31 * result + ( partition != null ? partition.hashCode() : 0 );
-    result = 31 * result + ( filters != null ? filters.hashCode() : 0 );
+    result = 31 * result + ( sourcePartitionFilters != null ? sourcePartitionFilters.hashCode() : 0 );
     return result;
     }
 
   @Override
   public String toString()
     {
-    return getClass().getSimpleName() + "[\"" + parent + "\"]" + "[\"" + partition + "\"]" + "[\"" + filters + "\"]";
+    return getClass().getSimpleName() + "[\"" + parent + "\"]" + "[\"" + partition + "\"]" + "[\"" + sourcePartitionFilters + "\"]";
     }
 
   public static class PartitionScheme<Config, Input, Output> extends Scheme<Config, Input, Output, Void, Void>

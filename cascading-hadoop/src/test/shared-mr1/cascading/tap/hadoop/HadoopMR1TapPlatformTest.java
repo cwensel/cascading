@@ -154,7 +154,7 @@ public class HadoopMR1TapPlatformTest extends PlatformTestCase implements Serial
 
     partitionTap = (PartitionTap) getPlatform().getPartitionTap( delimitedFile, partition, 1 );
 
-    partitionTap.addPartitionFilter( new Fields( "number" ), new PartitionFilter( Arrays.asList( "2", "4" ) ) );
+    partitionTap.addSourcePartitionFilter( new Fields( "number" ), new PartitionFilter( Arrays.asList( "2", "4" ) ) );
 
     Tap sink = getPlatform().getDelimitedFile( new Fields( "number", "lower" ), "+", getOutputPath( "/filteredpartition/final" ), SinkMode.REPLACE );
 
@@ -239,7 +239,7 @@ public class HadoopMR1TapPlatformTest extends PlatformTestCase implements Serial
     Tap tap = getPlatform().getTextFile( "dummy" );
     Partition partition = new DelimitedPartition( partitionFields );
     PartitionTap partitionTap = (PartitionTap) getPlatform().getPartitionTap( tap, partition, 1 );
-    partitionTap.addPartitionFilter( argumentSelector, new TrueFilter() );
+    partitionTap.addSourcePartitionFilter( argumentSelector, new TrueFilter() );
     }
 
   static class TrueFilter extends BaseOperation implements Filter
