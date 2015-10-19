@@ -43,7 +43,10 @@ abstract class BaseSerializer<T extends Tuple> implements Serializer<T>
 
   protected void setWriters( Fields fields )
     {
-    Class[] classes = fields == null ? null : elementWriter.getTupleSerialization().getTypesFor( fields );
+    if( fields == null )
+      return;
+
+    Class[] classes = elementWriter.getTupleSerialization().getTypesFor( fields );
 
     if( elementWriter.getTupleSerialization().areTypesRequired() )
       {

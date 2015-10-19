@@ -43,7 +43,10 @@ abstract class BaseDeserializer<T extends Tuple> implements Deserializer<T>
 
   protected void setReaders( Fields fields )
     {
-    Class[] classes = fields == null ? null : elementReader.getTupleSerialization().getTypesFor( fields );
+    if( fields == null )
+      return;
+
+    Class[] classes = elementReader.getTupleSerialization().getTypesFor( fields );
 
     if( elementReader.getTupleSerialization().areTypesRequired() )
       {

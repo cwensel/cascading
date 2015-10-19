@@ -34,7 +34,7 @@ import static cascading.tuple.Fields.asDeclaration;
 public class Scope implements Serializable
   {
   /** Enum Kind */
-  static public enum Kind
+  public enum Kind
     {
       TAP, EACH, EVERY, GROUPBY, COGROUP, HASHJOIN, MERGE
     }
@@ -135,14 +135,7 @@ public class Scope implements Serializable
     if( outValuesFields == null )
       throw new IllegalArgumentException( "values may not be null" );
 
-    if( kind == Kind.EACH )
-      {
-      this.outGroupingSelector = outGroupingFields;
-      this.outGroupingFields = asDeclaration( outGroupingFields );
-      this.outValuesSelector = outValuesFields;
-      this.outValuesFields = asDeclaration( outValuesFields );
-      }
-    else if( kind == Kind.EVERY )
+    if( kind == Kind.EACH || kind == Kind.EVERY )
       {
       this.outGroupingSelector = outGroupingFields;
       this.outGroupingFields = asDeclaration( outGroupingFields );
