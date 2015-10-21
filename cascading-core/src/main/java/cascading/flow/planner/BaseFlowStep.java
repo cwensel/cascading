@@ -164,12 +164,17 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   protected void configure()
     {
     // todo: remove once FlowMapper/FlowReducer aren't reliant
-    ElementGraphs.addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
-    ElementGraphs.addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
+    addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
+    addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
 
-    addGroups( findAllGroups( elementGraph ) );
+    addAllGroups();
 
     traps.putAll( flowNodeGraph.getTrapsMap() );
+    }
+
+  protected void addAllGroups()
+    {
+    addGroups( findAllGroups( elementGraph ) );
     }
 
   @Override
@@ -983,6 +988,24 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
             element = null;
           }
         }
+      }
+    }
+
+  protected static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
+    {
+    for( Tap tap : sources )
+      {
+      for( Scope scope : elementGraph.outgoingEdgesOf( tap ) )
+        flowStep.addSource( scope.getName(), tap );
+      }
+    }
+
+  protected static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
+    {
+    for( Tap tap : sinks )
+      {
+      for( Scope scope : elementGraph.incomingEdgesOf( tap ) )
+        flowStep.addSink( scope.getName(), tap );
       }
     }
 

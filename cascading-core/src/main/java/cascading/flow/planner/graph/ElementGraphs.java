@@ -40,7 +40,6 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowElements;
-import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.iso.expression.ElementCapture;
@@ -53,7 +52,6 @@ import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
 import cascading.flow.planner.process.ProcessGraph;
 import cascading.flow.planner.process.ProcessModel;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -592,15 +590,6 @@ public class ElementGraphs
     elementGraph.removeEdge( previousElement, nextElement );
     }
 
-  public static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
-    {
-    for( Tap tap : sources )
-      {
-      for( Scope scope : elementGraph.outgoingEdgesOf( tap ) )
-        flowStep.addSource( scope.getName(), tap );
-      }
-    }
-
   public static Set<Tap> findSources( ElementGraph elementGraph )
     {
     return findSources( elementGraph, Tap.class );
@@ -636,15 +625,6 @@ public class ElementGraphs
     );
 
     return narrowSet( type, getAllVertices( iterator ) );
-    }
-
-  public static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
-    {
-    for( Tap tap : sinks )
-      {
-      for( Scope scope : elementGraph.incomingEdgesOf( tap ) )
-        flowStep.addSink( scope.getName(), tap );
-      }
     }
 
   public static Set<Tap> findSinks( ElementGraph elementGraph )
