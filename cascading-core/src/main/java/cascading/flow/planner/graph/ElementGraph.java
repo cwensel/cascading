@@ -99,7 +99,19 @@ public interface ElementGraph
 
   boolean removeVertex( FlowElement flowElement );
 
+  /**
+   * Returns an immutable identity based Set.
+   *
+   * @return
+   */
   Set<FlowElement> vertexSet();
+
+  /**
+   * Returns a copy of {@link #vertexSet()} as an identity based Set suitable for modifying.
+   *
+   * @return
+   */
+  Set<FlowElement> vertexSetCopy();
 
   FlowElement getEdgeSource( Scope scope );
 

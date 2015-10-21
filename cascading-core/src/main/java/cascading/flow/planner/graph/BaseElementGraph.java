@@ -22,6 +22,8 @@ package cascading.flow.planner.graph;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -210,6 +212,16 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
   public Set<FlowElement> vertexSet()
     {
     return graph.vertexSet();
+    }
+
+  @Override
+  public Set<FlowElement> vertexSetCopy()
+    {
+    Set<FlowElement> result = Collections.newSetFromMap( new IdentityHashMap<FlowElement, Boolean>() );
+
+    result.addAll( vertexSet() );
+
+    return result;
     }
 
   @Override

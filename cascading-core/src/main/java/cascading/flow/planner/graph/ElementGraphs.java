@@ -95,6 +95,20 @@ public class ElementGraphs
     {
     }
 
+  private static class IdentityDirectedGraph<V, E> extends SimpleDirectedGraph<V, E>
+    {
+    public IdentityDirectedGraph( Class<? extends E> edgeClass )
+      {
+      super( edgeClass );
+      }
+
+    @Override
+    protected DirectedSpecifics createDirectedSpecifics()
+      {
+      return new DirectedSpecifics( new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
+      }
+    }
+
   public static DirectedGraph<FlowElement, Scope> directed( ElementGraph elementGraph )
     {
     if( elementGraph == null )
@@ -325,7 +339,7 @@ public class ElementGraphs
 
   public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted, Set<V> excludes )
     {
-    Set<V> vertices = new HashSet<>( contracted.vertexSet() );
+    Set<V> vertices = createIdentitySet( contracted.vertexSet() );
     LinkedList<V> allVertices = new LinkedList<>( full.vertexSet() );
 
     allVertices.removeAll( vertices );
@@ -384,7 +398,7 @@ public class ElementGraphs
 
   private static <V, E> DirectedGraph<V, E> disconnectExtentsAndExclude( DirectedGraph<V, E> full, Set<E> withoutEdges )
     {
-    DirectedGraph<V, E> copy = (DirectedGraph<V, E>) new SimpleDirectedGraph<>( Object.class );
+    IdentityDirectedGraph<V, E> copy = (IdentityDirectedGraph<V, E>) new IdentityDirectedGraph<>( Object.class );
 
     Graphs.addAllVertices( copy, full.vertexSet() );
 
@@ -640,16 +654,6 @@ public class ElementGraphs
     );
 
     return narrowSet( Group.class, getAllVertices( iterator ) );
-    }
-
-  public static Set<HashJoin> findAllHashJoins( ElementGraph elementGraph )
-    {
-    SubGraphIterator iterator = new ExpressionSubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, HashJoin.class ) ),
-      elementGraph
-    );
-
-    return narrowSet( HashJoin.class, getAllVertices( iterator ) );
     }
 
   private static Set<FlowElement> getAllVertices( SubGraphIterator iterator )
