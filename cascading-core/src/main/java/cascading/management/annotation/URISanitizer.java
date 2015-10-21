@@ -32,13 +32,22 @@ import org.slf4j.LoggerFactory;
 /**
  * URISanitizer is an implementation of the Sanitizer interface to sanitize URIs of different kinds
  * (file, HTTP, HDFS, JDBC etc.) Depending on the visibility, the Sanitizer will return different values:
+ * <p/>
+ * For hierarchical URIs (jdbc://...):
  * <ul>
  * <li>PUBLIC: Only return the path of the URI</li>
  * <li>PROTECTED: Same as PUBLIC + query parameters</li>
  * <li>PRIVATE: Same as PROTECTED + URI scheme and authority (host/port)</li>
  * </ul>
  * <p/>
- * <p>Parameters containing sensitive information like user-names, passwords, API-keys etc. can be filtered out by setting
+ * For opaque URIs (mailto:someone@email.com):
+ * <ul>
+ * <li>PUBLIC: Only return the scheme of the URI, 'mailto:' etc</li>
+ * <li>PROTECTED: Same as PUBLIC</li>
+ * <li>PRIVATE: The whole URI</li>
+ * </ul>
+ * <p>
+ * Parameters containing sensitive information like user-names, passwords, API-keys etc. can be filtered out by setting
  * the {@link cascading.management.annotation.URISanitizer#PARAMETER_FILTER_PROPERTY} System property to a comma separated
  * list of names that should never show up in the {@link cascading.management.DocumentService}. Some systems may use
  * non-standard URIs, which cannot be parsed by {@link java.net.URI}.</p>
@@ -114,7 +123,8 @@ public class URISanitizer implements Sanitizer
         }
       catch( IllegalArgumentException exception )
         {
-        LOG.warn( "failed to parse uri: {}", value, exception );
+        LOG.warn( "failed to parse uri: {} with: {}", value, exception.getMessage() );
+        LOG.debug( "exception:", exception );
 
         if( Boolean.parseBoolean( System.getProperty( FAILURE_MODE_PASS_THROUGH ) ) )
           {
@@ -124,6 +134,18 @@ public class URISanitizer implements Sanitizer
 
         // return an empty string, to avoid the leakage of sensitive information.
         return "";
+        }
+      }
+
+    if( uri.isOpaque() )
+      {
+      switch( visibility )
+        {
+        case PRIVATE:
+          return value.toString();
+        case PROTECTED:
+        case PUBLIC:
+          return uri.getScheme() + ":";
         }
       }
 

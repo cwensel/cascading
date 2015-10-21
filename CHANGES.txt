@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated c.m.a.URISanitizer to treat opaque URIs differently than hierarchical URIs by hiding the scheme specific
+  parts in PUBLIC and PROTECTED visibility and storing the full URI for PRIVATE.
+
   Updated c.t.p.BasePartitionTap and subsequent PartitionTap sub-classes to allow for partition filters by providing
   one or more c.t.Fields argument selector and c.o.Filter instance pairs.
 
