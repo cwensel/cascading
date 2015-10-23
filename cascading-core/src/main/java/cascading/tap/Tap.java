@@ -218,7 +218,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
    * @return String
    */
   @Property(name = "identifier", visibility = Visibility.PUBLIC)
-  @PropertyDescription("The resource this Tap instance represents")
+  @PropertyDescription("The resource this instance represents")
   @PropertySanitizer("cascading.management.annotation.URISanitizer")
   public abstract String getIdentifier();
 
