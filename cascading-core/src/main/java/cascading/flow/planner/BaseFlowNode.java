@@ -334,7 +334,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSourceElements() ) );
+    sourceTaps = Collections.unmodifiableSet( Util.narrowIdentitySet( Tap.class, getSourceElements() ) );
 
     return sourceTaps;
     }
@@ -345,7 +345,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSinkElements() ) );
+    sinkTaps = Collections.unmodifiableSet( Util.narrowIdentitySet( Tap.class, getSinkElements() ) );
 
     return sinkTaps;
     }

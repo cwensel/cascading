@@ -417,7 +417,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   public Set<Tap> getAllAccumulatedSources()
     {
-    return Util.narrowSet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
+    return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
     }
 
   public void addSource( String name, Tap source )

@@ -615,14 +615,14 @@ public class ElementGraphs
       return Collections.emptySet();
 
     if( elementGraph.containsVertex( Extent.head ) )
-      return narrowSet( type, elementGraph.successorListOf( Extent.head ) );
+      return narrowIdentitySet( type, elementGraph.successorListOf( Extent.head ) );
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Head ) ),
       elementGraph
     );
 
-    return narrowSet( type, getAllVertices( iterator ) );
+    return narrowIdentitySet( type, getAllVertices( iterator ) );
     }
 
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
@@ -631,14 +631,14 @@ public class ElementGraphs
       return Collections.emptySet();
 
     if( elementGraph.containsVertex( Extent.tail ) )
-      return narrowSet( type, elementGraph.predecessorListOf( Extent.tail ) );
+      return narrowIdentitySet( type, elementGraph.predecessorListOf( Extent.tail ) );
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Tail ) ),
       elementGraph
     );
 
-    return narrowSet( type, getAllVertices( iterator ) );
+    return narrowIdentitySet( type, getAllVertices( iterator ) );
     }
 
   public static Set<Tap> findSinks( ElementGraph elementGraph )
@@ -653,7 +653,7 @@ public class ElementGraphs
       elementGraph
     );
 
-    return narrowSet( Group.class, getAllVertices( iterator ) );
+    return narrowIdentitySet( Group.class, getAllVertices( iterator ) );
     }
 
   private static Set<FlowElement> getAllVertices( SubGraphIterator iterator )

@@ -133,7 +133,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = Util.narrowSet( Tap.class, getSourceElements() );
+    sourceTaps = Util.narrowIdentitySet( Tap.class, getSourceElements() );
 
     return sourceTaps;
     }
@@ -167,7 +167,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = Util.narrowSet( Tap.class, getSinkElements() );
+    sinkTaps = Util.narrowIdentitySet( Tap.class, getSinkElements() );
 
     return sinkTaps;
     }
