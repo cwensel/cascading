@@ -34,7 +34,7 @@ public interface FlowDescriptors
   String STATEMENTS = "statements";
 
   /** Denotes the type of statement in the current flow. e.g. SQL, Pig Latin etc. */
-  String STATEMENT_TYPE = "statementtype";
+  String STATEMENT_TYPES = "statement_types";
 
   /** Briefly describes the current Flow * */
   String DESCRIPTION = "description";
