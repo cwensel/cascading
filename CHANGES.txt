@@ -1,6 +1,11 @@
 Cascading Change Log
 
-3.0.2 [unreleased]
+3.0.3 [unreleased]
+
+  Fixed issue with the Hadoop MapReduce planner that created a malformed plan for a single source split and join pipe
+  assembly.
+
+3.0.2
 
   Updated Apache Tez to 0.6.2 to prevent deadlocks in complex DAGs. Note this release is incompatible with Tez 0.6.1.
 
