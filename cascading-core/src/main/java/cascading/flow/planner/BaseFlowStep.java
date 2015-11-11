@@ -140,8 +140,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     this.elementGraph = null;
     this.flowNodeGraph = flowNodeGraph;
 
-    if( flowStepDescriptor != null )
-      this.flowStepDescriptor = flowStepDescriptor;
+    setFlowStepDescriptor( flowStepDescriptor );
     }
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
@@ -155,8 +154,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     this.elementGraph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
-    if( flowStepDescriptor != null )
-      this.flowStepDescriptor = flowStepDescriptor;
+    setFlowStepDescriptor( flowStepDescriptor );
 
     configure();
     }
@@ -212,6 +210,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   public Map<String, String> getFlowStepDescriptor()
     {
     return Collections.unmodifiableMap( flowStepDescriptor );
+    }
+
+  protected void setFlowStepDescriptor( Map<String, String> flowStepDescriptor )
+    {
+    if( flowStepDescriptor != null )
+      this.flowStepDescriptor = flowStepDescriptor;
     }
 
   @Override

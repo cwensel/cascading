@@ -89,8 +89,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     this.ordinal = ordinal;
     this.trapMap = Collections.emptyMap();
 
-    if( flowNodeDescriptor != null )
-      this.flowNodeDescriptor = flowNodeDescriptor;
+    setFlowNodeDescriptor( flowNodeDescriptor );
     }
 
   public BaseFlowNode( ElementGraph nodeSubGraph )
@@ -123,11 +122,9 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.nodeSubGraph = nodeSubGraph;
 
-    if( pipelineGraphs != null )
-      this.pipelineGraphs = pipelineGraphs;
+    setPipelineGraphs( pipelineGraphs );
 
-    if( flowNodeDescriptor != null )
-      this.flowNodeDescriptor = flowNodeDescriptor;
+    setFlowNodeDescriptor( flowNodeDescriptor );
 
     verifyPipelines();
     createPipelineMap();
@@ -171,6 +168,12 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
   public Map<String, String> getFlowNodeDescriptor()
     {
     return flowNodeDescriptor;
+    }
+
+  protected void setFlowNodeDescriptor( Map<String, String> flowNodeDescriptor )
+    {
+    if( flowNodeDescriptor != null )
+      this.flowNodeDescriptor = flowNodeDescriptor;
     }
 
   @Override
@@ -314,6 +317,12 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
   public List<? extends ElementGraph> getPipelineGraphs()
     {
     return pipelineGraphs;
+    }
+
+  protected void setPipelineGraphs( List<? extends ElementGraph> pipelineGraphs )
+    {
+    if( pipelineGraphs != null )
+      this.pipelineGraphs = pipelineGraphs;
     }
 
   @Override
