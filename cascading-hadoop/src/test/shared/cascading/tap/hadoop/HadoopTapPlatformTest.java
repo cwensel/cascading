@@ -53,12 +53,15 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import cascading.tap.partition.DelimitedPartition;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import data.InputData;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -788,4 +791,28 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       // success
       }
     }
+
+  @Test
+  public void testTemporarySinkPathIsDeleted() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "a", "b" ), " ", inputFileLowerOffset );
+
+    Pipe pipe = new Pipe( "test" );
+
+    String outputPath = getOutputPath( "partition-tap-sink" );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "a" ), " ", outputPath );
+    sink = getPlatform().getPartitionTap( sink, new DelimitedPartition( new Fields( "b" ) ), 1 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+    flow.complete();
+    
+    Path tempPath = new Path( outputPath, Hadoop18TapUtil.TEMPORARY_PATH );
+    FileSystem fileSystem = tempPath.getFileSystem( ( Configuration ) flow.getConfigCopy() );
+    
+    assertFalse( fileSystem.exists( tempPath ) );
+    }
+
   }
