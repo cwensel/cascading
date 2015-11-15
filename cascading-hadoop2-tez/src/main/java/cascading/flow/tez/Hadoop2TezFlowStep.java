@@ -59,6 +59,7 @@ import cascading.property.AppProps;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.PartitionTap;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tuple.Fields;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.hadoop.util.GroupingSortingComparator;
@@ -787,9 +788,39 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     }
 
   @Override
-  public void clean( TezConfiguration entries )
+  public void clean( TezConfiguration config )
     {
+    if( getSink().isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
+      {
+      try
+        {
+        getSink().deleteResource( config );
+        }
+      catch( Exception exception )
+        {
+        // sink all exceptions, don't fail app
+        logWarn( "unable to remove temporary file: " + getSink(), exception );
+        }
+      }
+    else
+      {
+      cleanTapMetaData( config, getSink() );
+      }
 
+    for( Tap tap : getTraps() )
+      cleanTapMetaData( config, tap );
+    }
+
+  private void cleanTapMetaData( TezConfiguration config, Tap tap )
+    {
+    try
+      {
+      Hadoop18TapUtil.cleanupTapMetaData( config, tap );
+      }
+    catch( IOException exception )
+      {
+      // ignore exception
+      }
     }
 
   public void syncArtifacts()

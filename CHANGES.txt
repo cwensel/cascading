@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fixed issue on Apache Tez platform that prevented additional clean up of Hadoop created meta-data files on c.f.Flow
+  completion.
+
   Updated c.m.a.URISanitizer to treat opaque URIs differently than hierarchical URIs by hiding the scheme specific
   parts in PUBLIC and PROTECTED visibility and storing the full URI for PRIVATE.
 
