@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fixed issue on Apache MapReduce platform that caused planner failures when merging the results of two c.p.GroupBy
+  pipes via a single c.p.Merge pipe.
+
   Fixed issue on Apache Tez platform that prevented additional clean up of Hadoop created meta-data files on c.f.Flow
   completion.
 

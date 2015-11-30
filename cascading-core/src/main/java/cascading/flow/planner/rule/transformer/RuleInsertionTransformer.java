@@ -36,9 +36,9 @@ public class RuleInsertionTransformer extends RuleTransformer
     this( phase, ruleExpression, null, factoryName );
     }
 
-  public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, String factoryName, InsertionGraphTransformer.Insertion insertAfter )
+  public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, String factoryName, InsertionGraphTransformer.Insertion insertion )
     {
-    this( phase, ruleExpression, null, factoryName, insertAfter );
+    this( phase, ruleExpression, null, factoryName, insertion );
     }
 
   public RuleInsertionTransformer( PlanPhase phase, RuleExpression ruleExpression, ElementCapture capture, String factoryName )
