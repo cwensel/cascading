@@ -140,8 +140,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     this.elementGraph = null;
     this.flowNodeGraph = flowNodeGraph;
 
-    if( flowStepDescriptor != null )
-      this.flowStepDescriptor = flowStepDescriptor;
+    setFlowStepDescriptor( flowStepDescriptor );
     }
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
@@ -155,8 +154,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     this.elementGraph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
-    if( flowStepDescriptor != null )
-      this.flowStepDescriptor = flowStepDescriptor;
+    setFlowStepDescriptor( flowStepDescriptor );
 
     configure();
     }
@@ -164,12 +162,17 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   protected void configure()
     {
     // todo: remove once FlowMapper/FlowReducer aren't reliant
-    ElementGraphs.addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
-    ElementGraphs.addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
+    addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
+    addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
 
-    addGroups( findAllGroups( elementGraph ) );
+    addAllGroups();
 
     traps.putAll( flowNodeGraph.getTrapsMap() );
+    }
+
+  protected void addAllGroups()
+    {
+    addGroups( findAllGroups( elementGraph ) );
     }
 
   @Override
@@ -207,6 +210,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   public Map<String, String> getFlowStepDescriptor()
     {
     return Collections.unmodifiableMap( flowStepDescriptor );
+    }
+
+  protected void setFlowStepDescriptor( Map<String, String> flowStepDescriptor )
+    {
+    if( flowStepDescriptor != null )
+      this.flowStepDescriptor = flowStepDescriptor;
     }
 
   @Override
@@ -412,7 +421,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   public Set<Tap> getAllAccumulatedSources()
     {
-    return Util.narrowSet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
+    return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
     }
 
   public void addSource( String name, Tap source )
@@ -467,9 +476,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSourceWith( String identifier )
     {
+    if( Util.isEmpty( identifier ) )
+      return null;
+
     for( Tap tap : sources.keySet() )
       {
-      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+      if( identifier.equalsIgnoreCase( tap.getIdentifier() ) )
         return tap;
       }
 
@@ -479,9 +491,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSinkWith( String identifier )
     {
+    if( Util.isEmpty( identifier ) )
+      return null;
+
     for( Tap tap : sinks.keySet() )
       {
-      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+      if( identifier.equalsIgnoreCase( tap.getIdentifier() ) )
         return tap;
       }
 
@@ -977,6 +992,24 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
             element = null;
           }
         }
+      }
+    }
+
+  protected static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
+    {
+    for( Tap tap : sources )
+      {
+      for( Scope scope : elementGraph.outgoingEdgesOf( tap ) )
+        flowStep.addSource( scope.getName(), tap );
+      }
+    }
+
+  protected static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
+    {
+    for( Tap tap : sinks )
+      {
+      for( Scope scope : elementGraph.incomingEdgesOf( tap ) )
+        flowStep.addSink( scope.getName(), tap );
       }
     }
 

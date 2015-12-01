@@ -18,37 +18,25 @@
  * limitations under the License.
  */
 
-/*
- * See package LICENSE.txt for additional license information.
+package cascading.flow.hadoop.planner.rule.transformer;
+
+import cascading.flow.hadoop.planner.rule.expression.BalanceGroupSplitJoinExpression;
+import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
+import cascading.flow.planner.rule.transformer.RuleInsertionTransformer;
+
+import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
+
+/**
+ *
  */
-
-package cascading.util.jgrapht;
-
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-public class IntegerNameProvider<V> implements VertexNameProvider<V>
+public class TapBalanceGroupSplitJoinTransformer extends RuleInsertionTransformer
   {
-  private int nextID = 1;
-  private final Map<V, Integer> idMap = new IdentityHashMap<>();
-
-  public void clear()
+  public TapBalanceGroupSplitJoinTransformer()
     {
-    nextID = 1;
-    idMap.clear();
-    }
-
-  @Override
-  public String getVertexName( V vertex )
-    {
-    Integer id = idMap.get( vertex );
-
-    if( id == null )
-      {
-      id = nextID++;
-      idMap.put( vertex, id );
-      }
-
-    return id.toString();
+    super(
+      BalanceAssembly,
+      new BalanceGroupSplitJoinExpression(),
+      IntermediateTapElementFactory.TEMP_TAP
+    );
     }
   }

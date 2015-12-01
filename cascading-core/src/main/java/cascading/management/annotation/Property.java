@@ -31,18 +31,39 @@ import java.lang.annotation.Target;
  * DocumentService to inspect, process or persist them.
  * <p/>
  * Property annotations can be applied to {@link cascading.tap.Tap}s, {@link cascading.scheme.Scheme}s,
- * {@link cascading.flow.Flow}s, {@link cascading.operation.Function}s and {@link cascading.operation.Filter}s.
+ * and any {@link cascading.operation.Operation} sub-classes (like Function or Aggregator).
  * <p/>
- *
- * @Property annotations can be applied to public methods and public fields, so that they can be accessed via
- * java.lang.Class#getMethods() and java.lang.Class.getFields() respectively. Adding @Property annotations on any
- * non-public method or field will have no effect.
+ * Property annotations can be applied to any method or field members, so that they can be accessed via
+ * java.lang.Class#getMethods() and java.lang.Class.getFields() respectively. If the member is protected/private,
+ * there will be an attempt to bypass the protected/private scope to retrieve the value.
+ * <p/>
+ * By default the {@link Visibility} is {@link Visibility#PUBLIC}, and optionality is {@code true}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})
 public @interface Property
   {
+  /**
+   * The display name for the property value. Does not need to match the bean property or field name.
+   *
+   * @return the display name
+   */
   String name();
 
-  Visibility visibility();
+  /**
+   * The display visibility, see {@link Visibility}.
+   *
+   * @return the display visibility
+   */
+  Visibility visibility() default Visibility.PUBLIC;
+
+  /**
+   * Whether the field name and null should be displayed if the value is {@code null}.
+   * <p/>
+   * When {@code true}, no data (field name, visibility, and the {@code null} value are sent to the display. The property
+   * is ignored.
+   *
+   * @return whether the field should be displayed if {@code null}
+   */
+  boolean optional() default true;
   }

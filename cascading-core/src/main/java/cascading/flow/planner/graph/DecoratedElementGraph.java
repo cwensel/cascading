@@ -21,6 +21,8 @@
 package cascading.flow.planner.graph;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -208,6 +210,16 @@ public class DecoratedElementGraph implements ElementGraph
   public Set<FlowElement> vertexSet()
     {
     return decorated.vertexSet();
+    }
+
+  @Override
+  public Set<FlowElement> vertexSetCopy()
+    {
+    Set<FlowElement> result = Collections.newSetFromMap( new IdentityHashMap<FlowElement, Boolean>() );
+
+    result.addAll( vertexSet() );
+
+    return result;
     }
 
   @Override

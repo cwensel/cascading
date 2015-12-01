@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
+import cascading.operation.Filter;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -233,6 +235,8 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   protected Tap parent;
   /** Field partition */
   protected Partition partition;
+  /** Field sourcePartitionFilters */
+  protected final List<PartitionTapFilter> sourcePartitionFilters = new ArrayList<>();
   /** Field keepParentOnDelete */
   protected boolean keepParentOnDelete = false;
   /** Field openTapsThreshold */
@@ -310,7 +314,71 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
    */
   public String[] getChildPartitionIdentifiers( FlowProcess<? extends Config> flowProcess, boolean fullyQualified ) throws IOException
     {
-    return ( (FileType) parent ).getChildIdentifiers( flowProcess.getConfig(), partition.getPathDepth(), fullyQualified );
+    String[] childIdentifiers = ( (FileType) parent ).getChildIdentifiers(
+      flowProcess.getConfig(),
+      partition.getPathDepth(),
+      fullyQualified
+    );
+
+    if( sourcePartitionFilters.isEmpty() )
+      return childIdentifiers;
+
+    return getFilteredPartitionIdentifiers( flowProcess, childIdentifiers );
+    }
+
+  protected String[] getFilteredPartitionIdentifiers( FlowProcess<? extends Config> flowProcess, String[] childIdentifiers )
+    {
+    Fields partitionFields = partition.getPartitionFields();
+    TupleEntry partitionEntry = new TupleEntry( partitionFields, Tuple.size( partitionFields.size() ) );
+
+    List<String> filteredIdentifiers = new ArrayList<>( childIdentifiers.length );
+
+    for( PartitionTapFilter filter : sourcePartitionFilters )
+      filter.prepare( flowProcess );
+
+    for( String childIdentifier : childIdentifiers )
+      {
+      partition.toTuple( childIdentifier.substring( parent.getFullIdentifier( flowProcess ).length() + 1 ), partitionEntry );
+
+      boolean isRemove = false;
+      for( PartitionTapFilter filter : sourcePartitionFilters )
+        {
+        if( filter.isRemove( flowProcess, partitionEntry ) )
+          {
+          isRemove = true;
+          break;
+          }
+        }
+
+      if( !isRemove )
+        filteredIdentifiers.add( childIdentifier );
+      }
+
+    for( PartitionTapFilter filter : sourcePartitionFilters )
+      filter.cleanup( flowProcess );
+
+    return filteredIdentifiers.toArray( new String[ filteredIdentifiers.size() ] );
+    }
+
+  /**
+   * Add a {@link Filter} with its associated argument selector when using this PartitionTap as a source. On read, each
+   * child identifier is converted to a {@link Tuple} using the provided {@link Partition}. Each {@link Filter} will be
+   * applied to the {@link Tuple} so that the input paths can be filtered to only accept those required for the
+   * {@link Flow}.
+   *
+   * @param argumentSelector field selector that selects Filter arguments from the input Tuple
+   * @param filter           Filter to be applied to each input Tuple
+   */
+  public void addSourcePartitionFilter( Fields argumentSelector, Filter filter )
+    {
+    Fields argumentFields;
+
+    if( argumentSelector.isAll() )
+      argumentFields = partition.getPartitionFields();
+    else
+      argumentFields = partition.getPartitionFields().select( argumentSelector );
+
+    sourcePartitionFilters.add( new PartitionTapFilter( argumentFields, filter ) );
     }
 
   @Override
@@ -407,6 +475,8 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       return false;
     if( partition != null ? !partition.equals( that.partition ) : that.partition != null )
       return false;
+    if( partition != null ? !sourcePartitionFilters.equals( that.sourcePartitionFilters ) : that.sourcePartitionFilters != null )
+      return false;
 
     return true;
     }
@@ -417,13 +487,14 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     int result = super.hashCode();
     result = 31 * result + ( parent != null ? parent.hashCode() : 0 );
     result = 31 * result + ( partition != null ? partition.hashCode() : 0 );
+    result = 31 * result + ( sourcePartitionFilters != null ? sourcePartitionFilters.hashCode() : 0 );
     return result;
     }
 
   @Override
   public String toString()
     {
-    return getClass().getSimpleName() + "[\"" + parent + "\"]" + "[\"" + partition + "\"]";
+    return getClass().getSimpleName() + "[\"" + parent + "\"]" + "[\"" + partition + "\"]" + "[\"" + sourcePartitionFilters + "\"]";
     }
 
   public static class PartitionScheme<Config, Input, Output> extends Scheme<Config, Input, Output, Void, Void>

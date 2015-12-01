@@ -89,8 +89,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     this.ordinal = ordinal;
     this.trapMap = Collections.emptyMap();
 
-    if( flowNodeDescriptor != null )
-      this.flowNodeDescriptor = flowNodeDescriptor;
+    setFlowNodeDescriptor( flowNodeDescriptor );
     }
 
   public BaseFlowNode( ElementGraph nodeSubGraph )
@@ -123,11 +122,9 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.nodeSubGraph = nodeSubGraph;
 
-    if( pipelineGraphs != null )
-      this.pipelineGraphs = pipelineGraphs;
+    setPipelineGraphs( pipelineGraphs );
 
-    if( flowNodeDescriptor != null )
-      this.flowNodeDescriptor = flowNodeDescriptor;
+    setFlowNodeDescriptor( flowNodeDescriptor );
 
     verifyPipelines();
     createPipelineMap();
@@ -171,6 +168,12 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
   public Map<String, String> getFlowNodeDescriptor()
     {
     return flowNodeDescriptor;
+    }
+
+  protected void setFlowNodeDescriptor( Map<String, String> flowNodeDescriptor )
+    {
+    if( flowNodeDescriptor != null )
+      this.flowNodeDescriptor = flowNodeDescriptor;
     }
 
   @Override
@@ -316,6 +319,12 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     return pipelineGraphs;
     }
 
+  protected void setPipelineGraphs( List<? extends ElementGraph> pipelineGraphs )
+    {
+    if( pipelineGraphs != null )
+      this.pipelineGraphs = pipelineGraphs;
+    }
+
   @Override
   public ElementGraph getPipelineGraphFor( FlowElement streamedSource )
     {
@@ -334,7 +343,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSourceElements() ) );
+    sourceTaps = Collections.unmodifiableSet( Util.narrowIdentitySet( Tap.class, getSourceElements() ) );
 
     return sourceTaps;
     }
@@ -345,7 +354,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSinkElements() ) );
+    sinkTaps = Collections.unmodifiableSet( Util.narrowIdentitySet( Tap.class, getSinkElements() ) );
 
     return sinkTaps;
     }

@@ -825,6 +825,9 @@ public class TupleSerialization extends Configured implements Serialization
 
   private static Fields maskVoid( Fields fields, Fields mask )
     {
+    if( fields == null )
+      return null;
+
     if( mask == null || !fields.hasTypes() || !mask.hasTypes() )
       return fields;
 

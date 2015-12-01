@@ -20,7 +20,7 @@
 
 package cascading.util;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,8 +38,15 @@ public class EnumMultiMap<V> extends SetMultiMap<Enum, V>
     addAll( map );
     }
 
+  @Override
   protected Map<Enum, Set<V>> createMap()
     {
-    return new HashMap<>();
+    return new IdentityHashMap<>();
+    }
+
+  @Override
+  protected Set<V> createCollection()
+    {
+    return Util.createIdentitySet();
     }
   }

@@ -173,11 +173,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     this.name = name;
     }
 
-  protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name )
-    {
-    this( platformInfo, properties, defaultConfig, name, new LinkedHashMap<String, String>() );
-    }
-
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name, Map<String, String> flowDescriptor )
     {
     if( platformInfo != null )
@@ -190,8 +185,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
-
-    this.flowStats = createPrepareFlowStats(); // must be last
     }
 
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef )
@@ -246,7 +239,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
     initSteps();
 
-    this.flowStats = createPrepareFlowStats(); // must be last
+    this.flowStats = createPrepareFlowStats();
 
     initializeNewJobsMap();
 

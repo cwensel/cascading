@@ -36,8 +36,8 @@ public class ProcessModels
     {
     ElementGraph elementGraph = ElementGraphs.asExtentMaskedSubGraph( process.getElementGraph() );
 
-    Set<? extends FlowElement> sourceElements = Util.narrowSet( excludingType, process.getSourceElements(), false );
-    Set<? extends FlowElement> sinkElements = Util.narrowSet( excludingType, process.getSinkElements(), false );
+    Set<? extends FlowElement> sourceElements = Util.narrowIdentitySet( excludingType, process.getSourceElements(), false );
+    Set<? extends FlowElement> sinkElements = Util.narrowIdentitySet( excludingType, process.getSinkElements(), false );
 
     return elementGraph.vertexSet().size() == ( sourceElements.size() + sinkElements.size() );
     }

@@ -473,6 +473,11 @@ public class HadoopUtil
     return platformInfo;
     }
 
+  public static PlatformInfo createPlatformInfo( Class type, String attributePath, String platformName )
+    {
+    return getPlatformInfoInternal( type, attributePath, platformName );
+    }
+
   private static PlatformInfo getPlatformInfoInternal( Class type, String attributePath, String platformName )
     {
     URL url = type.getResource( type.getSimpleName() + ".class" );
@@ -496,7 +501,7 @@ public class HadoopUtil
       {
       LOG.warn( "unable to get manifest from {}: {}", manifestPath, exception.getMessage() );
 
-      return new PlatformInfo( "Hadoop", null, parsedVersion );
+      return new PlatformInfo( platformName, null, parsedVersion );
       }
 
     Attributes attributes = manifest.getAttributes( attributePath );
@@ -506,7 +511,7 @@ public class HadoopUtil
 
     if( attributes == null )
       {
-      LOG.debug( "unable to get Hadoop manifest attributes" );
+      LOG.debug( "unable to get platform manifest attributes" );
       return new PlatformInfo( platformName, null, parsedVersion );
       }
 

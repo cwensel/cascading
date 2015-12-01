@@ -35,7 +35,9 @@ import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupBlockingHas
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupGroupTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupMergeGroupTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupNonBlockingHashJoinTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitJoinTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitMergeGroupTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitMergeTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceHashJoinBlockingHashJoinTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceHashJoinSameSourceTransformer;
@@ -70,7 +72,9 @@ public class MapReduceHadoopRuleRegistry extends RuleRegistry
 
     // Balance with temporary Taps
     addRule( new TapBalanceGroupSplitTransformer() );
+    addRule( new TapBalanceGroupSplitJoinTransformer() );
     addRule( new TapBalanceGroupSplitMergeGroupTransformer() );
+    addRule( new TapBalanceGroupSplitMergeTransformer() );
     addRule( new TapBalanceGroupMergeGroupTransformer() );
     addRule( new TapBalanceGroupGroupTransformer() );
     addRule( new TapBalanceCheckpointTransformer() );

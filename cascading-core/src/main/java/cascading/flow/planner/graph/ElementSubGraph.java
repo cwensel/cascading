@@ -40,10 +40,15 @@ public class ElementSubGraph extends BaseElementGraph implements ElementGraph
   private final Set<FlowElement> flowElements;
   private final Set<Scope> scopes;
 
+  public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements )
+    {
+    this( elementGraph, flowElements, null );
+    }
+
   public ElementSubGraph( ElementGraph elementGraph, Collection<FlowElement> flowElements, Collection<Scope> scopes )
     {
     this.flowElements = createIdentitySet( flowElements );
-    this.scopes = createIdentitySet( scopes );
+    this.scopes = scopes == null || scopes.isEmpty() ? null : createIdentitySet( scopes ); // forces edges to be induced
     this.graph = new DirectedSubGraph( directed( elementGraph ), this.flowElements, this.scopes );
     this.elementGraph = elementGraph;
     }

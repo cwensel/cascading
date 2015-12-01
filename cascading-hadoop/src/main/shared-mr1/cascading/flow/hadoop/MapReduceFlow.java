@@ -158,7 +158,7 @@ public class MapReduceFlow extends HadoopFlow
     this.deleteSinkOnInit = deleteSinkOnInit;
     this.stopJobsOnExit = stopJobsOnExit;
 
-    initializeFrom( jobConf );
+    initializeFrom( jobConf ); // push off initialization allowing for overrides
     }
 
   protected void initializeFrom( JobConf jobConf )
@@ -167,9 +167,16 @@ public class MapReduceFlow extends HadoopFlow
     setSinks( createSinks( jobConf ) );
     setTraps( createTraps( jobConf ) );
     setFlowStepGraph( makeStepGraph( jobConf ) );
+
+    // this mirrors BaseFlow#initialize()
+
     initSteps();
 
+    this.flowStats = createPrepareFlowStats(); // must be last
+
     initializeNewJobsMap();
+
+    initializeChildStats();
     }
 
   protected FlowStepGraph makeStepGraph( JobConf jobConf )

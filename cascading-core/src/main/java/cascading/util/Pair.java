@@ -79,4 +79,14 @@ public class Pair<Lhs, Rhs>
     result = 31 * result + ( rhs != null ? rhs.hashCode() : 0 );
     return result;
     }
+
+  @Override
+  public String toString()
+    {
+    final StringBuilder sb = new StringBuilder( "Pair{" );
+    sb.append( "lhs=" ).append( lhs );
+    sb.append( ", rhs=" ).append( rhs );
+    sb.append( '}' );
+    return sb.toString();
+    }
   }

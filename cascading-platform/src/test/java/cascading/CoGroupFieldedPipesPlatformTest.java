@@ -47,6 +47,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.Discard;
 import cascading.pipe.assembly.Rename;
+import cascading.pipe.assembly.Retain;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
 import cascading.pipe.joiner.LeftJoin;
@@ -1804,5 +1805,41 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
     validateLength( flow.openTapForRead( uniqueSinkLhs ), 15 );
     validateLength( flow.openTapForRead( innerSinkRhs ), 3900 );
     validateLength( flow.openTapForRead( uniqueSinkRhs ), 15 );
+    }
+
+  @Test
+  public void testSameSourceGroupSplitCoGroup() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ).applyTypes( Long.TYPE, String.class ), inputFileLower );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath(), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ).applyTypes( String.class, String.class ), " " );
+
+    Pipe sourcePipe = new Each( new Pipe( "source" ), new Fields( "line" ), splitter );
+    sourcePipe = new GroupBy( sourcePipe, new Fields( "num" ) );
+    sourcePipe = new Every( sourcePipe, new Fields( "char" ), new First( new Fields( "first", String.class ) ), Fields.ALL );
+
+    Pipe lhsPipe = new Retain( new Pipe( "lhs", sourcePipe ), Fields.ALL );
+    Pipe rhsPipe = new Retain( new Pipe( "rhs", sourcePipe ), Fields.ALL );
+
+    Pipe splice = new CoGroup( lhsPipe, new Fields( "num" ), rhsPipe, new Fields( "num" ), Fields.size( 4 ) );
+
+    Map<Object, Object> properties = getPlatform().getProperties();
+
+    properties.put( "cascading.serialization.types.required", "true" );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
     }
   }
