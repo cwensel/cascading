@@ -95,7 +95,7 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
 
     Flow third = thirdFlow( second1.getSink(), second2.getSink() );
 
-    Cascade cascade = new CascadeConnector().connect( first1, second1, first2, second2, third );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( first1, second1, first2, second2, third );
 
     cascade.start();
 
@@ -112,35 +112,35 @@ public class ParallelCascadePlatformTest extends PlatformTestCase
     final Throwable[] found = new Throwable[ 1 ];
 
     CascadeListener listener = new CascadeListener()
-    {
-    @Override
-    public void onStarting( Cascade cascade )
       {
-      }
+      @Override
+      public void onStarting( Cascade cascade )
+        {
+        }
 
-    @Override
-    public void onStopping( Cascade cascade )
-      {
-      }
+      @Override
+      public void onStopping( Cascade cascade )
+        {
+        }
 
-    @Override
-    public void onCompleted( Cascade cascade )
-      {
-      }
+      @Override
+      public void onCompleted( Cascade cascade )
+        {
+        }
 
-    @Override
-    public boolean onThrowable( Cascade cascade, Throwable throwable )
-      {
-      found[ 0 ] = throwable;
-      return false;
-      }
-    };
+      @Override
+      public boolean onThrowable( Cascade cascade, Throwable throwable )
+        {
+        found[ 0 ] = throwable;
+        return false;
+        }
+      };
 
     for( int i = 0; i <= 500; i += 50 )
       {
       Flow first = firstFlow( String.format( "race-%d/first" + ComparePlatformsTest.NONDETERMINISTIC, i ) );
 
-      Cascade cascade = new CascadeConnector().connect( first );
+      Cascade cascade = new CascadeConnector( getProperties() ).connect( first );
 
       cascade.addListener( listener );
 

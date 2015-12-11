@@ -83,7 +83,7 @@ public class HadoopStatsPlatformTest extends PlatformTestCase
     Flow flow1 = getPlatform().getFlowConnector().connect( "stats1 test", source, sink1, pipe );
     Flow flow2 = getPlatform().getFlowConnector().connect( "stats2 test", source, sink2, pipe );
 
-    Cascade cascade = new CascadeConnector().connect( flow1, flow2 );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( flow1, flow2 );
 
     cascade.complete();
 

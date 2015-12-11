@@ -177,7 +177,7 @@ public class MapReduceFlowPlatformTest extends PlatformTestCase
 
     Flow thirdMR = new MapReduceFlow( new JobConf( job.getConfiguration() ), true );
 
-    CascadeConnector cascadeConnector = new CascadeConnector();
+    CascadeConnector cascadeConnector = new CascadeConnector( getProperties() );
 
     // pass out of order
     Cascade cascade = cascadeConnector.connect( firstFlow, secondFlow, thirdMR, firstMR, secondMR );
