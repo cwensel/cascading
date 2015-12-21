@@ -25,7 +25,9 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
@@ -253,7 +255,7 @@ public class TypedFieldedPipesPlatformTest extends PlatformTestCase
     Pipe rhsPipe = new Pipe( "rhs" );
 
     Class<Long> type = getPlatform().isMapReduce() ? Long.TYPE : Long.class;
-    rhsPipe = new Each( rhsPipe, new Fields( "date" ), new DateParser( new Fields( "date", type ), TestConstants.APACHE_DATE_FORMAT ), Fields.REPLACE );
+    rhsPipe = new Each( rhsPipe, new Fields( "date" ), new DateParser( new Fields( "date", type ), TimeZone.getDefault(), Locale.US, TestConstants.APACHE_DATE_FORMAT ), Fields.REPLACE );
     rhsPipe = new Each( rhsPipe, new Fields( "date" ), AssertionLevel.STRICT, new AssertExpression( "date instanceof Long", Object.class ) );
 
     Fields declared = lhsFields.append( Fields.mask( rhsFields, lhsFields ) );
