@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.0.4 [unreleased]
 
+  Fixed issue where a c.f.FlowStep attempts to determine if it should be skipped but throws an Exception preventing
+  the c.s.FlowStepStats from advancing to the 'started' state from 'pending'.
+
 3.0.3
 
   Fixed issues with c.t.Fields#applyType() and c.t.Fields#resolve().

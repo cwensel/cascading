@@ -189,6 +189,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
 
       dumpDebugInfo();
 
+      // in case isSkipFlowStep fails before the previous markStarted, we don't fail advancing to the failed state
+      if( flowStepStats.isPending() )
+        markStarted();
+
       if( !flowStepStats.isFinished() )
         {
         flowStepStats.markFailed( this.throwable );
