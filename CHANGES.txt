@@ -1,5 +1,7 @@
 Cascading Change Log
 
+3.0.4 [unreleased]
+
 3.0.3
 
   Fixed issues with c.t.Fields#applyType() and c.t.Fields#resolve().
