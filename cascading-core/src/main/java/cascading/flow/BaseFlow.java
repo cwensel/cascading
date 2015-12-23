@@ -46,6 +46,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.process.ProcessGraphs;
@@ -125,7 +126,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   /** Field stop */
   protected boolean stop;
 
-  /** Field pipeGraph */
+  /** Field flowCanonicalHash */
+  protected String flowCanonicalHash;
+  /** Field flowElementGraph */
   protected FlowElementGraph flowElementGraph; // only used for documentation purposes
 
   private transient CascadingServices cascadingServices;
@@ -457,6 +460,29 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       throw new IllegalArgumentException( "submitPriority must be between 1 and 10 inclusive, was: " + submitPriority );
 
     this.submitPriority = submitPriority;
+    }
+
+  /**
+   * The hash value can be used to determine if two unique Flow instances performed the same work.
+   * <p/>
+   * The source and sink taps are not relevant to the hash.
+   *
+   * @return a String value
+   */
+  public synchronized String getFlowCanonicalHash()
+    {
+    if( flowCanonicalHash == null )
+      flowCanonicalHash = createFlowCanonicalHash();
+
+    return flowCanonicalHash;
+    }
+
+  protected String createFlowCanonicalHash()
+    {
+    if( flowElementGraph != null )
+      return ElementGraphs.canonicalHash( flowElementGraph );
+
+    return null;
     }
 
   FlowElementGraph getFlowElementGraph()
@@ -886,13 +912,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   protected Thread createFlowThread( String threadName )
     {
     return new Thread( new Runnable()
-    {
-    @Override
-    public void run()
       {
-      BaseFlow.this.run();
-      }
-    }, threadName );
+      @Override
+      public void run()
+        {
+        BaseFlow.this.run();
+        }
+      }, threadName );
     }
 
   protected abstract void internalStart();
@@ -1575,21 +1601,21 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       return;
 
     shutdownHook = new ShutdownUtil.Hook()
-    {
-    @Override
-    public Priority priority()
       {
-      return Priority.WORK_CHILD;
-      }
+      @Override
+      public Priority priority()
+        {
+        return Priority.WORK_CHILD;
+        }
 
-    @Override
-    public void execute()
-      {
-      logInfo( "shutdown hook calling stop on flow" );
+      @Override
+      public void execute()
+        {
+        logInfo( "shutdown hook calling stop on flow" );
 
-      BaseFlow.this.stop();
-      }
-    };
+        BaseFlow.this.stop();
+        }
+      };
 
     ShutdownUtil.addHook( shutdownHook );
     }
