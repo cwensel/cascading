@@ -179,4 +179,13 @@ public class URISanitizerTest
     String result = sanitizer.apply( Visibility.PROTECTED, uri );
     assertEquals( "/2014/12/2[5-9]/*", result );
     }
+
+  @Test
+  public void testS3NGlob2()
+    {
+    String uri = "s3n://host/path/conversion_date={2015-12-23,2015-12-22}";
+    URISanitizer sanitizer = new URISanitizer();
+    String result = sanitizer.apply( Visibility.PROTECTED, uri );
+    assertEquals( "/path/conversion_date={2015-12-23,2015-12-22}", result );
+    }
   }

@@ -156,6 +156,9 @@ public class URISanitizer implements Sanitizer
     {
     input = input.replaceAll( "\\[", "%5B" );
     input = input.replaceAll( "\\]", "%5D" );
+    input = input.replaceAll( "\\{", "%7B" );
+    input = input.replaceAll( "\\}", "%7D" );
+
     return input;
     }
 
