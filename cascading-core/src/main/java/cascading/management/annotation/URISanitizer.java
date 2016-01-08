@@ -117,18 +117,14 @@ public class URISanitizer implements Sanitizer
         LOG.warn( "failed to parse uri: {}, message: {}", value, exception.getMessage() );
         LOG.debug( "failed to parse uri: {}", value, exception );
 
-        boolean ignore = Boolean.parseBoolean( System.getProperty( FAILURE_MODE_PASS_THROUGH ) );
-
-        if( !ignore )
-          LOG.info( "set property: '{}', to true to disable uri sanitization", FAILURE_MODE_PASS_THROUGH );
-
-        if( ignore )
+        if( Boolean.parseBoolean( System.getProperty( FAILURE_MODE_PASS_THROUGH ) ) )
           {
-          LOG.warn( "ignoring uri sanitizer failures, returning raw value, property '{}' set to true", FAILURE_MODE_PASS_THROUGH );
+          LOG.warn( "ignoring uri sanitizer failures, returning unsanitized value, property '{}' set to true", FAILURE_MODE_PASS_THROUGH );
           return value.toString();
           }
 
         // return an empty string, to avoid the leakage of sensitive information.
+        LOG.info( "set property: '{}', to true to return unsanitized value, returning empty string", FAILURE_MODE_PASS_THROUGH );
         return "";
         }
       }
