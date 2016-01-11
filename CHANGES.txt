@@ -1,6 +1,6 @@
 Cascading Change Log
 
-3.0.4 [unreleased]
+3.0.4
 
   Fixed issue where c.m.a.URISanitizer would fail parsing glob expressions containing curly braces.
 
