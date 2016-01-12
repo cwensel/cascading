@@ -27,6 +27,7 @@ import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
+import cascading.property.AppProps;
 import cascading.scheme.Scheme;
 import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
@@ -265,4 +266,15 @@ public abstract class TestPlatform
   public abstract Comparator getStringComparator( boolean reverseSort );
 
   public abstract String getHiddenTemporaryPath();
+
+  protected String getApplicationJar()
+    {
+    // mapred.jar is for backwards compatibility with the compatibility suite
+    String property = System.getProperty( "mapred.jar", System.getProperty( AppProps.APP_JAR_PATH ) );
+
+    if( property == null || property.isEmpty() )
+      return null;
+
+    return property;
+    }
   }
