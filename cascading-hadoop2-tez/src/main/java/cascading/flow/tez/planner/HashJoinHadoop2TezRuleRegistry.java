@@ -78,9 +78,9 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new BoundaryBalanceCheckpointTransformer() );
 
     // hash join
+    addRule( new BoundaryBalanceHashJoinSameSourceTransformer() );
     addRule( new BoundaryBalanceSplitToStreamedHashJoinTransformer() ); // testGroupBySplitGroupByJoin
     addRule( new BoundaryBalanceSplitSplitToStreamedHashJoinTransformer() ); // testGroupBySplitSplitGroupByJoin
-    addRule( new BoundaryBalanceHashJoinSameSourceTransformer() );
     addRule( new BoundaryBalanceHashJoinToHashJoinTransformer() ); // force HJ into unique nodes
     addRule( new BoundaryBalanceGroupBlockingHashJoinTransformer() ); // joinAfterEvery
     addRule( new BoundaryBalanceGroupSplitHashJoinTransformer() ); // groupBySplitJoins
