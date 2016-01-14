@@ -54,6 +54,13 @@ Cascading Change Log
   information to reduce serialized data and perform bitwise equality comparisons. See c.t.h.TupleSerializationProps to
   disable bitwise comparisons.
 
+3.0.4
+
+  Fixed issue where c.m.a.URISanitizer would fail parsing glob expressions containing curly braces.
+
+  Fixed issue where a c.f.FlowStep attempts to determine if it should be skipped but throws an Exception preventing
+  the c.s.FlowStepStats from advancing to the 'started' state from 'pending'.
+
 3.0.3
 
   Fixed issues with c.t.Fields#applyType() and c.t.Fields#resolve().

@@ -123,16 +123,17 @@ public class URISanitizer implements Sanitizer
         }
       catch( IllegalArgumentException exception )
         {
-        LOG.warn( "failed to parse uri: {} with: {}", value, exception.getMessage() );
-        LOG.debug( "exception:", exception );
+        LOG.warn( "failed to parse uri: {}, message: {}", value, exception.getMessage() );
+        LOG.debug( "failed to parse uri: {}", value, exception );
 
         if( Boolean.parseBoolean( System.getProperty( FAILURE_MODE_PASS_THROUGH ) ) )
           {
-          LOG.warn( "ignoring failures, returning raw value" );
+          LOG.warn( "ignoring uri sanitizer failures, returning unsanitized value, property '{}' set to true", FAILURE_MODE_PASS_THROUGH );
           return value.toString();
           }
 
         // return an empty string, to avoid the leakage of sensitive information.
+        LOG.info( "set property: '{}', to true to return unsanitized value, returning empty string", FAILURE_MODE_PASS_THROUGH );
         return "";
         }
       }
@@ -178,6 +179,9 @@ public class URISanitizer implements Sanitizer
     {
     input = input.replaceAll( "\\[", "%5B" );
     input = input.replaceAll( "\\]", "%5D" );
+    input = input.replaceAll( "\\{", "%7B" );
+    input = input.replaceAll( "\\}", "%7D" );
+
     return input;
     }
 
