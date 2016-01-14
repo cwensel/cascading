@@ -598,6 +598,10 @@ public class ElementGraphs
     Scope scope = new Scope( previousEdge );
 
     scope.setOrdinal( previousEdge.getOrdinal() );
+
+    if( nextElement instanceof Splice && ( (Splice) nextElement ).isJoin() && previousEdge.getOrdinal() != 0 )
+      scope.setNonBlocking( false );
+
     elementGraph.addEdge( newElement, nextElement, scope );
 
     // remove previous edge
