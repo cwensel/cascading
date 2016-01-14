@@ -32,6 +32,13 @@ import cascading.util.Util;
  */
 public class ProcessModels
   {
+  /**
+   * Does the given process perform any work?
+   *
+   * @param process
+   * @param excludingType
+   * @return
+   */
   public static boolean isIdentity( ProcessModel process, Class<? extends FlowElement> excludingType )
     {
     ElementGraph elementGraph = ElementGraphs.asExtentMaskedSubGraph( process.getElementGraph() );
@@ -42,6 +49,12 @@ public class ProcessModels
     return elementGraph.vertexSet().size() == ( sourceElements.size() + sinkElements.size() );
     }
 
+  /**
+   * Does the given process perform any work?
+   *
+   * @param process
+   * @return
+   */
   public static boolean isIdentity( ProcessModel process )
     {
     ElementGraph elementGraph = ElementGraphs.asExtentMaskedSubGraph( process.getElementGraph() );

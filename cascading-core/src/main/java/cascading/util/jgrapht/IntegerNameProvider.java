@@ -24,13 +24,13 @@
 
 package cascading.util.jgrapht;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class IntegerNameProvider<V> implements VertexNameProvider<V>
   {
   private int nextID = 1;
-  private final Map<V, Integer> idMap = new IdentityHashMap<>();
+  private final Map<V, Integer> idMap = new HashMap<>();
 
   public void clear()
     {

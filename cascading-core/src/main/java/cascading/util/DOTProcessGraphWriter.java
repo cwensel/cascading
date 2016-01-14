@@ -116,17 +116,28 @@ public class DOTProcessGraphWriter
 
   protected Set<FlowElement> getIdentityElements( ProcessGraph<? extends ProcessModel> processGraph )
     {
-    Set<FlowElement> identityElements = new HashSet<>();
+    Set<FlowElement> candidates = new HashSet<>();
 
     // force identity nodes to be visualized
     for( ElementGraph elementGraph : processGraph.getIdentityElementGraphs() )
       {
       if( !Util.contains( Tap.class, elementGraph.vertexSet() ) )
-        identityElements.addAll( elementGraph.vertexSet() );
+        candidates.addAll( elementGraph.vertexSet() );
       }
 
-    identityElements.remove( Extent.head );
-    identityElements.remove( Extent.tail );
+    candidates.remove( Extent.head );
+    candidates.remove( Extent.tail );
+
+    // many elements span, but are included into multiple nodes
+    // the first to include the element owns it, making other node representations mis-representative
+    // for now, lets force shared elements to span, but this hides the identity nodes outright
+    Set<FlowElement> identityElements = new HashSet<>();
+
+    for( FlowElement identityElement : candidates )
+      {
+      if( processGraph.getElementProcesses( identityElement ).size() == 1 )
+        identityElements.add( identityElement );
+      }
 
     return identityElements;
     }
