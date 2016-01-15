@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,6 +27,7 @@ import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.local.LocalFlowProcess;
 import cascading.flow.local.LocalFlowStep;
+import cascading.flow.local.stream.duct.ParallelFork;
 import cascading.flow.local.stream.element.LocalGroupByGate;
 import cascading.flow.local.stream.element.SyncMergeStage;
 import cascading.flow.stream.duct.Duct;
@@ -73,6 +74,12 @@ public class LocalStepStreamGraph extends NodeStreamGraph
 
       handleDuct( (FlowElement) rhsElement, rhsDuct );
       }
+    }
+
+  @Override
+  protected Duct createFork( Duct[] allNext )
+    {
+    return new ParallelFork( allNext );
     }
 
   protected Gate createCoGroupGate( CoGroup element, IORole role )

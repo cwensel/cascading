@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fixed issue where local mode could deadlock across multiple c.p.HashJoin or c.p.CoGroup instances in some situations.
+
   Fixed issue on Apache MapReduce platform that caused planner failures when merging the results of two c.p.GroupBy
   pipes via a single c.p.Merge pipe.
 
