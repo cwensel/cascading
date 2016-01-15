@@ -30,7 +30,7 @@ import java.util.Map;
 public class IntegerNameProvider<V> implements VertexNameProvider<V>
   {
   private int nextID = 1;
-  private final Map<V, Integer> idMap = new HashMap<V, Integer>();
+  private final Map<V, Integer> idMap = new HashMap<>();
 
   public void clear()
     {
@@ -42,6 +42,7 @@ public class IntegerNameProvider<V> implements VertexNameProvider<V>
   public String getVertexName( V vertex )
     {
     Integer id = idMap.get( vertex );
+
     if( id == null )
       {
       id = nextID++;

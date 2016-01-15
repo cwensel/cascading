@@ -26,6 +26,7 @@ import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.expressiongraph.SyncPipeExpressionGraph;
+import cascading.pipe.Boundary;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;

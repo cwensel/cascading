@@ -116,30 +116,30 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   private transient String prefixID; // cached sub-string
 
   /** Field name */
-  final String name;
+  protected final String name;
   protected final ClientState clientState;
 
   /** Field status */
-  Status status = Status.PENDING;
+  protected Status status = Status.PENDING;
 
-  Set<StatsListener> listeners;
+  protected Set<StatsListener> listeners;
 
   /** Field pendingTime */
-  long pendingTime;
+  protected long pendingTime;
   /** Field startTime */
-  long startTime;
+  protected long startTime;
   /** Field submitTime */
-  long submitTime;
+  protected long submitTime;
   /** Field runTime */
-  long runTime;
+  protected long runTime;
   /** Field finishedTime */
-  long finishedTime;
+  protected long finishedTime;
   /** Field throwable */
-  Throwable throwable;
+  protected Throwable throwable;
   /** Field throwableTrace */
-  String[] throwableTrace;
+  protected String[] throwableTrace;
 
-  AtomicLong lastCaptureDetail = new AtomicLong( 0 );
+  protected AtomicLong lastCaptureDetail = new AtomicLong( 0 );
 
   protected CascadingStats( String name, ClientState clientState )
     {
@@ -455,7 +455,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
     recordInfo();
     }
 
-  private void markFinishedTime()
+  protected void markFinishedTime()
     {
     finishedTime = System.currentTimeMillis();
     }
@@ -761,7 +761,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
     getProcessLogger().logError( getPrefix() + message, throwable );
     }
 
-  private String getPrefix()
+  protected String getPrefix()
     {
     if( prefixID == null )
       prefixID = "[" + getType().name().toLowerCase() + ":" + getID().substring( 0, 5 ) + "] ";

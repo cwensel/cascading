@@ -48,9 +48,9 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   /** static field to capture errors in hadoop local mode */
   private static Throwable localError;
   /** Field jobClient */
-  private JobClient jobClient;
+  protected JobClient jobClient;
   /** Field runningJob */
-  private RunningJob runningJob;
+  protected RunningJob runningJob;
 
   private static long getStoreInterval( JobConf jobConf )
     {
@@ -103,12 +103,17 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   protected void internalNonBlockingStart() throws IOException
     {
     jobClient = new JobClient( jobConfiguration );
-    runningJob = jobClient.submitJob( jobConfiguration );
+    runningJob = internalNonBlockingSubmit();
 
     flowStep.logInfo( "submitted hadoop job: " + runningJob.getID() );
 
     if( runningJob.getTrackingURL() != null )
       flowStep.logInfo( "tracking url: " + runningJob.getTrackingURL() );
+    }
+
+  protected RunningJob internalNonBlockingSubmit() throws IOException
+    {
+    return jobClient.submitJob( jobConfiguration );
     }
 
   @Override

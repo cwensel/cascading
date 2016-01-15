@@ -36,6 +36,11 @@ public class ProcessFlowStep extends BaseFlowStep
     super( processWrapper.toString(), counter );
     }
 
+  public ProcessFlowStep( ProcessWrapper processWrapper, int counter, Map<String, String> flowStepDescriptor )
+    {
+    super( processWrapper.toString(), counter, flowStepDescriptor );
+    }
+
   @Override
   public Map<Object, Object> getConfigAsProperties()
     {
@@ -59,4 +64,5 @@ public class ProcessFlowStep extends BaseFlowStep
     {
     return null;
     }
+
   }

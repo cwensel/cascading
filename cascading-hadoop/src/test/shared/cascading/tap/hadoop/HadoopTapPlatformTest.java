@@ -53,12 +53,15 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import cascading.tap.partition.DelimitedPartition;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import data.InputData;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -284,7 +287,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Flow nextFlow = getPlatform().getFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
 
-    Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( concatFlow, nextFlow );
 
     cascade.complete();
 
@@ -316,7 +319,7 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Flow nextFlow = getPlatform().getFlowConnector( getProperties() ).connect( "second", sink, nextSink, concatPipe );
 
-    Cascade cascade = new CascadeConnector().connect( concatFlow, nextFlow );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( concatFlow, nextFlow );
 
     cascade.complete();
 
@@ -360,14 +363,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     final int[] count = {0};
     Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "committap" ), SinkMode.REPLACE )
-    {
-    @Override
-    public boolean commitResource( Configuration conf ) throws IOException
       {
-      count[ 0 ] = count[ 0 ] + 1;
-      return true;
-      }
-    };
+      @Override
+      public boolean commitResource( Configuration conf ) throws IOException
+        {
+        count[ 0 ] = count[ 0 ] + 1;
+        return true;
+        }
+      };
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -393,13 +396,13 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "committapfail" ), SinkMode.REPLACE )
-    {
-    @Override
-    public boolean commitResource( Configuration conf ) throws IOException
       {
-      throw new IOException( "failed intentionally" );
-      }
-    };
+      @Override
+      public boolean commitResource( Configuration conf ) throws IOException
+        {
+        throw new IOException( "failed intentionally" );
+        }
+      };
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -538,14 +541,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextDelimited( new Fields( "offset", "line" ) ), inputFileApache )
-    {
-    @Override
-    public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
       {
-      // don't set input format
-      //super.sourceConfInit( process, conf );
-      }
-    };
+      @Override
+      public void sourceConfInit( FlowProcess<? extends Configuration> process, Configuration conf )
+        {
+        // don't set input format
+        //super.sourceConfInit( process, conf );
+        }
+      };
 
     Pipe pipe = new Pipe( "test" );
 
@@ -676,14 +679,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     final int[] readCount = {0};
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache )
-    {
-    @Override
-    public boolean prepareResourceForRead( Configuration conf ) throws IOException
       {
-      readCount[ 0 ] = readCount[ 0 ] + 1;
-      return true;
-      }
-    };
+      @Override
+      public boolean prepareResourceForRead( Configuration conf ) throws IOException
+        {
+        readCount[ 0 ] = readCount[ 0 ] + 1;
+        return true;
+        }
+      };
 
     Pipe pipe = new Pipe( "test" );
 
@@ -695,14 +698,14 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     final int[] writeCount = {0};
     Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "preparetap" ), SinkMode.REPLACE )
-    {
-    @Override
-    public boolean prepareResourceForWrite( Configuration conf ) throws IOException
       {
-      writeCount[ 0 ] = writeCount[ 0 ] + 1;
-      return true;
-      }
-    };
+      @Override
+      public boolean prepareResourceForWrite( Configuration conf ) throws IOException
+        {
+        writeCount[ 0 ] = writeCount[ 0 ] + 1;
+        return true;
+        }
+      };
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -719,13 +722,13 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     getPlatform().copyFromLocal( inputFileApache );
 
     Tap source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileApache )
-    {
-    @Override
-    public boolean prepareResourceForRead( Configuration conf ) throws IOException
       {
-      throw new IOException( "failed intentionally" );
-      }
-    };
+      @Override
+      public boolean prepareResourceForRead( Configuration conf ) throws IOException
+        {
+        throw new IOException( "failed intentionally" );
+        }
+      };
 
     Pipe pipe = new Pipe( "test" );
 
@@ -767,13 +770,13 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
     pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
     Tap sink = new Hfs( new TextDelimited( Fields.ALL ), getOutputPath( "preparewritetapfail" ), SinkMode.REPLACE )
-    {
-    @Override
-    public boolean prepareResourceForWrite( Configuration conf ) throws IOException
       {
-      throw new IOException( "failed intentionally" );
-      }
-    };
+      @Override
+      public boolean prepareResourceForWrite( Configuration conf ) throws IOException
+        {
+        throw new IOException( "failed intentionally" );
+        }
+      };
 
     Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
 
@@ -788,4 +791,28 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
       // success
       }
     }
+
+  @Test
+  public void testTemporarySinkPathIsDeleted() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "a", "b" ), " ", inputFileLowerOffset );
+
+    Pipe pipe = new Pipe( "test" );
+
+    String outputPath = getOutputPath( "partition-tap-sink" );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "a" ), " ", outputPath );
+    sink = getPlatform().getPartitionTap( sink, new DelimitedPartition( new Fields( "b" ) ), 1 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+    flow.complete();
+
+    Path tempPath = new Path( outputPath, Hadoop18TapUtil.TEMPORARY_PATH );
+    FileSystem fileSystem = tempPath.getFileSystem( (Configuration) flow.getConfigCopy() );
+
+    assertFalse( fileSystem.exists( tempPath ) );
+    }
+
   }

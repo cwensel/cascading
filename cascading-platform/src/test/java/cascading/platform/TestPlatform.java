@@ -27,6 +27,7 @@ import java.util.Map;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowProcess;
+import cascading.property.AppProps;
 import cascading.scheme.Scheme;
 import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
@@ -44,6 +45,7 @@ public abstract class TestPlatform
   private static final Logger LOG = LoggerFactory.getLogger( TestPlatform.class );
 
   public static final String CLUSTER_TESTING_PROPERTY = "test.cluster.enabled";
+  public static final String PLATFORM_PREFIX = "platform.";
 
   private boolean useCluster = false;
   private boolean enableCluster = true;
@@ -65,8 +67,8 @@ public abstract class TestPlatform
 
     for( String propertyName : System.getProperties().stringPropertyNames() )
       {
-      if( propertyName.startsWith( "platform." ) )
-        properties.put( propertyName.substring( "platform.".length() ), System.getProperty( propertyName ) );
+      if( propertyName.startsWith( PLATFORM_PREFIX ) )
+        properties.put( propertyName.substring( PLATFORM_PREFIX.length() ), System.getProperty( propertyName ) );
       }
 
     if( !properties.isEmpty() )
@@ -264,4 +266,15 @@ public abstract class TestPlatform
   public abstract Comparator getStringComparator( boolean reverseSort );
 
   public abstract String getHiddenTemporaryPath();
+
+  protected String getApplicationJar()
+    {
+    // mapred.jar is for backwards compatibility with the compatibility suite
+    String property = System.getProperty( "mapred.jar", System.getProperty( AppProps.APP_JAR_PATH ) );
+
+    if( property == null || property.isEmpty() )
+      return null;
+
+    return property;
+    }
   }

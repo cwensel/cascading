@@ -62,7 +62,12 @@ public class DelegatingTupleElementComparator implements StreamComparator<TupleI
 
     type = type == null && rhs != null ? rhs.getClass() : type;
 
-    return new TupleElementComparator( tupleSerialization.getComparator( type ) );
+    Comparator comparator = tupleSerialization.getComparator( type );
+
+    if( comparator instanceof StreamComparator )
+      return new TupleElementStreamComparator( (StreamComparator) comparator );
+
+    return new TupleElementComparator( comparator );
     }
 
   @Override

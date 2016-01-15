@@ -181,7 +181,7 @@ public class CascadePlatformTest extends PlatformTestCase
     Flow third = thirdFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
 
-    Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( fourth, second, third, first );
 
     cascade.start();
 
@@ -261,7 +261,7 @@ public class CascadePlatformTest extends PlatformTestCase
     Flow second = previousMultiTapFlow( path, "second" );
     Flow multitap = multiTapFlow( Tap.taps( first.getSink(), second.getSink() ), path );
 
-    Cascade cascade = new CascadeConnector().connect( multitap, first, second );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( multitap, first, second );
 
     cascade.start();
 
@@ -285,15 +285,15 @@ public class CascadePlatformTest extends PlatformTestCase
     CountingFlowListener flowListener = new CountingFlowListener();
     second.addListener( flowListener );
 
-    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( first, second, third, fourth );
 
     cascade.setFlowSkipStrategy( new FlowSkipStrategy()
-    {
-    public boolean skipFlow( Flow flow ) throws IOException
       {
-      return true;
-      }
-    } );
+      public boolean skipFlow( Flow flow ) throws IOException
+        {
+        return true;
+        }
+      } );
 
     cascade.start();
 
@@ -321,7 +321,7 @@ public class CascadePlatformTest extends PlatformTestCase
 
     first.addListener( flowListener );
 
-    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( first, second, third, fourth );
 
     cascade.addListener( cascadeListener );
 
@@ -371,7 +371,7 @@ public class CascadePlatformTest extends PlatformTestCase
     Flow third = thirdFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( third.getSink(), path + "/fourth" );
 
-    Cascade cascade = new CascadeConnector().connect( first, second, third, fourth );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( first, second, third, fourth );
 
     String id = cascade.getID();
 
@@ -397,7 +397,7 @@ public class CascadePlatformTest extends PlatformTestCase
     Flow third = thirdCheckpointFlow( second.getSink(), path + "/third" );
     Flow fourth = fourthFlow( (Tap) third.getCheckpoints().values().iterator().next(), path + "/fourth" );
 
-    Cascade cascade = new CascadeConnector().connect( fourth, second, third, first );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( fourth, second, third, first );
 
     cascade.start();
 
@@ -442,6 +442,6 @@ public class CascadePlatformTest extends PlatformTestCase
 
     Flow secondFlow = getPlatform().getFlowConnector().connect( flowDef );
 
-    new CascadeConnector().connect( firstFlow, secondFlow );
+    new CascadeConnector( getProperties() ).connect( firstFlow, secondFlow );
     }
   }

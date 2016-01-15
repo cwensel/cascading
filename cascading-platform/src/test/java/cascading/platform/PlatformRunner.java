@@ -22,6 +22,7 @@ package cascading.platform;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -77,6 +78,7 @@ public class PlatformRunner extends ParentRunner<Runner>
   private List<Runner> runners;
 
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface Platform
     {
     Class<? extends TestPlatform>[] value();

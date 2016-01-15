@@ -96,7 +96,7 @@ public class CascadingStatsLocalHadoopErrorPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( "mapper fail test", source, sink, pipe );
 
-    Cascade cascade = new CascadeConnector().connect( flow );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( flow );
     assertNull( cascade.getCascadeStats().getThrowable() );
 
     try
@@ -127,7 +127,7 @@ public class CascadingStatsLocalHadoopErrorPlatformTest extends PlatformTestCase
 
     Flow flow = getPlatform().getFlowConnector().connect( "reducer fail test", source, sink, pipe );
 
-    Cascade cascade = new CascadeConnector().connect( flow );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( flow );
     assertNull( cascade.getCascadeStats().getThrowable() );
     try
       {

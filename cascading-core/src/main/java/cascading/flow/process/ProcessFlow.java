@@ -120,7 +120,15 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
     try
       {
       if( processWrapper.hasCounters() )
-        this.flowStats = new ProcessFlowStats( this, getFlowSession().getCascadingServices().createClientState( getID() ), processWrapper );
+        {
+        flowStats = new ProcessFlowStats( this, getFlowSession().getCascadingServices().createClientState( getID() ), processWrapper );
+        flowStats.prepare();
+        flowStats.markPending();
+        }
+      else
+        {
+        flowStats = createPrepareFlowStats();
+        }
       }
     catch( ProcessException exception )
       {
@@ -402,7 +410,7 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
 
     for( Object path : paths )
       {
-      if( path instanceof Tap )
+      if( path instanceof Tap && ( (Tap) path ).getIdentifier() != null )
         taps.put( ( (Tap) path ).getIdentifier(), (Tap) path );
       else
         taps.put( path.toString(), new ProcessTap( new NullScheme(), path.toString() ) );

@@ -31,11 +31,13 @@ import cascading.flow.FlowStep;
 import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.BaseFlowStepFactory;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.FlowStepFactory;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.property.AppProps;
@@ -194,9 +196,17 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     return new HadoopFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
-  public FlowStep<JobConf> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  @Override
+  public FlowStepFactory<JobConf> getFlowStepFactory()
     {
-    return new HadoopFlowStep( stepElementGraph, flowNodeGraph );
+    return new BaseFlowStepFactory<JobConf>( getFlowNodeFactory() )
+    {
+    @Override
+    public FlowStep<JobConf> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+      {
+      return new HadoopFlowStep( stepElementGraph, flowNodeGraph );
+      }
+    };
     }
 
   public URI getDefaultURIScheme( Tap tap )

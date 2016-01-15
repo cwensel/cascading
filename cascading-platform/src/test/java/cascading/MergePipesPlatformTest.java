@@ -28,10 +28,12 @@ import java.util.Map;
 import cascading.flow.Flow;
 import cascading.operation.Function;
 import cascading.operation.Identity;
+import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
+import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
@@ -613,5 +615,47 @@ public class MergePipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, interMerge ? 17 : 14 );
+    }
+
+  @Test
+  public void testGroupByAggregationMerge() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath(), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+
+    pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
+    pipeLower = new Every( pipeLower, new Fields( "char" ), new First( Fields.ARGS ) );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    pipeUpper = new GroupBy( pipeUpper, new Fields( "num" ) );
+    pipeUpper = new Every( pipeUpper, new Fields( "char" ), new First( Fields.ARGS ) );
+
+    Pipe splice = new Merge( "merge", pipeLower, pipeUpper );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+
+    Collection results = getSinkAsList( flow );
+
+    assertTrue( "missing value", results.contains( new Tuple( "1\ta" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "1\tA" ) ) );
     }
   }

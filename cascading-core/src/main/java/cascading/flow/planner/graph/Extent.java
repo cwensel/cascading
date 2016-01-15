@@ -20,12 +20,7 @@
 
 package cascading.flow.planner.graph;
 
-import java.util.Set;
-
 import cascading.flow.FlowElement;
-import cascading.flow.planner.Scope;
-import cascading.property.ConfigDef;
-import cascading.tuple.Fields;
 
 /**
  * Enum Extent provides simple markers for the head and tail of an {@link ElementGraph} {@link FlowElement} graph.
@@ -34,66 +29,6 @@ public enum Extent implements FlowElement
   {
     head,
     tail;
-
-  @Override
-  public Scope outgoingScopeFor( Set<Scope> scopes )
-    {
-    return new Scope();
-    }
-
-  @Override
-  public Fields resolveIncomingOperationArgumentFields( Scope incomingScope )
-    {
-    return null;
-    }
-
-  @Override
-  public Fields resolveIncomingOperationPassThroughFields( Scope incomingScope )
-    {
-    return null;
-    }
-
-  @Override
-  public boolean isEquivalentTo( FlowElement element )
-    {
-    return false;
-    }
-
-  @Override
-  public ConfigDef getStepConfigDef()
-    {
-    return null;
-    }
-
-  @Override
-  public boolean hasStepConfigDef()
-    {
-    return false;
-    }
-
-  @Override
-  public ConfigDef getNodeConfigDef()
-    {
-    return null;
-    }
-
-  @Override
-  public boolean hasNodeConfigDef()
-    {
-    return false;
-    }
-
-  @Override
-  public ConfigDef getConfigDef()
-    {
-    return null;
-    }
-
-  @Override
-  public boolean hasConfigDef()
-    {
-    return false;
-    }
 
   @Override
   public String toString()

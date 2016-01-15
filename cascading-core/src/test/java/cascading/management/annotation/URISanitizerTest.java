@@ -181,6 +181,21 @@ public class URISanitizerTest
     }
 
   @Test
+  public void testOpaqueURI()
+    {
+    String uri = "memory:driven.agent.driven.spark.SkewExampleTest.testSubmit(SkewExampleTest.scala:36)";
+    URISanitizer sanitizer = new URISanitizer();
+    String result = sanitizer.apply( Visibility.PRIVATE, uri );
+    assertEquals( "memory:driven.agent.driven.spark.SkewExampleTest.testSubmit(SkewExampleTest.scala:36)", result );
+
+    result = sanitizer.apply( Visibility.PROTECTED, uri );
+    assertEquals( "memory:", result );
+
+    result = sanitizer.apply( Visibility.PUBLIC, uri );
+    assertEquals( "memory:", result );
+    }
+
+  @Test
   public void testS3NGlob2()
     {
     String uri = "s3n://host/path/conversion_date={2015-12-23,2015-12-22}";

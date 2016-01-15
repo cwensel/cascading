@@ -36,27 +36,49 @@ public abstract class TupleOutputStream extends DataOutputStream
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( TupleOutputStream.class );
 
-  protected interface TupleElementWriter
+  public interface TupleElementWriter
     {
     void write( TupleOutputStream stream, Object element ) throws IOException;
     }
-
-  private final Map<Class, TupleElementWriter> tupleElementWriters;
-  /** Field elementWriter */
-  final ElementWriter elementWriter;
 
   public interface ElementWriter
     {
     void write( DataOutputStream outputStream, Object object ) throws IOException;
 
+    void write( DataOutputStream outputStream, Class<?> type, Object object ) throws IOException;
+
     void close();
     }
 
-  public TupleOutputStream( Map<Class, TupleElementWriter> tupleElementWriters, OutputStream outputStream, ElementWriter elementWriter )
+  private final Map<Class, TupleElementWriter> tupleUnTypedElementWriters;
+  private final Map<Class, TupleElementWriter> tupleTypedElementWriters;
+
+  /** Field elementWriter */
+  final ElementWriter elementWriter;
+
+  public TupleOutputStream( Map<Class, TupleElementWriter> tupleUnTypedElementWriters, Map<Class, TupleElementWriter> tupleTypedElementWriters, OutputStream outputStream, ElementWriter elementWriter )
     {
     super( outputStream );
-    this.tupleElementWriters = tupleElementWriters;
+    this.tupleUnTypedElementWriters = tupleUnTypedElementWriters;
+    this.tupleTypedElementWriters = tupleTypedElementWriters;
     this.elementWriter = elementWriter;
+    }
+
+  public final TupleOutputStream.TupleElementWriter getWriterFor( final Class type ) throws IOException
+    {
+    TupleOutputStream.TupleElementWriter tupleElementWriter = tupleTypedElementWriters.get( type );
+
+    if( tupleElementWriter != null )
+      return tupleElementWriter;
+
+    return new TupleOutputStream.TupleElementWriter()
+    {
+    @Override
+    public void write( TupleOutputStream stream, Object element ) throws IOException
+      {
+      elementWriter.write( stream, type, element );
+      }
+    };
     }
 
   public void writeTuple( Tuple tuple ) throws IOException
@@ -81,6 +103,30 @@ public abstract class TupleOutputStream extends DataOutputStream
    */
   private void write( Tuple tuple ) throws IOException
     {
+    writeUnTyped( tuple );
+    }
+
+  public void writeWith( TupleElementWriter[] writers, Tuple tuple ) throws IOException
+    {
+    List<Object> elements = Tuple.elements( tuple );
+
+    for( int i = 0; i < writers.length; i++ )
+      writers[ i ].write( this, elements.get( i ) );
+    }
+
+  public void writeTyped( Class[] classes, Tuple tuple ) throws IOException
+    {
+    List<Object> elements = Tuple.elements( tuple );
+
+    for( int i = 0; i < classes.length; i++ )
+      {
+      Class type = classes[ i ];
+      writeTypedElement( type, elements.get( i ) );
+      }
+    }
+
+  public void writeUnTyped( Tuple tuple ) throws IOException
+    {
     List<Object> elements = Tuple.elements( tuple );
 
     writeIntInternal( elements.size() );
@@ -97,6 +143,16 @@ public abstract class TupleOutputStream extends DataOutputStream
       writeElement( element );
     }
 
+  public final void writeTypedElement( Class type, Object element ) throws IOException
+    {
+    TupleElementWriter tupleElementWriter = tupleTypedElementWriters.get( type );
+
+    if( tupleElementWriter != null )
+      tupleElementWriter.write( this, element );
+    else
+      elementWriter.write( this, type, element );
+    }
+
   public final void writeElement( Object element ) throws IOException
     {
     if( element == null )
@@ -106,7 +162,7 @@ public abstract class TupleOutputStream extends DataOutputStream
       }
 
     Class type = element.getClass();
-    TupleElementWriter tupleElementWriter = tupleElementWriters.get( type );
+    TupleElementWriter tupleElementWriter = tupleUnTypedElementWriters.get( type );
 
     if( tupleElementWriter != null )
       tupleElementWriter.write( this, element );

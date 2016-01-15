@@ -24,12 +24,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import cascading.tuple.Tuple;
+import cascading.tuple.util.Resettable2;
 
 /**
  * Class TuplePair is a utility class that is optimized to hold two Tuple instances for sorting and hashing of each
  * part independently.
  */
-public class TuplePair extends Tuple
+public class TuplePair extends Tuple implements Resettable2<Tuple, Tuple>
   {
   /** Field tuples */
   private final Tuple[] tuples = new Tuple[ 2 ];
@@ -40,7 +41,7 @@ public class TuplePair extends Tuple
    * @param tuplePair of type Tuple[]
    * @return Tuple[]
    */
-  static Tuple[] tuples( TuplePair tuplePair )
+  public static Tuple[] tuples( TuplePair tuplePair )
     {
     return tuplePair.tuples;
     }
@@ -90,6 +91,13 @@ public class TuplePair extends Tuple
   public Tuple getRhs()
     {
     return tuples[ 1 ];
+    }
+
+  @Override
+  public void reset( Tuple lhs, Tuple rhs )
+    {
+    tuples[ 0 ] = lhs;
+    tuples[ 1 ] = rhs;
     }
 
   @Override

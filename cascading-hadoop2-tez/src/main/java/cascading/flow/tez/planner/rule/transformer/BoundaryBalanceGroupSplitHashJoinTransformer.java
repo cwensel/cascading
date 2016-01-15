@@ -38,7 +38,7 @@ public class BoundaryBalanceGroupSplitHashJoinTransformer extends RuleInsertionT
       BalanceAssembly,
       new BalanceGroupSplitHashJoinExpression(),
       BoundaryElementFactory.BOUNDARY_PIPE,
-      InsertionGraphTransformer.Insertion.AfterEachEdge
+      InsertionGraphTransformer.Insertion.After
     );
     }
   }

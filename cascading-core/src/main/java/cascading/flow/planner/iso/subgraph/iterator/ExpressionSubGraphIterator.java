@@ -22,7 +22,6 @@ package cascading.flow.planner.iso.subgraph.iterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -181,7 +180,7 @@ public class ExpressionSubGraphIterator implements SubGraphIterator
 
       ElementGraph contractedMatchedGraph = match.getMatchedGraph();
 
-      Set<FlowElement> excludes = new HashSet<>( getContractedGraph().vertexSet() );
+      Set<FlowElement> excludes = getContractedGraph().vertexSetCopy();
 
       excludes.removeAll( contractedMatchedGraph.vertexSet() );
 

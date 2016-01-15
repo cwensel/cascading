@@ -26,6 +26,8 @@ import java.util.Map;
 
 import cascading.flow.FlowNode;
 import cascading.management.state.ClientState;
+import cascading.stats.BaseCachedNodeStats;
+import cascading.stats.CounterCache;
 import cascading.stats.FlowNodeStats;
 import cascading.stats.FlowSliceStats;
 import cascading.util.Util;
@@ -42,7 +44,7 @@ import static cascading.util.Util.formatDurationFromMillis;
 /**
  *
  */
-public class HadoopNodeStats extends BaseHadoopNodeStats<FlowNodeStats, Map<String, Map<String, Long>>>
+public class HadoopNodeStats extends BaseCachedNodeStats<Configuration, FlowNodeStats, Map<String, Map<String, Long>>>
   {
   private Map<TaskID, String> sliceIDCache = new HashMap<TaskID, String>( 4999 ); // caching for ids
 

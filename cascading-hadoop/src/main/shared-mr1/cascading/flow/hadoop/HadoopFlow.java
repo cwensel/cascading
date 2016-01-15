@@ -29,6 +29,7 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
+import cascading.flow.hadoop.util.HadoopMRUtil;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
@@ -91,6 +92,7 @@ public class HadoopFlow extends BaseFlow<JobConf>
   protected HadoopFlow( PlatformInfo platformInfo, Map<Object, Object> properties, JobConf jobConf, String name, Map<String, String> flowDescriptor )
     {
     super( platformInfo, properties, jobConf, name, flowDescriptor );
+
     initFromProperties( properties );
     }
 
@@ -120,14 +122,14 @@ public class HadoopFlow extends BaseFlow<JobConf>
     jobConf.set( "fs.http.impl", HttpFileSystem.class.getName() );
     jobConf.set( "fs.https.impl", HttpFileSystem.class.getName() );
 
-    syncPaths = HadoopUtil.addToClassPath( jobConf, getClassPath() );
+    syncPaths = HadoopMRUtil.addToClassPath( jobConf, getClassPath() );
     }
 
   @Override
   protected void setConfigProperty( JobConf config, Object key, Object value )
     {
     // don't let these objects pass, even though toString is called below.
-    if( value instanceof Class || value instanceof JobConf )
+    if( value instanceof Class || value instanceof JobConf || value == null )
       return;
 
     config.set( key.toString(), value.toString() );
@@ -203,10 +205,15 @@ public class HadoopFlow extends BaseFlow<JobConf>
       throw new FlowException( "unable to delete sinks", exception );
       }
 
+    registerHadoopShutdownHook();
+    }
+
+  protected void registerHadoopShutdownHook()
+    {
     registerHadoopShutdownHook( this );
     }
 
-  private void copyToDistributedCache()
+  protected void copyToDistributedCache()
     {
     HadoopUtil.syncPaths( jobConf, syncPaths, true );
     }

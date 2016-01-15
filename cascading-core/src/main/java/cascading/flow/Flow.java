@@ -171,7 +171,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    *
    * @return Map<String,String>
    */
-  public Map<String, String> getFlowDescriptor();
+  Map<String, String> getFlowDescriptor();
 
   @Override
   String getTags();

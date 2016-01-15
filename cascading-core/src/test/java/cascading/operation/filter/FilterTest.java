@@ -25,11 +25,9 @@ import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
-import cascading.operation.expression.ExpressionFilter;
 import cascading.pipe.assembly.Unique;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import org.junit.Test;
 
 /**
@@ -212,58 +210,5 @@ public class FilterTest extends CascadingTestCase
 
     for( int i = 0; i < results.length; i++ )
       assertEquals( "failed on: " + i, expected[ i ], results[ i ] );
-    }
-
-  // these tests verify an Expression can be safely nested.
-
-  public void testOrExpression()
-    {
-    Fields inputFields = new Fields( "a", "b" );
-    ExpressionFilter f1 = new ExpressionFilter( "( 100f < a )", new String[]{"a"}, new Class<?>[]{Float.TYPE} );
-    ExpressionFilter f2 = new ExpressionFilter( "( 100f < b )", new String[]{"b"}, new Class<?>[]{Float.TYPE} );
-    Or logic = new Or( new Fields( "a" ), f1, new Fields( "b" ), f2 );
-
-    boolean[] results = invokeFilter( logic,
-      new TupleEntry[]{
-        new TupleEntry( inputFields, new Tuple( "1", "10" ) ),
-        new TupleEntry( inputFields, new Tuple( "2", "20" ) )
-      } );
-
-    assertFalse( results[ 0 ] );
-    assertFalse( results[ 1 ] );
-    }
-
-  public void testXorExpression()
-    {
-    Fields inputFields = new Fields( "a", "b" );
-    ExpressionFilter f1 = new ExpressionFilter( "( 100f < a )", new String[]{"a"}, new Class<?>[]{Float.TYPE} );
-    ExpressionFilter f2 = new ExpressionFilter( "( 100f < b )", new String[]{"b"}, new Class<?>[]{Float.TYPE} );
-    Xor logic = new Xor( new Fields( "a" ), f1, new Fields( "b" ), f2 );
-
-    boolean[] results = invokeFilter( logic,
-      new TupleEntry[]{
-        new TupleEntry( inputFields, new Tuple( "1", "10" ) ),
-        new TupleEntry( inputFields, new Tuple( "2", "20" ) )
-      } );
-
-    assertFalse( results[ 0 ] );
-    assertFalse( results[ 1 ] );
-    }
-
-  public void testAndExpression()
-    {
-    Fields inputFields = new Fields( "a", "b" );
-    ExpressionFilter f1 = new ExpressionFilter( "( 100f < a )", new String[]{"a"}, new Class<?>[]{Float.TYPE} );
-    ExpressionFilter f2 = new ExpressionFilter( "( 100f < b )", new String[]{"b"}, new Class<?>[]{Float.TYPE} );
-    And logic = new And( new Fields( "a" ), f1, new Fields( "b" ), f2 );
-
-    boolean[] results = invokeFilter( logic,
-      new TupleEntry[]{
-        new TupleEntry( inputFields, new Tuple( "1", "10" ) ),
-        new TupleEntry( inputFields, new Tuple( "2", "20" ) )
-      } );
-
-    assertFalse( results[ 0 ] );
-    assertFalse( results[ 1 ] );
     }
   }

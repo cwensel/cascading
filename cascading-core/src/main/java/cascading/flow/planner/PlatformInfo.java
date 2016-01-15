@@ -27,6 +27,8 @@ import java.io.Serializable;
  */
 public class PlatformInfo implements Serializable, Comparable<PlatformInfo>
   {
+  public static final PlatformInfo NULL = new PlatformInfo( null, null, null );
+
   public final String name;
   public final String vendor;
   public final String version;

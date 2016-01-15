@@ -46,6 +46,7 @@ import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.process.ProcessGraphs;
@@ -84,8 +85,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   private static final Logger LOG = LoggerFactory.getLogger( Flow.class ); // wrapped by ProcessLogger interface methods
   private static final int LOG_FLOW_NAME_MAX = 25;
 
-  private PlannerInfo plannerInfo;
-  private PlatformInfo platformInfo;
+  private PlannerInfo plannerInfo = PlannerInfo.NULL;
+  protected PlatformInfo platformInfo = PlatformInfo.NULL;
 
   /** Field id */
   private String id;
@@ -117,7 +118,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   private int submitPriority = 5;
 
   /** Field stepGraph */
-  private FlowStepGraph flowStepGraph;
+  protected FlowStepGraph flowStepGraph;
   /** Field thread */
   protected transient Thread thread;
   /** Field throwable */
@@ -125,14 +126,16 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   /** Field stop */
   protected boolean stop;
 
-  /** Field pipeGraph */
-  private FlowElementGraph flowElementGraph; // only used for documentation purposes
+  /** Field flowCanonicalHash */
+  protected String flowCanonicalHash;
+  /** Field flowElementGraph */
+  protected FlowElementGraph flowElementGraph; // only used for documentation purposes
 
   private transient CascadingServices cascadingServices;
 
   private FlowStepStrategy<Config> flowStepStrategy = null;
   /** Field steps */
-  private transient List<FlowStep<Config>> steps;
+  protected transient List<FlowStep<Config>> steps;
   /** Field jobsMap */
   private transient Map<String, FlowStepJob<Config>> jobsMap;
   private transient UnitOfWorkSpawnStrategy spawnStrategy = new UnitOfWorkExecutorStrategy();
@@ -140,7 +143,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   private transient ReentrantLock stopLock = new ReentrantLock( true );
   protected ShutdownUtil.Hook shutdownHook;
 
-  private HashMap<String, String> flowDescriptor;
+  protected HashMap<String, String> flowDescriptor;
 
   /**
    * Returns property stopJobsOnExit.
@@ -160,14 +163,24 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     this.flowStats = createPrepareFlowStats();
     }
 
-  protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name )
+  /**
+   * Does not initialize stats
+   *
+   * @param name
+   */
+  protected BaseFlow( PlatformInfo platformInfo, String name )
     {
-    this( platformInfo, properties, defaultConfig, name, new LinkedHashMap<String, String>() );
+    if( platformInfo != null )
+      this.platformInfo = platformInfo;
+
+    this.name = name;
     }
 
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, String name, Map<String, String> flowDescriptor )
     {
-    this.platformInfo = platformInfo;
+    if( platformInfo != null )
+      this.platformInfo = platformInfo;
+
     this.name = name;
 
     if( flowDescriptor != null )
@@ -175,22 +188,22 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
-
-    this.flowStats = createPrepareFlowStats(); // must be last
     }
 
   protected BaseFlow( PlatformInfo platformInfo, Map<Object, Object> properties, Config defaultConfig, FlowDef flowDef )
     {
     properties = PropertyUtil.asFlatMap( properties );
 
-    this.platformInfo = platformInfo;
+    if( platformInfo != null )
+      this.platformInfo = platformInfo;
+
     this.name = flowDef.getName();
     this.tags = flowDef.getTags();
     this.runID = flowDef.getRunID();
     this.classPath = flowDef.getClassPath();
 
     if( !flowDef.getFlowDescriptor().isEmpty() )
-      this.flowDescriptor = new LinkedHashMap<String, String>( flowDef.getFlowDescriptor() );
+      this.flowDescriptor = new LinkedHashMap<>( flowDef.getFlowDescriptor() );
 
     addSessionProperties( properties );
     initConfig( properties, defaultConfig );
@@ -229,9 +242,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
     initSteps();
 
-    this.flowStats = createPrepareFlowStats(); // must be last
+    this.flowStats = createPrepareFlowStats();
 
     initializeNewJobsMap();
+
+    initializeChildStats();
     }
 
   public FlowElementGraph updateSchemes( FlowElementGraph pipeGraph )
@@ -302,7 +317,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     return pipeGraph.outgoingEdgesOf( tap ).iterator().next().getOutValuesFields();
     }
 
-  private void addSessionProperties( Map<Object, Object> properties )
+  protected void addSessionProperties( Map<Object, Object> properties )
     {
     if( properties == null )
       return;
@@ -347,14 +362,19 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     return Util.findVersion( AppProps.getApplicationJarPath( properties ) );
     }
 
-  private FlowStats createPrepareFlowStats()
+  protected FlowStats createPrepareFlowStats()
     {
-    FlowStats flowStats = new FlowStats( this, getClientState() );
+    FlowStats flowStats = createFlowStats();
 
     flowStats.prepare();
     flowStats.markPending();
 
     return flowStats;
+    }
+
+  protected FlowStats createFlowStats()
+    {
+    return new FlowStats( this, getClientState() );
     }
 
   public CascadingServices getCascadingServices()
@@ -365,7 +385,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     return cascadingServices;
     }
 
-  private ClientState getClientState()
+  protected ClientState getClientState()
     {
     return getFlowSession().getCascadingServices().createClientState( getID() );
     }
@@ -442,6 +462,29 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     this.submitPriority = submitPriority;
     }
 
+  /**
+   * The hash value can be used to determine if two unique Flow instances performed the same work.
+   * <p/>
+   * The source and sink taps are not relevant to the hash.
+   *
+   * @return a String value
+   */
+  public synchronized String getFlowCanonicalHash()
+    {
+    if( flowCanonicalHash == null )
+      flowCanonicalHash = createFlowCanonicalHash();
+
+    return flowCanonicalHash;
+    }
+
+  protected String createFlowCanonicalHash()
+    {
+    if( flowElementGraph != null )
+      return ElementGraphs.canonicalHash( flowElementGraph );
+
+    return null;
+    }
+
   FlowElementGraph getFlowElementGraph()
     {
     return flowElementGraph;
@@ -454,12 +497,18 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   protected void setSources( Map<String, Tap> sources )
     {
+    if( sources == null )
+      return;
+
     addListeners( sources.values() );
     this.sources = sources;
     }
 
   protected void setSinks( Map<String, Tap> sinks )
     {
+    if( sinks == null )
+      return;
+
     addListeners( sinks.values() );
     this.sinks = sinks;
     }
@@ -863,13 +912,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   protected Thread createFlowThread( String threadName )
     {
     return new Thread( new Runnable()
-    {
-    @Override
-    public void run()
       {
-      BaseFlow.this.run();
-      }
-    }, threadName );
+      @Override
+      public void run()
+        {
+        BaseFlow.this.run();
+        }
+      }, threadName );
     }
 
   protected abstract void internalStart();
@@ -1252,10 +1301,16 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   private List<Future<Throwable>> spawnJobs( int numThreads ) throws InterruptedException
     {
-    if( stop )
-      return new ArrayList<Future<Throwable>>();
+    if( spawnStrategy == null )
+      {
+      logError( "no spawnStrategy set" );
+      return new ArrayList<>();
+      }
 
-    List<Callable<Throwable>> list = new ArrayList<Callable<Throwable>>();
+    if( stop )
+      return new ArrayList<>();
+
+    List<Callable<Throwable>> list = new ArrayList<>();
 
     for( FlowStepJob<Config> job : jobsMap.values() )
       list.add( job );
@@ -1296,9 +1351,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
         predecessors.add( jobsMap.get( ( (FlowStep) flowStep ).getName() ) );
 
       flowStepJob.setPredecessors( predecessors );
-
-      flowStats.addStepStats( flowStepJob.getStepStats() );
       }
+    }
+
+  protected void initializeChildStats()
+    {
+    for( FlowStepJob<Config> flowStepJob : jobsMap.values() )
+      flowStats.addStepStats( flowStepJob.getStepStats() );
     }
 
   protected void internalStopAllJobs()
@@ -1325,10 +1384,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   protected void handleExecutorShutdown()
     {
+    if( spawnStrategy == null )
+      return;
+
     if( spawnStrategy.isCompleted( this ) )
       return;
 
-    logInfo( "shutting down job executor" );
+    logDebug( "shutting down job executor" );
 
     try
       {
@@ -1339,14 +1401,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       // ignore
       }
 
-    logInfo( "shutdown complete" );
+    logDebug( "shutdown of job executor complete" );
     }
 
   protected void fireOnCompleted()
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onCompleted event: " + getListeners().size() );
 
       for( FlowListener flowListener : getListeners() )
@@ -1364,7 +1426,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onThrowable event: " + getListeners().size() );
 
       boolean isHandled = false;
@@ -1381,7 +1443,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStopping event: " + getListeners().size() );
 
       for( FlowListener flowListener : getListeners() )
@@ -1393,7 +1455,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     if( hasListeners() )
       {
-      if( LOG.isDebugEnabled() )
+      if( isDebugEnabled() )
         logDebug( "firing onStarting event: " + getListeners().size() );
 
       for( FlowListener flowListener : getListeners() )
@@ -1539,21 +1601,21 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       return;
 
     shutdownHook = new ShutdownUtil.Hook()
-    {
-    @Override
-    public Priority priority()
       {
-      return Priority.WORK_CHILD;
-      }
+      @Override
+      public Priority priority()
+        {
+        return Priority.WORK_CHILD;
+        }
 
-    @Override
-    public void execute()
-      {
-      logInfo( "shutdown hook calling stop on flow" );
+      @Override
+      public void execute()
+        {
+        logInfo( "shutdown hook calling stop on flow" );
 
-      BaseFlow.this.stop();
-      }
-    };
+        BaseFlow.this.stop();
+        }
+      };
 
     ShutdownUtil.addHook( shutdownHook );
     }

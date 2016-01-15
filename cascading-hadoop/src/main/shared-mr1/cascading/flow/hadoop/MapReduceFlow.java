@@ -158,32 +158,54 @@ public class MapReduceFlow extends HadoopFlow
     this.deleteSinkOnInit = deleteSinkOnInit;
     this.stopJobsOnExit = stopJobsOnExit;
 
+    initializeFrom( jobConf ); // push off initialization allowing for overrides
+    }
+
+  protected void initializeFrom( JobConf jobConf )
+    {
     setSources( createSources( jobConf ) );
     setSinks( createSinks( jobConf ) );
     setTraps( createTraps( jobConf ) );
     setFlowStepGraph( makeStepGraph( jobConf ) );
+
+    // this mirrors BaseFlow#initialize()
+
     initSteps();
 
+    this.flowStats = createPrepareFlowStats(); // must be last
+
     initializeNewJobsMap();
+
+    initializeChildStats();
     }
 
-  private FlowStepGraph makeStepGraph( JobConf jobConf )
+  protected FlowStepGraph makeStepGraph( JobConf jobConf )
     {
     FlowStepGraph flowStepGraph = new FlowStepGraph();
 
     Tap sink = getSinksCollection().iterator().next();
-    FlowStep<JobConf> step = new MapReduceFlowStep( getName(), sink.toString(), jobConf, sink );
+    FlowStep<JobConf> step = createFlowStep( jobConf, sink );
 
     flowStepGraph.addVertex( step );
 
     return flowStepGraph;
     }
 
+  protected FlowStep<JobConf> createFlowStep( JobConf jobConf, Tap sink )
+    {
+    return new MapReduceFlowStep( getName(), sink.toString(), jobConf, sink );
+    }
+
   protected Map<String, Tap> createSources( JobConf jobConf )
+    {
+    return fileInputToTaps( jobConf );
+    }
+
+  protected Map<String, Tap> fileInputToTaps( JobConf jobConf )
     {
     Path[] paths = FileInputFormat.getInputPaths( jobConf );
 
-    if( paths.length == 0 )
+    if( paths == null || paths.length == 0 )
       {
       try
         {
@@ -195,18 +217,28 @@ public class MapReduceFlow extends HadoopFlow
         }
       }
 
-    Map<String, Tap> taps = new HashMap<String, Tap>();
+    Map<String, Tap> taps = new HashMap<>();
 
     for( Path path : paths )
-      taps.put( path.toString(), new Hfs( new NullScheme(), path.toString() ) );
+      toSourceTap( taps, path );
 
     return taps;
     }
 
+  protected Tap toSourceTap( Map<String, Tap> taps, Path path )
+    {
+    String name = makeNameFromPath( taps, path );
+
+    return taps.put( name, new Hfs( new NullScheme(), path.toString() ) );
+    }
+
   protected Map<String, Tap> createSinks( JobConf jobConf )
     {
-    Map<String, Tap> taps = new HashMap<String, Tap>();
+    return fileOutputToTaps( jobConf );
+    }
 
+  protected Map<String, Tap> fileOutputToTaps( JobConf jobConf )
+    {
     Path path = FileOutputFormat.getOutputPath( jobConf );
 
     if( path == null )
@@ -221,13 +253,37 @@ public class MapReduceFlow extends HadoopFlow
         }
       }
 
-    taps.put( path.toString(), new Hfs( new NullScheme(), path.toString(), deleteSinkOnInit ? SinkMode.REPLACE : SinkMode.KEEP ) );
+    Map<String, Tap> taps = new HashMap<>();
+
+    toSinkTap( taps, path );
 
     return taps;
     }
 
+  protected Tap toSinkTap( Map<String, Tap> taps, Path path )
+    {
+    String name = makeNameFromPath( taps, path );
+
+    return taps.put( name, new Hfs( new NullScheme(), path.toString(), deleteSinkOnInit ? SinkMode.REPLACE : SinkMode.KEEP ) );
+    }
+
+  // find the least sensitive name
+  protected String makeNameFromPath( Map<String, Tap> taps, Path path )
+    {
+    Path parent = path.getParent();
+    String name = path.getName();
+
+    while( taps.containsKey( name ) )
+      {
+      name = new Path( parent.getName(), name ).toString();
+      parent = parent.getParent();
+      }
+
+    return name;
+    }
+
   protected Map<String, Tap> createTraps( JobConf jobConf )
     {
-    return new HashMap<String, Tap>();
+    return new HashMap<>();
     }
   }

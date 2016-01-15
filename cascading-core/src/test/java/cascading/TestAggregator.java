@@ -26,6 +26,7 @@ import cascading.operation.AggregatorCall;
 import cascading.operation.BaseOperation;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 
 public class TestAggregator extends BaseOperation implements Aggregator
   {
@@ -90,10 +91,29 @@ public class TestAggregator extends BaseOperation implements Aggregator
 
   public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
     {
+    TupleEntry result;
+
+    if( aggregatorCall.getDeclaredFields().isUnknown() )
+      result = new TupleEntry( Fields.size( value[ 0 ].size() ), Tuple.size( value[ 0 ].size() ) );
+    else
+      result = new TupleEntry( aggregatorCall.getDeclaredFields(), Tuple.size( aggregatorCall.getDeclaredFields().size() ) );
+
     for( int i = 0; i < duplicates; i++ )
       {
       for( Tuple tuple : value )
-        aggregatorCall.getOutputCollector().add( tuple );
+        {
+        try
+          {
+          result.setCanonicalTuple( tuple );
+          }
+        catch( Exception exception )
+          {
+          // value is a string, but the the test declared a numeric type
+          result.setCanonicalTuple( Tuple.size( value[ 0 ].size(), -99 ) );
+          }
+
+        aggregatorCall.getOutputCollector().add( result );
+        }
       }
     }
   }

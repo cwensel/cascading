@@ -118,22 +118,43 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   private transient FlowStepJob<Config> flowStepJob;
 
-  // for testing
+  /** optional metadata about the FlowStep */
+  private Map<String, String> flowStepDescriptor = Collections.emptyMap();
+
   protected BaseFlowStep( String name, int ordinal )
+    {
+    this( name, ordinal, null );
+    }
+
+  protected BaseFlowStep( String name, int ordinal, Map<String, String> flowStepDescriptor )
+    {
+    this( name, ordinal, null, flowStepDescriptor );
+    }
+
+  protected BaseFlowStep( String name, int ordinal, FlowNodeGraph flowNodeGraph, Map<String, String> flowStepDescriptor )
     {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     setName( name );
     this.ordinal = ordinal;
 
     this.elementGraph = null;
-    this.flowNodeGraph = null;
+    this.flowNodeGraph = flowNodeGraph;
+
+    setFlowStepDescriptor( flowStepDescriptor );
     }
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph )
     {
+    this( elementStepGraph, flowNodeGraph, null );
+    }
+
+  protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph, Map<String, String> flowStepDescriptor )
+    {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.elementGraph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
+
+    setFlowStepDescriptor( flowStepDescriptor );
 
     configure();
     }
@@ -141,12 +162,17 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   protected void configure()
     {
     // todo: remove once FlowMapper/FlowReducer aren't reliant
-    ElementGraphs.addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
-    ElementGraphs.addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
+    addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
+    addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
 
-    addGroups( findAllGroups( elementGraph ) );
+    addAllGroups();
 
     traps.putAll( flowNodeGraph.getTrapsMap() );
+    }
+
+  protected void addAllGroups()
+    {
+    addGroups( findAllGroups( elementGraph ) );
     }
 
   @Override
@@ -178,6 +204,18 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
       throw new IllegalArgumentException( "step name may not be null or empty" );
 
     this.name = name;
+    }
+
+  @Override
+  public Map<String, String> getFlowStepDescriptor()
+    {
+    return Collections.unmodifiableMap( flowStepDescriptor );
+    }
+
+  protected void setFlowStepDescriptor( Map<String, String> flowStepDescriptor )
+    {
+    if( flowStepDescriptor != null )
+      this.flowStepDescriptor = flowStepDescriptor;
     }
 
   @Override
@@ -383,7 +421,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   public Set<Tap> getAllAccumulatedSources()
     {
-    return Util.narrowSet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
+    return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
     }
 
   public void addSource( String name, Tap source )
@@ -438,9 +476,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSourceWith( String identifier )
     {
+    if( Util.isEmpty( identifier ) )
+      return null;
+
     for( Tap tap : sources.keySet() )
       {
-      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+      if( identifier.equalsIgnoreCase( tap.getIdentifier() ) )
         return tap;
       }
 
@@ -450,9 +491,12 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSinkWith( String identifier )
     {
+    if( Util.isEmpty( identifier ) )
+      return null;
+
     for( Tap tap : sinks.keySet() )
       {
-      if( tap.getIdentifier().equalsIgnoreCase( identifier ) )
+      if( identifier.equalsIgnoreCase( tap.getIdentifier() ) )
         return tap;
       }
 
@@ -841,6 +885,9 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     {
     CascadingServices services = flowProcess.getCurrentSession().getCascadingServices();
 
+    if( services == null )
+      return ClientState.NULL;
+
     return services.createClientState( getID() );
     }
 
@@ -897,8 +944,8 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
             continue;
             }
 
-          if( element.hasNodeConfigDef() )
-            element.getNodeConfigDef().apply( mode, setter );
+          if( element instanceof ScopedElement && ( (ScopedElement) element ).hasNodeConfigDef() )
+            ( (ScopedElement) element ).getNodeConfigDef().apply( mode, setter );
 
           // walk up the sub-assembly parent hierarchy
           if( element instanceof Pipe )
@@ -935,8 +982,8 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
         while( element != null )
           {
-          if( element.hasStepConfigDef() )
-            element.getStepConfigDef().apply( mode, setter );
+          if( element instanceof ScopedElement && ( (ScopedElement) element ).hasStepConfigDef() )
+            ( (ScopedElement) element ).getStepConfigDef().apply( mode, setter );
 
           // walk up the sub-assembly parent hierarchy
           if( element instanceof Pipe )
@@ -945,6 +992,24 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
             element = null;
           }
         }
+      }
+    }
+
+  protected static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
+    {
+    for( Tap tap : sources )
+      {
+      for( Scope scope : elementGraph.outgoingEdgesOf( tap ) )
+        flowStep.addSource( scope.getName(), tap );
+      }
+    }
+
+  protected static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
+    {
+    for( Tap tap : sinks )
+      {
+      for( Scope scope : elementGraph.incomingEdgesOf( tap ) )
+        flowStep.addSink( scope.getName(), tap );
       }
     }
 

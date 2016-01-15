@@ -32,6 +32,7 @@ import cascading.tuple.Fields;
 public class TestConstants
   {
   /** Field TAB_SPLITTER is a predefined {@link cascading.operation.regex.RegexSplitter} for splitting on the TAB character */
+  @Deprecated
   public static final RegexSplitter TAB_SPLITTER = new RegexSplitter( "\t" );
 
   /** Field APACHE_GROUPS defines the significant regex groups used in {@link #APACHE_COMMON_GROUP_FIELDS} */
@@ -56,7 +57,9 @@ public class TestConstants
    */
   public static final String APACHE_DATE_FORMAT = "dd/MMM/yyyy:HH:mm:ss Z";
   /** Field APACHE_DATE_PARSER is a convenience {@link cascading.operation.text.DateParser} instance for parsing the date from an Apache log file */
+  @Deprecated
   public static final DateParser APACHE_DATE_PARSER = new DateParser( APACHE_DATE_FORMAT );
   /** Field TAB_JOINER is a predfined {@link cascading.operation.text.FieldJoiner} for joining field values with the TAB character. */
+  @Deprecated
   public static final FieldJoiner TAB_JOINER = new FieldJoiner( "\t" );
   }

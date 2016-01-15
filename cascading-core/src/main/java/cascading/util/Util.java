@@ -128,6 +128,27 @@ public class Util
     return collection.iterator().next();
     }
 
+  public static <V> V getFirst( Iterator<V> iterator )
+    {
+    if( iterator == null || !iterator.hasNext() )
+      return null;
+
+    return iterator.next();
+    }
+
+  public static <V> V getLast( Iterator<V> iterator )
+    {
+    if( iterator == null || !iterator.hasNext() )
+      return null;
+
+    V v = iterator.next();
+
+    while( iterator.hasNext() )
+      v = iterator.next();
+
+    return v;
+    }
+
   public static <N extends Number> N max( Collection<N> collection )
     {
     return new TreeSet<>( collection ).first();
@@ -143,9 +164,19 @@ public class Util
     return narrowSet( type, collection.iterator() );
     }
 
+  public static <T> Set<T> narrowIdentitySet( Class<T> type, Collection collection )
+    {
+    return narrowIdentitySet( type, collection.iterator() );
+    }
+
   public static <T> Set<T> narrowSet( Class<T> type, Collection collection, boolean include )
     {
     return narrowSet( type, collection.iterator(), include );
+    }
+
+  public static <T> Set<T> narrowIdentitySet( Class<T> type, Collection collection, boolean include )
+    {
+    return narrowIdentitySet( type, collection.iterator(), include );
     }
 
   public static <T> Set<T> narrowSet( Class<T> type, Iterator iterator )
@@ -153,10 +184,23 @@ public class Util
     return narrowSet( type, iterator, true );
     }
 
+  public static <T> Set<T> narrowIdentitySet( Class<T> type, Iterator iterator )
+    {
+    return narrowIdentitySet( type, iterator, true );
+    }
+
   public static <T> Set<T> narrowSet( Class<T> type, Iterator iterator, boolean include )
     {
-    Set<T> set = new HashSet<>();
+    return narrowSetInternal( type, iterator, include, new HashSet<T>() );
+    }
 
+  public static <T> Set<T> narrowIdentitySet( Class<T> type, Iterator iterator, boolean include )
+    {
+    return narrowSetInternal( type, iterator, include, Util.<T>createIdentitySet() );
+    }
+
+  private static <T> Set<T> narrowSetInternal( Class<T> type, Iterator iterator, boolean include, Set<T> set )
+    {
     while( iterator.hasNext() )
       {
       Object o = iterator.next();
@@ -465,9 +509,12 @@ public class Util
 
   public static <T> List<T> split( Class<T> type, String delim, String values )
     {
-    String[] split = values.split( delim );
-
     List<T> results = new ArrayList<>();
+
+    if( values == null )
+      return results;
+
+    String[] split = values.split( delim );
 
     for( String value : split )
       results.add( Coercions.<T>coerce( value, type ) );

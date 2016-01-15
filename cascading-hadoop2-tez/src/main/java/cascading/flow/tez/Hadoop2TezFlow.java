@@ -91,12 +91,6 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
     return jobConf.getInt( MAX_CONCURRENT_STEPS, 0 );
     }
 
-  protected Hadoop2TezFlow( PlatformInfo platformInfo, Map<Object, Object> properties, TezConfiguration flowConf, String name )
-    {
-    super( platformInfo, properties, flowConf, name );
-    initFromProperties( properties );
-    }
-
   public Hadoop2TezFlow( PlatformInfo platformInfo, Map<Object, Object> properties, TezConfiguration flowConf, FlowDef flowDef )
     {
     super( platformInfo, properties, flowConf, flowDef );
@@ -108,6 +102,7 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
   protected void initFromProperties( Map<Object, Object> properties )
     {
     super.initFromProperties( properties );
+
     preserveTemporaryFiles = getPreserveTemporaryFiles( properties );
     }
 
@@ -145,7 +140,7 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
   protected void setConfigProperty( TezConfiguration config, Object key, Object value )
     {
     // don't let these objects pass, even though toString is called below.
-    if( value instanceof Class || value instanceof Configuration )
+    if( value instanceof Class || value instanceof Configuration || value == null )
       return;
 
     config.set( key.toString(), value.toString() );

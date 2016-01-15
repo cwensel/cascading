@@ -27,6 +27,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.Scope;
+import cascading.flow.planner.ScopedElement;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.Stage;
 import cascading.pipe.Pipe;
@@ -54,8 +55,8 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
 
     while( element != null )
       {
-      if( element.hasConfigDef() )
-        flowProcess = new ElementFlowProcess( flowProcess, element.getConfigDef() );
+      if( element instanceof ScopedElement && ( (ScopedElement) element ).hasConfigDef() )
+        flowProcess = new ElementFlowProcess( flowProcess, ( (ScopedElement) element ).getConfigDef() );
 
       if( element instanceof Pipe )
         element = ( (Pipe) element ).getParent();
@@ -106,7 +107,7 @@ public abstract class ElementStage<Incoming, Outgoing> extends Stage<Incoming, O
 
   protected Fields getOutgoingFields()
     {
-    return unwind( next ).getFlowElement().resolveIncomingOperationPassThroughFields( outgoingScopes.get( 0 ) );
+    return ( (ScopedElement) unwind( next ).getFlowElement() ).resolveIncomingOperationPassThroughFields( outgoingScopes.get( 0 ) );
     }
 
   private ElementDuct unwind( Duct next )

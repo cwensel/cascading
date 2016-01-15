@@ -69,7 +69,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * base path and default {@link cascading.scheme.Scheme}, and the partition.
    *
    * @param parent    of type Tap
-   * @param partition of type String
+   * @param partition of type Partition
    */
   @ConstructorProperties({"parent", "partition"})
   public PartitionTap( FileTap parent, Partition partition )
@@ -84,7 +84,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * {@code openWritesThreshold} limits the number of open files to be output to.
    *
    * @param parent              of type Hfs
-   * @param partition           of type String
+   * @param partition           of type Partition
    * @param openWritesThreshold of type int
    */
   @ConstructorProperties({"parent", "partition", "openWritesThreshold"})
@@ -98,7 +98,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * base path and default {@link cascading.scheme.Scheme}, and the partition.
    *
    * @param parent    of type Tap
-   * @param partition of type String
+   * @param partition of type Partition
    * @param sinkMode  of type SinkMode
    */
   @ConstructorProperties({"parent", "partition", "sinkMode"})
@@ -115,7 +115,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    *
    * @param parent             of type Tap
-   * @param partition          of type String
+   * @param partition          of type Partition
    * @param sinkMode           of type SinkMode
    * @param keepParentOnDelete of type boolean
    */
@@ -135,7 +135,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * {@code openWritesThreshold} limits the number of open files to be output to.
    *
    * @param parent              of type Tap
-   * @param partition           of type String
+   * @param partition           of type Partition
    * @param sinkMode            of type SinkMode
    * @param keepParentOnDelete  of type boolean
    * @param openWritesThreshold of type int

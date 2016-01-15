@@ -39,6 +39,7 @@ public class ShutdownUtil
    * System property set to true when we have entered shutdown
    */
   public static final String SHUTDOWN_EXECUTING = "cascading.jvm.shutdown.executing";
+  public static final String SHUTDOWN_FORCE_NON_DAEMON = "cascading.jvm.shutdown.non-daemon";
 
   private static final Logger LOG = LoggerFactory.getLogger( ShutdownUtil.class );
 
@@ -94,8 +95,16 @@ public class ShutdownUtil
     if( shutdownHook != null )
       return;
 
+    final boolean isForceNonDaemon = Boolean.getBoolean( SHUTDOWN_FORCE_NON_DAEMON );
+
     shutdownHook = new Thread( "cascading shutdown hooks" )
     {
+
+    {
+    if( isForceNonDaemon )
+      this.setDaemon( false );
+    }
+
     @Override
     public void run()
       {
@@ -121,7 +130,8 @@ public class ShutdownUtil
             }
           catch( Exception exception )
             {
-            LOG.error( "failed executing hook: {}, with exception: {}", hook, exception );
+            LOG.error( "failed executing hook: {}, with exception: {}", hook, exception.getMessage() );
+            LOG.debug( "with exception trace", exception );
             }
           }
         }

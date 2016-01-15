@@ -24,7 +24,7 @@ idea {
   pathVariables MODULE_DIR: file( "${rootDir}/cascading-hadoop" )
 }
 
-ext.hadoop2Version = '2.6.0'
+ext.hadoop2Version = '2.7.1'
 ext.tezVersion = '0.6.2'
 
 if( System.properties[ 'hadoop2tez.release.final' ] )
@@ -39,6 +39,8 @@ repositories {
 dependencies {
 
   compile project( ':cascading-core' )
+  compile project( ':cascading-hadoop2-io' )
+  compile project( ':cascading-hadoop2-tez-stats' )
 
   // forces update of yarn slf4j dependencies
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'

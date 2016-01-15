@@ -49,9 +49,11 @@ public class FlowRuntimeProps extends Props
   {
   public static final String GATHER_PARTITIONS = "cascading.flow.runtime.gather.partitions.num";
   public static final String LOG_COUNTERS = "cascading.flow.runtime.log.counters";
+  public static final String COMBINE_SPLITS = "cascading.flow.runtime.splits.combine";
 
   int gatherPartitions = 0;
   Set<String> logCounters = new LinkedHashSet<>();
+  Boolean combineSplits;
 
   public static FlowRuntimeProps flowRuntimeProps()
     {
@@ -120,6 +122,32 @@ public class FlowRuntimeProps extends Props
     return this;
     }
 
+  public Boolean getCombineSplits()
+    {
+    return combineSplits;
+    }
+
+  /**
+   * Method setCombineSplits will enable or disable combining of 'splits' on sources.
+   * <p/>
+   * A split is a sub-set of data from a {@link cascading.tap.Tap} source resource. Combining
+   * small splits into larger ones both reduce parallelism, but also reduce overhead of starting
+   * work on a very small data set.
+   * <p/>
+   * This is commonly done when sourcing large numbers of very small files.
+   * <p/>
+   * Setting this value will change the default, which is a platform dependent value.
+   *
+   * @param combineSplits
+   * @return
+   */
+  public FlowRuntimeProps setCombineSplits( Boolean combineSplits )
+    {
+    this.combineSplits = combineSplits;
+
+    return this;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -128,5 +156,8 @@ public class FlowRuntimeProps extends Props
 
     if( !logCounters.isEmpty() )
       properties.setProperty( LOG_COUNTERS, Util.join( logCounters, "," ) );
+
+    if( combineSplits != null )
+      properties.setProperty( COMBINE_SPLITS, Boolean.toString( combineSplits ) );
     }
   }

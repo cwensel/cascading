@@ -145,12 +145,13 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform<JobConf>
 
       JobConf conf = new JobConf();
 
-      if( !Util.isEmpty( System.getProperty( "mapred.jar" ) ) )
+      if( getApplicationJar() != null )
         {
-        LOG.info( "using a remote cluster with jar: {}", System.getProperty( "mapred.jar" ) );
+        LOG.info( "using a remote cluster with jar: {}", getApplicationJar() );
+
         configuration = conf;
 
-        ( (JobConf) configuration ).setJar( System.getProperty( "mapred.jar" ) );
+        ( (JobConf) configuration ).setJar( getApplicationJar() );
 
         if( !Util.isEmpty( System.getProperty( "fs.default.name" ) ) )
           {
@@ -182,6 +183,7 @@ public class Hadoop2MR1Platform extends BaseHadoopPlatform<JobConf>
           configuration.set( "mapreduce.jobhistory.address", System.getProperty( "mapreduce.jobhistory.address" ) );
           }
 
+        configuration.set( "mapreduce.job.user.classpath.first", "true" ); // use test dependencies
         configuration.set( "mapreduce.user.classpath.first", "true" ); // use test dependencies
         configuration.set( "mapreduce.framework.name", "yarn" );
 

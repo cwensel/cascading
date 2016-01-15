@@ -160,6 +160,12 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
     }
 
   @Override
+  public String getProcessNodeID()
+    {
+    return null; // map and reduce side of the job don't have ids, like a tez vertex does
+    }
+
+  @Override
   public String getProcessStepID()
     {
     return taskReport.getTaskID().getJobID().toString();

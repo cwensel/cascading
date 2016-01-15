@@ -394,7 +394,7 @@ public class Hadoop2TezStreamGraph extends NodeStreamGraph
       if( !foundID.equals( id ) )
         continue;
 
-      String values = configuration.get( "cascading.node.source.ordinals", "" );
+      String values = configuration.get( "cascading.node.ordinals", "" );
       List<Integer> ordinals = Util.split( Integer.class, ",", values );
 
       for( Integer ordinal : ordinals )

@@ -19,6 +19,7 @@
  */
 
 apply from: "${rootDir}/etc/hadoop-shared-config.gradle"
+apply from: "${rootDir}/etc/hadoop-shared-io-config.gradle"
 apply from: "${rootDir}/etc/hadoop-shared-mr1-config.gradle"
 
 //ext.hadoopVersion = '0.20.2' // no longer supported

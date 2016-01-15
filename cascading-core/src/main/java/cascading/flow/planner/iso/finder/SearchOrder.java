@@ -75,13 +75,13 @@ public enum SearchOrder
       case Breadth:
         return new BreadthFirstIterator( graph, node );
       case Topological:
-        return new TopologicalOrderIterator( graph );
+        return new TopologicalOrderIterator( graph ); // TODO: uses a equality based hashmap internally, will fail if relying on identity
       case ReverseDepth:
         return new DepthFirstIterator( new EdgeReversedGraph( graph ), node );
       case ReverseBreadth:
         return new BreadthFirstIterator( new EdgeReversedGraph( graph ), node );
       case ReverseTopological:
-        return new TopologicalOrderIterator( new EdgeReversedGraph( graph ) );
+        return new TopologicalOrderIterator( new EdgeReversedGraph( graph ) ); // TODO: uses a equality based hashmap internally, will fail if relying on identity
       }
 
     throw new IllegalStateException( "unknown order: " + searchOrder );

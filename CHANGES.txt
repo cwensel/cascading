@@ -1,6 +1,60 @@
 Cascading Change Log
 
-3.0.4 [unreleased]
+3.1.0 [unreleased]
+
+  Fixed issue on Apache MapReduce platform that caused planner failures when merging the results of two c.p.GroupBy
+  pipes via a single c.p.Merge pipe.
+
+  Fixed issue on Apache Tez platform that prevented additional clean up of Hadoop created meta-data files on c.f.Flow
+  completion.
+
+  Updated c.m.a.URISanitizer to treat opaque URIs differently than hierarchical URIs by hiding the scheme specific
+  parts in PUBLIC and PROTECTED visibility and storing the full URI for PRIVATE.
+
+  Updated c.t.p.BasePartitionTap and subsequent PartitionTap sub-classes to allow for partition filters by providing
+  one or more c.t.Fields argument selector and c.o.Filter instance pairs.
+
+  Fixed issue on Apache Tez that did not create a proper vertex edge on a split in the pipe assembly under some
+  circumstances.
+
+  Updated c.m.a.PropertyAnnotation to have default #visibility() of PUBLIC, and added an #optional() property that
+  defaults to true.
+
+  Fix for NPE when attempting to set null values on underlying config instance.
+
+  Created cascading-hadoop2-tez-stats sub-project to isolate Tez/YARN timeline server dependencies.
+
+  Fixed issue on Apache Tez where multiple prior splits and subsequent splicing back into a c.p.HashJoin could create an
+  invalid plan.
+
+  Updated Apache Hadoop 2 based sub-projects to 2.7.1.
+
+  Added new c.f.FlowStep#getFlowStepDescriptor and c.f.FlowStepDescriptors to store additional metadata on c.f.FlowStep
+  instances.
+
+  Updated c.f.t.p.r.t.BoundaryBalanceGroupSplitHashJoinTransformer to insert After and not AfterEachEdge.
+
+  Fixed c.f.p.i.t.InsertionGraphTransformer to properly place insertions.
+
+  Created cascading-expression sub-project to isolate all 'expression' operations based on Janino and it isolate
+  the Janino dependency. A dependency to cascading-expression must be added to projects that depend on the isolated
+  classes.
+
+  Created cascading-hadoop2-io sub-project to isolate Hadoop 2.x HDFS and serialization dependencies and updated
+  cascading-hadoop2-mr1 and cascading-hadoop2-tez to depend on cascading-hadoop2-io.
+
+  Updated c.t.Fields to provide a constructor accepting type information, and a method #applyFields() to update
+  field names.
+
+  Added support for configuring split combining across supported platforms through the c.f.FlowRuntimeProps
+  "cascading.flow.runtime.splits.combine" property. If enabled, will induce c.t.h.Hfs to enable combined files
+  support on the MapReduce platforms.
+
+  Updated Hadoop, Hadoop2, and Tez serialization and comparator frameworks to fully leverage declared field type
+  information to reduce serialized data and perform bitwise equality comparisons. See c.t.h.TupleSerializationProps to
+  disable bitwise comparisons.
+
+3.0.4
 
   Fixed issue where c.m.a.URISanitizer would fail parsing glob expressions containing curly braces.
 
@@ -46,9 +100,6 @@ Cascading Change Log
   services.
 
   Fixed issue where c.s.FlowStepStats#getProcessStatusURL() always returned null for Apache MapReduce and Tez platforms.
-
-  Fixed issue on Apache Tez where a split before and subsequent splicing back into a c.p.HashJoin could create an
-  invalid plan.
 
   Fixed issue with c.t.u.TupleHasher#ObjectHasher not being serializable.
 

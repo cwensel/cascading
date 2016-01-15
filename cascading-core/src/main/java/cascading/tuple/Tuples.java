@@ -277,7 +277,7 @@ public class Tuples
    * @param tuple of type Tuple
    * @return Tuple
    */
-  public static Tuple asUnmodifiable( Tuple tuple )
+  public static <T extends Tuple> T asUnmodifiable( T tuple )
     {
     tuple.isUnmodifiable = true;
 
@@ -290,14 +290,14 @@ public class Tuples
    * @param tuple of type Tuple
    * @return Tuple
    */
-  public static Tuple asModifiable( Tuple tuple )
+  public static <T extends Tuple> T asModifiable( T tuple )
     {
     tuple.isUnmodifiable = false;
 
     return tuple;
     }
 
-  public static Tuple setUnmodifiable( Tuple tuple, boolean isUnmodifiable )
+  public static <T extends Tuple> T setUnmodifiable( T tuple, boolean isUnmodifiable )
     {
     tuple.isUnmodifiable = isUnmodifiable;
 

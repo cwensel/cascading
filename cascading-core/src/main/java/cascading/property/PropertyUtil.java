@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import cascading.flow.FlowElement;
+import cascading.flow.planner.ScopedElement;
 
 import static cascading.util.Util.isEmpty;
 
@@ -86,7 +86,7 @@ public class PropertyUtil
     return value == null ? defaultValue : value;
     }
 
-  public static String getProperty( final Map<Object, Object> properties, FlowElement flowElement, String property )
+  public static String getProperty( final Map<Object, Object> properties, ScopedElement flowElement, String property )
     {
     if( flowElement.hasConfigDef() )
       return PropertyUtil.getProperty( properties, flowElement.getConfigDef(), property );

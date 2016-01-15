@@ -59,13 +59,16 @@ import cascading.property.AppProps;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.PartitionTap;
-import cascading.tuple.Tuple;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
+import cascading.tuple.Fields;
 import cascading.tuple.hadoop.TupleSerialization;
 import cascading.tuple.hadoop.util.GroupingSortingComparator;
 import cascading.tuple.hadoop.util.ReverseGroupingSortingComparator;
 import cascading.tuple.hadoop.util.ReverseTupleComparator;
 import cascading.tuple.hadoop.util.TupleComparator;
+import cascading.tuple.io.KeyTuple;
 import cascading.tuple.io.TuplePair;
+import cascading.tuple.io.ValueTuple;
 import cascading.tuple.tez.util.GroupingSortingPartitioner;
 import cascading.tuple.tez.util.TuplePartitioner;
 import cascading.util.Util;
@@ -105,11 +108,11 @@ import org.apache.tez.runtime.library.output.UnorderedPartitionedKVOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static cascading.flow.hadoop.util.HadoopUtil.addComparators;
-import static cascading.flow.hadoop.util.HadoopUtil.serializeBase64;
+import static cascading.flow.hadoop.util.HadoopUtil.*;
 import static cascading.flow.tez.util.TezUtil.addToClassPath;
 import static cascading.tap.hadoop.DistCacheTap.CASCADING_LOCAL_RESOURCES;
 import static cascading.tap.hadoop.DistCacheTap.CASCADING_REMOTE_RESOURCES;
+import static cascading.util.Util.getFirst;
 import static java.util.Collections.singletonList;
 import static org.apache.hadoop.yarn.api.records.LocalResourceType.ARCHIVE;
 import static org.apache.hadoop.yarn.api.records.LocalResourceType.FILE;
@@ -279,8 +282,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
     EdgeValues edgeValues = new EdgeValues( new TezConfiguration( config ), processEdge );
 
-    edgeValues.keyClassName = Tuple.class.getName(); // TEZ_RUNTIME_INTERMEDIATE_OUTPUT_KEY_CLASS
-    edgeValues.valueClassName = Tuple.class.getName(); // TEZ_RUNTIME_INTERMEDIATE_OUTPUT_VALUE_CLASS
+    edgeValues.keyClassName = KeyTuple.class.getName(); // TEZ_RUNTIME_INTERMEDIATE_OUTPUT_KEY_CLASS
+    edgeValues.valueClassName = ValueTuple.class.getName(); // TEZ_RUNTIME_INTERMEDIATE_OUTPUT_VALUE_CLASS
     edgeValues.keyComparatorClassName = TupleComparator.class.getName();
     edgeValues.keyPartitionerClassName = TuplePartitioner.class.getName();
     edgeValues.outputClassName = null;
@@ -342,7 +345,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     if( group.isSortReversed() )
       edgeValues.keyComparatorClassName = ReverseTupleComparator.class.getName();
 
-    addComparators( edgeValues.config, "cascading.group.comparator", group.getKeySelectors(), this, group );
+    int ordinal = getFirst( edgeValues.ordinals );
+
+    addComparators( edgeValues.config, "cascading.group.comparator", group.getKeySelectors(), edgeValues.getResolvedKeyFieldsMap().get( ordinal ) );
 
     if( !group.isGroupBy() )
       {
@@ -355,7 +360,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       }
     else
       {
-      addComparators( edgeValues.config, "cascading.sort.comparator", group.getSortingSelectors(), this, group );
+      addComparators( edgeValues.config, "cascading.sort.comparator", group.getSortingSelectors(), edgeValues.getResolvedSortFieldsMap().get( ordinal ) );
 
       edgeValues.outputClassName = OrderedPartitionedKVOutput.class.getName();
       edgeValues.inputClassName = OrderedGroupedKVInput.class.getName();
@@ -383,12 +388,19 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     {
     TezConfiguration outputConfig = new TezConfiguration( edgeValues.getConfig() );
     outputConfig.set( "cascading.node.sink", FlowElements.id( edgeValues.getFlowElement() ) );
+    outputConfig.set( "cascading.node.ordinals", Util.join( edgeValues.getOrdinals(), "," ) );
+    addFields( outputConfig, "cascading.node.key.fields", edgeValues.getResolvedKeyFieldsMap() );
+    addFields( outputConfig, "cascading.node.sort.fields", edgeValues.getResolvedSortFieldsMap() );
+    addFields( outputConfig, "cascading.node.value.fields", edgeValues.getResolvedValueFieldsMap() );
 
     UserPayload outputPayload = createIntermediatePayloadOutput( outputConfig, edgeValues );
 
     TezConfiguration inputConfig = new TezConfiguration( edgeValues.getConfig() );
     inputConfig.set( "cascading.node.source", FlowElements.id( edgeValues.getFlowElement() ) );
-    inputConfig.set( "cascading.node.source.ordinals", Util.join( edgeValues.getOrdinals(), "," ) );
+    inputConfig.set( "cascading.node.ordinals", Util.join( edgeValues.getOrdinals(), "," ) );
+    addFields( inputConfig, "cascading.node.key.fields", edgeValues.getResolvedKeyFieldsMap() );
+    addFields( inputConfig, "cascading.node.sort.fields", edgeValues.getResolvedSortFieldsMap() );
+    addFields( inputConfig, "cascading.node.value.fields", edgeValues.getResolvedValueFieldsMap() );
 
     UserPayload inputPayload = createIntermediatePayloadInput( inputConfig, edgeValues );
 
@@ -491,6 +503,10 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
       // unfortunately we cannot just load the input format and set it on the builder with also pulling all other
       // values out of the configuration.
       MRInput.MRInputConfigBuilder configBuilder = MRInput.createConfigBuilder( sourceConf, null );
+
+      // the default in Tez is true, this overrides
+      if( conf.get( FlowRuntimeProps.COMBINE_SPLITS ) != null )
+        configBuilder.groupSplits( conf.getBoolean( FlowRuntimeProps.COMBINE_SPLITS, true ) );
 
       // grouping splits loses file name info, breaking partition tap default impl
       if( flowElement instanceof PartitionTap ) // todo: generify
@@ -772,9 +788,39 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     }
 
   @Override
-  public void clean( TezConfiguration entries )
+  public void clean( TezConfiguration config )
     {
+    if( getSink().isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
+      {
+      try
+        {
+        getSink().deleteResource( config );
+        }
+      catch( Exception exception )
+        {
+        // sink all exceptions, don't fail app
+        logWarn( "unable to remove temporary file: " + getSink(), exception );
+        }
+      }
+    else
+      {
+      cleanTapMetaData( config, getSink() );
+      }
 
+    for( Tap tap : getTraps() )
+      cleanTapMetaData( config, tap );
+    }
+
+  private void cleanTapMetaData( TezConfiguration config, Tap tap )
+    {
+    try
+      {
+      Hadoop18TapUtil.cleanupTapMetaData( config, tap );
+      }
+    catch( IOException exception )
+      {
+      // ignore exception
+      }
     }
 
   public void syncArtifacts()
@@ -878,7 +924,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     {
     FlowElement flowElement;
     TezConfiguration config;
-    Set ordinals;
+    Set<Integer> ordinals;
     String keyClassName;
     String valueClassName;
     String keyComparatorClassName;
@@ -889,11 +935,19 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     EdgeProperty.DataSourceType sourceType;
     EdgeProperty.SchedulingType schedulingType;
 
+    Map<Integer, Fields> resolvedKeyFieldsMap;
+    Map<Integer, Fields> resolvedSortFieldsMap;
+    Map<Integer, Fields> resolvedValueFieldsMap;
+
     private EdgeValues( TezConfiguration config, ProcessEdge processEdge )
       {
       this.config = config;
       this.flowElement = processEdge.getFlowElement();
       this.ordinals = processEdge.getSourceProvidedOrdinals();
+
+      this.resolvedKeyFieldsMap = processEdge.getResolvedKeyFields();
+      this.resolvedSortFieldsMap = processEdge.getResolvedSortFields();
+      this.resolvedValueFieldsMap = processEdge.getResolvedValueFields();
       }
 
     public FlowElement getFlowElement()
@@ -954,6 +1008,21 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     public EdgeProperty.SchedulingType getSchedulingType()
       {
       return schedulingType;
+      }
+
+    public Map<Integer, Fields> getResolvedKeyFieldsMap()
+      {
+      return resolvedKeyFieldsMap;
+      }
+
+    public Map<Integer, Fields> getResolvedSortFieldsMap()
+      {
+      return resolvedSortFieldsMap;
+      }
+
+    public Map<Integer, Fields> getResolvedValueFieldsMap()
+      {
+      return resolvedValueFieldsMap;
       }
     }
   }

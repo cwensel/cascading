@@ -51,10 +51,6 @@ buildscript {
 apply from: 'etc/version.gradle'
 apply from: "etc/s3Upload.gradle"
 
-configurations {
-  s3AntTask
-}
-
 allprojects {
 
   apply plugin: 'idea'
@@ -110,7 +106,6 @@ subprojects {
       bottom = copyright
       links = [
         'http://docs.oracle.com/javase/7/docs/api/',
-        'http://dist.codehaus.org/janino/javadoc/',
         'http://junit.sourceforge.net/javadoc/'
       ]
     }
@@ -211,7 +206,35 @@ subprojects {
   }
 }
 
-task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:build', 'cascading-local:build', 'cascading-hadoop:build', 'cascading-hadoop2-mr1:build', 'cascading-hadoop2-tez:build', 'cascading-xml:build', 'cascading-platform:build'] ) {
+task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
+
+  def copyright = '<i>Copyright &#169; 2007-2015 Concurrent, Inc. All Rights Reserved.</i>'
+
+  title = "Cascading ${releaseVersion}"
+  destinationDir = file( "${distDir}/javadoc/all/" )
+
+  source subprojects.javadoc.source
+  classpath = rootProject.files( subprojects.javadoc.classpath )
+
+  failOnError = false
+
+  configure( options ) {
+    linkSource = true
+    encoding = "UTF8"
+    bottom = copyright
+    links = [
+      'http://docs.oracle.com/javase/7/docs/api/',
+      'http://junit.sourceforge.net/javadoc/'
+    ]
+  }
+}
+
+task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:build', 'cascading-local:build',
+                                             'cascading-hadoop:build', 'cascading-hadoop2-io:build',
+                                             'cascading-hadoop2-mr1:build',
+                                             'cascading-hadoop2-tez:build', 'cascading-hadoop2-tez-stats:build',
+                                             'cascading-expression:build', 'cascading-xml:build',
+                                             'cascading-platform:build', ':allJavadoc'] ) {
 
   s3UploadDocs.dependsOn << prepareRelease
   s3UploadArtifacts.dependsOn << prepareRelease
@@ -231,7 +254,7 @@ prepareRelease << {
   logger.info( 'built all artifacts' )
 }
 
-task buildDist( dependsOn: [prepareRelease, subprojects.javadoc] ) << {
+task buildDist( dependsOn: prepareRelease ) << {
 
   copy {
     from 'CHANGES.txt'

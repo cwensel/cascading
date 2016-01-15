@@ -21,16 +21,21 @@
 package cascading.flow;
 
 /**
- * Constants to be used as key in Flow#getFlowDescriptor.
+ * Constants to be used as key in {@link Flow#getFlowDescriptor()}.
+ * <p/>
+ * See also {@link FlowStepDescriptors}.
  */
 public interface FlowDescriptors
   {
   /** String that can be used as a record separator. */
-  public final static String VALUE_SEPARATOR = "\u001E";
+  String VALUE_SEPARATOR = "\u001E";
 
   /** Denotes a collection  of statements like SQL or similar. */
-  public final static String STATEMENTS = "statements";
+  String STATEMENTS = "statements";
+
+  /** Denotes the type of statement in the current flow. e.g. SQL, Pig Latin etc. */
+  String STATEMENT_TYPES = "statement_types";
 
   /** Briefly describes the current Flow * */
-  public final static String DESCRIPTION = "description";
+  String DESCRIPTION = "description";
   }

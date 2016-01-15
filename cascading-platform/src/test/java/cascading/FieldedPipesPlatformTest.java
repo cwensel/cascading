@@ -927,7 +927,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     Pipe pipe = new Pipe( "test" );
 
-    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+    pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip", String.class ), "^[^ ]*" ), new Fields( "ip" ) );
 
     pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
@@ -937,7 +937,11 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "groupgroup" ), SinkMode.REPLACE );
 
-    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+    Map<Object, Object> properties = getProperties();
+
+    properties.put( "cascading.serialization.types.required", "true" );
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( source, sink, pipe );
 
     flow.complete();
 

@@ -186,6 +186,8 @@ public class DateType implements CoercibleType<Long>
     {
     final StringBuilder sb = new StringBuilder( "DateType{" );
     sb.append( "dateFormatString='" ).append( dateFormatString ).append( '\'' );
+    sb.append( "," );
+    sb.append( "canonicalType='" ).append( getCanonicalType() ).append( '\'' );
     sb.append( '}' );
     return sb.toString();
     }

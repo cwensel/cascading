@@ -25,6 +25,7 @@ import java.util.TreeMap;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
 import cascading.tap.Tap;
+import cascading.util.Util;
 
 /**
  *
@@ -38,6 +39,11 @@ public class FlowElements
 
     if( flowElement instanceof Tap )
       return Tap.id( (Tap) flowElement );
+
+    String id = Util.returnInstanceFieldIfExistsSafe( flowElement, "id" );
+
+    if( id != null )
+      return id;
 
     throw new IllegalArgumentException( "id not supported for: " + flowElement.getClass().getCanonicalName() );
     }

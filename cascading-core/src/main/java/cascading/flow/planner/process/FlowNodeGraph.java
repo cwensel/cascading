@@ -30,7 +30,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowNode;
 import cascading.flow.planner.BaseFlowNode;
-import cascading.flow.planner.FlowPlanner;
+import cascading.flow.planner.BaseFlowNodeFactory;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 
@@ -73,14 +73,24 @@ public class FlowNodeGraph extends BaseProcessGraph<FlowNode>
     {
     }
 
-  public FlowNodeGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs )
+  public FlowNodeGraph( FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs )
     {
-    this( flowPlanner, flowElementGraph, nodeSubGraphs, Collections.<ElementGraph, List<? extends ElementGraph>>emptyMap() );
+    this( new BaseFlowNodeFactory(), flowElementGraph, nodeSubGraphs );
     }
 
-  public FlowNodeGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+  public FlowNodeGraph( FlowNodeFactory flowNodeFactory, List<? extends ElementGraph> nodeSubGraphs )
     {
-    buildGraph( flowPlanner, flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
+    this( flowNodeFactory, null, nodeSubGraphs );
+    }
+
+  public FlowNodeGraph( FlowNodeFactory flowNodeFactory, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs )
+    {
+    this( flowNodeFactory, flowElementGraph, nodeSubGraphs, Collections.<ElementGraph, List<? extends ElementGraph>>emptyMap() );
+    }
+
+  public FlowNodeGraph( FlowNodeFactory flowNodeFactory, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+    {
+    buildGraph( flowNodeFactory, flowElementGraph, nodeSubGraphs, pipelineSubGraphsMap );
 
     // consistently sets ordinal of node based on topological dependencies and tie breaking by the given Comparator
     Iterator<FlowNode> iterator = getOrderedTopologicalIterator();
@@ -93,19 +103,22 @@ public class FlowNodeGraph extends BaseProcessGraph<FlowNode>
       BaseFlowNode next = (BaseFlowNode) iterator.next();
 
       next.setOrdinal( ordinal );
-      next.setName( flowPlanner.makeFlowNodeName( next, size, ordinal ) );
+      next.setName( flowNodeFactory.makeFlowNodeName( next, size, ordinal ) );
 
       ordinal++;
       }
     }
 
-  protected void buildGraph( FlowPlanner<?, ?> flowPlanner, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
+  protected void buildGraph( FlowNodeFactory flowNodeFactory, FlowElementGraph flowElementGraph, List<? extends ElementGraph> nodeSubGraphs, Map<ElementGraph, List<? extends ElementGraph>> pipelineSubGraphsMap )
     {
+    if( pipelineSubGraphsMap == null )
+      pipelineSubGraphsMap = Collections.emptyMap();
+
     for( ElementGraph nodeSubGraph : nodeSubGraphs )
       {
       List<? extends ElementGraph> pipelineGraphs = pipelineSubGraphsMap.get( nodeSubGraph );
 
-      FlowNode flowNode = flowPlanner.createFlowNode( flowElementGraph, nodeSubGraph, pipelineGraphs );
+      FlowNode flowNode = flowNodeFactory.createFlowNode( flowElementGraph, nodeSubGraph, pipelineGraphs );
 
       addVertex( flowNode );
       }

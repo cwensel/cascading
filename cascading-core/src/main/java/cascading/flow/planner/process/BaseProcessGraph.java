@@ -133,9 +133,32 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = Util.narrowSet( Tap.class, getSourceElements() );
+    sourceTaps = Util.narrowIdentitySet( Tap.class, getSourceElements() );
 
     return sourceTaps;
+    }
+
+  @Override
+  public Map<String, Tap> getSourceTapsMap()
+    {
+    Map<String, Tap> result = new HashMap<>();
+    Set<Tap> sourceTaps = getSourceTaps();
+
+    for( Tap sourceTap : sourceTaps )
+      {
+      for( Process process : graph.vertexSet() )
+        {
+        if( !process.getSourceTaps().contains( sourceTap ) )
+          continue;
+
+        ElementGraph elementGraph = process.getElementGraph();
+
+        for( Scope scope : elementGraph.outgoingEdgesOf( sourceTap ) )
+          result.put( scope.getName(), sourceTap );
+        }
+      }
+
+    return result;
     }
 
   @Override
@@ -144,9 +167,32 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = Util.narrowSet( Tap.class, getSinkElements() );
+    sinkTaps = Util.narrowIdentitySet( Tap.class, getSinkElements() );
 
     return sinkTaps;
+    }
+
+  @Override
+  public Map<String, Tap> getSinkTapsMap()
+    {
+    Map<String, Tap> result = new HashMap<>();
+    Set<Tap> sinkTaps = getSinkTaps();
+
+    for( Tap sinkTap : sinkTaps )
+      {
+      for( Process process : graph.vertexSet() )
+        {
+        if( !process.getSinkTaps().contains( sinkTap ) )
+          continue;
+
+        ElementGraph elementGraph = process.getElementGraph();
+
+        for( Scope scope : elementGraph.incomingEdgesOf( sinkTap ) )
+          result.put( scope.getName(), sinkTap );
+        }
+      }
+
+    return result;
     }
 
   @Override

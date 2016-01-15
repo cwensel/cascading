@@ -30,11 +30,13 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.flow.planner.BaseFlowStepFactory;
 import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.process.FlowNodeGraph;
+import cascading.flow.planner.process.FlowStepFactory;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.transformer.BoundaryElementFactory;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
@@ -166,9 +168,17 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
     return new Hadoop2TezFlow( getPlatformInfo(), getDefaultProperties(), getDefaultConfig(), flowDef );
     }
 
-  public FlowStep<TezConfiguration> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+  @Override
+  public FlowStepFactory<TezConfiguration> getFlowStepFactory()
     {
-    return new Hadoop2TezFlowStep( stepElementGraph, flowNodeGraph );
+    return new BaseFlowStepFactory<TezConfiguration>( getFlowNodeFactory() )
+    {
+    @Override
+    public FlowStep<TezConfiguration> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+      {
+      return new Hadoop2TezFlowStep( stepElementGraph, flowNodeGraph );
+      }
+    };
     }
 
   public URI getDefaultURIScheme( Tap tap )

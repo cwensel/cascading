@@ -67,6 +67,7 @@ import cascading.tuple.TupleEntry;
 public class TextLine extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
   {
   public static final String DEFAULT_CHARSET = "UTF-8";
+  public static final Fields DEFAULT_SOURCE_FIELDS = new Fields( "num", "line" ).applyTypes( Integer.TYPE, String.class );
 
   private String charsetName = DEFAULT_CHARSET;
 
@@ -76,7 +77,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
    */
   public TextLine()
     {
-    super( new Fields( "num", "line" ), Fields.ALL );
+    super( DEFAULT_SOURCE_FIELDS, Fields.ALL );
     }
 
   /**

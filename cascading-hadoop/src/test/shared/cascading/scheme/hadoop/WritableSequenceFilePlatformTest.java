@@ -64,7 +64,7 @@ public class WritableSequenceFilePlatformTest extends PlatformTestCase
     Flow flowKey = getPlatform().getFlowConnector( getProperties() ).connect( tapKeyValue, tapKey, new Pipe( "key" ) );
     Flow flowValue = getPlatform().getFlowConnector( getProperties() ).connect( tapKeyValue, tapValue, new Pipe( "value" ) );
 
-    Cascade cascade = new CascadeConnector().connect( "keyvalues", flowKeyValue, flowKey, flowValue );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( "keyvalues", flowKeyValue, flowKey, flowValue );
 
     cascade.complete();
 

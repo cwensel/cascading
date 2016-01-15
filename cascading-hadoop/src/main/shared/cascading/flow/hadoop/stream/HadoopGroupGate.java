@@ -36,7 +36,6 @@ import cascading.pipe.joiner.BufferJoin;
 import cascading.tap.hadoop.util.MeasuredOutputCollector;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.io.TuplePair;
 import org.apache.hadoop.mapred.OutputCollector;
 
 /**
@@ -88,34 +87,41 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
       super.start( previous );
     }
 
-  public void receive( Duct previous, TupleEntry incomingEntry ) // todo: receive should receive the edge or ordinal so no lookup
-  {
-  Integer pos = ordinalMap.get( previous ); // todo: when posMap size == 1, pos is always zero -- optimize #get() out
+  // todo: receive should receive the edge or ordinal so no lookup
+  public void receive( Duct previous, TupleEntry incomingEntry )
+    {
+    Integer pos = ordinalMap.get( previous );
 
-  Tuple groupTuple = keyBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
-  Tuple sortTuple = sortFields == null ? null : sortBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
-  Tuple valuesTuple = valuesBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+    // create a view over the incoming tuple
+    Tuple groupTupleView = keyBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
 
-  Tuple groupKey = sortTuple == null ? groupTuple : new TuplePair( groupTuple, sortTuple );
+    // reset keyTuple via groupTuple or groupSortTuple
+    if( sortFields == null )
+      groupTuple.reset( groupTupleView );
+    else
+      groupSortTuple.reset( groupTupleView, sortBuilder[ pos ].makeResult( incomingEntry.getTuple(), null ) );
 
-  try
-    {
-    wrapGroupingAndCollect( previous, valuesTuple, groupKey );
-    flowProcess.increment( SliceCounters.Tuples_Written, 1 );
+    valueTuple.reset( valuesBuilder[ pos ].makeResult( incomingEntry.getTuple(), null ) );
+
+    try
+      {
+      // keyTuple is a reference to either groupTuple or groupSortTuple
+      wrapGroupingAndCollect( previous, (Tuple) valueTuple, keyTuple );
+      flowProcess.increment( SliceCounters.Tuples_Written, 1 );
+      }
+    catch( OutOfMemoryError error )
+      {
+      handleReThrowableException( "out of memory, try increasing task memory allocation", error );
+      }
+    catch( CascadingException exception )
+      {
+      handleException( exception, incomingEntry );
+      }
+    catch( Throwable throwable )
+      {
+      handleException( new DuctException( "internal error: " + incomingEntry.getTuple().print(), throwable ), incomingEntry );
+      }
     }
-  catch( OutOfMemoryError error )
-    {
-    handleReThrowableException( "out of memory, try increasing task memory allocation", error );
-    }
-  catch( CascadingException exception )
-    {
-    handleException( exception, incomingEntry );
-    }
-  catch( Throwable throwable )
-    {
-    handleException( new DuctException( "internal error: " + incomingEntry.getTuple().print(), throwable ), incomingEntry );
-    }
-  }
 
   @Override
   public void complete( Duct previous )

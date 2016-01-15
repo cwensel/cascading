@@ -40,7 +40,6 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.FlowElements;
-import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.PlatformInfo;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.iso.expression.ElementCapture;
@@ -53,7 +52,6 @@ import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
 import cascading.flow.planner.process.ProcessGraph;
 import cascading.flow.planner.process.ProcessModel;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
@@ -95,6 +93,20 @@ public class ElementGraphs
   // not for instantiation
   private ElementGraphs()
     {
+    }
+
+  private static class IdentityDirectedGraph<V, E> extends SimpleDirectedGraph<V, E>
+    {
+    public IdentityDirectedGraph( Class<? extends E> edgeClass )
+      {
+      super( edgeClass );
+      }
+
+    @Override
+    protected DirectedSpecifics createDirectedSpecifics()
+      {
+      return new DirectedSpecifics( new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
+      }
     }
 
   public static DirectedGraph<FlowElement, Scope> directed( ElementGraph elementGraph )
@@ -263,6 +275,9 @@ public class ElementGraphs
 
   public static Iterator<FlowElement> getTopologicalIterator( ElementGraph graph )
     {
+    if( graph == null )
+      return Collections.emptyIterator();
+
     return new TopologicalOrderIterator<>( directed( graph ) );
     }
 
@@ -324,7 +339,7 @@ public class ElementGraphs
 
   public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted, Set<V> excludes )
     {
-    Set<V> vertices = new HashSet<>( contracted.vertexSet() );
+    Set<V> vertices = createIdentitySet( contracted.vertexSet() );
     LinkedList<V> allVertices = new LinkedList<>( full.vertexSet() );
 
     allVertices.removeAll( vertices );
@@ -383,7 +398,7 @@ public class ElementGraphs
 
   private static <V, E> DirectedGraph<V, E> disconnectExtentsAndExclude( DirectedGraph<V, E> full, Set<E> withoutEdges )
     {
-    DirectedGraph<V, E> copy = (DirectedGraph<V, E>) new SimpleDirectedGraph<>( Object.class );
+    IdentityDirectedGraph<V, E> copy = (IdentityDirectedGraph<V, E>) new IdentityDirectedGraph<>( Object.class );
 
     Graphs.addAllVertices( copy, full.vertexSet() );
 
@@ -479,7 +494,7 @@ public class ElementGraphs
       writer.close();
       return true;
       }
-    catch( IOException exception )
+    catch( NullPointerException | IOException exception )
       {
       LOG.error( "failed printing graph to: {}, with exception: {}", filename, exception );
       }
@@ -569,13 +584,28 @@ public class ElementGraphs
       }
     }
 
-  public static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
+  public static void insertFlowElementBetweenEdge( ElementGraph elementGraph, Scope previousEdge, FlowElement newElement )
     {
-    for( Tap tap : sources )
-      {
-      for( Scope scope : elementGraph.outgoingEdgesOf( tap ) )
-        flowStep.addSource( scope.getName(), tap );
-      }
+    FlowElement previousElement = elementGraph.getEdgeSource( previousEdge );
+    FlowElement nextElement = elementGraph.getEdgeTarget( previousEdge );
+
+    elementGraph.addVertex( newElement );
+
+    // add edge between previous and new
+    elementGraph.addEdge( previousElement, newElement, new Scope( previousEdge ) );
+
+    // add edge between new and next
+    Scope scope = new Scope( previousEdge );
+
+    scope.setOrdinal( previousEdge.getOrdinal() );
+
+    if( nextElement instanceof Splice && ( (Splice) nextElement ).isJoin() && previousEdge.getOrdinal() != 0 )
+      scope.setNonBlocking( false );
+
+    elementGraph.addEdge( newElement, nextElement, scope );
+
+    // remove previous edge
+    elementGraph.removeEdge( previousElement, nextElement );
     }
 
   public static Set<Tap> findSources( ElementGraph elementGraph )
@@ -589,14 +619,14 @@ public class ElementGraphs
       return Collections.emptySet();
 
     if( elementGraph.containsVertex( Extent.head ) )
-      return narrowSet( type, elementGraph.successorListOf( Extent.head ) );
+      return narrowIdentitySet( type, elementGraph.successorListOf( Extent.head ) );
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Head ) ),
       elementGraph
     );
 
-    return narrowSet( type, getAllVertices( iterator ) );
+    return narrowIdentitySet( type, getAllVertices( iterator ) );
     }
 
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
@@ -605,23 +635,14 @@ public class ElementGraphs
       return Collections.emptySet();
 
     if( elementGraph.containsVertex( Extent.tail ) )
-      return narrowSet( type, elementGraph.predecessorListOf( Extent.tail ) );
+      return narrowIdentitySet( type, elementGraph.predecessorListOf( Extent.tail ) );
 
     SubGraphIterator iterator = new ExpressionSubGraphIterator(
       new ExpressionGraph( SearchOrder.ReverseTopological, new FlowElementExpression( ElementCapture.Primary, type, TypeExpression.Topo.Tail ) ),
       elementGraph
     );
 
-    return narrowSet( type, getAllVertices( iterator ) );
-    }
-
-  public static void addSinks( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sinks )
-    {
-    for( Tap tap : sinks )
-      {
-      for( Scope scope : elementGraph.incomingEdgesOf( tap ) )
-        flowStep.addSink( scope.getName(), tap );
-      }
+    return narrowIdentitySet( type, getAllVertices( iterator ) );
     }
 
   public static Set<Tap> findSinks( ElementGraph elementGraph )
@@ -636,17 +657,7 @@ public class ElementGraphs
       elementGraph
     );
 
-    return narrowSet( Group.class, getAllVertices( iterator ) );
-    }
-
-  public static Set<HashJoin> findAllHashJoins( ElementGraph elementGraph )
-    {
-    SubGraphIterator iterator = new ExpressionSubGraphIterator(
-      new ExpressionGraph( SearchOrder.Topological, new FlowElementExpression( ElementCapture.Primary, HashJoin.class ) ),
-      elementGraph
-    );
-
-    return narrowSet( HashJoin.class, getAllVertices( iterator ) );
+    return narrowIdentitySet( Group.class, getAllVertices( iterator ) );
     }
 
   private static Set<FlowElement> getAllVertices( SubGraphIterator iterator )
@@ -838,7 +849,7 @@ public class ElementGraphs
 
       Iterator<Scope> iterator = elementGraph.outgoingEdgesOf( object ).iterator();
 
-      if( object instanceof Tap || !iterator.hasNext() )
+      if( !( object instanceof Pipe ) || !iterator.hasNext() )
         {
         label = object.toString().replaceAll( "\"", "\'" ).replaceAll( "(\\)|\\])(\\[)", "$1|$2" ).replaceAll( "(^[^(\\[]+)(\\(|\\[)", "$1|$2" );
         }

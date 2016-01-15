@@ -40,6 +40,7 @@ import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.stream.annotations.StreamMode;
 import cascading.pipe.Group;
 import cascading.pipe.Pipe;
+import cascading.stats.FlowNodeStats;
 import cascading.tap.Tap;
 import cascading.util.ProcessLogger;
 import cascading.util.Util;
@@ -63,36 +64,76 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
 
   private transient Set<FlowElement> sourceElements;
   private transient Set<FlowElement> sinkElements;
-  private Map<String, Tap> trapMap;
-  private Set<Tap> sourceTaps;
-  private Set<Tap> sinkTaps;
+  private Map<String, Tap> trapMap = Collections.emptyMap();
+  protected Set<Tap> sourceTaps;
+  protected Set<Tap> sinkTaps;
 
   private Map<Tap, Set<String>> reverseSourceTaps;
   private Map<Tap, Set<String>> reverseSinkTaps;
   private Map<FlowElement, ElementGraph> streamPipelineMap = Collections.emptyMap();
 
-  // for testing
+  /** optional metadata about the FlowStep */
+  private Map<String, String> flowNodeDescriptor = Collections.emptyMap();
+
+  protected transient FlowNodeStats flowNodeStats;
+
   public BaseFlowNode( String name, int ordinal )
+    {
+    this( name, ordinal, null );
+    }
+
+  public BaseFlowNode( String name, int ordinal, Map<String, String> flowNodeDescriptor )
     {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     setName( name );
     this.ordinal = ordinal;
     this.trapMap = Collections.emptyMap();
+
+    setFlowNodeDescriptor( flowNodeDescriptor );
+    }
+
+  public BaseFlowNode( ElementGraph nodeSubGraph )
+    {
+    this( null, nodeSubGraph, null, null );
+    }
+
+  public BaseFlowNode( ElementGraph nodeSubGraph, Map<String, String> flowNodeDescriptor )
+    {
+    this( null, nodeSubGraph, flowNodeDescriptor );
+    }
+
+  public BaseFlowNode( ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
+    {
+    this( null, nodeSubGraph, pipelineGraphs, null );
+    }
+
+  public BaseFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, Map<String, String> flowNodeDescriptor )
+    {
+    this( flowElementGraph, nodeSubGraph, null, flowNodeDescriptor );
     }
 
   public BaseFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs )
     {
+    this( flowElementGraph, nodeSubGraph, pipelineGraphs, null );
+    }
+
+  public BaseFlowNode( FlowElementGraph flowElementGraph, ElementGraph nodeSubGraph, List<? extends ElementGraph> pipelineGraphs, Map<String, String> flowNodeDescriptor )
+    {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
     this.nodeSubGraph = nodeSubGraph;
 
-    if( pipelineGraphs != null )
-      this.pipelineGraphs = pipelineGraphs;
+    setPipelineGraphs( pipelineGraphs );
+
+    setFlowNodeDescriptor( flowNodeDescriptor );
 
     verifyPipelines();
     createPipelineMap();
 
-    assignTrappableNames( flowElementGraph );
-    assignTraps( flowElementGraph.getTrapMap() );
+    if( flowElementGraph != null )
+      {
+      assignTrappableNames( flowElementGraph );
+      assignTraps( flowElementGraph.getTrapMap() );
+      }
     }
 
   public void setOrdinal( int ordinal )
@@ -124,6 +165,18 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     }
 
   @Override
+  public Map<String, String> getFlowNodeDescriptor()
+    {
+    return flowNodeDescriptor;
+    }
+
+  protected void setFlowNodeDescriptor( Map<String, String> flowNodeDescriptor )
+    {
+    if( flowNodeDescriptor != null )
+      this.flowNodeDescriptor = flowNodeDescriptor;
+    }
+
+  @Override
   public Map<String, String> getProcessAnnotations()
     {
     if( processAnnotations == null )
@@ -148,6 +201,17 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
       processAnnotations = new HashMap<>();
 
     processAnnotations.put( key, value );
+    }
+
+  public void setFlowNodeStats( FlowNodeStats flowNodeStats )
+    {
+    this.flowNodeStats = flowNodeStats;
+    }
+
+  @Override
+  public FlowNodeStats getFlowNodeStats()
+    {
+    return flowNodeStats;
     }
 
   public void setFlowStep( FlowStep flowStep )
@@ -255,6 +319,12 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     return pipelineGraphs;
     }
 
+  protected void setPipelineGraphs( List<? extends ElementGraph> pipelineGraphs )
+    {
+    if( pipelineGraphs != null )
+      this.pipelineGraphs = pipelineGraphs;
+    }
+
   @Override
   public ElementGraph getPipelineGraphFor( FlowElement streamedSource )
     {
@@ -273,7 +343,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     if( sourceTaps != null )
       return sourceTaps;
 
-    sourceTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSourceElements() ) );
+    sourceTaps = Collections.unmodifiableSet( Util.narrowIdentitySet( Tap.class, getSourceElements() ) );
 
     return sourceTaps;
     }
@@ -284,7 +354,7 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
     if( sinkTaps != null )
       return sinkTaps;
 
-    sinkTaps = Collections.unmodifiableSet( Util.narrowSet( Tap.class, getSinkElements() ) );
+    sinkTaps = Collections.unmodifiableSet( Util.narrowIdentitySet( Tap.class, getSinkElements() ) );
 
     return sinkTaps;
     }
@@ -309,6 +379,9 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
 
   private void assignTrappableNames( FlowElementGraph flowElementGraph )
     {
+    if( flowElementGraph == null )
+      return;
+
     reverseSourceTaps = new HashMap<>();
     reverseSinkTaps = new HashMap<>();
 

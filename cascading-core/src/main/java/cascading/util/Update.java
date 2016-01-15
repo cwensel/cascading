@@ -238,7 +238,7 @@ public class Update extends TimerTask
     sb.append( "id=" );
     sb.append( getClientId() );
     sb.append( "&instance=" );
-    sb.append( urlEncode( AppProps.getApplicationID( null ) ) );
+    sb.append( urlEncode( AppProps.getApplicationID() ) );
     sb.append( "&request=" );
     sb.append( requests.get() );
     sb.append( "&os-name=" );
@@ -257,6 +257,14 @@ public class Update extends TimerTask
     sb.append( urlEncode( Version.getReleaseBuild() ) );
     sb.append( "&frameworks=" );
     sb.append( urlEncode( getProperty( AppProps.APP_FRAMEWORKS ) ) );
+
+    if( getProperty( "driven.agent.name" ) != null )
+      {
+      sb.append( "&agent-name=" );
+      sb.append( urlEncode( getProperty( "driven.agent.name" ) ) );
+      sb.append( "&agent-version=" );
+      sb.append( urlEncode( getProperty( "driven.agent.version" ) ) );
+      }
 
     synchronized( plannerSet )
       {

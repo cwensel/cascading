@@ -154,7 +154,7 @@ public class RiffleCascadePlatformTest extends PlatformTestCase
     LockingFlowListener flowListener = new LockingFlowListener();
     secondProcess.addListener( flowListener );
 
-    Cascade cascade = new CascadeConnector().connect( fourthProcess, secondProcess, firstProcess, thirdProcess );
+    Cascade cascade = new CascadeConnector( getProperties() ).connect( fourthProcess, secondProcess, firstProcess, thirdProcess );
 
     cascade.start();
 

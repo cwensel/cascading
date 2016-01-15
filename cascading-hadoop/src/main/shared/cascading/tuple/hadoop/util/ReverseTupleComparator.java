@@ -33,6 +33,6 @@ public class ReverseTupleComparator extends TupleComparator
   @Override
   public int compare( Tuple lhs, Tuple rhs )
     {
-    return super.compare( rhs, lhs );
+    return -1 * super.compare( rhs, lhs );
     }
   }

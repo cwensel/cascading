@@ -27,6 +27,7 @@ import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.local.LocalFlowProcess;
 import cascading.flow.local.LocalFlowStep;
+import cascading.flow.local.stream.duct.ParallelFork;
 import cascading.flow.local.stream.element.LocalGroupByGate;
 import cascading.flow.local.stream.element.SyncMergeStage;
 import cascading.flow.stream.duct.Duct;
@@ -75,7 +76,13 @@ public class LocalStepStreamGraph extends NodeStreamGraph
       }
     }
 
-  protected Gate createCoGroupGate( CoGroup element, IORole role )
+  @Override
+  protected Duct createFork(Duct[] allNext)
+    {
+    return new ParallelFork( allNext );
+    }
+
+  protected Gate createCoGroupGate(CoGroup element, IORole role )
     {
     return new MemoryCoGroupGate( flowProcess, element );
     }

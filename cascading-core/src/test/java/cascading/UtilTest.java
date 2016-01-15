@@ -23,7 +23,7 @@ package cascading;
 import cascading.util.Util;
 import org.junit.Test;
 
-import static junit.framework.Assert.*;
+import static junit.framework.TestCase.*;
 
 /**
  *
@@ -107,5 +107,4 @@ public class UtilTest
     assertTrue( Util.containsWhitespace( "\tabc\tdef\tghi\t" ) );
     assertTrue( Util.containsWhitespace( "contains\tstuff\twe\rdon't\nwant\f" ) );
     }
-
   }

@@ -27,16 +27,22 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
+import cascading.flow.FlowProcess;
+
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.operation.Aggregator;
+import cascading.operation.BaseOperation;
 import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
+
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
 import cascading.operation.expression.ExpressionFunction;
@@ -50,6 +56,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Rename;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.Joiner;
 import cascading.pipe.joiner.LeftJoin;
@@ -61,6 +68,8 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Hasher;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static data.InputData.*;
@@ -193,6 +202,164 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
     }
+
+    /**
+     * This test checks for a deadlock when the same input is forked, adapted on one edge, then hashjoined back together.
+     * @throws Exception
+       */
+    @Test
+    @Ignore /* this test fails under Tez, for now. The other "testForkThen.*Join.*" already validate the need for
+     ParallelFork on cascading-local -- cchepelov, 2016-01-12 */
+    public void testForkThenJoin() throws Exception
+    {
+      getPlatform().copyFromLocal( inputFileLower );
+      Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+
+      Map sources = new HashMap();
+
+      sources.put( "lower", sourceLower );
+
+      Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "join" ), SinkMode.REPLACE );
+
+      Function splitter = new RegexSplitter( new Fields( "num", "text" ), " " );
+
+      Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+      Pipe pipeUpper = new Each( new Pipe("upper", pipeLower), new Fields( "text" ),
+              new ExpressionFunction( Fields.ARGS, "text.toUpperCase(java.util.Locale.ROOT)", String.class ),
+              Fields.REPLACE);
+
+      Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+      Map<Object, Object> properties = getProperties();
+
+      Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
+
+      flow.complete();
+
+      validateLength( flow, 5 );
+
+      List<Tuple> values = getSinkAsList( flow );
+
+      assertTrue( values.contains( new Tuple( "1\ta\t1\tA" ) ) );
+      assertTrue( values.contains( new Tuple( "2\tb\t2\tB" ) ) );
+    }
+
+    /**
+     * This test checks for a deadlock when the same input is forked, adapted on one edge, then hashjoined back together.
+     * @throws Exception
+     */
+    @Test
+    public void testForkCoGroupThenHashJoin() throws Exception
+    {
+      getPlatform().copyFromLocal( inputFileLower );
+      Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+      Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+      Map sources = new HashMap();
+
+      sources.put( "sourceLower", sourceLower );
+      sources.put( "sourceUpper", sourceUpper );
+
+      Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "join" ), SinkMode.REPLACE );
+
+      Function splitter = new RegexSplitter( new Fields( "num", "text" ), " " );
+
+      Pipe leftPipeLower = new Each( new Pipe( "sourceLower" ), new Fields( "line" ), splitter );
+      Pipe rightPipeUpper = new Each( new Pipe( "sourceUpper" ), new Fields( "line" ), splitter );
+
+      Pipe leftPipeUpper = new Each( new Pipe( "leftUpper", leftPipeLower), new Fields( "text" ),
+              new ExpressionFunction( Fields.ARGS, "text.toUpperCase(java.util.Locale.ROOT)", String.class ),
+              Fields.REPLACE);
+      Pipe rightPipeLower = new Each( new Pipe( "rightLower", rightPipeUpper), new Fields( "text" ),
+              new ExpressionFunction( Fields.ARGS, "text.toLowerCase(java.util.Locale.ROOT)", String.class ),
+              Fields.REPLACE);
+
+      leftPipeUpper = new GroupBy(leftPipeUpper, new Fields("num"));
+      rightPipeLower = new GroupBy(rightPipeLower, new Fields("num"));
+
+      Pipe middleSplice = new CoGroup("middleCoGroup", leftPipeUpper, new Fields( "num" ), rightPipeLower, new Fields( "num" ), new Fields( "numM1", "charM1", "numM2", "charM2" )  );
+
+      Pipe leftSplice = new HashJoin(leftPipeLower, new Fields("num"), middleSplice, new Fields("numM1"));
+
+      Map<Object, Object> properties = getProperties();
+
+      Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, leftSplice);
+
+      flow.complete();
+
+      validateLength( flow, 5 );
+
+      List<Tuple> values = getSinkAsList( flow );
+      // that the flow completes at all is already success.
+      assertTrue( values.contains( new Tuple( "1\ta\t1\tA\t1\ta" ) ) );
+      assertTrue( values.contains( new Tuple( "2\tb\t2\tB\t2\tb" ) ) );
+    }
+
+    /**
+     * This test checks for a deadlock when the same input is forked, adapted on one edge, cogroup with something,
+     * then hashjoined back together.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testForkCoGroupThenHashJoinCoGroupAgain() throws Exception
+    {
+      getPlatform().copyFromLocal( inputFileLower );
+      getPlatform().copyFromLocal( inputFileUpper );
+
+      Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+      Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+      Map sources = new HashMap();
+
+      sources.put( "sourceLower", sourceLower );
+      sources.put( "sourceUpper", sourceUpper );
+
+      Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "join" ), SinkMode.REPLACE );
+
+      Function splitter = new RegexSplitter( new Fields( "num", "text" ), " " );
+
+      Pipe leftPipeLower = new Each( new Pipe( "sourceLower" ), new Fields( "line" ), splitter );
+      Pipe rightPipeUpper = new Each( new Pipe( "sourceUpper" ), new Fields( "line" ), splitter );
+
+      Pipe leftPipeUpper = new Each( new Pipe( "leftUpper", leftPipeLower), new Fields( "text" ),
+              new ExpressionFunction( Fields.ARGS, "text.toUpperCase(java.util.Locale.ROOT)", String.class ),
+              Fields.REPLACE);
+      Pipe rightPipeLower = new Each( new Pipe( "rightLower", rightPipeUpper), new Fields( "text" ),
+              new ExpressionFunction( Fields.ARGS, "text.toLowerCase(java.util.Locale.ROOT)", String.class ),
+              Fields.REPLACE);
+
+      leftPipeUpper = new GroupBy(leftPipeUpper, new Fields("num"));
+      rightPipeLower = new GroupBy(rightPipeLower, new Fields("num"));
+
+      Pipe middleSplice = new CoGroup("middleCoGroup", leftPipeUpper, new Fields( "num" ), rightPipeLower, new Fields( "num" ), new Fields( "numM1", "charM1", "numM2", "charM2" )  );
+
+      Pipe leftSplice = new HashJoin(leftPipeLower, new Fields("num"), middleSplice, new Fields("numM1"));
+      Pipe rightSplice = new HashJoin(rightPipeUpper, new Fields("num"), middleSplice, new Fields("numM2"));
+
+      leftSplice = new Rename(leftSplice, new Fields("num", "text", "numM1", "charM1", "numM2", "charM2"), new Fields("numL1", "charL1", "numM1L", "charM1L", "numM2L", "charM2L"));
+      rightSplice = new Rename(rightSplice, new Fields("num", "text", "numM1", "charM1", "numM2", "charM2"), new Fields("numR1", "charR1", "numM1R", "charM1R", "numM2R", "charM2R"));
+
+      leftSplice = new GroupBy(leftSplice, new Fields("numM1L"));
+      rightSplice = new GroupBy(rightSplice, new Fields("numM2R"));
+
+      Pipe splice = new CoGroup( "cogrouping", leftSplice, new Fields( "numM1L" ), rightSplice, new Fields( "numM2R" ) );
+
+      Map<Object, Object> properties = getProperties();
+
+      Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice);
+
+      flow.complete();
+
+      validateLength( flow, 5 );
+
+      List<Tuple> values = getSinkAsList( flow );
+
+      // getting this far is a success already (past old deadlocks)
+      assertTrue( values.contains( new Tuple( "1\ta\t1\tA\t1\ta\t1\tA\t1\tA\t1\ta" ) ) );
+      assertTrue( values.contains( new Tuple( "2\tb\t2\tB\t2\tb\t2\tB\t2\tB\t2\tb" ) ) );
+    }
+
 
   @Test
   public void testJoinWithUnknowns() throws Exception
@@ -2192,5 +2359,114 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "3\tc\t3\tc" ) ) );
     assertTrue( values.contains( new Tuple( "4\td\t4\td" ) ) );
     assertTrue( values.contains( new Tuple( "5\te\t5\te" ) ) );
+    }
+
+  //////////////////////////////////////
+  // tests below deadlock in local mode
+  //////////////////////////////////////
+
+  @Test
+  public void testGroupBySplitSplitGroupByJoin() throws Exception
+    {
+    // currently deadlocks in local mode - will require arch changes to support
+    if( !getPlatform().isMapReduce() && !getPlatform().isDAG() )
+      return;
+
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "sink" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeFirst = new Pipe( "first" );
+    pipeFirst = new Each( pipeFirst, new Fields( "line" ), splitter );
+    pipeFirst = new GroupBy( pipeFirst, new Fields( "num" ) );
+    pipeFirst = new Every( pipeFirst, new Fields( "char" ), new First( new Fields( "firstFirst" ) ), Fields.ALL );
+
+    Pipe pipeSecond = new Pipe( "second", pipeFirst );
+    pipeSecond = new Each( pipeSecond, new Identity() );
+    pipeSecond = new GroupBy( pipeSecond, new Fields( "num" ) );
+    pipeSecond = new Every( pipeSecond, new Fields( "firstFirst" ), new First( new Fields( "secondFirst" ) ), Fields.ALL );
+
+    Pipe splice = new HashJoin( pipeFirst, new Fields( "num" ), pipeSecond, new Fields( "num" ), Fields.size( 4 ) );
+//    Pipe splice = new HashJoin( pipeSecond, new Fields( "num" ), pipeFirst, new Fields( "num" ), Fields.size( 4 ) );
+
+    splice = new HashJoin( splice, new Fields( 0 ), pipeSecond, new Fields( "num" ), Fields.size( 6 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb\t2\tb" ) ) );
+    assertTrue( values.contains( new Tuple( "3\tc\t3\tc\t3\tc" ) ) );
+    assertTrue( values.contains( new Tuple( "4\td\t4\td\t4\td" ) ) );
+    assertTrue( values.contains( new Tuple( "5\te\t5\te\t5\te" ) ) );
+    }
+
+  @Test
+  public void testGroupBySplitAroundSplitGroupByJoin() throws Exception
+    {
+    // currently deadlocks in local mode - will require arch changes to support
+    if( !getPlatform().isMapReduce() && !getPlatform().isDAG() )
+      return;
+
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "sink" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "sink2" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeInit = new Pipe( "init" );
+    Pipe pipeFirst = new Pipe( "first", pipeInit );
+    pipeFirst = new Each( pipeFirst, new Fields( "line" ), splitter );
+    pipeFirst = new GroupBy( pipeFirst, new Fields( "num" ) );
+    pipeFirst = new Every( pipeFirst, new Fields( "char" ), new First( new Fields( "firstFirst" ) ), Fields.ALL );
+
+    Pipe sink2Pipe = new Pipe( "sink2", pipeFirst );
+
+    Pipe pipeSecond = new Pipe( "second", pipeInit );
+    pipeSecond = new Each( pipeSecond, new Fields( "line" ), splitter );
+    pipeSecond = new GroupBy( pipeSecond, new Fields( "num" ) );
+    pipeSecond = new Every( pipeSecond, new Fields( "char" ), new First( new Fields( "secondFirst" ) ), Fields.ALL );
+
+//    Pipe splice = new HashJoin( pipeFirst, new Fields( "num" ), pipeSecond, new Fields( "num" ), Fields.size( 4 ) );
+    Pipe splice = new HashJoin( pipeSecond, new Fields( "num" ), pipeFirst, new Fields( "num" ), Fields.size( 4 ) );
+
+    Pipe pipeThird = new Pipe( "third", pipeSecond );
+    pipeThird = new Each( pipeThird, new Identity() );
+    pipeThird = new GroupBy( pipeThird, new Fields( "num" ) );
+    pipeThird = new Every( pipeThird, new Fields( "secondFirst" ), new First( new Fields( "thirdFirst" ) ), Fields.ALL );
+
+    splice = new HashJoin( splice, new Fields( 0 ), pipeThird, new Fields( "num" ), Fields.size( 6 ) );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .setName( splice.getName() )
+      .addSource( "init", source )
+      .addTailSink( splice, sink )
+      .addTailSink( sink2Pipe, sink2 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 5, null );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb\t2\tb" ) ) );
+    assertTrue( values.contains( new Tuple( "3\tc\t3\tc\t3\tc" ) ) );
+    assertTrue( values.contains( new Tuple( "4\td\t4\td\t4\td" ) ) );
+    assertTrue( values.contains( new Tuple( "5\te\t5\te\t5\te" ) ) );
     }
   }

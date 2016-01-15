@@ -21,6 +21,7 @@
 package cascading.stats;
 
 import cascading.flow.FlowNode;
+import cascading.flow.planner.BaseFlowNode;
 import cascading.management.state.ClientState;
 import cascading.util.ProcessLogger;
 
@@ -35,6 +36,8 @@ public abstract class FlowNodeStats extends CascadingStats<FlowSliceStats>
     {
     super( flowNode.getName(), clientState );
     this.flowNode = flowNode;
+
+    ( (BaseFlowNode) this.flowNode ).setFlowNodeStats( this );
     }
 
   public abstract String getKind();
