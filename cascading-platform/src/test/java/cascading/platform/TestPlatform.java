@@ -92,6 +92,11 @@ public abstract class TestPlatform
     return false;
     }
 
+  public boolean supportsGroupbyAfterMerge()
+    {
+    return false;
+    }
+
   public boolean isDAG()
     {
     return false;
