@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -85,6 +85,11 @@ public abstract class TestPlatform
   public String getName()
     {
     return getClass().getSimpleName().replaceAll( "^(.*)Platform$", "$1" ).toLowerCase();
+    }
+
+  public boolean supportsGroupByAfterMerge()
+    {
+    return false;
     }
 
   public boolean isMapReduce()

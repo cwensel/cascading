@@ -1932,7 +1932,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       .addSource( lhs, lhsTap )
       .addTailSink( counted, sink );
 
-    boolean failOnPlanner = getPlatform().isMapReduce() || getPlatform().isDAG();
+    boolean failOnPlanner = !getPlatform().supportsGroupByAfterMerge();
 
     Flow flow = null;
 

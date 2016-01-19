@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,6 +22,8 @@ package cascading.scheme;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import cascading.ComparePlatformsTest;
 import cascading.PlatformTestCase;
@@ -244,7 +246,7 @@ public class TextDelimitedPlatformTest extends PlatformTestCase
     {
     // 75.185.76.245 - - [01/Sep/2007:00:01:03 +0000] "POST /mt-tb.cgi/235 HTTP/1.1" 403 174 "-" "Opera/9.10 (Windows NT 5.1; U; ru)" "-"
 
-    DateType dateType = new DateType( TestConstants.APACHE_DATE_FORMAT );
+    DateType dateType = new DateType( TestConstants.APACHE_DATE_FORMAT, TimeZone.getDefault(), Locale.US );
 
     Type[] types = new Type[]{
       String.class, // ip
