@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -363,6 +363,12 @@ public class AggregateBy extends SubAssembly
       for( Map.Entry<Tuple, Tuple[]> entry : context.entrySet() )
         completeFunctors( flowProcess, collector, result, entry );
 
+      context.clear();
+      }
+
+    @Override
+    public void cleanup( FlowProcess flowProcess, OperationCall<Context> operationCall )
+      {
       operationCall.setContext( null );
       }
 
