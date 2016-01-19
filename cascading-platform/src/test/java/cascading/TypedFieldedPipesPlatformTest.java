@@ -208,7 +208,7 @@ public class TypedFieldedPipesPlatformTest extends PlatformTestCase
 
     // 75.185.76.245 - - [01/Sep/2007:00:01:03 +0000] "POST /mt-tb.cgi/235 HTTP/1.1" 403 174 "-" "Opera/9.10 (Windows NT 5.1; U; ru)" "-"
 
-    DateType dateType = new DateType( TestConstants.APACHE_DATE_FORMAT );
+    DateType dateType = new DateType( TestConstants.APACHE_DATE_FORMAT , TimeZone.getDefault(), Locale.US);
 
     Type[] lhsTypes = new Type[]{
       String.class, // ip

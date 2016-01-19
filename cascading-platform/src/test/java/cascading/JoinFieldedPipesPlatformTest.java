@@ -1934,6 +1934,10 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     boolean failOnPlanner = getPlatform().isMapReduce() || getPlatform().isDAG();
 
+    if (getPlatform().supportsGroupbyAfterMerge()) {
+        failOnPlanner=false;
+    }
+
     Flow flow = null;
 
     try
