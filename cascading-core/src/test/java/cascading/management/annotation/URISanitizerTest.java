@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -202,5 +202,23 @@ public class URISanitizerTest
     URISanitizer sanitizer = new URISanitizer();
     String result = sanitizer.apply( Visibility.PROTECTED, uri );
     assertEquals( "/path/conversion_date={2015-12-23,2015-12-22}", result );
+    }
+
+  @Test
+  public void testRelativePathWindows()
+    {
+    String path = "..\\some\\directory";
+    URISanitizer sanitizer = new URISanitizer();
+    String result = sanitizer.apply( Visibility.PRIVATE, path );
+    assertEquals( "../some/directory", result );
+    }
+
+  @Test
+  public void testAbsolutePathWindows()
+    {
+    String path = "c:\\some\\directory";
+    URISanitizer sanitizer = new URISanitizer();
+    String result = sanitizer.apply( Visibility.PRIVATE, path );
+    assertEquals( "c:///some/directory", result );
     }
   }

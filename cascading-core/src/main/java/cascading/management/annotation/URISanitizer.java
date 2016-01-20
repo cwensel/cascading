@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -177,12 +177,31 @@ public class URISanitizer implements Sanitizer
 
   private String encode( String input )
     {
-    input = input.replaceAll( "\\[", "%5B" );
-    input = input.replaceAll( "\\]", "%5D" );
-    input = input.replaceAll( "\\{", "%7B" );
-    input = input.replaceAll( "\\}", "%7D" );
+    String[] parts = input.split( "://", 2 );
+    String protocol = "";
+    String rest;
 
-    return input;
+    if( parts.length == 2 )
+      protocol = parts[ 0 ];
+
+    rest = parts[ parts.length - 1 ];
+
+    rest = rest.replaceAll( "\\[", "%5B" );
+    rest = rest.replaceAll( "\\]", "%5D" );
+    rest = rest.replaceAll( "\\{", "%7B" );
+    rest = rest.replaceAll( "\\}", "%7D" );
+    rest = rest.replaceAll( "\\\\", "/" );
+    rest = rest.replaceAll( ";", "%3B" );
+    rest = rest.replaceAll( ",", "%2C" );
+
+    StringBuilder builder = new StringBuilder();
+
+    if( !protocol.isEmpty() )
+      builder.append( protocol ).append( "://" );
+
+    builder.append( rest );
+
+    return builder.toString();
     }
 
   private String sanitizeQuery( String query )
