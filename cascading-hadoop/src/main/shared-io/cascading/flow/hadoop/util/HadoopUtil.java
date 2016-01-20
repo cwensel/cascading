@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -800,13 +800,38 @@ public class HadoopUtil
     conf.set( "tez.runtime.optimize.local.fetch", "true" );
     }
 
+  private static boolean interfaceAssignableFromClassName( Class<?> xface, String className )
+    {
+    if( ( className == null ) || ( xface == null ) )
+      return false;
+
+    try
+      {
+      Class<?> klass = Class.forName( className );
+      if( klass == null )
+        return false;
+
+      if( !xface.isAssignableFrom( klass ) )
+        return false;
+
+      return true;
+      }
+    catch( ClassNotFoundException cnfe )
+      {
+      return false; // let downstream figure it out
+      }
+    }
+
   public static boolean setNewApi( Configuration conf, String className )
     {
     if( className == null ) // silently return and let the error be caught downstream
       return false;
 
-    boolean isStable = className.startsWith( "org.apache.hadoop.mapred." );
-    boolean isNew = className.startsWith( "org.apache.hadoop.mapreduce." );
+    boolean isStable = className.startsWith( "org.apache.hadoop.mapred." )
+      || interfaceAssignableFromClassName( org.apache.hadoop.mapred.InputFormat.class, className );
+
+    boolean isNew = className.startsWith( "org.apache.hadoop.mapreduce." )
+      || interfaceAssignableFromClassName( org.apache.hadoop.mapreduce.InputFormat.class, className );
 
     if( isStable )
       conf.setBoolean( "mapred.mapper.new-api", false );
