@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -790,21 +790,24 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
   @Override
   public void clean( TezConfiguration config )
     {
-    if( getSink().isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
+    for( Tap sink : getSinkTaps() )
       {
-      try
+      if( sink.isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
         {
-        getSink().deleteResource( config );
+        try
+          {
+          sink.deleteResource( config );
+          }
+        catch( Exception exception )
+          {
+          // sink all exceptions, don't fail app
+          logWarn( "unable to remove temporary file: " + sink, exception );
+          }
         }
-      catch( Exception exception )
+      else
         {
-        // sink all exceptions, don't fail app
-        logWarn( "unable to remove temporary file: " + getSink(), exception );
+        cleanTapMetaData( config, sink );
         }
-      }
-    else
-      {
-      cleanTapMetaData( config, getSink() );
       }
 
     for( Tap tap : getTraps() )
