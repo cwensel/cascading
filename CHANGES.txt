@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated Apache Tez to 0.8.2.
+
   Updated jgrapht to 0.9.2.
 
   Fixed an issue on Apache MapReduce 1.x where an NPE will be thrown when fetching slice level counters on a map only
