@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -76,13 +76,13 @@ public abstract class HadoopStepStats extends BaseCachedStepStats<Configuration,
       throw new IllegalStateException( "mapper node not found" );
 
     counterCache = new HadoopStepCounterCache( this, (Configuration) getConfig() )
-    {
-    @Override
-    protected RunningJob getJobStatusClient()
       {
-      return HadoopStepStats.this.getJobStatusClient();
-      }
-    };
+      @Override
+      protected RunningJob getJobStatusClient()
+        {
+        return HadoopStepStats.this.getJobStatusClient();
+        }
+      };
     }
 
   private Configuration getConfig()
@@ -245,7 +245,9 @@ public abstract class HadoopStepStats extends BaseCachedStepStats<Configuration,
         continue;
         }
 
-      if( event.isMapTask() )
+      // in hadoop 1, isMapTask may be false when it is indeed a map task
+      // this may only manifest in mini-cluster tests -- included to be safe
+      if( event.isMapTask() || reducerNodeStats == null )
         mapperNodeStats.addAttempt( event );
       else
         reducerNodeStats.addAttempt( event );
