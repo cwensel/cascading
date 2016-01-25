@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -658,24 +658,24 @@ public class Util
   private static void printGraph( Writer writer, SimpleDirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
-    {
-    public String getVertexName( Object object )
       {
-      if( object == null )
-        return "none";
+      public String getVertexName( Object object )
+        {
+        if( object == null )
+          return "none";
 
-      return object.toString().replaceAll( "\"", "\'" );
-      }
-    }, new EdgeNameProvider<Object>()
-    {
-    public String getEdgeName( Object object )
+        return object.toString().replaceAll( "\"", "\'" );
+        }
+      }, new EdgeNameProvider<Object>()
       {
-      if( object == null )
-        return "none";
+      public String getEdgeName( Object object )
+        {
+        if( object == null )
+          return "none";
 
-      return object.toString().replaceAll( "\"", "\'" );
+        return object.toString().replaceAll( "\"", "\'" );
+        }
       }
-    }
     );
 
     dot.export( writer, graph );
@@ -1412,5 +1412,31 @@ public class Util
   public static boolean containsWhitespace( String string )
     {
     return Pattern.compile( "\\s" ).matcher( string ).find();
+    }
+
+  public static String parseHostname( String uri )
+    {
+    if( isEmpty( uri ) )
+      return null;
+
+    String[] parts = uri.split( "://", 2 );
+    String result;
+
+    // missing protocol
+    result = parts[ parts.length - 1 ];
+
+    // user:pass@hostname:port/stuff
+    parts = result.split( "/", 2 );
+    result = parts[ 0 ];
+
+    // user:pass@hostname:port
+    parts = result.split( "@", 2 );
+    result = parts[ parts.length - 1 ];
+
+    // hostname:port
+    parts = result.split( ":", 2 );
+    result = parts[ 0 ];
+
+    return result;
     }
   }

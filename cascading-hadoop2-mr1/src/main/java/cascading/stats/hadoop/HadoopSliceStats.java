@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,6 +27,7 @@ import java.util.Map;
 import cascading.stats.CascadingStats;
 import cascading.stats.FlowSliceStats;
 import cascading.stats.ProvidesCounters;
+import cascading.util.Util;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.Counters;
@@ -101,6 +102,12 @@ public class HadoopSliceStats extends FlowSliceStats<HadoopSliceStats.Kind> impl
           break;
         }
       return status;
+      }
+
+    @Override
+    public String getProcessHostname()
+      {
+      return Util.parseHostname( event.getTaskTrackerHttp() );
       }
     }
 

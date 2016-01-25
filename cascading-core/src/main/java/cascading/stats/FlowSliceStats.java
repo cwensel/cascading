@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -39,11 +39,10 @@ import java.util.Map;
  * </ul>
  * <p/>
  * pending is mostly irrelevant and unavailable, start, submit, and runtime are by default synonymous at the slice level
- *
+ * <p/>
  * All methods with the word 'process' like {@link #getProcessID()}, refer to the underlying implementations value.
  * In this example, processID is the task id this slice actually represents, where the id ({@link #getID()} is a local
  * guid not related to the platform implementation id to guarantee uniqueness.
- *
  */
 public abstract class FlowSliceStats<K extends Enum>
   {
@@ -65,6 +64,8 @@ public abstract class FlowSliceStats<K extends Enum>
     public abstract String getStatusURL();
 
     public abstract CascadingStats.Status getStatus();
+
+    public abstract String getProcessHostname();
     }
 
   public abstract String getID();

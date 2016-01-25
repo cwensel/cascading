@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -68,6 +68,12 @@ public class TezSliceStats extends FlowSliceStats<TezNodeStats.Kind> implements 
 
     @Override
     public CascadingStats.Status getStatus()
+      {
+      return null;
+      }
+
+    @Override
+    public String getProcessHostname()
       {
       return null;
       }

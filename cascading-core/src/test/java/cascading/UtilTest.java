@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,7 +23,9 @@ package cascading;
 import cascading.util.Util;
 import org.junit.Test;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  *
@@ -106,5 +108,49 @@ public class UtilTest
     assertTrue( Util.containsWhitespace( "aaa\t " ) );
     assertTrue( Util.containsWhitespace( "\tabc\tdef\tghi\t" ) );
     assertTrue( Util.containsWhitespace( "contains\tstuff\twe\rdon't\nwant\f" ) );
+    }
+
+  String[] results = new String[]{
+    null,
+    null,
+    "www.example.com",
+    "ip-172-31-11-27.us-west-2.compute.internal",
+    "172.31.11.27",
+    "www.example.com",
+    "hadoop42.example.com",
+    "hadoop42.example.com",
+    "hadoop42.example.com",
+    "hadoop42.example.com",
+    "hadoop42.example.com",
+    "hadoop42.example.com",
+    "some-bucket"
+  };
+
+  String[] uris = new String[]{
+    null,
+    "",
+    "www.example.com",
+    "http://ip-172-31-11-27.us-west-2.compute.internal:20888/proxy/application_1451945425832_15086/",
+    "http://172.31.11.27:20888/proxy/application_1451945425832_15086/",
+    "http://www.example.com:8080/docs/resource1.html?user=foo&password=secret&action=do",
+    "hdfs://hadoop42.example.com:8020/some/dataset",
+    "hdfs://foor:bar@hadoop42.example.com:8020/some/dataset",
+    "hdfs://foor:bar@hadoop42.example.com:8020/some/dataset#@foo/:baz",
+    "hadoop42.example.com:8020/some/dataset", // hadoop leaves out the uri sometimes
+    "foor:bar@hadoop42.example.com:8020/some/dataset",
+    "foor:bar@hadoop42.example.com/some/dataset",
+    "s3n://some-bucket/2014/12/2[5-9]/*"
+  };
+
+  @Test
+  public void testURIHostnameParser() throws Exception
+    {
+    for( int i = 0; i < results.length; i++ )
+      {
+      String result = results[ i ];
+      String uri = uris[ i ];
+
+      assertEquals( result, Util.parseHostname( uri ) );
+      }
     }
   }
