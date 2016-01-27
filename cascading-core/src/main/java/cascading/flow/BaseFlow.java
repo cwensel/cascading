@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -469,20 +469,29 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
    *
    * @return a String value
    */
-  public synchronized String getFlowCanonicalHash()
+  public String getFlowCanonicalHash()
     {
-    if( flowCanonicalHash == null )
-      flowCanonicalHash = createFlowCanonicalHash();
+    if( flowCanonicalHash != null || flowElementGraph == null )
+      return flowCanonicalHash;
+
+    // synchronize on flowElementGraph to prevent duplicate hash creation - can be high overhead
+    // and to prevent deadlocks if the DocumentService calls back into the flow when transitioning
+    // into a running state
+    synchronized( flowElementGraph )
+      {
+      flowCanonicalHash = createFlowCanonicalHash( flowElementGraph );
+      }
 
     return flowCanonicalHash;
     }
 
-  protected String createFlowCanonicalHash()
+  // allow for sub-class overrides
+  protected String createFlowCanonicalHash( FlowElementGraph flowElementGraph )
     {
-    if( flowElementGraph != null )
-      return ElementGraphs.canonicalHash( flowElementGraph );
+    if( flowElementGraph == null )
+      return null;
 
-    return null;
+    return ElementGraphs.canonicalHash( flowElementGraph );
     }
 
   FlowElementGraph getFlowElementGraph()
