@@ -165,11 +165,12 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
     Tuples.asModifiable( sourceCall.getIncomingEntry().getTuple() );
     hasWaiting = scheme.source( flowProcess, sourceCall );
 
-    if( !hasWaiting && inputIterator.hasNext() )
+    while ( !hasWaiting && inputIterator.hasNext() )
       {
       sourceCall.setInput( wrapInput( inputIterator.next() ) );
 
-      return getNext();
+      Tuples.asModifiable( sourceCall.getIncomingEntry().getTuple() );
+      hasWaiting = scheme.source( flowProcess, sourceCall );
       }
 
     return getTupleEntry();
