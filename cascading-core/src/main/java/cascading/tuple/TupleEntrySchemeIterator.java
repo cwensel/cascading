@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -165,11 +165,12 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
     Tuples.asModifiable( sourceCall.getIncomingEntry().getTuple() );
     hasWaiting = scheme.source( flowProcess, sourceCall );
 
-    if( !hasWaiting && inputIterator.hasNext() )
+    while( !hasWaiting && inputIterator.hasNext() )
       {
       sourceCall.setInput( wrapInput( inputIterator.next() ) );
 
-      return getNext();
+      Tuples.asModifiable( sourceCall.getIncomingEntry().getTuple() );
+      hasWaiting = scheme.source( flowProcess, sourceCall );
       }
 
     return getTupleEntry();
