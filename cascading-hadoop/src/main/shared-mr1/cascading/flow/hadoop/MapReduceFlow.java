@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -219,6 +219,9 @@ public class MapReduceFlow extends HadoopFlow
 
     Map<String, Tap> taps = new HashMap<>();
 
+    if( paths == null )
+      return taps;
+
     for( Path path : paths )
       toSourceTap( taps, path );
 
@@ -255,7 +258,8 @@ public class MapReduceFlow extends HadoopFlow
 
     Map<String, Tap> taps = new HashMap<>();
 
-    toSinkTap( taps, path );
+    if( path != null )
+      toSinkTap( taps, path );
 
     return taps;
     }
