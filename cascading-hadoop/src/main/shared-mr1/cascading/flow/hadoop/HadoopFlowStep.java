@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -333,25 +333,32 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
         }
       }
 
-    if( getSink().isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
+    // safe way to handle zero sinks case
+    for( Tap sink : getSinkTaps() )
+      cleanIntermediateData( config, sink );
+
+    for( Tap tap : getTraps() )
+      cleanTapMetaData( config, tap );
+    }
+
+  protected void cleanIntermediateData( JobConf config, Tap sink )
+    {
+    if( sink.isTemporary() && ( getFlow().getFlowStats().isSuccessful() || getFlow().getRunID() == null ) )
       {
       try
         {
-        getSink().deleteResource( config );
+        sink.deleteResource( config );
         }
       catch( Exception exception )
         {
         // sink all exceptions, don't fail app
-        logWarn( "unable to remove temporary file: " + getSink(), exception );
+        logWarn( "unable to remove temporary file: " + sink, exception );
         }
       }
     else
       {
-      cleanTapMetaData( config, getSink() );
+      cleanTapMetaData( config, sink );
       }
-
-    for( Tap tap : getTraps() )
-      cleanTapMetaData( config, tap );
     }
 
   private void cleanTapMetaData( JobConf jobConf, Tap tap )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -455,7 +455,10 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   @Override
   public Tap getSink()
     {
-    if( sinks.size() != 1 )
+    if( sinks.size() == 0 )
+      return null;
+
+    if( sinks.size() > 1 )
       throw new IllegalStateException( "more than one sink" );
 
     return sinks.keySet().iterator().next();
