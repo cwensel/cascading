@@ -2195,17 +2195,9 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( values.contains( new Tuple( "5\te\t5\te" ) ) );
     }
 
-  //////////////////////////////////////
-  // tests below deadlock in local mode
-  //////////////////////////////////////
-
   @Test
   public void testGroupBySplitSplitGroupByJoin() throws Exception
     {
-    // currently deadlocks in local mode - will require arch changes to support
-    if( !getPlatform().isMapReduce() && !getPlatform().isDAG() )
-      return;
-
     getPlatform().copyFromLocal( inputFileLower );
 
     Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
@@ -2247,10 +2239,6 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
   @Test
   public void testGroupBySplitAroundSplitGroupByJoin() throws Exception
     {
-    // currently deadlocks in local mode - will require arch changes to support
-    if( !getPlatform().isMapReduce() && !getPlatform().isDAG() )
-      return;
-
     getPlatform().copyFromLocal( inputFileLower );
 
     Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
