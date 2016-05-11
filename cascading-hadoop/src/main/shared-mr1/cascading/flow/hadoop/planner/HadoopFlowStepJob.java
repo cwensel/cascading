@@ -79,19 +79,19 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
   protected FlowStepStats createStepStats( ClientState clientState )
     {
     return new HadoopStepStats( flowStep, clientState )
-    {
-    @Override
-    public JobClient getJobClient()
       {
-      return jobClient;
-      }
+      @Override
+      public JobClient getJobClient()
+        {
+        return jobClient;
+        }
 
-    @Override
-    public RunningJob getJobStatusClient()
-      {
-      return runningJob;
-      }
-    };
+      @Override
+      public RunningJob getJobStatusClient()
+        {
+        return runningJob;
+        }
+      };
     }
 
   protected void internalBlockOnStop() throws IOException
@@ -125,7 +125,10 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
         return;
 
       boolean isMapper = flowNodeStats.getOrdinal() == 0;
-      int jobState = runningJob.getJobState();
+      Integer jobState = getJobStateSafe();
+
+      if( jobState == null ) // if call throws an NPE internally
+        return;
 
       if( JobStatus.FAILED == jobState )
         {
@@ -169,6 +172,18 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
     catch( IOException exception )
       {
       flowStep.logError( "failed setting node status", throwable );
+      }
+    }
+
+  private Integer getJobStateSafe() throws IOException
+    {
+    try
+      {
+      return runningJob.getJobState();
+      }
+    catch( NullPointerException exception ) // this happens
+      {
+      return null;
       }
     }
 
@@ -219,7 +234,10 @@ public class HadoopFlowStepJob extends FlowStepJob<JobConf>
       if( runningJob == null )
         return;
 
-      int jobState = runningJob.getJobState(); // may throw an NPE internally
+      Integer jobState = getJobStateSafe();  // if call throws an NPE internally
+
+      if( jobState == null )
+        return;
 
       flowStep.logWarn( "hadoop job " + runningJob.getID() + " state at " + JobStatus.getJobRunState( jobState ) );
       flowStep.logWarn( "failure info: " + runningJob.getFailureInfo() );

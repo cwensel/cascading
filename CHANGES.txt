@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Fixed issue where Hadoop throws an NPE when polling for the current job state making the state polling loop unstable.
+
   Prevent c.t.h.Hfs and c.t.h.Lfs from setting the current configuration into stand-alone mode when running
   cluster-side and Hfs or Lfs are used to read/write data from within an operation or internally. This has historically
   had no other effect than emitting a confusing log message on the cluster slaves.
