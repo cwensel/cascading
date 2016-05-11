@@ -154,8 +154,6 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     stepConf.set( CASCADING_FLOW_STEP_ID, getID() );
     stepConf.set( "cascading.flow.step.num", Integer.toString( getOrdinal() ) );
 
-    HadoopUtil.setIsInflow( stepConf );
-
     String flowStagingPath = ( (Hadoop2TezFlow) getFlow() ).getFlowStagingPath();
     List<String> classPath = ( (Hadoop2TezFlow) getFlow() ).getClassPath();
 
@@ -476,6 +474,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     setLocalMode( initializedConfig, conf, null );
 
     conf.set( "cascading.flow.node.num", Integer.toString( flowNode.getOrdinal() ) );
+
+    HadoopUtil.setIsInflow( conf ); // must be called after all taps configurations have been retrieved
 
     int parallelism = getParallelism( flowNode, conf );
 

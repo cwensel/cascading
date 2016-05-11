@@ -123,19 +123,19 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   private transient String cachedPath = null;
 
   private static final PathFilter HIDDEN_FILES_FILTER = new PathFilter()
-  {
-  public boolean accept( Path path )
     {
-    String name = path.getName();
+    public boolean accept( Path path )
+      {
+      String name = path.getName();
 
-    if( name.isEmpty() ) // should never happen
-      return true;
+      if( name.isEmpty() ) // should never happen
+        return true;
 
-    char first = name.charAt( 0 );
+      char first = name.charAt( 0 );
 
-    return first != '_' && first != '.';
-    }
-  };
+      return first != '_' && first != '.';
+      }
+    };
 
   protected static String getLocalModeScheme( Configuration conf, String defaultValue )
     {
@@ -364,7 +364,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     {
     HadoopUtil.addInputPath( conf, qualifiedPath );
 
-    makeLocal( conf, qualifiedPath, "forcing job to local mode, via source: " );
+    makeLocal( conf, qualifiedPath, "forcing job to stand-alone mode, via source: " );
     }
 
   protected void sourceConfInitComplete( FlowProcess<? extends Configuration> process, Configuration conf )
@@ -426,13 +426,17 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     HadoopUtil.setOutputPath( conf, qualifiedPath );
     super.sinkConfInit( process, conf );
 
-    makeLocal( conf, qualifiedPath, "forcing job to local mode, via sink: " );
+    makeLocal( conf, qualifiedPath, "forcing job to stand-alone mode, via sink: " );
 
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
     }
 
   private void makeLocal( Configuration conf, Path qualifiedPath, String infoMessage )
     {
+    // don't change the conf or log any messages if running cluster side
+    if( HadoopUtil.isInflow( conf ) )
+      return;
+
     String scheme = getLocalModeScheme( conf, "file" );
 
     if( !HadoopUtil.isLocal( conf ) && qualifiedPath.toUri().getScheme().equalsIgnoreCase( scheme ) )
