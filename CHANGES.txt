@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.1.0 [unreleased]
 
+  Updated Apache Hadoop 2 based sub-projects to 2.7.2.
+
   Updated Apache Tez to 0.8.2.
 
   Updated jgrapht to 0.9.2.
@@ -37,8 +39,6 @@ Cascading Change Log
 
   Fixed issue on Apache Tez where multiple prior splits and subsequent splicing back into a c.p.HashJoin could create an
   invalid plan.
-
-  Updated Apache Hadoop 2 based sub-projects to 2.7.1.
 
   Added new c.f.FlowStep#getFlowStepDescriptor and c.f.FlowStepDescriptors to store additional metadata on c.f.FlowStep
   instances.
