@@ -4,7 +4,7 @@ Thanks for using Cascading.
 
 ## Cascading 3.1
 
-Cascading 3.1 includes a few major changes and additions from prior releases: 
+Cascading 3 includes a few major changes and additions from prior major releases:
 
 * Complete re-write of the platform query planner and improvements to the planner API
 * Addition of Apache Tez as a supported runtime platform
@@ -20,27 +20,28 @@ For project documentation and community support, visit: [cascading.org](http://c
 To download a pre-built distribution, visit [http://cascading.org/downloads/](http://cascading.org/downloads/),
 or use Maven (described below).
 
-The project includes eight Cascading jar files:
+The project includes nine Cascading jar files:
 
-* `cascading-core-x.y.z.jar`          - all Cascading Core class files
-* `cascading-xml-x.y.z.jar`           - all Cascading XML operations class files
-* `cascading-expression-x.y.z.jar`    - all Cascading Janino expression operations class files
-* `cascading-local-x.y.z.jar`         - all Cascading Local in-memory mode class files
-* `cascading-hadoop-x.y.z.jar`        - all Cascading Hadoop 1.x MapReduce mode class files
-* `cascading-hadoop2-io-x.y.z.jar`    - all Cascading Hadoop 2.x HDFS and IO related class files
-* `cascading-hadoop2-mr1-x.y.z.jar`   - all Cascading Hadoop 2.x MapReduce mode class files
-* `cascading-hadoop2-tez-x.y.z.jar`   - all Cascading Hadoop 2.x Tez mode class files
+* `cascading-core-x.y.z.jar`              - all Cascading Core class files
+* `cascading-xml-x.y.z.jar`               - all Cascading XML operations class files
+* `cascading-expression-x.y.z.jar`        - all Cascading Janino expression operations class files
+* `cascading-local-x.y.z.jar`             - all Cascading Local in-memory mode class files
+* `cascading-hadoop-x.y.z.jar`            - all Cascading Hadoop 1.x MapReduce mode class files
+* `cascading-hadoop2-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
+* `cascading-hadoop2-mr1-x.y.z.jar`       - all Cascading Hadoop 2.x MapReduce mode class files
+* `cascading-hadoop2-tez-x.y.z.jar`       - all Cascading Hadoop 2.x Tez mode class files
+* `cascading-hadoop2-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the
 [Conjars.org](http://conjars.org) Maven repository.
 
-Hadoop 1.x mode is where the Cascading application should run on a Hadoop *MapReduce* cluster. 
+Hadoop 1.x mode is where the Cascading application should run on a Hadoop *MapReduce* cluster.
 
-Hadoop 2.x MR1 is the same as above but for Hadoop 2.x releases.
+Hadoop 2.x MR1 mode is the same as above but for Hadoop 2.x releases.
 
-Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster. 
+Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
 
-Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies or 
+Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies or
 cluster distribution. This implementation has minimal to no robustness in low memory situations, by design.
 
 As of Cascading 3.x, all above jar files are built against Java 1.7. Prior versions of Cascading are built
@@ -48,34 +49,40 @@ against Java 1.6.
 
 ## Extensions, the SDK, and DSLs
 
-There are a number of projects based on Cascading available. Visit the
-[Cascading Extensions](http://cascading.org/extensions/) page for a current list.
+There are a number of projects based on and extensions to Cascading available.
 
-Or download the [Cascading SDK](http://cascading.org/sdk/) which includes pre-built binaries.
+Visit the [Cascading Extensions](http://cascading.org/extensions/) page for a current list.
+
+Or download the [Cascading SDK](http://cascading.org/sdk/) which includes many pre-built binaries.
 
 Of note are three top level projects:
 
-* [Fluid](http://cascading.org/fluid/) - A fluent API for Cascading that is compatible with the default API.
+* [Fluid](http://cascading.org/fluid/) - A fluent Java API for Cascading that is compatible with the default API.
 * [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC on Cascading
 * [Pattern](http://cascading.org/pattern/) - Machine Learning scoring and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
 
-And new languages:
+And alternative languages:
 
 * [Scalding](http://cascading.org/projects/scalding/) - A Scala based DSL
 * [Cascalog](http://cascading.org/projects/cascalog/) - A Clojure based DSL
+* [PigPen](https://github.com/Netflix/PigPen) - A Clojure based DSL
+
+And a third-party computing platform:
+
+* [Apache Flink](http://www.cascading.org/cascading-flink/) - Faster than MapReduce cluster computing
 
 ## Versioning
 
 Cascading stable releases are always of the form `x.y.z`, where `z` is the current maintenance release.
 
-`x.y.z` releases are maintenance releases. No public incompatible API changes will be made, but in an effort to fix 
+`x.y.z` releases are maintenance releases. No public incompatible API changes will be made, but in an effort to fix
 bugs, remediation may entail throwing new Exceptions.
 
 `x.y` releases are minor releases. New features are added. No public incompatible API changes will be made on the
-core processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be 
-necessary. 
+core processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be
+necessary.
 
-It is important to note that *we do reserve to make breaking changes to the new query planner API through the 3.x 
+It is important to note that *we do reserve to make breaking changes to the new query planner API through the 3.x
 releases*. This allows us to respond to bugs and performance issues without issuing new major releases. Cascading
 4.0 will keep the public query planner APIs stable.
 
@@ -101,29 +108,29 @@ available from the [http://cascading.org/downloads/](http://cascading.org/downlo
 
 Comprehensive tests should be written against the `cascading.PlatformTestCase`.
 
-When running tests built against the PlatformTestCase, the local cluster can be disabled (if enabled by the test) 
+When running tests built against the PlatformTestCase, the local cluster can be disabled (if enabled by the test)
 by setting:
-    
-    -Dtest.cluster.enabled=false 
 
-From Gradle, to run a single test case: 
+    -Dtest.cluster.enabled=false
 
-    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i 
+From Gradle, to run a single test case:
+
+    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i
 
 or a single test method:
-    
-    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i 
+
+    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i
 
 ## Debugging the 3.x Planner
 
 The new 3.0 planner has a much improved debugging framework.
 
-When running tests, set the following 
+When running tests, set the following
 
-    -Dtest.traceplan.enabled=true 
+    -Dtest.traceplan.enabled=true
 
-If you are on Mac OS X and have installed GraphViz, dot files can be converted to pdf on the fly. To enable, set:    
-    
+If you are on Mac OS X and have installed GraphViz, dot files can be converted to pdf on the fly. To enable, set:
+
     -Dutil.dot.to.pdf.enabled=true
 
 Optionally, for stand alone applications, statistics and tracing can be enabled selectively with the following
@@ -150,6 +157,7 @@ You can find the latest public and WIP (work in progress) releases here:
 *  http://conjars.org/cascading/cascading-hadoop2-io
 *  http://conjars.org/cascading/cascading-hadoop2-mr1
 *  http://conjars.org/cascading/cascading-hadoop2-tez
+*  http://conjars.org/cascading/cascading-hadoop2-tez-stats
 *  http://conjars.org/cascading/cascading-xml
 *  http://conjars.org/cascading/cascading-expression
 
@@ -166,7 +174,7 @@ dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
 
-Note that `cascading-hadoop`, `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the 
+Note that `cascading-hadoop`, `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the
 Hadoop jars so that it won't get sucked into any application packaging as a dependency, typically.
 
 ## Building and IDE Integration
@@ -182,7 +190,7 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading requires Gradle 1.12 and Java 1.7 to build.
+Cascading requires at least Gradle 2.7 and Java 1.7 to build.
 
 To use an IDE like IntelliJ, run the following to create IntelliJ project files:
 
@@ -201,18 +209,18 @@ Similarly for Eclipse:
 First confirm you are using a supported version of Apache Hadoop by checking the
 [Compatibility](http://cascading.org/support/compatibility/) page.
 
-To use Cascading with Hadoop, we suggest stuffing `cascading-core`, `cascading-hadoop2-mr1`, 
-(optionally) `cascading-xml` jar files and all third-party libs into the `lib` folder of your job jar and executing 
-your job via `$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
+To use Cascading with Hadoop, we suggest stuffing `cascading-core` and `cascading-hadoop2-mr1`, jar files and all
+third-party libs into the `lib` folder of your job jar and executing your job via
+`$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
 
 For example, your job jar would look like this (via: `jar -t your.jar`)
 
 ```bash
 /<all your class and resource files>
 /lib/cascading-core-x.y.z.jar
-/lib/cascading-hadoop2-io-x.y.z.jar
 /lib/cascading-hadoop2-mr1-x.y.z.jar
-/lib/cascading-xml-x.y.z.jar
+/lib/cascading-hadoop2-io-x.y.z.jar
+/lib/cascading-expression-x.y.z.jar
 /lib/<cascading third-party jar files>
 ```
 
