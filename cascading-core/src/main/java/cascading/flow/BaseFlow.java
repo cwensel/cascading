@@ -1352,12 +1352,12 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       BaseFlowStep<Config> step = (BaseFlowStep) topoIterator.next();
       FlowStepJob<Config> flowStepJob = step.getCreateFlowStepJob( getFlowProcess(), getConfig() );
 
-      jobsMap.put( step.getName(), flowStepJob );
+      jobsMap.put( step.getID(), flowStepJob );
 
       List<FlowStepJob<Config>> predecessors = new ArrayList<FlowStepJob<Config>>();
 
       for( Object flowStep : ProcessGraphs.predecessorListOf( flowStepGraph, step ) )
-        predecessors.add( jobsMap.get( ( (FlowStep) flowStep ).getName() ) );
+        predecessors.add( jobsMap.get( ( (FlowStep) flowStep ).getID() ) );
 
       flowStepJob.setPredecessors( predecessors );
       }
