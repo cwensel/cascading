@@ -1,5 +1,7 @@
 Cascading Change Log
 
+3.2.0 [unreleased]
+
 3.1.0
 
   Fixed issue where Hadoop throws an NPE when polling for the current job state making the state polling loop unstable.
