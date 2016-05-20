@@ -415,9 +415,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
     Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
     Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
 
-    Pipe splice = new Merge( "merge", pipeLower, pipeUpper );
-
-    splice = new GroupBy( splice, new Fields( "line" ) );
+    Pipe splice = new GroupBy( new Pipe[]{ pipeUpper, pipeLower }, new Fields( "line" ) );
 
     Pipe tail1 = new Each( new Pipe( "sink1", splice ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
     Pipe tail2 = new Each( new Pipe( "sink2", splice ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
