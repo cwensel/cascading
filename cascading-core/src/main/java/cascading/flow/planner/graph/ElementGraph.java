@@ -131,5 +131,7 @@ public interface ElementGraph
 
   ElementGraph copyElementGraph();
 
+  ElementGraph bindExtents();
+
   void writeDOT( String filename );
   }

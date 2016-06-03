@@ -87,6 +87,33 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     copyFrom( flowElementGraph );
     }
 
+  public FlowElementGraph( PlatformInfo platformInfo, ElementGraph elementGraph, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints )
+    {
+    this();
+    this.platformInfo = platformInfo;
+
+    if( elementGraph == null )
+      elementGraph = BaseElementGraph.NULL;
+
+    if( sources == null || sources.isEmpty() )
+      throw new IllegalArgumentException( "sources may not be null or empty" );
+
+    if( sinks == null || sinks.isEmpty() )
+      throw new IllegalArgumentException( "sinks may not be null or empty" );
+
+    this.sources = new HashMap<>( sources );
+    this.sinks = new HashMap<>( sinks );
+    this.traps = new HashMap<>( traps == null ? Collections.<String, Tap>emptyMap() : traps );
+    this.checkpoints = new HashMap<>( checkpoints == null ? Collections.<String, Tap>emptyMap() : checkpoints );
+
+    EnumMultiMap<FlowElement> annotations = ElementGraphs.annotations( elementGraph );
+
+    if( annotations != null )
+      this.annotations = new EnumMultiMap<>( annotations );
+
+    copyFrom( elementGraph );
+    }
+
   public FlowElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
     {
     this( null, pipes, sources, sinks, Collections.<String, Tap>emptyMap(), Collections.<String, Tap>emptyMap(), false );

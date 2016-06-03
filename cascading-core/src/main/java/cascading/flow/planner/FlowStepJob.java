@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowException;
@@ -65,8 +66,10 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
   protected List<FlowStepJob<Config>> predecessors;
   /** Field latch */
   private final CountDownLatch latch = new CountDownLatch( 1 );
+  /** Field started */
+  private AtomicBoolean callableStarted = new AtomicBoolean( false );
   /** Field stop */
-  private boolean stop = false;
+  private volatile boolean stop = false;
   /** Field flowStep */
   protected final BaseFlowStep<Config> flowStep;
   /** Field stepStats */
@@ -148,8 +151,16 @@ public abstract class FlowStepJob<Config> implements Callable<Throwable>
     return throwable;
     }
 
+  public boolean isCallableStarted()
+    {
+    return callableStarted.get();
+    }
+
   protected void start()
     {
+    if( callableStarted.getAndSet( true ) )
+      return;
+
     try
       {
       if( isSkipFlowStep() )

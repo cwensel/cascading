@@ -84,7 +84,18 @@ public class BaseFlowNode implements Serializable, FlowNode, ProcessLogger
 
   public BaseFlowNode( String name, int ordinal, Map<String, String> flowNodeDescriptor )
     {
+    this( null, name, ordinal, flowNodeDescriptor );
+    }
+
+  public BaseFlowNode( ElementGraph nodeSubGraph, String name, int ordinal )
+    {
+    this( nodeSubGraph, name, ordinal, null );
+    }
+
+  public BaseFlowNode( ElementGraph nodeSubGraph, String name, int ordinal, Map<String, String> flowNodeDescriptor )
+    {
     this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
+    this.nodeSubGraph = nodeSubGraph;
     setName( name );
     this.ordinal = ordinal;
     this.trapMap = Collections.emptyMap();

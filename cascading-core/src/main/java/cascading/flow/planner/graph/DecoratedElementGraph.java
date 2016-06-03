@@ -54,6 +54,12 @@ public class DecoratedElementGraph implements ElementGraph
     }
 
   @Override
+  public ElementGraph bindExtents()
+    {
+    return decorated.bindExtents();
+    }
+
+  @Override
   public void writeDOT( String filename )
     {
     boolean success = ElementGraphs.printElementGraph( filename, this, null );

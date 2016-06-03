@@ -107,6 +107,8 @@ public interface ProcessGraph<Process extends ProcessModel> extends Serializable
 
   Iterator<Process> getOrderedTopologicalIterator( Comparator<Process> comparator );
 
+  Set<ElementGraph> getElementGraphs();
+
   List<ElementGraph> getElementGraphs( FlowElement flowElement );
 
   List<Process> getElementProcesses( FlowElement flowElement );

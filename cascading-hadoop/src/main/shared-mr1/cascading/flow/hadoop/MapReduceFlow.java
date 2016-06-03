@@ -21,24 +21,13 @@
 package cascading.flow.hadoop;
 
 import java.beans.ConstructorProperties;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.CascadingException;
-import cascading.flow.FlowStep;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.flow.planner.process.FlowStepGraph;
-import cascading.scheme.NullScheme;
-import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapreduce.Job;
 
 /**
  * Class MapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs
@@ -59,11 +48,8 @@ import org.apache.hadoop.mapreduce.Job;
  * <p/>
  * MapReduceFlow supports both org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* API Jobs.
  */
-public class MapReduceFlow extends HadoopFlow
+public class MapReduceFlow extends BaseMapReduceFlow
   {
-  /** Field deleteSinkOnInit */
-  protected boolean deleteSinkOnInit = false;
-
   /**
    * Constructor MapReduceFlow creates a new MapReduceFlow instance.
    *
@@ -154,8 +140,7 @@ public class MapReduceFlow extends HadoopFlow
   @ConstructorProperties({"properties", "name", "jobConf", "flowDescriptor", "deleteSinkOnInit", "stopJobsOnExit"})
   public MapReduceFlow( Properties properties, String name, JobConf jobConf, Map<String, String> flowDescriptor, boolean deleteSinkOnInit, boolean stopJobsOnExit )
     {
-    super( HadoopUtil.getPlatformInfo( JobConf.class, "org/apache/hadoop", "Hadoop MR" ), properties, jobConf, name, flowDescriptor );
-    this.deleteSinkOnInit = deleteSinkOnInit;
+    super( HadoopUtil.getPlatformInfo( JobConf.class, "org/apache/hadoop", "Hadoop MR" ), properties, jobConf, name, flowDescriptor, deleteSinkOnInit );
     this.stopJobsOnExit = stopJobsOnExit;
 
     initializeFrom( jobConf ); // push off initialization allowing for overrides
@@ -177,117 +162,5 @@ public class MapReduceFlow extends HadoopFlow
     initializeNewJobsMap();
 
     initializeChildStats();
-    }
-
-  protected FlowStepGraph makeStepGraph( JobConf jobConf )
-    {
-    FlowStepGraph flowStepGraph = new FlowStepGraph();
-
-    Tap sink = getSinksCollection().iterator().next();
-    FlowStep<JobConf> step = createFlowStep( jobConf, sink );
-
-    flowStepGraph.addVertex( step );
-
-    return flowStepGraph;
-    }
-
-  protected FlowStep<JobConf> createFlowStep( JobConf jobConf, Tap sink )
-    {
-    return new MapReduceFlowStep( getName(), sink.toString(), jobConf, sink );
-    }
-
-  protected Map<String, Tap> createSources( JobConf jobConf )
-    {
-    return fileInputToTaps( jobConf );
-    }
-
-  protected Map<String, Tap> fileInputToTaps( JobConf jobConf )
-    {
-    Path[] paths = FileInputFormat.getInputPaths( jobConf );
-
-    if( paths == null || paths.length == 0 )
-      {
-      try
-        {
-        paths = org.apache.hadoop.mapreduce.lib.input.FileInputFormat.getInputPaths( new Job( jobConf ) );
-        }
-      catch( IOException exception )
-        {
-        throw new CascadingException( exception );
-        }
-      }
-
-    Map<String, Tap> taps = new HashMap<>();
-
-    if( paths == null )
-      return taps;
-
-    for( Path path : paths )
-      toSourceTap( taps, path );
-
-    return taps;
-    }
-
-  protected Tap toSourceTap( Map<String, Tap> taps, Path path )
-    {
-    String name = makeNameFromPath( taps, path );
-
-    return taps.put( name, new Hfs( new NullScheme(), path.toString() ) );
-    }
-
-  protected Map<String, Tap> createSinks( JobConf jobConf )
-    {
-    return fileOutputToTaps( jobConf );
-    }
-
-  protected Map<String, Tap> fileOutputToTaps( JobConf jobConf )
-    {
-    Path path = FileOutputFormat.getOutputPath( jobConf );
-
-    if( path == null )
-      {
-      try
-        {
-        path = org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.getOutputPath( new Job( jobConf ) );
-        }
-      catch( IOException exception )
-        {
-        throw new CascadingException( exception );
-        }
-      }
-
-    Map<String, Tap> taps = new HashMap<>();
-
-    if( path != null )
-      toSinkTap( taps, path );
-
-    return taps;
-    }
-
-  protected Tap toSinkTap( Map<String, Tap> taps, Path path )
-    {
-    String name = makeNameFromPath( taps, path );
-
-    return taps.put( name, new Hfs( new NullScheme(), path.toString(), deleteSinkOnInit ? SinkMode.REPLACE : SinkMode.KEEP ) );
-    }
-
-  // find the least sensitive name
-  protected String makeNameFromPath( Map<String, Tap> taps, Path path )
-    {
-    Path parent = path.getParent();
-    String name = path.getName();
-
-    while( taps.containsKey( name ) )
-      {
-      name = new Path( parent.getName(), name ).toString();
-      parent = parent.getParent();
-      }
-
-    return name;
-    }
-
-  protected Map<String, Tap> createTraps( JobConf jobConf )
-    {
-    return new HashMap<>();
     }
   }

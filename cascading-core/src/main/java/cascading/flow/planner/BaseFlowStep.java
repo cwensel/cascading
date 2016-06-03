@@ -95,17 +95,16 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
   /** Field step listeners */
   private List<SafeFlowStepListener> listeners;
 
-  /** Field graph */
-  private final ElementGraph elementGraph;
-
-  private FlowNodeGraph flowNodeGraph;
+  /** Field elementGraph */
+  protected ElementGraph elementGraph;
+  /** Field flowNodeGraph */
+  protected FlowNodeGraph flowNodeGraph;
 
   /** Field sources */
   protected final Map<Tap, Set<String>> sources = new HashMap<>(); // all sources
   /** Field sink */
   protected final Map<Tap, Set<String>> sinks = new HashMap<>(); // all sinks
-
-  /** Field mapperTraps */
+  /** Field traps */
   private final Map<String, Tap> traps = new HashMap<>();
 
   /** Field tempSink */
@@ -133,7 +132,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   protected BaseFlowStep( String name, int ordinal, FlowNodeGraph flowNodeGraph, Map<String, String> flowStepDescriptor )
     {
-    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
+    this();
     setName( name );
     this.ordinal = ordinal;
 
@@ -150,7 +149,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   protected BaseFlowStep( ElementGraph elementStepGraph, FlowNodeGraph flowNodeGraph, Map<String, String> flowStepDescriptor )
     {
-    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
+    this();
     this.elementGraph = elementStepGraph;
     this.flowNodeGraph = flowNodeGraph; // TODO: verify no missing elements in the union of the node graphs
 
@@ -159,20 +158,24 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
     configure();
     }
 
+  protected BaseFlowStep()
+    {
+    this.id = Util.createUniqueIDWhichStartsWithAChar(); // timeline server cannot filter strings that start with a number
+    }
+
   protected void configure()
     {
-    // todo: remove once FlowMapper/FlowReducer aren't reliant
-    addSources( this, elementGraph, flowNodeGraph.getSourceTaps() );
-    addSinks( this, elementGraph, flowNodeGraph.getSinkTaps() );
+    addSources( this, getElementGraph(), getFlowNodeGraph().getSourceTaps() );
+    addSinks( this, getElementGraph(), getFlowNodeGraph().getSinkTaps() );
 
     addAllGroups();
 
-    traps.putAll( flowNodeGraph.getTrapsMap() );
+    traps.putAll( getFlowNodeGraph().getTrapsMap() );
     }
 
   protected void addAllGroups()
     {
-    addGroups( findAllGroups( elementGraph ) );
+    addGroups( findAllGroups( getElementGraph() ) );
     }
 
   @Override

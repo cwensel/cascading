@@ -149,6 +149,16 @@ public class Util
     return v;
     }
 
+  public static <T> List<T> asList( T t, T[] ts )
+    {
+    List<T> list = new ArrayList<>( 1 + ts.length );
+
+    list.add( t );
+    Collections.addAll( list, ts );
+
+    return list;
+    }
+
   public static <N extends Number> N max( Collection<N> collection )
     {
     return new TreeSet<>( collection ).first();

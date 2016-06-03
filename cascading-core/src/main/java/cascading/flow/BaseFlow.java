@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -122,9 +123,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   /** Field thread */
   protected transient Thread thread;
   /** Field throwable */
-  private Throwable throwable;
+  protected Throwable throwable;
   /** Field stop */
-  protected boolean stop;
+  protected volatile boolean stop;
+  /** Field completed */
+  protected volatile boolean completed = false;
 
   /** Field flowCanonicalHash */
   protected String flowCanonicalHash;
@@ -494,14 +497,24 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     return ElementGraphs.canonicalHash( flowElementGraph );
     }
 
-  FlowElementGraph getFlowElementGraph()
+  protected FlowElementGraph getFlowElementGraph()
     {
     return flowElementGraph;
     }
 
-  FlowStepGraph getFlowStepGraph()
+  protected void setFlowElementGraph( FlowElementGraph flowElementGraph )
+    {
+    this.flowElementGraph = flowElementGraph;
+    }
+
+  protected FlowStepGraph getFlowStepGraph()
     {
     return flowStepGraph;
+    }
+
+  protected void setFlowStepGraph( FlowStepGraph flowStepGraph )
+    {
+    this.flowStepGraph = flowStepGraph;
     }
 
   protected void setSources( Map<String, Tap> sources )
@@ -532,11 +545,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     {
     addListeners( checkpoints.values() );
     this.checkpoints = checkpoints;
-    }
-
-  protected void setFlowStepGraph( FlowStepGraph flowStepGraph )
-    {
-    this.flowStepGraph = flowStepGraph;
     }
 
   /**
@@ -618,6 +626,18 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       {
       if( listener instanceof FlowListener )
         addListener( (FlowListener) listener );
+      }
+    }
+
+  protected void removeListeners( Collection listeners )
+    {
+    if( listeners == null || listeners.isEmpty() )
+      return;
+
+    for( Object listener : listeners )
+      {
+      if( listener instanceof FlowListener )
+        removeListener( (FlowListener) listener );
       }
     }
 
@@ -969,7 +989,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
   @ProcessComplete
   public void complete()
     {
-    start();
+    if( !completed )
+      start();
 
     try
       {
@@ -977,7 +998,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
         {
         synchronized( this ) // prevent NPE on quick stop() & complete() after start()
           {
-          while( thread == null && !stop )
+          while( !completed && thread == null && !stop )
             Util.safeSleep( 10 );
           }
 
@@ -999,6 +1020,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
         stopLock.unlock();
         }
 
+      // if multiple threads enter #complete, each will get a copy of the exception, if any
       if( throwable instanceof FlowException )
         ( (FlowException) throwable ).setFlowName( getName() );
 
@@ -1022,6 +1044,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     finally
       {
+      completed = true;
       thread = null;
       throwable = null;
       }
@@ -1218,7 +1241,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
       fireOnStarting();
 
-      if( LOG.isInfoEnabled() )
+      if( isInfoEnabled() )
         {
         logInfo( "starting" );
 
@@ -1228,38 +1251,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
           logInfo( " sink: " + sink );
         }
 
-      // if jobs are run local, then only use one thread to force execution serially
-      //int numThreads = jobsAreLocal() ? 1 : getMaxConcurrentSteps( getJobConf() );
-      int numThreads = getMaxNumParallelSteps();
-
-      if( numThreads == 0 )
-        numThreads = jobsMap.size();
-
-      if( numThreads == 0 )
-        throw new IllegalStateException( "no jobs rendered for flow: " + getName() );
-
-      if( LOG.isInfoEnabled() )
-        {
-        logInfo( " parallel execution of steps is enabled: " + ( getMaxNumParallelSteps() != 1 ) );
-        logInfo( " executing total steps: " + jobsMap.size() );
-        logInfo( " allocating management threads: " + numThreads );
-        }
-
-      List<Future<Throwable>> futures = spawnJobs( numThreads );
-
-      for( Future<Throwable> future : futures )
-        {
-        throwable = future.get();
-
-        if( throwable != null )
-          {
-          if( !stop )
-            internalStopAllJobs();
-
-          handleExecutorShutdown();
-          break;
-          }
-        }
+      spawnSteps();
       }
     catch( Throwable throwable )
       {
@@ -1299,6 +1291,52 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     }
 
+  /**
+   * Reentrant method to launch all step jobs, returns false if any of the current steps failed.
+   *
+   * @return
+   * @throws InterruptedException
+   * @throws ExecutionException
+   */
+  protected boolean spawnSteps() throws InterruptedException, ExecutionException
+    {
+    // if jobs are run local, then only use one thread to force execution serially
+    //int numThreads = jobsAreLocal() ? 1 : getMaxConcurrentSteps( getJobConf() );
+    int numThreads = getMaxNumParallelSteps();
+    int eligibleJobsSize = getEligibleJobsSize(); // only jobs that have not previously been started
+
+    if( numThreads == 0 )
+      numThreads = eligibleJobsSize;
+
+    if( numThreads == 0 )
+      throw new IllegalStateException( "no jobs rendered for flow: " + getName() );
+
+    if( LOG.isInfoEnabled() )
+      {
+      logInfo( " parallel execution of steps is enabled: " + ( getMaxNumParallelSteps() != 1 ) );
+      logInfo( " executing total steps: " + eligibleJobsSize );
+      logInfo( " allocating management threads: " + numThreads );
+      }
+
+    List<Future<Throwable>> futures = spawnJobs( numThreads );
+
+    for( Future<Throwable> future : futures )
+      {
+      throwable = future.get();
+
+      if( throwable != null )
+        {
+        if( !stop )
+          internalStopAllJobs();
+
+        handleExecutorShutdown();
+        return false;
+        }
+      }
+
+    return true;
+    }
+
   protected long getTotalSliceCPUMilliSeconds()
     {
     return -1;
@@ -1319,10 +1357,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     if( stop )
       return new ArrayList<>();
 
-    List<Callable<Throwable>> list = new ArrayList<>();
-
-    for( FlowStepJob<Config> job : jobsMap.values() )
-      list.add( job );
+    List<Callable<Throwable>> list = getJobMapCallables();
 
     return spawnStrategy.start( this, numThreads, list );
     }
@@ -1342,25 +1377,66 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
     return jobsMap;
     }
 
+  protected boolean isJobsMapInitialized()
+    {
+    return jobsMap != null;
+    }
+
+  protected int getEligibleJobsSize()
+    {
+    return getJobMapCallables().size();
+    }
+
+  protected List<Callable<Throwable>> getJobMapCallables()
+    {
+    List<Callable<Throwable>> list = new ArrayList<>();
+
+    for( FlowStepJob<Config> job : jobsMap.values() )
+      {
+      if( job.isCallableStarted() )
+        continue;
+
+      list.add( job );
+      }
+
+    return list;
+    }
+
   protected void initializeNewJobsMap()
     {
-    jobsMap = new LinkedHashMap<>(); // keep topo order
-    Iterator<FlowStep> topoIterator = flowStepGraph.getTopologicalIterator();
+    jobsMap = updateJobsMap( flowStepGraph, new LinkedHashMap<String, FlowStepJob<Config>>() ); // keep topo order
+    }
 
-    while( topoIterator.hasNext() )
+  protected void updateJobsMap()
+    {
+    jobsMap = updateJobsMap( flowStepGraph, new LinkedHashMap<>( jobsMap ) );
+    }
+
+  Map<String, FlowStepJob<Config>> updateJobsMap( FlowStepGraph flowStepGraph, Map<String, FlowStepJob<Config>> jobsMap )
+    {
+    Iterator<FlowStep> iterator = flowStepGraph.getTopologicalIterator();
+
+    while( iterator.hasNext() )
       {
-      BaseFlowStep<Config> step = (BaseFlowStep) topoIterator.next();
-      FlowStepJob<Config> flowStepJob = step.getCreateFlowStepJob( getFlowProcess(), getConfig() );
+      BaseFlowStep<Config> step = (BaseFlowStep) iterator.next();
+      FlowStepJob<Config> flowStepJob = jobsMap.get( step.getID() );
 
-      jobsMap.put( step.getID(), flowStepJob );
+      if( flowStepJob == null )
+        {
+        flowStepJob = step.getCreateFlowStepJob( getFlowProcess(), getConfig() );
 
-      List<FlowStepJob<Config>> predecessors = new ArrayList<FlowStepJob<Config>>();
+        jobsMap.put( step.getID(), flowStepJob );
+        }
+
+      List<FlowStepJob<Config>> predecessors = new ArrayList<>();
 
       for( Object flowStep : ProcessGraphs.predecessorListOf( flowStepGraph, step ) )
         predecessors.add( jobsMap.get( ( (FlowStep) flowStep ).getID() ) );
 
       flowStepJob.setPredecessors( predecessors );
       }
+
+    return jobsMap;
     }
 
   protected void initializeChildStats()

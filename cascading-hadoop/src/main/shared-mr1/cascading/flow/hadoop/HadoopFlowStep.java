@@ -81,6 +81,10 @@ import static cascading.flow.hadoop.util.HadoopUtil.*;
  */
 public class HadoopFlowStep extends BaseFlowStep<JobConf>
   {
+  protected HadoopFlowStep()
+    {
+    }
+
   protected HadoopFlowStep( String name, int ordinal )
     {
     super( name, ordinal );

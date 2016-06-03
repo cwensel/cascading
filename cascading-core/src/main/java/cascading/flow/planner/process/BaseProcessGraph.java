@@ -84,7 +84,7 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
     return graph.addVertex( process );
     }
 
-  protected void bindEdges()
+  public void bindEdges()
     {
     for( Process sinkProcess : vertexSet() )
       {
@@ -106,13 +106,17 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
         if( sourceProcess == sinkProcess )
           continue;
 
-        for( Object intermediate : sourceProcess.getSinkElements() )
+        for( FlowElement intermediate : sourceProcess.getSinkElements() )
           {
           if( sinkProcess.getSourceElements().contains( intermediate ) )
-            addEdge( sourceProcess, sinkProcess, new ProcessEdge<>( sourceProcess, (FlowElement) intermediate, sinkProcess ) );
+            addEdge( sourceProcess, sinkProcess, new ProcessEdge<>( sourceProcess, intermediate, sinkProcess ) );
           }
         }
       }
+
+    // clear tap map caches
+    sourceTaps = null;
+    sinkTaps = null;
     }
 
   @Override
@@ -231,6 +235,17 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
   public Iterator<Process> getOrderedTopologicalIterator( Comparator<Process> comparator )
     {
     return new TopologicalOrderIterator<>( graph, new PriorityQueue<>( 10, comparator ) );
+    }
+
+  @Override
+  public Set<ElementGraph> getElementGraphs()
+    {
+    Set<ElementGraph> results = createIdentitySet();
+
+    for( Process process : vertexSet() )
+      results.add( process.getElementGraph() );
+
+    return results;
     }
 
   @Override

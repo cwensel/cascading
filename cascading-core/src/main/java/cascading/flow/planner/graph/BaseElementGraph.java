@@ -59,10 +59,10 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
     this.graph = graph;
     }
 
-  protected void copyFrom( BaseElementGraph elementGraph )
+  protected void copyFrom( ElementGraph elementGraph )
     {
     Graphs.addAllVertices( graph, elementGraph.vertexSet() );
-    Graphs.addAllEdges( graph, elementGraph.graph, elementGraph.edgeSet() );
+    Graphs.addAllEdges( graph, ElementGraphs.directed( elementGraph ), elementGraph.edgeSet() );
     }
 
   public boolean containsEdge( FlowElement sourceVertex, FlowElement targetVertex )
@@ -234,6 +234,30 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
   public List<FlowElement> successorListOf( FlowElement flowElement )
     {
     return Graphs.successorListOf( graph, flowElement );
+    }
+
+  @Override
+  public ElementGraph bindExtents()
+    {
+    Set<FlowElement> vertexSet = vertexSetCopy();
+
+    for( FlowElement flowElement : vertexSet )
+      {
+      if( inDegreeOf( flowElement ) == 0 )
+        addHeadVertex( flowElement );
+
+      if( outDegreeOf( flowElement ) == 0 )
+        addTailVertex( flowElement );
+      }
+
+    // be sure to test underlying container
+    if( !vertexSet().contains( Extent.head ) )
+      throw new IllegalStateException( "did not bind head vertex to graph" );
+
+    if( !vertexSet().contains( Extent.tail ) )
+      throw new IllegalStateException( "did not bind tail vertex to graph" );
+
+    return this;
     }
 
   @Override

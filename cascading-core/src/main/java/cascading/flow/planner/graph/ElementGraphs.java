@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.flow.planner.iso.subgraph.iterator.ExpressionSubGraphIterator;
+import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.process.ProcessGraph;
 import cascading.flow.planner.process.ProcessModel;
 import cascading.pipe.Group;
@@ -57,6 +59,7 @@ import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
 import cascading.tap.Tap;
 import cascading.util.DOTProcessGraphWriter;
+import cascading.util.EnumMultiMap;
 import cascading.util.Murmur3;
 import cascading.util.Pair;
 import cascading.util.Util;
@@ -95,6 +98,26 @@ public class ElementGraphs
     {
     }
 
+  public static FlowElementGraph asFlowElementGraph( PlatformInfo platformInfo, FlowStepGraph flowStepGraph )
+    {
+    ElementDirectedGraph elementDirectedGraph = asElementDirectedGraph( flowStepGraph.getElementGraphs() );
+
+    Map<String, Tap> sources = asSourceMap( elementDirectedGraph, findSources( elementDirectedGraph ) );
+    Map<String, Tap> sinks = asSinkMap( elementDirectedGraph, findSinks( elementDirectedGraph ) );
+
+    return new FlowElementGraph( platformInfo, elementDirectedGraph, sources, sinks, null, null );
+    }
+
+  public static ElementDirectedGraph asElementDirectedGraph( Collection<ElementGraph> elementGraphs )
+    {
+    ElementDirectedGraph elementDirectedGraph = new ElementDirectedGraph();
+
+    for( ElementGraph elementGraph : elementGraphs )
+      elementDirectedGraph.copyFrom( asExtentMaskedSubGraph( elementGraph ) );
+
+    return elementDirectedGraph;
+    }
+
   private static class IdentityDirectedGraph<V, E> extends SimpleDirectedGraph<V, E>
     {
     public IdentityDirectedGraph( Class<? extends E> edgeClass )
@@ -118,6 +141,20 @@ public class ElementGraphs
       return directed( ( (DecoratedElementGraph) elementGraph ).getDecorated() );
 
     return ( (BaseElementGraph) elementGraph ).graph;
+    }
+
+  public static EnumMultiMap<FlowElement> annotations( ElementGraph elementGraph )
+    {
+    if( elementGraph == null )
+      return null;
+
+    if( elementGraph instanceof DecoratedElementGraph )
+      return annotations( ( (DecoratedElementGraph) elementGraph ).getDecorated() );
+
+    if( elementGraph instanceof AnnotatedGraph )
+      return ( (AnnotatedGraph) elementGraph ).getAnnotations();
+
+    return null;
     }
 
   public static int hashCodeIgnoreAnnotations( ElementGraph elementGraph )
@@ -284,6 +321,28 @@ public class ElementGraphs
   public static Iterator<FlowElement> getReverseTopologicalIterator( ElementGraph graph )
     {
     return new TopologicalOrderIterator<>( new EdgeReversedGraph<>( directed( graph ) ) );
+    }
+
+  public static Collection<FlowElement> getAllElementsBetweenExclusive( ElementGraph graph, FlowElement from, FlowElement to )
+    {
+    Collection<FlowElement> results = getAllElementsBetweenInclusive( graph, from, to );
+
+    results.remove( from );
+    results.remove( to );
+
+    return results;
+    }
+
+  public static Collection<FlowElement> getAllElementsBetweenInclusive( ElementGraph graph, FlowElement from, FlowElement to )
+    {
+    Set<FlowElement> results = Util.createIdentitySet();
+
+    List<GraphPath<FlowElement, Scope>> pathsBetween = getAllShortestPathsBetween( graph, from, to );
+
+    for( GraphPath<FlowElement, Scope> graphPath : pathsBetween )
+      results.addAll( Graphs.getPathVertexList( graphPath ) );
+
+    return results;
     }
 
   public static List<GraphPath<FlowElement, Scope>> getAllShortestPathsBetween( ElementGraph graph, FlowElement from, FlowElement to )
@@ -608,6 +667,19 @@ public class ElementGraphs
     elementGraph.removeEdge( previousElement, nextElement );
     }
 
+  public static <F extends FlowElement> Map<String, F> asSourceMap( ElementGraph elementGraph, Set<F> elements )
+    {
+    Map<String, F> map = new HashMap<>();
+
+    for( F element : elements )
+      {
+      for( Scope scope : elementGraph.outgoingEdgesOf( element ) )
+        map.put( scope.getName(), element );
+      }
+
+    return map;
+    }
+
   public static Set<Tap> findSources( ElementGraph elementGraph )
     {
     return findSources( elementGraph, Tap.class );
@@ -627,6 +699,19 @@ public class ElementGraphs
     );
 
     return narrowIdentitySet( type, getAllVertices( iterator ) );
+    }
+
+  public static <F extends FlowElement> Map<String, F> asSinkMap( ElementGraph elementGraph, Set<F> elements )
+    {
+    Map<String, F> map = new HashMap<>();
+
+    for( F element : elements )
+      {
+      for( Scope scope : elementGraph.incomingEdgesOf( element ) )
+        map.put( scope.getName(), element );
+      }
+
+    return map;
     }
 
   public static <F extends FlowElement> Set<F> findSinks( ElementGraph elementGraph, Class<F> type )
@@ -892,9 +977,9 @@ public class ElementGraphs
   private static class VertexAttributeProvider implements ComponentAttributeProvider<FlowElement>
     {
     static Map<String, String> defaultNode = new HashMap<String, String>()
-    {
-    {put( "shape", "Mrecord" );}
-    };
+      {
+      {put( "shape", "Mrecord" );}
+      };
 
     public VertexAttributeProvider()
       {
@@ -910,11 +995,11 @@ public class ElementGraphs
   private static class EdgeAttributeProvider implements ComponentAttributeProvider<Scope>
     {
     static Map<String, String> attributes = new HashMap<String, String>()
-    {
-    {put( "style", "dotted" );}
+      {
+      {put( "style", "dotted" );}
 
-    {put( "arrowhead", "dot" );}
-    };
+      {put( "arrowhead", "dot" );}
+      };
 
     @Override
     public Map<String, String> getComponentAttributes( Scope scope )

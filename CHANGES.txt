@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.2.0 [unreleased]
 
+  Added c.f.h.MultiMapReduceFlow to provide support for a single c.f.Flow instance with many interrelated
+  predefined c.a.h.m.JobConf instances that can be executed at once or added incrementally.
+
 3.1.0
 
   Fixed issue where Hadoop throws an NPE when polling for the current job state making the state polling loop unstable.
