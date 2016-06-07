@@ -20,7 +20,9 @@
 
 package cascading.pipe.checkpoint;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cascading.PlatformTestCase;
 import cascading.TestFunction;
@@ -44,7 +46,7 @@ import cascading.tuple.Tuple;
 import org.junit.Test;
 
 import static cascading.flow.FlowDef.flowDef;
-import static data.InputData.inputFileApache;
+import static data.InputData.*;
 
 /**
  *
@@ -409,5 +411,55 @@ public class CheckpointPlatformTest extends PlatformTestCase
       .setRunID( "restartable" );
 
     return getPlatform().getFlowConnector().connect( flowDef );
+    }
+
+  /**
+   * identified missing match element in TapBalanceGroupSplitTransformer
+   */
+  @Test
+  public void testMergeAndWriteToTwoSinksWithCheckpoint() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink1 = getPlatform().getTextFile( getOutputPath( "sink1" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( getOutputPath( "sink2" ), SinkMode.REPLACE );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "sink1", sink1 );
+    sinks.put( "sink2", sink2 );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+
+    Pipe splice = new GroupBy( new Pipe[]{pipeUpper, pipeLower}, new Fields( "line" ) );
+
+    Pipe tail1 = new Each( new Pipe( "sink1", splice ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+    Pipe tail2 = new Each( new Pipe( "sink2", splice ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+
+    tail2 = new Checkpoint( tail2 );
+
+    tail2 = new Each( tail2, new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, tail1, tail2 );
+
+    flow.complete();
+
+    List<Tuple> tuples1 = asList( flow, sink1 );
+    List<Tuple> tuples2 = asList( flow, sink2 );
+
+    assertEquals( 10, tuples1.size() );
+    assertEquals( 10, tuples2.size() );
+
+    assertEquals( tuples1, tuples2 );
     }
   }
