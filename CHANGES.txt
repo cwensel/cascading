@@ -1,5 +1,1023 @@
 Cascading Change Log
 
+3.1.0 [unreleased]
+
+  Fixed issue where Hadoop throws an NPE when polling for the current job state making the state polling loop unstable.
+
+  Prevent c.t.h.Hfs and c.t.h.Lfs from setting the current configuration into stand-alone mode when running
+  cluster-side and Hfs or Lfs are used to read/write data from within an operation or internally. This has historically
+  had no other effect than emitting a confusing log message on the cluster slaves.
+
+  Updated Apache Hadoop 2 based sub-projects to 2.7.2.
+
+  Updated Apache Tez to 0.8.2.
+
+  Updated jgrapht to 0.9.2.
+
+  Fixed an issue on Apache MapReduce 1.x where an NPE will be thrown when fetching slice level counters on a map only
+  job and the c.a.h.m.TaskCompletionEvent falsely identifies itself as a reducer task event.
+
+  Fixed issue where c.m.a.URISanitizer would fail parsing Windows path names.
+
+  Fixed issue where local mode could deadlock across multiple c.p.HashJoin or c.p.CoGroup instances in some situations.
+
+  Fixed issue on Apache MapReduce platform that caused planner failures when merging the results of two c.p.GroupBy
+  pipes via a single c.p.Merge pipe.
+
+  Fixed issue on Apache Tez platform that prevented additional clean up of Hadoop created meta-data files on c.f.Flow
+  completion.
+
+  Updated c.m.a.URISanitizer to treat opaque URIs differently than hierarchical URIs by hiding the scheme specific
+  parts in PUBLIC and PROTECTED visibility and storing the full URI for PRIVATE.
+
+  Updated c.t.p.BasePartitionTap and subsequent PartitionTap sub-classes to allow for partition filters by providing
+  one or more c.t.Fields argument selector and c.o.Filter instance pairs.
+
+  Fixed issue on Apache Tez that did not create a proper vertex edge on a split in the pipe assembly under some
+  circumstances.
+
+  Updated c.m.a.PropertyAnnotation to have default #visibility() of PUBLIC, and added an #optional() property that
+  defaults to true.
+
+  Fix for NPE when attempting to set null values on underlying config instance.
+
+  Created cascading-hadoop2-tez-stats sub-project to isolate Tez/YARN timeline server dependencies.
+
+  Fixed issue on Apache Tez where multiple prior splits and subsequent splicing back into a c.p.HashJoin could create an
+  invalid plan.
+
+  Added new c.f.FlowStep#getFlowStepDescriptor and c.f.FlowStepDescriptors to store additional metadata on c.f.FlowStep
+  instances.
+
+  Updated c.f.t.p.r.t.BoundaryBalanceGroupSplitHashJoinTransformer to insert After and not AfterEachEdge.
+
+  Fixed c.f.p.i.t.InsertionGraphTransformer to properly place insertions.
+
+  Created cascading-expression sub-project to isolate all 'expression' operations based on Janino and it isolate
+  the Janino dependency. A dependency to cascading-expression must be added to projects that depend on the isolated
+  classes.
+
+  Created cascading-hadoop2-io sub-project to isolate Hadoop 2.x HDFS and serialization dependencies and updated
+  cascading-hadoop2-mr1 and cascading-hadoop2-tez to depend on cascading-hadoop2-io.
+
+  Updated c.t.Fields to provide a constructor accepting type information, and a method #applyFields() to update
+  field names.
+
+  Added support for configuring split combining across supported platforms through the c.f.FlowRuntimeProps
+  "cascading.flow.runtime.splits.combine" property. If enabled, will induce c.t.h.Hfs to enable combined files
+  support on the MapReduce platforms.
+
+  Updated Hadoop, Hadoop2, and Tez serialization and comparator frameworks to fully leverage declared field type
+  information to reduce serialized data and perform bitwise equality comparisons. See c.t.h.TupleSerializationProps to
+  disable bitwise comparisons.
+
+3.0.4
+
+  Fixed issue where c.m.a.URISanitizer would fail parsing glob expressions containing curly braces.
+
+  Fixed issue where a c.f.FlowStep attempts to determine if it should be skipped but throws an Exception preventing
+  the c.s.FlowStepStats from advancing to the 'started' state from 'pending'.
+
+3.0.3
+
+  Fixed issues with c.t.Fields#applyType() and c.t.Fields#resolve().
+
+  Fixed issue with the Hadoop MapReduce planner that created a malformed plan for a single source split and join pipe
+  assembly.
+
+3.0.2
+
+  Updated Apache Tez to 0.6.2 to prevent deadlocks in complex DAGs. Note this release is incompatible with Tez 0.6.1.
+
+  Fixed issue where platform information was not consistently retrieved and reported where possible.
+
+  Fixed issue in c.p.AppProps where getApplicationJarPath would return null when used with a j.u.Properties instance.
+
+  Fixed issue that prevented o.a.h.m.OutputCollector sub-classes from properly flushing.
+
+  Fixed issue on Apache Tez where diagnostic failure data would not propagate.
+
+  Fixed issue where c.f.h.MapReduceFlow could throw a NPE.
+
+  Updated c.f.h.MapReduceFlow to accept properties and c.f.FlowDescriptors values map.
+
+  Fixed issue when resolving Fields through a Boundary when immediately following grouping operations.
+
+  Fixed issues concerning detailed stats retrieval robustness for both MapReduce and Tez platforms.
+
+  Fixed issue where child stats detail retrieval may not fetch final state of children.
+
+  Fixed issue where c.s.FlowNodeStats node kind could be mislabeled.
+
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
+
+  Updated build to exclude jgrapht-ext, further isolation of jgrapht apis to support reliable shading.
+
+  Fixed issue where c.f.p.ProcessFlow would not propagate the application name, version, tags, etc to the management
+  services.
+
+  Fixed issue where c.s.FlowStepStats#getProcessStatusURL() always returned null for Apache MapReduce and Tez platforms.
+
+  Fixed issue with c.t.u.TupleHasher#ObjectHasher not being serializable.
+
+  Fixed issue where an unreachable YARN timeline server could cause the application to fail.
+
+  Fixed issue with NPE when retrieving Tez task status from timeline server.
+
+3.0.1
+
+  Fixed issue in c.f.t.p.Hadoop2TezFlowStepJob where the LocalResources were not passed to the AppMaster correctly
+  causing ClassNotFoundException during split calculation for custom InputFormats.
+
+3.0.0
+
+  Updated Apache Hadoop 2 based sub-projects to 2.6.0.
+
+  Updated c.f.h.ProcessFlow and related classes to be independent of the Hadoop platforms. The class has been moved to
+  c.f.p.ProcessFlow.
+
+  Added ability to specify counters to be logged cluster side when a slice has completed executing. See the
+  c.f.FlowRuntimeProps class.
+
+  Update build to support Gradle 2.3 by removing use of deprecated 1.x features/apis.
+
+  Updated jgrapht to 0.9.1 so that all internal graphs can be backed by a j.u.IdentityHashMap.
+
+  Added support for node level c.p.ConfigDef properties on both c.p.Pipe and c.t.Tap instances. Only the Tez platform
+  is supported as there are no Map/Reduce independent node configurations on the MR platforms.
+
+  Updated c.c.Cascade and c.f.Flow implementations to fire c.f.FlowListener and c.f.FlowStepListener when a c.f.Flow
+  or c.f.FlowStep are marked skipped.
+
+  Updated HashFunction in c.t.u.TupleHasher to pass null values to implementations of c.t.Hasher. All custom
+  implementations must be null safe as of now.
+
+  Update c.o.r.RegexMatcher and sub-classes to honor type coercions, allows for custom value delimiter.
+
+  Fixed issue where the Hadoop o.a.h.m.OutputFormat would be ignored during job configuration as configured by a custom
+  c.s.Scheme that was not a o.a.h.m.FileOutputFormat sub-class. In such cases a o.a.h.m.l.NullOutputFormat would be
+  erroneously set and passed to c.t.Tap#openForWrite().
+
+  Fixed issue where c.f.t.Hadoop2TezFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
+  implementations.
+
+  Fixed issue where local mode could deadlock during a c.p.HashJoin on the same source in some situations.
+
+  Removed the deprecated c.t.PlatformRunner, c.t.HadoopPlatform, and c.t.LocalPlatform. See c.p.PlatformRunner,
+  c.p.h.HadoopPlatform, and c.p.l.LocalPlatform as alternatives.
+
+  Removed the deprecated c.f.h.HadoopFlowConnector from the cascading-hadoop2-mr1 sub-project.
+
+  Removed all deprecated methods, constructors, enums, and constants.
+
+  Removed the deprecated c.o.a.Max, c.o.a.Min, and c.o.a.ExtremaBase classes. See c.o.a.MaxValue and c.o.a.MinValue
+  classes as alternatives.
+
+  Removed the deprecated c.t.h.TemplateTap, c.t.l.TemplateTap, and c.t.BaseTemplateTap classes and associated tests.
+
+  Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a
+  predecessor fails.
+
+  Update janino to 2.7.6.
+
+  Added support for Apache Tez. See README for details.
+
+  Added c.f.FlowRuntimeProps to allow for setting cluster side specific properties per c.f.Flow instance in a platform
+  independent manner.
+
+  Changed planner to disallow duplicate c.p.Pipe head and tail names.
+
+  Updated c.f.p.FlowPlanner to use generalized isomorphic sub-graph matching rules to apply platform specific plan
+  assertions, transforms, and step partitioning.
+
+2.7.1
+
+  Fixed issue where c.p.GroupBy or c.p.CoGroup would fail if attempting to group or join incoming Fields.UNKNOWN
+  tuple streams using relative positions in the grouping fields selectors.
+
+  Fixed issue where c.u.ShutdownUtil could log a NPE if a hook is removed during JVM shutdown.
+
+2.7.0
+
+  Updated Riffle to 1.0.0.
+
+  Deprecated c.f.h.ProcessFlow and related classes, which will be moved to a different package in Cascading 3.0.
+
+  Fixed issue where trap c.t.Tap#commitResource() would not get called if c.f.Flow#complete() was not called.
+
+  Added support for o.a.h.m.l.CombineFileInputFormat in the Hadoop specific c.t.h.PartitionTap implementation.
+
+  Fixed issue where c.f.h.HadoopFlowStep was setting 'mapred.output.path' for non file based o.a.h.m.OutputFormat
+  implementations (backport from wip-3.0 at 5e0493a).
+
+  Added c.t.Tap#prepareResourceForRead() and c.t.Tap#prepareResourceForWrite() methods to allow for client side tap
+  resource initialization.
+
+  Fixed issue where a failure to open or write a trap would pass the throwable up to the prior trap. Failures on trap
+  io will now result in a c.f.Flow failure.
+
+  Fixed issue where c.t.TupleEntry#setTuple( Tuple tuple ) and c.t.TupleEntry#setCanonicalTuple( Tuple tuple ) would
+  cause an NPE if given an null argument.
+
+  Updated trap handling to capture diagnostic information within a trap when configured via a c.t.TrapProps instance.
+
+  Added the c.t.TrapProp class to provide fine grained configuration over c.t.Tap traps per c.f.Flow or per
+  c.t.Tap instances.
+
+  Updated c.t.u.TupleHasher to use MurmurHash3 32bit for hashCode calculation. Users relying on the old hashCode
+  implementation for partitioning can set "cascading.tuple.hadoop.util.hasherpartitioner.uselegacyhash" to true.
+
+  Updated c.f.h.HadoopPlanner and c.f.h2.Hadoop2MR1Planner to log a warning if a flow is being run on the wrong version
+  of Hadoop.
+
+  Fixed issue where c.m.a.URISanitizer would fail parsing glob expressions.
+
+  Added ability to provide a custom cache to be used in c.p.a.AggregateBy and c.p.a.Unique.
+
+  Added ability to use custom properties in the various invoke methods in c.CascadingTestCase to simplify testing of
+  functions, filters, buffers and aggregators.
+
+  Updated c.f.h.ProcessFlow to support optional counters provided by Riffle based flows.
+
+  Updated c.p.AppProps and c.p.UnitOfWorkDef to log a warning if a tag contains whitespace characters.
+
+  Fixed issue where c.c.CascadeDef was allowing multiple flows with the same sink to be part of a Cascade.
+
+  Updated c.f.h.MapReduceFlow to support both the org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* APIs.
+
+  Fixed issue where c.t.TupleEntrySchemeIterator was not behaving correctly if #hasNext() is called multiple times
+  without calling #next().
+
+  Fixed issue where c.f.h.ProcessFlow would not report Exceptions to registered FlowListeners.
+
+  Fixed issue where a start/stop race condition in c.c.Cascade could allow a downstream c.f.Flow to start when a
+  predecessor fails.
+
+2.6.3
+
+  Updated c.p.Splice to throw an IllegalArgumentException if performing a self c.p.Merge on a split with no intermediate
+  c.o.Operations after the split.
+
+  Fixed issue where c.p.a.FirstBy would perform a comparison on the aggregating values when no j.u.Comparator was
+  provided to the argument c.t.Fields selector.
+
+  Updated local mode counter implementation to be thread-safe.
+
+  Updated c.t.h.i.MultiRecordReaderIterator to use an existing o.a.h.m.Reporter if present.
+
+  Fixed issues in c.f.h.FlowPlatformTest which caused the test go into an endless loop. Also increased timeout to make
+  tests more reliable on slower hardware.
+
+  Fixed issue where c.t.Tuple#set( Fields declarator, Fields selector, Tuple tuple ) did not honor given type
+  information.
+
+  Fixed issue where c.t.TupleEntry#set( TupleEntry tupleEntry ) could cause an NPE if complete type information is
+  not provided.
+
+2.6.2
+
+  Fixed issue where c.s.h.SequenceFile default ctor would throw an NPE.
+
+  Updated c.u.Version to warn if multiple 'cascading/version.properties' files are present on the classpath.
+
+  Fixed issue where a c.p.a.Coerce constructor would throw a j.l.IllegalArgumentException on a valid types argument.
+
+  Fixed issue where c.t.TapPlatformTest was not preserving properties coming from the TestPlatform when creating a Flow
+  causing remote test failures.
+
+  Fixed issue in c.p.h.Hadoop2MR1Platform causing tests to not properly run on a remote cluster when configured to do
+  so.
+
+2.6.1
+
+  Updated c.p.h.Hadoop2MR1Platform to enforce settings to make local mode behave the same across distributions.
+
+  Fixed issues where a c.f.Flow instance could be marked stopped while transitioning to a started state when used in
+  a c.c.Cascade.
+
+  Fixed issue where c.t.h.i.TapOutputCollector did not honor the current task o.a.h.m.Reporter instance on the
+  cluster side. This should improve the accuracy of Hadoop counters wrapped by c.t.h.PartitionTap.
+
+  Updated c.t.Tuple#isUnmodifiable to be transient to prevent the value from being serialized and restored resulting in
+  an unmodifiable Tuple from a data source.
+
+  Updated c.s.h.HadoopStepStats to reduce memory pressure when fetching TaskReports and TaskCompletionEvents from
+  Hadoop 2.x.
+
+  Updated c.p.h.HadoopPlatform to set 'mapreduce.jobtracker.staging.root.dir' to a fully qualified path for non-cluster
+  tests.
+
+  Fixed issue where c.u.Version was leaking file descriptors.
+
+  Fixed issue where c.t.h.Hfs would not properly ignore 'hidden' files starting with '.' or '_' when listing children
+  in a directory.
+
+2.6.0
+
+  Updated c.p.a.AggregateBy and c.p.a.Unique to count cache flushes, hits, and misses. Previously only AggregateBy
+  tracked cache flushes.
+
+  Updated slf4j to 1.7.5.
+
+  Added ability to customize trace data captured for debugging purposes.
+
+  Added CONTRIBUTING.md.
+
+  Updated c.t.h.DistCacheTap to support simple file globing as provided by c.t.h.Hfs.
+
+  Fixed issue where c.p.a.UniqueBy was not honoring the c.t.Hasher interface.
+
+  Added c.t.h.DistCacheTap a decorator for a c.t.h.Hfs instance that uses o.a.h.f.DistributedCache to read files
+  transparently from local disk. This is useful for c.p.HashJoins.
+
+  Added c.t.DecoratorTap class to simplify wrapping a given c.t.Tap instance with additional meta-data.
+
+  Updated c.f.p.FlowPlanner to allow both intermediate temporary c.t.Tap or any c.p.Checkpoint tap to be decorated
+  by a configured c.t.DecoratorTap class via new c.f.FlowConnectorProps properties.
+
+  Fixed issue where c.p.a.AggregateBy was not honoring the c.t.Hasher interface.
+
+  Fixed issues around c.o.e.ExpressionFunction and c.o.e.ExpressionFilter either accepting Fields.NONE as incoming
+  arguments, or inheriting incoming type information from the resolved arguments.
+
+  Added c.m.a.URISanitizer, an implementation of the c.m.a.Sanitizer interface, for sanitizing URIs of different
+  resources (file, HTTP, HDFS, JDBC etc.). c.t.Tap and all subclasses use it for the identifier.
+
+  Fixed issue in c.f.h.ProcessFlow where the flowStats object would try to mark a flow as "STOPPED" even if it was
+  already "FINISHED" causing an IllegalStateException.
+
+  Added a new c.t.TupleEntrySchemeIterator property to set certain exceptions to be caught, ignored, and logged during
+  read. Commonly java.io.EOFException is thrown and can be safely ignored. By default no exception will be ignored.
+
+  Fixed issue in c.f.h.p.HadoopStepGraph where Traps would be ignored if the Flow had no operation ("copy flows").
+
+  Updated Janino to 2.7.5.
+
+  Added ability to add more meta information about a c.f.Flow, which can be read and used by a c.m.DocumentService.
+
+  Fixed null handling problem in c.p.a.MaxBy and c.p.a.MinBy.
+
+  Added Java Annotations to c.m.annotation for marking and granting access of custom properties to c.m.DocumentService
+  implementations like the Driven plug-in. Instrumented core Operations, SubAssemblies, Taps, and Schemes.
+
+  Updated Apache Hadoop to 2.4.1 in cascading-hadoop2-mr1.
+
+2.5.6
+
+  Updated for Cascading Fluid compatibility.
+
+2.5.5
+
+  Added new c.t.p.BasePartitionTap property to control to control the behaviour in case of an Exception while closing a
+  c.t.TupleEntryCollector. Setting "cascading.tap.partition.failonclose" to "true" will cause the Exception to be
+  rethrown as a c.t.TapException. When set to "false", the default, it will log the error and continue.
+
+  Added custom error reporting for Hadoop standalone mode. The o.a.h.mapred.LocalJobRunner does not return
+  o.a.h.mapred.TaskReports which would cause the actual Exception to be lost. c.f.h.FlowMapper and c.f.h.FlowReducer
+  will now report the Exception directly to c.f.h.p.HadoopFlowStepJob. This has no influence on Jobs running on a
+  real cluster.
+
+  Fixed issue where c.f.h.HadoopFlowStep would not set a o.a.h.mapred.Partitioner that supports custom c.t.Hasher
+  implementations during partitioning. c.t.h.u.GroupingPartitioner has been renamed to
+  c.t.h.u.GroupingSortingPartitioner and a new c.t.h.u.GroupingPartitioner has been introduced that uses the hashCode
+  of the tuples while honoring custom hashers.
+
+  Fixed issue where the ctor of c.t.Fields was not checking the given types for null values.
+
+  Fixed issue where Hadoop credentials could be shared across job submissions and become corrupted
+  causing j.i.EOFExceptions.
+
+  Fixed issue where c.t.Fields#resolve() would lose type information with complex selectors.
+
+  Added new c.f.h.p.HadoopPlanner property to disable adjacent tap removal optimization. Setting
+  "cascading.multimapreduceplanner.collapseadjacentaps" to false will disable the optimization that is on by default.
+  This optimization can in a few cases reduce the number of MR jobs, but without consistent type information, could
+  result in a type mismatch errors during joins.
+
+2.5.4
+
+  Fixed an issue where c.t.h.Hfs#getChildIdentifiers() could throw an j.l.StringIndexOutOfBoundsException.
+
+  Updated c.p.a.AggregateBy$CompositeFunction to not use the capacity in #equals or #hashCode.
+
+  Fixed issue where a c.p.Merge could hide the streamed/accumulated nature of a stream when leading to a c.p.Group
+  pipe. This could result in duplicate data passed to the c.p.GroupBy or c.p.CoGroup within a MapReduce job.
+
+  Fixed issue where c.p.a.FirstBy only accepted a single field name.
+
+  Updated c.t.p.PartitionCollector in c.t.p.BasePartitionTap to be public.
+
+2.5.3
+
+  Updated c.f.h.ProcessFlow to include missing status changes.
+
+  Deprecated both c.t.l.TemplateTap and c.t.h.TemplateTap for the respective PartitionTap.
+
+  Updated c.p.Pipe and c.p.SubAssembly to cache any resolved name as its own name to improve #hashCode() performance.
+
+  Fixed issue where c.t.Fields#merge() did not honor underlying Fields type information properly.
+
+  Fixed issue where c.t.Fields#getType() attempted to resolve position when there is no associated type information.
+
+2.5.2
+
+  Updated c.t.TupleEntryCollector javadoc to clarify re-use of c.t.Tuple instances.
+
+  Updated c.t.h.Hfs to log a warning and disable o.a.h.m.l.CombineFileInputFormat (if enabled) if
+  c.t.h.HfsProps#isCombineInputSafeMode is true but the current o.a.h.mapred.InputFormat is not
+  a o.a.h.mapred.FileInputFormat.
+
+  Updated c.p.h2.Hadoop2MR1Platform to return a name consistent with other resources and artifacts for Hadoop2 MR1.
+
+  Fixed issue in c.o.f.Logic filter sub-classes where argumentFields was not properly set causing some nested
+  c.o.Filter instances to fail.
+
+2.5.1
+
+  Updated c.t.h.Hfs to throw an exception if the o.a.h.m.l.CombineFileInputFormat is enabled but the wrapped
+  o.a.h.mapred.InputFormat is not a o.a.h.mapred.FileInputFormat.
+
+  Fixed issue in c.c.Cascade where a race condition during start/stop/complete could result in state exception.
+
+  Updated Hadoop 1 platform tests to enable default num task retries.
+
+2.5.0
+
+  Updated c.f.BaseFlow to fail when deleting resources fails.
+
+  Updated c.t.h.PartitionTap to append sequence numbers to part files to prevent filename collisions within a task.
+
+  Added the c.f.FlowStepListener listener interface and subsequent listener support to c.f.FlowStep. @Ahmed--Mohsen
+
+  Updated Hadoop 1 dependency to use Hadoop 1.2.1.
+
+  Updated c.f.h.p.HadoopFlowStepJob to call kill only jobs on that are not complete. In theory calling kill on a
+  completed job should have no effect, but resulting logs could be confusing during postmortem.
+
+  Added c.t.l.PartitionTap and c.t.h.PartitionTap to replace c.t.l.TemplateTap and c.t.h.TemplateTap respectively. The
+  PartitionTap can be used as both a sink and source and provides pluggable partitioning via c.t.p.Partition.
+
+  Added c.p.j.BufferJoin as a convenience to flag to the planner the following c.o.Buffer implements a join strategy.
+
+  Updated c.o.BufferCall to allow access to the current c.p.j.JoinerClosure to allow for more complex join operations
+  to be built out within a c.o.Buffer implementation.
+
+  Added support for Apache Hadoop 2 and YARN.
+
+2.2.1
+
+  Updated Hadoop platform to fail during planning if "mapred.job.tracker" is not set.
+
+  Updated c.t.h.Hfs to improve duplicate identifier check performance. @gianm
+
+  Fixed issue where resolved fields were not properly presented to c.t.MultiSinkTap child c.t.Tap and c.s.Scheme
+  instances preventing header information from being written in the case of TextDelimited files.
+
+  Fixed issue where the number of fields parsed by c.s.u.DelimitedParser were greater than those declared could cause
+  an j.l.ArrayIndexOutOfBoundsException.
+
+  Fixed issue where a race condition could cause a NPE between c.c.Cascade#start() and Cascade#stop().
+
+2.2.0
+
+  Fixed issue where c.p.CoGroup in local mode did not properly handle joins where the grouping j.u.Comparator
+  did not treat null values as equal. SQL semantics expect null values to not be equivalent. c.p.HashJoin
+  does not support non-equality between null and will issue a warning.
+
+  Updated c.p.a.AggregateBy sub-classes to pass 0 as default capacity value to allow the system default value
+  to be honored.
+
+  Added c.o.a.MaxValue and c.o.a.MinValue c.o.Aggregator sub-classes to replace c.o.a.Max and c.o.a.Min classes
+  respectively. MaxValue and MinValue rely on the values compared to be j.l.Comparable types resulting in a simpler
+  implementation and support for max/min of non numeric types.
+
+  Fixed issue where c.o.t.DateParser would drop incoming Tuples if the argument was null.
+
+  Fixed issue where c.t.Hasher was not honored during grouping in local mode.
+
+  Updated c.t.h.GlobHfs to use fewer resources when deriving member identifiers.
+
+  Updated c.t.h.HadoopTapPlatformTest to skip the c.t.h.Dfs test if HDFS filesystem is unavailable on the current
+  configuration.
+
+  Fixed issue where c.t.h.Hfs#resourceExists() could fail is the identifier represented a file globing pattern.
+
+  Changed regex j.u.r.Pattern builder methods on c.s.u.DelimitedParser from static to instance methods.
+
+  Updated c.t.TupleEntry to issue a warning if an "unmodifiable" c.t.Tuple is set via #setTuple() on a "modifiable"
+  TupleEntry instance. This typically is an indicator the Tuple instance is about to be cached and/or modified at a
+  later point. Unmodifiable, system created, Tuples should never be cached.
+
+  Added c.t.TupleEntry#selectInto() to provide a more efficient way to copy values from one c.t.Tuple into another.
+
+  Added c.t.TupleEntry#selectTupleCopy() and #selectEntryCopy method to always provide a modifiable and cacheable
+  instance.
+
+  Fixed issue where c.t.TupleEntry#selectTuple() and #selectEntry() could return a unmodifiable or un-cacheable
+  c.t.Tuple or TupleEntry depending on the given c.t.Fields selector.
+
+  Fixed issue where c.t.MultiSourceTap could keep too many open resources if #openForRead() is called directly.
+
+  Fixed issue where c.o.Buffer#flush() was never called.
+
+  Fixed issue where an exception at #close() on step state reader could mask more prominent errors.
+
+  Fixed issue where the c.t.TupleEntryCollector was not set to "null" on the c.o.OperationCall before
+  c.o.Operation#cleanup() was called to prevent the method from emitting values during cleanup. See Operation#flush().
+  Use "cascading.compatibility.retain.collector" to disable.
+
+  Fixed issue where c.f.h.ProcessFlow would not honor c.f.FlowListener instances. Currently does not support
+  the #onThrowable event.
+
+  Updated c.p.a.Unique to use c.o.b.FirstNBuffer to improve performance.
+
+  Added c.o.b.FirstNBuffer to provide a faster implementation of returning the first N tuples encountered in a grouping.
+
+  Updated junit to version 4.11.
+
+  Update default Apache Hadoop support to version 1.1.x. End support for 0.20.2.
+
+  Updated c.f.FlowDef to accept classpath elements that allow for pipe assemblies to load additional resources
+  from the current context j.l.ClassLoader.
+
+  Updated error messages in c.t.Fields, delegate property initialization to c.f.Flow sub-classes. @fderose
+
+  Removed Hadoop oro dependency from build and test runtime classpaths to stop transient build failures.
+
+  Added ability to pass System level properties into platform level property sets to override defaults during testing.
+
+  Fixed issue where c.t.l.FileTap#getFullIdentifier() was not returning the fully qualified path.
+
+  Added c.t.h.HfsProps to localize optional Hadoop HDFS specific properties, specifically provides properties for
+  enabling the combining of small files into larger splits.
+
+  Updated c.t.h.Hfs to allow for smaller files to be combined into fewer splits, thus fewer map tasks. @sjlee
+
+  Updated c.p.SubAssembly to support setting local and step properties via the c.p.ConfigDef.
+
+  Updated c.o.Buffer to allow implementations to disable nulling of non-grouping fields after the arguments iterator
+  has completed. This simplifies appending aggregated fields to the incoming tuple stream.
+
+  Updated c.t.Fields to return appending value when calling Fields#append on Fields.NONE and optimized Fields#subtract
+  when subtracting Fields.NONE.
+
+  Added c.f.AssemblyPlanner interface to allow for platform independent generative c.f.Flow planning.
+
+  Fixed issue in local mode where an OOME could cause a cascading set of additional OOMEs making the jvm unstable.
+
+  Updated c.f.s.MemoryCoGroupGate and c.f.l.s.LocalGroupByGate to drain internal collections when pipelining
+  tuples downstream in the pipeline.
+
+  Added c.t.h.BigDecimalSerialization to allow Hadoop to serialize and deserialize j.m.BigDecimal instances.
+
+  Update slf4j to version 1.7.2.
+
+  Added coercion support for j.m.BigDecimal.
+
+  Added c.p.PlatformSuite annotation allowing a c.PlatformTestCase sub-class to be marked as being a JUnit suite
+  of tests accessible, by default, via a static "suite" method.
+
+  Updated provided c.s.Scheme subclasses to honor field type information.
+
+  Updated c.o.expression, c.o.aggregator, and c.p.assembly operations to honor field type information.
+
+  Updated c.o.Identity and c.p.a.Coerce to uses field type information during coercion.
+
+  Added c.t.t.CoercibleType interface to allow for customization of individual field data types and formats. Also
+  added the c.t.t.DateType implementation for managing string formatted dates to and from a long timestamp.
+
+  Updated c.p.Splice to fail during planning if grouping or merging fields do not share the same field types, unless
+  the field in question has a j.u.Comparator to handle the incompatible comparisons.
+
+  Fixed issue where a c.p.CoGroup join on Fields.NONE would fail during planning.
+
+  Updated c.p.a.Unique to optionally filter out null values.
+
+  Added c.o.e.ScriptFunction, ScriptTupleFunction, and c.o.e.ScriptFilter operations to allow for more expressive
+  Java scripts.
+
+  Added "test.platform.includes" system property so tests can be limited to specified platforms.
+
+  Added c.p.a.MaxBy and c.p.a.MinBy c.p.a.AggregateBy sub-classes to perform max and min, respectively.
+
+  Updated c.p.a.SumBy and c.p.a.AverageBy to honor result fields type declaration by coercing the result to the
+  declared type.
+
+  Updated c.p.a.CountBy to count all value occurrences, non-null values, or only null values, within a grouping. Using
+  grouping Fields.NONE provides an efficient count for a set of columns. Counting distinct values is not supported.
+
+  Updated c.t.Fields to accept type information and to propagate type values along with fields.
+
+  Updated c.s.l.TextDelimited and c.s.h.TextDelimited to take c.s.u.DelimitedParser on the constructor to allow
+  for overriding parsing behavior. DelimitedParser now takes a c.s.u.FieldTypeResolver to allow for field name
+  permutations during source and sink, and type inference from field names.
+
+2.1.6
+
+  Updated c.p.SubAssembly to throw UnsupportedOperationException on #getConfigDef() and #getStepConfigDef() calls.
+
+  Fixed issue where join field level c.t.Hasher instances were not honored during a c.p.HashJoin.
+
+  Fixed issue where a j.l.StackOverflowError would be thrown if the Hadoop mapred.input.format.class property
+  was not set.
+
+  Updated c.t.Fields#size() to return Fields.NONE on size == 0, instead of failing.
+
+  Fixed issue where Fields.REPLACE on an incoming Fields.UNKNOWN could result in a
+  java.lang.ArrayIndexOutOfBoundsException during runtime.
+
+  Updated c.s.h.HadoopStepStats counter caching strategy to make a final attempt even if max timeouts have been
+  met. Added "cascading.step.counter.timeout" property to allow tuning of timeout period.
+
+2.1.5
+
+  Updated c.t.h.u.BytesComparator to implement c.t.Hasher as a convenience.
+
+  Fixed issue where c.c.CascadeListener was receiving null as the c.c.Cascade parameter.
+
+2.1.4
+
+  Added ability to capture frameworks used in an application via c.p.AppProps.
+
+  Restored platform test compatibility with Cascading 2.0.x via return of c.p.PlatformRunner.Platform annotation
+  and deprecated c.t.LocalPlatform and c.t.HadoopPlatform platform implementations.
+
+2.1.3
+
+  Fix for extra trailing ']' in c.t.Tap#toString().
+
+  Fix for c.f.FlowProcess#getNumProcessSlices() incorrectly returning zero in local mode, should be 1.
+
+  Fix for c.p.a.AggregateBy not honoring the global system property capacity value if not overridden on the ctor.
+
+  Fix for NPE if c.f.FlowProcess returns null config.
+
+  Fixed issue where a c.f.FlowStep would attempt to detect if it should be skipped regardless of whether the "runID"
+  had been set or not on the c.f.Flow enabling restartable flows.
+
+2.1.2
+
+  Fixed issue where c.f.FlowProcess#openForWrite on Hadoop would re-use the existing o.a.h.m.OutputCollector instance
+  as that used in the current task.
+
+  Fixed issue where fetching remote Hadoop counter values could block indefinitely. Fetching remote counters is now
+  serialized across jobs to prevent deadlocks inside the Hadoop API and counter values are now cached with a final
+  refresh on job completion.
+
+  Fixed issue where NPE could be thrown by c.s.CascadingStats#getCounterValue if given counter had no value.
+
+2.1.1
+
+  Fixed issue where c.s.h.TextDelimited would not honor charsetName.
+
+  Fixed issue where c.t.BaseTemplateTap would lose parent fields if they were declared as Fields.ALL.
+
+  Fixed issue where c.t.Fields#append would not include current Fields instance when appending an array of Fields
+  instances.
+
+  Fixed issue where subsequent c.p.Merge pipes in a pipeline path would obscure prior Merges preventing a c.t.Tap
+  insertion during planning resulting in a missing Tap configuration resource property.
+
+  Fixed NPE with c.s.l.TextDelimited when line after header was null.
+
+  Fix for c.s.u.DelimitedParser not fully honoring the default strict parsing policy. This resolution may cause
+  some text delimited files to fail if they have arbitrary numbers of fields.
+
+  Added quote and delimiter getters to c.s.l.TextDelimited and c.s.h.TextDelimited.
+
+  Fixed issue where a c.f.FlowStep being skipped was not considered successful after 2.0.7 merge.
+
+2.1.0
+
+  Added c.t.t.FileType interface to mark specific platform c.t.Tap classes as representing a file like interface.
+
+  Fixed issue where c.p.a.Coerce would coerce a null value to 0 if the coerce type was a j.l.Number
+  instead of a numeric primitive, or false if the coerce type was j.l.Boolean instead of boolean.
+
+  Fixed issue where c.s.u.DelimitedParser did not honor number of field found in a text delimited file header.
+
+  Fixed issue where c.t.Tap#openForWrite did not honor the c.t.SinkMode#REPLACE setting.
+
+  Added version update check to print out latest available release. Use system property cascading.update.skip=true
+  to disable.
+
+  Updated all tuple stream permutations to minimize new c.t.Tuple instantiations and maximize upstream Tuple reuse.
+
+  Updated janino to version 2.6.1.
+
+  Updated c.s.l.TextLine, c.s.l.TextDelimited, c.s.h.TextLine, and c.s.h.TextDelimited to encode/decode any supported
+  j.n.c.Charset.
+
+  Fixed issue where c.o.t.DateParser may throw an NPE if the value to be parsed was null.
+
+  Added c.p.Props#buildProperties( Iterable<Map.Entry<String, String>> defaultProperties ) to allow for re-using
+  and existing o.a.h.m.JobConf instances as default properties.
+
+  Added c.p.a.FirstBy partial aggregator to allow for capturing first seen c.t.Tuple in a Tuple stream. Argument
+  c.f.Fields j.u.Comparators are honored for secondary sorting.
+
+  Updated c.p.a.AggregateBy to honor argumentField c.f.Fields j.u.Comparator instances for secondary sorting.
+
+  Updated c.o.a.First to accumulate the first N seen c.t.Tuple instances.
+
+  Added support for c.c.CascadeListener on c.c.Cascade instances.
+
+  Updated c.p.j.InnerJoin.JoinIterator and sub-classes to re-use c.t.Tuple instances.
+
+  Added support for restartable checkpoint c.f.Flow instances by providing a runID to identify run attempts.
+
+  Updated build and tests to simplify development of alternative planners.
+
+2.0.8
+
+  Updated c.m.CascadingServices to more robustly load optional services. Service agent jar may now be optionally defined
+  in a cascading-service.properties file from the CLASSPATH with the "cascading.management.service.jar" property.
+
+2.0.7
+
+  Fixed issue where c.t.Tap instances were not presented resolved c.t.Fields instances in local mode during planning.
+
+  Fixed issue where Hadoop forgets past job completion status of a job during very long running c.f.Flows and
+  throws a NPE when queried for the result.
+
+2.0.6
+
+  Added "cascading.step.display.id.truncate" property to allow simple truncation of flow and step ID values in
+  the step display name.
+
+  Fixed issue where attempting to iterate the left most side of a join more than once would silently fail on the
+  Hadoop platform.
+
+  Fixed issue where step state was not properly removed from the Hadoop distributed cache during cleanup.
+
+  Fixed issue where c.f.Flow#writeStepsDot() would fail if a Flow c.f.FlowStep had multiple sinks.
+
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.java.lang.ArrayIndexOutOfBoundsException when there aren't any
+  actual o.a.h.m.FileInputFormat input paths.
+
+  Fix for c.t.h.i.MultiInputFormat throwing j.l.IllegalStateException on an empty child o.a.h.m.InputSplit array.
+
+  Fix for j.l.IndexOutOfBoundsException thrown on an empty c.c.Cascade.
+
+  Fix for c.t.c.SpillableProps#SPILL_COMPRESS not being honored if set to false.
+
+2.0.5
+
+  Updated c.f.p.ElementGraphException messages to name disconnected elements.
+
+  Properly scope c.t.Tap properties to c.f.l.LocalFlowStep and then pass them to source/sink stages in
+  c.f.l.s.LocalStepStreamGraph. @mrwalker
+
+  Fix for c.s.u.DelimitedParser to support delimiter as last char in quoted field.
+
+  Fix for c.o.f.UnGroup constructor failing against correct constructor values.
+
+  Added missing setter methods on c.p.AppProps for application jar path and class values.
+
+  Fix for possible NPE when debug logging is enabled during planning.
+
+  Improved error message when Hadoop serializer for a given type cannot be found in some cases.
+
+2.0.4
+
+  Removed remnant log4j dependency in c.t.h.i.MultiInputSplit.
+
+  Fixed issue where c.t.Tap may fail resolving outgoing fields.
+
+  Added missing #equals() method to c.t.TupleEntry that will honor field j.u.Comparator instances.
+
+  Fixed issue where c.f.s.SparseTupleComparator would not properly sort with re-ordered sort fields.
+
+  Fixed issue where c.t.TupleEntryChainIterator#hasNext() would fail if called more than once.
+
+  Updated c.t.h.Hfs internal methods call #getPath() instead of #getIdentifier() so sub-classes can override.
+
+  Updated the #verify() methods on c.s.l.TextLine and c.s.h.TextLine to be protected.
+
+2.0.3
+
+  Fixed issue where the c.f.p.FlowPlanner would allow declared fields in a checkpoint c.t.Tap instance.
+
+  Fixed issue where c.f.Flow#writeStepsDot() would fail if the Flow was planned by the local mode planner.
+
+  Added c.f.h.u.ObjectSerializer to allow for custom state serializers. To override the default
+  c.f.h.u.JavaObjectSerializer, specify the name of a class that implements ObjectSerializer (and optionally
+  implements o.a.h.c.Configurable) via the "cascading.util.serializer" property. @sritchie
+
+2.0.2
+
+  Added cascading.version property to Hadoop job configuration.
+
+  Removed tests for deprecated method c.t.Tuple#parse().
+
+  Fixed error message in c.s.u.DelimitedParser where parsed value was not being reported.
+
+  Updated c.s.h.TextLine and c.s.l.TextLine to ignore planner presented fields to allow instances to be re-used.
+
+  Changed c.t.c.SpillableTupleList to use j.u.LinkedList to reduce memory footprint when backing a
+  c.t.c.SpillableTupleMap.
+
+  Fixed issue where c.p.Merge into the streamed side of a c.p.HashJoin would produce an incorrect plan.
+
+  Fixed issue where c.p.CoGroup was not properly resolving fields from immediate prior c.p.Every pipes.
+
+2.0.1
+
+  Changed c.s.h.TextDelimited to use fully qualified path when reading headers so that the filesystem scheme
+  will be inherited.
+
+  Removed redundant property value kept by c.t.h.i.MultiInputSplit to reduce input split serialized size.
+
+  Updated commit and rollback functionality in c.f.BaseFlow and c.f.p.BaseFlowStep to fail the c.f.Flow on a
+  c.t.Tap#commitResource failure and to call Tap#rollbackResource on subsequent tap instances. Note this isn't
+  intended to provide a 2PC type transactional functionality.
+
+  Updated dependency to Hadoop 1.0.3
+
+2.0.0
+
+  Added c.p.Checkpoint pipe to force any supported planners to persist the tuple stream at that location. If bound to
+  a checkpoint c.t.Tap via the c.f.FlowDef, this data will not be cleaned up after the c.f.Flow completes. This pipe
+  is useful in conjunction with a c.p.HashJoin to minimize replicated data.
+
+  Added c.t.l.TemplateTap for local mode. Refactored out c.t.BaseTemplateTap to simplify support for additional
+  platforms.
+
+  Added c.t.l.StdIn, StdOut, and StdErr local mode c.t.Tap types.
+
+  Changed c.f.h.HadoopFlowStep to save step state to the Hadoop distributed cache if larger than Short.MAX_VALUE.
+
+  Fixed issue where a null value was printed as "null" in c.o.r.RegexMatcher, c.o.r.RegexFilter, c.o.a.AssertGroupBase,
+  and c.o.t.FieldJoiner.
+
+  Updated dependency to Hadoop 1.0.2.
+
+  Changed c.s.h.TextDelimited and c.s.l.TextDelimited to optionally read the field names from from the header during
+  planning if skipHeaders or hasHeaders is set to true and if Fields.ALL or Fields.UNKNOWN is declared on the
+  constructor.
+
+  Changed the planner and added new methods to c.s.Scheme so that field names can be retrieved after a proper
+  configuration has been built, but before the planner resolves fields internally. This is useful for reading field
+  names from a header of a text file, or meta-data in a binary file. These methods are optional.
+
+  Fixed issue where any c.p.Splice following a c.p.Merge may be unable to resolve the tuple stream branch.
+
+  Added support for c.p.ConfigDef on c.p.Pipe and c.t.Tap classes to allow for process and pipe/tap level
+  property values. Where process allows a Pipe or Tap to set c.f.FlowStep specific properties.
+
+  Added c.p.Props base and sub-classes to simplify managing Cascading and Hadoop related properties.
+
+  Added c.m.UnitOfWorkSpawnStrategy interface to allow for pluggable thread management services. Also added
+  c.m.UnitOfWorkExecutorStrategy class as the default implementation.
+
+  Added typed set and add methods to c.t.Tuple and c.t.TupleEntry.
+
+  Changed packages for many internal types to simplify documentation.
+
+  Changed c.f.Flow and c.f.FlowStep to interfaces to hide internal only methods.
+
+  Added support for trapping actual raw input data as read by a c.s.Scheme during processing by allowing
+  c.t.TupleException to accept a payload c.t.Tuple instance with the data to be trapped. Updated c.s.h.TextDelimited
+  and c.s.l.TextDelimited to provide a proper payload when sourcing and parsing text.
+
+  Fixed issue where a c.p.GroupBy following a c.p.Every could not see result Aggregator fields from the Every instance.
+
+  Changed c.s.h.TextDelimited and c.s.l.TextDelimited to optionally write headers if writeHeaders or hasHeaders
+  is set to true. If Fields.ALL or Fields.UNKNOWN is declared, during sinking the field names will be resolved
+  at runtime.
+
+  Added the c.t.TupleCollectionFactory and c.t.TupleMapFactory interfaces and relevant implementations to allow
+  custom c.t.Spillable types to be plugged into a given execution. Spillable types are used to back in memory
+  collections to disk to improve scalability of c.p.CoGroup and c.p.HashJoin pipes on different platforms.
+
+  Fixed issue where a c.s.Scheme was not seeing properly resolved fields if they were not declared in the Scheme
+  instance. This allows a Scheme declared to sink c.t.Fields#ALL to see the actual field names during the
+  Scheme#sinkPrepare() and Scheme#sink() methods.
+
+  Changed c.t.TupleEntrySchemeSelector#prepare method to protected and is now called lazily internally during
+  the first add method. This should simplify custom c.t.Tap development and allows for lazily setting of resolved
+  sink fields.
+
+  Fixed issue where the grouping Tuple resulting from a c.p.CoGroup did not properly reflect all the current
+  grouping keys and field names. This fix allows an c.o.Aggregator or c.o.Buffer see which fields are null, if at all,
+  during an "outer" join type. resultGroupFields parameter now must reflect all joined fields as well.
+
+  Fixed issue where a c.p.GroupBy merge of branches with the same names threw a NPE.
+
+  Fixed issue where c.p.a.AggregateBy.AveragePartials functor was using fixed declared fields.
+
+  Added the "cascading.aggregateby.capacity" property so that a default capacity can be set for the
+  c.p.a.AggregateBy sub-assemblies.
+
+  Added the c.m.UnitOfWork interface to give c.f.Flow and c.c.Cascade a common contract.
+
+  Changed c.t.h.TupleSerialization#setSerializations() to force TupleSerialization and o.a.h.i.s.WritableSerialization
+  are first in the "io.serializations" list.
+
+  Added support for properties scoped at the pipe or process scope. Process scope properties will be inherited by
+  the current job if any.
+
+  Added c.t.SpillableTupleMap to allow durable groups during asymmetrical joins.
+
+  Changed c.t.SpillableTupleList to implement c.u.Collection and c.t.Spillable interfaces.
+
+  Renamed the c.p.Group class to c.p.Splice and created a c.p.Group interface. c.p.Groupby, CoGroup, Merge, and HashJoin
+  are all c.p.Splice types. Only GroupBy and CoGroup are c.p.Group types.
+
+  Moved all "joiners" to c.p.joiner package from c.p.cogroup as they are now shared with the c.p.HashJoin pipe.
+
+  Added c.p.HashJoin pipe to join two or more streams by a common key value without blocking/accumulating the largest
+  data stream. This differs from c.p.CoGroup in that there is no grouping or sorting, and on the MapReduce platform,
+  no Reduce task. The is commonly known as an asymmetrical or replicated join.
+
+  Changed c.t.h.TupleSerialization#setSerializations() to always include o.a.h.i.s.WritableSerialization as some
+  Hadoop versions do not include it if omitted. WritableSerialization is required by c.t.h.MultiInputSplit.
+
+  Added c.p.Merge pipe to create a union of multiple tuple streams. This differs from c.p.GroupBy in that there
+  is no grouping or sorting, and on the MapReduce platform, no Reduce task.
+
+  Added c.t.Tap#commitResource() && #rollbackResource() to allow the underlying resource to be notified write processing
+  has successfully completed or has failed, respectively, so that any additional cleanup or processing may be completed.
+
+  Added c.t.Hasher to allow any field level Comparators to have hashCode generation delegated to them for their
+  respective c.t.Tuple element/field value.
+
+  Added c.f.FlowStepStrategy interface to allow customization of c.f.p.FlowStep configuration information.
+
+  Changed c.f.Flow to lazily test child source taps for modified time to reduce file meta-data queries.
+
+  Changed c.t.CompositeTap#getChildTaps to return an j.u.Iterator to allow for lazy resolution of child tap instances.
+
+  Added "cascading.default.comparator" property to allow for a default j.u.Comparator class to be set and used
+  if no Comparator is returned by the c.t.Comparison interface or set on a c.t.Fields instance.
+  See c.t.h.TupleSerialization for the static accessor.
+
+  Changed planner to allow traps to be re-used across any branches. Prior planner would throw an error.
+
+  Changed c.f.Flow to delete traps during the same conditions a sink will be deleted before execution.
+
+  Fixed issue where the c.t.h.TemplateTap would not properly remove Hadoop temporary directories on completion.
+
+  Changed the behavior of traps to capture operation argument values instead of all the incoming values so that it is
+  simpler to identify the values causing the failure and reduce the data stored in the trap and log files, which
+  record a truncated stringified version of the argument tuple.
+
+  Updated c.f.h.MapReduceFlow to allow source/sink/trap create methods to be overridden by a sub-class in order
+  to support path identifiers not compatible with the Hadoop FS.
+
+  Changed c.f.FlowProcess increment methods to take a long instead of int type.
+
+  Fixed issue where the c.t.h.TemplateTap would not properly handle pathFields value if set to c.f.Fields.ALL.
+
+  Fixed issue where the c.p.a.AB.CompositeFunction was not getting flushed when planned into a reduce task.
+
+  Renamed c.p.a.Shape to c.p.a.Retain, as it retains given fields, and created c.p.a.Discard to perform the opposite
+  function or discarding given fields.
+
+  Added c.o.NoOp operation to allow fields to be dropped from a stream when used with c.t.Fields.SWAP.
+
+  Added c.T.Fields.NONE to denote no fields in a c.t.Tuple.
+
+  Added shutdown hook for the c.c.Cascade class so during jvm shutdown #stop() will be called forcing proper state
+  change.
+
+  Changed #stop() to push from c.c.Cascade down through c.f.Flow and c.f.p.FlowStep instances.
+
+  Added new JUnit runner for injecting platform dependencies into c.t.PlatformTestCase subclasses. Subclasses should
+  use c.t.PlatformRunner.Platform Annotation to specify relevant c.t.TestPlatform instances.
+
+  Changed test and assertion helper methods on c.t.CascadingTestCase static to remove subclassing requirement.
+
+  Upgraded to support JUnit 4.8.x.
+
+  Changed license from GPLv3 to APLv2.
+
+  Changed c.f.Flow to prevent #complete() from returning while #stop() is executing. Should prevent certain kinds
+  of race conditions when a shutdown hook is used, from a different thread, to stop running flows.
+
+  Added support for gradle.
+
+  Renamed c.f.FlowSkipIfSinkStale to FlowSkipIfSinkNotStale to match the semantics.
+
+  Added support for c.f.Flow tags via the c.f.FlowDef class.
+
+  Added c.f.FlowDef to allow for creating flow definitions via a fluent builder interface.
+
+  Added STARTED and SUBMITTED status to c.s.CascadingStats to properly track when a job is submitted vs when it actually begins
+  processing after being queued.
+
+  Added management interfaces for capturing detailed statistics.
+
+  Decoupled core from Apache Hadoop, removed stack based streaming model. Use c.f.h.HadoopFlowConnector to plan
+  Hadoop specific flows.
+
+  Implemented 'local' mode to support independent processing of complex processes in memory. Use
+  c.f.l.LocalFlowConnector for local mode specific flows.
+
+  Updated and simplified c.t.Tap and c.t.Scheme interfaces. Changes are not backwards compatible to 1.x releases.
+
+  Implemented new pipelining infrastructure to support more complex streaming topologies.
+
 1.2.6
 
   Fixed bug in TupleEntry#selectInteger() and marked it as deprecated.
@@ -219,7 +1237,7 @@ Cascading Change Log
 
   Added support for custom EMR properties used for managing task attempt temporary path management for some filesystems.
 
-  Changed c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the threshold
+  Changed c.t.TemplateTap to support an openTapsThreshold value. The default open taps is 300. After the capacity
   is met, 10% of the least recently used open taps will be closed.
 
   Changed c.t.Fields #setComparator fieldName argument to accept Fields instances as the fieldName argument.
@@ -936,7 +1954,7 @@ Cascading Change Log
 
   Changed c.t.h.S3HttpFileSystem so it can now create files remotely.
 
-  Renamed cascading.spill.threshold to cascading.cogroup.spill.threshold, so there is less a chance of collision.
+  Renamed cascading.spill.capacity to cascading.cogroup.spill.capacity, so there is less a chance of collision.
 
   Made numerous optimizations to improve overall performance. Namely split and merge of key/value tuples to remove
   redundancy in the stream between the mapper and reducer.
@@ -1002,7 +2020,7 @@ Cascading Change Log
 
 0.2.0
 
-  CoGroup will now spill to disk on extremely large co-groupings. Configurable via "cascading.spill.threshold".
+  CoGroup will now spill to disk on extremely large co-groupings. Configurable via "cascading.spill.capacity".
   Defaults to 10k elements.
 
   java.util.Properties instances can be used to set defauls for FlowConnectors.
