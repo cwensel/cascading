@@ -47,6 +47,7 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.NullSafeReverseComparator;
 import cascading.util.Util;
 import org.junit.Test;
 
@@ -158,13 +159,13 @@ public class SortedValuesPlatformTest extends PlatformTestCase
 
   private void runComprehensiveCase( Boolean[] testCase, boolean useCollectionsComparator ) throws IOException
     {
-    getPlatform().copyFromLocal( inputFileCross );
+    getPlatform().copyFromLocal( inputFileCrossNulls );
 
     String test = Util.join( testCase, "_", true ) + "_" + useCollectionsComparator;
     String path = "comprehensive/" + test;
 
-    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileCross );
-    Tap sink = getPlatform().getTextFile( new Fields( "line" ), new Fields( "num", "lower", "upper" ), getOutputPath( path ), SinkMode.REPLACE );
+    Tap source = getPlatform().getTextFile( new Fields( "line" ), inputFileCrossNulls );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "num", "lower", "upper" ).applyTypes( Long.class, String.class, String.class ), " ", getOutputPath( path ), SinkMode.REPLACE );
 
     sink.getScheme().setNumSinkParts( 1 );
 
@@ -172,12 +173,12 @@ public class SortedValuesPlatformTest extends PlatformTestCase
 
     pipe = new Each( pipe, new Fields( "line" ), new RegexSplitter( new Fields( "num", "lower", "upper" ), "\\s" ) );
 
-    pipe = new Each( pipe, new Fields( "num" ), new Identity( long.class ), Fields.REPLACE );
+    pipe = new Each( pipe, new Fields( "num" ), new Identity( Long.class ), Fields.REPLACE );
 
     Fields groupFields = new Fields( "num" );
 
     if( testCase[ 0 ] )
-      groupFields.setComparator( "num", useCollectionsComparator ? Collections.reverseOrder() : getPlatform().getLongComparator( true ) );
+      groupFields.setComparator( "num", useCollectionsComparator ? new NullSafeReverseComparator() : getPlatform().getLongComparator( true ) );
 
     Fields sortFields = null;
 
@@ -186,7 +187,7 @@ public class SortedValuesPlatformTest extends PlatformTestCase
       sortFields = new Fields( "upper" );
 
       if( testCase[ 1 ] )
-        sortFields.setComparator( "upper", useCollectionsComparator ? Collections.reverseOrder() : getPlatform().getStringComparator( true ) );
+        sortFields.setComparator( "upper", useCollectionsComparator ? new NullSafeReverseComparator() : getPlatform().getStringComparator( true ) );
       }
 
     pipe = new GroupBy( pipe, groupFields, sortFields, testCase[ 2 ] );
@@ -212,14 +213,10 @@ public class SortedValuesPlatformTest extends PlatformTestCase
       {
       Tuple tuple = iterator.next().getTuple();
 
-      String[] values = tuple.getString( 0 ).split( "\\s" );
+      if( !group.containsKey( tuple.getLong( 0 ) ) )
+        group.put( tuple.getLong( 0 ), new ArrayList<String>() );
 
-      long num = Long.parseLong( values[ 0 ] );
-
-      if( !group.containsKey( num ) )
-        group.put( num, new ArrayList<String>() );
-
-      group.get( num ).add( values[ 2 ] );
+      group.get( tuple.getLong( 0 ) ).add( tuple.getString( 2 ) );
       }
 
     boolean groupIsReversed = testCase[ 0 ];

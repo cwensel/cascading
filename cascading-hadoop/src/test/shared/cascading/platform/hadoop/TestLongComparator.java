@@ -20,7 +20,6 @@
 
 package cascading.platform.hadoop;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -48,14 +47,32 @@ public class TestLongComparator implements Hasher<Long>, StreamComparator<Buffer
     }
 
   @Override
-  public int compare( Long o1, Long o2 )
+  public int compare( Long lhs, Long rhs )
     {
-    return reverse ? o2.compareTo( o1 ) : o1.compareTo( o2 );
+    if( lhs == null && rhs == null )
+      return 0;
+
+    if( lhs == null )
+      return !reverse ? -1 : 1;
+
+    if( rhs == null )
+      return !reverse ? 1 : -1;
+
+    return reverse ? rhs.compareTo( lhs ) : lhs.compareTo( rhs );
     }
 
   @Override
   public int compare( BufferedInputStream lhsStream, BufferedInputStream rhsStream )
     {
+    if( lhsStream == null && rhsStream == null )
+      return 0;
+
+    if( lhsStream == null )
+      return !reverse ? -1 : 1;
+
+    if( rhsStream == null )
+      return !reverse ? 1 : -1;
+
     HadoopTupleInputStream lhsInput = new HadoopTupleInputStream( lhsStream, new TupleSerialization().getElementReader() );
     HadoopTupleInputStream rhsInput = new HadoopTupleInputStream( rhsStream, new TupleSerialization().getElementReader() );
 
@@ -64,9 +81,10 @@ public class TestLongComparator implements Hasher<Long>, StreamComparator<Buffer
       // explicit for debugging purposes
       Long l1 = (Long) lhsInput.readVLong();
       Long l2 = (Long) rhsInput.readVLong();
+
       return reverse ? l2.compareTo( l1 ) : l1.compareTo( l2 );
       }
-    catch( IOException exception )
+    catch( Exception exception )
       {
       throw new CascadingException( exception );
       }

@@ -20,7 +20,6 @@
 
 package cascading.flow.stream.element;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -47,6 +46,7 @@ import cascading.tuple.util.Resettable1;
 import cascading.tuple.util.Resettable2;
 import cascading.tuple.util.TupleBuilder;
 import cascading.tuple.util.TupleHasher;
+import cascading.util.NullSafeReverseComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,33 +114,33 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
     {
     if( narrowFields.isNone() )
       return new TupleBuilder()
-      {
-      @Override
-      public Tuple makeResult( Tuple input, Tuple output )
         {
-        return Tuple.NULL;
-        }
-      };
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          return Tuple.NULL;
+          }
+        };
 
     if( incomingFields.isUnknown() )
       return new TupleBuilder()
-      {
-      @Override
-      public Tuple makeResult( Tuple input, Tuple output )
         {
-        return input.get( incomingFields, narrowFields );
-        }
-      };
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          return input.get( incomingFields, narrowFields );
+          }
+        };
 
     if( narrowFields.isAll() ) // dubious this is ever reached
       return new TupleBuilder()
-      {
-      @Override
-      public Tuple makeResult( Tuple input, Tuple output )
         {
-        return input;
-        }
-      };
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          return input;
+          }
+        };
 
     return createDefaultNarrowBuilder( incomingFields, narrowFields );
     }
@@ -148,62 +148,62 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
   protected TupleBuilder createDefaultNarrowBuilder( final Fields incomingFields, final Fields narrowFields )
     {
     return new TupleBuilder()
-    {
-    Tuple result = createNarrow( incomingFields.getPos( narrowFields ) );
-
-    @Override
-    public Tuple makeResult( Tuple input, Tuple output )
       {
-      return reset( result, input );
-      }
-    };
+      Tuple result = createNarrow( incomingFields.getPos( narrowFields ) );
+
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return reset( result, input );
+        }
+      };
     }
 
   protected TupleBuilder createNulledBuilder( final Fields incomingFields, final Fields keyField )
     {
     if( incomingFields.isUnknown() )
       return new TupleBuilder()
-      {
-      @Override
-      public Tuple makeResult( Tuple input, Tuple output )
         {
-        return Tuples.nulledCopy( incomingFields, input, keyField );
-        }
-      };
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          return Tuples.nulledCopy( incomingFields, input, keyField );
+          }
+        };
 
     if( keyField.isNone() )
       return new TupleBuilder()
-      {
-      @Override
-      public Tuple makeResult( Tuple input, Tuple output )
         {
-        return input;
-        }
-      };
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          return input;
+          }
+        };
 
     if( keyField.isAll() )
       return new TupleBuilder()
-      {
-      Tuple nullTuple = Tuple.size( incomingFields.size() );
-
-      @Override
-      public Tuple makeResult( Tuple input, Tuple output )
         {
-        return nullTuple;
-        }
-      };
+        Tuple nullTuple = Tuple.size( incomingFields.size() );
+
+        @Override
+        public Tuple makeResult( Tuple input, Tuple output )
+          {
+          return nullTuple;
+          }
+        };
 
     return new TupleBuilder()
-    {
-    Tuple nullTuple = Tuple.size( keyField.size() );
-    Tuple result = createOverride( incomingFields, keyField );
-
-    @Override
-    public Tuple makeResult( Tuple baseTuple, Tuple output )
       {
-      return reset( result, baseTuple, nullTuple );
-      }
-    };
+      Tuple nullTuple = Tuple.size( keyField.size() );
+      Tuple result = createOverride( incomingFields, keyField );
+
+      @Override
+      public Tuple makeResult( Tuple baseTuple, Tuple output )
+        {
+        return reset( result, baseTuple, nullTuple );
+        }
+      };
     }
 
   @Override
@@ -313,7 +313,7 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
       else
         groupComparators[ pos ] = new SparseTupleComparator( Fields.asDeclaration( groupFields ), defaultComparator );
 
-      groupComparators[ pos ] = splice.isSortReversed() ? Collections.reverseOrder( groupComparators[ pos ] ) : groupComparators[ pos ];
+      groupComparators[ pos ] = splice.isSortReversed() ? NullSafeReverseComparator.reverseOrder( groupComparators[ pos ] ) : groupComparators[ pos ];
 
       if( sortFields != null )
         {
@@ -322,7 +322,7 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
         valueComparators[ pos ] = new SparseTupleComparator( valuesFields[ pos ], sortFields, defaultComparator );
 
         if( splice.isSortReversed() )
-          valueComparators[ pos ] = Collections.reverseOrder( valueComparators[ pos ] );
+          valueComparators[ pos ] = NullSafeReverseComparator.reverseOrder( valueComparators[ pos ] );
         }
       }
 
@@ -341,13 +341,13 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
       return groupComparators[ 0 ];
 
     return new Comparator<Comparable>()
-    {
-    @Override
-    public int compare( Comparable lhs, Comparable rhs )
       {
-      return lhs.compareTo( rhs );
-      }
-    };
+      @Override
+      public int compare( Comparable lhs, Comparable rhs )
+        {
+        return lhs.compareTo( rhs );
+        }
+      };
     }
 
   @Override

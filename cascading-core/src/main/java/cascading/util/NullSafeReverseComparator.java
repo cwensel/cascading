@@ -18,49 +18,37 @@
  * limitations under the License.
  */
 
-package cascading.platform.local;
+package cascading.util;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Comparator;
-
-import cascading.tuple.Hasher;
 
 /**
  *
  */
-public class TestLongComparator implements Hasher<Long>, Comparator<Long>, Serializable
+public class NullSafeReverseComparator implements Comparator<Comparable<Object>>, Serializable
   {
-  boolean reverse = true;
-
-  public TestLongComparator()
+  public static <T> Comparator<T> reverseOrder( Comparator<T> comparator )
     {
-    }
+    if( comparator == null )
+      return (Comparator<T>) new NullSafeReverseComparator();
 
-  public TestLongComparator( boolean reverse )
-    {
-    this.reverse = reverse;
+    return Collections.reverseOrder( comparator );
     }
 
   @Override
-  public int compare( Long lhs, Long rhs )
+  public int compare( Comparable<Object> lhs, Comparable<Object> rhs )
     {
     if( lhs == null && rhs == null )
       return 0;
 
     if( lhs == null )
-      return !reverse ? -1 : 1;
+      return 1;
 
     if( rhs == null )
-      return !reverse ? 1 : -1;
+      return -1;
 
-    return reverse ? rhs.compareTo( lhs ) : lhs.compareTo( rhs );
-    }
-
-  @Override
-  public int hashCode( Long value )
-    {
-    if( value == null )
-      return 0;
-    return value.hashCode();
+    return rhs.compareTo( lhs );
     }
   }
