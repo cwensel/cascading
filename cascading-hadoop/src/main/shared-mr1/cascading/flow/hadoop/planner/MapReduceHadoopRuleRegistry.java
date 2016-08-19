@@ -116,6 +116,7 @@ public class MapReduceHadoopRuleRegistry extends RuleRegistry
 
     // enable when GraphFinder supports captured edges
 //    addRule( new RemoveStreamedBranchTransformer() );
-
+    // disabled by default
+    //  addRule( new BalanceHashJoinDistCacheTransformer() );
     }
   }

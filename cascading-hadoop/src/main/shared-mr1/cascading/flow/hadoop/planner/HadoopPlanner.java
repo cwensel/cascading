@@ -27,9 +27,11 @@ import java.util.Set;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.HadoopFlow;
 import cascading.flow.hadoop.HadoopFlowStep;
+import cascading.flow.hadoop.planner.rule.transformer.BalanceHashJoinDistCacheTransformer;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStepFactory;
 import cascading.flow.planner.FlowPlanner;
@@ -42,6 +44,7 @@ import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.property.AppProps;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.DistCacheTap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
@@ -182,6 +185,9 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     super.configRuleRegistryDefaults( ruleRegistry );
 
     ruleRegistry.addDefaultElementFactory( IntermediateTapElementFactory.TEMP_TAP, new TempTapElementFactory() );
+
+    // disabled by default
+    // ruleRegistry.addDefaultElementFactory( BalanceHashJoinDistCacheTransformer.DIST_CACHE_TAP, new DistCacheTapElementFactory());
     }
 
   protected void checkPlatform( Configuration conf )
@@ -224,5 +230,19 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     {
     // must give Taps unique names
     return new TempHfs( defaultJobConf, Util.makePath( prefix, name ), intermediateSchemeClass, prefix == null );
+    }
+
+    public class DistCacheTapElementFactory extends IntermediateTapElementFactory {
+      transient private Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+      @Override
+      public FlowElement create(ElementGraph graph, FlowElement flowElement) {
+        if (flowElement instanceof Hfs) {
+          LOG.info("Wrapping flowElement {} in a DistCacheTap", flowElement);
+          return new DistCacheTap( (Hfs)flowElement);
+        } else {
+          throw new IllegalStateException("FlowElement of type Hfs expected, but found: " + flowElement);
+        }
+      }
     }
   }
