@@ -38,6 +38,26 @@ public class PropertyUtil
     return getProperty( properties, property, (String) null );
     }
 
+  public static boolean getBooleanProperty( Map<Object, Object> properties, String property, boolean defaultValue )
+    {
+    return getBooleanProperty( System.getProperties(), properties, property, defaultValue );
+    }
+
+  public static boolean getBooleanProperty( Properties defaultProperties, Map<Object, Object> properties, String property, boolean defaultValue )
+    {
+    String result;
+
+    if( defaultProperties == null )
+      result = getProperty( properties, property );
+    else
+      result = getProperty( properties, property, defaultProperties.getProperty( property ) );
+
+    if( isEmpty( result ) )
+      return defaultValue;
+
+    return Boolean.parseBoolean( result );
+    }
+
   public static int getIntProperty( Map<Object, Object> properties, String property, int defaultValue )
     {
     return getIntProperty( System.getProperties(), properties, property, defaultValue );
@@ -88,7 +108,7 @@ public class PropertyUtil
 
   public static String getProperty( final Map<Object, Object> properties, ScopedElement flowElement, String property )
     {
-    if( flowElement.hasConfigDef() )
+    if( flowElement != null && flowElement.hasConfigDef() )
       return PropertyUtil.getProperty( properties, flowElement.getConfigDef(), property );
 
     return PropertyUtil.getProperty( properties, property );

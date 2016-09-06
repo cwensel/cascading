@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import cascading.PlatformTestCase;
 import cascading.cascade.Cascade;
@@ -69,6 +70,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.flow.FlowConnectorProps.flowConnectorProps;
 import static data.InputData.*;
 
 /**
@@ -521,7 +523,11 @@ public class HadoopTapPlatformTest extends PlatformTestCase implements Serializa
 
     Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
-    Map<Object, Object> properties = getProperties();
+    // by default the source is decorated with a DistCacheTap which uses a Lfs tap to read the local file, so it is safe
+    // to call #sourceConfInit a second time client side as we are leveraging a new tap instance
+    Properties properties = flowConnectorProps()
+      .setEnableDecorateAccumulatedTap( false )
+      .buildProperties( getProperties() );
 
     Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
 

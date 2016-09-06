@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.2.0 [unreleased]
 
+  Added new planner rule for Apache Hadoop MapReduce and Apache Tez that will decorate any Tap instances on the
+  accumulated side of a c.p.HashJoin with a platform specific version of the c.t.h.DistCacheTap.
+
   Added c.u.NullSafeComparator to replace all uses of j.u.Collections#reverseOrder() in tuple sorting/grouping
   code paths.
 

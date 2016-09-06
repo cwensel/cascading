@@ -380,6 +380,6 @@ public class DecoratorTap<MetaInfo, Config, Input, Output> extends Tap<Config, I
   @Override
   public String toString()
     {
-    return original.toString();
+    return getClass().getSimpleName() + "<" + original.toString() + ">";
     }
   }

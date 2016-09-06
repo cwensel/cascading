@@ -28,4 +28,5 @@ import cascading.flow.planner.iso.transformer.ElementFactory;
 public abstract class IntermediateTapElementFactory implements ElementFactory
   {
   public static final String TEMP_TAP = "cascading.registry.tap.intermediate";
+  public static final String ACCUMULATED_TAP = "cascading.registry.tap.accumulated";
   }

@@ -20,6 +20,7 @@
 
 package cascading.flow.tez.planner;
 
+import cascading.flow.hadoop.planner.rule.transformer.ReplaceAccumulateTapWithDistCacheTransformer;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.assertion.BufferAfterEveryAssert;
 import cascading.flow.planner.rule.assertion.EveryAfterBufferAssert;
@@ -90,6 +91,7 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new RemoveNoOpPipeTransformer() );
     addRule( new ApplyAssertionLevelTransformer() );
     addRule( new ApplyDebugLevelTransformer() );
+    addRule( new ReplaceAccumulateTapWithDistCacheTransformer() );
 
     // PostResolve
 

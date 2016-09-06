@@ -30,6 +30,7 @@ import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelin
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedSelfJoinSourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.TapGroupTapStepPartitioner;
 import cascading.flow.hadoop.planner.rule.transformer.RemoveMalformedHashJoinPipelineTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.ReplaceAccumulateTapWithDistCacheTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceCheckpointTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupBlockingHashJoinTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupGroupTransformer;
@@ -90,6 +91,7 @@ public class MapReduceHadoopRuleRegistry extends RuleRegistry
     addRule( new RemoveNoOpPipeTransformer() );
     addRule( new ApplyAssertionLevelTransformer() );
     addRule( new ApplyDebugLevelTransformer() );
+    addRule( new ReplaceAccumulateTapWithDistCacheTransformer() );
 
     // PostResolve
 //    addRule( new CombineAdjacentTapTransformer() );

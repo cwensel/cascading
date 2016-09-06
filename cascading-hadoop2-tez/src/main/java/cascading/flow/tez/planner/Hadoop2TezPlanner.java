@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
@@ -45,7 +46,9 @@ import cascading.flow.tez.Hadoop2TezFlowStep;
 import cascading.flow.tez.util.TezUtil;
 import cascading.pipe.Boundary;
 import cascading.property.AppProps;
+import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.DistCacheTap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
@@ -160,6 +163,9 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
 
     ruleRegistry.addDefaultElementFactory( IntermediateTapElementFactory.TEMP_TAP, new TempTapElementFactory() );
     ruleRegistry.addDefaultElementFactory( BoundaryElementFactory.BOUNDARY_PIPE, new IntermediateBoundaryElementFactory() );
+
+    if( PropertyUtil.getBooleanProperty( getDefaultProperties(), FlowConnectorProps.ENABLE_DECORATE_ACCUMULATED_TAP, true ) )
+      ruleRegistry.addDefaultElementFactory( IntermediateTapElementFactory.ACCUMULATED_TAP, new TempTapElementFactory( DistCacheTap.class.getName() ) );
     }
 
   @Override
@@ -172,13 +178,13 @@ public class Hadoop2TezPlanner extends FlowPlanner<Hadoop2TezFlow, TezConfigurat
   public FlowStepFactory<TezConfiguration> getFlowStepFactory()
     {
     return new BaseFlowStepFactory<TezConfiguration>( getFlowNodeFactory() )
-    {
-    @Override
-    public FlowStep<TezConfiguration> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
       {
-      return new Hadoop2TezFlowStep( stepElementGraph, flowNodeGraph );
-      }
-    };
+      @Override
+      public FlowStep<TezConfiguration> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+        {
+        return new Hadoop2TezFlowStep( stepElementGraph, flowNodeGraph );
+        }
+      };
     }
 
   public URI getDefaultURIScheme( Tap tap )

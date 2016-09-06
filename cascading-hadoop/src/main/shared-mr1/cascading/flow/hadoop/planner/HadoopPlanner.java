@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
 import cascading.flow.hadoop.HadoopFlow;
@@ -41,7 +42,9 @@ import cascading.flow.planner.process.FlowStepFactory;
 import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.property.AppProps;
+import cascading.property.PropertyUtil;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.DistCacheTap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.util.TempHfs;
 import cascading.util.Util;
@@ -182,6 +185,9 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
     super.configRuleRegistryDefaults( ruleRegistry );
 
     ruleRegistry.addDefaultElementFactory( IntermediateTapElementFactory.TEMP_TAP, new TempTapElementFactory() );
+
+    if( PropertyUtil.getBooleanProperty( getDefaultProperties(), FlowConnectorProps.ENABLE_DECORATE_ACCUMULATED_TAP, true ) )
+      ruleRegistry.addDefaultElementFactory( IntermediateTapElementFactory.ACCUMULATED_TAP, new TempTapElementFactory( DistCacheTap.class.getName() ) );
     }
 
   protected void checkPlatform( Configuration conf )
@@ -200,13 +206,13 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   public FlowStepFactory<JobConf> getFlowStepFactory()
     {
     return new BaseFlowStepFactory<JobConf>( getFlowNodeFactory() )
-    {
-    @Override
-    public FlowStep<JobConf> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
       {
-      return new HadoopFlowStep( stepElementGraph, flowNodeGraph );
-      }
-    };
+      @Override
+      public FlowStep<JobConf> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+        {
+        return new HadoopFlowStep( stepElementGraph, flowNodeGraph );
+        }
+      };
     }
 
   public URI getDefaultURIScheme( Tap tap )

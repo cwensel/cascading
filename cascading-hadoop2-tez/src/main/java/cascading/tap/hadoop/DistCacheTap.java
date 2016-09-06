@@ -32,16 +32,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class DistCacheTap extends BaseDistCacheTap
   {
-  private static final Logger LOG = LoggerFactory.getLogger( DistCacheTap.class );
-
   public static final String CASCADING_LOCAL_RESOURCES = "cascading.resources.local.";
   public static final String CASCADING_REMOTE_RESOURCES = "cascading.resources.remote.";
 

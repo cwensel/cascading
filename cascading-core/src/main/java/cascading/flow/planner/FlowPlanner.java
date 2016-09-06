@@ -36,12 +36,10 @@ import cascading.flow.FlowConnector;
 import cascading.flow.FlowConnectorProps;
 import cascading.flow.FlowDef;
 import cascading.flow.FlowElement;
-import cascading.flow.FlowStep;
 import cascading.flow.Flows;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.process.FlowNodeFactory;
-import cascading.flow.planner.process.FlowNodeGraph;
 import cascading.flow.planner.process.FlowStepFactory;
 import cascading.flow.planner.process.FlowStepGraph;
 import cascading.flow.planner.rule.ProcessLevel;
@@ -752,21 +750,38 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   public class TempTapElementFactory extends IntermediateTapElementFactory
     {
+    private String defaultDecoratorClassName;
+
+    public TempTapElementFactory()
+      {
+      }
+
+    public TempTapElementFactory( String defaultDecoratorClassName )
+      {
+      this.defaultDecoratorClassName = defaultDecoratorClassName;
+      }
+
     @Override
     public FlowElement create( ElementGraph graph, FlowElement flowElement )
       {
-      return makeTempTap( (FlowElementGraph) graph, (Pipe) flowElement );
+      if( flowElement instanceof Pipe )
+        return makeTempTap( (FlowElementGraph) graph, (Pipe) flowElement, defaultDecoratorClassName );
+
+      if( flowElement instanceof Tap )
+        return decorateTap( null, (Tap) flowElement, FlowConnectorProps.TEMPORARY_TAP_DECORATOR_CLASS, defaultDecoratorClassName );
+
+      throw new IllegalStateException( "unknown flow element type: " + flowElement );
       }
     }
 
-  private Tap makeTempTap( FlowElementGraph graph, Pipe pipe )
+  private Tap makeTempTap( FlowElementGraph graph, Pipe pipe, String defaultDecoratorClassName )
     {
     Tap checkpointTap = graph.getCheckpointsMap().get( pipe.getName() );
 
     if( checkpointTap != null )
       {
       LOG.info( "found checkpoint: {}, using tap: {}", pipe.getName(), checkpointTap );
-      checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.CHECKPOINT_TAP_DECORATOR_CLASS );
+      checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.CHECKPOINT_TAP_DECORATOR_CLASS, null );
       }
 
     if( checkpointTap == null )
@@ -775,7 +790,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
       if( pipe instanceof Checkpoint )
         {
         checkpointTap = makeTempTap( checkpointTapRootPath, pipe.getName() );
-        checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.CHECKPOINT_TAP_DECORATOR_CLASS );
+        checkpointTap = decorateTap( pipe, checkpointTap, FlowConnectorProps.CHECKPOINT_TAP_DECORATOR_CLASS, null );
         // mark as an anonymous checkpoint
         checkpointTap.getConfigDef().setProperty( ConfigDef.Mode.DEFAULT, "cascading.checkpoint", "true" );
         }
@@ -785,17 +800,20 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
         }
       }
 
-    return decorateTap( pipe, checkpointTap, FlowConnectorProps.TEMPORARY_TAP_DECORATOR_CLASS );
+    return decorateTap( pipe, checkpointTap, FlowConnectorProps.TEMPORARY_TAP_DECORATOR_CLASS, defaultDecoratorClassName );
     }
 
-  private Tap decorateTap( Pipe pipe, Tap tempTap, String decoratorClass )
+  private Tap decorateTap( Pipe pipe, Tap tempTap, String decoratorClassProp, String defaultDecoratorClassName )
     {
-    String decoratorClassName = PropertyUtil.getProperty( defaultProperties, pipe, decoratorClass );
+    String decoratorClassName = PropertyUtil.getProperty( defaultProperties, pipe, decoratorClassProp );
+
+    if( Util.isEmpty( decoratorClassName ) )
+      decoratorClassName = defaultDecoratorClassName;
 
     if( Util.isEmpty( decoratorClassName ) )
       return tempTap;
 
-    LOG.info( "found decorator: {}, wrapping tap: {}", decoratorClass, tempTap );
+    LOG.info( "found decorator property: {}, with value: {}, wrapping tap: {}", decoratorClassProp, decoratorClassName, tempTap );
 
     tempTap = Util.newInstance( decoratorClassName, tempTap );
 

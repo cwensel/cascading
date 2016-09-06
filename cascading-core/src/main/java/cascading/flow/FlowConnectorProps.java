@@ -44,12 +44,14 @@ public class FlowConnectorProps extends Props
   public static final String INTERMEDIATE_SCHEME_CLASS = "cascading.flowconnector.intermediateschemeclass";
   public static final String TEMPORARY_TAP_DECORATOR_CLASS = "cascading.flowconnector.temporary_tap.decorator.classname";
   public static final String CHECKPOINT_TAP_DECORATOR_CLASS = "cascading.flowconnector.checkpoint_tap.decorator.classname";
+  public static final String ENABLE_DECORATE_ACCUMULATED_TAP = "cascading.flowconnector.accumulated_tap.decorator.enable";
 
   AssertionLevel assertionLevel;
   DebugLevel debugLevel;
   String intermediateSchemeClassName;
   String temporaryTapDecoratorClassName;
   String checkpointTapDecoratorClassName;
+  Boolean enableDecorateAccumulatedTap;
 
   /**
    * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
@@ -273,6 +275,30 @@ public class FlowConnectorProps extends Props
     return this;
     }
 
+  public Boolean getEnableDecorateAccumulatedTap()
+    {
+    return enableDecorateAccumulatedTap;
+    }
+
+  /**
+   * Method setEnableDecorateAccumulatedTap, when set to {@code false}, disables the use of a DistCacheTap decorator
+   * implementation during planning. It is enabled by default.
+   * <p>
+   * When enabled, any {@link cascading.tap.Tap} instance declared or planned via the planner (intermediate Tap or binding
+   * a {@link cascading.pipe.Checkpoint} pipe to a tap -- when applicable) will be wrapped by a platform specific
+   * implementation of a Tap that allows for data reads from the platform provided distributed caches or similiar
+   * service, if any.
+   *
+   * @param enableDecorateAccumulatedTap the enableDecorateAccumulatedTap of type boolean
+   * @return FlowConnectorProps
+   */
+  public FlowConnectorProps setEnableDecorateAccumulatedTap( boolean enableDecorateAccumulatedTap )
+    {
+    this.enableDecorateAccumulatedTap = enableDecorateAccumulatedTap;
+
+    return this;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -281,5 +307,8 @@ public class FlowConnectorProps extends Props
     setIntermediateSchemeClass( properties, intermediateSchemeClassName );
     setTemporaryTapDecoratorClass( properties, temporaryTapDecoratorClassName );
     setCheckpointTapDecoratorClass( properties, checkpointTapDecoratorClassName );
+
+    if( enableDecorateAccumulatedTap != null )
+      properties.setProperty( ENABLE_DECORATE_ACCUMULATED_TAP, enableDecorateAccumulatedTap.toString() );
     }
   }
