@@ -2,7 +2,7 @@
 
 Thanks for using Cascading.
 
-## Cascading 3.1
+## Cascading 3.2
 
 Cascading 3 includes a few major changes and additions from prior major releases:
 
