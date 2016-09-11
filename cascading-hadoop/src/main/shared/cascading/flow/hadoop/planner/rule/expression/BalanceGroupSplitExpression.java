@@ -26,7 +26,7 @@ import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.expressiongraph.SyncPipeExpressionGraph;
-import cascading.pipe.Boundary;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.Group;
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
@@ -48,8 +48,8 @@ public class BalanceGroupSplitExpression extends RuleExpression
 
       // in order to capture out degree in sub-graph, we need to capture at least two successors
       new ExpressionGraph()
-        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ) ) )
-        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ) ) ),
+        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ), new FlowElementExpression( Checkpoint.class ) ) )
+        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ), new FlowElementExpression( Checkpoint.class ) ) ),
 
       // sub-graph to match has out degree captured above
       new ExpressionGraph()
