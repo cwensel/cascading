@@ -46,6 +46,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.HashJoin;
 import cascading.tap.Tap;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Reporter;
 
 /**
  *
@@ -85,7 +86,7 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
     // accumulated paths
     for( Object source : tributaries )
       {
-      HadoopFlowProcess hadoopProcess = (HadoopFlowProcess) flowProcess;
+      final HadoopFlowProcess hadoopProcess = (HadoopFlowProcess) flowProcess;
       JobConf conf = hadoopProcess.getJobConf();
 
       // allows client side config to be used cluster side
@@ -95,7 +96,16 @@ public class HadoopMapStreamGraph extends NodeStreamGraph
         throw new IllegalStateException( "accumulated source conf property missing for: " + ( (Tap) source ).getIdentifier() );
 
       conf = getSourceConf( hadoopProcess, conf, property );
-      flowProcess = new HadoopFlowProcess( hadoopProcess, conf );
+
+      // the reporter isn't provided until after the #run method is called
+      flowProcess = new HadoopFlowProcess( hadoopProcess, conf )
+        {
+        @Override
+        public Reporter getReporter()
+          {
+          return hadoopProcess.getReporter();
+          }
+        };
 
       handleHead( (Tap) source, flowProcess );
       }

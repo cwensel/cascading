@@ -20,6 +20,7 @@
 
 package cascading.stats;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import cascading.PlatformTestCase;
@@ -29,17 +30,20 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowRuntimeProps;
 import cascading.flow.SliceCounters;
+import cascading.operation.Function;
 import cascading.operation.regex.RegexParser;
+import cascading.operation.regex.RegexSplitter;
 import cascading.operation.state.Counter;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
+import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import org.junit.Test;
 
-import static data.InputData.inputFileApache;
+import static data.InputData.*;
 
 /**
  *
@@ -122,5 +126,52 @@ public class CascadingStatsPlatformTest extends PlatformTestCase
     assertEquals( 10, flowStats2.getCounterValue( TestEnum.SECOND ) );
 
     cascadeStats.captureDetail();
+    }
+
+  @Test
+  public void testStatsOnJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "join" ), SinkMode.REPLACE );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
+    pipeLower = new Each( pipeLower, new Counter( TestEnum.FIRST ) );
+
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+
+    pipeUpper = new Each( pipeUpper, new Counter( TestEnum.SECOND ) );
+
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Map<Object, Object> properties = getProperties();
+
+    Flow flow = getPlatform().getFlowConnector( properties ).connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 5 );
+
+    FlowStats flowStats = flow.getFlowStats();
+
+    assertNotNull( flowStats.getID() );
+
+    long firstCounter = flowStats.getCounterValue( TestEnum.FIRST );
+    long secondCounter = flowStats.getCounterValue( TestEnum.SECOND );
+
+    assertEquals( 5, firstCounter );
+    assertNotSame( 0, secondCounter ); // verifies accumulated side counters fired
+    assertEquals( firstCounter + secondCounter, flowStats.getCounterValue( SliceCounters.Tuples_Read ) );
     }
   }

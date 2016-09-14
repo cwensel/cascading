@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.1.2 [unreleased]
 
+  Fixed issue on MapReduce that prevented counters from registering if incremented on a pipe assembly branch feeding the
+  accumulated side of a c.p.HashJoin.
+
 3.1.1
 
   Fixed issue with the MapReduce planner where a c.p.Checkpoint after a c.p.GroupBy merge would fail the planner.
