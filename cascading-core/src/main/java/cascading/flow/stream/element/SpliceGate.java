@@ -139,4 +139,37 @@ public abstract class SpliceGate<Incoming, Outgoing> extends Gate<Incoming, Outg
     {
     return incomingScopes;
     }
+
+  @Override
+  public final boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof SpliceGate ) )
+      return false;
+
+    SpliceGate that = (SpliceGate) object;
+
+    if( splice != null ? splice != that.splice : that.splice != null )
+      return false;
+
+    return true;
+    }
+
+  @Override
+  public final int hashCode()
+    {
+    return splice != null ? System.identityHashCode( splice ) : 0;
+    }
+
+  @Override
+  public String toString()
+    {
+    final StringBuilder sb = new StringBuilder();
+    sb.append( getClass().getSimpleName() ).append( "{" );
+    sb.append( "splice=" ).append( splice );
+    sb.append( ", role=" ).append( role );
+    sb.append( '}' );
+    return sb.toString();
+    }
   }

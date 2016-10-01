@@ -401,38 +401,6 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
     return "";
     }
 
-  @Override
-  public final boolean equals( Object object )
-    {
-    if( this == object )
-      return true;
-    if( !( object instanceof GroupingSpliceGate ) )
-      return false;
-
-    GroupingSpliceGate groupingSpliceGate = (GroupingSpliceGate) object;
-
-    if( splice != null ? splice != groupingSpliceGate.splice : groupingSpliceGate.splice != null )
-      return false;
-
-    return true;
-    }
-
-  @Override
-  public final int hashCode()
-    {
-    return splice != null ? System.identityHashCode( splice ) : 0;
-    }
-
-  @Override
-  public String toString()
-    {
-    final StringBuilder sb = new StringBuilder( "SpliceGate{" );
-    sb.append( "splice=" ).append( splice );
-    sb.append( ", role=" ).append( role );
-    sb.append( '}' );
-    return sb.toString();
-    }
-
   protected class DelegatedTuple extends Tuple
     {
     public DelegatedTuple( Tuple wrapped )
