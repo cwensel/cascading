@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,16 +22,13 @@
 package cascading.flow.stream.element;
 
 import java.util.Comparator;
-import java.util.Map;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProps;
 import cascading.flow.planner.Scope;
-import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.Grouping;
 import cascading.flow.stream.duct.Window;
 import cascading.flow.stream.graph.IORole;
-import cascading.flow.stream.graph.StreamGraph;
 import cascading.flow.stream.util.SparseTupleComparator;
 import cascading.pipe.Splice;
 import cascading.tuple.Fields;
@@ -58,10 +56,6 @@ import static cascading.tuple.util.TupleViews.*;
 public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping<TupleEntry, TupleEntryIterator>> implements Window
   {
   private static final Logger LOG = LoggerFactory.getLogger( GroupingSpliceGate.class );
-
-  // incoming ducts have a unique ordinal into the splice, so we cannot store the ordinal directly on the
-  // previous duct
-  protected Map<Duct, Integer> ordinalMap;
 
   protected Fields[] keyFields;
   protected Fields[] sortFields;
@@ -95,19 +89,6 @@ public abstract class GroupingSpliceGate extends SpliceGate<TupleEntry, Grouping
   protected GroupingSpliceGate( FlowProcess flowProcess, Splice splice, IORole role )
     {
     super( flowProcess, splice, role );
-    }
-
-  @Override
-  public void bind( StreamGraph streamGraph )
-    {
-    super.bind( streamGraph );
-
-    setOrdinalMap( streamGraph );
-    }
-
-  protected synchronized void setOrdinalMap( StreamGraph streamGraph )
-    {
-    ordinalMap = streamGraph.getOrdinalMap( this );
     }
 
   protected TupleBuilder createNarrowBuilder( final Fields incomingFields, final Fields narrowFields )

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,6 +23,7 @@ package cascading.flow.tez.planner;
 
 import cascading.flow.hadoop.planner.rule.transformer.ReplaceAccumulateTapWithDistCacheTransformer;
 import cascading.flow.planner.rule.RuleRegistry;
+import cascading.flow.planner.rule.annotator.LogicalMergeAnnotator;
 import cascading.flow.planner.rule.assertion.BufferAfterEveryAssert;
 import cascading.flow.planner.rule.assertion.EveryAfterBufferAssert;
 import cascading.flow.planner.rule.assertion.LoneGroupAssert;
@@ -91,6 +93,7 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
     addRule( new RemoveNoOpPipeTransformer() );
     addRule( new ApplyAssertionLevelTransformer() );
     addRule( new ApplyDebugLevelTransformer() );
+    addRule( new LogicalMergeAnnotator() ); // MergePipesPlatformTest#testSameSourceMergeHashJoin
     addRule( new ReplaceAccumulateTapWithDistCacheTransformer() );
 
     // PostResolve

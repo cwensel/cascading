@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -47,11 +48,14 @@ import cascading.flow.planner.rule.RuleRegistry;
 import cascading.flow.planner.rule.RuleRegistrySet;
 import cascading.flow.planner.rule.RuleResult;
 import cascading.flow.planner.rule.RuleSetExec;
+import cascading.flow.planner.rule.transformer.IntermediatePipeElementFactory;
 import cascading.flow.planner.rule.transformer.IntermediateTapElementFactory;
 import cascading.flow.planner.rule.util.TraceWriter;
 import cascading.operation.AssertionLevel;
 import cascading.operation.DebugLevel;
+import cascading.operation.Identity;
 import cascading.pipe.Checkpoint;
+import cascading.pipe.Each;
 import cascading.pipe.OperatorException;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
@@ -219,7 +223,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   public void configRuleRegistryDefaults( RuleRegistry ruleRegistry )
     {
-
+    ruleRegistry.addDefaultElementFactory( IntermediatePipeElementFactory.IDENTITY, new IdentityElementFactgory() );
     }
 
   protected Pipe[] resolveTails( FlowDef flowDef, F flow )
@@ -745,6 +749,15 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
         message = String.format( "%s: [%s]", message, exception.getMessage() );
 
       return new PlannerException( message, exception, flowElementGraph );
+      }
+    }
+
+  public class IdentityElementFactgory extends IntermediatePipeElementFactory
+    {
+    @Override
+    public FlowElement create( ElementGraph graph, FlowElement flowElement )
+      {
+      return new Each( (Pipe) flowElement, Fields.ALL, new Identity( Fields.ALL ), Fields.RESULTS );
       }
     }
 

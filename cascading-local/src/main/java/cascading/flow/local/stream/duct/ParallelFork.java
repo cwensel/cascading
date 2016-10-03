@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -82,11 +83,13 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
 
   static final class ReceiveMessage extends Message
     {
+    final int ordinal;
     final TupleEntry tuple;
 
-    public ReceiveMessage( Duct previous, TupleEntry tuple )
+    public ReceiveMessage( Duct previous, int ordinal, TupleEntry tuple )
       {
       super( previous );
+      this.ordinal = ordinal;
 
       // we make a new copy right here, to avoid cross-thread trouble when upstream changes the tuple
       this.tuple = new TupleEntry( tuple );
@@ -94,7 +97,7 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
 
     public void passOn( Duct next )
       {
-      next.receive( previous, tuple );
+      next.receive( previous, ordinal, tuple );
       }
 
     public boolean isTermination()
@@ -166,10 +169,9 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
               {
               Message message = queue.take();
               message.passOn( anAllNext );
+
               if( message.isTermination() )
-                {
                 return null;
-                }
               }
             }
           catch( Throwable throwable )
@@ -196,9 +198,7 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
   private void broadcastMessage( Message message )
     {
     for( LinkedBlockingQueue<Message> queue : buffers )
-      {
       queue.offer( message );
-      }
     }
 
   private WeakReference<Duct> started = null;
@@ -215,10 +215,9 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
         LOG.error( "ParallelFork already started! former previous={}, new previous={}", started.get(), previous );
         return;
         }
+
       if( completed != null )
-        {
         throw new IllegalStateException( "cannot start an already completed ParallelFork" );
-        }
 
       started = new WeakReference<>( previous );
       }
@@ -226,10 +225,7 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
     try
       {
       for( Callable<Throwable> action : actions )
-        {
-        Future<Throwable> future = executor.submit( action );
-        futures.add( future );
-        }
+        futures.add( executor.submit( action ) );
 
       CountDownLatch startLatch = new CountDownLatch( allNext.length );
       broadcastMessage( new StartMessage( previous, startLatch ) );
@@ -243,10 +239,10 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incoming )
+  public void receive( Duct previous, int ordinal, TupleEntry incoming )
     {
     // incoming is copied once for each downstream pipe, within the current thread.
-    broadcastMessage( new ReceiveMessage( previous, incoming ) );
+    broadcastMessage( new ReceiveMessage( previous, ordinal, incoming ) );
     }
 
   private WeakReference<Duct> completed = null; /* records origin duct */
@@ -261,6 +257,7 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
         LOG.error( "ParallelFork already complete! former previous={} new previous={}", completed.get(), previous );
         return;
         }
+
       completed = new WeakReference<>( previous );
       }
 
@@ -286,9 +283,7 @@ public class ParallelFork<Outgoing> extends Fork<TupleEntry, Outgoing>
           }
 
         if( throwable != null )
-          {
           throw new RuntimeException( throwable );
-          }
         }
       }
     finally

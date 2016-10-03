@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -70,7 +71,6 @@ import cascading.util.jgrapht.EdgeNameProvider;
 import cascading.util.jgrapht.IntegerNameProvider;
 import cascading.util.jgrapht.VertexNameProvider;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -642,7 +642,7 @@ public class Util
     return String.format( "%s...", string.subSequence( 0, maxSize - 3 ) );
     }
 
-  public static void printGraph( String filename, SimpleDirectedGraph graph )
+  public static void printGraph( String filename, DirectedGraph graph )
     {
     try
       {
@@ -665,7 +665,7 @@ public class Util
     }
 
   @SuppressWarnings({"unchecked"})
-  private static void printGraph( Writer writer, SimpleDirectedGraph graph )
+  private static void printGraph( Writer writer, DirectedGraph graph )
     {
     DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
       {

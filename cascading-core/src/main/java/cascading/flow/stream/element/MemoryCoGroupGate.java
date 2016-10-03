@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -55,17 +56,15 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
-    int pos = ordinalMap.get( previous );
-
     Tuple valuesTuple = incomingEntry.getTupleCopy();
-    Tuple groupTuple = keyBuilder[ pos ].makeResult( valuesTuple, null ); // view on valuesTuple
+    Tuple groupTuple = keyBuilder[ ordinal ].makeResult( valuesTuple, null ); // view on valuesTuple
 
     groupTuple = getDelegatedTuple( groupTuple ); // wrap so hasher/comparator is honored
 
     keys.add( groupTuple );
-    keyValues[ pos ].get( groupTuple ).add( valuesTuple );
+    keyValues[ ordinal ].get( groupTuple ).add( valuesTuple );
     }
 
   @Override
@@ -142,6 +141,6 @@ public class MemoryCoGroupGate extends MemorySpliceGate
     // create Closure type here
     tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
 
-    next.receive( this, grouping );
+    next.receive( this, 0, grouping );
     }
   }

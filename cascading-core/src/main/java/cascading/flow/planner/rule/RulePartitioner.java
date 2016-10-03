@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -88,12 +89,12 @@ public abstract class RulePartitioner implements Rule
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
     {
-    Partitions partition = getGraphPartitioner().partition( plannerContext, elementGraph, excludes );
+    Partitions partitions = getGraphPartitioner().partition( plannerContext, elementGraph, excludes );
 
-    if( partition != null )
-      partition.setRulePartitioner( this );
+    if( partitions != null )
+      partitions.setRulePartitioner( this );
 
-    return partition;
+    return partitions;
     }
 
   @Override

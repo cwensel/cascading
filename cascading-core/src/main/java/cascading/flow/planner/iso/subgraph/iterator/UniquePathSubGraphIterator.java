@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -20,6 +21,7 @@
 
 package cascading.flow.planner.iso.subgraph.iterator;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,14 +49,17 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
   {
   SubGraphIterator subGraphIterator;
   boolean longestFirst;
+  boolean multiEdge;
+
   ElementGraph current = null;
   Iterator<GraphPath<FlowElement, Scope>> pathsIterator;
   Set<Pair<FlowElement, FlowElement>> pairs = new HashSet<>();
 
-  public UniquePathSubGraphIterator( SubGraphIterator subGraphIterator, boolean longestFirst )
+  public UniquePathSubGraphIterator( SubGraphIterator subGraphIterator, boolean longestFirst, boolean multiEdge )
     {
     this.subGraphIterator = subGraphIterator;
     this.longestFirst = longestFirst;
+    this.multiEdge = multiEdge;
     }
 
   public Set<Pair<FlowElement, FlowElement>> getPairs()
@@ -139,7 +144,10 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
 
     GraphPath<FlowElement, Scope> path = pathsIterator.next();
     List<FlowElement> vertexList = getPathVertexList( path );
-    List<Scope> edgeList = path.getEdgeList();
+    Collection<Scope> edgeList = path.getEdgeList();
+
+    if( multiEdge )
+      edgeList = getAllMultiEdgesBetween( edgeList, current );
 
     return new ElementSubGraph( current, vertexList, edgeList );
     }

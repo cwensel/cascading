@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -62,7 +63,7 @@ public class ValueAssertionEachStage extends EachStage
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
     argumentsEntry.setTuple( argumentsBuilder.makeResult( incomingEntry.getTuple(), null ) );
 
@@ -70,7 +71,7 @@ public class ValueAssertionEachStage extends EachStage
       {
       valueAssertion.doAssert( flowProcess, operationCall );
 
-      next.receive( this, incomingEntry );
+      next.receive( this, 0, incomingEntry );
       }
     catch( CascadingException exception )
       {

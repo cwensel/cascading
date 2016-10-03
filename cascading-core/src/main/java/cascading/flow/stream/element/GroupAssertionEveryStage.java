@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -95,7 +96,7 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry tupleEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry tupleEntry )
     {
     try
       {
@@ -113,7 +114,7 @@ public class GroupAssertionEveryStage extends EveryStage<TupleEntry> implements 
       handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
 
-    next.receive( this, tupleEntry );
+    next.receive( this, 0, tupleEntry );
     }
 
   @Override

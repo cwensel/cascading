@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,6 +24,7 @@ package cascading;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -282,6 +284,39 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
     assertTrue( tuples.contains( new Tuple( "4", "D" ) ) );
     assertTrue( tuples.contains( new Tuple( "5", "E" ) ) );
     assertTrue( tuples.contains( new Tuple( "6", "c" ) ) );
+    }
+
+  @Test
+  public void testSameSourceMerge() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap sourceLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceLower );
+
+    // using null pos so all fields are written
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath(), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Pipe( "lower" );
+    Pipe pipeUpper = new Pipe( "upper" );
+
+    Pipe splice = new GroupBy( "merge", Pipe.pipes( pipeLower, pipeUpper ), new Fields( "num" ), null, false );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+
+    Collection results = getSinkAsList( flow );
+
+    assertEquals( "missing value", 2, Collections.frequency( results, new Tuple( "1\ta" ) ) );
+    assertEquals( "missing value", 2, Collections.frequency( results, new Tuple( "2\tb" ) ) );
+    assertEquals( "missing value", 2, Collections.frequency( results, new Tuple( "3\tc" ) ) );
     }
 
   /**

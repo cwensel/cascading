@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -38,11 +39,12 @@ public class SyncMergeStage extends MergeStage
    * synchronized, as by default, each source gets its turn, no concurrent threads. Except in local mode
    *
    * @param previous
+   * @param ordinal
    * @param tupleEntry
    */
   @Override
-  public synchronized void receive( Duct previous, TupleEntry tupleEntry )
+  public synchronized void receive( Duct previous, int ordinal, TupleEntry tupleEntry )
     {
-    super.receive( previous, tupleEntry );
+    super.receive( previous, ordinal, tupleEntry );
     }
   }

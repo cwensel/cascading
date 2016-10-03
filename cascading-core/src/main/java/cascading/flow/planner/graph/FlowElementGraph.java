@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -46,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class ElementGraph represents the executable FlowElement graph. */
-public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedGraph
+public class FlowElementGraph extends ElementMultiGraph implements AnnotatedGraph
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( FlowElementGraph.class );
@@ -111,7 +112,10 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
     if( annotations != null )
       this.annotations = new EnumMultiMap<>( annotations );
 
-    copyFrom( elementGraph );
+    // prevents multiple edge from head and to tail extents
+    copyFrom( ElementGraphs.asExtentMaskedSubGraph( elementGraph ) );
+
+    bindExtents();
     }
 
   public FlowElementGraph( Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks )
@@ -273,6 +277,12 @@ public class FlowElementGraph extends ElementDirectedGraph implements AnnotatedG
   public void setResolved( boolean resolved )
     {
     this.resolved = resolved;
+    }
+
+  @Override
+  protected boolean allowMultipleExtentEdges()
+    {
+    return false;
     }
 
   /**

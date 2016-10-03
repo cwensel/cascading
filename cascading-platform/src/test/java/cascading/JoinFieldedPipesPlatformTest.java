@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -276,22 +277,22 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
   @Test
   public void testJoinSelf() throws Exception
     {
-    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileLhs );
 
-    Tap sourceLower = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
-    Tap sourceUpper = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLower );
+    Tap sourceLhs = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLhs );
+    Tap sourceRhs = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileLhs );
 
     Map sources = new HashMap();
 
-    sources.put( "lower", sourceLower );
-    sources.put( "upper", sourceUpper );
+    sources.put( "lhs", sourceLhs );
+    sources.put( "rhs", sourceRhs );
 
     Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath( "joinself" ), SinkMode.REPLACE );
 
     Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
 
-    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), splitter );
-    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), splitter );
+    Pipe pipeLower = new Each( new Pipe( "lhs" ), new Fields( "line" ), splitter );
+    Pipe pipeUpper = new Each( new Pipe( "rhs" ), new Fields( "line" ), splitter );
 
     Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
@@ -299,7 +300,38 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
     flow.complete();
 
-    validateLength( flow, 5 );
+    validateLength( flow, 37 );
+
+    List<Tuple> values = getSinkAsList( flow );
+
+    assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
+    assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
+    }
+
+  @Test
+  public void testSameSourceJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+
+    Map sources = new HashMap();
+
+    sources.put( "lhs", source );
+    sources.put( "rhs", source );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath(), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Pipe( "lhs" );
+    Pipe pipeUpper = new Pipe( "rhs" );
+
+    Pipe splice = new HashJoin( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 37 );
 
     List<Tuple> values = getSinkAsList( flow );
 

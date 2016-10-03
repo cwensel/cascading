@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -58,24 +59,24 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
     buffer = every.getBuffer();
 
     outputCollector = new TupleEntryCollector( getOperationDeclaredFields() )
-    {
-    @Override
-    protected void collect( TupleEntry resultEntry ) throws IOException
       {
-      Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), resultEntry.getTuple() );
-
-      outgoingEntry.setTuple( outgoing );
-
-      try
+      @Override
+      protected void collect( TupleEntry resultEntry ) throws IOException
         {
-        next.receive( BufferEveryWindow.this, outgoingEntry );
+        Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), resultEntry.getTuple() );
+
+        outgoingEntry.setTuple( outgoing );
+
+        try
+          {
+          next.receive( BufferEveryWindow.this, 0, outgoingEntry );
+          }
+        finally
+          {
+          Tuples.asModifiable( outgoing );
+          }
         }
-      finally
-        {
-        Tuples.asModifiable( outgoing );
-        }
-      }
-    };
+      };
     }
 
   @Override
@@ -103,7 +104,7 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
     }
 
   @Override
-  public void receive( Duct previous, final Grouping<TupleEntry, TupleEntryIterator> grouping )
+  public void receive( Duct previous, int ordinal, final Grouping<TupleEntry, TupleEntryIterator> grouping )
     {
     try
       {
@@ -140,28 +141,28 @@ public class BufferEveryWindow extends EveryStage<Grouping<TupleEntry, TupleEntr
   private Iterator<TupleEntry> createArgumentsIterator( final Grouping<TupleEntry, TupleEntryIterator> grouping, final TupleEntry tupleEntry, final Tuple valueNulledTuple )
     {
     return new Iterator<TupleEntry>()
-    {
-    public boolean hasNext()
       {
-      boolean hasNext = grouping.joinIterator.hasNext();
+      public boolean hasNext()
+        {
+        boolean hasNext = grouping.joinIterator.hasNext();
 
-      if( !hasNext && !operationCall.isRetainValues() )
-        tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
+        if( !hasNext && !operationCall.isRetainValues() )
+          tupleEntry.setTuple( valueNulledTuple ); // null out footer entries
 
-      return hasNext;
-      }
+        return hasNext;
+        }
 
-    public TupleEntry next()
-      {
-      argumentsEntry.setTuple( argumentsBuilder.makeResult( grouping.joinIterator.next().getTuple(), null ) );
+      public TupleEntry next()
+        {
+        argumentsEntry.setTuple( argumentsBuilder.makeResult( grouping.joinIterator.next().getTuple(), null ) );
 
-      return argumentsEntry;
-      }
+        return argumentsEntry;
+        }
 
-    public void remove()
-      {
-      grouping.joinIterator.remove();
-      }
-    };
+      public void remove()
+        {
+        grouping.joinIterator.remove();
+        }
+      };
     }
   }

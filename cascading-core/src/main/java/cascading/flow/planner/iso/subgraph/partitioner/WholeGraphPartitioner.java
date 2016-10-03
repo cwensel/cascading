@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,9 +27,9 @@ import java.util.Map;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.PlannerContext;
-import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
+import cascading.flow.planner.graph.ElementMultiGraph;
 import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 import cascading.flow.planner.iso.subgraph.Partitions;
@@ -51,7 +52,7 @@ public class WholeGraphPartitioner extends GraphPartitioner
     if( elementGraph.containsVertex( Extent.head ) )
       elementGraph = new ElementMaskSubGraph( elementGraph, Extent.head, Extent.tail );
 
-    annotatedSubGraphs.put( new ElementDirectedGraph( elementGraph ), new EnumMultiMap() );
+    annotatedSubGraphs.put( new ElementMultiGraph( elementGraph ), new EnumMultiMap() );
 
     return new Partitions( this, elementGraph, annotatedSubGraphs );
     }

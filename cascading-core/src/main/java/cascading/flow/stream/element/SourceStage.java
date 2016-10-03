@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -107,7 +108,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
           continue;
           }
 
-        next.receive( this, tupleEntry );
+        next.receive( this, 0, tupleEntry );
         }
 
       next.complete( this );
@@ -144,7 +145,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
     }
 
   @Override
-  public void receive( Duct previous, Void nada )
+  public void receive( Duct previous, int ordinal, Void nada )
     {
     throw new UnsupportedOperationException( "use call() instead" );
     }

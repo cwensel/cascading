@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,11 +26,16 @@ package cascading.flow.stream.duct;
  */
 public class Fork<Incoming, Outgoing> extends Duct<Incoming, Outgoing>
   {
-  protected final Duct[] allNext;
+  protected final Duct[] allNext; // ordinal in array must match ordinal expected downstream
 
   public Fork( Duct[] allNext )
     {
     this.allNext = allNext;
+    }
+
+  public Duct[] getAllNext()
+    {
+    return allNext;
     }
 
   @Override
@@ -47,10 +53,10 @@ public class Fork<Incoming, Outgoing> extends Duct<Incoming, Outgoing>
     }
 
   @Override
-  public void receive( Duct previous, Incoming incoming )
+  public void receive( Duct previous, int ordinal, Incoming incoming )
     {
     for( int i = 0; i < allNext.length; i++ )
-      allNext[ i ].receive( previous, incoming );
+      allNext[ i ].receive( previous, i, incoming );
     }
 
   @Override

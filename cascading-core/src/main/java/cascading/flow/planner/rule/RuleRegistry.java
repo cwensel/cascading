@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -70,6 +71,7 @@ public class RuleRegistry
    */
   public void enableDebugLogging()
     {
+    LogUtil.setLog4jLevel( "cascading.flow.Flow", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.rule", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.transformer", "DEBUG" );
     LogUtil.setLog4jLevel( "cascading.flow.planner.iso.assertion", "DEBUG" );

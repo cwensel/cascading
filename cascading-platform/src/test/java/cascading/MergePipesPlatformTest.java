@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.flow.FlowDef;
 import cascading.operation.Function;
 import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
@@ -657,5 +660,75 @@ public class MergePipesPlatformTest extends PlatformTestCase
 
     assertTrue( "missing value", results.contains( new Tuple( "1\ta" ) ) );
     assertTrue( "missing value", results.contains( new Tuple( "1\tA" ) ) );
+    }
+
+  @Test
+  public void testSameSourceMerge() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs" );
+    lhs = new Pipe( "lhs", lhs ); // rule should catch adjacent pipes
+
+    Pipe rhs = new Pipe( "rhs" );
+
+    Pipe merge = new Merge( "merge", lhs, rhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( lhs, source )
+      .addSource( rhs, source )
+      .addTailSink( merge, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
+  @Test
+  public void testSameSourceMergeHashJoin() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe mergeLhs = new Pipe( "lhs" );
+    Pipe mergeRhs = new Pipe( "rhs" );
+
+    Pipe mergePipe = new Merge( "merge", mergeLhs, mergeRhs );
+
+    mergePipe = new Rename( mergePipe, new Fields( "num", "char" ), new Fields( "merged.num", "merged.char" ) );
+
+    Pipe joinRhs = new Pipe( "join" );
+    joinRhs = new Rename( joinRhs, new Fields( "num", "char" ), new Fields( "rhs.num", "rhs.char" ) );
+
+    Pipe lookupJoin = new HashJoin( mergePipe, new Fields( "merged.num" ), joinRhs, new Fields( "rhs.num" ) );
+
+    Pipe retain = new Retain( lookupJoin, new Fields( "merged.num", "merged.char", "rhs.char" ) );
+
+    Pipe out = new Rename( retain, new Fields( "merged.num", "merged.char", "rhs.char" ), new Fields( "num", "merged", "char" ) );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( mergeLhs, source )
+      .addSource( mergeRhs, source )
+      .addSource( joinRhs, source )
+      .addTailSink( out, sink );
+
+    FlowConnector flowConnector = getPlatform().getFlowConnector();
+
+//    flowConnector.getRuleRegistrySet().setPlannerTimeoutSec( 20 );
+
+    Flow flow = flowConnector.connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
     }
   }

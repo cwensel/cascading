@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -55,6 +56,7 @@ import cascading.pipe.CoGroup;
 import cascading.pipe.Group;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
+import cascading.pipe.Splice;
 import cascading.property.AppProps;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
@@ -262,7 +264,8 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
 
         InputDescriptor inputDescriptor = InputDescriptor.create( inputClassName ).setUserPayload( edgeProperty.getEdgeDestination().getUserPayload() );
 
-        LOG.info( "adding grouped edge between: {} and {}", Util.join( sourceVerticesIDs, "," ), targetVertex.getName() );
+        String type = ( (Splice) flowElement ).isMerge() ? "merged" : "grouped";
+        LOG.info( "adding {} edge between: {} and {}", type, Util.join( sourceVerticesIDs, "," ), targetVertex.getName() );
         dag.addEdge( GroupInputEdge.create( vertexGroup, targetVertex, edgeProperty, inputDescriptor ) );
         }
       else

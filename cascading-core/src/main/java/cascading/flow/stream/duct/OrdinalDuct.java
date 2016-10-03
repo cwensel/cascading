@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,52 +18,36 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import cascading.flow.stream.duct.Duct;
-import cascading.flow.stream.duct.Stage;
-import cascading.flow.stream.graph.StreamGraph;
+package cascading.flow.stream.duct;
 
 /**
  *
  */
-public class TestSinkStage<Incoming> extends Stage<Incoming, Void>
+public class OrdinalDuct<Incoming, Outgoing> extends Duct<Incoming, Outgoing>
   {
-  List<Incoming> results = new ArrayList<Incoming>();
+  int ordinal = 0;
 
-  public TestSinkStage()
+  public OrdinalDuct( Duct next, int ordinal )
     {
+    super( next );
+    this.ordinal = ordinal;
     }
 
-  public List<Incoming> getResults()
-    {
-    return results;
-    }
-
-  @Override
-  public void bind( StreamGraph streamGraph )
-    {
-    // do nothing
-    }
-
-  @Override
-  public void start( Duct previous )
-    {
-    // do nothing
-    }
-
-  @Override
   public void receive( Duct previous, int ordinal, Incoming incoming )
     {
-    results.add( incoming );
+    // override ordinal value
+    next.receive( previous, this.ordinal, (Outgoing) incoming );
     }
 
   @Override
-  public void complete( Duct previous )
+  public String toString()
     {
-    // do nothing
+    final StringBuilder sb = new StringBuilder();
+    sb.append( getClass().getSimpleName() );
+    sb.append( "{ordinal=" ).append( ordinal );
+    sb.append( "{next=" ).append( next );
+    sb.append( '}' );
+    return sb.toString();
     }
+
   }

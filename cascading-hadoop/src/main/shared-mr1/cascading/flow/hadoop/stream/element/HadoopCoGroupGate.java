@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -60,10 +61,8 @@ public class HadoopCoGroupGate extends HadoopGroupGate
     }
 
   @Override
-  protected void wrapGroupingAndCollect( Duct previous, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException
+  protected void wrapGroupingAndCollect( Duct previous, int ordinal, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException
     {
-    Integer ordinal = ordinalMap.get( previous );
-
     keyTuple.setIndex( ordinal );
     keyTuple.setTuple( groupKey );
 

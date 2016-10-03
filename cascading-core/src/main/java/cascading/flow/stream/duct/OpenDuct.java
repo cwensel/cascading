@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,10 +40,10 @@ public class OpenDuct<Incoming, Outgoing> extends Duct<Grouping<Incoming, Iterat
     }
 
   @Override
-  public void receive( Duct previous, Grouping<Incoming, Iterator<Incoming>> grouping )
+  public void receive( Duct previous, int ordinal, Grouping<Incoming, Iterator<Incoming>> grouping )
     {
     while( grouping.joinIterator.hasNext() )
-      next.receive( previous, (Outgoing) grouping.joinIterator.next() );
+      next.receive( previous, 0, (Outgoing) grouping.joinIterator.next() );
     }
 
   @Override

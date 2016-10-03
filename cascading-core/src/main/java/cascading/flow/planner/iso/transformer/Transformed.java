@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,8 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cascading.flow.planner.PlannerContext;
-import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementMultiGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.rule.Rule;
@@ -51,7 +52,7 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     this.graphTransformer = graphTransformer;
 
     if( plannerContext.isTransformTracingEnabled() )
-      beginGraph = new ElementDirectedGraph( beginGraph );
+      beginGraph = new ElementMultiGraph( beginGraph );
 
     this.beginGraph = beginGraph;
     }
@@ -63,7 +64,7 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     this.expressionGraph = expressionGraph;
 
     if( plannerContext.isTransformTracingEnabled() )
-      beginGraph = new ElementDirectedGraph( beginGraph );
+      beginGraph = new ElementMultiGraph( beginGraph );
 
     this.beginGraph = beginGraph;
     }
@@ -134,7 +135,7 @@ public class Transformed<E extends ElementGraph> extends GraphResult
     recursionCount++;
 
     if( plannerContext.isTransformTracingEnabled() )
-      getRecursions().add( new ElementDirectedGraph( transformed ) );
+      getRecursions().add( new ElementMultiGraph( transformed ) );
     }
 
   public void addChildTransform( Transformed transformed )

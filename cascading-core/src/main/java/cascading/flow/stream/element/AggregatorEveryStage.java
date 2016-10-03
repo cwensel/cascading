@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -56,24 +57,24 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
     aggregator = every.getAggregator();
 
     outputCollector = new TupleEntryCollector( getOperationDeclaredFields() )
-    {
-    @Override
-    protected void collect( TupleEntry resultEntry ) throws IOException
       {
-      Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), resultEntry.getTuple() );
-
-      outgoingEntry.setTuple( outgoing );
-
-      try
+      @Override
+      protected void collect( TupleEntry resultEntry ) throws IOException
         {
-        reducing.completeGroup( AggregatorEveryStage.this, outgoingEntry );
+        Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), resultEntry.getTuple() );
+
+        outgoingEntry.setTuple( outgoing );
+
+        try
+          {
+          reducing.completeGroup( AggregatorEveryStage.this, outgoingEntry );
+          }
+        finally
+          {
+          Tuples.asModifiable( outgoing );
+          }
         }
-      finally
-        {
-        Tuples.asModifiable( outgoing );
-        }
-      }
-    };
+      };
 
     reducing = (Reducing) getNext();
     }
@@ -120,7 +121,7 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry tupleEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry tupleEntry )
     {
     try
       {
@@ -138,7 +139,7 @@ public class AggregatorEveryStage extends EveryStage<TupleEntry> implements Redu
       handleException( new OperatorException( every, "operator Every failed executing operation: " + every.getOperation(), throwable ), argumentsEntry );
       }
 
-    next.receive( this, tupleEntry );
+    next.receive( this, ordinal, tupleEntry );
     }
 
   @Override

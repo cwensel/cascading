@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,8 +33,8 @@ import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.BoundedElementMultiGraph;
-import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementMultiGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.graph.IgnoreAnnotationsHashSet;
 import cascading.flow.planner.iso.GraphResult;
@@ -413,6 +414,12 @@ public class RuleExec
           {
           transformed = transformer.transform( plannerContext, child );
           }
+        catch( TransformException exception )
+          {
+          writeTransformTrace( ruleResult, phase, (Rule) transformer, parent, child, exception.getTransformed() );
+
+          throw new PlannerException( registry, phase, (Rule) transformer, child, exception.getCause() );
+          }
         catch( Throwable throwable )
           {
           throw new PlannerException( registry, phase, (Rule) transformer, child, throwable );
@@ -438,7 +445,7 @@ public class RuleExec
       return elementGraph;
 
     // the results are sub-graphs of the elementGraph, so guaranteed to exist in graph
-    AnnotatedGraph resultGraph = new ElementDirectedGraph( elementGraph );
+    AnnotatedGraph resultGraph = new ElementMultiGraph( elementGraph );
 
     for( ElementGraph result : priorResults )
       {

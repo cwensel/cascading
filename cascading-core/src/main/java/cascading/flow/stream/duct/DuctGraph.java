@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,12 +22,12 @@
 package cascading.flow.stream.duct;
 
 import org.jgrapht.EdgeFactory;
-import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.DirectedMultigraph;
 
 /**
  *
  */
-public class DuctGraph extends SimpleDirectedGraph<Duct, DuctGraph.Ordinal>
+public class DuctGraph extends DirectedMultigraph<Duct, DuctGraph.Ordinal>
   {
   private static class DuctOrdinalEdgeFactory implements EdgeFactory<Duct, Ordinal>
     {

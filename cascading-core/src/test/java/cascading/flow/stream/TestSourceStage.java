@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,12 +41,12 @@ public class TestSourceStage<Outgoing> extends Stage<Void, Outgoing>
     }
 
   @Override
-  public void receive( Duct previous, Void value )
+  public void receive( Duct previous, int ordinal, Void value )
     {
     next.start( this );
 
     for( Outgoing item : values )
-      next.receive( this, item );
+      next.receive( this, 0, item );
 
     next.complete( this );
     }

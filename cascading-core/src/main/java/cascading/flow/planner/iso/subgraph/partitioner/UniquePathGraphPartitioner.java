@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,6 +34,7 @@ import cascading.flow.planner.iso.subgraph.iterator.UniquePathSubGraphIterator;
 public class UniquePathGraphPartitioner extends ExpressionGraphPartitioner
   {
   boolean includeRemainders = false;
+  private boolean multiEdge = false; // experimental -- disable
 
   public UniquePathGraphPartitioner( ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
     {
@@ -49,8 +51,8 @@ public class UniquePathGraphPartitioner extends ExpressionGraphPartitioner
   protected SubGraphIterator wrapIterator( ExpressionSubGraphIterator expressionIterator )
     {
     if( !includeRemainders )
-      return new UniquePathSubGraphIterator( expressionIterator, true );
+      return new UniquePathSubGraphIterator( expressionIterator, true, multiEdge );
 
-    return new IncludeRemainderSubGraphIterator( new UniquePathSubGraphIterator( expressionIterator, true ) );
+    return new IncludeRemainderSubGraphIterator( new UniquePathSubGraphIterator( expressionIterator, true, multiEdge ), multiEdge );
     }
   }

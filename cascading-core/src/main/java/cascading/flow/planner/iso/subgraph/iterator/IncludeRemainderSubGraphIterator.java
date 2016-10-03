@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -20,6 +21,8 @@
 
 package cascading.flow.planner.iso.subgraph.iterator;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.Set;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.ElementMaskSubGraph;
 import cascading.flow.planner.graph.Extent;
 import cascading.flow.planner.iso.ElementAnnotation;
@@ -46,6 +50,7 @@ import static cascading.util.Util.createIdentitySet;
 public class IncludeRemainderSubGraphIterator implements SubGraphIterator
   {
   SubGraphIterator parentIterator;
+  boolean multiEdge;
 
   Set<FlowElement> maskedElements = createIdentitySet();
   Set<Scope> maskedScopes = new HashSet<>();
@@ -56,9 +61,10 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
   maskedElements.add( Extent.tail );
   }
 
-  public IncludeRemainderSubGraphIterator( SubGraphIterator parentIterator )
+  public IncludeRemainderSubGraphIterator( SubGraphIterator parentIterator, boolean multiEdge )
     {
     this.parentIterator = parentIterator;
+    this.multiEdge = multiEdge;
     }
 
   @Override
@@ -86,22 +92,40 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
 
     if( parentIterator.hasNext() )
       {
+      // hide these elements from the remainder graph
       maskedElements.addAll( next.vertexSet() );
       maskedScopes.addAll( next.edgeSet() ); // catches case with no elements on path
 
       return next;
       }
 
-    maskedElements.removeAll( next.vertexSet() );
-    maskedScopes.removeAll( next.edgeSet() );
+    ElementGraph elementGraph = parentIterator.getElementGraph();
 
-    // if there is branching in the root graph, common ancestors could be masked out
-    // here we iterate all paths for all remaining paths
+    if( !multiEdge ) // no effect on mergepipes/tez
+      {
+      maskedElements.removeAll( next.vertexSet() );
+      maskedScopes.removeAll( next.edgeSet() );
+      }
+    else
+      {
+      // this is experimental, but was intended to allow capture of multiple edges between two
+      // nodes
+      maskedElements.addAll( next.vertexSet() );
+      maskedScopes.addAll( next.edgeSet() );
+
+      // if there is branching in the root graph, common ancestors could be masked out
+      // here we iterate all paths for all remaining paths
+
+      for( FlowElement maskedElement : new ArrayList<>( maskedElements ) )
+        {
+        if( !maskedScopes.containsAll( elementGraph.edgesOf( maskedElement ) ) )
+          maskedElements.remove( maskedElement );
+        }
+      }
 
     // previously source/sink pairs captured in prior partitions
     Set<Pair<FlowElement, FlowElement>> pairs = getPairs();
 
-    ElementGraph elementGraph = parentIterator.getElementGraph();
     ElementMaskSubGraph maskSubGraph = new ElementMaskSubGraph( elementGraph, maskedElements, maskedScopes );
 
     // remaining source/sink pairs we need to traverse
@@ -120,7 +144,13 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
         for( GraphPath<FlowElement, Scope> path : paths )
           {
           maskedElements.removeAll( Graphs.getPathVertexList( path ) );
-          maskedScopes.removeAll( path.getEdgeList() );
+
+          Collection<Scope> edgeList = path.getEdgeList();
+
+          if( multiEdge )
+            edgeList = ElementGraphs.getAllMultiEdgesBetween( edgeList, elementGraph );
+
+          maskedScopes.removeAll( edgeList );
           }
         }
       }

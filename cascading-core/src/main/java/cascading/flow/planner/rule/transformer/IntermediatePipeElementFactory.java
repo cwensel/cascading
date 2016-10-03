@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,32 +18,14 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream.duct;
+package cascading.flow.planner.rule.transformer;
+
+import cascading.flow.planner.iso.transformer.ElementFactory;
 
 /**
  *
  */
-public class CloseReducingDuct<Group, Incoming, Outgoing> extends Duct<Incoming, Outgoing> implements CloseWindow, Reducing<Group, Outgoing>
+public abstract class IntermediatePipeElementFactory implements ElementFactory
   {
-  public CloseReducingDuct( Duct<Outgoing, ?> next )
-    {
-    super( next );
-    }
-
-  @Override
-  public void receive( Duct previous, int ordinal, Incoming incoming )
-    {
-    // do nothing
-    }
-
-  @Override
-  public void startGroup( Duct previous, Group group )
-    {
-    }
-
-  @Override
-  public void completeGroup( Duct previous, Outgoing outgoing )
-    {
-    next.receive( previous, 0, outgoing );
-    }
+  public static final String IDENTITY = "cascading.registry.pipe.identity";
   }

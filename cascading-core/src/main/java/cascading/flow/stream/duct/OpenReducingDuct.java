@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,7 +38,7 @@ public class OpenReducingDuct<Incoming, Outgoing> extends Duct<Grouping<Incoming
     }
 
   @Override
-  public void receive( Duct previous, Grouping<Incoming, Iterator<Incoming>> grouping )
+  public void receive( Duct previous, int ordinal, Grouping<Incoming, Iterator<Incoming>> grouping )
     {
     // don't start a grouping if there are no values in the group
     if( !grouping.joinIterator.hasNext() )
@@ -46,7 +47,7 @@ public class OpenReducingDuct<Incoming, Outgoing> extends Duct<Grouping<Incoming
     reducing.startGroup( previous, grouping.key );
 
     while( grouping.joinIterator.hasNext() )
-      next.receive( this, (Outgoing) grouping.joinIterator.next() );
+      next.receive( this, 0, (Outgoing) grouping.joinIterator.next() );
 
     reducing.completeGroup( previous, grouping.key );
     }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -68,28 +69,28 @@ public class FunctionEachStage extends EachStage
     operationCall.setArguments( argumentsEntry );
 
     operationCall.setOutputCollector( new TupleEntryCollector( getOperationDeclaredFields() )
-    {
-    @Override
-    protected void collect( TupleEntry input ) throws IOException
       {
-      Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), input.getTuple() );
-
-      outgoingEntry.setTuple( outgoing );
-
-      try
+      @Override
+      protected void collect( TupleEntry input ) throws IOException
         {
-        next.receive( FunctionEachStage.this, outgoingEntry );
+        Tuple outgoing = outgoingBuilder.makeResult( incomingEntry.getTuple(), input.getTuple() );
+
+        outgoingEntry.setTuple( outgoing );
+
+        try
+          {
+          next.receive( FunctionEachStage.this, 0, outgoingEntry );
+          }
+        finally
+          {
+          Tuples.asModifiable( outgoing );
+          }
         }
-      finally
-        {
-        Tuples.asModifiable( outgoing );
-        }
-      }
-    } );
+      } );
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
     this.incomingEntry = incomingEntry;
 

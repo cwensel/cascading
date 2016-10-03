@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,14 +22,17 @@
 package cascading.flow.tez.planner.rule.expressiongraph;
 
 import cascading.flow.planner.graph.Extent;
+import cascading.flow.planner.iso.expression.AnnotationExpression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
+import cascading.flow.stream.annotations.RoleMode;
 import cascading.pipe.Boundary;
 import cascading.pipe.Group;
 import cascading.pipe.Merge;
 import cascading.tap.Tap;
 
+import static cascading.flow.planner.iso.expression.AndElementExpression.and;
 import static cascading.flow.planner.iso.expression.NotElementExpression.not;
 import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 
@@ -45,7 +49,7 @@ public class NoGroupMergeBoundaryTapExpressionGraph extends ExpressionGraph
           ElementCapture.Primary,
           new FlowElementExpression( Extent.class ),
           new FlowElementExpression( Group.class ),
-          new FlowElementExpression( Merge.class ),
+          and( new FlowElementExpression( Merge.class ), not( new AnnotationExpression( RoleMode.Logical ) ) ),
           new FlowElementExpression( Boundary.class ),
           new FlowElementExpression( Tap.class )
         )

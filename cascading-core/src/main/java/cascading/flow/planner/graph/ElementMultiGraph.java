@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,6 +25,7 @@ import java.util.IdentityHashMap;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
+import cascading.util.EnumMultiMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DirectedMultigraph;
 
@@ -44,6 +46,13 @@ public class ElementMultiGraph extends BaseAnnotatedElementGraph implements Elem
     graph = new DirectedMultiGraph( directed( parent ) );
 
     addParentAnnotations( parent );
+    }
+
+  public ElementMultiGraph( ElementGraph parent, EnumMultiMap annotations )
+    {
+    this( parent );
+
+    getAnnotations().addAll( annotations );
     }
 
   @Override

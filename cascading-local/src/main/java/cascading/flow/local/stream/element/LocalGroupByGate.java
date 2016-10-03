@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -72,7 +73,7 @@ public class LocalGroupByGate extends MemorySpliceGate
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
     Tuple valuesTuple = incomingEntry.getTupleCopy();
     Tuple groupTuple = keyBuilder[ 0 ].makeResult( valuesTuple, null ); // view on valuesTuple
@@ -110,7 +111,7 @@ public class LocalGroupByGate extends MemorySpliceGate
 
       tupleEntryIterator.reset( tuples.iterator() );
 
-      next.receive( this, grouping );
+      next.receive( this, 0, grouping );
 
       tuples.clear();
       }

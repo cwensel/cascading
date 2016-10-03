@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,7 +29,6 @@ import cascading.flow.stream.graph.StreamGraph;
 public abstract class Duct<Incoming, Outgoing>
   {
   protected Duct<Outgoing, ?> next;
-  protected Integer ordinal;
 
   Duct()
     {
@@ -69,7 +69,7 @@ public abstract class Duct<Incoming, Outgoing>
 
   public final void receiveFirst( Incoming incoming )
     {
-    receive( null, incoming );
+    receive( null, 0, incoming );
     }
 
   public void start( Duct previous )
@@ -77,7 +77,7 @@ public abstract class Duct<Incoming, Outgoing>
     next.start( this );
     }
 
-  public abstract void receive( Duct previous, Incoming incoming );
+  public abstract void receive( Duct previous, int ordinal, Incoming incoming );
 
   public void complete( Duct previous )
     {

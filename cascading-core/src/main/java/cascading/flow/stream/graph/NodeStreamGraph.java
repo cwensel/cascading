@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -100,12 +101,12 @@ public abstract class NodeStreamGraph extends StreamGraph
     if( successors.contains( Extent.tail ) )
       addTail( lhsDuct );
     else
-      handleSuccessors( lhsDuct, successors );
+      handleSuccessors( lhsElement, lhsDuct, successors );
     }
 
-  private void handleSuccessors( Duct lhsDuct, List<FlowElement> successors )
+  private void handleSuccessors( FlowElement lhsElement, Duct lhsDuct, List<FlowElement> successors )
     {
-    for( FlowElement rhsElement : successors )
+    for( FlowElement rhsElement : Util.createIdentitySet( successors ) )
       {
       if( rhsElement instanceof Extent )
         continue;
@@ -125,31 +126,20 @@ public abstract class NodeStreamGraph extends StreamGraph
       Duct newRhsDuct = createDuctFor( rhsElement, role );
       Duct rhsDuct = findExisting( newRhsDuct );
 
-      int ordinal = findEdgeOrdinal( lhsDuct, rhsDuct );
+      Set<Scope> allEdges = elementGraph.getAllEdges( lhsElement, rhsElement );
 
-      addPath( lhsDuct, ordinal, rhsDuct );
+      for( Scope scope : allEdges )
+        {
+        int ordinal = scope.getOrdinal();
+
+        addPath( lhsDuct, ordinal, rhsDuct );
+        }
 
       if( rhsDuct != newRhsDuct ) // don't keep going if we have already seen rhs
         continue;
 
       handleDuct( rhsElement, rhsDuct );
       }
-    }
-
-  private int findEdgeOrdinal( Duct lhsDuct, Duct rhsDuct )
-    {
-    if( !( rhsDuct instanceof GroupingSpliceGate ) )
-      return 0;
-
-    FlowElement lhsElement = ( (ElementDuct) lhsDuct ).getFlowElement();
-    FlowElement rhsElement = ( (ElementDuct) rhsDuct ).getFlowElement();
-
-    Set<Scope> allEdges = elementGraph.getAllEdges( lhsElement, rhsElement );
-
-    if( allEdges.size() == 1 )
-      return Util.getFirst( allEdges ).getOrdinal();
-
-    throw new IllegalStateException( "could not find ordinal, too many edges between elements" );
     }
 
   private Duct createDuctFor( FlowElement element, IORole role )

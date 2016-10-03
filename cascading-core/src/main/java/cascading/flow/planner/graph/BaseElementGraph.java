@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,13 +41,13 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 public abstract class BaseElementGraph implements ElementGraph, Serializable
   {
   public static final ElementGraph NULL = new BaseElementGraph( new SimpleDirectedGraph<FlowElement, Scope>( Scope.class ) )
-  {
-  @Override
-  public ElementGraph copyElementGraph()
     {
-    return null;
-    }
-  };
+    @Override
+    public ElementGraph copyElementGraph()
+      {
+      return null;
+      }
+    };
 
   protected DirectedGraph<FlowElement, Scope> graph;
 
@@ -97,12 +98,25 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
 
   public Scope addEdge( FlowElement sourceVertex, FlowElement targetVertex )
     {
+//     prevent multiple edges from head or to tail
+    if( !allowMultipleExtentEdges() && ( sourceVertex == Extent.head || targetVertex == Extent.tail ) && graph.containsEdge( sourceVertex, targetVertex ) )
+      return graph.getEdge( sourceVertex, targetVertex );
+
     return graph.addEdge( sourceVertex, targetVertex );
     }
 
   public boolean addEdge( FlowElement sourceVertex, FlowElement targetVertex, Scope scope )
     {
+    // prevent multiple edges from head or to tail
+    if( !allowMultipleExtentEdges() && ( sourceVertex == Extent.head || targetVertex == Extent.tail ) && graph.containsEdge( sourceVertex, targetVertex ) )
+      return true;
+
     return graph.addEdge( sourceVertex, targetVertex, scope );
+    }
+
+  protected boolean allowMultipleExtentEdges()
+    {
+    return true;
     }
 
   @Override

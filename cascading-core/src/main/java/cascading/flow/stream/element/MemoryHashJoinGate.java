@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -75,19 +76,17 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
-    int pos = ordinalMap.get( previous );
-
-    Tuple incomingTuple = pos != 0 ? incomingEntry.getTupleCopy() : incomingEntry.getTuple();
-    Tuple keyTuple = keyBuilder[ pos ].makeResult( incomingTuple, null ); // view in incomingTuple
+    Tuple incomingTuple = ordinal != 0 ? incomingEntry.getTupleCopy() : incomingEntry.getTuple();
+    Tuple keyTuple = keyBuilder[ ordinal ].makeResult( incomingTuple, null ); // view in incomingTuple
 
     keyTuple = getDelegatedTuple( keyTuple );
 
-    if( pos != 0 )
+    if( ordinal != 0 )
       {
       keys.add( keyTuple );
-      keyValues[ pos ].get( keyTuple ).add( incomingTuple ); // always a copy
+      keyValues[ ordinal ].get( keyTuple ).add( incomingTuple ); // always a copy
       return;
       }
 
@@ -118,7 +117,7 @@ public class MemoryHashJoinGate extends MemorySpliceGate
     keyEntry.setTuple( keyTuple );
     tupleEntryIterator.reset( splice.getJoiner().getIterator( closure ) );
 
-    next.receive( this, grouping );
+    next.receive( this, 0, grouping );
     }
 
   @Override

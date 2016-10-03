@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -60,9 +61,6 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
     {
     if( role != IORole.sink )
       next = getNextFor( streamGraph );
-
-    if( role == IORole.sink )
-      setOrdinalMap( streamGraph );
     }
 
   @Override
@@ -88,25 +86,23 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
     }
 
   // todo: receive should receive the edge or ordinal so no lookup
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
-    Integer pos = ordinalMap.get( previous );
-
     // create a view over the incoming tuple
-    Tuple groupTupleView = keyBuilder[ pos ].makeResult( incomingEntry.getTuple(), null );
+    Tuple groupTupleView = keyBuilder[ ordinal ].makeResult( incomingEntry.getTuple(), null );
 
     // reset keyTuple via groupTuple or groupSortTuple
     if( sortFields == null )
       groupTuple.reset( groupTupleView );
     else
-      groupSortTuple.reset( groupTupleView, sortBuilder[ pos ].makeResult( incomingEntry.getTuple(), null ) );
+      groupSortTuple.reset( groupTupleView, sortBuilder[ ordinal ].makeResult( incomingEntry.getTuple(), null ) );
 
-    valueTuple.reset( valuesBuilder[ pos ].makeResult( incomingEntry.getTuple(), null ) );
+    valueTuple.reset( valuesBuilder[ ordinal ].makeResult( incomingEntry.getTuple(), null ) );
 
     try
       {
       // keyTuple is a reference to either groupTuple or groupSortTuple
-      wrapGroupingAndCollect( previous, (Tuple) valueTuple, keyTuple );
+      wrapGroupingAndCollect( previous, ordinal, (Tuple) valueTuple, keyTuple );
       flowProcess.increment( SliceCounters.Tuples_Written, 1 );
       }
     catch( OutOfMemoryError error )
@@ -144,12 +140,12 @@ public abstract class HadoopGroupGate extends GroupingSpliceGate
 
     keyEntry.setTuple( closure.getGroupTuple( key ) );
 
-    next.receive( this, grouping );
+    next.receive( this, 0, grouping );
     }
 
   protected abstract HadoopGroupByClosure createClosure();
 
-  protected abstract void wrapGroupingAndCollect( Duct previous, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException;
+  protected abstract void wrapGroupingAndCollect( Duct previous, int ordinal, Tuple valuesTuple, Tuple groupKey ) throws java.io.IOException;
 
   protected abstract Tuple unwrapGrouping( Tuple key );
   }

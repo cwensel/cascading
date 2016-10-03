@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,10 +23,15 @@ package cascading.flow.tez.planner.rule.expressiongraph;
 
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
+import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
-import cascading.flow.planner.iso.expression.TypeExpression;
+import cascading.flow.planner.iso.expression.TypeExpression.Topo;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression;
+import cascading.tap.Tap;
+
+import static cascading.flow.planner.iso.expression.AndElementExpression.and;
+import static cascading.flow.planner.iso.expression.NotElementExpression.not;
 
 /**
  *
@@ -37,11 +43,17 @@ public class TopDownSplitJoinBoundariesExpressionGraph extends ExpressionGraph
     super( SearchOrder.Topological );
 
     this.arc(
-      new BoundariesElementExpression( TypeExpression.Topo.Split ),
+      new BoundariesElementExpression( Topo.Split ),
 
       PathScopeExpression.ANY,
 
-      new BoundariesElementExpression( ElementCapture.Primary, TypeExpression.Topo.Splice )
+      // don't capture a contracted graph having a tap split to a splice tap (two taps with two edges)
+      // this interferes if there is a logical split and merge
+      and(
+        ElementCapture.Primary,
+        new BoundariesElementExpression( Topo.Splice ),
+        not( new FlowElementExpression( Tap.class ) )
+      )
     );
     }
   }

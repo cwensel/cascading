@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,6 +24,7 @@ package cascading.flow.hadoop.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
+import cascading.flow.planner.iso.expression.JoinEdgesSameSourceScopeExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.rule.RuleExpression;
@@ -36,17 +38,17 @@ import cascading.tap.Tap;
  */
 public class BalanceHashJoinSameSourceExpression extends RuleExpression
   {
-  private static final FlowElementExpression SHARED_TAP = new FlowElementExpression( Tap.class, TypeExpression.Topo.SplitOnly );
-  public static final FlowElementExpression SHARED_HASHJOIN = new FlowElementExpression( HashJoin.class );
-
   public BalanceHashJoinSameSourceExpression()
     {
     super(
       new SyncPipeExpressionGraph(),
 
       new ExpressionGraph()
-        .arcs( SHARED_TAP, SHARED_HASHJOIN )
-        .arcs( SHARED_TAP, SHARED_HASHJOIN ),
+        .arc(
+          new FlowElementExpression( ElementCapture.Primary, Tap.class, TypeExpression.Topo.SplitOnly ),
+          JoinEdgesSameSourceScopeExpression.ALL_SAME_SOURCE,
+          new FlowElementExpression( HashJoin.class )
+        ),
 
       new ExpressionGraph()
         .arc(

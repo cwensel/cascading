@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,6 +33,7 @@ import cascading.flow.FlowSession;
 import cascading.flow.local.LocalFlowConnector;
 import cascading.flow.local.LocalFlowProcess;
 import cascading.platform.TestPlatform;
+import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
 import cascading.scheme.local.TextDelimited;
 import cascading.scheme.local.TextLine;
@@ -53,19 +55,16 @@ public class LocalPlatform extends TestPlatform
   {
   private Properties properties = new Properties();
 
-  {
-  properties.putAll( getGlobalProperties() );
-  }
-
   @Override
   public void setUp() throws IOException
     {
+    properties.putAll( getGlobalProperties() );
     }
 
   @Override
   public Map<Object, Object> getProperties()
     {
-    return new Properties( properties );
+    return PropertyUtil.asFlatMap( properties );
     }
 
   @Override
@@ -121,7 +120,7 @@ public class LocalPlatform extends TestPlatform
   @Override
   public FlowProcess getFlowProcess()
     {
-    return new LocalFlowProcess( FlowSession.NULL, (Properties) getProperties() );
+    return new LocalFlowProcess( FlowSession.NULL, PropertyUtil.createProperties( getProperties(), null ) );
     }
 
   @Override

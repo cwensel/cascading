@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +28,7 @@ import cascading.flow.planner.graph.ElementSubGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
+import cascading.flow.planner.rule.TransformException;
 
 /**
  * Class SubGraphTransformer will return a bounded sub-graph after matching a sub-graph within a contracted graph.
@@ -50,25 +52,32 @@ public class SubGraphTransformer extends GraphTransformer<ElementGraph, ElementS
     {
     Transformed<ElementSubGraph> transformed = new Transformed<>( plannerContext, this, subGraphMatcher, rootGraph );
 
-    Transformed contractedTransformed = graphTransformer.transform( plannerContext, rootGraph ); // contracted graph transform
+    try
+      {
+      Transformed contractedTransformed = graphTransformer.transform( plannerContext, rootGraph ); // contracted graph transform
 
-    transformed.addChildTransform( contractedTransformed );
+      transformed.addChildTransform( contractedTransformed );
 
-    // apply contracted sub-graph matcher to get the bounded sub-graph of the original graph
-    ElementGraph contractedGraph = contractedTransformed.getEndGraph();
+      // apply contracted sub-graph matcher to get the bounded sub-graph of the original graph
+      ElementGraph contractedGraph = contractedTransformed.getEndGraph();
 
-    Match match = findAllPrimaries ? subGraphFinder.findAllMatches( plannerContext, contractedGraph ) : subGraphFinder.findFirstMatch( plannerContext, contractedGraph );
+      Match match = findAllPrimaries ? subGraphFinder.findAllMatches( plannerContext, contractedGraph ) : subGraphFinder.findFirstMatch( plannerContext, contractedGraph );
 
-    if( !match.foundMatch() )
+      if( !match.foundMatch() )
+        return transformed;
+
+      ElementGraph contractedSubGraph = match.getMatchedGraph();
+
+      ElementSubGraph resultSubGraph = asSubGraphOf( rootGraph, contractedSubGraph ); // the bounded sub-graph of the rootGraph
+
+      transformed.setEndGraph( resultSubGraph );
+
       return transformed;
-
-    ElementGraph contractedSubGraph = match.getMatchedGraph();
-
-    ElementSubGraph resultSubGraph = asSubGraphOf( rootGraph, contractedSubGraph ); // the bounded sub-graph of the rootGraph
-
-    transformed.setEndGraph( resultSubGraph );
-
-    return transformed;
+      }
+    catch( Throwable throwable )
+      {
+      throw new TransformException( throwable, transformed );
+      }
     }
 
   protected ElementSubGraph asSubGraphOf( ElementGraph rootGraph, ElementGraph contractedSubGraph )

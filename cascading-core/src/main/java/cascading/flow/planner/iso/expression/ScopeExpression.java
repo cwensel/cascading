@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,7 +41,20 @@ public abstract class ScopeExpression implements Expression<Scope>
 
   public enum Applies
     {
-      Any, All, Each
+      /**
+       * At least one edge
+       */
+      Any,
+
+      /**
+       * All edges
+       */
+      All,
+
+      /**
+       * Each edge - unsupported
+       */
+      Each
     }
 
   protected Applies applies = Applies.Any;

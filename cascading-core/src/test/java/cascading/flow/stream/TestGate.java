@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -55,7 +56,7 @@ public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing> imple
     }
 
   @Override
-  public void receive( Duct previous, Incoming incoming )
+  public void receive( Duct previous, int ordinal, Incoming incoming )
     {
     list.add( incoming );
     }
@@ -76,7 +77,7 @@ public class TestGate<Incoming, Outgoing> extends Gate<Incoming, Outgoing> imple
 
       next.start( this );
 
-      next.receive( this, (Outgoing) grouping );
+      next.receive( this, 0, (Outgoing) grouping );
 
       next.complete( this );
       }

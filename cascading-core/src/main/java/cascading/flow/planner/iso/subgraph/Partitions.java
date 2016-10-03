@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,8 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import cascading.flow.planner.graph.ElementDirectedGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementMultiGraph;
 import cascading.flow.planner.iso.GraphResult;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.Match;
@@ -142,7 +143,7 @@ public class Partitions extends GraphResult
       ElementGraph subGraph = subGraphs.get( i );
 
       // want to write annotations with elements
-      new ElementDirectedGraph( subGraph, annotatedSubGraphs.get( subGraph ) ).writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
+      new ElementMultiGraph( subGraph, annotatedSubGraphs.get( subGraph ) ).writeDOT( new File( path, makeFileName( count, i, "partition-result-sub-graph" ) ).toString() );
 
       if( i < contractedMatches.size() )
         contractedMatches.get( i ).getMatchedGraph().writeDOT( new File( path, makeFileName( count, i, "partition-contracted-graph" ) ).toString() );

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,6 +23,8 @@ package cascading.flow.tez.stream.element;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import cascading.CascadingException;
 import cascading.flow.FlowProcess;
@@ -82,7 +85,9 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
     if( logicalInputs == null || logicalInputs.getKeys().size() == 0 )
       throw new IllegalArgumentException( "inputs must not be null or empty" );
 
-    if( logicalInputs.getValues().size() != 1 )
+    Set<LogicalInput> inputs = new HashSet<>( logicalInputs.getValues() );
+
+    if( inputs.size() != 1 )
       throw new IllegalArgumentException( "only supports a single input" );
 
     this.logicalInputs = logicalInputs;
@@ -148,7 +153,7 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
     }
 
   @Override
-  public void receive( Duct previous, TupleEntry incomingEntry )
+  public void receive( Duct previous, int ordinal, TupleEntry incomingEntry )
     {
     try
       {
@@ -205,7 +210,7 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
         Tuple currentKey = (Tuple) reader.getCurrentKey();
 
         valueEntry.setTuple( currentKey );
-        next.receive( this, valueEntry );
+        next.receive( this, 0, valueEntry );
         }
 
       complete( this );
@@ -233,13 +238,13 @@ public class TezMergeGate extends SpliceGate<TupleEntry, TupleEntry> implements 
       collectors[ count++ ] = new OldOutputCollector( logicalOutput );
 
     return new OutputCollector()
-    {
-    @Override
-    public void collect( Object key, Object value ) throws IOException
       {
-      for( OutputCollector outputCollector : collectors )
-        outputCollector.collect( key, value );
-      }
-    };
+      @Override
+      public void collect( Object key, Object value ) throws IOException
+        {
+        for( OutputCollector outputCollector : collectors )
+          outputCollector.collect( key, value );
+        }
+      };
     }
   }

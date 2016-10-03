@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -702,16 +703,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sinks = new HashMap();
     sinks.put( "cogroup", sink );
 
-    try
-      {
-      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
-//    flow.writeDOT( "dupesource.dot" );
-      fail( "did not throw planner exception" );
-      }
-    catch( Exception exception )
-      {
-
-      }
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
     }
 
   @Test
@@ -739,15 +731,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
     Map sinks = new HashMap();
     sinks.put( "cogroup", sink );
 
-    try
-      {
-      Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
-      fail( "did not throw planner exception" );
-      }
-    catch( PlannerException exception )
-      {
-//      exception.printStackTrace();
-      }
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, merge );
     }
 
 //  public void testEquivalentPaths()

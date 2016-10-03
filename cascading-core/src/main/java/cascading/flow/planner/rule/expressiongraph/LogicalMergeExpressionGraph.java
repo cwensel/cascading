@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,41 +20,36 @@
 
 package cascading.flow.planner.rule.expressiongraph;
 
-import cascading.flow.planner.graph.Extent;
-import cascading.flow.planner.iso.expression.AnnotationExpression;
 import cascading.flow.planner.iso.expression.ElementCapture;
+import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.stream.annotations.RoleMode;
-import cascading.pipe.Boundary;
+import cascading.flow.planner.iso.expression.JoinEdgesSameSourceScopeExpression;
+import cascading.flow.planner.iso.expression.OrElementExpression;
+import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.pipe.Group;
-import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.tap.Tap;
 
-import static cascading.flow.planner.iso.expression.AndElementExpression.and;
-import static cascading.flow.planner.iso.expression.NotElementExpression.not;
-import static cascading.flow.planner.iso.expression.OrElementExpression.or;
+import static cascading.flow.planner.iso.expression.TypeExpression.Topo.Splice;
+import static cascading.flow.planner.iso.expression.TypeExpression.Topo.Split;
 
 /**
  *
  */
-public class NoGroupJoinMergeBoundaryTapExpressionGraph extends ExpressionGraph
+public class LogicalMergeExpressionGraph extends ExpressionGraph
   {
-  public NoGroupJoinMergeBoundaryTapExpressionGraph()
+  public LogicalMergeExpressionGraph()
     {
-    super(
-      not(
-        or(
-          ElementCapture.Primary,
-          new FlowElementExpression( Extent.class ),
-          new FlowElementExpression( Group.class ),
-          new FlowElementExpression( HashJoin.class ),
-          and( new FlowElementExpression( Merge.class ), not( new AnnotationExpression( RoleMode.Logical ) ) ),
-          new FlowElementExpression( Boundary.class ),
-          new FlowElementExpression( Tap.class )
-        )
-      )
+    super( SearchOrder.ReverseDepth );
+
+    ElementExpression source = OrElementExpression.or( ElementCapture.Primary, new FlowElementExpression( Tap.class, Split ), new FlowElementExpression( Group.class, Split ) );
+    ElementExpression sink = new FlowElementExpression( ElementCapture.Secondary, Merge.class, Splice );
+
+    this.arc(
+      source,
+      JoinEdgesSameSourceScopeExpression.ALL_SAME_SOURCE,
+      sink
     );
     }
   }

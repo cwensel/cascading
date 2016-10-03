@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -76,6 +77,7 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.alg.KShortestPaths;
 import org.jgrapht.graph.AbstractGraph;
+import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -100,7 +102,7 @@ public class ElementGraphs
 
   public static FlowElementGraph asFlowElementGraph( PlatformInfo platformInfo, FlowStepGraph flowStepGraph )
     {
-    ElementDirectedGraph elementDirectedGraph = asElementDirectedGraph( flowStepGraph.getElementGraphs() );
+    ElementMultiGraph elementDirectedGraph = asElementMultiGraph( flowStepGraph.getElementGraphs() );
 
     Map<String, Tap> sources = asSourceMap( elementDirectedGraph, findSources( elementDirectedGraph ) );
     Map<String, Tap> sinks = asSinkMap( elementDirectedGraph, findSinks( elementDirectedGraph ) );
@@ -111,6 +113,16 @@ public class ElementGraphs
   public static ElementDirectedGraph asElementDirectedGraph( Collection<ElementGraph> elementGraphs )
     {
     ElementDirectedGraph elementDirectedGraph = new ElementDirectedGraph();
+
+    for( ElementGraph elementGraph : elementGraphs )
+      elementDirectedGraph.copyFrom( asExtentMaskedSubGraph( elementGraph ) );
+
+    return elementDirectedGraph;
+    }
+
+  public static ElementMultiGraph asElementMultiGraph( Collection<ElementGraph> elementGraphs )
+    {
+    ElementMultiGraph elementDirectedGraph = new ElementMultiGraph();
 
     for( ElementGraph elementGraph : elementGraphs )
       elementDirectedGraph.copyFrom( asExtentMaskedSubGraph( elementGraph ) );
@@ -155,6 +167,11 @@ public class ElementGraphs
       return ( (AnnotatedGraph) elementGraph ).getAnnotations();
 
     return null;
+    }
+
+  public static boolean isMultiGraph( ElementGraph elementGraph )
+    {
+    return directed( elementGraph ) instanceof DirectedMultigraph;
     }
 
   public static int hashCodeIgnoreAnnotations( ElementGraph elementGraph )
@@ -526,7 +543,11 @@ public class ElementGraphs
 
         scope.setNonBlocking( isNonBlocking );
         scope.addPriorNames( incoming, outgoing ); // not copied
-        elementGraph.addEdge( source, target, scope );
+
+        boolean success = elementGraph.addEdge( source, target, scope );
+
+        if( !success )
+          throw new IllegalStateException( "during graph contraction, unable to add new edge between: " + source + " and " + target );
         }
       }
 
@@ -753,6 +774,21 @@ public class ElementGraphs
       vertices.addAll( iterator.next().vertexSet() );
 
     return vertices;
+    }
+
+  public static Set<Scope> getAllMultiEdgesBetween( Collection<Scope> edgeList, ElementGraph current )
+    {
+    Set<Scope> allEdgesBetween = new HashSet<>();
+
+    for( Scope scope : edgeList )
+      {
+      FlowElement edgeSource = current.getEdgeSource( scope );
+      FlowElement edgeTarget = current.getEdgeTarget( scope );
+
+      allEdgesBetween.addAll( current.getAllEdges( edgeSource, edgeTarget ) );
+      }
+
+    return allEdgesBetween;
     }
 
   public static void replaceElementWith( ElementGraph elementGraph, FlowElement replace, FlowElement replaceWith )

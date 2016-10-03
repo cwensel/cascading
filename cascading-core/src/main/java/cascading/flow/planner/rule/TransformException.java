@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,52 +18,35 @@
  * limitations under the License.
  */
 
-package cascading.flow.stream;
+package cascading.flow.planner.rule;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cascading.flow.stream.duct.Duct;
-import cascading.flow.stream.duct.Stage;
-import cascading.flow.stream.graph.StreamGraph;
+import cascading.flow.planner.PlannerException;
+import cascading.flow.planner.iso.transformer.Transformed;
 
 /**
  *
  */
-public class TestSinkStage<Incoming> extends Stage<Incoming, Void>
+public class TransformException extends PlannerException
   {
-  List<Incoming> results = new ArrayList<Incoming>();
+  private Transformed<?> transformed;
 
-  public TestSinkStage()
+  public TransformException()
     {
     }
 
-  public List<Incoming> getResults()
+  public TransformException( Transformed<?> transformed )
     {
-    return results;
+    this.transformed = transformed;
     }
 
-  @Override
-  public void bind( StreamGraph streamGraph )
+  public TransformException( Throwable cause, Transformed<?> transformed )
     {
-    // do nothing
+    super( cause );
+    this.transformed = transformed;
     }
 
-  @Override
-  public void start( Duct previous )
+  public Transformed<?> getTransformed()
     {
-    // do nothing
-    }
-
-  @Override
-  public void receive( Duct previous, int ordinal, Incoming incoming )
-    {
-    results.add( incoming );
-    }
-
-  @Override
-  public void complete( Duct previous )
-    {
-    // do nothing
+    return transformed;
     }
   }

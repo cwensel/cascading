@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,14 +22,9 @@
 package cascading.flow.stream.graph;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
 import cascading.flow.stream.duct.CloseReducingDuct;
@@ -40,14 +36,15 @@ import cascading.flow.stream.duct.Gate;
 import cascading.flow.stream.duct.OpenDuct;
 import cascading.flow.stream.duct.OpenReducingDuct;
 import cascading.flow.stream.duct.OpenWindow;
+import cascading.flow.stream.duct.OrdinalDuct;
 import cascading.flow.stream.duct.Reducing;
 import cascading.flow.stream.duct.Stage;
 import cascading.flow.stream.duct.Window;
 import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.GraphPath;
+import org.jgrapht.EdgeFactory;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.KShortestPaths;
+import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,18 +199,22 @@ public class StreamGraph
 
   public Duct[] findAllNextFor( Duct current )
     {
-    LinkedList<Duct> successors = new LinkedList<Duct>( Graphs.successorListOf( ductGraph, current ) );
-    ListIterator<Duct> iterator = successors.listIterator();
+    Set<DuctGraph.Ordinal> outgoing = ductGraph.outgoingEdgesOf( current );
+    LinkedList<Duct> successors = new LinkedList<Duct>();
 
-    while( iterator.hasNext() )
+    for( DuctGraph.Ordinal edge : outgoing )
       {
-      Duct successor = iterator.next();
+      Duct successor = ductGraph.getEdgeTarget( edge );
 
       if( successor == getHEAD() )
         throw new IllegalStateException( "HEAD may not be next" );
 
       if( successor == getTAIL() ) // tail is not included, its just a marker
-        iterator.remove();
+        continue;
+
+      successor = wrapWithOrdinal( edge, successor );
+
+      successors.add( successor );
       }
 
     return successors.toArray( new Duct[ successors.size() ] );
@@ -238,18 +239,6 @@ public class StreamGraph
     return predecessors.toArray( new Duct[ predecessors.size() ] );
     }
 
-  public Map<Duct, Integer> getOrdinalMap( Duct current )
-    {
-    Duct[] allPrevious = findAllPreviousFor( current );
-
-    Map<Duct, Integer> results = new IdentityHashMap<>();
-
-    for( Duct previous : allPrevious )
-      results.put( previous, ductGraph.getEdge( previous, current ).getOrdinal() );
-
-    return results;
-    }
-
   public Duct createNextFor( Duct current )
     {
     if( current == getHEAD() || current == getTAIL() )
@@ -260,7 +249,8 @@ public class StreamGraph
     if( edges.size() == 0 )
       throw new IllegalStateException( "ducts must have an outgoing edge, current: " + current );
 
-    Duct next = ductGraph.getEdgeTarget( edges.iterator().next() );
+    DuctGraph.Ordinal edge = edges.iterator().next();
+    Duct next = ductGraph.getEdgeTarget( edge );
 
     if( current instanceof Gate )
       {
@@ -269,7 +259,7 @@ public class StreamGraph
         if( edges.size() > 1 )
           return createFork( findAllNextFor( current ) );
 
-        return next;
+        return wrapWithOrdinal( edge, next );
         }
 
       if( next instanceof OpenWindow )
@@ -281,7 +271,7 @@ public class StreamGraph
       if( next instanceof Reducing )
         return createOpenReducingWindow( next );
 
-      return createOpenWindow( next );
+      return createOpenWindow( wrapWithOrdinal( edge, next ) );
       }
 
     if( current instanceof Reducing )
@@ -292,7 +282,7 @@ public class StreamGraph
       if( edges.size() > 1 )
         return createCloseWindow( createFork( findAllNextFor( current ) ) );
 
-      return createCloseWindow( next );
+      return createCloseWindow( wrapWithOrdinal( edge, next ) );
       }
 
     if( edges.size() > 1 )
@@ -301,10 +291,18 @@ public class StreamGraph
     if( next == getTAIL() ) // tail is not included, its just a marker
       throw new IllegalStateException( "tail ducts should not bind to next" );
 
+    return wrapWithOrdinal( edge, next );
+    }
+
+  protected Duct wrapWithOrdinal( DuctGraph.Ordinal edge, Duct next )
+    {
+    if( next instanceof Collapsing )
+      next = new OrdinalDuct( next, edge.getOrdinal() );
+
     return next;
     }
 
-  private Duct createCloseWindow( Duct next )
+  protected Duct createCloseWindow( Duct next )
     {
     return new CloseReducingDuct( next );
     }
@@ -324,89 +322,9 @@ public class StreamGraph
     return new Fork( allNext );
     }
 
-  /**
-   * Returns all free paths to the current duct, usually a GroupGate.
-   * <p/>
-   * Paths all unique paths are counted, minus any immediate prior GroupGates as they
-   * block incoming paths into a single path
-   *
-   * @param duct of type Duct
-   * @return an int
-   */
-  public int countAllEventingPathsTo( Duct duct )
-    {
-    // find all immediate prior groups/ collapsed
-    LinkedList<List<Duct>> allPaths = asPathList( allPathsBetweenInclusive( getHEAD(), duct ) );
-
-    Set<Duct> nearestCollapsed = new HashSet<Duct>();
-
-    for( List<Duct> path : allPaths )
-      {
-      Collections.reverse( path );
-
-      path.remove( 0 ); // remove the duct param
-
-      for( Duct element : path )
-        {
-        if( !( element instanceof Collapsing ) )
-          continue;
-
-        nearestCollapsed.add( element );
-        break;
-        }
-      }
-
-    // find all paths
-    // remove all paths containing prior groups
-    LinkedList<List<Duct>> collapsedPaths = new LinkedList<List<Duct>>( allPaths );
-    ListIterator<List<Duct>> iterator = collapsedPaths.listIterator();
-    while( iterator.hasNext() )
-      {
-      List<Duct> path = iterator.next();
-
-      if( Collections.disjoint( path, nearestCollapsed ) )
-        iterator.remove();
-      }
-
-    int collapsedPathsCount = 0;
-    for( Duct collapsed : nearestCollapsed )
-      {
-      LinkedList<List<Duct>> subPaths = asPathList( allPathsBetweenInclusive( collapsed, duct ) );
-      for( List<Duct> subPath : subPaths )
-        {
-        subPath.remove( 0 ); // remove collapsed duct
-        if( Collections.disjoint( subPath, nearestCollapsed ) )
-          collapsedPathsCount += 1;
-        }
-      }
-
-    int nonCollapsedPathsCount = allPaths.size() - collapsedPaths.size();
-
-    // incoming == paths + prior
-    return nonCollapsedPathsCount + collapsedPathsCount;
-    }
-
   public int ordinalBetween( Duct lhs, Duct rhs )
     {
     return ductGraph.getEdge( lhs, rhs ).getOrdinal();
-    }
-
-  private List<GraphPath<Duct, DuctGraph.Ordinal>> allPathsBetweenInclusive( Duct from, Duct to )
-    {
-    return new KShortestPaths<>( ductGraph, from, Integer.MAX_VALUE ).getPaths( to );
-    }
-
-  public static LinkedList<List<Duct>> asPathList( List<GraphPath<Duct, DuctGraph.Ordinal>> paths )
-    {
-    LinkedList<List<Duct>> results = new LinkedList<List<Duct>>();
-
-    if( paths == null )
-      return results;
-
-    for( GraphPath<Duct, DuctGraph.Ordinal> path : paths )
-      results.add( Graphs.getPathVertexList( path ) );
-
-    return results;
     }
 
   public TopologicalOrderIterator<Duct, Integer> getTopologicalOrderIterator()
@@ -481,5 +399,88 @@ public class StreamGraph
     {
     LOG.info( "writing stream graph to {}", filename );
     Util.printGraph( filename, ductGraph );
+    }
+
+  public void printBoundGraph( String id, String classifier, int discriminator )
+    {
+    String path = (String) getProperty( DOT_FILE_PATH );
+
+    if( path == null )
+      return;
+
+    classifier = Util.cleansePathName( classifier );
+
+    path = String.format( "%s/streamgraph-bound-%s-%s-%s.dot", path, id, classifier, discriminator );
+
+    printBoundGraph( path );
+    }
+
+  public void printBoundGraph( String filename )
+    {
+    LOG.info( "writing stream bound graph to {}", filename );
+
+    DirectedMultigraph<Duct, Integer> graph = new DirectedMultigraph<>( new EdgeFactory<Duct, Integer>()
+      {
+      int count = 0;
+
+      @Override
+      public Integer createEdge( Duct sourceVertex, Duct targetVertex )
+        {
+        return count++;
+        }
+      } );
+
+    TopologicalOrderIterator<Duct, Integer> iterator = getTopologicalOrderIterator();
+
+    while( iterator.hasNext() )
+      {
+      Duct previous = iterator.next();
+
+      if( graph.containsVertex( previous ) || previous instanceof Extent )
+        continue;
+
+      graph.addVertex( previous );
+      addNext( graph, previous );
+      }
+
+    Util.printGraph( filename, graph );
+    }
+
+  private void addNext( DirectedMultigraph graph, Duct previous )
+    {
+
+    if( previous instanceof Fork )
+      {
+      for( Duct next : ( (Fork) previous ).getAllNext() )
+        {
+        if( next == null || next instanceof Extent )
+          continue;
+
+        graph.addVertex( next );
+
+        if( graph.containsEdge( previous, next ) )
+          continue;
+
+        graph.addEdge( previous, next );
+
+        addNext( graph, next );
+        }
+      }
+    else
+      {
+      Duct next = previous.getNext();
+
+      if( next == null || next instanceof Extent )
+        return;
+
+      graph.addVertex( next );
+
+      if( graph.containsEdge( previous, next ) )
+        return;
+
+      graph.addEdge( previous, next );
+
+      addNext( graph, next );
+      }
     }
   }
