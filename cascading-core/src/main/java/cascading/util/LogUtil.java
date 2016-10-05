@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,12 +30,32 @@ import org.slf4j.Logger;
  */
 public class LogUtil
   {
+  public static String[] setLog4jLevel( String[] contexts, String level )
+    {
+    String[] results = new String[ contexts.length ];
+
+    for( int i = 0; i < contexts.length; i++ )
+      results[ i ] = setLog4jLevel( contexts[ i ], level );
+
+    return results;
+    }
+
+  public static String[] setLog4jLevel( String[] contexts, String[] levels )
+    {
+    String[] results = new String[ contexts.length ];
+
+    for( int i = 0; i < contexts.length; i++ )
+      results[ i ] = setLog4jLevel( contexts[ i ], levels[ i ] );
+
+    return results;
+    }
+
   public static void setLog4jLevel( String[] logger )
     {
     setLog4jLevel( logger[ 0 ], logger[ 1 ] );
     }
 
-  public static void setLog4jLevel( String logger, String level )
+  public static String setLog4jLevel( String logger, String level )
     {
     // removing logj4 dependency
     // org.apache.log4j.Logger.getLogger( logger[ 0 ] ).setLevel( org.apache.log4j.Level.toLevel( logger[ 1 ] ) );
@@ -42,11 +63,22 @@ public class LogUtil
     Object loggerObject = Util.invokeStaticMethod( "org.apache.log4j.Logger", "getLogger",
       new Object[]{logger}, new Class[]{String.class} );
 
-    Object levelObject = Util.invokeStaticMethod( "org.apache.log4j.Level", "toLevel",
-      new Object[]{level}, new Class[]{String.class} );
+    Object levelObject = null;
+
+    if( level != null )
+      levelObject = Util.invokeStaticMethod( "org.apache.log4j.Level", "toLevel",
+        new Object[]{level}, new Class[]{String.class} );
+
+    Object oldLevel = Util.invokeInstanceMethod( loggerObject, "getLevel",
+      new Object[]{}, new Class[]{} );
 
     Util.invokeInstanceMethod( loggerObject, "setLevel",
-      new Object[]{levelObject}, new Class[]{levelObject.getClass()} );
+      new Object[]{levelObject}, new Class[]{Util.loadClass( "org.apache.log4j.Level" )} );
+
+    if( oldLevel == null )
+      return null;
+
+    return oldLevel.toString();
     }
 
   public static void logMemory( Logger logger, String message )

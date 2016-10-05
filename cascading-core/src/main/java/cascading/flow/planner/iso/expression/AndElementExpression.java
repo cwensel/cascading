@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,6 +32,16 @@ import cascading.flow.planner.graph.ElementGraph;
  */
 public class AndElementExpression extends ElementExpression
   {
+  public static ElementExpression and( String name, ElementExpression... elementMatchers )
+    {
+    return new AndElementExpression( name, elementMatchers );
+    }
+
+  public static ElementExpression and( String name, ElementCapture capture, ElementExpression... elementMatchers )
+    {
+    return new AndElementExpression( name, capture, elementMatchers );
+    }
+
   public static ElementExpression and( ElementExpression... elementMatchers )
     {
     return new AndElementExpression( elementMatchers );
@@ -41,7 +52,19 @@ public class AndElementExpression extends ElementExpression
     return new AndElementExpression( capture, elementMatchers );
     }
 
+  String name;
   ElementExpression[] matchers;
+
+  public AndElementExpression( String name, ElementExpression... matchers )
+    {
+    this.matchers = matchers;
+    }
+
+  public AndElementExpression( String name, ElementCapture capture, ElementExpression... matchers )
+    {
+    super( capture );
+    this.matchers = matchers;
+    }
 
   public AndElementExpression( ElementExpression... matchers )
     {
@@ -69,6 +92,9 @@ public class AndElementExpression extends ElementExpression
   @Override
   public String toString()
     {
+    if( name != null )
+      return name;
+
     final StringBuilder sb = new StringBuilder( "And{" );
     sb.append( Arrays.toString( matchers ) );
     sb.append( '}' );

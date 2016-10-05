@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -179,6 +180,9 @@ class State
 
   public Pair<Integer, Integer> nextPair( int prevN1, int prevN2 )
     {
+    if( LOG.isTraceEnabled() )
+      LOG.trace( "prev N1: {}, N2: {}", prevN1, prevN2 );
+
     if( prevN1 == NULL_NODE )
       prevN1 = 0;
 
@@ -251,12 +255,15 @@ class State
         prevN2++;
       }
 
-    LOG.trace( "prevN1: {}, prevN2: {}", prevN1, prevN2 );
-
     if( prevN1 < n1 && prevN2 < n2 )
+      {
+      if( LOG.isTraceEnabled() )
+        LOG.trace( "next N1: {}, N2: {}", prevN1, prevN2 );
+
       return new Pair<>( prevN1, prevN2 );
-    else
-      return null;
+      }
+
+    return null;
     }
 
   protected boolean areCompatibleEdges( int v1, int v2, int v3, int v4 )
@@ -265,23 +272,37 @@ class State
     List<ScopeExpression> matchers = matchGraph.getAllEdgesList( v1, v2 );
 
     if( matchers.size() == 1 && matchers.get( 0 ).acceptsAll() )
+      {
+      if( LOG.isDebugEnabled() )
+        debugCompatibleEdges( elementGraph.getAllEdgesList( v3, v4 ), v1, v2, matchers );
+
       return true;
+      }
 
     List<Scope> scopes = elementGraph.getAllEdgesList( v3, v4 );
 
     Collection<Scope> results = areCompatibleEdges( plannerContext, elementGraph.getElementGraph(), matchers, scopes );
 
     if( LOG.isDebugEnabled() && results != null )
-      {
-      for( Scope result : results )
-        {
-        FlowElement lhs = elementGraph.getDelegate().getEdgeSource( result );
-        FlowElement rhs = elementGraph.getDelegate().getEdgeTarget( result );
-        LOG.debug( "compatible edge: {} - {}", lhs, rhs );
-        }
-      }
+      debugCompatibleEdges( results, v1, v2, matchers );
 
     return results != null;
+    }
+
+  private void debugCompatibleEdges( Collection<Scope> results, int v1, int v2, List<ScopeExpression> matchers )
+    {
+    for( Scope result : results )
+      {
+      FlowElement lhs = elementGraph.getDelegate().getEdgeSource( result );
+      int lhsIndex = elementGraph.getIndex( lhs );
+      FlowElement rhs = elementGraph.getDelegate().getEdgeTarget( result );
+      int rhsIndex = elementGraph.getIndex( rhs );
+
+      LOG.debug( "compatible edge: {}:{} -> {}:{}, having: {}", lhsIndex, lhs, rhsIndex, rhs, result.printSimple() );
+      }
+
+    for( ScopeExpression matcher : matchers )
+      LOG.debug( " - {} -> {} matcher: {}", v1, v2, matcher );
     }
 
   public static Collection<Scope> areCompatibleEdges( PlannerContext plannerContext, ElementGraph elementGraph, List<ScopeExpression> matchers, List<Scope> scopes )
@@ -393,7 +414,7 @@ class State
       result = expression.applies( plannerContext, elementGraph.getElementGraph(), flowElement );
 
     if( LOG.isDebugEnabled() && result )
-      LOG.debug( "compatible nodes: {} with {}", flowElement, expression );
+      LOG.debug( "compatible nodes: {}:{} matched {}:{}", node1, expression, node2, flowElement );
 
     return result;
     }
@@ -468,7 +489,12 @@ class State
         {
         int other1 = core2[ other2 ];
         if( !matchGraph.containsEdge( node1, other1 ) )
+          {
+          if( LOG.isTraceEnabled() )
+            LOG.trace( "no matcher edge between nodes: {}:{} -> {}:{}", node1, matchGraph.getVertex( node1 ), other1, matchGraph.getVertex( other1 ) );
+
           return false;
+          }
         }
       else
         {
@@ -488,9 +514,13 @@ class State
         {
         int other1 = core2[ other2 ];
         if( !matchGraph.containsEdge( other1, node1 ) )
-          return false;
-        }
+          {
+          if( LOG.isTraceEnabled() )
+            LOG.trace( "no matcher edge between nodes: {}:{} -> {}:{}", other1, matchGraph.getVertex( other1 ), node1, matchGraph.getVertex( node1 ) );
 
+          return false;
+          }
+        }
       else
         {
         if( in2[ other2 ] != 0 )
@@ -502,7 +532,12 @@ class State
         }
       }
 
-    return termin1 <= termin2 && termout1 <= termout2 && new1 <= new2;
+    boolean isFeasible = termin1 <= termin2 && termout1 <= termout2 && new1 <= new2;
+
+    if( LOG.isTraceEnabled() )
+      LOG.trace( "feasible: {} = termin1({}) <= termin2({}) && termout1({}) <= termout2({}) && new1({}) <= new2({})", isFeasible, termin1, termin2, termout1, termout2, new1, new2 );
+
+    return isFeasible;
     }
 
   public void addPair( int node1, int node2 )
@@ -694,6 +729,15 @@ class State
   public FlowElement getElementNode( int vertex )
     {
     return elementGraph.getVertex( vertex );
+    }
+
+  @Override
+  public String toString()
+    {
+    final StringBuilder sb = new StringBuilder( "State{" );
+    sb.append( "coreLen=" ).append( coreLen );
+    sb.append( '}' );
+    return sb.toString();
     }
 
   /**

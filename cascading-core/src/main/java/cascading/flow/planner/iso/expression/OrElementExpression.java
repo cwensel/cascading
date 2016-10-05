@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,6 +32,16 @@ import cascading.flow.planner.graph.ElementGraph;
  */
 public class OrElementExpression extends ElementExpression
   {
+  public static ElementExpression or( String name, ElementExpression... elementMatchers )
+    {
+    return new OrElementExpression( name, elementMatchers );
+    }
+
+  public static ElementExpression or( String name, ElementCapture capture, ElementExpression... elementMatchers )
+    {
+    return new OrElementExpression( name, capture, elementMatchers );
+    }
+
   public static ElementExpression or( ElementExpression... elementMatchers )
     {
     return new OrElementExpression( elementMatchers );
@@ -41,7 +52,21 @@ public class OrElementExpression extends ElementExpression
     return new OrElementExpression( capture, elementMatchers );
     }
 
+  String name;
   ElementExpression[] matchers;
+
+  public OrElementExpression( String name, ElementExpression... matchers )
+    {
+    this.name = name;
+    this.matchers = matchers;
+    }
+
+  public OrElementExpression( String name, ElementCapture capture, ElementExpression... matchers )
+    {
+    super( capture );
+    this.name = name;
+    this.matchers = matchers;
+    }
 
   public OrElementExpression( ElementExpression... matchers )
     {
@@ -69,6 +94,9 @@ public class OrElementExpression extends ElementExpression
   @Override
   public String toString()
     {
+    if( name != null )
+      return name;
+
     final StringBuilder sb = new StringBuilder( "Or{" );
     sb.append( Arrays.toString( matchers ) );
     sb.append( '}' );

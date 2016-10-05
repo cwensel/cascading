@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import cascading.flow.planner.iso.transformer.ElementFactory;
-import cascading.util.LogUtil;
+import cascading.flow.planner.rule.util.RuleLogUtil;
 
 /**
  * RuleRegistry contains all planner rules for a given platform. Where a rule is of type
@@ -56,6 +56,7 @@ public class RuleRegistry
   {
   private Map<String, ElementFactory> factories = new HashMap<>();
   private Map<PlanPhase, LinkedList<Rule>> rules = new HashMap<>();
+  private String[] logLevels;
 
   {
   for( PlanPhase phase : PlanPhase.values() )
@@ -67,17 +68,19 @@ public class RuleRegistry
   /**
    * Method enableDebugLogging forces log4j to emit DEBUG level stats for the planner classes.
    * <p/>
+   * Use {@link #restoreLogging()} to resume normal logging levels.
+   * <p/>
    * For planner tracing, see {@link cascading.flow.planner.FlowPlanner} properties.
    */
   public void enableDebugLogging()
     {
-    LogUtil.setLog4jLevel( "cascading.flow.Flow", "DEBUG" );
-    LogUtil.setLog4jLevel( "cascading.flow.planner.rule", "DEBUG" );
-    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.transformer", "DEBUG" );
-    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.assertion", "DEBUG" );
-    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.subgraph", "DEBUG" );
-    LogUtil.setLog4jLevel( "cascading.flow.planner.iso.finder", "DEBUG" );
-//    LogUtil.setLog4jLevel( "org.apache", "DEBUG" );
+    logLevels = RuleLogUtil.enableDebugLogging();
+    }
+
+  public void restoreLogging()
+    {
+    if( logLevels != null )
+      RuleLogUtil.restoreLogging( logLevels );
     }
 
   /**

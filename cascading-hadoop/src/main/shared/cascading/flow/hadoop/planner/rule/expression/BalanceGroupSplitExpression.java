@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,7 +24,8 @@ package cascading.flow.hadoop.planner.rule.expression;
 import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.TypeExpression;
+import cascading.flow.planner.iso.expression.ScopeExpression;
+import cascading.flow.planner.iso.expression.TypeExpression.Topo;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.expressiongraph.SyncPipeExpressionGraph;
 import cascading.pipe.Checkpoint;
@@ -39,7 +41,7 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
  */
 public class BalanceGroupSplitExpression extends RuleExpression
   {
-  public static final FlowElementExpression SHARED_GROUP = new FlowElementExpression( Group.class );
+  public static final FlowElementExpression SHARED_GROUP = new FlowElementExpression( Group.class, Topo.Split );
 
   public BalanceGroupSplitExpression()
     {
@@ -48,13 +50,22 @@ public class BalanceGroupSplitExpression extends RuleExpression
 
       // in order to capture out degree in sub-graph, we need to capture at least two successors
       new ExpressionGraph()
-        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ), new FlowElementExpression( Checkpoint.class ) ) )
-        .arcs( SHARED_GROUP, or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ), new FlowElementExpression( Checkpoint.class ) ) ),
+        .arc(
+          SHARED_GROUP,
+          ScopeExpression.ANY,
+          or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ), new FlowElementExpression( Checkpoint.class ) )
+        )
+
+        .arc(
+          SHARED_GROUP,
+          ScopeExpression.ANY,
+          or( new FlowElementExpression( HashJoin.class ), new FlowElementExpression( Group.class ), new FlowElementExpression( Tap.class ), new FlowElementExpression( Checkpoint.class ) )
+        ),
 
       // sub-graph to match has out degree captured above
       new ExpressionGraph()
         .arcs(
-          new FlowElementExpression( ElementCapture.Primary, Pipe.class, TypeExpression.Topo.SplitOnly )
+          new FlowElementExpression( ElementCapture.Primary, Pipe.class, Topo.SplitOnly )
         )
     );
     }

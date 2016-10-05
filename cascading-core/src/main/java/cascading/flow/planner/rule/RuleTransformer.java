@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,12 +28,17 @@ import cascading.flow.planner.iso.transformer.GraphTransformer;
 import cascading.flow.planner.iso.transformer.RecursiveGraphTransformer;
 import cascading.flow.planner.iso.transformer.SubGraphTransformer;
 import cascading.flow.planner.iso.transformer.Transformed;
+import cascading.flow.planner.rule.util.LogLevel;
+
+import static cascading.flow.planner.rule.util.RuleLogUtil.enableLogging;
+import static cascading.flow.planner.rule.util.RuleLogUtil.restoreLogging;
 
 /**
  * The RuleTransformer class is responsible for transforming an element graph into a new graph.
  */
 public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph> implements Rule
   {
+  private final LogLevel level;
   private final PlanPhase phase;
   protected final RuleExpression ruleExpression;
   protected final ContractedTransformer contractedTransformer;
@@ -42,6 +48,12 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
 
   public RuleTransformer( PlanPhase phase, RuleExpression ruleExpression )
     {
+    this( null, phase, ruleExpression );
+    }
+
+  public RuleTransformer( LogLevel level, PlanPhase phase, RuleExpression ruleExpression )
+    {
+    this.level = level;
     this.phase = phase;
     this.ruleExpression = ruleExpression;
 
@@ -77,6 +89,20 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
 
   @Override
   public Transformed<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
+    {
+    String[] logLevels = enableLogging( level );
+
+    try
+      {
+      return performTransform( plannerContext, rootGraph );
+      }
+    finally
+      {
+      restoreLogging( logLevels );
+      }
+    }
+
+  public Transformed<ElementGraph> performTransform( PlannerContext plannerContext, ElementGraph rootGraph )
     {
     Transformed<ElementGraph> result = new Transformed<>( plannerContext, this, rootGraph );
 

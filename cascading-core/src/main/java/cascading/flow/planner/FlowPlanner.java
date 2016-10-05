@@ -70,6 +70,7 @@ import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.TraceUtil.formatTraces;
 import static cascading.util.Util.*;
 import static java.util.Arrays.asList;
 
@@ -621,7 +622,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( !missing.isEmpty() )
               {
-              String message = "union of steps have " + missing.size() + " fewer elements than parent assembly: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              String message = "union of steps have " + missing.size() + " fewer elements than parent assembly: " + registryName + ", missing: [" + formatTraces( missing, ", " ) + "]";
               throw new PlannerException( message, assembly );
               }
             }
@@ -659,7 +660,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( !missing.isEmpty() )
               {
-              String message = "union of nodes have " + missing.size() + " fewer elements than parent step: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              String message = "union of nodes have " + missing.size() + " fewer elements than parent step: " + registryName + ", missing: [" + formatTraces( missing, ", " ) + "]";
               throw new PlannerException( message, step );
               }
             }
@@ -698,7 +699,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
             if( !missing.isEmpty() )
               {
-              String message = "union of pipelines have " + missing.size() + " fewer elements than parent node: " + registryName + ", missing: [" + join( missing, ", " ) + "]";
+              String message = "union of pipelines have " + missing.size() + " fewer elements than parent node: " + registryName + ", missing: [" + formatTraces( missing, ", " ) + "]";
               throw new PlannerException( message, node );
               }
             }

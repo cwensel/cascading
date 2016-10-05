@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,6 +27,9 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -99,16 +103,33 @@ public class TraceUtil
     return formatter.format( trace ) + " " + message;
     }
 
+  public static String formatTraces( Collection<FlowElement> flowElements, String delim )
+    {
+    List<String> messages = new ArrayList<>( flowElements.size() );
+
+    for( FlowElement flowElement : flowElements )
+      messages.add( formatTrace( (Traceable) flowElement, flowElement.toString(), new TraceFormatter()
+        {
+        @Override
+        public String format( String trace )
+          {
+          return "[" + trace + "] ->";
+          }
+        } ) );
+
+    return Util.join( messages, delim );
+    }
+
   public static String formatTrace( final Scheme scheme, String message )
     {
     return formatTrace( scheme, message, new TraceFormatter()
-    {
-    @Override
-    public String format( String trace )
       {
-      return "[" + Util.truncate( scheme.toString(), 25 ) + "][" + trace + "]";
-      }
-    } );
+      @Override
+      public String format( String trace )
+        {
+        return "[" + Util.truncate( scheme.toString(), 25 ) + "][" + trace + "]";
+        }
+      } );
     }
 
   public static String formatTrace( FlowElement flowElement, String message )
@@ -135,37 +156,37 @@ public class TraceUtil
   public static String formatRawTrace( Pipe pipe, String message )
     {
     return formatTrace( pipe, message, new TraceFormatter()
-    {
-    @Override
-    public String format( String trace )
       {
-      return "[" + trace + "]";
-      }
-    } );
+      @Override
+      public String format( String trace )
+        {
+        return "[" + trace + "]";
+        }
+      } );
     }
 
   public static String formatTrace( final Pipe pipe, String message )
     {
     return formatTrace( pipe, message, new TraceFormatter()
-    {
-    @Override
-    public String format( String trace )
       {
-      return "[" + Util.truncate( pipe.getName(), 25 ) + "][" + trace + "]";
-      }
-    } );
+      @Override
+      public String format( String trace )
+        {
+        return "[" + Util.truncate( pipe.getName(), 25 ) + "][" + trace + "]";
+        }
+      } );
     }
 
   public static String formatTrace( final Tap tap, String message )
     {
     return formatTrace( tap, message, new TraceFormatter()
-    {
-    @Override
-    public String format( String trace )
       {
-      return "[" + Util.truncate( tap.toString(), 25 ) + "][" + trace + "]";
-      }
-    } );
+      @Override
+      public String format( String trace )
+        {
+        return "[" + Util.truncate( tap.toString(), 25 ) + "][" + trace + "]";
+        }
+      } );
     }
 
   public static String formatTrace( Operation operation, String message )

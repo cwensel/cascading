@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -512,6 +513,26 @@ public class Scope implements Serializable
     this.outGroupingFields = scope.outGroupingFields;
     this.outValuesSelector = scope.outValuesSelector;
     this.outValuesFields = scope.outValuesFields;
+    }
+
+  public String printSimple()
+    {
+    StringBuilder buffer = new StringBuilder();
+
+    if( name != null )
+      buffer.append( "[" ).append( name ).append( "]" );
+
+    buffer.append( "{id=" ).append( System.identityHashCode( this ) );
+
+    if( ordinal != null )
+      buffer.append( ",ordinal=" ).append( ordinal );
+
+    if( kind != null )
+      buffer.append( ",kind=" ).append( kind );
+
+    buffer.append( "}" );
+
+    return buffer.toString();
     }
 
   @Override

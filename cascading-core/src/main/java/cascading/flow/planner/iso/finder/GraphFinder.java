@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -42,6 +43,8 @@ import cascading.util.EnumMultiMap;
 import cascading.util.Pair;
 import cascading.util.Util;
 import org.jgrapht.graph.DirectedMultigraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
 
@@ -50,6 +53,8 @@ import static cascading.flow.planner.graph.ElementGraphs.directed;
  */
 public class GraphFinder
   {
+  private static final Logger LOG = LoggerFactory.getLogger( GraphFinder.class );
+
   ExpressionGraph matchExpression;
 
   public GraphFinder( ExpressionGraph matchExpression )
@@ -127,16 +132,16 @@ public class GraphFinder
 
     // we are only capturing Primary distinguished elements
     return new Match( matchExpression, elementGraph, null, foundElements, Collections.<Scope>emptySet() )
-    {
-    @Override
-    public Set<FlowElement> getCapturedElements( ElementCapture... captures )
       {
-      if( !Arrays.asList( captures ).contains( ElementCapture.Primary ) )
-        return Collections.emptySet();
+      @Override
+      public Set<FlowElement> getCapturedElements( ElementCapture... captures )
+        {
+        if( !Arrays.asList( captures ).contains( ElementCapture.Primary ) )
+          return Collections.emptySet();
 
-      return (Set<FlowElement>) this.foundElements;
-      }
-    };
+        return (Set<FlowElement>) this.foundElements;
+        }
+      };
     }
 
   public Match findAllMatchesOnPrimary( ElementGraph elementGraph )
@@ -269,6 +274,9 @@ public class GraphFinder
    */
   private boolean match( State state, Map<Integer, Integer> vertexMap )
     {
+    if( LOG.isTraceEnabled() )
+      LOG.trace( "begin matching with state: {}", state );
+
     if( state.isGoal() )
       return true;
 
@@ -285,7 +293,15 @@ public class GraphFinder
       n1 = next.getLhs();
       n2 = next.getRhs();
 
-      if( state.isFeasiblePair( n1, n2 ) )
+      if( LOG.isTraceEnabled() )
+        LOG.trace( "begin matching pair: N1: {}, N2: {}", n1, n2 );
+
+      boolean feasiblePair = state.isFeasiblePair( n1, n2 );
+
+      if( LOG.isTraceEnabled() && !feasiblePair )
+        LOG.trace( "not feasible pair: N1: {}, N2: {}", n1, n2 );
+
+      if( feasiblePair )
         {
         State copy = state.copy();
         copy.addPair( n1, n2 );
@@ -300,14 +316,26 @@ public class GraphFinder
               throw new IllegalStateException( "duplicate key with differing values" );
             }
 
+          if( LOG.isTraceEnabled() )
+            LOG.trace( "match for feasible pair: N1: {}, N2: {}", n1, n2 );
+
           vertexMap.putAll( copy.getVertexMapping() );
+
+          if( LOG.isTraceEnabled() )
+            LOG.trace( "vertex map: {}", vertexMap );
           }
         else
           {
+          if( LOG.isTraceEnabled() )
+            LOG.trace( "no match for feasible pair: N1: {}, N2: {}", n1, n2 );
+
           copy.backTrack();
           }
         }
       }
+
+    if( LOG.isTraceEnabled() )
+      LOG.trace( "completed matching with state: {}, found: {}", state, found );
 
     return found;
     }
