@@ -16,6 +16,11 @@ Cascading Change Log
   Added c.f.h.MultiMapReduceFlow to provide support for a single c.f.Flow instance with many interrelated
   predefined c.a.h.m.JobConf instances that can be executed at once or added incrementally.
 
+3.1.2
+
+  Fixed issue on MapReduce that prevented counters from registering if incremented on a pipe assembly branch feeding the
+  accumulated side of a c.p.HashJoin.
+
 3.1.1
 
   Fixed issue with the MapReduce planner where a c.p.Checkpoint after a c.p.GroupBy merge would fail the planner.
