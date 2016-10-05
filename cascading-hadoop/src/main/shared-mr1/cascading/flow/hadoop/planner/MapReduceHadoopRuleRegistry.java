@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,6 +41,7 @@ import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitJoinTr
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitMergeGroupTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitMergeTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitTransformer;
+import cascading.flow.hadoop.planner.rule.transformer.TapBalanceGroupSplitTriangleTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceHashJoinBlockingHashJoinTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceHashJoinSameSourceTransformer;
 import cascading.flow.hadoop.planner.rule.transformer.TapBalanceNonSafePipeSplitTransformer;
@@ -74,6 +76,7 @@ public class MapReduceHadoopRuleRegistry extends RuleRegistry
     // Balance with temporary Taps
     addRule( new TapBalanceGroupSplitTransformer() );
     addRule( new TapBalanceGroupSplitJoinTransformer() );
+    addRule( new TapBalanceGroupSplitTriangleTransformer() ); // testGroupSplitToCoGroupsTriangle
     addRule( new TapBalanceGroupSplitMergeGroupTransformer() );
     addRule( new TapBalanceGroupSplitMergeTransformer() );
     addRule( new TapBalanceGroupMergeGroupTransformer() );

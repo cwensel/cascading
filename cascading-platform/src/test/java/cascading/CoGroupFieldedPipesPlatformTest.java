@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -1841,5 +1842,41 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
 
     assertTrue( values.contains( new Tuple( "1\ta\t1\ta" ) ) );
     assertTrue( values.contains( new Tuple( "2\tb\t2\tb" ) ) );
+    }
+
+  /**
+   * Requires rule TapBalanceGroupSplitTriangleTransformer   *
+   */
+  @Test
+  public void testGroupSplitToCoGroupsTriangle() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Map sources = new HashMap();
+    sources.put( "lower", getPlatform().getDelimitedFile( new Fields( "numLower", "charLower" ), " ", inputFileLower ) );
+    sources.put( "upper", getPlatform().getDelimitedFile( new Fields( "numUpper", "charUpper" ), " ", inputFileUpper ) );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath( "sink" ), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "numLower", "charLower" ), new Identity() );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "numUpper", "charUpper" ), new Identity() );
+
+    Pipe upperGroupBy = new GroupBy( pipeUpper, new Fields( "numUpper" ) );
+    Pipe grpByEvery = new Every( upperGroupBy, new Count(), new Fields( "numUpper", "count" ) );
+
+    Pipe grpByEveryE1 = new Each( grpByEvery, new Fields( "numUpper", "count" ), new Identity() );
+    Pipe grpByEveryE2 = new Each( grpByEvery, new Fields( "numUpper", "count" ), new Identity( new Fields( "numUpperUpper", "countUpper" ) ) );
+
+    Pipe cogroup = new CoGroup( "cogroup", pipeLower, new Fields( "numLower" ), grpByEveryE1, new Fields( "numUpper" ) );
+    Each cogroupEach = new Each( cogroup, new Fields( "numLower", "charLower", "numUpper", "count" ), new Identity() );
+
+    Pipe cogroupNested = new CoGroup( cogroupEach, new Fields( "numLower" ), grpByEveryE2, new Fields( "numUpperUpper" ) );
+    Pipe cogrpNestedEach = new Each( cogroupNested, Fields.ALL, new Identity() );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, cogrpNestedEach );
+    flow.complete();
+
+    validateLength( flow, 5 );
     }
   }
