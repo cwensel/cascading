@@ -54,6 +54,23 @@ public class RegexesTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
     assertEquals( "not equal: tuple.get(1)", "bar", tuple.getObject( 1 ) );
     }
+  
+  public void testSplitterDeclared() throws IOException
+  {
+  RegexSplitter splitter = new RegexSplitter( new Fields("field"), "\t" );
+  Tuple arguments = new Tuple( "foo\tbar" );
+  Fields resultFields = Fields.UNKNOWN;
+
+  TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
+
+  assertEquals( "wrong size", 1, collector.size() );
+
+  Iterator<Tuple> iterator = collector.iterator();
+
+  Tuple tuple = iterator.next();
+
+  assertEquals( "not equal: tuple.get(0)", "foo", tuple.getObject( 0 ) );
+  }
 
   public void testSplitterGenerator() throws IOException
     {
