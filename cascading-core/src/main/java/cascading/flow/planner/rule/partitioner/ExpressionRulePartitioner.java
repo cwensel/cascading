@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,6 +31,7 @@ import cascading.flow.planner.iso.subgraph.partitioner.ExpressionGraphPartitione
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.planner.rule.util.LogLevel;
 
 /**
  * Class ExpressionRulePartitioner relies on a {@link cascading.flow.planner.rule.RuleExpression} to identify
@@ -41,17 +43,17 @@ public class ExpressionRulePartitioner extends RulePartitioner
 
   public ExpressionRulePartitioner( PlanPhase phase, RuleExpression ruleExpression )
     {
-    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    this( null, phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
     }
 
   public ExpressionRulePartitioner( PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation... annotations )
     {
-    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
+    this( null, phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
     }
 
   public ExpressionRulePartitioner( PlanPhase phase, RuleExpression ruleExpression, Enum... annotationExcludes )
     {
-    this( phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    this( null, phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
 
     if( annotationExcludes != null )
       this.annotationExcludes = annotationExcludes;
@@ -59,33 +61,56 @@ public class ExpressionRulePartitioner extends RulePartitioner
 
   public ExpressionRulePartitioner( PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression )
     {
-    this( phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    this( null, phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
     }
 
   public ExpressionRulePartitioner( PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression, ElementAnnotation... annotations )
     {
-    this( phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
+    this( null, phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
     }
 
   public ExpressionRulePartitioner( PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression, Enum... annotationExcludes )
     {
-    this( phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    this( null, phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
 
     if( annotationExcludes != null )
       this.annotationExcludes = annotationExcludes;
     }
 
-  private ExpressionRulePartitioner( PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
+  public ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression )
     {
-    this.phase = phase;
-    this.graphPartitioner = createExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    this( logLevel, phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
     }
 
-  private ExpressionRulePartitioner( PlanPhase phase, PartitionSource partitionSource, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
+  public ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation... annotations )
     {
-    this.phase = phase;
-    this.partitionSource = partitionSource;
-    this.graphPartitioner = createExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    this( logLevel, phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
+    }
+
+  public ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression, Enum... annotationExcludes )
+    {
+    this( logLevel, phase, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+
+    if( annotationExcludes != null )
+      this.annotationExcludes = annotationExcludes;
+    }
+
+  public ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression )
+    {
+    this( logLevel, phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+    }
+
+  public ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression, ElementAnnotation... annotations )
+    {
+    this( logLevel, phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression(), annotations );
+    }
+
+  public ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression, Enum... annotationExcludes )
+    {
+    this( logLevel, phase, partitionSource, ruleExpression.getContractionExpression(), ruleExpression.getMatchExpression() );
+
+    if( annotationExcludes != null )
+      this.annotationExcludes = annotationExcludes;
     }
 
   protected ExpressionRulePartitioner( PlanPhase phase, GraphPartitioner graphPartitioner )
@@ -94,8 +119,36 @@ public class ExpressionRulePartitioner extends RulePartitioner
     this.graphPartitioner = graphPartitioner;
     }
 
+  protected ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, GraphPartitioner graphPartitioner )
+    {
+    this.logLevel = logLevel;
+    this.phase = phase;
+    this.graphPartitioner = graphPartitioner;
+    }
+
+  private ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
+    {
+    this.logLevel = logLevel;
+    this.phase = phase;
+    this.graphPartitioner = createExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    }
+
+  private ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, ExpressionGraph contractionGraph, ExpressionGraph expressionGraph, ElementAnnotation... annotations )
+    {
+    this.logLevel = logLevel;
+    this.phase = phase;
+    this.partitionSource = partitionSource;
+    this.graphPartitioner = createExpressionGraphPartitioner( contractionGraph, expressionGraph, annotations );
+    }
+
   protected ExpressionRulePartitioner( PlanPhase phase )
     {
+    this.phase = phase;
+    }
+
+  protected ExpressionRulePartitioner( LogLevel logLevel, PlanPhase phase )
+    {
+    this.logLevel = logLevel;
     this.phase = phase;
     }
 

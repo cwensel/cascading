@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,6 +25,7 @@ import cascading.flow.planner.iso.transformer.RemoveBranchGraphTransformer;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
 import cascading.flow.planner.rule.RuleTransformer;
+import cascading.flow.planner.rule.util.LogLevel;
 
 /**
  *
@@ -32,7 +34,12 @@ public class RuleRemoveBranchTransformer extends RuleTransformer
   {
   public RuleRemoveBranchTransformer( PlanPhase phase, RuleExpression ruleExpression )
     {
-    super( phase, ruleExpression );
+    this( null, phase, ruleExpression );
+    }
+
+  public RuleRemoveBranchTransformer( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression )
+    {
+    super( logLevel, phase, ruleExpression );
 
     if( subGraphTransformer != null )
       graphTransformer = new RemoveBranchGraphTransformer( subGraphTransformer, ruleExpression.getMatchExpression() );

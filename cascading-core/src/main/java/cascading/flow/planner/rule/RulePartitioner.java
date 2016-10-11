@@ -28,6 +28,10 @@ import cascading.flow.planner.PlannerContext;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.subgraph.GraphPartitioner;
 import cascading.flow.planner.iso.subgraph.Partitions;
+import cascading.flow.planner.rule.util.LogLevel;
+
+import static cascading.flow.planner.rule.util.RuleLogUtil.enableLogging;
+import static cascading.flow.planner.rule.util.RuleLogUtil.restoreLogging;
 
 /**
  * The RulePartitioner class is responsible for partitioning an element graph into smaller sub-graphs.
@@ -51,12 +55,19 @@ public abstract class RulePartitioner implements Rule
       PartitionCurrent
     }
 
+  protected LogLevel logLevel;
   protected PlanPhase phase;
   protected PartitionSource partitionSource = PartitionSource.PartitionParent;
   protected GraphPartitioner graphPartitioner;
 
   public RulePartitioner( PlanPhase phase, PartitionSource partitionSource, GraphPartitioner graphPartitioner )
     {
+    this( null, phase, partitionSource, graphPartitioner );
+    }
+
+  public RulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, GraphPartitioner graphPartitioner )
+    {
+    this.logLevel = logLevel;
     this.phase = phase;
     this.partitionSource = partitionSource;
     this.graphPartitioner = graphPartitioner;
@@ -88,6 +99,20 @@ public abstract class RulePartitioner implements Rule
     }
 
   public Partitions partition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
+    {
+    String[] logLevels = enableLogging( logLevel );
+
+    try
+      {
+      return performPartition( plannerContext, elementGraph, excludes );
+      }
+    finally
+      {
+      restoreLogging( logLevels );
+      }
+    }
+
+  public Partitions performPartition( PlannerContext plannerContext, ElementGraph elementGraph, Collection<FlowElement> excludes )
     {
     Partitions partitions = getGraphPartitioner().partition( plannerContext, elementGraph, excludes );
 

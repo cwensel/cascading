@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +28,7 @@ import cascading.flow.planner.iso.subgraph.partitioner.ExpressionGraphPartitione
 import cascading.flow.planner.iso.subgraph.partitioner.UniquePathGraphPartitioner;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.util.LogLevel;
 
 /**
  * Class UniquePathRulePartitioner relies on a {@link cascading.flow.planner.rule.RuleExpression} to identify
@@ -35,9 +37,8 @@ import cascading.flow.planner.rule.RuleExpression;
  * <p/>
  * This partitioner currently requires the matched sub-graph (per the RuleExpression) to have a single head and single
  * tail. All paths will between the matched head and tail.
- *
+ * <p>
  * Any remaining elements from the original graph will be included in the final path sub-graph.
- *
  */
 public class UniquePathRulePartitioner extends ExpressionRulePartitioner
   {
@@ -71,9 +72,44 @@ public class UniquePathRulePartitioner extends ExpressionRulePartitioner
     super( phase, partitionSource, ruleExpression, annotationExcludes );
     }
 
+  public UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression )
+    {
+    super( logLevel, phase, ruleExpression );
+    }
+
+  public UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression, ElementAnnotation... annotations )
+    {
+    super( logLevel, phase, ruleExpression, annotations );
+    }
+
+  public UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression, Enum... annotationExcludes )
+    {
+    super( logLevel, phase, ruleExpression, annotationExcludes );
+    }
+
+  public UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression )
+    {
+    super( logLevel, phase, partitionSource, ruleExpression );
+    }
+
+  public UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression, ElementAnnotation... annotations )
+    {
+    super( logLevel, phase, partitionSource, ruleExpression, annotations );
+    }
+
+  public UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, PartitionSource partitionSource, RuleExpression ruleExpression, Enum... annotationExcludes )
+    {
+    super( logLevel, phase, partitionSource, ruleExpression, annotationExcludes );
+    }
+
   protected UniquePathRulePartitioner( PlanPhase phase, GraphPartitioner graphPartitioner )
     {
     super( phase, graphPartitioner );
+    }
+
+  protected UniquePathRulePartitioner( LogLevel logLevel, PlanPhase phase, GraphPartitioner graphPartitioner )
+    {
+    super( logLevel, phase, graphPartitioner );
     }
 
   protected UniquePathRulePartitioner( PlanPhase phase )

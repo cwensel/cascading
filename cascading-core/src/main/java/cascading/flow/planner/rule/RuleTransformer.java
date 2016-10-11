@@ -38,7 +38,7 @@ import static cascading.flow.planner.rule.util.RuleLogUtil.restoreLogging;
  */
 public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph> implements Rule
   {
-  private final LogLevel level;
+  private final LogLevel logLevel;
   private final PlanPhase phase;
   protected final RuleExpression ruleExpression;
   protected final ContractedTransformer contractedTransformer;
@@ -51,9 +51,9 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
     this( null, phase, ruleExpression );
     }
 
-  public RuleTransformer( LogLevel level, PlanPhase phase, RuleExpression ruleExpression )
+  public RuleTransformer( LogLevel logLevel, PlanPhase phase, RuleExpression ruleExpression )
     {
-    this.level = level;
+    this.logLevel = logLevel;
     this.phase = phase;
     this.ruleExpression = ruleExpression;
 
@@ -90,7 +90,7 @@ public class RuleTransformer extends GraphTransformer<ElementGraph, ElementGraph
   @Override
   public Transformed<ElementGraph> transform( PlannerContext plannerContext, ElementGraph rootGraph )
     {
-    String[] logLevels = enableLogging( level );
+    String[] logLevels = enableLogging( logLevel );
 
     try
       {

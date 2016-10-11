@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,12 +24,18 @@ package cascading.flow.planner.rule.partitioner;
 import cascading.flow.planner.iso.subgraph.partitioner.WholeGraphPartitioner;
 import cascading.flow.planner.rule.PlanPhase;
 import cascading.flow.planner.rule.RulePartitioner;
+import cascading.flow.planner.rule.util.LogLevel;
 
 /**
  *
  */
 public class WholeGraphRulePartitioner extends RulePartitioner
   {
+  protected WholeGraphRulePartitioner( LogLevel logLevel, PlanPhase phase )
+    {
+    super( logLevel, phase, PartitionSource.PartitionParent, new WholeGraphPartitioner() );
+    }
+
   protected WholeGraphRulePartitioner( PlanPhase phase )
     {
     super( phase, PartitionSource.PartitionParent, new WholeGraphPartitioner() );
