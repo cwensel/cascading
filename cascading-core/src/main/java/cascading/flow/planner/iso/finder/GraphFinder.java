@@ -89,7 +89,7 @@ public class GraphFinder
     {
     Map<ElementExpression, FlowElement> mapping = findMapping( finderContext, plannerContext, elementGraph );
 
-    return new Match( matchExpression, elementGraph, mapping, mapping.values(), getAllEdges( plannerContext, elementGraph, mapping ) );
+    return new Match( matchExpression, elementGraph, mapping, mapping.values(), getCapturedEdges( plannerContext, elementGraph, mapping ) );
     }
 
   public Match findAllMatches( ElementGraph elementGraph )
@@ -190,7 +190,7 @@ public class GraphFinder
       Map<ElementExpression, FlowElement> vertexMapping = current.getVertexMapping();
 
       finderContext.getMatchedElements().addAll( vertexMapping.values() );
-      finderContext.getMatchedScopes().addAll( getAllEdges( plannerContext, elementGraph, vertexMapping ) );
+      finderContext.getMatchedScopes().addAll( getCapturedEdges( plannerContext, elementGraph, vertexMapping ) );
 
       if( firstOnly ) // we are not rotating around the primary capture
         break;
@@ -212,13 +212,16 @@ public class GraphFinder
     return new Match( matchExpression, elementGraph, mapping, finderContext.getMatchedElements(), finderContext.getMatchedScopes(), captureMap );
     }
 
-  public Map<ScopeExpression, Set<Scope>> getEdgeMapping( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
+  public Map<ScopeExpression, Set<Scope>> getCapturedEdgeMapping( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
     {
     Map<ScopeExpression, Set<Scope>> edgeMapping = new HashMap<>();
 
     DirectedMultigraph<ElementExpression, ScopeExpression> delegate = matchExpression.getGraph();
     for( ScopeExpression scopeExpression : delegate.edgeSet() )
       {
+      if( !scopeExpression.isCapture() )
+        continue;
+
       ElementExpression lhs = delegate.getEdgeSource( scopeExpression );
       ElementExpression rhs = delegate.getEdgeTarget( scopeExpression );
 
@@ -234,11 +237,14 @@ public class GraphFinder
     return edgeMapping;
     }
 
-  public Set<Scope> getAllEdges( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
+  public Set<Scope> getCapturedEdges( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
     {
     Set<Scope> scopes = new HashSet<>();
 
-    for( Set<Scope> set : getEdgeMapping( plannerContext, elementGraph, vertexMapping ).values() )
+    if( vertexMapping.isEmpty() )
+      return scopes;
+
+    for( Set<Scope> set : getCapturedEdgeMapping( plannerContext, elementGraph, vertexMapping ).values() )
       scopes.addAll( set );
 
     return scopes;

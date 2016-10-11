@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -178,6 +179,12 @@ public class ExpressionGraph
     protected DelegateScopeExpression( ScopeExpression delegate )
       {
       this.delegate = delegate;
+      }
+
+    @Override
+    public boolean isCapture()
+      {
+      return delegate.isCapture();
       }
 
     @Override

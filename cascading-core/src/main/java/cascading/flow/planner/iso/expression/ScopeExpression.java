@@ -39,6 +39,8 @@ public abstract class ScopeExpression implements Expression<Scope>
   public static final PathScopeExpression ALL = new PathScopeExpression( Applies.All );
   public static final PathScopeExpression EACH = new PathScopeExpression( Applies.Each ); // unsupported
 
+  public static final PathScopeExpression NO_CAPTURE = new PathScopeExpression( false, Applies.All );
+
   public enum Applies
     {
       /**
@@ -57,6 +59,7 @@ public abstract class ScopeExpression implements Expression<Scope>
       Each
     }
 
+  protected boolean capture = true;
   protected Applies applies = Applies.Any;
 
   protected ScopeExpression()
@@ -66,6 +69,20 @@ public abstract class ScopeExpression implements Expression<Scope>
   protected ScopeExpression( Applies applies )
     {
     this.applies = applies;
+    }
+
+  public ScopeExpression( boolean capture, Applies applies )
+    {
+    this.capture = capture;
+    this.applies = applies;
+
+    if( capture == false && applies != Applies.All )
+      throw new IllegalArgumentException( "applies must be ALL if capture is false" );
+    }
+
+  public boolean isCapture()
+    {
+    return capture;
     }
 
   public boolean appliesToAllPaths()
@@ -91,5 +108,15 @@ public abstract class ScopeExpression implements Expression<Scope>
   public Applies getApplies()
     {
     return applies;
+    }
+
+  @Override
+  public String toString()
+    {
+    final StringBuilder sb = new StringBuilder( "ScopeExpression{" );
+    sb.append( "capture=" ).append( capture );
+    sb.append( ", applies=" ).append( applies );
+    sb.append( '}' );
+    return sb.toString();
     }
   }

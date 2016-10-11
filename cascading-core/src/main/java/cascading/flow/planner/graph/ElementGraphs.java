@@ -130,9 +130,33 @@ public class ElementGraphs
     return elementDirectedGraph;
     }
 
+  public static boolean isEmpty( ElementGraph elementGraph )
+    {
+    int size = elementGraph.vertexSet().size();
+
+    if( size == 0 )
+      return true;
+
+    return size == 2 && elementGraph.containsVertex( Extent.head ) && elementGraph.containsVertex( Extent.tail );
+    }
+
   private static class IdentityDirectedGraph<V, E> extends SimpleDirectedGraph<V, E>
     {
     public IdentityDirectedGraph( Class<? extends E> edgeClass )
+      {
+      super( edgeClass );
+      }
+
+    @Override
+    protected DirectedSpecifics createDirectedSpecifics()
+      {
+      return new DirectedSpecifics( new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
+      }
+    }
+
+  private static class IdentityMultiGraphGraph<V, E> extends DirectedMultigraph<V, E>
+    {
+    public IdentityMultiGraphGraph( Class<? extends E> edgeClass )
       {
       super( edgeClass );
       }
@@ -439,12 +463,22 @@ public class ElementGraphs
       {
       if( contracted.inDegreeOf( v ) == 0 )
         excludeEdges.addAll( full.incomingEdgesOf( v ) );
-      }
 
-    for( V v : contracted.vertexSet() )
-      {
       if( contracted.outDegreeOf( v ) == 0 )
         excludeEdges.addAll( full.outgoingEdgesOf( v ) );
+      }
+
+    // exclude edged between nodes in full that are not in the contracted graph
+    for( V outer : contracted.vertexSet() )
+      {
+      for( V inner : contracted.vertexSet() )
+        {
+        if( outer == inner )
+          continue;
+
+        if( contracted.getAllEdges( inner, outer ).isEmpty() )
+          excludeEdges.addAll( full.getAllEdges( inner, outer ) );
+        }
       }
 
     DirectedGraph<V, E> disconnected = disconnectExtentsAndExclude( full, excludeEdges );
@@ -474,7 +508,7 @@ public class ElementGraphs
 
   private static <V, E> DirectedGraph<V, E> disconnectExtentsAndExclude( DirectedGraph<V, E> full, Set<E> withoutEdges )
     {
-    IdentityDirectedGraph<V, E> copy = (IdentityDirectedGraph<V, E>) new IdentityDirectedGraph<>( Object.class );
+    IdentityMultiGraphGraph<V, E> copy = (IdentityMultiGraphGraph<V, E>) new IdentityMultiGraphGraph<>( Object.class );
 
     Graphs.addAllVertices( copy, full.vertexSet() );
 

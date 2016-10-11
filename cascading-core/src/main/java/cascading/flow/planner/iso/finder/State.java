@@ -444,8 +444,7 @@ class State
         int other2 = core1[ other1 ];
         // If there's node edge to the other node, or if there is some
         // edge incompatibility, then the mapping is not feasible
-        if( !elementGraph.containsEdge( node2, other2 ) ||
-          !areCompatibleEdges( node1, other1, node2, other2 ) )
+        if( !elementGraph.containsEdge( node2, other2 ) || !areCompatibleEdges( node1, other1, node2, other2 ) )
           return false;
         }
       else
@@ -467,8 +466,7 @@ class State
         int other2 = core1[ other1 ];
         // If there's node edge to the other node, or if there is some
         // edge incompatibility, then the mapping is not feasible
-        if( !elementGraph.containsEdge( other2, node2 ) ||
-          !areCompatibleEdges( other1, node1, other2, node2 ) )
+        if( !elementGraph.containsEdge( other2, node2 ) || !areCompatibleEdges( other1, node1, other2, node2 ) )
           return false;
         }
       else
@@ -642,10 +640,7 @@ class State
 
   public boolean isDead()
     {
-    return n1 > n2
-      || t1bothLen > t2bothLen
-      || t1outLen > t2outLen
-      || t1inLen > t2inLen;
+    return n1 > n2 || t1bothLen > t2bothLen || t1outLen > t2outLen || t1inLen > t2inLen;
     }
 
   public Map<Integer, Integer> getVertexMapping()

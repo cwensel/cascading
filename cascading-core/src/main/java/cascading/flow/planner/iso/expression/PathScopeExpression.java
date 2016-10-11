@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -54,6 +55,11 @@ public class PathScopeExpression extends ScopeExpression
     this.applies = applies;
     }
 
+  public PathScopeExpression( boolean capture, Applies applies )
+    {
+    super( capture, applies );
+    }
+
   public PathScopeExpression( Mode mode )
     {
     this.mode = mode;
@@ -62,6 +68,12 @@ public class PathScopeExpression extends ScopeExpression
   public PathScopeExpression( Applies applies, Mode mode )
     {
     super( applies );
+    this.mode = mode;
+    }
+
+  public PathScopeExpression( boolean capture, Applies applies, Mode mode )
+    {
+    super( capture, applies );
     this.mode = mode;
     }
 
@@ -101,7 +113,8 @@ public class PathScopeExpression extends ScopeExpression
   public String toString()
     {
     final StringBuilder sb = new StringBuilder( "PathScopeExpression{" );
-    sb.append( "path=" ).append( applies );
+    sb.append( "capture=" ).append( capture );
+    sb.append( ", applies=" ).append( applies );
     sb.append( ", mode=" ).append( mode );
     sb.append( '}' );
     return sb.toString();

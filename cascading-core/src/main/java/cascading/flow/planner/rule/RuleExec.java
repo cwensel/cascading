@@ -34,6 +34,7 @@ import cascading.flow.planner.PlannerException;
 import cascading.flow.planner.graph.AnnotatedGraph;
 import cascading.flow.planner.graph.BoundedElementMultiGraph;
 import cascading.flow.planner.graph.ElementGraph;
+import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.graph.ElementMultiGraph;
 import cascading.flow.planner.graph.FlowElementGraph;
 import cascading.flow.planner.graph.IgnoreAnnotationsHashSet;
@@ -429,10 +430,10 @@ public class RuleExec
 
         ElementGraph endGraph = transformed.getEndGraph();
 
-        if( endGraph != null )
-          results.add( endGraph );
-        else
+        if( endGraph == null )
           results.add( child );
+        else if( !ElementGraphs.isEmpty( endGraph ) )
+          results.add( endGraph );
         }
 
       ruleResult.setLevelResults( phase.getLevel(), parent, results );
