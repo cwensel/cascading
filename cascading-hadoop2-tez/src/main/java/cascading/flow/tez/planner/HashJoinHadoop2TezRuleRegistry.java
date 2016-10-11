@@ -37,6 +37,7 @@ import cascading.flow.tez.planner.rule.annotator.AccumulatedPostNodeAnnotator;
 import cascading.flow.tez.planner.rule.assertion.DualStreamedAccumulatedMergeNodeAssert;
 import cascading.flow.tez.planner.rule.partitioner.BottomUpBoundariesNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.BottomUpJoinedBoundariesNodePartitioner;
+import cascading.flow.tez.planner.rule.partitioner.BottomUpJoinedBoundariesTriangleNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.ConsecutiveGroupOrMergesNodePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.SplitJoinBoundariesNodeRePartitioner;
 import cascading.flow.tez.planner.rule.partitioner.StreamedAccumulatedBoundariesNodeRePartitioner;
@@ -113,6 +114,7 @@ public class HashJoinHadoop2TezRuleRegistry extends RuleRegistry
 
     // hash join inclusion
     addRule( new BottomUpJoinedBoundariesNodePartitioner() ); // will capture multiple inputs into sink for use with HashJoins
+    addRule( new BottomUpJoinedBoundariesTriangleNodePartitioner() ); // will capture multiple inputs into sink for use with HashJoins
     addRule( new StreamedAccumulatedBoundariesNodeRePartitioner() ); // joinsIntoCoGroupLhs & groupBySplitJoins
     addRule( new StreamedOnlySourcesNodeRePartitioner() );
 

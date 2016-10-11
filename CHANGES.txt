@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.2.0 [unreleased]
 
+  Fixed issue where a triangle of split through a c.p.HashJoin into a c.p.Merge on Apache Tez would fail
+  during planning.
+
   Fixed issue where a triangle of split and joins on Apache Hadoop MapReduce would fail during planning.
 
   Fixed issue where trivial pipe assemblies that reduced to assemblies with multiple edges between two elements would

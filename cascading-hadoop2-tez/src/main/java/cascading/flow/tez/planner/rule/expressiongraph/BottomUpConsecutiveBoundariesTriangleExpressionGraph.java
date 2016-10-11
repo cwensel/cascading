@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +25,7 @@ import cascading.flow.planner.iso.expression.ElementCapture;
 import cascading.flow.planner.iso.expression.ElementExpression;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.expression.FlowElementExpression;
-import cascading.flow.planner.iso.expression.PathScopeExpression;
+import cascading.flow.planner.iso.expression.ScopeExpression;
 import cascading.flow.planner.iso.expression.TypeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.flow.planner.rule.elementexpression.BoundariesElementExpression;
@@ -44,13 +43,20 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 /**
  *
  */
-public class BottomUpConsecutiveBoundariesExpressionGraph extends ExpressionGraph
+public class BottomUpConsecutiveBoundariesTriangleExpressionGraph extends ExpressionGraph
   {
-  public BottomUpConsecutiveBoundariesExpressionGraph()
+  public BottomUpConsecutiveBoundariesTriangleExpressionGraph()
     {
     super( SearchOrder.ReverseTopological );
 
-    ElementExpression head = or(
+    ElementExpression lhs = or(
+      new FlowElementExpression( Boundary.class ),
+      new FlowElementExpression( Tap.class ),
+      new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut ),
+      new FlowElementExpression( Merge.class, TypeExpression.Topo.LinearOut )
+    );
+
+    ElementExpression rhs = or(
       new FlowElementExpression( Boundary.class ),
       new FlowElementExpression( Tap.class ),
       new FlowElementExpression( Group.class, TypeExpression.Topo.LinearOut ),
@@ -69,9 +75,17 @@ public class BottomUpConsecutiveBoundariesExpressionGraph extends ExpressionGrap
     );
 
     this.arc(
-      head,
+      lhs,
 
-      PathScopeExpression.ANY,
+      ScopeExpression.ANY,
+
+      shared
+    );
+
+    this.arc(
+      rhs,
+
+      ScopeExpression.ANY,
 
       shared
     );
@@ -79,7 +93,15 @@ public class BottomUpConsecutiveBoundariesExpressionGraph extends ExpressionGrap
     this.arc(
       shared,
 
-      PathScopeExpression.ANY,
+      ScopeExpression.ANY,
+
+      tail
+    );
+
+    this.arc(
+      rhs,
+
+      ScopeExpression.NO_CAPTURE, // match, but do not include edge in result graph
 
       tail
     );

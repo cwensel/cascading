@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -112,6 +113,12 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
 
   @Override
   public boolean isDAG()
+    {
+    return true;
+    }
+
+  @Override
+  public boolean supportsGroupByAfterMerge()
     {
     return true;
     }
@@ -291,20 +298,20 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
       return;
 
     securityManager = new SecurityManager()
-    {
-    public void checkPermission( Permission permission )
       {
-      if( !"exitVM".equals( permission.getName() ) )
-        return;
+      public void checkPermission( Permission permission )
+        {
+        if( !"exitVM".equals( permission.getName() ) )
+          return;
 
-      StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-      for( StackTraceElement stackTraceElement : stackTrace )
-        LOG.warn( "exit vm trace: {}", stackTraceElement );
+        for( StackTraceElement stackTraceElement : stackTrace )
+          LOG.warn( "exit vm trace: {}", stackTraceElement );
 
-      throw new ExitTrappedException();
-      }
-    };
+        throw new ExitTrappedException();
+        }
+      };
 
     System.setSecurityManager( securityManager );
     }

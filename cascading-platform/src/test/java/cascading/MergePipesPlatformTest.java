@@ -94,6 +94,48 @@ public class MergePipesPlatformTest extends PlatformTestCase
     }
 
   /**
+   * Confirms support for Merge->GroupBy
+   * <p>
+   * On Tez, this results in an identity node
+   * <p>
+   * TODO: tez planner logical optimization - remove Merge and push 'merge' to GroupBy
+   */
+  @Test
+  public void testMergeGroupBy() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap sourceUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), getOutputPath(), SinkMode.REPLACE );
+
+    Pipe pipeLower = new Pipe( "lower" );
+    Pipe pipeUpper = new Pipe( "upper" );
+
+    Pipe splice = new Merge( "merge", pipeLower, pipeUpper );
+
+    splice = new GroupBy( splice, Fields.ALL );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+
+    Collection results = getSinkAsList( flow );
+
+    assertTrue( "missing value", results.contains( new Tuple( "1\ta" ) ) );
+    assertTrue( "missing value", results.contains( new Tuple( "1\tA" ) ) );
+    }
+
+  /**
    * Specifically tests GroupBy will return the correct grouping fields to the following Every
    *
    * @throws Exception
@@ -356,6 +398,9 @@ public class MergePipesPlatformTest extends PlatformTestCase
     validateLength( flow, 3 );
     }
 
+  /**
+   * Verifies field names are consistent across streams
+   */
   @Test
   public void testSimpleMergeFail() throws Exception
     {
@@ -723,9 +768,180 @@ public class MergePipesPlatformTest extends PlatformTestCase
 
     FlowConnector flowConnector = getPlatform().getFlowConnector();
 
-//    flowConnector.getRuleRegistrySet().setPlannerTimeoutSec( 20 );
-
     Flow flow = flowConnector.connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
+  @Test
+  public void testHashJoinMerge() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap lower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap upper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+    Tap offset = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLowerOffset );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs" );
+    Pipe mid = new Pipe( "mid" );
+    Pipe rhs = new Pipe( "rhs" );
+
+    mid = new Rename( mid, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), mid, new Fields( "num2" ) );
+
+    join = new Retain( join, new Fields( "num", "char" ) );
+
+    Pipe merge = new Merge( "merge", join, rhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( lhs, lower )
+      .addSource( mid, upper )
+      .addSource( rhs, offset )
+      .addTailSink( merge, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 9 );
+    }
+
+  // BottomUpJoinedBoundariesNodePartitioner
+  @Test
+  public void testSameSourceHashJoinMergeOnStreamed() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap lower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap upper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs" );
+    Pipe accumulated = new Pipe( "accumulated" );
+    Pipe rhs = new Pipe( "rhs" );
+
+    accumulated = new Rename( accumulated, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), accumulated, new Fields( "num2" ) );
+
+    join = new Retain( join, new Fields( "num", "char" ) );
+
+    Pipe merge = new Merge( "merge", join, rhs );
+
+    // split feeds hashjoin streamed side
+    FlowDef flowDef = FlowDef.flowDef()
+      .setName( "streamed" )
+      .addSource( lhs, lower )
+      .addSource( accumulated, upper )
+      .addSource( rhs, lower )
+      .addTailSink( merge, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
+  // BottomUpJoinedBoundariesNodePartitioner
+  @Test
+  public void testSameSourceHashJoinMergeOnAccumulated() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap lower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap upper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs" );
+    Pipe accumulated = new Pipe( "accumulated" );
+    Pipe rhs = new Pipe( "rhs" );
+
+    // forces no_capture edge to work
+//    rhs = new Retain( rhs, Fields.ALL );
+
+    accumulated = new Rename( accumulated, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), accumulated, new Fields( "num2" ) );
+
+    join = new Retain( join, new Fields( "num", "char" ) );
+
+    Pipe merge = new Merge( "merge", join, rhs );
+
+    // split feeds hashjoin accumulated side
+    FlowDef flowDef = FlowDef.flowDef()
+      .setName( "accumulated" )
+      .addSource( lhs, upper )
+      .addSource( accumulated, lower )
+      .addSource( rhs, lower )
+      .addTailSink( merge, sink );
+
+    boolean failOnPlanner = !getPlatform().supportsGroupByAfterMerge();
+
+    Flow flow;
+
+    try
+      {
+      flow = getPlatform().getFlowConnector().connect( flowDef );
+
+      if( failOnPlanner )
+        fail( "planner should throw error on plan" );
+      }
+    catch( Exception exception )
+      {
+      if( !failOnPlanner )
+        throw exception;
+
+      return;
+      }
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
+  /**
+   * TODO: tez plan optimization - remove Boundary insertion and rely on DistCacheTap rule to provide broadcast
+   */
+  @Test
+  public void testSelfHashJoinMerge() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap lower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap upper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhs = new Pipe( "lhs" );
+    Pipe mid = new Pipe( "mid" );
+    Pipe rhs = new Pipe( "rhs" );
+
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), mid, new Fields( "num" ), new Fields( "num", "char", "num2", "char2" ) );
+
+    join = new Retain( join, new Fields( "num", "char" ) );
+
+    Pipe merge = new Merge( "merge", join, rhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( lhs, lower )
+      .addSource( mid, lower )
+      .addSource( rhs, upper )
+      .addTailSink( merge, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
 
     flow.complete();
 
