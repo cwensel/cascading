@@ -73,12 +73,6 @@ public class LocalPlatform extends TestPlatform
     }
 
   @Override
-  public boolean supportsGroupByAfterMerge()
-    {
-    return true;
-    }
-
-  @Override
   public void copyFromLocal( String inputFile ) throws IOException
     {
     }

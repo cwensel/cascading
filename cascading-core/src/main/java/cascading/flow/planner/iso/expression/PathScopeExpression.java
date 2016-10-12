@@ -39,6 +39,9 @@ public class PathScopeExpression extends ScopeExpression
   public static final PathScopeExpression ANY_BLOCKING = new PathScopeExpression( Applies.Any, Mode.Blocking );
   public static final PathScopeExpression ANY_NON_BLOCKING = new PathScopeExpression( Applies.Any, Mode.NonBlocking );
 
+  public static final PathScopeExpression ALL_BLOCKING_NO_CAPTURE = new PathScopeExpression( false, Applies.All, Mode.Blocking );
+  public static final PathScopeExpression ALL_NON_BLOCKING_NO_CAPTURE = new PathScopeExpression( false, Applies.All, Mode.NonBlocking );
+
   public enum Mode
     {
       Ignore, Blocking, NonBlocking

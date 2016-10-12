@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,6 +30,7 @@ import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.iso.expression.ExpressionGraph;
 import cascading.flow.planner.iso.finder.GraphFinder;
 import cascading.flow.planner.iso.finder.Match;
+import cascading.flow.planner.rule.TransformException;
 import cascading.util.ProcessLogger;
 
 /**
@@ -115,7 +117,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
     if( processLogger.isDebugEnabled() )
       processLogger.logDebug( "performing transform in place within: {}", this.getClass().getSimpleName() );
 
-    boolean transformResult = transformGraphInPlaceUsing( transformed, graph, match );
+    boolean transformResult = transformGraphInPlaceUsingSafe( transformed, graph, match );
 
     if( processLogger.isDebugEnabled() )
       processLogger.logDebug( "completed transform in place within: {}, with result: {}", this.getClass().getSimpleName(), transformResult );
@@ -129,6 +131,22 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
       return graph;
 
     return transform( processLogger, transformed, graph, maxDepth, ++currentDepth );
+    }
+
+  private boolean transformGraphInPlaceUsingSafe( Transformed<E> transformed, E graph, Match match )
+    {
+    try
+      {
+      return transformGraphInPlaceUsing( transformed, graph, match );
+      }
+    catch( TransformException exception )
+      {
+      throw exception;
+      }
+    catch( Throwable throwable )
+      {
+      throw new TransformException( throwable, transformed );
+      }
     }
 
   /**

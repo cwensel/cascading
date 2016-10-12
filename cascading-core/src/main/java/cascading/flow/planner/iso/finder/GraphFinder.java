@@ -212,16 +212,13 @@ public class GraphFinder
     return new Match( matchExpression, elementGraph, mapping, finderContext.getMatchedElements(), finderContext.getMatchedScopes(), captureMap );
     }
 
-  public Map<ScopeExpression, Set<Scope>> getCapturedEdgeMapping( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
+  public Map<ScopeExpression, Set<Scope>> getEdgeMapping( PlannerContext plannerContext, ElementGraph elementGraph, Map<ElementExpression, FlowElement> vertexMapping )
     {
     Map<ScopeExpression, Set<Scope>> edgeMapping = new HashMap<>();
 
     DirectedMultigraph<ElementExpression, ScopeExpression> delegate = matchExpression.getGraph();
     for( ScopeExpression scopeExpression : delegate.edgeSet() )
       {
-      if( !scopeExpression.isCapture() )
-        continue;
-
       ElementExpression lhs = delegate.getEdgeSource( scopeExpression );
       ElementExpression rhs = delegate.getEdgeTarget( scopeExpression );
 
@@ -244,8 +241,11 @@ public class GraphFinder
     if( vertexMapping.isEmpty() )
       return scopes;
 
-    for( Set<Scope> set : getCapturedEdgeMapping( plannerContext, elementGraph, vertexMapping ).values() )
-      scopes.addAll( set );
+    for( Map.Entry<ScopeExpression, Set<Scope>> entry : getEdgeMapping( plannerContext, elementGraph, vertexMapping ).entrySet() )
+      {
+      if( entry.getKey().isCapture() )
+        scopes.addAll( entry.getValue() );
+      }
 
     return scopes;
     }

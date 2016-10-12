@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,25 +18,21 @@
  * limitations under the License.
  */
 
-package cascading.flow.hadoop.planner.rule.assertion;
+package cascading.flow.hadoop.planner.rule.expression;
 
-import cascading.flow.hadoop.planner.rule.expression.DualStreamedAccumulatedExpression;
-import cascading.flow.planner.rule.RuleAssert;
-
-import static cascading.flow.planner.rule.PlanPhase.PostPipelines;
+import cascading.flow.planner.rule.RuleExpression;
+import cascading.flow.planner.rule.expressiongraph.NoGroupJoinMergeBoundaryTapExpressionGraph;
 
 /**
- * Throws a planner failure if a Tap, both accumulating and streamed, flows into a single merge within a given
- * pipeline.
+ *
  */
-public class DualStreamedAccumulatedMergePipelineAssert extends RuleAssert
+public class StreamedAccumulatedTapsHashJoinPipelinePartitionExpression extends RuleExpression
   {
-  public DualStreamedAccumulatedMergePipelineAssert()
+  public StreamedAccumulatedTapsHashJoinPipelinePartitionExpression()
     {
     super(
-      PostPipelines,
-      new DualStreamedAccumulatedExpression(),
-      "may not merge accumulated and streamed in same pipeline: {Secondary}"
+      new NoGroupJoinMergeBoundaryTapExpressionGraph(),
+      new StreamedAccumulatedTapsHashJoinExpressionGraph()
     );
     }
   }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -422,9 +423,24 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
       groups.add( group );
     }
 
+  /**
+   * Returns all source Tap instances annotated by the planner as being {@link StreamMode#Accumulated}.
+   *
+   * @return Set of accumulated Tap instances
+   */
   public Set<Tap> getAllAccumulatedSources()
     {
     return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
+    }
+
+  /**
+   * Returns all source Tap instances annotated by the planner as being {@link StreamMode#Streamed}.
+   *
+   * @return Set of streamed Tap instances
+   */
+  public Set<Tap> getAllStreamedSources()
+    {
+    return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Streamed ) );
     }
 
   public void addSource( String name, Tap source )

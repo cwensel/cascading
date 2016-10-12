@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.2.0 [unreleased]
 
+  Fixed issue on Apache Hadoop MapReduce where a c.t.Tap used in both accumulated and streamed roles within a single
+  step, but having distinct roles in different pipelines, could not be successfully planned and executed.
+
   Fixed issue where a triangle of split through a c.p.HashJoin into a c.p.Merge on Apache Tez would fail
   during planning.
 

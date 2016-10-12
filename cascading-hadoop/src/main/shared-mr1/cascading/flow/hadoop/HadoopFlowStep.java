@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -450,6 +451,11 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     {
     Set<Tap> allAccumulatedSources = getAllAccumulatedSources();
 
+    // if a source is dual accumulated and streamed, honor the streamed annotation
+    allAccumulatedSources.removeAll( getAllStreamedSources() );
+
+    // start with the full source declaration and removed undesired taps. the above methods are dependent on
+    // annotations which may not exist, so we are safeguarding a declared tap is treated streamed by default
     HashSet<Tap> set = new HashSet<>( sources.keySet() );
 
     set.removeAll( allAccumulatedSources );

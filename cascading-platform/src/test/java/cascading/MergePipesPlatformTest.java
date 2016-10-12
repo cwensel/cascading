@@ -813,7 +813,11 @@ public class MergePipesPlatformTest extends PlatformTestCase
     validateLength( flow, 9 );
     }
 
-  // BottomUpJoinedBoundariesNodePartitioner
+  /**
+   * TODO: tez plan optimization - remove Boundary insertion and rely on DistCacheTap rule to provide broadcast
+   * <p>
+   * BottomUpJoinedBoundariesNodePartitioner
+   */
   @Test
   public void testSameSourceHashJoinMergeOnStreamed() throws Exception
     {
@@ -829,9 +833,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
     Pipe accumulated = new Pipe( "accumulated" );
     Pipe rhs = new Pipe( "rhs" );
 
-    accumulated = new Rename( accumulated, Fields.ALL, new Fields( "num2", "char2" ) );
-
-    Pipe join = new HashJoin( lhs, new Fields( "num" ), accumulated, new Fields( "num2" ) );
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), accumulated, new Fields( "num" ), new Fields( "num", "char", "num2", "char2" ) );
 
     join = new Retain( join, new Fields( "num", "char" ) );
 
@@ -852,7 +854,11 @@ public class MergePipesPlatformTest extends PlatformTestCase
     validateLength( flow, 10 );
     }
 
-  // BottomUpJoinedBoundariesNodePartitioner
+  /**
+   * TODO: tez plan optimization - remove Boundary insertion and rely on DistCacheTap rule to provide broadcast
+   * <p>
+   * BottomUpJoinedBoundariesNodePartitioner
+   */
   @Test
   public void testSameSourceHashJoinMergeOnAccumulated() throws Exception
     {
@@ -868,12 +874,7 @@ public class MergePipesPlatformTest extends PlatformTestCase
     Pipe accumulated = new Pipe( "accumulated" );
     Pipe rhs = new Pipe( "rhs" );
 
-    // forces no_capture edge to work
-//    rhs = new Retain( rhs, Fields.ALL );
-
-    accumulated = new Rename( accumulated, Fields.ALL, new Fields( "num2", "char2" ) );
-
-    Pipe join = new HashJoin( lhs, new Fields( "num" ), accumulated, new Fields( "num2" ) );
+    Pipe join = new HashJoin( lhs, new Fields( "num" ), accumulated, new Fields( "num" ), new Fields( "num", "char", "num2", "char2" ) );
 
     join = new Retain( join, new Fields( "num", "char" ) );
 
@@ -885,60 +886,6 @@ public class MergePipesPlatformTest extends PlatformTestCase
       .addSource( lhs, upper )
       .addSource( accumulated, lower )
       .addSource( rhs, lower )
-      .addTailSink( merge, sink );
-
-    boolean failOnPlanner = !getPlatform().supportsGroupByAfterMerge();
-
-    Flow flow;
-
-    try
-      {
-      flow = getPlatform().getFlowConnector().connect( flowDef );
-
-      if( failOnPlanner )
-        fail( "planner should throw error on plan" );
-      }
-    catch( Exception exception )
-      {
-      if( !failOnPlanner )
-        throw exception;
-
-      return;
-      }
-
-    flow.complete();
-
-    validateLength( flow, 10 );
-    }
-
-  /**
-   * TODO: tez plan optimization - remove Boundary insertion and rely on DistCacheTap rule to provide broadcast
-   */
-  @Test
-  public void testSelfHashJoinMerge() throws Exception
-    {
-    getPlatform().copyFromLocal( inputFileLower );
-    getPlatform().copyFromLocal( inputFileUpper );
-
-    Tap lower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
-    Tap upper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
-
-    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
-
-    Pipe lhs = new Pipe( "lhs" );
-    Pipe mid = new Pipe( "mid" );
-    Pipe rhs = new Pipe( "rhs" );
-
-    Pipe join = new HashJoin( lhs, new Fields( "num" ), mid, new Fields( "num" ), new Fields( "num", "char", "num2", "char2" ) );
-
-    join = new Retain( join, new Fields( "num", "char" ) );
-
-    Pipe merge = new Merge( "merge", join, rhs );
-
-    FlowDef flowDef = FlowDef.flowDef()
-      .addSource( lhs, lower )
-      .addSource( mid, lower )
-      .addSource( rhs, upper )
       .addTailSink( merge, sink );
 
     Flow flow = getPlatform().getFlowConnector().connect( flowDef );

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -87,9 +88,13 @@ public abstract class TestPlatform
     return getClass().getSimpleName().replaceAll( "^(.*)Platform$", "$1" ).toLowerCase();
     }
 
+  /**
+   * Prior versions of all the planners had challenges with Merge->GroupBy and related plans.
+   */
+  @Deprecated
   public boolean supportsGroupByAfterMerge()
     {
-    return false;
+    return true;
     }
 
   public boolean isMapReduce()

@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -28,6 +27,8 @@ import cascading.flow.planner.iso.expression.FlowElementExpression;
 import cascading.flow.planner.iso.expression.PathScopeExpression;
 import cascading.flow.planner.iso.finder.SearchOrder;
 import cascading.pipe.Group;
+import cascading.pipe.HashJoin;
+import cascading.pipe.Merge;
 import cascading.tap.Tap;
 
 import static cascading.flow.planner.iso.expression.OrElementExpression.or;
@@ -35,11 +36,17 @@ import static cascading.flow.planner.iso.expression.OrElementExpression.or;
 /**
  *
  */
-public class StreamedAccumulatedTapsExpressionGraph extends ExpressionGraph
+public class StreamedAccumulatedTapsHashJoinExpressionGraph extends ExpressionGraph
   {
-  public StreamedAccumulatedTapsExpressionGraph()
+  public StreamedAccumulatedTapsHashJoinExpressionGraph()
     {
     super( SearchOrder.Depth );
+
+    FlowElementExpression split = new FlowElementExpression( Tap.class );
+
+    ElementExpression join = new FlowElementExpression( HashJoin.class );
+
+    ElementExpression merge = new FlowElementExpression( Merge.class );
 
     ElementExpression sink = or(
       ElementCapture.Secondary,
@@ -50,12 +57,30 @@ public class StreamedAccumulatedTapsExpressionGraph extends ExpressionGraph
     this.arc(
       new FlowElementExpression( ElementCapture.Primary, Tap.class ),
       PathScopeExpression.ALL_NON_BLOCKING,
-      sink
+      join
     );
 
     this.arc(
-      new FlowElementExpression( Tap.class ),
+      split,
       PathScopeExpression.ALL_BLOCKING, // if ANY_BLOCKING DualStreamedAccumulatedMergePipelineAssert will fire
+      join
+    );
+
+    this.arc(
+      join,
+      PathScopeExpression.ANY,
+      merge
+    );
+
+    this.arc(
+      split,
+      PathScopeExpression.NO_CAPTURE,
+      merge
+    );
+
+    this.arc(
+      merge,
+      PathScopeExpression.ANY,
       sink
     );
     }

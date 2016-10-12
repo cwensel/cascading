@@ -118,12 +118,6 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
     }
 
   @Override
-  public boolean supportsGroupByAfterMerge()
-    {
-    return true;
-    }
-
-  @Override
   public synchronized void setUp() throws IOException
     {
     if( configuration != null )

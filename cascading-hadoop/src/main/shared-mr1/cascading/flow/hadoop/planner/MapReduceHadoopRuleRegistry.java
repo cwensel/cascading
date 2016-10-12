@@ -21,11 +21,11 @@
 
 package cascading.flow.hadoop.planner;
 
-import cascading.flow.hadoop.planner.rule.assertion.DualStreamedAccumulatedMergePipelineAssert;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.ConsecutiveTapsStepPartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.GroupTapNodePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.MultiTapGroupNodePartitioner;
+import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsHashJoinPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedAccumulatedTapsPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedOnlySourcesPipelinePartitioner;
 import cascading.flow.hadoop.planner.rule.partitioner.StreamedSelfJoinSourcesPipelinePartitioner;
@@ -109,18 +109,12 @@ public class MapReduceHadoopRuleRegistry extends RuleRegistry
     addRule( new GroupTapNodePartitioner() );
 
     // PartitionPipelines
+    addRule( new StreamedAccumulatedTapsHashJoinPipelinePartitioner() ); // solves streamed/accumulated annotation hiding
     addRule( new StreamedAccumulatedTapsPipelinePartitioner() );
     addRule( new StreamedSelfJoinSourcesPipelinePartitioner() );
     addRule( new StreamedOnlySourcesPipelinePartitioner() );
 
     // PostPipelines
     addRule( new RemoveMalformedHashJoinPipelineTransformer() );
-
-    // remove when GraphFinder supports captured edges
-    addRule( new DualStreamedAccumulatedMergePipelineAssert() );
-
-    // enable when GraphFinder supports captured edges
-//    addRule( new RemoveStreamedBranchTransformer() );
-
     }
   }

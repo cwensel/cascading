@@ -268,9 +268,9 @@ class State
 
   protected boolean areCompatibleEdges( int v1, int v2, int v3, int v4 )
     {
-    // there is probably a more elegant solution
     List<ScopeExpression> matchers = matchGraph.getAllEdgesList( v1, v2 );
 
+    // if there is any edge between the nodes, capture all and return true
     if( matchers.size() == 1 && matchers.get( 0 ).acceptsAll() )
       {
       if( LOG.isDebugEnabled() )

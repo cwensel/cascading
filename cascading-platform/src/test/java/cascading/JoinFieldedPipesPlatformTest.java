@@ -1924,9 +1924,10 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
     }
 
   /**
-   * currently we cannot efficiently plan for this case. better to throw an error
-   * <p/>
    * When run against a cluster a Merge before a GroupBy can hide the streamed/accumulated nature of a branch.
+   * <p>
+   * The planner nw
+   * <p>
    * <p/>
    * commented code is for troubleshooting.
    *
@@ -1964,24 +1965,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
       .addSource( lhs, lhsTap )
       .addTailSink( counted, sink );
 
-    boolean failOnPlanner = !getPlatform().supportsGroupByAfterMerge();
-
-    Flow flow = null;
-
-    try
-      {
-      flow = getPlatform().getFlowConnector().connect( flowDef );
-
-      if( failOnPlanner )
-        fail( "planner should throw error on plan" );
-      }
-    catch( Exception exception )
-      {
-      if( !failOnPlanner )
-        throw exception;
-
-      return;
-      }
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
 
 //    flow.writeDOT( "joinmerge.dot" );
 //    flow.writeStepsDOT( "joinmerge-steps.dot" );

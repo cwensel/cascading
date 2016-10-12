@@ -39,6 +39,11 @@ public abstract class ScopeExpression implements Expression<Scope>
   public static final PathScopeExpression ALL = new PathScopeExpression( Applies.All );
   public static final PathScopeExpression EACH = new PathScopeExpression( Applies.Each ); // unsupported
 
+  /**
+   * Match the edge, but do not capture it. Only works if the edge matched in the contracted graph is exactly
+   * present in the original graph. If the edge is a contraction of a more complex path, the edges/path won't be
+   * discarded.
+   */
   public static final PathScopeExpression NO_CAPTURE = new PathScopeExpression( false, Applies.All );
 
   public enum Applies
@@ -85,21 +90,38 @@ public abstract class ScopeExpression implements Expression<Scope>
     return capture;
     }
 
+  /**
+   * This match must apply to all the edges between the two candidate nodes for the match to be true.
+   */
   public boolean appliesToAllPaths()
     {
     return applies == Applies.All;
     }
 
+  /**
+   * This match must apply to at least one edge between the two candidate nodes for the match to be true.
+   * <p>
+   * The first to apply is captured.
+   */
   public boolean appliesToAnyPath()
     {
     return applies == Applies.Any;
     }
 
+  /**
+   * This match is applied to each edge, at least one edge between the two candidate nodes must apply for the match
+   * to be true.
+   * <p>
+   * Each edge that applies is captured.
+   */
   public boolean appliesToEachPath()
     {
     return applies == Applies.Each;
     }
 
+  /**
+   * True if there is at least one edge between the candidate nodes.
+   */
   public boolean acceptsAll()
     {
     return appliesToAllPaths();
