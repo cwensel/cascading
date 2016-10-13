@@ -57,6 +57,9 @@ import org.slf4j.LoggerFactory;
  * Implementation in Java, modifications, and bug fixes have been applied.
  * <p/>
  * Keep variable/field naming schemes mirroring the above paper to improve/retain readability.
+ * <p>
+ * Thanks to David Jergens for permission allowing use of his VF2State.java in S-Space to help bootstraps this
+ * implementation. https://github.com/fozziethebeat/S-Space
  * <p/>
  * Notes:
  * <p/>
