@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -971,8 +972,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   final int[] getPos( Fields fields, int tupleSize )
     {
     // test for key, as we stuff a null value
-    if( !isUnknown() && getPosCache().containsKey( fields ) )
-      return getPosCache().get( fields );
+    int[] pos = getPosCache().get( fields );
+
+    if( !isUnknown() && pos != null )
+      return pos;
 
     if( fields.isAll() )
       return putReturn( fields, null ); // return null, not getPos()
@@ -984,7 +987,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     if( size() == 0 && isUnknown() )
       return translatePos( fields, tupleSize );
 
-    int[] pos = translatePos( fields, size() );
+    pos = translatePos( fields, size() );
 
     return putReturn( fields, pos );
     }
