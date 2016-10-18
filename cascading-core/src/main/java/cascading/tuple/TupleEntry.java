@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -800,7 +801,7 @@ public class TupleEntry
       return this.tuple;
 
     if( selector.isNone() )
-      return Tuple.NULL;
+      return isUnmodifiable ? Tuple.NULL : new Tuple();
 
     Tuple result = tuple.get( fields, selector );
 
@@ -954,39 +955,36 @@ public class TupleEntry
   public <T> Iterable<T> asIterableOf( final Class<T> type )
     {
     return new Iterable<T>()
-    {
-    @Override
-    public Iterator<T> iterator()
-      {
-      final Iterator<CoercibleType> coercibleIterator = coercions.length == 0 ?
-        OBJECT_ITERATOR :
-        Arrays.asList( coercions ).iterator();
-
-      final Iterator valuesIterator = tuple.iterator();
-
-      return new Iterator<T>()
       {
       @Override
-      public boolean hasNext()
+      public Iterator<T> iterator()
         {
-        return valuesIterator.hasNext();
-        }
+        final Iterator<CoercibleType> coercibleIterator = coercions.length == 0 ? OBJECT_ITERATOR : Arrays.asList( coercions ).iterator();
+        final Iterator valuesIterator = tuple.iterator();
 
-      @Override
-      public T next()
-        {
-        Object next = valuesIterator.next();
+        return new Iterator<T>()
+          {
+          @Override
+          public boolean hasNext()
+            {
+            return valuesIterator.hasNext();
+            }
 
-        return (T) coercibleIterator.next().coerce( next, type );
-        }
+          @Override
+          public T next()
+            {
+            Object next = valuesIterator.next();
 
-      @Override
-      public void remove()
-        {
-        valuesIterator.remove();
+            return (T) coercibleIterator.next().coerce( next, type );
+            }
+
+          @Override
+          public void remove()
+            {
+            valuesIterator.remove();
+            }
+          };
         }
       };
-      }
-    };
     }
   }
