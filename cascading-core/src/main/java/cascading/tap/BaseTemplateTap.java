@@ -54,6 +54,8 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
     private final Config conf;
     private final Fields parentFields;
     private final Fields pathFields;
+    private final Map<String,String> pathMap = new HashMap<String,String>();
+    private boolean warned = false;
 
     public TemplateCollector( FlowProcess<Config> flowProcess )
       {
@@ -66,6 +68,20 @@ public abstract class BaseTemplateTap<Config, Output> extends SinkTap<Config, Ou
 
     private TupleEntryCollector getCollector( String path )
       {
+      final String lowerPath = path.toLowerCase();
+      
+      if( ! warned ) {
+        if( pathMap.contains( lowerPath ) ) {
+          final String previous = pathMap.get( lowerPath );
+          if ( ! previous.equals( path ) ) {
+            LOG.warning( "paths will collide on case insensitive file systems yielding file corruption, path: {} and {}", previous, path );
+            warned = true;
+          }
+        } else {
+          pathMap.put( lowerPath, path );
+        }
+      }
+
       TupleEntryCollector collector = collectors.get( path );
 
       if( collector != null )
