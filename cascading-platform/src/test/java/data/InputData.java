@@ -53,6 +53,8 @@ public interface InputData
   String testDelimitedExtraField = inputPath + "delimited-extra-field.txt";
   String testDelimitedProblematic = inputPath + "delimited-problematic.txt";
 
+  String textDelimitedFile = inputPath + "delimited-file.txt";
+  
   String inputFileComments = inputPath + "comments+lower.txt";
 
   String testClasspathJar = inputPath + "test-classpath.jar";
