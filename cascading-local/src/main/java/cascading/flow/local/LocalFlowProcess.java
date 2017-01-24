@@ -180,13 +180,17 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public Properties getConfigCopy()
     {
-    return new Properties( config );
+    Properties configCopy = new Properties( config );
+    configCopy.putAll( config );
+    return configCopy ;
     }
 
   @Override
   public Properties copyConfig( Properties config )
     {
-    return new Properties( config );
+    Properties configCopy = new Properties( config );
+    configCopy.putAll( config );
+    return configCopy ;
     }
 
   @Override
