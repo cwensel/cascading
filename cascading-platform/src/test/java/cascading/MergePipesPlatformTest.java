@@ -31,6 +31,7 @@ import cascading.operation.Identity;
 import cascading.operation.aggregator.First;
 import cascading.operation.regex.RegexFilter;
 import cascading.operation.regex.RegexSplitter;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -389,6 +390,43 @@ public class MergePipesPlatformTest extends PlatformTestCase
       // ignore
       }
     }
+
+  @Test
+  public void testMergeAndWriteToTwoSinks() throws Exception {
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap sourceLower = getPlatform().getTextFile( inputFileLower );
+    Tap sourceUpper = getPlatform().getTextFile( inputFileUpper );
+
+    Map sources = new HashMap();
+
+    sources.put( "lower", sourceLower );
+    sources.put( "upper", sourceUpper );
+
+    Tap sink1 = getPlatform().getTextFile( getOutputPath( "sink1" ), SinkMode.REPLACE );
+    Tap sink2 = getPlatform().getTextFile( getOutputPath( "sink2" ), SinkMode.REPLACE );
+
+    Map sinks = new HashMap();
+
+    sinks.put( "sink1", sink1 );
+    sinks.put( "sink2", sink2 );
+
+    Pipe pipeLower = new Each( new Pipe( "lower" ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+    Pipe pipeUpper = new Each( new Pipe( "upper" ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+
+    Pipe splice = new GroupBy( new Pipe[]{ pipeUpper, pipeLower }, new Fields( "line" ) );
+
+    Pipe tail1 = new Each( new Pipe( "sink1", splice ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+    Pipe tail2 = new Each( new Pipe( "sink2", splice ), new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+
+    tail2 = new Checkpoint( tail2 ); // test passes if this Checkpoint is removed
+
+    tail2 = new Each( tail2, new Fields( "line" ), new Identity( new Fields( "line" ) ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( sources, sinks, tail1, tail2 );
+    flow.complete();
+  }
 
   @Test
   public void testMergeIntoHashJoinStreamed() throws Exception
