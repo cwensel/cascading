@@ -33,7 +33,7 @@ import org.codehaus.janino.ExpressionEvaluator;
  * returns true for the given expression will be removed from the stream. This {@link Filter}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
  * <p/>
- * Specifically this filter uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
+ * Specifially this filter uses the Janino <a href="http://dist.codehaus.org/janino/javadoc/org/codehaus/janino/ExpressionEvaluator.html" target="_blank">ExpressionEvaluator</a>, thus the syntax from that class is inherited here.
  * <p/>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
