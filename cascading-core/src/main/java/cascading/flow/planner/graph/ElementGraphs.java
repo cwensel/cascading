@@ -569,6 +569,26 @@ public class ElementGraphs
       }
     }
 
+	  public static void insertFlowElementBetweenEdge( ElementGraph elementGraph, Scope previousEdge, FlowElement newElement )
+	  {
+
+		  FlowElement previousElement = elementGraph.getEdgeSource(previousEdge);
+		  FlowElement nextElement = elementGraph.getEdgeTarget(previousEdge);
+
+		  elementGraph.addVertex( newElement );
+
+		  // add edge between previous and new
+		  elementGraph.addEdge( previousElement, newElement, new Scope(previousEdge));
+
+		  // add edge between new and next
+		  Scope s = new Scope(previousEdge);
+		  s.setOrdinal(previousEdge.getOrdinal());
+		  elementGraph.addEdge( newElement, nextElement, s);
+
+		  // remove previous edge
+		  elementGraph.removeEdge(previousElement, nextElement);
+	  }
+
   public static void addSources( BaseFlowStep flowStep, ElementGraph elementGraph, Set<Tap> sources )
     {
     for( Tap tap : sources )

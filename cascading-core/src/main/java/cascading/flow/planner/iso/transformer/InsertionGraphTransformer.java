@@ -20,10 +20,12 @@
 
 package cascading.flow.planner.iso.transformer;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import cascading.flow.FlowElement;
+import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
 import cascading.flow.planner.iso.expression.ElementCapture;
@@ -128,21 +130,23 @@ public class InsertionGraphTransformer extends MutateGraphTransformer
 
         case BeforeEachEdge:
 
-          List<FlowElement> predecessors = graph.predecessorListOf( flowElement );
+		  Set<Scope> incommingEdges = new HashSet<>(graph.incomingEdgesOf( flowElement ));
 
-          for( FlowElement predecessor : predecessors )
-            ElementGraphs.insertFlowElementAfter( graph, predecessor, elementFactory.create( graph, predecessor ) );
-
+		  for( Scope incomingEdge : incommingEdges) {
+			  FlowElement predecessor = graph.getEdgeSource(incomingEdge);
+			  ElementGraphs.insertFlowElementBetweenEdge( graph, incomingEdge, elementFactory.create( graph, predecessor ));
+		  }
           break;
 
         case AfterEachEdge:
 
-          List<FlowElement> successors = graph.successorListOf( flowElement );
+			Set<Scope> outgoingEdges = new HashSet<>(graph.outgoingEdgesOf(flowElement));
 
-          for( FlowElement successor : successors )
-            ElementGraphs.insertFlowElementBefore( graph, successor, elementFactory.create( graph, successor ) );
-
-          break;
+			for( Scope outgoingEdge : outgoingEdges) {
+				FlowElement successor = graph.getEdgeTarget(outgoingEdge);
+				ElementGraphs.insertFlowElementBetweenEdge( graph, outgoingEdge, elementFactory.create( graph, successor ));
+			}
+			break;
         }
       }
 
