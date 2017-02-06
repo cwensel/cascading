@@ -22,13 +22,16 @@ package cascading.flow.tez.planner;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import cascading.CascadingException;
+import cascading.flow.FlowException;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
@@ -457,25 +460,14 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
   protected void dumpDebugInfo()
     {
-//    try
-//      {
-//      if( dagStatus == null )
-//        return;
+     DAGStatus dagStatus = getDagStatus();
+     if( dagStatus == null )
+       return;
 
-//      flowStep.logWarn( "hadoop job " + runningJob.getID() + " state at " + JobStatus.getJobRunState( runningJob.getJobState() ) );
-//      flowStep.logWarn( "failure info: " + runningJob.getFailureInfo() );
-
-//      TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
-//      flowStep.logWarn( "task completion events identify failed tasks" );
-//      flowStep.logWarn( "task completion events count: " + events.length );
-//
-//      for( TaskCompletionEvent event : events )
-//        flowStep.logWarn( "event = " + event );
-//      }
-//    catch( IOException exception )
-//      {
-//      flowStep.logError( "failed reading task completion events", exception );
-//      }
+     flowStep.logWarn( "Tez DAG " + dagId + " state at " + dagStatus.getState());
+     flowStep.logWarn( "failure info: ");
+     for ( String diagLine: dagStatus.getDiagnostics() )
+       flowStep.logWarn( diagLine );
     }
 
   protected boolean internalIsStartedRunning()
