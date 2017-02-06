@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2016 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -104,7 +104,7 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
   @ConstructorProperties({"properties", "name", "process", "flowDescriptor"})
   public ProcessFlow( Map<Object, Object> properties, String name, Process process, Map<String, String> flowDescriptor )
     {
-    super( new PlatformInfo( "process", "Concurrent, Inc.", Version.getRelease() ), properties, null, name, flowDescriptor );
+    super( new PlatformInfo( "process", "Xplenty, Inc.", Version.getRelease() ), properties, null, name, flowDescriptor );
     this.process = process;
     this.processWrapper = new ProcessWrapper( this.process );
     this.properties = properties;

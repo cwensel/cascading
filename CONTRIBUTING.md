@@ -86,7 +86,7 @@ will run all tests for the Cascading local mode platform. This works for other s
 
 ### Submitting Changes
 
-* Sign the [Concurrent Contributor License Agreement](http://files.concurrentinc.com/agreements/Concurrent_Contributor_Agreement.doc)
+* Sign the [Xplenty Contributor License Agreement](http://files.concurrentinc.com/agreements/Concurrent_Contributor_Agreement.doc)
   and email as a PDF to support@cascading.org
 * Push your changes to a topic branch in your fork of the repository
 * Submit a pull request to the repository in the Cascading organization
