@@ -90,9 +90,9 @@ public class Version
     String releaseVersion;
 
     if( getReleaseBuild() == null || getReleaseBuild().isEmpty() )
-      releaseVersion = String.format( "Concurrent, Inc - %s %s", CASCADING, getReleaseFull() );
+      releaseVersion = String.format( "%s %s", CASCADING, getReleaseFull() );
     else
-      releaseVersion = String.format( "Concurrent, Inc - %s %s-%s", CASCADING, getReleaseFull(), getReleaseBuild() );
+      releaseVersion = String.format( "%s %s-%s", CASCADING, getReleaseFull(), getReleaseBuild() );
 
     return releaseVersion;
     }
