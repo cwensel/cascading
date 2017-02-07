@@ -457,25 +457,16 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
   protected void dumpDebugInfo()
     {
-//    try
-//      {
-//      if( dagStatus == null )
-//        return;
+    DAGStatus dagStatus = getDagStatus();
 
-//      flowStep.logWarn( "hadoop job " + runningJob.getID() + " state at " + JobStatus.getJobRunState( runningJob.getJobState() ) );
-//      flowStep.logWarn( "failure info: " + runningJob.getFailureInfo() );
+    if( dagStatus == null )
+      return;
 
-//      TaskCompletionEvent[] events = runningJob.getTaskCompletionEvents( 0 );
-//      flowStep.logWarn( "task completion events identify failed tasks" );
-//      flowStep.logWarn( "task completion events count: " + events.length );
-//
-//      for( TaskCompletionEvent event : events )
-//        flowStep.logWarn( "event = " + event );
-//      }
-//    catch( IOException exception )
-//      {
-//      flowStep.logError( "failed reading task completion events", exception );
-//      }
+    flowStep.logWarn( "Tez DAG " + dagId + " state at " + dagStatus.getState() );
+    flowStep.logWarn( "failure info: " );
+
+    for( String diagLine : dagStatus.getDiagnostics() )
+      flowStep.logWarn( diagLine );
     }
 
   protected boolean internalIsStartedRunning()
