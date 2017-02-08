@@ -2,6 +2,10 @@ Cascading Change Log
 
 3.2.0 [unreleased]
 
+  Updated c.s.Scheme with optional #sourceRePrepare() method allowing the Scheme instance to be notified on Input
+  instances changes. c.t.TupleEntrySchemeIterator currently allows for an Iterator of Input instances, this method
+  allows Scheme to be notified as the Iterator is traversed.
+
   Fixed issue on Apache Hadoop MapReduce where a c.t.Tap used in both accumulated and streamed roles within a single
   step, but having distinct roles in different pipelines, could not be successfully planned and executed.
 

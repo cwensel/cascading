@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -215,6 +216,12 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
 
   @Override
   public void sourcePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
+    {
+    sourceCall.setContext( createInput( sourceCall.getInput() ) );
+    }
+
+  @Override
+  public void sourceRePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<LineNumberReader, InputStream> sourceCall ) throws IOException
     {
     sourceCall.setContext( createInput( sourceCall.getInput() ) );
     }

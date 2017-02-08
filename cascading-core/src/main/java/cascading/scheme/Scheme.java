@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -344,13 +345,30 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method sourcePrepare is used to initialize resources needed during each call of
    * {@link #source(cascading.flow.FlowProcess, SourceCall)}.
    * <p/>
+   * This method is guaranteed to be called once before the first invocation of {@link #source(FlowProcess, SourceCall)}.
+   * <p/>
    * Be sure to place any initialized objects in the {@code SourceContext} so each instance
-   * will remain threadsafe.
+   * will remain thread-safe.
    *
    * @param flowProcess of type FlowProcess
    * @param sourceCall  of type SourceCall<SourceContext, Input>
    */
   public void sourcePrepare( FlowProcess<? extends Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
+    {
+    }
+
+  /**
+   * Method sourceRePrepare is used to re-initialize resources needed during each call of
+   * {@link #source(cascading.flow.FlowProcess, SourceCall)} after the {@code Input} object
+   * has been changed, if needed.
+   * <p/>
+   * This method may be called zero or more times. Note {@link #sourcePrepare(FlowProcess, SourceCall)} will always
+   * be called before any {@link #source(FlowProcess, SourceCall)} invocation.
+   *
+   * @param flowProcess of type FlowProcess
+   * @param sourceCall  of type SourceCall<SourceContext, Input>
+   */
+  public void sourceRePrepare( FlowProcess<? extends Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
     }
 
@@ -389,6 +407,8 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method sinkPrepare is used to initialize resources needed during each call of
    * {@link #sink(cascading.flow.FlowProcess, SinkCall)}.
    * <p/>
+   * This method is guaranteed to be called once before the first invocation of {@link #sink(FlowProcess, SinkCall)}.
+   * <p>
    * Be sure to place any initialized objects in the {@code SinkContext} so each instance
    * will remain threadsafe.
    *
