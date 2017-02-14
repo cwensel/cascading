@@ -1,5 +1,7 @@
 Cascading Change Log
 
+3.2.1 [unreleased]
+
 3.2.0
 
   Updated c.s.Scheme with optional #sourceRePrepare() method allowing the Scheme instance to be notified on Input
