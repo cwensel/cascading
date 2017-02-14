@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -1692,6 +1692,28 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
+   * Method applyType should be used to associate a {@link java.lang.reflect.Type} with all positions in the current instance.
+   * A new instance of Fields will be returned, this instance will not be modified.
+   *
+   * @param type of type Type
+   */
+  public Fields applyTypeToAll( Type type )
+    {
+    Fields result = new Fields( fields );
+
+    if( type == null ) // allows for type erasure
+      return result;
+
+    Type[] copy = new Type[ result.size() ];
+
+    Arrays.fill( copy, type );
+
+    result.types = copy;
+
+    return result;
+    }
+
+  /**
    * Method applyType should be used to associate {@link java.lang.reflect.Type} with a given field name or position
    * as declared in the given Fields parameter.
    * <p/>
@@ -1715,15 +1737,17 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
    * information within the new instance.
    * <p/>
    * The Class array must be the same length as the number for fields in this instance.
+   * <p>
+   * If no values are given, the resulting Fields instance will have no type information.
    *
    * @param types the class types of this Fields object.
-   * @return returns a new instance of Fields with this instances field names and the given types
+   * @return returns a new instance of Fields with this instances field names and the given types, if any
    */
   public Fields applyTypes( Type... types )
     {
     Fields result = new Fields( fields );
 
-    if( types == null ) // allows for type erasure
+    if( types == null || types.length == 0 ) // allows for type erasure
       return result;
 
     if( types.length != size() )
@@ -1738,6 +1762,16 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     result.types = copyTypes( types, types.length ); // make copy as Class[] could be passed in
 
     return result;
+    }
+
+  /**
+   * Method unApplyTypes returns a new Fields instance without any type information.
+   *
+   * @return returns a new instance of Fields with this instances field names and no type information
+   */
+  public Fields unApplyTypes()
+    {
+    return applyTypes();
     }
 
   /**
