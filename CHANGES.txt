@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.2.1 [unreleased]
 
+  Added new convenience methods to c.t.Fields.
+
 3.2.0
 
   Updated c.s.Scheme with optional #sourceRePrepare() method allowing the Scheme instance to be notified on Input
