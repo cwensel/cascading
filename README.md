@@ -2,16 +2,11 @@
 
 Thanks for using Cascading.
 
-## Cascading 3.2
+## Cascading 4.0
 
-Cascading 3 includes a few major changes and additions from prior major releases:
+Cascading 4 includes a few major changes and additions from prior major releases:
 
-* Complete re-write of the platform query planner and improvements to the planner API
-* Addition of Apache Tez as a supported runtime platform
-* Changes to the Tap/Scheme generic type signatures to support portability
-
-These changes hope to simplify the creation of new bindings to new platform implementations and to improve the
-performance of resulting applications.
+* TBD
 
 ## General Information:
 
@@ -44,7 +39,7 @@ Hadoop 2.x Tez mode is where the Cascading application should run on an Apache T
 Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies or
 cluster distribution. This implementation has minimal to no robustness in low memory situations, by design.
 
-As of Cascading 3.x, all above jar files are built against Java 1.7. Prior versions of Cascading are built
+As of Cascading 4.x, all above jar files are built against Java 1.7. Prior versions of Cascading are built
 against Java 1.6.
 
 ## Extensions, the SDK, and DSLs
@@ -82,9 +77,8 @@ bugs, remediation may entail throwing new Exceptions.
 core processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be
 necessary.
 
-It is important to note that *we do reserve to make breaking changes to the new query planner API through the 3.x
-releases*. This allows us to respond to bugs and performance issues without issuing new major releases. Cascading
-4.0 will keep the public query planner APIs stable.
+It is important to note that *we do reserve to make breaking changes to the new query planner API through the 4.x
+releases*. This allows us to respond to bugs and performance issues without issuing new major releases.
 
 The source and tags for all stable releases can be found here:
 [https://github.com/Cascading/cascading](https://github.com/Cascading/cascading)
@@ -121,9 +115,7 @@ or a single test method:
 
     > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i
 
-## Debugging the 3.x Planner
-
-The new 3.0 planner has a much improved debugging framework.
+## Debugging the Planner
 
 When running tests, set the following
 
