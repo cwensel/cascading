@@ -1,5 +1,7 @@
 Cascading Change Log
 
+4.0 [unreleased]
+
 3.2.1
 
   Fixed issue when using a c.p.ConfigDef on a sink c.t.Tap could cause a j.l.ClassCastException.
