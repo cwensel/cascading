@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -19,15 +18,21 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-expression'
-include 'cascading-local'
-include 'cascading-hadoop2-common'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-hadoop2-tez-stats'
-include 'cascading-platform'
+package cascading.tuple.hadoop.util;
 
-rootProject.name = 'cascading'
+import cascading.tuple.Tuple;
+
+public class ReverseTupleComparator extends TupleComparator
+  {
+  @Override
+  public int compare( byte[] b1, int s1, int l1, byte[] b2, int s2, int l2 )
+    {
+    return -1 * super.compare( b1, s1, l1, b2, s2, l2 );
+    }
+
+  @Override
+  public int compare( Tuple lhs, Tuple rhs )
+    {
+    return -1 * super.compare( rhs, lhs );
+    }
+  }

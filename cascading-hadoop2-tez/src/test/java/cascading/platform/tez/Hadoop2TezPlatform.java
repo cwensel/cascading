@@ -36,6 +36,9 @@ import cascading.flow.tez.Hadoop2TezFlowConnector;
 import cascading.flow.tez.Hadoop2TezFlowProcess;
 import cascading.flow.tez.planner.Hadoop2TezPlanner;
 import cascading.platform.hadoop.BaseHadoopPlatform;
+import cascading.tap.Tap;
+import cascading.tap.hadoop.DistCacheTap;
+import cascading.tap.hadoop.Hfs;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -97,6 +100,12 @@ public class Hadoop2TezPlatform extends BaseHadoopPlatform<TezConfiguration>
   public TezConfiguration getConfiguration()
     {
     return new TezConfiguration( configuration );
+    }
+
+  @Override
+  public Tap getDistCacheTap( Hfs parent )
+    {
+    return new DistCacheTap( parent );
     }
 
   @Override

@@ -27,56 +27,24 @@ if( System.properties[ 'hadoop2mr1.release.final' ] )
 dependencies {
 
   compile project( ':cascading-core' )
-  compile project( ':cascading-hadoop2-common' )
   compile project( ':cascading-hadoop2-io' )
 
   // forces update of yarn slf4j dependencies
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
   provided group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
 
-  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
-  testCompile project( path: ':cascading-hadoop2-common', configuration: 'testArtifacts' )
-  testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
-
   provided( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
   provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+
+  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
 
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
 }
 
-configurations.all {
-  resolutionStrategy {
-
-    if( !hadoop2Version.startsWith( '2.4' )  )
-      force 'com.google.guava:guava:11.0.2'
-  }
-}
-
-test {
-
-  delete( "target" ) // hardcoded path in hadoop2
-
-  forkEvery = 1 // static fields on the platform test get munged otherwise
-
-  systemProperties[ 'hadoop.log.dir' ] = new String( "${buildDir}/test/log" )
-  systemProperties[ 'hadoop.tmp.dir' ] = new String( "${buildDir}/test/tmp" )
-  systemProperties[ 'test.build.data' ] = new String( "${buildDir}/test/data" )
-}
-
-platformTest {
-
-  delete( "target" ) // hardcoded path in hadoop2
-
-  forkEvery = 1 // static fields on the platform test get munged otherwise
-
-  systemProperties[ 'hadoop.log.dir' ] = new String( "${buildDir}/test/log" )
-  systemProperties[ 'hadoop.tmp.dir' ] = new String( "${buildDir}/test/tmp" )
-  systemProperties[ 'test.build.data' ] = new String( "${buildDir}/test/data" )
-}
+platformTest.enabled = false
 
 javadoc {
-
-  source 'src/test/java/cascading/platform/hadoop2/Hadoop2MR1Platform.java'
 
   classpath = files( project.sourceSets.test.compileClasspath )
 

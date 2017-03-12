@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Removed support for all Apache Hadoop 1.x and prior releases, subsequently removing all sub-project interdependencies
+  via symlinks.
+
 3.2.1
 
   Fixed issue when using a c.p.ConfigDef on a sink c.t.Tap could cause a j.l.ClassCastException.

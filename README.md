@@ -21,7 +21,7 @@ The project includes nine Cascading jar files:
 * `cascading-xml-x.y.z.jar`               - all Cascading XML operations class files
 * `cascading-expression-x.y.z.jar`        - all Cascading Janino expression operations class files
 * `cascading-local-x.y.z.jar`             - all Cascading Local in-memory mode class files
-* `cascading-hadoop-x.y.z.jar`            - all Cascading Hadoop 1.x MapReduce mode class files
+* `cascading-hadoop2-common-x.y.z.jar`    - all Cascading Hadoop 2.x common class files
 * `cascading-hadoop2-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
 * `cascading-hadoop2-mr1-x.y.z.jar`       - all Cascading Hadoop 2.x MapReduce mode class files
 * `cascading-hadoop2-tez-x.y.z.jar`       - all Cascading Hadoop 2.x Tez mode class files
@@ -29,8 +29,6 @@ The project includes nine Cascading jar files:
 
 These class jars, along with, tests, source and javadoc jars, are all available via the
 [Conjars.org](http://conjars.org) Maven repository.
-
-Hadoop 1.x mode is where the Cascading application should run on a Hadoop *MapReduce* cluster.
 
 Hadoop 2.x MR1 mode is the same as above but for Hadoop 2.x releases.
 
@@ -145,7 +143,7 @@ You can find the latest public and WIP (work in progress) releases here:
 
 *  http://conjars.org/cascading/cascading-core
 *  http://conjars.org/cascading/cascading-local
-*  http://conjars.org/cascading/cascading-hadoop
+*  http://conjars.org/cascading/cascading-hadoop2-common
 *  http://conjars.org/cascading/cascading-hadoop2-io
 *  http://conjars.org/cascading/cascading-hadoop2-mr1
 *  http://conjars.org/cascading/cascading-hadoop2-tez
@@ -166,7 +164,7 @@ dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
 
-Note that `cascading-hadoop`, `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the
+Note that `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the
 Hadoop jars so that it won't get sucked into any application packaging as a dependency, typically.
 
 ## Building and IDE Integration
@@ -210,6 +208,7 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 ```bash
 /<all your class and resource files>
 /lib/cascading-core-x.y.z.jar
+/lib/cascading-hadoop2-common-x.y.z.jar
 /lib/cascading-hadoop2-mr1-x.y.z.jar
 /lib/cascading-hadoop2-io-x.y.z.jar
 /lib/cascading-expression-x.y.z.jar

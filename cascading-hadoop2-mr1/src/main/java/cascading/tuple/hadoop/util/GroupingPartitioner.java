@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,15 +18,23 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-xml'
-include 'cascading-expression'
-include 'cascading-local'
-include 'cascading-hadoop2-common'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-hadoop2-tez-stats'
-include 'cascading-platform'
+package cascading.tuple.hadoop.util;
 
-rootProject.name = 'cascading'
+import cascading.tuple.Tuple;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Partitioner;
+
+/** Class GroupingPartitioner is an implementation of {@link org.apache.hadoop.mapred.Partitioner}. */
+public class GroupingPartitioner extends HasherPartitioner implements Partitioner<Tuple, Tuple>
+  {
+  public int getPartition( Tuple key, Tuple value, int numReduceTasks )
+    {
+    return ( hashCode( key ) & Integer.MAX_VALUE ) % numReduceTasks;
+    }
+
+  @Override
+  public void configure( JobConf job )
+    {
+    setConf( job );
+    }
+  }
