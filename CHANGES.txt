@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.2.1 [unreleased]
 
+  Added Apache Tez to output comparison tests.
+
   Added new convenience methods to c.t.Fields.
 
 3.2.0
