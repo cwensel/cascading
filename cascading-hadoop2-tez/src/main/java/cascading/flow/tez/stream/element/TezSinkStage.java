@@ -23,6 +23,7 @@ package cascading.flow.tez.stream.element;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProcessWrapper;
 import cascading.flow.stream.element.SinkStage;
 import cascading.flow.tez.Hadoop2TezFlowProcess;
 import cascading.tap.Tap;
@@ -100,7 +101,7 @@ public class TezSinkStage extends SinkStage
       // gracefully.
       try
         {
-        if( ( (Hadoop2TezFlowProcess) flowProcess ).getContext().canCommit() )
+        if( ( (Hadoop2TezFlowProcess) FlowProcessWrapper.undelegate( flowProcess ) ).getContext().canCommit() )
           break;
 
         Thread.sleep( 100 );

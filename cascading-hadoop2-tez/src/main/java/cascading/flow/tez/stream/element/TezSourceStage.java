@@ -64,12 +64,7 @@ public class TezSourceStage extends SourceStage
 
     logicalInput.start();
 
-    Hadoop2TezFlowProcess tezFlowProcess;
-
-    if( flowProcess instanceof FlowProcessWrapper )
-      tezFlowProcess = (Hadoop2TezFlowProcess) ( (FlowProcessWrapper) flowProcess ).getDelegate();
-    else
-      tezFlowProcess = (Hadoop2TezFlowProcess) flowProcess;
+    Hadoop2TezFlowProcess tezFlowProcess = (Hadoop2TezFlowProcess) FlowProcessWrapper.undelegate( flowProcess );
 
     TezConfiguration configuration = tezFlowProcess.getConfiguration();
 
