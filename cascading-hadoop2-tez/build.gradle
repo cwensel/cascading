@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-ext.hadoop2Version = '2.7.2'
+ext.hadoop2Version = '2.7.3'
 ext.tezVersion = '0.8.2'
 
 if( System.properties[ 'hadoop2tez.release.final' ] )
