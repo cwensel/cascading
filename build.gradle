@@ -78,8 +78,8 @@ subprojects {
   apply plugin: 'maven'
   apply from: '../etc/testing.gradle'
 
-  sourceCompatibility = 1.7
-  targetCompatibility = 1.7
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
 
   group = 'cascading'
   version = releaseVersion

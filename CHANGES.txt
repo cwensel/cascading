@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Update project to use JDK 1.8.
+
   Update Apache Hadoop to version 2.7.3.
 
   Removed support for all Apache Hadoop 1.x and prior releases, subsequently removing all sub-project interdependencies
