@@ -37,8 +37,8 @@ Hadoop 2.x Tez mode is where the Cascading application should run on an Apache T
 Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies or
 cluster distribution. This implementation has minimal to no robustness in low memory situations, by design.
 
-As of Cascading 4.x, all above jar files are built against Java 1.7. Prior versions of Cascading are built
-against Java 1.6.
+As of Cascading 4.x, all above jar files are built against Java 1.8. Prior versions of Cascading are built
+against Java 1.7 and 1.6.
 
 ## Extensions, the SDK, and DSLs
 
@@ -180,7 +180,7 @@ To build Cascading, run the following in the shell:
 > gradle build
 ```
 
-Cascading requires at least Gradle 2.7 and Java 1.7 to build.
+Cascading requires at least Gradle 3.4 and Java 1.8 to build.
 
 To use an IDE like IntelliJ, run the following to create IntelliJ project files:
 

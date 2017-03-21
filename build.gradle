@@ -28,25 +28,12 @@
  or a single method
   > gradle :cascading-local:test --tests *LocalTapPlatformTest.testIO -i
 
- Prior to 1.10:
- To run a single test:
-   > gradle -Dtest.single=LocalTapPlatformTest :cascading-local:test -i
-
- To run a single platform test:
-   > gradle -DplatformTest.single=CoGroupFieldedPipesPlatformTest :cascading-local:platformTest -i
-
  To remotely debug use
    -Dtest.debug
-
 */
 
-buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.1'
-  }
+plugins {
+  id 'nebula.provided-base' version '3.0.3' // if you want provided-base
 }
 
 apply from: 'etc/version.gradle'
@@ -56,7 +43,7 @@ allprojects {
 
   apply plugin: 'idea'
   apply plugin: 'eclipse'
-  apply plugin: 'provided-base'
+  apply plugin: 'nebula.provided-base'
 
   repositories {
     mavenLocal()
@@ -153,7 +140,7 @@ subprojects {
 
   assemble.dependsOn << prepareDist
 
-  assemble << {
+  assemble.doLast {
 
     if( project.name.equals( 'cascading-platform' ) )
       return
@@ -251,18 +238,19 @@ task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:bui
   }
 }
 
-prepareRelease << {
+prepareRelease.doLast {
   logger.info( 'built all artifacts' )
 }
 
-task buildDist( dependsOn: prepareRelease ) << {
-
-  copy {
-    from 'CHANGES.txt'
-    from 'README.txt'
-    from 'apl.txt'
-    from 'LICENSE.txt'
-    into distDir
+task buildDist( dependsOn: prepareRelease ) {
+  doLast {
+    copy {
+      from 'CHANGES.txt'
+      from 'README.txt'
+      from 'apl.txt'
+      from 'LICENSE.txt'
+      into distDir
+    }
   }
 }
 
@@ -288,7 +276,7 @@ task buildLatestMeta( dependsOn: buildPackage ) {
   ext.latestPropertiesPath = null
 }
 
-buildLatestMeta << {
+buildLatestMeta.doLast {
 
   def destination = s3UploadArtifacts.source
   def releaseTar = buildPackage.archivePath.name
