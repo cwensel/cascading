@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,14 +25,20 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import cascading.flow.planner.PlannerInfo;
 import cascading.flow.planner.PlatformInfo;
 import cascading.management.UnitOfWork;
 import cascading.stats.FlowStats;
 import cascading.tap.Tap;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.tuple.TupleEntryStream;
+import cascading.tuple.TupleStream;
 
 /**
  * A Flow is a logical unit of work declared by an assembly of {@link cascading.pipe.Pipe} instances connected to source
@@ -530,4 +537,124 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * @return the stopJobsOnExit (type boolean) of this Flow object.
    */
   boolean isStopJobsOnExit();
+
+  default Stream<TupleEntry> getSourceEntryStream( String name )
+    {
+    return TupleEntryStream.entryStream( getSource( name ), getFlowProcess() );
+    }
+
+  default Stream<TupleEntry> getSourceEntryStream( String name, Fields selector )
+    {
+    return TupleEntryStream.entryStream( getSource( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<TupleEntry> getSourceEntryStreamCopy( String name )
+    {
+    return TupleEntryStream.entryStreamCopy( getSource( name ), getFlowProcess() );
+    }
+
+  default Stream<TupleEntry> getSourceEntryStreamCopy( String name, Fields selector )
+    {
+    return TupleEntryStream.entryStreamCopy( getSource( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<Tuple> getSourceTupleStream( String name )
+    {
+    return TupleStream.tupleStream( getSource( name ), getFlowProcess() );
+    }
+
+  default Stream<Tuple> getSourceTupleStream( String name, Fields selector )
+    {
+    return TupleStream.tupleStream( getSource( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<Tuple> getSourceTupleStreamCopy( String name )
+    {
+    return TupleStream.tupleStream( getSource( name ), getFlowProcess() );
+    }
+
+  default Stream<Tuple> getSourceTupleStreamCopy( String name, Fields selector )
+    {
+    return TupleStream.tupleStream( getSource( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStream()
+    {
+    return TupleEntryStream.entryStream( getSink(), getFlowProcess() );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStream( Fields selector )
+    {
+    return TupleEntryStream.entryStream( getSink(), getFlowProcess(), selector );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStreamCopy()
+    {
+    return TupleEntryStream.entryStreamCopy( getSink(), getFlowProcess() );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStreamCopy( Fields selector )
+    {
+    return TupleEntryStream.entryStreamCopy( getSink(), getFlowProcess(), selector );
+    }
+
+  default Stream<Tuple> getSinkTupleStream()
+    {
+    return TupleStream.tupleStream( getSink(), getFlowProcess() );
+    }
+
+  default Stream<Tuple> getSinkTupleStream( Fields selector )
+    {
+    return TupleStream.tupleStream( getSink(), getFlowProcess(), selector );
+    }
+
+  default Stream<Tuple> getSinkTupleStreamCopy()
+    {
+    return TupleStream.tupleStream( getSink(), getFlowProcess() );
+    }
+
+  default Stream<Tuple> getSinkTupleStreamCopy( Fields selector )
+    {
+    return TupleStream.tupleStream( getSink(), getFlowProcess(), selector );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStream( String name )
+    {
+    return TupleEntryStream.entryStream( getSink( name ), getFlowProcess() );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStream( String name, Fields selector )
+    {
+    return TupleEntryStream.entryStream( getSink( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStreamCopy( String name )
+    {
+    return TupleEntryStream.entryStreamCopy( getSink( name ), getFlowProcess() );
+    }
+
+  default Stream<TupleEntry> getSinkEntryStreamCopy( String name, Fields selector )
+    {
+    return TupleEntryStream.entryStreamCopy( getSink( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<Tuple> getSinkTupleStream( String name )
+    {
+    return TupleStream.tupleStream( getSink( name ), getFlowProcess() );
+    }
+
+  default Stream<Tuple> getSinkTupleStream( String name, Fields selector )
+    {
+    return TupleStream.tupleStream( getSink( name ), getFlowProcess(), selector );
+    }
+
+  default Stream<Tuple> getSinkTupleStreamCopy( String name )
+    {
+    return TupleStream.tupleStream( getSink( name ), getFlowProcess() );
+    }
+
+  default Stream<Tuple> getSinkTupleStreamCopy( String name, Fields selector )
+    {
+    return TupleStream.tupleStream( getSink( name ), getFlowProcess(), selector );
+    }
   }

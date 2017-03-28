@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -169,53 +170,53 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
     return name.getMethodName();
     }
 
-  public static void validateLength( Flow flow, int length ) throws IOException
+  public static void validateLength( Flow flow, int numTuples ) throws IOException
     {
-    validateLength( flow, length, -1 );
+    validateLength( flow, numTuples, -1 );
     }
 
-  public static void validateLength( Flow flow, int length, String name ) throws IOException
+  public static void validateLength( Flow flow, int numTuples, String name ) throws IOException
     {
-    validateLength( flow, length, -1, null, name );
+    validateLength( flow, numTuples, -1, null, name );
     }
 
-  public static void validateLength( Flow flow, int length, int size ) throws IOException
+  public static void validateLength( Flow flow, int numTuples, int tupleSize ) throws IOException
     {
-    validateLength( flow, length, size, null, null );
+    validateLength( flow, numTuples, tupleSize, null, null );
     }
 
-  public static void validateLength( Flow flow, int length, int size, Pattern regex ) throws IOException
+  public static void validateLength( Flow flow, int numTuples, int tupleSize, Pattern regex ) throws IOException
     {
-    validateLength( flow, length, size, regex, null );
+    validateLength( flow, numTuples, tupleSize, regex, null );
     }
 
-  public static void validateLength( Flow flow, int length, Pattern regex, String name ) throws IOException
+  public static void validateLength( Flow flow, int numTuples, Pattern regex, String name ) throws IOException
     {
-    validateLength( flow, length, -1, regex, name );
+    validateLength( flow, numTuples, -1, regex, name );
     }
 
-  public static void validateLength( Flow flow, int length, int size, Pattern regex, String name ) throws IOException
+  public static void validateLength( Flow flow, int numTuples, int tupleSize, Pattern regex, String name ) throws IOException
     {
     TupleEntryIterator iterator = name == null ? flow.openSink() : flow.openSink( name );
-    validateLength( iterator, length, size, regex );
+    validateLength( iterator, numTuples, tupleSize, regex );
     }
 
-  public static void validateLength( TupleEntryIterator iterator, int length )
+  public static void validateLength( TupleEntryIterator iterator, int numTuples )
     {
-    validateLength( iterator, length, -1, null );
+    validateLength( iterator, numTuples, -1, null );
     }
 
-  public static void validateLength( TupleEntryIterator iterator, int length, int size )
+  public static void validateLength( TupleEntryIterator iterator, int numTuples, int tupleSize )
     {
-    validateLength( iterator, length, size, null );
+    validateLength( iterator, numTuples, tupleSize, null );
     }
 
-  public static void validateLength( TupleEntryIterator iterator, int length, Pattern regex )
+  public static void validateLength( TupleEntryIterator iterator, int numTuples, Pattern regex )
     {
-    validateLength( iterator, length, -1, regex );
+    validateLength( iterator, numTuples, -1, regex );
     }
 
-  public static void validateLength( TupleEntryIterator iterator, int length, int size, Pattern regex )
+  public static void validateLength( TupleEntryIterator iterator, int numTuples, int tupleSize, Pattern regex )
     {
     int count = 0;
 
@@ -223,8 +224,8 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
       {
       TupleEntry tupleEntry = iterator.next();
 
-      if( size != -1 )
-        assertEquals( "wrong number of elements", size, tupleEntry.size() );
+      if( tupleSize != -1 )
+        assertEquals( "wrong number of elements", tupleSize, tupleEntry.size() );
 
       if( regex != null )
         assertTrue( "regex: " + regex + " does not match: " + tupleEntry.getTuple().toString(), regex.matcher( tupleEntry.getTuple().toString() ).matches() );
@@ -241,7 +242,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
       throw new RuntimeException( exception );
       }
 
-    assertEquals( "wrong number of lines", length, count );
+    assertEquals( "wrong number of lines", numTuples, count );
     }
 
   public static TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields )

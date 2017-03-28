@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,6 +22,7 @@
 package cascading.tuple;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit
@@ -75,6 +77,19 @@ public abstract class TupleEntryCollector
     }
 
   /**
+   * Method addTupleEntry inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
+   * more efficient as it simply calls {@link TupleEntry#getTuple()};
+   * <p/>
+   * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
+   *
+   * @param supplier of type Supplier
+   */
+  public void addTupleEntry( Supplier<TupleEntry> supplier )
+    {
+    add( supplier.get() );
+    }
+
+  /**
    * Method add inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
    * more efficient as it simply calls {@link TupleEntry#getTuple()};
    * <p/>
@@ -110,6 +125,18 @@ public abstract class TupleEntryCollector
 
       throw new TupleException( string, exception );
       }
+    }
+
+  /**
+   * Method addTuple inserts the given {@link Tuple} into the outgoing stream.
+   * <p/>
+   * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
+   *
+   * @param supplier of type Supplier
+   */
+  public void addTuple( Supplier<Tuple> supplier )
+    {
+    add( supplier.get() );
     }
 
   /**

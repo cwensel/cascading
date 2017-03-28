@@ -191,7 +191,7 @@ public abstract class TestPlatform
 
   public abstract boolean remoteRemove( String outputFile, boolean recursive ) throws IOException;
 
-  public abstract FlowProcess getFlowProcess();
+  public abstract <C> FlowProcess<C> getFlowProcess();
 
   public abstract FlowConnector getFlowConnector( Map<Object, Object> properties );
 
@@ -224,7 +224,7 @@ public abstract class TestPlatform
 
   public abstract Tap getTextFile( Fields sourceFields, Fields sinkFields, String filename, SinkMode mode );
 
-  public Tap getDelimitedFile( Fields fields, String delimiter, String filename )
+  public <C, I, O> Tap<? extends C, ? extends I, ? extends O> getDelimitedFile( Fields fields, String delimiter, String filename )
     {
     return getDelimitedFile( fields, false, delimiter, "\"", null, filename, SinkMode.KEEP );
     }

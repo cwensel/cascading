@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.t.Tap and c.f.Flow to provide Java 8 Stream instances on sink and source Tap instances. See the new
+  c.t.TupleEntryStream and c.t.TupleStream helper classes.
+
   Update project to use JDK 1.8.
 
   Update Apache Hadoop to version 2.7.3.
