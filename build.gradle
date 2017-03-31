@@ -242,6 +242,11 @@ prepareRelease.doLast {
   logger.info( 'built all artifacts' )
 }
 
+task clean {
+  doLast {
+    delete buildDir
+  }
+}
 task buildDist( dependsOn: prepareRelease ) {
   doLast {
     copy {
