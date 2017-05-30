@@ -54,7 +54,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   private final Set<Class<? extends Exception>> permittedExceptions;
   private ConcreteCall sourceCall;
 
-  private String identifier;
+  private String loggableIdentifier;
   private boolean isComplete = false;
   private boolean hasWaiting = false;
   private TupleException currentException;
@@ -64,9 +64,9 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
     this( flowProcess, scheme, input, null );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, Input input, String identifier )
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, Input input, String loggableIdentifier )
     {
-    this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), identifier );
+    this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), loggableIdentifier );
     }
 
   public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator )
@@ -74,13 +74,13 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
     this( flowProcess, scheme, inputIterator, null );
     }
 
-  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String identifier )
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String loggableIdentifier )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;
     this.scheme = scheme;
     this.inputIterator = inputIterator;
-    this.identifier = identifier;
+    this.loggableIdentifier = loggableIdentifier;
 
     Object permittedExceptions = flowProcess.getProperty( TupleEntrySchemeIteratorProps.PERMITTED_EXCEPTIONS );
 
@@ -89,8 +89,8 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
     else
       this.permittedExceptions = Collections.emptySet();
 
-    if( this.identifier == null || this.identifier.isEmpty() )
-      this.identifier = "'unknown'";
+    if( this.loggableIdentifier == null || this.loggableIdentifier.isEmpty() )
+      this.loggableIdentifier = "'unknown'";
 
     if( !inputIterator.hasNext() )
       {
@@ -109,7 +109,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       }
     catch( IOException exception )
       {
-      throw new TupleException( "unable to prepare source for input identifier: " + this.identifier, exception );
+      throw new TupleException( "unable to prepare source for input identifier: " + this.loggableIdentifier, exception );
       }
     }
 
@@ -141,16 +141,16 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       }
     catch( Exception exception )
       {
-      if( identifier == null || identifier.isEmpty() )
-        identifier = "'unknown'";
+      if( loggableIdentifier == null || loggableIdentifier.isEmpty() )
+        loggableIdentifier = "'unknown'";
 
       if( permittedExceptions.contains( exception.getClass() ) )
         {
-        LOG.warn( "Caught permitted exception while reading {}", identifier, exception );
+        LOG.warn( "Caught permitted exception while reading {}", loggableIdentifier, exception );
         return false;
         }
 
-      currentException = new TupleException( "unable to read from input identifier: " + identifier, exception );
+      currentException = new TupleException( "unable to read from input identifier: " + loggableIdentifier, exception );
 
       return true;
       }
@@ -172,11 +172,11 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
 
       try
         {
-        this.scheme.sourceRePrepare( flowProcess, sourceCall );
+        scheme.sourceRePrepare( flowProcess, sourceCall );
         }
       catch( IOException exception )
         {
-        throw new TupleException( "unable to prepare source for input identifier: " + this.identifier, exception );
+        throw new TupleException( "unable to prepare source for input identifier: " + loggableIdentifier, exception );
         }
 
       Tuples.asModifiable( sourceCall.getIncomingEntry().getTuple() );
@@ -211,7 +211,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       }
     catch( Exception exception )
       {
-      throw new TupleException( "unable to source from input identifier: " + identifier, exception );
+      throw new TupleException( "unable to source from input identifier: " + loggableIdentifier, exception );
       }
     finally
       {

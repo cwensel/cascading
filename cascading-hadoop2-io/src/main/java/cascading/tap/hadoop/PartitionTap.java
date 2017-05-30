@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,10 +33,10 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.io.CombineInputPartitionTupleEntryIterator;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
-import cascading.tap.hadoop.io.MultiInputSplit;
 import cascading.tap.hadoop.io.TapOutputCollector;
 import cascading.tap.partition.BasePartitionTap;
 import cascading.tap.partition.Partition;
+import cascading.tap.type.FileType;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryIterableChainIterator;
 import cascading.tuple.TupleEntryIterator;
@@ -177,14 +178,14 @@ public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, 
   @Override
   protected String getCurrentIdentifier( FlowProcess<? extends Configuration> flowProcess )
     {
-    String identifier = flowProcess.getStringProperty( MultiInputSplit.CASCADING_SOURCE_PATH ); // set on current split
+    String identifier = flowProcess.getStringProperty( FileType.CASCADING_SOURCE_PATH ); // set on current split
 
     if( identifier == null )
       {
       if( flowProcess.getBooleanProperty( HfsProps.COMBINE_INPUT_FILES, false ) )
         throw new TapException( "combined input format support, via '" + HfsProps.COMBINE_INPUT_FILES + "', may not be enabled for use with the PartitionTap" );
 
-      throw new TapException( "unable to retrieve the current file being processed, '" + MultiInputSplit.CASCADING_SOURCE_PATH + "' is not set" );
+      throw new TapException( "unable to retrieve the current file being processed, '" + FileType.CASCADING_SOURCE_PATH + "' is not set" );
       }
 
     return new Path( identifier ).getParent().toString(); // drop part-xxxx

@@ -37,6 +37,7 @@ import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
 import cascading.management.annotation.Visibility;
+import cascading.scheme.FileFormat;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -111,7 +112,7 @@ import cascading.tuple.util.TupleViews;
  *
  * @see TextLine
  */
-public class TextDelimited extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
+public class TextDelimited extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter> implements FileFormat
   {
   public static final String DEFAULT_CHARSET = "UTF-8";
 
@@ -731,5 +732,20 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
     {
     sinkCall.getContext().flush();
     sinkCall.setContext( null );
+    }
+
+  @Override
+  public String getExtension()
+    {
+    switch( getDelimiter().trim() )
+      {
+      case "\t":
+        return "tsv";
+
+      case ",":
+        return "csv";
+      }
+
+    return "txt";
     }
   }

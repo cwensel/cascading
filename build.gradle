@@ -49,7 +49,7 @@ allprojects {
     mavenLocal()
     mavenCentral()
     maven {url = 'http://conjars.org/repo/'}
-    maven {url = 'https://repository.apache.org/content/repositories/releases/'}
+    maven {url = 'https://repository.apache.org'}
   }
 }
 

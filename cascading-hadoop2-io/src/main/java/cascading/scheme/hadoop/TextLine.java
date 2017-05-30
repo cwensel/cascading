@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,6 +31,7 @@ import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
 import cascading.management.annotation.Visibility;
+import cascading.scheme.FileFormat;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -75,7 +77,7 @@ import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
  */
-public class TextLine extends Scheme<Configuration, RecordReader, OutputCollector, Object[], Object[]>
+public class TextLine extends Scheme<Configuration, RecordReader, OutputCollector, Object[], Object[]> implements FileFormat
   {
   public enum Compress
     {
@@ -483,5 +485,11 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
 
     // it's ok to use NULL here so the collector does not write anything
     sinkCall.getOutput().collect( null, text );
+    }
+
+  @Override
+  public String getExtension()
+    {
+    return "txt";
     }
   }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -42,7 +43,7 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
   {
   private final FlowProcess<? extends Config> flowProcess;
   private final Scheme scheme;
-  private String identifier;
+  private String loggableIdentifier;
 
   protected final ConcreteCall<Object, Output> sinkCall;
   private boolean prepared = false;
@@ -52,9 +53,9 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
     this( flowProcess, scheme, null, null );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, String identifier )
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, String loggableIdentifier )
     {
-    this( flowProcess, scheme, null, identifier );
+    this( flowProcess, scheme, null, loggableIdentifier );
     }
 
   public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, Output output )
@@ -67,12 +68,18 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
     this( flowProcess, tap.getScheme(), output, tap.getIdentifier() );
     }
 
-  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, Output output, String identifier )
+  /**
+   * @param flowProcess
+   * @param scheme
+   * @param output
+   * @param loggableIdentifier is only used for logging purposes
+   */
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, Output output, String loggableIdentifier )
     {
     super( Fields.asDeclaration( scheme.getSinkFields() ) );
     this.flowProcess = flowProcess;
     this.scheme = scheme;
-    this.identifier = identifier;
+    this.loggableIdentifier = loggableIdentifier; // only used for logging
 
     this.sinkCall = new ConcreteCall();
     this.sinkCall.setOutgoingEntry( this.tupleEntry ); // created in super ctor
@@ -154,10 +161,10 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
       }
     catch( Exception exception )
       {
-      if( identifier == null || identifier.isEmpty() )
-        identifier = "'unknown'";
+      if( loggableIdentifier == null || loggableIdentifier.isEmpty() )
+        loggableIdentifier = "'unknown'";
 
-      throw new TupleException( "unable to sink into output identifier: " + identifier, exception );
+      throw new TupleException( "unable to sink into output identifier: " + loggableIdentifier, exception );
       }
     }
 
@@ -176,7 +183,7 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
         }
       catch( IOException exception )
         {
-        throw new TupleException( "unable to cleanup sink for output identifier: " + identifier, exception );
+        throw new TupleException( "unable to cleanup sink for output identifier: " + loggableIdentifier, exception );
         }
       }
     finally

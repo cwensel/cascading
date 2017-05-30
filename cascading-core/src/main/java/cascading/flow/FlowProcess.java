@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import cascading.flow.stream.duct.DuctException;
 import cascading.tap.Tap;
+import cascading.tap.type.FileType;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 
@@ -178,8 +180,24 @@ public abstract class FlowProcess<Config>
       }
     }
 
+  public class FlowProcessContext
+    {
+    String sourcePath;
+
+    public String getSourcePath()
+      {
+      return FlowProcess.this.getStringProperty( FileType.CASCADING_SOURCE_PATH, sourcePath );
+      }
+
+    public void setSourcePath( String sourcePath )
+      {
+      this.sourcePath = sourcePath;
+      }
+    }
+
   private FlowSession currentSession = FlowSession.NULL;
   private Map<Tap, TupleEntryCollector> trapCollectors;
+  private FlowProcessContext flowProcessContext = new FlowProcessContext();
 
   protected FlowProcess()
     {
@@ -203,6 +221,11 @@ public abstract class FlowProcess<Config>
 
     // lazy initialize trap collectors collection and share across copies
     this.trapCollectors = flowProcess.getTrapCollectors();
+    }
+
+  public FlowProcessContext getFlowProcessContext()
+    {
+    return flowProcessContext;
     }
 
   public abstract FlowProcess<Config> copyWith( Config config );

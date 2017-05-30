@@ -41,6 +41,7 @@ import cascading.scheme.util.DelimitedParser;
 import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.local.DirTap;
 import cascading.tap.local.FileTap;
 import cascading.tap.local.PartitionTap;
 import cascading.tap.partition.Partition;
@@ -133,27 +134,27 @@ public class LocalPlatform extends TestPlatform
   public Tap getTextFile( Fields sourceFields, Fields sinkFields, String filename, SinkMode mode )
     {
     if( sourceFields == null )
-      return new FileTap( new TextLine(), filename, mode );
+      return new DirTap( new TextLine(), filename, mode );
 
-    return new FileTap( new TextLine( sourceFields, sinkFields ), filename, mode );
+    return new DirTap( new TextLine( sourceFields, sinkFields ), filename, mode );
     }
 
   @Override
   public Tap getDelimitedFile( Fields fields, boolean hasHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
-    return new FileTap( new TextDelimited( fields, hasHeader, delimiter, quote, types ), filename, mode );
+    return new DirTap( new TextDelimited( fields, hasHeader, delimiter, quote, types ), filename, mode );
     }
 
   @Override
   public Tap getDelimitedFile( Fields fields, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, String filename, SinkMode mode )
     {
-    return new FileTap( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
+    return new DirTap( new TextDelimited( fields, skipHeader, writeHeader, delimiter, quote, types ), filename, mode );
     }
 
   @Override
   public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
     {
-    return new FileTap( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), filename, mode );
+    return new DirTap( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), filename, mode );
     }
 
   @Override

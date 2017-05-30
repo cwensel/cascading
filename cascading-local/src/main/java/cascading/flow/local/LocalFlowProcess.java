@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -100,21 +101,21 @@ public class LocalFlowProcess extends FlowProcess<Properties>
 
     try
       {
-      Class type = (Class) LocalFlowProcess.class.getClassLoader().loadClass( className.toString() );
+      Class type = LocalFlowProcess.class.getClassLoader().loadClass( className );
 
       return type.newInstance();
       }
     catch( ClassNotFoundException exception )
       {
-      throw new CascadingException( "unable to load class: " + className.toString(), exception );
+      throw new CascadingException( "unable to load class: " + className, exception );
       }
     catch( InstantiationException exception )
       {
-      throw new CascadingException( "unable to instantiate class: " + className.toString(), exception );
+      throw new CascadingException( "unable to instantiate class: " + className, exception );
       }
     catch( IllegalAccessException exception )
       {
-      throw new CascadingException( "unable to access class: " + className.toString(), exception );
+      throw new CascadingException( "unable to access class: " + className, exception );
       }
     }
 

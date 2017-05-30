@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,9 +26,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
@@ -42,18 +47,20 @@ import cascading.tuple.TupleEntrySchemeIterator;
 
 /**
  * Class FileTap is a {@link Tap} sub-class that allows for direct local file access.
+ * <p>
+ * This class can only open an single file, see {@link DirTap} for reading from a directory tree.
  * <p/>
  * FileTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
  * {@link cascading.flow.Flow} instances that run in "local" mode.
  */
 public class FileTap extends Tap<Properties, InputStream, OutputStream> implements FileType<Properties>
   {
-  private final String path;
+  private final Path path;
 
   /**
    * Constructor FileTap creates a new FileTap instance using the given {@link cascading.scheme.Scheme} and file {@code path}.
    *
-   * @param scheme of type LocalScheme
+   * @param scheme of type Scheme
    * @param path   of type String
    */
   public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String path )
@@ -62,29 +69,69 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     }
 
   /**
+   * Constructor FileTap creates a new FileTap instance using the given {@link cascading.scheme.Scheme} and file {@code path}.
+   *
+   * @param scheme of type Scheme
+   * @param path   of type Path
+   */
+  public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, Path path )
+    {
+    this( scheme, path, SinkMode.KEEP );
+    }
+
+  /**
    * Constructor FileTap creates a new FileTap instance using the given {@link cascading.scheme.Scheme},
    * file {@code path}, and {@code SinkMode}.
    *
-   * @param scheme   of type LocalScheme
+   * @param scheme   of type Scheme
    * @param path     of type String
    * @param sinkMode of type SinkMode
    */
   public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String path, SinkMode sinkMode )
     {
     super( scheme, sinkMode );
-    this.path = new File( path ).getPath(); // cleans path information
+    this.path = Paths.get( path ); // cleans path information
+
+    verify();
     }
 
-  @Override
-  public String getIdentifier()
+  /**
+   * Constructor FileTap creates a new FileTap instance using the given {@link cascading.scheme.Scheme},
+   * file {@code path}, and {@code SinkMode}.
+   *
+   * @param scheme   of type Scheme
+   * @param path     of type String
+   * @param sinkMode of type SinkMode
+   */
+  public FileTap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, Path path, SinkMode sinkMode )
+    {
+    super( scheme, sinkMode );
+    this.path = path;
+
+    verify();
+    }
+
+  protected void verify()
+    {
+    if( getPath() == null )
+      throw new IllegalArgumentException( "path may not be null" );
+    }
+
+  protected Path getPath()
     {
     return path;
     }
 
   @Override
+  public String getIdentifier()
+    {
+    return path.toString();
+    }
+
+  @Override
   public String getFullIdentifier( Properties conf )
     {
-    return fullyQualifyIdentifier( getIdentifier() );
+    return getPath().toAbsolutePath().toUri().toString();
     }
 
   private String fullyQualifyIdentifier( String identifier )
@@ -98,6 +145,8 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     if( input == null )
       input = new FileInputStream( getIdentifier() );
 
+    flowProcess.getFlowProcessContext().setSourcePath( getFullIdentifier( flowProcess ) );
+
     return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, getScheme(), input, getIdentifier() );
     }
 
@@ -105,15 +154,23 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   public TupleEntryCollector openForWrite( FlowProcess<? extends Properties> flowProcess, OutputStream output ) throws IOException
     {
     if( output == null )
-      output = new TapFileOutputStream( getIdentifier(), isUpdate() ); // append if we are in update mode
+      output = new TapFileOutputStream( getOutputIdentifier(), isUpdate() ); // append if we are in update mode
 
     return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, getIdentifier() );
+    }
+
+  /**
+   * Only used with {@link #openForWrite(FlowProcess, OutputStream)} calls.
+   */
+  protected String getOutputIdentifier()
+    {
+    return getIdentifier();
     }
 
   @Override
   public boolean createResource( Properties conf ) throws IOException
     {
-    File parentFile = new File( getIdentifier() ).getParentFile();
+    File parentFile = new File( getIdentifier() ).getParentFile(); // parent dir
 
     return parentFile.exists() || parentFile.mkdirs();
     }
@@ -121,7 +178,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean deleteResource( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).delete();
+    return Files.deleteIfExists( getPath() );
     }
 
   @Override
@@ -133,13 +190,13 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean resourceExists( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).exists();
+    return Files.exists( getPath() );
     }
 
   @Override
   public long getModifiedTime( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).lastModified();
+    return Files.getLastModifiedTime( getPath() ).to( TimeUnit.MILLISECONDS );
     }
 
   @Override
@@ -151,7 +208,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean isDirectory( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).isDirectory();
+    return Files.isDirectory( getPath() );
     }
 
   @Override

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -51,6 +52,12 @@ public class FlowProcessWrapper<Config> extends FlowProcess<Config>
   public FlowProcess getDelegate()
     {
     return delegate;
+    }
+
+  @Override
+  public FlowProcessContext getFlowProcessContext()
+    {
+    return delegate.getFlowProcessContext();
     }
 
   @Override

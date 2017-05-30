@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,7 +33,7 @@ import java.util.Set;
 import cascading.CascadingException;
 import cascading.flow.FlowException;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.tap.hadoop.io.MultiInputSplit;
+import cascading.tap.type.FileType;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -212,7 +213,7 @@ public class TezUtil
       }
 
     if( path != null )
-      configuration.set( MultiInputSplit.CASCADING_SOURCE_PATH, path.toString() );
+      configuration.set( FileType.CASCADING_SOURCE_PATH, path.toString() );
     }
 
   public static Map<Path, Path> addToClassPath( Configuration config, String stagingRoot, String resourceSubPath, Collection<String> classpath,

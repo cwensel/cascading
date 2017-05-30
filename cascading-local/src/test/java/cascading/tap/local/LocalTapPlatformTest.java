@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,6 +30,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Properties;
 
 import cascading.PlatformTestCase;
@@ -43,6 +45,8 @@ import cascading.scheme.local.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import data.InputData;
 import org.junit.Test;
 
 import static data.InputData.inputFileNums20;
@@ -177,5 +181,21 @@ public class LocalTapPlatformTest extends PlatformTestCase implements Serializab
     flow.complete();
 
     assertTrue( flow.resourceExists( sink ) );
+    }
+
+  @Test
+  public void testDirTap() throws Exception
+    {
+    Tap source = new DirTap( new TextLine(), InputData.inputPath, "glob:**/*.txt" );
+    DirTap sink = new DirTap( new TextLine(), getOutputPath(), SinkMode.REPLACE );
+    Pipe pipe = new Pipe( "copy" );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    List<Tuple> list = getSinkAsList( flow );
+
+    assertEquals( 600, list.size() );
     }
   }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,6 +25,7 @@ import java.beans.ConstructorProperties;
 import java.io.IOException;
 
 import cascading.flow.FlowProcess;
+import cascading.scheme.FileFormat;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -43,7 +45,7 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
  * A SequenceFile is a type of {@link cascading.scheme.Scheme}, which is a flat file consisting of
  * binary key/value pairs. This is a space and time efficient means to store data.
  */
-public class SequenceFile extends Scheme<Configuration, RecordReader, OutputCollector, Object[], Void>
+public class SequenceFile extends Scheme<Configuration, RecordReader, OutputCollector, Object[], Void> implements FileFormat
   {
   /** Protected for use by TempDfs and other subclasses. Not for general consumption. */
   protected SequenceFile()
@@ -119,5 +121,11 @@ public class SequenceFile extends Scheme<Configuration, RecordReader, OutputColl
   public void sink( FlowProcess<? extends Configuration> flowProcess, SinkCall<Void, OutputCollector> sinkCall ) throws IOException
     {
     sinkCall.getOutput().collect( Tuple.NULL, sinkCall.getOutgoingEntry().getTuple() );
+    }
+
+  @Override
+  public String getExtension()
+    {
+    return "seq";
     }
   }

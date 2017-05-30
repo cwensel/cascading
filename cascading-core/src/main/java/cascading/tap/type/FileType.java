@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +28,8 @@ import cascading.flow.FlowProcess;
 /** Interface FileType marks specific platform {@link cascading.tap.Tap} classes as representing a file like interface. */
 public interface FileType<Config>
   {
+  String CASCADING_SOURCE_PATH = "cascading.source.path";
+
   /**
    * Method isDirectory returns true if the underlying resource represents a directory or folder instead
    * of an individual file.

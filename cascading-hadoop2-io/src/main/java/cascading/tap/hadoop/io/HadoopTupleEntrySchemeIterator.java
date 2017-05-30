@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +28,7 @@ import cascading.flow.SliceCounters;
 import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.util.MeasuredRecordReader;
+import cascading.tap.type.FileType;
 import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.CloseableIterator;
 import org.apache.hadoop.conf.Configuration;
@@ -46,7 +48,7 @@ public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<Con
 
   public HadoopTupleEntrySchemeIterator( FlowProcess<? extends Configuration> flowProcess, Scheme scheme, CloseableIterator<RecordReader> closeableIterator )
     {
-    super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( MultiInputSplit.CASCADING_SOURCE_PATH ) );
+    super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( FileType.CASCADING_SOURCE_PATH ) );
     }
 
   private static CloseableIterator<RecordReader> makeIterator( FlowProcess<? extends Configuration> flowProcess, Tap parentTap, RecordReader recordReader ) throws IOException

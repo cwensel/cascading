@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.t.l.DirTap to allow for sourcing and sinking local directory trees. DirTap can be used as a replacement for
+  c.t.l.FileTap.
+
   Updated c.t.Tap and c.f.Flow to provide Java 8 Stream instances on sink and source Tap instances. See the new
   c.t.TupleEntryStream and c.t.TupleStream helper classes.
 

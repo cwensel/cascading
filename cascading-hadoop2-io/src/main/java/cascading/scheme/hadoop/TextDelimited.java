@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -1068,6 +1069,21 @@ public class TextDelimited extends TextLine
     sinkCall.getOutput().collect( null, text );
 
     line.setLength( 0 );
+    }
+
+  @Override
+  public String getExtension()
+    {
+    switch( getDelimiter().trim() )
+      {
+      case "\t":
+        return "tsv";
+
+      case ",":
+        return "csv";
+      }
+
+    return "txt";
     }
   }
 

@@ -116,5 +116,4 @@ public class LocalStepStreamGraph extends NodeStreamGraph
 
     return new LocalFlowProcess( (LocalFlowProcess) flowProcess, tapProperties );
     }
-
   }

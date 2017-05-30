@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cascading.flow.hadoop.util.HadoopUtil;
+import cascading.tap.type.FileType;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapred.FileSplit;
@@ -40,7 +42,11 @@ import org.slf4j.LoggerFactory;
 /** Class MultiInputSplit is used by MultiInputFormat */
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
-  public static final String CASCADING_SOURCE_PATH = "cascading.source.path";
+  /**
+   * @deprecated see {@link FileType{@link #CASCADING_SOURCE_PATH}}.
+   */
+  @Deprecated
+  public static final String CASCADING_SOURCE_PATH = FileType.CASCADING_SOURCE_PATH;
   private static final Logger LOG = LoggerFactory.getLogger( MultiInputSplit.class );
 
   /** Field jobConf */
@@ -60,7 +66,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
    */
   public static String getCurrentTapSourcePath( JobConf jobConf )
     {
-    return jobConf.get( CASCADING_SOURCE_PATH );
+    return jobConf.get( FileType.CASCADING_SOURCE_PATH );
     }
 
   public MultiInputSplit( InputSplit inputSplit, Map<String, String> config )
@@ -156,7 +162,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
 
       if( path != null )
         {
-        jobConf.set( CASCADING_SOURCE_PATH, path.toString() );
+        jobConf.set( FileType.CASCADING_SOURCE_PATH, path.toString() );
 
         LOG.info( "current split input path: {}", path );
         }
