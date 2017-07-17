@@ -344,6 +344,7 @@ public class DirTap extends FileTap
         .filter( path -> !Files.isDirectory( path ) )
         .filter( pathMatcher::matches );
       Iterator<Path> iterator = stream.iterator();
+      InputStream lastInputStream = null;
 
       @Override
       public boolean hasNext()
@@ -354,6 +355,8 @@ public class DirTap extends FileTap
       @Override
       public InputStream next()
         {
+        safeClose();
+
         Path path = iterator.next();
 
         flowProcess.getFlowProcessContext().setSourcePath( path.toAbsolutePath().toString() );
@@ -363,7 +366,9 @@ public class DirTap extends FileTap
 
         try
           {
-          return Files.newInputStream( path );
+          lastInputStream = Files.newInputStream( path );
+
+          return lastInputStream;
           }
         catch( IOException exception )
           {
@@ -371,9 +376,26 @@ public class DirTap extends FileTap
           }
         }
 
+      private void safeClose()
+        {
+        try
+          {
+          if( lastInputStream != null )
+            lastInputStream.close();
+
+          lastInputStream = null;
+          }
+        catch( IOException exception )
+          {
+          // do nothing
+          }
+        }
+
       @Override
       public void close() throws IOException
         {
+        safeClose();
+
         if( stream != null )
           stream.close();
         }
