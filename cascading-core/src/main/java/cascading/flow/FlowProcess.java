@@ -221,6 +221,7 @@ public abstract class FlowProcess<Config>
 
     // lazy initialize trap collectors collection and share across copies
     this.trapCollectors = flowProcess.getTrapCollectors();
+    this.flowProcessContext = flowProcess.getFlowProcessContext();
     }
 
   public FlowProcessContext getFlowProcessContext()
