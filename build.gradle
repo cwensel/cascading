@@ -1,0 +1,279 @@
+/*
+ * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ *
+ * Project and contact information: http://www.cascading.org/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply from: 'etc/version.gradle'
+apply from: "etc/s3Upload.gradle"
+
+allprojects {
+
+  apply plugin: 'idea'
+  apply plugin: 'eclipse'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {url = 'http://conjars.org/repo/'}
+    maven {url = 'https://repository.apache.org'}
+  }
+}
+
+project.ext.distDir = null
+
+task prepareDist() {
+  project.distDir = file( "${rootDir}/build/dist" )
+  doFirst {
+    mkdir( distDir )
+  }
+}
+
+subprojects {
+
+  apply plugin: 'java'
+  apply plugin: 'maven'
+  apply from: '../etc/testing.gradle'
+
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+
+  group = 'cascading'
+  version = releaseVersion
+
+  configurations {
+
+    testArtifacts {
+      extendsFrom testRuntime
+    }
+  }
+
+  javadoc.dependsOn << prepareDist
+
+  javadoc {
+    def copyright = '<i>Copyright &#169; 21017 Chris K Wensel. All Rights Reserved.</i>'
+
+    title = "Cascading ${releaseVersion}"
+    destinationDir = file( "${distDir}/javadoc/${project.name}" )
+
+    failOnError = false
+
+    configure( options ) {
+      linkSource = true
+      encoding = "UTF8"
+      bottom = copyright
+      links = [
+        'http://docs.oracle.com/javase/7/docs/api/',
+        'http://junit.sourceforge.net/javadoc/'
+      ]
+    }
+  }
+
+  task sourcesJar( type: Jar, dependsOn: classes ) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+  }
+
+  task javadocJar( type: Jar, dependsOn: javadoc ) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  task testsJar( type: Jar, dependsOn: testClasses ) {
+    from sourceSets.test.output
+    classifier = 'tests'
+  }
+
+  task testSourcesJar( type: Jar, dependsOn: classes ) {
+    from sourceSets.test.allSource
+    classifier = 'test-sources'
+  }
+
+  artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+    archives testsJar
+    archives testSourcesJar
+    testArtifacts testsJar
+    testArtifacts testSourcesJar
+  }
+
+  dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+  }
+
+  test {
+    include '**/*Test.class'
+    ignoreFailures = !System.getProperty( 'test.haltonerror', "true" ).equals( "true" )
+  }
+
+  assemble.dependsOn << prepareDist
+
+  assemble.doLast {
+
+    copy {
+      into "${distDir}/lib/${archivesBaseName}"
+      from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll {dep ->
+        !dep.name.contains( 'cascading' )
+      }.collect {dep ->
+        dep.moduleArtifacts.collect {it.file}
+      } )
+    }
+
+    copy {
+      into distDir
+      from configurations.default.allArtifacts.files
+    }
+  }
+
+  uploadArchives {
+
+    def deployer = repositories.mavenDeployer {
+      configuration = configurations.archives
+
+      repository( url: repoUrl ) {
+        authentication( userName: repoUserName, password: repoPassword )
+      }
+
+      pom.project {
+        description 'An API for data management, analytics, and machine learning on parallel computing clusters.'
+        inceptionYear '2007'
+        url 'http://cascading.org/'
+        scm {
+          url 'https://github.com/Cascading/cascading.git'
+        }
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+          }
+        }
+      }
+    }
+    // make sure test dependencies come first, so that maven isn't getting
+    // confused, when reading the generated pom
+    [install.repositories.mavenInstaller, deployer]*.pom*.whenConfigured {pom ->
+      def scopeOrder = [test: 1, runtime: 2, provided: 3, compile: 4].withDefault {100}
+      pom.dependencies = pom.dependencies.sort {scopeOrder[ it.scope ]}
+    }
+  }
+}
+
+task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
+
+  def copyright = '<i>Copyright &#169; 2017 Chris K Wensel. All Rights Reserved.</i>'
+
+  title = "Cascading ${releaseVersion}"
+  destinationDir = file( "${distDir}/javadoc/all/" )
+
+  source subprojects.javadoc.source
+  classpath = rootProject.files( subprojects.javadoc.classpath )
+
+  failOnError = false
+
+  configure( options ) {
+    linkSource = true
+    encoding = "UTF8"
+    bottom = copyright
+    links = [
+      'http://docs.oracle.com/javase/7/docs/api/',
+      'http://junit.sourceforge.net/javadoc/'
+    ]
+  }
+}
+
+task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-kafka:build', ':allJavadoc'] ) {
+
+  s3UploadDocs.dependsOn << prepareRelease
+  s3UploadArtifacts.dependsOn << prepareRelease
+
+  // copy dist and apply any analytics scripts
+  def analytics = System.getProperty( 'publish.docs.analytics', '' )
+
+  from "${distDir}/javadoc/"
+  into "${s3UploadDocs.source}/javadoc"
+
+  filter {line ->
+    line.replaceAll( "</body>", "${analytics}\n</body>" )
+  }
+}
+
+prepareRelease.doLast {
+  logger.info( 'built all artifacts' )
+}
+
+task clean {
+  doLast {
+    delete buildDir
+  }
+}
+task buildDist( dependsOn: prepareRelease ) {
+  doLast {
+    copy {
+      from 'CHANGES.txt'
+      from 'README.txt'
+      from 'apl.txt'
+      from 'LICENSE.txt'
+      into distDir
+    }
+  }
+}
+
+task buildPackage( type: Tar, dependsOn: buildDist ) {
+
+  description = "package current build, does not run tests"
+
+  destinationDir = file( s3UploadArtifacts.source )
+  baseName = "cascading-${releaseVersion}"
+  compression = "GZIP"
+
+  into( baseName ) {
+    from distDir
+  }
+}
+
+task buildLatestMeta( dependsOn: buildPackage ) {
+
+  s3UploadArtifacts.dependsOn << buildLatestMeta
+
+  ext.latestArchivePath = null
+  ext.latestReleaseTagPath = null
+  ext.latestPropertiesPath = null
+}
+
+buildLatestMeta.doLast {
+
+  def destination = s3UploadArtifacts.source
+  def releaseTar = buildPackage.archivePath.name
+
+  latestArchivePath = file( destination, 'latest.txt' )
+  latestArchivePath.write( "http://${s3UploadArtifacts.destination}${releaseTar}" )
+
+  latestReleaseTagPath = file( destination, 'latest-tag.txt' )
+  latestReleaseTagPath.write( "${releaseTag}" )
+
+  latestPropertiesPath = file( destination, 'latest.properties' )
+  latestPropertiesPath.write( "${rootProject.name}.release.version=${releaseVersion}\n" +
+    "${rootProject.name}.release.major=${majorVersion}\n" +
+    "${rootProject.name}.release.minor=${minorVersion}\n" +
+    "${rootProject.name}.release.build=${buildNumber}\n" +
+    "${rootProject.name}.release.commit=${currentCommit}\n" +
+    "${rootProject.name}.release.tag=${releaseTag}"
+  )
+}
