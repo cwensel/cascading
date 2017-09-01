@@ -47,7 +47,7 @@ import java.util.function.Supplier;
  * <p/>
  * There is currently no way to specify that a deep copy must be performed when making a Tuple copy.
  */
-public abstract class TupleEntryCollector
+public abstract class TupleEntryCollector implements AutoCloseable
   {
   protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null, true );
 
@@ -189,6 +189,7 @@ public abstract class TupleEntryCollector
    * This method must not be called when an instance is returned from {@code getOutputCollector()} from any of
    * the relevant {@link cascading.operation.OperationCall} implementations (inside a Function, Aggregator, or Buffer).
    */
+  @Override
   public void close()
     {
     // do nothing
