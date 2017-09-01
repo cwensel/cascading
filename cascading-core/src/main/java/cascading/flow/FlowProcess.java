@@ -49,8 +49,20 @@ import cascading.tuple.TupleEntryIterator;
  */
 public abstract class FlowProcess<Config>
   {
-  /** Field NULL is a noop implementation of FlowSession. */
+  /** Field NULL is a noop implementation of FlowProcess. */
+  @SuppressWarnings("StaticInitializerReferencesSubClass")
   public static FlowProcess NULL = new NullFlowProcess();
+
+  /**
+   * A noop implementation of a FlowProcess.
+   *
+   * @return A noop implementation of a FlowProcess.
+   */
+  @SuppressWarnings("unchecked")
+  public static <C> FlowProcess<C> nullFlowProcess()
+    {
+    return (FlowProcess<C>) NULL;
+    }
 
   public static class NullFlowProcess extends FlowProcess<Object>
     {
