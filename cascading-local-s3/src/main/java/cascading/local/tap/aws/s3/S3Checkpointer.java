@@ -18,7 +18,33 @@
  * limitations under the License.
  */
 
-include 'cascading-local-s3'
-include 'cascading-local-s3-example'
+package cascading.local.tap.aws.s3;
 
-rootProject.name = 'cascading-local'
+/**
+ * Interface S3Checkpointer is used to retrieve and persist last known keys for any given S3 bucket.
+ *
+ * @see S3FileCheckpointer
+ */
+public interface S3Checkpointer
+  {
+  /**
+   * Method getLastKey returns the last known key or null for the requested bucket.
+   *
+   * @param bucketName of String
+   * @return String
+   */
+  String getLastKey( String bucketName );
+
+  /**
+   * Method setLastKey stores the last seen and consumed key for the given bucket.
+   *
+   * @param bucketName of String
+   * @param key        of String
+   */
+  void setLastKey( String bucketName, String key );
+
+  /**
+   * Method commit notifies the instance that no more keys will be handled.
+   */
+  void commit();
+  }

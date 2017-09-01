@@ -23,7 +23,7 @@ apply from: './etc/properties.gradle'
 project.ext.currentCommit = System.properties[ 'build.vcs.number' ];
 
 if( !currentCommit )
-{
+  {
   def commitPath = File.createTempFile( "commit", "tmp" )
 
   ant.exec( dir: '.', executable: "git", output: commitPath ) {
@@ -33,10 +33,10 @@ if( !currentCommit )
   currentCommit = commitPath.readLines().get( 0 )
 
   commitPath.delete()
-}
+  }
 
 def versionProperties = new Properties()
-file( 'version.properties' ).withInputStream { versionProperties.load( it ) }
+file( 'version.properties' ).withInputStream {versionProperties.load( it )}
 
 ext.majorVersion = versionProperties[ "${rootProject.name}.release.major" ]
 ext.minorVersion = versionProperties[ "${rootProject.name}.release.minor" ]
