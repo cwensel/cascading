@@ -182,6 +182,6 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     if( input == null )
       input = new FileInputStream( path );
 
-    return new TupleEntrySchemeIterator( flowProcess, parent.getScheme(), input, path );
+    return new TupleEntrySchemeIterator( flowProcess, parent, parent.getScheme(), input, path );
     }
   }

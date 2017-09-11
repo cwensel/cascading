@@ -29,6 +29,7 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.scheme.ConcreteCall;
 import cascading.scheme.Scheme;
+import cascading.tap.Tap;
 import cascading.util.CloseableIterator;
 import cascading.util.SingleCloseableInputIterator;
 import cascading.util.Util;
@@ -59,22 +60,46 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   private boolean hasWaiting = false;
   private TupleException currentException;
 
+  @Deprecated
   public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, Input input )
     {
     this( flowProcess, scheme, input, null );
     }
 
+  @Deprecated
   public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, Input input, String loggableIdentifier )
     {
     this( flowProcess, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), loggableIdentifier );
     }
 
+  @Deprecated
   public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator )
     {
     this( flowProcess, scheme, inputIterator, null );
     }
 
+  @Deprecated
   public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Scheme scheme, CloseableIterator<Input> inputIterator, String loggableIdentifier )
+    {
+    this( flowProcess, null, scheme, inputIterator, loggableIdentifier );
+    }
+
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, Input input )
+    {
+    this( flowProcess, tap, scheme, input, null );
+    }
+
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, Input input, String loggableIdentifier )
+    {
+    this( flowProcess, tap, scheme, (CloseableIterator<Input>) new SingleCloseableInputIterator( (Closeable) input ), loggableIdentifier );
+    }
+
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, CloseableIterator<Input> inputIterator )
+    {
+    this( flowProcess, tap, scheme, inputIterator, null );
+    }
+
+  public TupleEntrySchemeIterator( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, CloseableIterator<Input> inputIterator, String loggableIdentifier )
     {
     super( scheme.getSourceFields() );
     this.flowProcess = flowProcess;
@@ -100,6 +125,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
 
     sourceCall = new ConcreteCall();
 
+    sourceCall.setTap( tap );
     sourceCall.setIncomingEntry( getTupleEntry() );
     sourceCall.setInput( wrapInput( inputIterator.next() ) );
 

@@ -43,12 +43,18 @@ public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<Con
 
   public HadoopTupleEntrySchemeIterator( FlowProcess<? extends Configuration> flowProcess, Tap parentTap, RecordReader recordReader ) throws IOException
     {
-    this( flowProcess, parentTap.getScheme(), makeIterator( flowProcess, parentTap, recordReader ) );
+    this( flowProcess, parentTap, parentTap.getScheme(), makeIterator( flowProcess, parentTap, recordReader ) );
     }
 
+  @Deprecated
   public HadoopTupleEntrySchemeIterator( FlowProcess<? extends Configuration> flowProcess, Scheme scheme, CloseableIterator<RecordReader> closeableIterator )
     {
     super( flowProcess, scheme, closeableIterator, flowProcess.getStringProperty( FileType.CASCADING_SOURCE_PATH ) );
+    }
+
+  public HadoopTupleEntrySchemeIterator( FlowProcess<? extends Configuration> flowProcess, Tap tap, Scheme scheme, CloseableIterator<RecordReader> closeableIterator )
+    {
+    super( flowProcess, tap, scheme, closeableIterator, flowProcess.getStringProperty( FileType.CASCADING_SOURCE_PATH ) );
     }
 
   private static CloseableIterator<RecordReader> makeIterator( FlowProcess<? extends Configuration> flowProcess, Tap parentTap, RecordReader recordReader ) throws IOException

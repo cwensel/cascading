@@ -41,7 +41,7 @@ public class TupleEntrySchemeIteratorTest
     FlowProcess<?> flowProcess = FlowProcess.NULL;
     Scheme<?, ?, ?, ?, ?> scheme = new MockedScheme();
     CloseableIterator<Object> inputIterator = new MockedSingleValueCloseableIterator( new Object() );
-    TupleEntrySchemeIterator<?, ?> iterator = new TupleEntrySchemeIterator( flowProcess, scheme, inputIterator );
+    TupleEntrySchemeIterator<?, ?> iterator = new TupleEntrySchemeIterator( flowProcess, null, scheme, inputIterator );
 
     assertTrue( iterator.hasNext() );
     assertTrue( iterator.hasNext() );

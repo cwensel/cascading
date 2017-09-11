@@ -48,7 +48,7 @@ public class StdErrTap extends SinkTap<Properties, OutputStream>
   @Override
   public TupleEntryCollector openForWrite( FlowProcess<? extends Properties> flowProcess, OutputStream output ) throws IOException
     {
-    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), System.err );
+    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, this, getScheme(), System.err );
     }
 
   @Override

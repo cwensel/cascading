@@ -147,7 +147,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
 
     flowProcess.getFlowProcessContext().setSourcePath( getFullIdentifier( flowProcess ) );
 
-    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, getScheme(), input, getIdentifier() );
+    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, this, getScheme(), input, getIdentifier() );
     }
 
   @Override
@@ -156,7 +156,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
     if( output == null )
       output = new TapFileOutputStream( getOutputIdentifier(), isUpdate() ); // append if we are in update mode
 
-    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, getScheme(), output, getIdentifier() );
+    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, this, getScheme(), output, getIdentifier() );
     }
 
   /**

@@ -20,6 +20,7 @@
 
 package cascading.scheme;
 
+import cascading.tap.Tap;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -33,6 +34,7 @@ public class ConcreteCall<Context, IO> implements SourceCall<Context, IO>, SinkC
   Context context;
   TupleEntry entry;
   IO io;
+  Tap tap;
 
   @Override
   public Context getContext()
@@ -88,5 +90,16 @@ public class ConcreteCall<Context, IO> implements SourceCall<Context, IO>, SinkC
   public void setOutput( IO output )
     {
     this.io = output;
+    }
+
+  @Override
+  public Tap getTap()
+    {
+    return tap;
+    }
+
+  public void setTap( Tap tap )
+    {
+    this.tap = tap;
     }
   }

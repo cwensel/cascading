@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.s.SourceCall and c.s.SinkCall to allow the parent c.s.Scheme access to the parent c.t.Tap instance.
+
   Added c.t.l.DirTap to allow for sourcing and sinking local directory trees. DirTap can be used as a replacement for
   c.t.l.FileTap.
 

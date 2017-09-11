@@ -41,12 +41,12 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<C
 
   public HadoopTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap ) throws IOException
     {
-    super( flowProcess, tap.getScheme(), makeCollector( flowProcess, tap, null ), tap.getIdentifier() );
+    super( flowProcess, tap, tap.getScheme(), makeCollector( flowProcess, tap, null ), tap.getIdentifier() );
     }
 
   public HadoopTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException
     {
-    super( flowProcess, tap.getScheme(), makeCollector( flowProcess, tap, outputCollector ), tap.getIdentifier() );
+    super( flowProcess, tap, tap.getScheme(), makeCollector( flowProcess, tap, outputCollector ), tap.getIdentifier() );
     }
 
   private static OutputCollector makeCollector( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, OutputCollector outputCollector ) throws IOException

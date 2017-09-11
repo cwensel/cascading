@@ -20,6 +20,7 @@
 
 package cascading.scheme;
 
+import cascading.tap.Tap;
 import cascading.tuple.TupleEntry;
 
 /**
@@ -61,4 +62,11 @@ public interface SinkCall<Context, Output>
   TupleEntry getOutgoingEntry();
 
   Output getOutput();
+
+  /**
+   * Method getTap returns the parent {@link Tap} instance that encapsulates the current {@link Scheme} instance.
+   *
+   * @return the parent Tap
+   */
+  Tap getTap();
   }
