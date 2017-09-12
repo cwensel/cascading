@@ -18,10 +18,28 @@
  * limitations under the License.
  */
 
-include 'cascading-local-s3'
-//include 'cascading-local-s3-example'
+package cascading.local.tap.kafka;
 
-include 'cascading-local-kafka'
-//include 'cascading-local-kafka-example'
+import java.util.Iterator;
+import java.util.Properties;
 
-rootProject.name = 'cascading-local'
+import cascading.scheme.Scheme;
+import cascading.tuple.Fields;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.Producer;
+
+/**
+ * Class KafkaScheme is the base class used for all Schemes that are to be used with the {@link KafkaTap}.
+ */
+public abstract class KafkaScheme<K, V, SourceContext, SinkContext> extends Scheme<Properties, Iterator<ConsumerRecord<K, V>>, Producer<K, V>, SourceContext, SinkContext>
+  {
+  public KafkaScheme( Fields sourceFields )
+    {
+    super( sourceFields );
+    }
+
+  public KafkaScheme( Fields sourceFields, Fields sinkFields )
+    {
+    super( sourceFields, sinkFields );
+    }
+  }

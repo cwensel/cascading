@@ -22,13 +22,14 @@ if( project.properties[ 'teamcity' ] ) // make them system properties
   System.properties.putAll( project.properties[ 'teamcity' ] )
 
 if( System.properties[ 'aws.properties' ] )
-{
-  file( System.properties[ 'aws.properties' ] ).withReader { reader ->
-    def awsProperties = new Properties()
-    awsProperties.load( reader )
-    System.properties.putAll( awsProperties )
+  {
+  file( System.properties[ 'aws.properties' ] ).withReader {
+    reader ->
+      def awsProperties = new Properties()
+      awsProperties.load( reader )
+      System.properties.putAll( awsProperties )
   }
-}
+  }
 
 ext.repoUrl = 'http://conjars.org/repo/'
 ext.repoUserName = System.properties[ 'publish.repo.userName' ]
