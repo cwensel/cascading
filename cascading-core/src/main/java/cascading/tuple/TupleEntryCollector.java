@@ -73,6 +73,9 @@ public abstract class TupleEntryCollector implements AutoCloseable
     if( declared.isUnknown() || declared.isAll() )
       return;
 
+    // if operation declared ARGS, then the arguments are a selector and must be forced to declared
+    declared = Fields.asDeclaration( declared );
+
     this.tupleEntry = new TupleEntry( declared, Tuple.size( declared.size() ), true );
     }
 
