@@ -274,4 +274,26 @@ public class RegexesTest extends CascadingTestCase
 
     assertTrue( "was not remove", !isRemove );
     }
+
+  @Test
+  public void testParserDeclaredTypes() throws IOException
+    {
+    RegexParser splitter = new RegexParser( new Fields( "lhs", "rhs" ).applyTypes( Integer.class, Integer.class ), "(\\S+)\\s+(\\S+)", new int[]{
+      1, 2} );
+    Tuple arguments = new Tuple( "6666\t7777" );
+    Fields resultFields = Fields.size( 2 );
+
+    TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
+
+    assertEquals( "wrong size", 1, collector.size() );
+
+    Iterator<Tuple> iterator = collector.iterator();
+
+    Tuple tuple = iterator.next();
+
+    assertEquals( "not equal: tuple.get(0).getClass()", Integer.class, tuple.getObject( 0 ).getClass() );
+    assertEquals( "not equal: tuple.get(1).getClass()", Integer.class, tuple.getObject( 1 ).getClass() );
+    assertEquals( "not equal: tuple.get(0)", 6666, tuple.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", 7777, tuple.getObject( 1 ) );
+    }
   }

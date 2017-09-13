@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.o.r.RegexParser to honor declared field types, if any. RegexParser will now coerce parsed String values
+  into declared primitive or custom types.
+
   Fixed minor issue where a Fields.ARGS field declaration would inherit a argument selector not converted to a
   declaration.
 

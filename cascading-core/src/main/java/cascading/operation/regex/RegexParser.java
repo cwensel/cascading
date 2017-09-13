@@ -24,6 +24,7 @@ import java.beans.ConstructorProperties;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -31,6 +32,8 @@ import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.Tuples;
 import cascading.util.Pair;
 
 /**
@@ -52,8 +55,12 @@ import cascading.util.Pair;
  * Any Object value will be coerced to a String type if type information is provided. See the
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.
+ * <p/>
+ * Also, any type information on the declaredFields will also be honored by coercing the parsed String value to the
+ * canonical declared type. This is useful when creating or using CoercibleType classes, like
+ * {@link cascading.tuple.type.DateType}.
  */
-public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
+public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> implements Function<Pair<Matcher, TupleEntry>>
   {
   /** Field groups */
   private int[] groups = null;
@@ -153,13 +160,29 @@ public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, Tuple>> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, TupleEntry>> operationCall )
     {
-    operationCall.setContext( new Pair<Matcher, Tuple>( getPattern().matcher( "" ), new Tuple() ) );
+    // TupleEntry allows us to honor the declared field type information
+    TupleEntry entry;
+
+    if( getFieldDeclaration().isArguments() )
+      entry = new TupleEntry( Fields.asDeclaration( operationCall.getArgumentFields() ), Tuple.size( operationCall.getArgumentFields().size() ) );
+    else
+      entry = new TupleEntry( getFieldDeclaration(), Tuple.size( getSize() ) );
+
+    operationCall.setContext( new Pair<>( getPattern().matcher( "" ), entry ) );
+    }
+
+  private int getSize()
+    {
+    if( groups != null )
+      return groups.length;
+
+    return getFieldDeclaration().size(); // if Fields.UNKNOWN size will be zero
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, Tuple>> functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, TupleEntry>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
@@ -171,9 +194,7 @@ public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements
     if( !matcher.find() )
       throw new OperationException( "could not match pattern: [" + getPatternString() + "] with value: [" + value + "]" );
 
-    Tuple output = functionCall.getContext().getRhs();
-
-    output.clear();
+    TupleEntry output = functionCall.getContext().getRhs();
 
     if( groups != null )
       onGivenGroups( functionCall, matcher, output );
@@ -181,27 +202,79 @@ public class RegexParser extends RegexOperation<Pair<Matcher, Tuple>> implements
       onFoundGroups( functionCall, matcher, output );
     }
 
-  private final void onFoundGroups( FunctionCall<Pair<Matcher, Tuple>> functionCall, Matcher matcher, Tuple output )
+  private void onFoundGroups( FunctionCall<Pair<Matcher, TupleEntry>> functionCall, Matcher matcher, TupleEntry output )
     {
     int count = matcher.groupCount();
 
+    // if UNKNOWN then the returned number fields will be of variable size
+    // subsequently we must clear the tuple, and add the found values
+    if( isDeclaredFieldsUnknown() )
+      addGroupsToTuple( matcher, output, count );
+    else
+      setGroupsOnTuple( matcher, output, count );
+
+    // this overcomes an issue in the planner resolver where if REPLACE is declared, the declared
+    // fields for the current operation are expected to match the argument fields
+    functionCall.getOutputCollector().add( output.getTuple() );
+    }
+
+  private void setGroupsOnTuple( Matcher matcher, TupleEntry output, int count )
+    {
     if( count == 0 )
       {
-      output.add( matcher.group( 0 ) );
+      try
+        {
+        output.setString( 0, matcher.group( 0 ) );
+        }
+      catch( Exception exception )
+        {
+        throw new CascadingException( "unable to set tuple value at field: " + output.getFields().get( 0 ) + ", from regex group: 0", exception );
+        }
       }
     else
       {
       for( int i = 0; i < count; i++ )
-        output.add( matcher.group( i + 1 ) ); // skip group 0
+        {
+        try
+          {
+          output.setString( i, matcher.group( i + 1 ) ); // skip group 0
+          }
+        catch( Exception exception )
+          {
+          throw new CascadingException( "unable to set tuple value at field: " + output.getFields().get( i ) + ", from regex group: " + ( i + 1 ), exception );
+          }
+        }
       }
-
-    functionCall.getOutputCollector().add( output );
     }
 
-  private final void onGivenGroups( FunctionCall<Pair<Matcher, Tuple>> functionCall, Matcher matcher, Tuple output )
+  private void addGroupsToTuple( Matcher matcher, TupleEntry output, int count )
     {
-    for( int pos : groups )
-      output.add( matcher.group( pos ) );
+    Tuple tuple = output.getTuple();
+
+    Tuples.asModifiable( tuple );
+
+    tuple.clear();
+
+    if( count == 0 )
+      {
+      tuple.add( matcher.group( 0 ) );
+      }
+    else
+      {
+      for( int i = 0; i < count; i++ )
+        tuple.add( matcher.group( i + 1 ) ); // skip group 0
+      }
+    }
+
+  private boolean isDeclaredFieldsUnknown()
+    {
+    return getFieldDeclaration().isUnknown();
+    }
+
+  private void onGivenGroups( FunctionCall<Pair<Matcher, TupleEntry>> functionCall, Matcher matcher, TupleEntry output )
+    {
+    for( int i = 0; i < groups.length; i++ )
+      output.setString( i, matcher.group( groups[ i ] ) );
 
     functionCall.getOutputCollector().add( output );
     }
