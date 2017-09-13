@@ -382,7 +382,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
    * Method getSinkModified returns the youngest modified date of any sink {@link cascading.tap.Tap} managed by this Flow instance.
    * <p/>
    * If zero (0) is returned, at least one of the sink resources does not exist. If minus one (-1) is returned,
-   * atleast one of the sinks are marked for delete ({@link cascading.tap.Tap#isReplace() returns true}).
+   * at least one of the sinks are marked for delete ({@link cascading.tap.Tap#isReplace() returns true}).
    *
    * @return the sinkModified (type long) of this Flow object.
    * @throws java.io.IOException when

@@ -577,6 +577,10 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method getModifiedTime returns the date this resource was last modified.
+   * <p/>
+   * If the resource does not exist, returns zero (0).
+   * <p>
+   * If the resource is continuous, returns {@link Long#MAX_VALUE}.
    *
    * @param flowProcess of type FlowProcess
    * @return The date this resource was last modified.
@@ -589,6 +593,10 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method getModifiedTime returns the date this resource was last modified.
+   * <p/>
+   * If the resource does not exist, returns zero (0).
+   * <p>
+   * If the resource is continuous, returns {@link Long#MAX_VALUE}.
    *
    * @param conf of type Config
    * @return The date this resource was last modified.

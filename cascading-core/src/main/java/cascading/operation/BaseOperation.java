@@ -103,7 +103,7 @@ public abstract class BaseOperation<Context> implements Serializable, Operation<
     }
 
   /** Validates the state of this instance. */
-  private final void verify()
+  private void verify()
     {
     if( this instanceof Filter && fieldDeclaration != Fields.ALL )
       throw new IllegalArgumentException( "fieldDeclaration must be set to Fields.ALL for filter operations" );
