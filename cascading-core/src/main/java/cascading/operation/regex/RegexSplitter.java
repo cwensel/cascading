@@ -29,6 +29,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.util.Pair;
 
 /**
@@ -44,9 +45,9 @@ import cascading.util.Pair;
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.
  */
-public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implements Function<Pair<Pattern, Tuple>>
+public class RegexSplitter extends RegexOperation<Pair<Pattern, TupleEntry>> implements Function<Pair<Pattern, TupleEntry>>
   {
-  private final int length;
+  private int length;
 
   /**
    * Constructor RegexSplitter creates a new RegexSplitter instance.
@@ -69,7 +70,6 @@ public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implemen
   public RegexSplitter( Fields fieldDeclaration )
     {
     super( 1, fieldDeclaration, "\t" );
-    length = fieldDeclaration.isUnknown() ? -1 : fieldDeclaration.size();
     }
 
   /**
@@ -86,27 +86,38 @@ public class RegexSplitter extends RegexOperation<Pair<Pattern, Tuple>> implemen
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Pattern, Tuple>> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Pattern, TupleEntry>> operationCall )
     {
-    operationCall.setContext( new Pair<Pattern, Tuple>( getPattern(), new Tuple() ) );
+    length = operationCall.getDeclaredFields().isUnknown() ? -1 : operationCall.getDeclaredFields().size();
+
+    TupleEntry tupleEntry = new TupleEntry( operationCall.getDeclaredFields(), Tuple.size( Math.max( 1, length ) ) );
+
+    operationCall.setContext( new Pair<>( getPattern(), tupleEntry ) );
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Pattern, Tuple>> functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Pattern, TupleEntry>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
     if( value == null )
       value = "";
 
-    Tuple output = functionCall.getContext().getRhs();
-
-    output.clear();
+    TupleEntry output = functionCall.getContext().getRhs();
 
     String[] split = functionCall.getContext().getLhs().split( value, length );
 
-    for( int i = 0; i < split.length; i++ )
-      output.add( split[ i ] );
+    if( length == -1 )
+      {
+      output.getTuple().clear();
+
+      for( String element : split )
+        output.getTuple().add( element );
+      }
+    else
+      {
+      output.setCanonicalValues( split );
+      }
 
     functionCall.getOutputCollector().add( output );
     }

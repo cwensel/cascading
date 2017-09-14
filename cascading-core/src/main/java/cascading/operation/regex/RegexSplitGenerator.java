@@ -29,6 +29,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.util.Pair;
 
 /**
@@ -46,7 +47,7 @@ import cascading.util.Pair;
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.
  */
-public class RegexSplitGenerator extends RegexOperation<Pair<Pattern, Tuple>> implements Function<Pair<Pattern, Tuple>>
+public class RegexSplitGenerator extends RegexOperation<Pair<Pattern, TupleEntry>> implements Function<Pair<Pattern, TupleEntry>>
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -75,13 +76,15 @@ public class RegexSplitGenerator extends RegexOperation<Pair<Pattern, Tuple>> im
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Pattern, Tuple>> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Pattern, TupleEntry>> operationCall )
     {
-    operationCall.setContext( new Pair<Pattern, Tuple>( getPattern(), Tuple.size( 1 ) ) );
+    TupleEntry tupleEntry = new TupleEntry( operationCall.getDeclaredFields(), Tuple.size( 1 ) );
+
+    operationCall.setContext( new Pair<>( getPattern(), tupleEntry ) );
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Pattern, Tuple>> functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Pattern, TupleEntry>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
@@ -92,8 +95,10 @@ public class RegexSplitGenerator extends RegexOperation<Pair<Pattern, Tuple>> im
 
     for( String string : split )
       {
-      functionCall.getContext().getRhs().set( 0, string );
-      functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
+      TupleEntry tupleEntry = functionCall.getContext().getRhs();
+
+      tupleEntry.setString( 0, string );
+      functionCall.getOutputCollector().add( tupleEntry );
       }
     }
   }

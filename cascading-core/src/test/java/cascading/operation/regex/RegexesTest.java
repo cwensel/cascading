@@ -62,7 +62,7 @@ public class RegexesTest extends CascadingTestCase
     {
     RegexSplitGenerator splitter = new RegexSplitGenerator( new Fields( "word" ), "\\s+" );
     Tuple arguments = new Tuple( "foo\t  bar" );
-    Fields resultFields = new Fields( "field" );
+    Fields resultFields = new Fields( "word" );
 
     TupleListCollector collector = invokeFunction( splitter, arguments, resultFields );
 

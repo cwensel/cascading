@@ -29,6 +29,7 @@ import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.util.Pair;
 
 /**
@@ -41,7 +42,7 @@ import cascading.util.Pair;
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.
  */
-public class RegexGenerator extends RegexOperation<Pair<Matcher, Tuple>> implements Function<Pair<Matcher, Tuple>>
+public class RegexGenerator extends RegexOperation<Pair<Matcher, TupleEntry>> implements Function<Pair<Matcher, TupleEntry>>
   {
   /**
    * Constructor RegexGenerator creates a new RegexGenerator instance.
@@ -70,13 +71,15 @@ public class RegexGenerator extends RegexOperation<Pair<Matcher, Tuple>> impleme
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, Tuple>> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, TupleEntry>> operationCall )
     {
-    operationCall.setContext( new Pair<Matcher, Tuple>( getPattern().matcher( "" ), Tuple.size( 1 ) ) );
+    TupleEntry tupleEntry = new TupleEntry( operationCall.getDeclaredFields(), Tuple.size( 1 ) );
+
+    operationCall.setContext( new Pair<>( getPattern().matcher( "" ), tupleEntry ) );
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, Tuple>> functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<Matcher, TupleEntry>> functionCall )
     {
     String value = functionCall.getArguments().getString( 0 );
 
@@ -87,7 +90,7 @@ public class RegexGenerator extends RegexOperation<Pair<Matcher, Tuple>> impleme
 
     while( matcher.find() )
       {
-      functionCall.getContext().getRhs().set( 0, matcher.group() );
+      functionCall.getContext().getRhs().setString( 0, matcher.group() );
       functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
       }
     }

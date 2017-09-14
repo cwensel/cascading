@@ -34,7 +34,6 @@ import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import cascading.tuple.Tuples;
 import cascading.util.Pair;
 
 /**
@@ -246,8 +245,6 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
     {
     Tuple tuple = output.getTuple();
 
-    Tuples.asModifiable( tuple );
-
     tuple.clear();
 
     if( count == 0 )
@@ -259,11 +256,6 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
       for( int i = 0; i < count; i++ )
         tuple.add( matcher.group( i + 1 ) ); // skip group 0
       }
-    }
-
-  private boolean isDeclaredFieldsUnknown( Fields declaredFields )
-    {
-    return declaredFields.isUnknown();
     }
 
   private void onGivenGroups( FunctionCall<Pair<Matcher, TupleEntry>> functionCall, Matcher matcher, TupleEntry output )
