@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -167,6 +167,9 @@ public class TupleEntry
   @ConstructorProperties({"fields"})
   public TupleEntry( Fields fields )
     {
+    if( fields == null )
+      throw new IllegalArgumentException( "fields may not be null" );
+
     this.fields = fields;
 
     setCoercions();
@@ -181,6 +184,9 @@ public class TupleEntry
   @ConstructorProperties({"fields", "isUnmodifiable"})
   public TupleEntry( Fields fields, boolean isUnmodifiable )
     {
+    if( fields == null )
+      throw new IllegalArgumentException( "fields may not be null" );
+
     this.fields = fields;
     this.isUnmodifiable = isUnmodifiable;
 
@@ -197,6 +203,9 @@ public class TupleEntry
   @ConstructorProperties({"fields", "tuple", "isUnmodifiable"})
   public TupleEntry( Fields fields, Tuple tuple, boolean isUnmodifiable )
     {
+    if( fields == null )
+      throw new IllegalArgumentException( "fields may not be null" );
+
     this.fields = fields;
     this.isUnmodifiable = isUnmodifiable;
     setTuple( tuple );
@@ -213,6 +222,9 @@ public class TupleEntry
   @ConstructorProperties({"fields", "tuple"})
   public TupleEntry( Fields fields, Tuple tuple )
     {
+    if( fields == null )
+      throw new IllegalArgumentException( "fields may not be null" );
+
     this.fields = fields;
     this.tuple = tuple;
 
@@ -229,6 +241,9 @@ public class TupleEntry
   @ConstructorProperties({"tupleEntry"})
   public TupleEntry( TupleEntry tupleEntry )
     {
+    if( tupleEntry == null )
+      throw new IllegalArgumentException( "tupleEntry may not be null" );
+
     this.fields = tupleEntry.getFields();
     this.tuple = tupleEntry.getTupleCopy();
 
@@ -243,6 +258,9 @@ public class TupleEntry
   @ConstructorProperties({"tuple"})
   public TupleEntry( Tuple tuple )
     {
+    if( tuple == null )
+      throw new IllegalArgumentException( "tuple may not be null" );
+
     this.fields = Fields.size( tuple.size() );
     this.tuple = tuple;
 
