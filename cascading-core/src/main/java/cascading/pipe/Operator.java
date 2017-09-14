@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -345,7 +346,7 @@ public abstract class Operator extends Pipe
         throw new OperatorException( this, "during REPLACE both the arguments selector and field declaration must be the same size, arguments: " + arguments.printVerbose() + " declaration: " + fieldDeclaration.printVerbose() );
 
       if( fieldDeclaration.isArguments() ) // there is no type info, so inherit it
-        return arguments;
+        return Fields.asDeclaration( arguments );
 
       return arguments.project( fieldDeclaration );
       }
