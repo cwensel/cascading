@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.o.OperationCall interface to provide the resolved declared fields for the current c.o.Operation.
+
   Updated c.o.r.RegexParser to honor declared field types, if any. RegexParser will now coerce parsed String values
   into declared primitive or custom types.
 

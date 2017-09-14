@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -44,4 +45,15 @@ public interface OperationCall<Context>
    * @return the argumentFields (type Fields) of this OperationCall object.
    */
   Fields getArgumentFields();
+
+  /**
+   * Returns the {@link Fields} declared by this operation.
+   * <p>
+   * If the original declared fields on the current operation defined a substitution, this value
+   * will be the actual resolved fields. That is, if the current operation declared {@link Fields#ARGS}
+   * this method will return the declared arguments on the operator pipe.
+   *
+   * @return the declaredFields (type Fields) of this OperationCall object.
+   */
+  Fields getDeclaredFields();
   }

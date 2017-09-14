@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -115,7 +116,7 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
    * @param groups        of type int[]
    */
   @ConstructorProperties({"patternString", "groups"})
-  public RegexParser( String patternString, int[] groups )
+  public RegexParser( String patternString, int... groups )
     {
     super( 1, Fields.size( verifyReturnLength( groups ) ), patternString );
 
@@ -139,7 +140,7 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
    * @param groups           of type int[]
    */
   @ConstructorProperties({"fieldDeclaration", "patternString", "groups"})
-  public RegexParser( Fields fieldDeclaration, String patternString, int[] groups )
+  public RegexParser( Fields fieldDeclaration, String patternString, int... groups )
     {
     super( 1, fieldDeclaration, patternString );
 
@@ -162,23 +163,17 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Pair<Matcher, TupleEntry>> operationCall )
     {
-    // TupleEntry allows us to honor the declared field type information
-    TupleEntry entry;
+    int size;
 
-    if( getFieldDeclaration().isArguments() )
-      entry = new TupleEntry( Fields.asDeclaration( operationCall.getArgumentFields() ), Tuple.size( operationCall.getArgumentFields().size() ) );
+    if( groups != null )
+      size = groups.length;
     else
-      entry = new TupleEntry( getFieldDeclaration(), Tuple.size( getSize() ) );
+      size = operationCall.getDeclaredFields().size(); // if Fields.UNKNOWN size will be zero
+
+    // TupleEntry allows us to honor the declared field type information
+    TupleEntry entry = new TupleEntry( operationCall.getDeclaredFields(), Tuple.size( size ) );
 
     operationCall.setContext( new Pair<>( getPattern().matcher( "" ), entry ) );
-    }
-
-  private int getSize()
-    {
-    if( groups != null )
-      return groups.length;
-
-    return getFieldDeclaration().size(); // if Fields.UNKNOWN size will be zero
     }
 
   @Override
@@ -208,7 +203,7 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
 
     // if UNKNOWN then the returned number fields will be of variable size
     // subsequently we must clear the tuple, and add the found values
-    if( isDeclaredFieldsUnknown() )
+    if( functionCall.getDeclaredFields().isUnknown() )
       addGroupsToTuple( matcher, output, count );
     else
       setGroupsOnTuple( matcher, output, count );
@@ -266,9 +261,9 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
       }
     }
 
-  private boolean isDeclaredFieldsUnknown()
+  private boolean isDeclaredFieldsUnknown( Fields declaredFields )
     {
-    return getFieldDeclaration().isUnknown();
+    return declaredFields.isUnknown();
     }
 
   private void onGivenGroups( FunctionCall<Pair<Matcher, TupleEntry>> functionCall, Matcher matcher, TupleEntry output )

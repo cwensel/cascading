@@ -263,7 +263,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields, Map<Object, Object> properties )
     {
     FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( arguments.getFields() );
+    ConcreteCall operationCall = new ConcreteCall( arguments.getFields(), function.getFieldDeclaration() );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     operationCall.setArguments( arguments );
