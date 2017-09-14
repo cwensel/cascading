@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,7 +35,7 @@ import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.util.Pair;
 
 /**
@@ -43,7 +44,7 @@ import cascading.util.Pair;
  * <p/>
  * If given, individual {@link Calendar} fields can be stored in unique fields for a given {@link TimeZone} and {@link Locale}.
  */
-public class DateParser extends DateOperation implements Function<Pair<SimpleDateFormat, Tuple>>
+public class DateParser extends DateOperation implements Function<Pair<SimpleDateFormat, TupleEntry>>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "ts";
@@ -59,7 +60,7 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
   @ConstructorProperties({"dateFormatString"})
   public DateParser( String dateFormatString )
     {
-    super( 1, new Fields( FIELD_NAME ), dateFormatString );
+    super( 1, new Fields( FIELD_NAME, Long.class ), dateFormatString );
     }
 
   /**
@@ -133,9 +134,18 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Pair<SimpleDateFormat, Tuple>> functionCall )
+  protected int getDeclaredSize()
     {
-    Tuple output = functionCall.getContext().getRhs();
+    if( calendarFields != null )
+      return calendarFields.length;
+
+    return super.getDeclaredSize();
+    }
+
+  @Override
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<SimpleDateFormat, TupleEntry>> functionCall )
+    {
+    TupleEntry output = functionCall.getContext().getRhs();
 
     try
       {
@@ -143,7 +153,7 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
 
       if( value == null ) // if null, return null for the field
         {
-        output.set( 0, null ); // safe to call set, tuple is size of 1
+        output.setObject( 0, null ); // safe to call set, tuple is size of 1
 
         functionCall.getOutputCollector().add( output );
 
@@ -153,7 +163,7 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
       Date date = functionCall.getContext().getLhs().parse( value );
 
       if( calendarFields == null )
-        output.set( 0, date.getTime() ); // safe to call set, tuple is size of 1
+        output.setLong( 0, date.getTime() ); // safe to call set, tuple is size of 1
       else
         makeCalendarFields( output, date );
       }
@@ -165,16 +175,13 @@ public class DateParser extends DateOperation implements Function<Pair<SimpleDat
     functionCall.getOutputCollector().add( output );
     }
 
-  private void makeCalendarFields( Tuple output, Date date )
+  private void makeCalendarFields( TupleEntry output, Date date )
     {
-    output.clear();
-
     Calendar calendar = getCalendar();
     calendar.setTime( date );
 
     for( int i = 0; i < calendarFields.length; i++ )
-    //noinspection MagicConstant
-      output.add( calendar.get( calendarFields[ i ] ) );
+      output.setInteger( i, calendar.get( calendarFields[ i ] ) );
     }
 
   @Override

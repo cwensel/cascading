@@ -2,10 +2,13 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.o.t.DateFormatter and c.o.t.DateParser to honor declared field types, if any. Both operations will now
+  coerce formatted/parsed String values into declared primitive or custom canonical types.
+
   Updated c.o.OperationCall interface to provide the resolved declared fields for the current c.o.Operation.
 
   Updated c.o.r.RegexParser to honor declared field types, if any. RegexParser will now coerce parsed String values
-  into declared primitive or custom types.
+  into declared primitive or custom canonical types.
 
   Fixed minor issue where a Fields.ARGS field declaration would inherit a argument selector not converted to a
   declaration.

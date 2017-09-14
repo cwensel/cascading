@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,10 +32,11 @@ import cascading.operation.BaseOperation;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.util.Pair;
 
 /** Class DateOperation is the base class for {@link DateFormatter} and {@link DateParser}. */
-public class DateOperation extends BaseOperation<Pair<SimpleDateFormat, Tuple>>
+public class DateOperation extends BaseOperation<Pair<SimpleDateFormat, TupleEntry>>
   {
   /** Field zone */
   protected TimeZone zone;
@@ -119,9 +121,14 @@ public class DateOperation extends BaseOperation<Pair<SimpleDateFormat, Tuple>>
     }
 
   @Override
-  public void prepare( FlowProcess flowProcess, OperationCall<Pair<SimpleDateFormat, Tuple>> operationCall )
+  public void prepare( FlowProcess flowProcess, OperationCall<Pair<SimpleDateFormat, TupleEntry>> operationCall )
     {
-    operationCall.setContext( new Pair<SimpleDateFormat, Tuple>( getDateFormat(), Tuple.size( 1 ) ) );
+    operationCall.setContext( new Pair<>( getDateFormat(), new TupleEntry( operationCall.getDeclaredFields(), Tuple.size( getDeclaredSize() ) ) ) );
+    }
+
+  protected int getDeclaredSize()
+    {
+    return 1;
     }
 
   @Override

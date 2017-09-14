@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,7 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
 import cascading.util.Pair;
 
 /**
@@ -40,7 +41,7 @@ import cascading.util.Pair;
  * Note the timezone data is given to the SimpleDateFormat, not the internal Calendar instance which interprets
  * the 'timestamp' value as it is assumed the timestamp is already in GMT.
  */
-public class DateFormatter extends DateOperation implements Function<Pair<SimpleDateFormat, Tuple>>
+public class DateFormatter extends DateOperation implements Function<Pair<SimpleDateFormat, TupleEntry>>
   {
   /** Field FIELD_NAME */
   public static final String FIELD_NAME = "datetime";
@@ -96,7 +97,7 @@ public class DateFormatter extends DateOperation implements Function<Pair<Simple
     }
 
   @Override
-  public void operate( FlowProcess flowProcess, FunctionCall<Pair<SimpleDateFormat, Tuple>> functionCall )
+  public void operate( FlowProcess flowProcess, FunctionCall<Pair<SimpleDateFormat, TupleEntry>> functionCall )
     {
     long ts = functionCall.getArguments().getLong( 0 );
 
@@ -104,7 +105,9 @@ public class DateFormatter extends DateOperation implements Function<Pair<Simple
 
     calendar.setTimeInMillis( ts );
 
-    functionCall.getContext().getRhs().set( 0, functionCall.getContext().getLhs().format( calendar.getTime() ) );
+    String formatted = functionCall.getContext().getLhs().format( calendar.getTime() );
+
+    functionCall.getContext().getRhs().setString( 0, formatted );
 
     functionCall.getOutputCollector().add( functionCall.getContext().getRhs() );
     }
