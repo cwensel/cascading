@@ -83,6 +83,7 @@ public class FunctionEachStage extends EachStage
           }
         finally
           {
+          Tuples.asModifiable( input.getTuple() );
           Tuples.asModifiable( outgoing );
           }
         }
