@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.t.p.DelimitedPartition to support arbitrary postfix values so that static filenames and paths can be
+  applied.
+
   Updated all c.o.regex functions to honor declared field types, if any. THe functions will now coerce parsed String
   values into declared primitive or custom canonical types.
 

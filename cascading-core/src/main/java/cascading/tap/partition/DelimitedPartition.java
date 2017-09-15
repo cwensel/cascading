@@ -33,24 +33,34 @@ import cascading.util.Util;
  * For example, given the delimiter {@code -} (dash), a partition path will have dashes.
  * <p/>
  * Note the delimiter must not be naturally present in any of the values making up the partition.
+ * <p>
+ * The postfix value will be appended to any partition when created, and removed when the partition is parsed. Use
+ * this value to add static filenames to the output path. It is safe to include the delimiter in the postfix value
+ * (e.g '/somepath/filename.csv' where the delimiter is the default '/').
  */
 public class DelimitedPartition implements Partition
   {
   public static final String PATH_DELIM = "/";
 
-  Fields partitionFields;
-  String delimiter = PATH_DELIM;
+  final Fields partitionFields;
+  final String delimiter;
+  final String postfix;
+
+  int numSplits;
 
   transient Pattern pattern;
 
-  public DelimitedPartition( Fields partitionFields, String delimiter )
+  public DelimitedPartition( Fields partitionFields )
     {
-    this( partitionFields );
-
-    this.delimiter = delimiter;
+    this( partitionFields, null, null );
     }
 
-  public DelimitedPartition( Fields partitionFields )
+  public DelimitedPartition( Fields partitionFields, String delimiter )
+    {
+    this( partitionFields, delimiter, null );
+    }
+
+  public DelimitedPartition( Fields partitionFields, String delimiter, String postfix )
     {
     if( partitionFields == null )
       throw new IllegalArgumentException( "partitionFields must not be null" );
@@ -59,12 +69,18 @@ public class DelimitedPartition implements Partition
       throw new IllegalArgumentException( "partitionFields must be defined, got: " + partitionFields.printVerbose() );
 
     this.partitionFields = partitionFields;
+    this.delimiter = delimiter == null ? PATH_DELIM : delimiter;
+
+    postfix = Util.isEmpty( postfix ) ? null : postfix.startsWith( this.delimiter ) ? postfix.substring( this.delimiter.length() ) : postfix;
+
+    this.numSplits = partitionFields.size() + ( postfix != null ? postfix.split( this.delimiter ).length : 0 );
+    this.postfix = postfix == null ? null : delimiter + postfix; // prefix the postfix w/ the delimiter
     }
 
   @Override
   public int getPathDepth()
     {
-    return partitionFields.size();
+    return numSplits;
     }
 
   @Override
@@ -81,20 +97,35 @@ public class DelimitedPartition implements Partition
     return pattern;
     }
 
+  public String getDelimiter()
+    {
+    return delimiter;
+    }
+
+  public String getPostfix()
+    {
+    return postfix;
+    }
+
   @Override
   public void toTuple( String partition, TupleEntry tupleEntry )
     {
     if( partition.startsWith( delimiter ) )
       partition = partition.substring( 1 );
 
-    String[] split = getPattern().split( partition );
+    String[] split = getPattern().split( partition, numSplits );
 
-    tupleEntry.setCanonicalValues( split );
+    tupleEntry.setCanonicalValues( split, 0, partitionFields.size() );
     }
 
   @Override
   public String toPartition( TupleEntry tupleEntry )
     {
-    return Util.join( tupleEntry.asIterableOf( String.class ), delimiter, true );
+    String partition = Util.join( tupleEntry.asIterableOf( String.class ), delimiter, true );
+
+    if( postfix != null )
+      partition = partition + postfix; // delimiter prefixed in ctor
+
+    return partition;
     }
   }

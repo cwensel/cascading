@@ -439,10 +439,23 @@ public class TupleEntry
    */
   public void setCanonicalValues( Object[] values )
     {
-    if( fields.size() != values.length )
+    setCanonicalValues( values, 0, values.length );
+    }
+
+  /**
+   * Method setCanonicalValues replaces each value of the current tuple with th give Object[]
+   * after they are coerced.
+   *
+   * @param values to replace the current wrapped tuple instance values
+   * @param offset index to being the copy
+   * @param length the number of elements to copy
+   */
+  public void setCanonicalValues( Object[] values, int offset, int length )
+    {
+    if( fields.size() != length )
       throw new IllegalArgumentException( "current entry and given array must be same length" );
 
-    for( int i = 0; i < coercions.length; i++ )
+    for( int i = offset; i < coercions.length; i++ )
       {
       Object element = values[ i ];
 
@@ -972,37 +985,32 @@ public class TupleEntry
    */
   public <T> Iterable<T> asIterableOf( final Class<T> type )
     {
-    return new Iterable<T>()
+    return () -> {
+    final Iterator<CoercibleType> coercibleIterator = coercions.length == 0 ? OBJECT_ITERATOR : Arrays.asList( coercions ).iterator();
+    final Iterator valuesIterator = tuple.iterator();
+
+    return new Iterator<T>()
       {
       @Override
-      public Iterator<T> iterator()
+      public boolean hasNext()
         {
-        final Iterator<CoercibleType> coercibleIterator = coercions.length == 0 ? OBJECT_ITERATOR : Arrays.asList( coercions ).iterator();
-        final Iterator valuesIterator = tuple.iterator();
+        return valuesIterator.hasNext();
+        }
 
-        return new Iterator<T>()
-          {
-          @Override
-          public boolean hasNext()
-            {
-            return valuesIterator.hasNext();
-            }
+      @Override
+      public T next()
+        {
+        Object next = valuesIterator.next();
 
-          @Override
-          public T next()
-            {
-            Object next = valuesIterator.next();
+        return (T) coercibleIterator.next().coerce( next, type );
+        }
 
-            return (T) coercibleIterator.next().coerce( next, type );
-            }
-
-          @Override
-          public void remove()
-            {
-            valuesIterator.remove();
-            }
-          };
+      @Override
+      public void remove()
+        {
+        valuesIterator.remove();
         }
       };
+    };
     }
   }

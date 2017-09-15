@@ -192,13 +192,24 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
   @Test
   public void testPartitionTapTextDelimited() throws IOException
     {
+    runPartitionTest( "" ); // empty string is treated as null
+    }
+
+  @Test
+  public void testPartitionTapTextDelimitedPostFix() throws IOException
+    {
+    runPartitionTest( "/somepath/filename.txt" );
+    }
+
+  private void runPartitionTest( String postfix ) throws IOException
+    {
     getPlatform().copyFromLocal( inputFileCrossX2 );
 
     Tap source = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), " ", inputFileCrossX2 );
 
     Tap partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned" ), SinkMode.REPLACE );
 
-    Partition partition = new DelimitedPartition( new Fields( "lower", "number" ) );
+    Partition partition = new DelimitedPartition( new Fields( "lower", "number" ), "/", postfix );
     partitionTap = getPlatform().getPartitionTap( partitionTap, partition, 1 );
 
     Flow firstFlow = getPlatform().getFlowConnector().connect( source, partitionTap, new Pipe( "partition" ) );
@@ -211,10 +222,10 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     secondFlow.complete();
 
-    Tap test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/a/1" );
+    Tap test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/a/1" + postfix );
     validateLength( firstFlow.openTapForRead( test ), 6, Pattern.compile( "[A-Z]" ) );
 
-    test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/b/2" );
+    test = getPlatform().getTextFile( new Fields( "line" ), partitionTap.getIdentifier().toString() + "/b/2" + postfix );
     validateLength( firstFlow.openTapForRead( test ), 6, Pattern.compile( "[A-Z]" ) );
 
     List<Tuple> tuples = asList( firstFlow, partitionTap );
