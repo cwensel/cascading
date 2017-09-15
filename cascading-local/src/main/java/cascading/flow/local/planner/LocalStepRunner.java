@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,12 +23,15 @@ package cascading.flow.local.planner;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
@@ -51,13 +55,18 @@ public class LocalStepRunner implements Callable<Throwable>
 
   private final FlowProcess<Properties> currentProcess;
 
-  private boolean complete = false;
-  private boolean successful = false;
+  private volatile boolean started = false;
+  private volatile boolean completed = false;
+  private volatile boolean successful = false;
+  private volatile boolean stopped = false;
 
   private final FlowNode flowNode;
   private final StreamGraph streamGraph;
   private final Collection<Duct> heads;
   private Throwable throwable = null;
+
+  private Semaphore markComplete = new Semaphore( 0 );
+  private List<Future<Throwable>> futures = Collections.emptyList();
 
   public LocalStepRunner( FlowProcess<Properties> flowProcess, LocalFlowStep step )
     {
@@ -72,9 +81,34 @@ public class LocalStepRunner implements Callable<Throwable>
     return currentProcess;
     }
 
-  public boolean isComplete()
+  public boolean isCompleted()
     {
-    return complete;
+    return completed;
+    }
+
+  public void blockUntilStopped()
+    {
+    if( !started || completed )
+      return;
+
+    stopped = true;
+
+    for( Future<Throwable> future : futures )
+      future.cancel( true );
+
+    try
+      {
+      markComplete.acquire();
+      }
+    catch( InterruptedException exception )
+      {
+      // do nothing
+      }
+    }
+
+  public boolean isStopped()
+    {
+    return stopped;
     }
 
   public boolean isSuccessful()
@@ -90,6 +124,7 @@ public class LocalStepRunner implements Callable<Throwable>
   @Override
   public Throwable call() throws Exception
     {
+    started = true;
     boolean attemptedCleanup = false;
 
     try
@@ -102,27 +137,50 @@ public class LocalStepRunner implements Callable<Throwable>
         }
       catch( Throwable currentThrowable )
         {
-        if( !( currentThrowable instanceof OutOfMemoryError ) )
-          LOG.error( "unable to prepare operation graph", currentThrowable );
+        try
+          {
+          if( !( currentThrowable instanceof OutOfMemoryError ) )
+            LOG.error( "unable to prepare operation graph", currentThrowable );
 
-        complete = true;
-        successful = false;
-        throwable = currentThrowable;
+          completed = true;
+          successful = false;
+          throwable = currentThrowable;
 
-        return throwable;
+          return throwable;
+          }
+        finally
+          {
+          markComplete.release();
+          }
+        }
+
+      if( stopped )
+        {
+        markComplete.release();
+
+        return null;
         }
 
       try
         {
-        List<Future<Throwable>> futures = spawnHeads();
+        futures = spawnHeads();
 
         for( Future<Throwable> future : futures )
           {
-          throwable = future.get();
+          try
+            {
+            throwable = future.get();
+            }
+          catch( CancellationException exception )
+            {
+            break;
+            }
 
           if( throwable != null )
             break;
           }
+
+        futures = Collections.emptyList();
         }
       catch( Throwable currentThrowable )
         {
@@ -148,7 +206,7 @@ public class LocalStepRunner implements Callable<Throwable>
           throwable = currentThrowable;
         }
 
-      complete = true;
+      completed = true;
       successful = throwable == null;
 
       return throwable;
@@ -169,6 +227,10 @@ public class LocalStepRunner implements Callable<Throwable>
           throwable = currentThrowable;
 
         successful = false;
+        }
+      finally
+        {
+        markComplete.release();
         }
 
       String message = "flow node id: " + flowNode.getID();

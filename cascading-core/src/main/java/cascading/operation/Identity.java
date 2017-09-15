@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,7 +28,6 @@ import java.util.Arrays;
 import cascading.flow.FlowProcess;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryCollector;
 import cascading.util.Util;
 
@@ -111,37 +111,28 @@ public class Identity extends BaseOperation<Identity.Functor> implements Functio
 
     if( types != null )
       {
-      functor = new Functor()
-      {
       Tuple result = Tuple.size( types.length );
 
-      @Override
-      public void operate( FunctionCall<Functor> functionCall )
-        {
-        TupleEntry input = functionCall.getArguments();
-        TupleEntryCollector outputCollector = functionCall.getOutputCollector();
+      functor = functionCall ->
+      {
+      TupleEntryCollector outputCollector = functionCall.getOutputCollector();
 
-        outputCollector.add( input.getCoercedTuple( types, result ) );
-        }
+      outputCollector.add( functionCall.getArguments().getCoercedTuple( types, result ) );
       };
       }
     else
       {
-      functor = new Functor()
+      functor = functionCall ->
       {
-      @Override
-      public void operate( FunctionCall<Functor> functionCall )
-        {
-        TupleEntryCollector outputCollector = functionCall.getOutputCollector();
+      TupleEntryCollector outputCollector = functionCall.getOutputCollector();
 
-        outputCollector.add( functionCall.getArguments().getTuple() );
-        }
+      outputCollector.add( functionCall.getArguments().getTuple() );
       };
+
       operationCall.setContext( functor );
       }
 
     operationCall.setContext( functor );
-
     }
 
   @Override
@@ -176,7 +167,7 @@ public class Identity extends BaseOperation<Identity.Functor> implements Functio
     return result;
     }
 
-  interface Functor
+  protected interface Functor
     {
     void operate( FunctionCall<Functor> functionCall );
     }

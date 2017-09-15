@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -91,7 +92,7 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
   @Override
   protected boolean internalNonBlockingIsComplete() throws IOException
     {
-    return stackRunner.isComplete();
+    return stackRunner.isCompleted();
     }
 
   @Override
@@ -109,6 +110,7 @@ public class LocalFlowStepJob extends FlowStepJob<Properties>
   @Override
   protected void internalBlockOnStop() throws IOException
     {
+    stackRunner.blockUntilStopped();
     }
 
   @Override

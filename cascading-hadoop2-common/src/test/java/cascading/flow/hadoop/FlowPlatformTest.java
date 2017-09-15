@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -221,17 +221,14 @@ public class FlowPlatformTest extends PlatformTestCase
     final Semaphore start = new Semaphore( 0 );
     final long startTime = System.nanoTime();
 
-    Future<Long> future = newSingleThreadExecutor().submit( new Callable<Long>()
-    {
-    @Override
-    public Long call() throws Exception
+    Future<Long> future = newSingleThreadExecutor().submit( () ->
       {
       start.release();
       LOG.info( "calling complete" );
       flow.complete();
       return System.nanoTime() - startTime;
       }
-    } );
+    );
 
     start.acquire();
     LOG.info( "calling stop" );
@@ -363,13 +360,13 @@ public class FlowPlatformTest extends PlatformTestCase
     if( onFail == FailingFlowListener.OnFail.THROWABLE )
       {
       pipeLower = new Each( pipeLower, new Debug()
-      {
-      @Override
-      public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
         {
-        throw new RuntimeException( "failing inside pipe assembly intentionally" );
-        }
-      } );
+        @Override
+        public boolean isRemove( FlowProcess flowProcess, FilterCall filterCall )
+          {
+          throw new RuntimeException( "failing inside pipe assembly intentionally" );
+          }
+        } );
       }
 
     pipeLower = new GroupBy( pipeLower, new Fields( "num" ) );
