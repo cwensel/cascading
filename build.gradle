@@ -39,7 +39,7 @@ project.ext.distDir = null
 
 task prepareDist() {
   project.distDir = file( "${rootDir}/build/dist" )
-  doFirst {
+  doLast {
     mkdir( distDir )
   }
 }
@@ -153,10 +153,10 @@ subprojects {
 
       pom.project {
         description 'An API for data management, analytics, and machine learning on parallel computing clusters.'
-        inceptionYear '2007'
+        inceptionYear '2017'
         url 'http://cascading.org/'
         scm {
-          url 'https://github.com/Cascading/cascading.git'
+          url 'https://github.com/cwensel/cascading-local.git'
         }
         licenses {
           license {

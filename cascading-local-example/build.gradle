@@ -18,12 +18,23 @@
  * limitations under the License.
  */
 
-include 'cascading-local-s3'
-//include 'cascading-local-s3-example'
+plugins {
+  id "com.github.johnrengelman.shadow" version '2.0.0'
+}
 
-include 'cascading-local-kafka'
-//include 'cascading-local-kafka-example'
+apply from: "../etc/shadow.gradle"
 
-include 'cascading-local-example'
+dependencies {
 
-rootProject.name = 'cascading-local'
+  compile project( ':cascading-local-s3' )
+  compile project( ':cascading-local-kafka' )
+
+  compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
+
+  compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
+  compile group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+  compile group: 'log4j', name: 'log4j', version: log4jVersion
+
+  compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+}
