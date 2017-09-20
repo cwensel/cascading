@@ -53,24 +53,24 @@ public class RuleSetExec
   public static final int MAX_CONCURRENT_PLANNERS = 5;
   public static final int DEFAULT_TIMEOUT = 10 * 60;
   public static final Comparator<RuleResult> DEFAULT_PLAN_COMPARATOR = new Comparator<RuleResult>()
-  {
-  @Override
-  public int compare( RuleResult lhs, RuleResult rhs )
     {
-    int c = lhs.getNumSteps() - rhs.getNumSteps();
+    @Override
+    public int compare( RuleResult lhs, RuleResult rhs )
+      {
+      int c = lhs.getNumSteps() - rhs.getNumSteps();
 
-    if( c != 0 )
-      return c;
+      if( c != 0 )
+        return c;
 
-    return lhs.getNumNodes() - rhs.getNumNodes();
-    }
+      return lhs.getNumNodes() - rhs.getNumNodes();
+      }
 
-  @Override
-  public String toString()
-    {
-    return "default comparator: selects plan with fewest steps and fewest nodes";
-    }
-  };
+    @Override
+    public String toString()
+      {
+      return "default comparator: selects plan with fewest steps and fewest nodes";
+      }
+    };
 
   private TraceWriter traceWriter;
   private FlowPlanner flowPlanner;
@@ -111,14 +111,14 @@ public class RuleSetExec
   protected Comparator<RuleResult> getOrderComparator()
     {
     return new Comparator<RuleResult>()
-    {
-    @Override
-    public int compare( RuleResult lhs, RuleResult rhs )
       {
-      // preserver order of preference from rule registry if all things are equal
-      return registrySet.indexOf( lhs.getRegistry() ) - registrySet.indexOf( rhs.getRegistry() );
-      }
-    };
+      @Override
+      public int compare( RuleResult lhs, RuleResult rhs )
+        {
+        // preserver order of preference from rule registry if all things are equal
+        return registrySet.indexOf( lhs.getRegistry() ) - registrySet.indexOf( rhs.getRegistry() );
+        }
+      };
     }
 
   public RuleResult exec()
@@ -325,22 +325,22 @@ public class RuleSetExec
   protected Callable<RuleResult> createCallable( final RuleRegistry ruleRegistry )
     {
     return new Callable<RuleResult>()
-    {
-    @Override
-    public RuleResult call() throws Exception
       {
-      running.add( this );
+      @Override
+      public RuleResult call() throws Exception
+        {
+        running.add( this );
 
-      try
-        {
-        return execPlannerFor( ruleRegistry );
+        try
+          {
+          return execPlannerFor( ruleRegistry );
+          }
+        finally
+          {
+          running.remove( this );
+          }
         }
-      finally
-        {
-        running.remove( this );
-        }
-      }
-    };
+      };
     }
 
   protected boolean binResult( RuleResult ruleResult )

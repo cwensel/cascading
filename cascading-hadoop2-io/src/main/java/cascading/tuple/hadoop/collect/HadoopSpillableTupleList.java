@@ -124,21 +124,21 @@ public class HadoopSpillableTupleList extends SpillableTupleList
       final Compressor finalCompressor = compressor;
 
       return new HadoopTupleOutputStream( outputStream, tupleSerialization.getElementWriter() )
-      {
-      @Override
-      public void close() throws IOException
         {
-        try
+        @Override
+        public void close() throws IOException
           {
-          super.close();
+          try
+            {
+            super.close();
+            }
+          finally
+            {
+            if( finalCompressor != null )
+              CodecPool.returnCompressor( finalCompressor );
+            }
           }
-        finally
-          {
-          if( finalCompressor != null )
-            CodecPool.returnCompressor( finalCompressor );
-          }
-        }
-      };
+        };
       }
     catch( IOException exception )
       {
@@ -182,21 +182,21 @@ public class HadoopSpillableTupleList extends SpillableTupleList
 
       final Decompressor finalDecompressor = decompressor;
       return new HadoopTupleInputStream( inputStream, tupleSerialization.getElementReader() )
-      {
-      @Override
-      public void close() throws IOException
         {
-        try
+        @Override
+        public void close() throws IOException
           {
-          super.close();
+          try
+            {
+            super.close();
+            }
+          finally
+            {
+            if( finalDecompressor != null )
+              CodecPool.returnDecompressor( finalDecompressor );
+            }
           }
-        finally
-          {
-          if( finalDecompressor != null )
-            CodecPool.returnDecompressor( finalDecompressor );
-          }
-        }
-      };
+        };
       }
     catch( IOException exception )
       {

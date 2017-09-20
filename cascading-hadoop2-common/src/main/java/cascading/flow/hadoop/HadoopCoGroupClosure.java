@@ -238,15 +238,15 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
       Arrays.fill( fields, 0, fields.length, joinFields[ 0 ] );
 
     return new TupleBuilder()
-    {
-    Tuple result = TupleViews.createComposite( fields );
-
-    @Override
-    public Tuple makeResult( Tuple[] tuples )
       {
-      return TupleViews.reset( result, tuples );
-      }
-    };
+      Tuple result = TupleViews.createComposite( fields );
+
+      @Override
+      public Tuple makeResult( Tuple[] tuples )
+        {
+        return TupleViews.reset( result, tuples );
+        }
+      };
     }
 
   protected Collection<Tuple> createTupleCollection( Fields joinField )
@@ -267,36 +267,36 @@ public class HadoopCoGroupClosure extends HadoopGroupByClosure
   public Iterator<Tuple> createIterator( final IndexTuple current, final Iterator<IndexTuple> values )
     {
     return new Iterator<Tuple>()
-    {
-    IndexTuple value = current;
-
-    @Override
-    public boolean hasNext()
       {
-      return value != null;
-      }
+      IndexTuple value = current;
 
-    @Override
-    public Tuple next()
-      {
-      if( value == null && !values.hasNext() )
-        throw new NoSuchElementException();
+      @Override
+      public boolean hasNext()
+        {
+        return value != null;
+        }
 
-      Tuple result = value.getTuple();
+      @Override
+      public Tuple next()
+        {
+        if( value == null && !values.hasNext() )
+          throw new NoSuchElementException();
 
-      if( values.hasNext() )
-        value = values.next();
-      else
-        value = null;
+        Tuple result = value.getTuple();
 
-      return result;
-      }
+        if( values.hasNext() )
+          value = values.next();
+        else
+          value = null;
 
-    @Override
-    public void remove()
-      {
-      // unsupported
-      }
-    };
+        return result;
+        }
+
+      @Override
+      public void remove()
+        {
+        // unsupported
+        }
+      };
     }
   }

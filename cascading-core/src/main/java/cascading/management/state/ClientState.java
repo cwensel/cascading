@@ -34,53 +34,53 @@ public abstract class ClientState extends BaseState
   public static final String STATE_SERVICE_CLASS_PROPERTY = "cascading3.management.state.service.classname";
 
   public static ClientState NULL = new ClientState()
-  {
-  @Override
-  public void start( long time )
     {
-    }
+    @Override
+    public void start( long time )
+      {
+      }
 
-  @Override
-  public void run( long time )
-    {
-    }
+    @Override
+    public void run( long time )
+      {
+      }
 
-  @Override
-  public void stop( long time )
-    {
-    }
+    @Override
+    public void stop( long time )
+      {
+      }
 
-  @Override
-  String[] getContext( String group, String metric )
-    {
-    return new String[ 0 ];
-    }
+    @Override
+    String[] getContext( String group, String metric )
+      {
+      return new String[ 0 ];
+      }
 
-  @Override
-  public void recordStats( CascadingStats stats )
-    {
-    }
+    @Override
+    public void recordStats( CascadingStats stats )
+      {
+      }
 
-  @Override
-  public void recordFlowNode( FlowNode flowNode )
-    {
-    }
+    @Override
+    public void recordFlowNode( FlowNode flowNode )
+      {
+      }
 
-  @Override
-  public void recordFlowStep( FlowStep flowStep )
-    {
-    }
+    @Override
+    public void recordFlowStep( FlowStep flowStep )
+      {
+      }
 
-  @Override
-  public void recordFlow( Flow flow )
-    {
-    }
+    @Override
+    public void recordFlow( Flow flow )
+      {
+      }
 
-  @Override
-  public void recordCascade( Cascade cascade )
-    {
-    }
-  };
+    @Override
+    public void recordCascade( Cascade cascade )
+      {
+      }
+    };
 
   public ClientState()
     {

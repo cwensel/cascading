@@ -985,7 +985,8 @@ public class TupleEntry
    */
   public <T> Iterable<T> asIterableOf( final Class<T> type )
     {
-    return () -> {
+    return () ->
+    {
     final Iterator<CoercibleType> coercibleIterator = coercions.length == 0 ? OBJECT_ITERATOR : Arrays.asList( coercions ).iterator();
     final Iterator valuesIterator = tuple.iterator();
 

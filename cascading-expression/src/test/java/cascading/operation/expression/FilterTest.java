@@ -21,17 +21,9 @@
 package cascading.operation.expression;
 
 import cascading.CascadingTestCase;
-import cascading.flow.FlowProcess;
-import cascading.operation.BaseOperation;
-import cascading.operation.Filter;
-import cascading.operation.FilterCall;
 import cascading.operation.filter.And;
-import cascading.operation.filter.FilterNotNull;
-import cascading.operation.filter.FilterNull;
-import cascading.operation.filter.Not;
 import cascading.operation.filter.Or;
 import cascading.operation.filter.Xor;
-import cascading.pipe.assembly.Unique;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;

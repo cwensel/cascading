@@ -102,58 +102,58 @@ public class SecondarySortKeyValuesReader extends KeyValuesReader
   public Iterable<Object> getCurrentValues() throws IOException
     {
     return new Iterable<Object>()
-    {
-    @Override
-    public Iterator<Object> iterator()
-      {
-      final Iterator<Object>[] iterator = new Iterator[]{currentValues.iterator()};
-
-      return new Iterator<Object>()
       {
       @Override
-      public boolean hasNext()
+      public Iterator<Object> iterator()
         {
-        boolean hasNext = iterator[ 0 ].hasNext();
+        final Iterator<Object>[] iterator = new Iterator[]{currentValues.iterator()};
 
-        if( hasNext )
-          return true;
-
-        if( !advanceSafe() )
-          return false;
-
-        if( isNewKey )
-          return false;
-
-        iterator[ 0 ] = currentValues.iterator();
-
-        return hasNext();
-        }
-
-      @Override
-      public Object next()
-        {
-        return iterator[ 0 ].next();
-        }
-
-      @Override
-      public void remove()
-        {
-        iterator[ 0 ].remove();
-        }
-
-      protected boolean advanceSafe()
-        {
-        try
+        return new Iterator<Object>()
           {
-          return advance();
-          }
-        catch( IOException exception )
-          {
-          throw new CascadingException( "unable to advance values iterator", exception );
-          }
+          @Override
+          public boolean hasNext()
+            {
+            boolean hasNext = iterator[ 0 ].hasNext();
+
+            if( hasNext )
+              return true;
+
+            if( !advanceSafe() )
+              return false;
+
+            if( isNewKey )
+              return false;
+
+            iterator[ 0 ] = currentValues.iterator();
+
+            return hasNext();
+            }
+
+          @Override
+          public Object next()
+            {
+            return iterator[ 0 ].next();
+            }
+
+          @Override
+          public void remove()
+            {
+            iterator[ 0 ].remove();
+            }
+
+          protected boolean advanceSafe()
+            {
+            try
+              {
+              return advance();
+              }
+            catch( IOException exception )
+              {
+              throw new CascadingException( "unable to advance values iterator", exception );
+              }
+            }
+          };
         }
       };
-      }
-    };
     }
   }

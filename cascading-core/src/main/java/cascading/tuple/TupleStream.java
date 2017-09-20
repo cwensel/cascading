@@ -41,6 +41,9 @@ import cascading.tap.Tap;
  * <p>
  * This class is a convenience class over the methods provided on the Tap class that provide the same
  * functionality. This class exists to help overcome any generics compiler warnings.
+ * <p>
+ * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+ * is simply accomplished with a try-with-resources statement.
  */
 public class TupleStream
   {
@@ -49,6 +52,9 @@ public class TupleStream
    * {@link Tap} instance.
    * <p>
    * Also see {@link Tap#tupleStream(FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param tap         the Tap to open
    * @param flowProcess represents the current platform configuration
@@ -69,6 +75,9 @@ public class TupleStream
    * This method returns an Tuple instance suitable for caching.
    * <p>
    * Also see {@link Tap#tupleStreamCopy(FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param tap         the Tap to open
    * @param flowProcess represents the current platform configuration
@@ -87,6 +96,9 @@ public class TupleStream
    * {@link Tap} instance.
    * <p>
    * Also see {@link Tap#tupleStream(FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param tap         the Tap to open
    * @param flowProcess represents the current platform configuration
@@ -109,6 +121,9 @@ public class TupleStream
    * This method returns an Tuple instance suitable for caching.
    * <p>
    * Also see {@link Tap#tupleStreamCopy(FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param tap         the Tap to open
    * @param flowProcess represents the current platform configuration

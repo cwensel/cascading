@@ -97,46 +97,46 @@ public class InnerJoin extends BaseJoiner
 
       if( isUnknown )
         resultBuilder = new TupleBuilder()
-        {
-        Tuple result = new Tuple(); // is re-used
-
-        @Override
-        public Tuple makeResult( Tuple[] tuples )
           {
-          result.clear();
+          Tuple result = new Tuple(); // is re-used
 
-          // flatten the results into one Tuple
-          for( Tuple lastValue : tuples )
-            result.addAll( lastValue );
+          @Override
+          public Tuple makeResult( Tuple[] tuples )
+            {
+            result.clear();
 
-          return result;
-          }
-        };
+            // flatten the results into one Tuple
+            for( Tuple lastValue : tuples )
+              result.addAll( lastValue );
+
+            return result;
+            }
+          };
       else
         resultBuilder = new TupleBuilder()
-        {
-        Tuple result;
-
-        {
-        // handle self join.
-        Fields[] fields = closure.getValueFields();
-
-        if( closure.isSelfJoin() )
           {
-          fields = new Fields[ closure.size() ];
+          Tuple result;
 
-          Arrays.fill( fields, closure.getValueFields()[ 0 ] );
+          {
+          // handle self join.
+          Fields[] fields = closure.getValueFields();
+
+          if( closure.isSelfJoin() )
+            {
+            fields = new Fields[ closure.size() ];
+
+            Arrays.fill( fields, closure.getValueFields()[ 0 ] );
+            }
+
+          result = TupleViews.createComposite( fields );
           }
 
-        result = TupleViews.createComposite( fields );
-        }
-
-        @Override
-        public Tuple makeResult( Tuple[] tuples )
-          {
-          return TupleViews.reset( result, tuples );
-          }
-        };
+          @Override
+          public Tuple makeResult( Tuple[] tuples )
+            {
+            return TupleViews.reset( result, tuples );
+            }
+          };
       }
 
     protected Iterator getIterator( int i )

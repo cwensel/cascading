@@ -109,14 +109,14 @@ public class MemoryCoGroupClosure extends JoinerClosure
       Arrays.fill( fields, 0, fields.length, joinFields[ 0 ] );
 
     return new TupleBuilder()
-    {
-    Tuple result = TupleViews.createComposite( fields );
-
-    @Override
-    public Tuple makeResult( Tuple[] tuples )
       {
-      return TupleViews.reset( result, tuples );
-      }
-    };
+      Tuple result = TupleViews.createComposite( fields );
+
+      @Override
+      public Tuple makeResult( Tuple[] tuples )
+        {
+        return TupleViews.reset( result, tuples );
+        }
+      };
     }
   }

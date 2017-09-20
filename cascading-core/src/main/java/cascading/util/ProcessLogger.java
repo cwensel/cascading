@@ -26,61 +26,61 @@ package cascading.util;
 public interface ProcessLogger
   {
   ProcessLogger NULL = new ProcessLogger()
-  {
-  @Override
-  public boolean isInfoEnabled()
     {
-    return false;
-    }
+    @Override
+    public boolean isInfoEnabled()
+      {
+      return false;
+      }
 
-  @Override
-  public boolean isDebugEnabled()
-    {
-    return false;
-    }
+    @Override
+    public boolean isDebugEnabled()
+      {
+      return false;
+      }
 
-  @Override
-  public void logInfo( String message, Object... arguments )
-    {
+    @Override
+    public void logInfo( String message, Object... arguments )
+      {
 
-    }
+      }
 
-  @Override
-  public void logDebug( String message, Object... arguments )
-    {
+    @Override
+    public void logDebug( String message, Object... arguments )
+      {
 
-    }
+      }
 
-  @Override
-  public void logWarn( String message )
-    {
+    @Override
+    public void logWarn( String message )
+      {
 
-    }
+      }
 
-  @Override
-  public void logWarn( String message, Object... arguments )
-    {
+    @Override
+    public void logWarn( String message, Object... arguments )
+      {
 
-    }
+      }
 
-  @Override
-  public void logWarn( String message, Throwable throwable )
-    {
+    @Override
+    public void logWarn( String message, Throwable throwable )
+      {
 
-    }
+      }
 
-  @Override
-  public void logError( String message, Object... arguments )
-    {
+    @Override
+    public void logError( String message, Object... arguments )
+      {
 
-    }
+      }
 
-  @Override
-  public void logError( String message, Throwable throwable )
-    {
+    @Override
+    public void logError( String message, Throwable throwable )
+      {
 
-    }
-  };
+      }
+    };
 
   boolean isInfoEnabled();
 

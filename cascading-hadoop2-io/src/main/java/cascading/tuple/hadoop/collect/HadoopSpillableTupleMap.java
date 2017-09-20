@@ -79,25 +79,25 @@ public class HadoopSpillableTupleMap extends SpillableTupleMap
   protected Spillable.SpillStrategy getSpillStrategy()
     {
     return new Spillable.SpillStrategy()
-    {
-    int minThreshold = (int) ( getMapThreshold() * .05 );
-
-    int current()
       {
-      return Math.max( minThreshold, Math.min( getInitListThreshold(), getMapThreshold() / size() ) );
-      }
+      int minThreshold = (int) ( getMapThreshold() * .05 );
 
-    @Override
-    public boolean doSpill( Spillable spillable, int size )
-      {
-      return current() <= size;
-      }
+      int current()
+        {
+        return Math.max( minThreshold, Math.min( getInitListThreshold(), getMapThreshold() / size() ) );
+        }
 
-    @Override
-    public String getSpillReason( Spillable spillable )
-      {
-      return "met current threshold: " + current();
-      }
-    };
+      @Override
+      public boolean doSpill( Spillable spillable, int size )
+        {
+        return current() <= size;
+        }
+
+      @Override
+      public String getSpillReason( Spillable spillable )
+        {
+        return "met current threshold: " + current();
+        }
+      };
     }
   }

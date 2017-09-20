@@ -189,49 +189,49 @@ public class TraceTest extends CascadingTestCase
   public void testTap()
     {
     Tap tap = new Tap()
-    {
-    @Override
-    public String getIdentifier()
       {
-      return null;
-      }
+      @Override
+      public String getIdentifier()
+        {
+        return null;
+        }
 
-    @Override
-    public TupleEntryIterator openForRead( FlowProcess flowProcess, Object object ) throws IOException
-      {
-      return null;
-      }
+      @Override
+      public TupleEntryIterator openForRead( FlowProcess flowProcess, Object object ) throws IOException
+        {
+        return null;
+        }
 
-    @Override
-    public TupleEntryCollector openForWrite( FlowProcess flowProcess, Object object ) throws IOException
-      {
-      return null;
-      }
+      @Override
+      public TupleEntryCollector openForWrite( FlowProcess flowProcess, Object object ) throws IOException
+        {
+        return null;
+        }
 
-    @Override
-    public boolean createResource( Object conf ) throws IOException
-      {
-      return false;
-      }
+      @Override
+      public boolean createResource( Object conf ) throws IOException
+        {
+        return false;
+        }
 
-    @Override
-    public boolean deleteResource( Object conf ) throws IOException
-      {
-      return false;
-      }
+      @Override
+      public boolean deleteResource( Object conf ) throws IOException
+        {
+        return false;
+        }
 
-    @Override
-    public boolean resourceExists( Object conf ) throws IOException
-      {
-      return false;
-      }
+      @Override
+      public boolean resourceExists( Object conf ) throws IOException
+        {
+        return false;
+        }
 
-    @Override
-    public long getModifiedTime( Object conf ) throws IOException
-      {
-      return 0;
-      }
-    };
+      @Override
+      public long getModifiedTime( Object conf ) throws IOException
+        {
+        return 0;
+        }
+      };
 
     assertEqualsTrace( "cascading.TraceTest.testTap(TraceTest.java", tap.getTrace() );
     }
@@ -240,28 +240,28 @@ public class TraceTest extends CascadingTestCase
   public void testScheme()
     {
     Scheme scheme = new Scheme()
-    {
-    @Override
-    public void sourceConfInit( FlowProcess flowProcess, Tap tap, Object conf )
       {
-      }
+      @Override
+      public void sourceConfInit( FlowProcess flowProcess, Tap tap, Object conf )
+        {
+        }
 
-    @Override
-    public void sinkConfInit( FlowProcess flowProcess, Tap tap, Object conf )
-      {
-      }
+      @Override
+      public void sinkConfInit( FlowProcess flowProcess, Tap tap, Object conf )
+        {
+        }
 
-    @Override
-    public boolean source( FlowProcess flowProcess, SourceCall sourceCall ) throws IOException
-      {
-      return false;
-      }
+      @Override
+      public boolean source( FlowProcess flowProcess, SourceCall sourceCall ) throws IOException
+        {
+        return false;
+        }
 
-    @Override
-    public void sink( FlowProcess flowProcess, SinkCall sinkCall ) throws IOException
-      {
-      }
-    };
+      @Override
+      public void sink( FlowProcess flowProcess, SinkCall sinkCall ) throws IOException
+        {
+        }
+      };
 
     assertEqualsTrace( "cascading.TraceTest.testScheme(TraceTest.java", scheme.getTrace() );
     }

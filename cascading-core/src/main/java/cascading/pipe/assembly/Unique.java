@@ -160,13 +160,13 @@ public class Unique extends SubAssembly
     public void prepare( final FlowProcess flowProcess, OperationCall<CascadingCache<Tuple, Object>> operationCall )
       {
       CacheEvictionCallback callback = new CacheEvictionCallback()
-      {
-      @Override
-      public void evict( Map.Entry entry )
         {
-        flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
-        }
-      };
+        @Override
+        public void evict( Map.Entry entry )
+          {
+          flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
+          }
+        };
       FactoryLoader loader = FactoryLoader.getInstance();
       BaseCacheFactory cacheFactory = loader.loadFactoryFrom( flowProcess, UniqueProps.UNIQUE_CACHE_FACTORY, UniqueProps.DEFAULT_CACHE_FACTORY_CLASS );
 

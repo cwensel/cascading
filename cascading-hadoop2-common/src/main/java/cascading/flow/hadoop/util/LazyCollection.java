@@ -68,29 +68,29 @@ public class LazyCollection implements Collection<Tuple>, ResettableCollection<I
       return parent.iterator();
 
     return new Iterator<Tuple>()
-    {
-    @Override
-    public boolean hasNext()
       {
-      return iterator.hasNext();
-      }
+      @Override
+      public boolean hasNext()
+        {
+        return iterator.hasNext();
+        }
 
-    @Override
-    public Tuple next()
-      {
-      Tuple next = iterator.next();
+      @Override
+      public Tuple next()
+        {
+        Tuple next = iterator.next();
 
-      parent.add( next );
+        parent.add( next );
 
-      return next;
-      }
+        return next;
+        }
 
-    @Override
-    public void remove()
-      {
-      iterator.remove();
-      }
-    };
+      @Override
+      public void remove()
+        {
+        iterator.remove();
+        }
+      };
     }
 
   @Override

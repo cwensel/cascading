@@ -45,13 +45,13 @@ public class MalformedJoinExpressionGraph extends ExpressionGraph
       SearchOrder.ReverseDepth,
       and( ElementCapture.Primary,
         new FlowElementExpression( HashJoin.class )
-        {
-        @Override
-        public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, FlowElement flowElement )
           {
-          return super.applies( plannerContext, elementGraph, flowElement ) && !( (Splice) flowElement ).isSelfJoin();
-          }
-        },
+          @Override
+          public boolean applies( PlannerContext plannerContext, ElementGraph elementGraph, FlowElement flowElement )
+            {
+            return super.applies( plannerContext, elementGraph, flowElement ) && !( (Splice) flowElement ).isSelfJoin();
+            }
+          },
         not( new FlowElementExpression( HashJoin.class, TypeExpression.Topo.SpliceOnly ) )
       )
     );

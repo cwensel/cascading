@@ -32,14 +32,14 @@ public interface CacheEvictionCallback<Key, Value> extends Serializable
   /**
    * NO-OP implementation of {@link cascading.util.cache.CacheEvictionCallback}.
    */
-  public static final CacheEvictionCallback NULL = new CacheEvictionCallback()
-  {
-  @Override
-  public void evict( Map.Entry entry )
+  CacheEvictionCallback NULL = new CacheEvictionCallback()
     {
-    // NO-OP
-    }
-  };
+    @Override
+    public void evict( Map.Entry entry )
+      {
+      // NO-OP
+      }
+    };
 
   /**
    * Method will be called by the {@link CascadingCache} implementation whenever a key is evicted.

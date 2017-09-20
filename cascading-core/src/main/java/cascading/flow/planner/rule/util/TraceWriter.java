@@ -385,7 +385,7 @@ public class TraceWriter
 
     processLogger.logInfo( "writing final registry: {}", file );
 
-    try (PrintWriter writer = new PrintWriter( file ))
+    try( PrintWriter writer = new PrintWriter( file ) )
       {
       writer.println( "filename names winning rule registry" );
       }
@@ -408,7 +408,7 @@ public class TraceWriter
 
     file.getParentFile().mkdirs();
 
-    try (PrintWriter writer = new PrintWriter( file ))
+    try( PrintWriter writer = new PrintWriter( file ) )
       {
       Flow flow = plannerContext.getFlow();
 

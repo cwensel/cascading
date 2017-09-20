@@ -47,7 +47,6 @@ public class HashJoinsIntoMerge extends FlowElementGraph
     sources.put( "lhs", new NonTap( "lhs", new Fields( "offset", "line" ) ) );
     sources.put( "rhs", new NonTap( "rhs", new Fields( "offset", "line" ) ) );
 
-
     Map sinks = new HashMap();
     sinks.put( "sink", new NonTap( "sink", new Fields( "offset", "line" ) ) );
 

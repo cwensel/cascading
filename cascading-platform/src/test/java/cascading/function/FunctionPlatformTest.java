@@ -156,7 +156,7 @@ public class FunctionPlatformTest extends PlatformTestCase
       new TupleEntry( incoming, new Tuple( "a" ) ),
       new TupleEntry( incoming, new Tuple( "d" ) ),
       new TupleEntry( incoming, new Tuple( "d" ) ),
-    };
+      };
 
     List<Tuple> expected = new ArrayList<Tuple>();
     expected.add( new Tuple( "a", 2L ) );
@@ -199,7 +199,7 @@ public class FunctionPlatformTest extends PlatformTestCase
       new TupleEntry( incoming, new Tuple( "a", 1 ) ),
       new TupleEntry( incoming, new Tuple( "d", 1 ) ),
       new TupleEntry( incoming, new Tuple( "d", 1 ) ),
-    };
+      };
 
     List<Tuple> expected = new ArrayList<Tuple>();
     expected.add( new Tuple( "a", 2F ) );

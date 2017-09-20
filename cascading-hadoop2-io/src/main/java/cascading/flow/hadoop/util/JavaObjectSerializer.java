@@ -83,20 +83,20 @@ public class JavaObjectSerializer implements ObjectSerializer
       ByteArrayInputStream byteStream = new ByteArrayInputStream( bytes );
 
       in = new ObjectInputStream( decompress ? new GZIPInputStream( byteStream ) : byteStream )
-      {
-      @Override
-      protected Class<?> resolveClass( ObjectStreamClass desc ) throws IOException, ClassNotFoundException
         {
-        try
+        @Override
+        protected Class<?> resolveClass( ObjectStreamClass desc ) throws IOException, ClassNotFoundException
           {
-          return Class.forName( desc.getName(), false, Thread.currentThread().getContextClassLoader() );
+          try
+            {
+            return Class.forName( desc.getName(), false, Thread.currentThread().getContextClassLoader() );
+            }
+          catch( ClassNotFoundException exception )
+            {
+            return super.resolveClass( desc );
+            }
           }
-        catch( ClassNotFoundException exception )
-          {
-          return super.resolveClass( desc );
-          }
-        }
-      };
+        };
 
       return (T) in.readObject();
       }

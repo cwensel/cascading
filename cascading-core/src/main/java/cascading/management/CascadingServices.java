@@ -266,28 +266,28 @@ public class CascadingServices
       return;
 
     ShutdownUtil.addHook( new ShutdownUtil.Hook()
-    {
-    @Override
-    public Priority priority()
       {
-      return Priority.SERVICE_PROVIDER;
-      }
+      @Override
+      public Priority priority()
+        {
+        return Priority.SERVICE_PROVIDER;
+        }
 
-    @Override
-    public void execute()
-      {
-      try
+      @Override
+      public void execute()
         {
-        service.stopService();
+        try
+          {
+          service.stopService();
+          }
+        catch( Throwable throwable )
+          {
+          // safe to throw exception here so message is logged
+          LOG.error( "failed stopping cascading service", throwable );
+          throw new CascadeException( "failed stopping cascading service", throwable );
+          }
         }
-      catch( Throwable throwable )
-        {
-        // safe to throw exception here so message is logged
-        LOG.error( "failed stopping cascading service", throwable );
-        throw new CascadeException( "failed stopping cascading service", throwable );
-        }
-      }
-    } );
+      } );
     }
 
   /** Class NullDocumentService provides a null implementation. */

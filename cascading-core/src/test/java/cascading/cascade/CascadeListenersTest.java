@@ -36,28 +36,28 @@ public class CascadeListenersTest extends TestCase
     Cascade cascade = new BaseCascade();
 
     CascadeListener listener = new CascadeListener()
-    {
-    @Override
-    public void onStarting( Cascade cascade )
       {
-      }
+      @Override
+      public void onStarting( Cascade cascade )
+        {
+        }
 
-    @Override
-    public void onStopping( Cascade cascade )
-      {
-      }
+      @Override
+      public void onStopping( Cascade cascade )
+        {
+        }
 
-    @Override
-    public void onCompleted( Cascade cascade )
-      {
-      }
+      @Override
+      public void onCompleted( Cascade cascade )
+        {
+        }
 
-    @Override
-    public boolean onThrowable( Cascade cascade, Throwable throwable )
-      {
-      return false;
-      }
-    };
+      @Override
+      public boolean onThrowable( Cascade cascade, Throwable throwable )
+        {
+        return false;
+        }
+      };
 
     cascade.addListener( listener );
 

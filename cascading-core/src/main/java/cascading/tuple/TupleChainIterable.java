@@ -49,7 +49,6 @@ public class TupleChainIterable implements Iterable<Tuple>, Resettable<Iterable<
     System.arraycopy( iterables, 0, this.iterables, initial.length, iterables.length );
     }
 
-
   @Override
   public Iterator<Tuple> iterator()
     {

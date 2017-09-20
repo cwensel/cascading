@@ -39,25 +39,25 @@ public interface Spillable
   interface SpillListener
     {
     SpillListener NULL = new SpillListener()
-    {
-    private final Logger LOG = LoggerFactory.getLogger( SpillListener.class );
-
-    @Override
-    public void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason )
       {
-      LOG.info( "spilling {} tuples in list to spill number {}", spillSize, spillable.spillCount() + 1 );
-      }
+      private final Logger LOG = LoggerFactory.getLogger( SpillListener.class );
 
-    @Override
-    public void notifyReadSpillBegin( Spillable spillable )
-      {
-      }
+      @Override
+      public void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason )
+        {
+        LOG.info( "spilling {} tuples in list to spill number {}", spillSize, spillable.spillCount() + 1 );
+        }
 
-    @Override
-    public void notifyWriteSpillEnd( SpillableTupleList spillableTupleList, long duration )
-      {
-      }
-    };
+      @Override
+      public void notifyReadSpillBegin( Spillable spillable )
+        {
+        }
+
+      @Override
+      public void notifyWriteSpillEnd( SpillableTupleList spillableTupleList, long duration )
+        {
+        }
+      };
 
     void notifyWriteSpillBegin( Spillable spillable, int spillSize, String spillReason );
 

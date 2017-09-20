@@ -21,8 +21,8 @@
 package cascading.flow.planner.rule;
 
 /**
-*
-*/
+ *
+ */
 public enum RuleMode
   {
     Mutate,

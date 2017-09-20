@@ -541,7 +541,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
 
   public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, Fields selector, C collection ) throws IOException
     {
-    try (TupleEntryIterator iterator = flow.openTapForRead( tap ))
+    try( TupleEntryIterator iterator = flow.openTapForRead( tap ) )
       {
       return asCollection( iterator, selector, collection );
       }

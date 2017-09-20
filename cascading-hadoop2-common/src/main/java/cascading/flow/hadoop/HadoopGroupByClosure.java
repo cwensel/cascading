@@ -73,74 +73,74 @@ public class HadoopGroupByClosure extends JoinerClosure
   protected Iterator<Tuple> makeIterator( final int pos, final Iterator values )
     {
     return new Iterator<Tuple>()
-    {
-    final int cleanPos = valueFields.length == 1 ? 0 : pos; // support repeated pipes
-    TupleBuilder[] valueBuilder = new TupleBuilder[ valueFields.length ];
-
-    {
-    for( int i = 0; i < valueFields.length; i++ )
-      valueBuilder[ i ] = makeBuilder( valueFields[ i ], joinFields[ i ] );
-    }
-
-    private TupleBuilder makeBuilder( final Fields valueField, final Fields joinField )
       {
-      if( valueField.isUnknown() && joinField.hasRelativePos() )
-        return new TupleBuilder()
-        {
-        @Override
-        public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
-          {
-          Fields fields = joinFields[ cleanPos ];
+      final int cleanPos = valueFields.length == 1 ? 0 : pos; // support repeated pipes
+      TupleBuilder[] valueBuilder = new TupleBuilder[ valueFields.length ];
 
-          fields = Fields.size( valueTuple.size() ).select( fields );
-
-          valueTuple.set( valueFields[ cleanPos ], fields, groupTuple );
-
-          return valueTuple;
-          }
-        };
-
-      if( valueField.isUnknown() || joinField.isNone() )
-        return new TupleBuilder()
-        {
-        @Override
-        public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
-          {
-          valueTuple.set( valueFields[ cleanPos ], joinFields[ cleanPos ], groupTuple );
-
-          return valueTuple;
-          }
-        };
-
-      return new TupleBuilder()
       {
-      Tuple result = TupleViews.createOverride( valueField, joinField );
+      for( int i = 0; i < valueFields.length; i++ )
+        valueBuilder[ i ] = makeBuilder( valueFields[ i ], joinFields[ i ] );
+      }
 
-      @Override
-      public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+      private TupleBuilder makeBuilder( final Fields valueField, final Fields joinField )
         {
-        return TupleViews.reset( result, valueTuple, groupTuple );
+        if( valueField.isUnknown() && joinField.hasRelativePos() )
+          return new TupleBuilder()
+            {
+            @Override
+            public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+              {
+              Fields fields = joinFields[ cleanPos ];
+
+              fields = Fields.size( valueTuple.size() ).select( fields );
+
+              valueTuple.set( valueFields[ cleanPos ], fields, groupTuple );
+
+              return valueTuple;
+              }
+            };
+
+        if( valueField.isUnknown() || joinField.isNone() )
+          return new TupleBuilder()
+            {
+            @Override
+            public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+              {
+              valueTuple.set( valueFields[ cleanPos ], joinFields[ cleanPos ], groupTuple );
+
+              return valueTuple;
+              }
+            };
+
+        return new TupleBuilder()
+          {
+          Tuple result = TupleViews.createOverride( valueField, joinField );
+
+          @Override
+          public Tuple makeResult( Tuple valueTuple, Tuple groupTuple )
+            {
+            return TupleViews.reset( result, valueTuple, groupTuple );
+            }
+          };
+        }
+
+      public boolean hasNext()
+        {
+        return values.hasNext();
+        }
+
+      public Tuple next()
+        {
+        Tuple tuple = (Tuple) values.next();
+
+        return valueBuilder[ cleanPos ].makeResult( tuple, grouping );
+        }
+
+      public void remove()
+        {
+        throw new UnsupportedOperationException( "remove not supported" );
         }
       };
-      }
-
-    public boolean hasNext()
-      {
-      return values.hasNext();
-      }
-
-    public Tuple next()
-      {
-      Tuple tuple = (Tuple) values.next();
-
-      return valueBuilder[ cleanPos ].makeResult( tuple, grouping );
-      }
-
-    public void remove()
-      {
-      throw new UnsupportedOperationException( "remove not supported" );
-      }
-    };
     }
 
   public void reset( Tuple grouping, Iterator<Tuple>[] values )

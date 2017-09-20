@@ -126,20 +126,20 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
   protected SpillableTupleList( final int threshold )
     {
     this( new SpillStrategy()
-    {
-
-    @Override
-    public boolean doSpill( Spillable spillable, int size )
       {
-      return size >= threshold;
-      }
 
-    @Override
-    public String getSpillReason( Spillable spillable )
-      {
-      return "met threshold: " + threshold;
-      }
-    } );
+      @Override
+      public boolean doSpill( Spillable spillable, int size )
+        {
+        return size >= threshold;
+        }
+
+      @Override
+      public String getSpillReason( Spillable spillable )
+        {
+        return "met threshold: " + threshold;
+        }
+      } );
     }
 
   protected SpillableTupleList( SpillStrategy spillStrategy )
@@ -356,45 +356,45 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
       }
 
     return new CloseableIterator<Tuple>()
-    {
-    Tuple tuple = new Tuple();
-    long count = 0;
-
-    @Override
-    public boolean hasNext()
       {
-      return count < size;
-      }
+      Tuple tuple = new Tuple();
+      long count = 0;
 
-    @Override
-    public Tuple next()
-      {
-      try
+      @Override
+      public boolean hasNext()
         {
-        return tupleInputStream.readTuple( tuple );
+        return count < size;
         }
-      catch( IOException exception )
-        {
-        throw new TupleException( "unable to read next tuple from file input stream containing: " + size + " tuples, successfully read tuples: " + count, exception );
-        }
-      finally
-        {
-        count++;
-        }
-      }
 
-    @Override
-    public void remove()
-      {
-      throw new UnsupportedOperationException( "remove is not supported" );
-      }
+      @Override
+      public Tuple next()
+        {
+        try
+          {
+          return tupleInputStream.readTuple( tuple );
+          }
+        catch( IOException exception )
+          {
+          throw new TupleException( "unable to read next tuple from file input stream containing: " + size + " tuples, successfully read tuples: " + count, exception );
+          }
+        finally
+          {
+          count++;
+          }
+        }
 
-    @Override
-    public void close() throws IOException
-      {
-      tupleInputStream.close();
-      }
-    };
+      @Override
+      public void remove()
+        {
+        throw new UnsupportedOperationException( "remove is not supported" );
+        }
+
+      @Override
+      public void close() throws IOException
+        {
+        tupleInputStream.close();
+        }
+      };
     }
 
   protected abstract TupleInputStream createTupleInputStream( File file );
@@ -437,24 +437,24 @@ public abstract class SpillableTupleList implements Collection<Tuple>, Spillable
     final Iterator<Object[]> iterator = current.iterator();
 
     return new Iterator<Tuple>()
-    {
-    @Override
-    public boolean hasNext()
       {
-      return iterator.hasNext();
-      }
+      @Override
+      public boolean hasNext()
+        {
+        return iterator.hasNext();
+        }
 
-    @Override
-    public Tuple next()
-      {
-      return TupleViews.reset( tuple, iterator.next() );
-      }
+      @Override
+      public Tuple next()
+        {
+        return TupleViews.reset( tuple, iterator.next() );
+        }
 
-    @Override
-    public void remove()
-      {
-      }
-    };
+      @Override
+      public void remove()
+        {
+        }
+      };
     }
 
   // collection methods, this class cannot only be added to, so they aren't implemented

@@ -317,20 +317,20 @@ public class HadoopFlowProcess extends FlowProcess<JobConf> implements MapRed
   public TupleEntryCollector openSystemIntermediateForWrite() throws IOException
     {
     return new TupleEntryCollector( Fields.size( 2 ) )
-    {
-    @Override
-    protected void collect( TupleEntry tupleEntry )
       {
-      try
+      @Override
+      protected void collect( TupleEntry tupleEntry )
         {
-        getOutputCollector().collect( tupleEntry.getObject( 0 ), tupleEntry.getObject( 1 ) );
+        try
+          {
+          getOutputCollector().collect( tupleEntry.getObject( 0 ), tupleEntry.getObject( 1 ) );
+          }
+        catch( IOException exception )
+          {
+          throw new CascadingException( "failed collecting key and value", exception );
+          }
         }
-      catch( IOException exception )
-        {
-        throw new CascadingException( "failed collecting key and value", exception );
-        }
-      }
-    };
+      };
     }
 
   @Override

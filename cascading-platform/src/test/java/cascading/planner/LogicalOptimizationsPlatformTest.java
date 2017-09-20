@@ -39,7 +39,6 @@ import org.junit.Test;
 
 import static data.InputData.inputFileApache;
 
-
 @Ignore // TODO: enable when we have support for custom rules
 public class LogicalOptimizationsPlatformTest extends PlatformTestCase
   {

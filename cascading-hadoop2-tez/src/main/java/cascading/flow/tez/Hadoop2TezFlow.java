@@ -253,19 +253,19 @@ public class Hadoop2TezFlow extends BaseFlow<TezConfiguration>
     getHdfsShutdownHook();
 
     shutdownHook = new ShutdownUtil.Hook()
-    {
-    @Override
-    public Priority priority()
       {
-      return Priority.LAST; // very last thing to happen
-      }
+      @Override
+      public Priority priority()
+        {
+        return Priority.LAST; // very last thing to happen
+        }
 
-    @Override
-    public void execute()
-      {
-      callHdfsShutdownHook();
-      }
-    };
+      @Override
+      public void execute()
+        {
+        callHdfsShutdownHook();
+        }
+      };
 
     ShutdownUtil.addHook( shutdownHook );
     }

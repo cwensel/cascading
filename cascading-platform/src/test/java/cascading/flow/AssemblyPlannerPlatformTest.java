@@ -54,27 +54,27 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
     Tap source = getPlatform().getTextFile( new Fields( "offset", "line" ), inputFileApache );
 
     AssemblyPlanner planner = new AssemblyPlanner()
-    {
-    @Override
-    public Map<String, String> getFlowDescriptor()
       {
-      return Collections.emptyMap();
-      }
+      @Override
+      public Map<String, String> getFlowDescriptor()
+        {
+        return Collections.emptyMap();
+        }
 
-    @Override
-    public List<Pipe> resolveTails( Context context )
-      {
-      Pipe pipe = new Pipe( (String) context.getFlow().getSourceNames().get( 0 ) );
+      @Override
+      public List<Pipe> resolveTails( Context context )
+        {
+        Pipe pipe = new Pipe( (String) context.getFlow().getSourceNames().get( 0 ) );
 
-      pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+        pipe = new Each( pipe, new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-      pipe = new GroupBy( pipe, new Fields( "ip" ) );
+        pipe = new GroupBy( pipe, new Fields( "ip" ) );
 
-      pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+        pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-      return Arrays.asList( pipe );
-      }
-    };
+        return Arrays.asList( pipe );
+        }
+      };
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "simple" ), SinkMode.REPLACE );
 
@@ -100,41 +100,41 @@ public class AssemblyPlannerPlatformTest extends PlatformTestCase
     Pipe pipe = new Pipe( "test" );
 
     AssemblyPlanner lazyEach = new AssemblyPlanner()
-    {
-    @Override
-    public List<Pipe> resolveTails( Context context )
       {
-      Pipe pipe = new Each( context.getTails().get( 0 ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
+      @Override
+      public List<Pipe> resolveTails( Context context )
+        {
+        Pipe pipe = new Each( context.getTails().get( 0 ), new Fields( "line" ), new RegexParser( new Fields( "ip" ), "^[^ ]*" ), new Fields( "ip" ) );
 
-      return Arrays.asList( pipe );
-      }
+        return Arrays.asList( pipe );
+        }
 
-    @Override
-    public Map<String, String> getFlowDescriptor()
-      {
-      return Collections.EMPTY_MAP;
-      }
-    };
+      @Override
+      public Map<String, String> getFlowDescriptor()
+        {
+        return Collections.EMPTY_MAP;
+        }
+      };
 
     AssemblyPlanner lazyCount = new AssemblyPlanner()
-    {
-    @Override
-    public List<Pipe> resolveTails( Context context )
       {
-      Pipe pipe = new GroupBy( context.getTails().get( 0 ), new Fields( "ip" ) );
+      @Override
+      public List<Pipe> resolveTails( Context context )
+        {
+        Pipe pipe = new GroupBy( context.getTails().get( 0 ), new Fields( "ip" ) );
 
-      pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
+        pipe = new Every( pipe, new Count(), new Fields( "ip", "count" ) );
 
-      return Arrays.asList( pipe );
-      }
+        return Arrays.asList( pipe );
+        }
 
-    @Override
-    public Map<String, String> getFlowDescriptor()
-      {
-      return Collections.EMPTY_MAP;
-      }
+      @Override
+      public Map<String, String> getFlowDescriptor()
+        {
+        return Collections.EMPTY_MAP;
+        }
 
-    };
+      };
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "composite" ), SinkMode.REPLACE );
 

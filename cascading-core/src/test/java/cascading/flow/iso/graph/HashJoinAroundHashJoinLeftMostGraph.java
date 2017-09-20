@@ -45,7 +45,6 @@ public class HashJoinAroundHashJoinLeftMostGraph extends FlowElementGraph
     sources.put( "upper1", new NonTap( "upper", new Fields( "offset", "line" ) ) );
     sources.put( "upper2", new NonTap( "upper", new Fields( "offset", "line" ) ) );
 
-
     Map sinks = new HashMap();
     sinks.put( "sink", new NonTap( "sink", new Fields( "offset", "line" ) ) );
 

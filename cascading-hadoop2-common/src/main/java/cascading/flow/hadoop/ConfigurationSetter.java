@@ -24,8 +24,8 @@ import cascading.property.ConfigDef;
 import org.apache.hadoop.conf.Configuration;
 
 /**
-*
-*/
+ *
+ */
 public class ConfigurationSetter implements ConfigDef.Setter
   {
   private final Configuration conf;

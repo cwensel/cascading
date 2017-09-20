@@ -94,13 +94,13 @@ public abstract class HadoopStepStats extends BaseCachedStepStats<Configuration,
       throw new IllegalStateException( "mapper node not found" );
 
     counterCache = new HadoopStepCounterCache( this, (Configuration) getConfig() )
-    {
-    @Override
-    protected RunningJob getJobStatusClient()
       {
-      return HadoopStepStats.this.getJobStatusClient();
-      }
-    };
+      @Override
+      protected RunningJob getJobStatusClient()
+        {
+        return HadoopStepStats.this.getJobStatusClient();
+        }
+      };
     }
 
   private Configuration getConfig()

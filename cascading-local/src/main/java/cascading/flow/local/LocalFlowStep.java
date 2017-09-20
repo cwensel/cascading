@@ -98,41 +98,41 @@ public class LocalFlowStep extends BaseFlowStep<Properties>
   private ConfigDef.Setter getSetterFor( final Properties properties )
     {
     return new ConfigDef.Setter()
-    {
-    @Override
-    public String set( String key, String value )
       {
-      String oldValue = get( key );
+      @Override
+      public String set( String key, String value )
+        {
+        String oldValue = get( key );
 
-      properties.setProperty( key, value );
-
-      return oldValue;
-      }
-
-    @Override
-    public String update( String key, String value )
-      {
-      String oldValue = get( key );
-
-      if( oldValue == null )
         properties.setProperty( key, value );
-      else if( !oldValue.contains( value ) )
-        properties.setProperty( key, oldValue + "," + value );
 
-      return oldValue;
-      }
+        return oldValue;
+        }
 
-    @Override
-    public String get( String key )
-      {
-      String value = properties.getProperty( key );
+      @Override
+      public String update( String key, String value )
+        {
+        String oldValue = get( key );
 
-      if( value == null || value.isEmpty() )
-        return null;
+        if( oldValue == null )
+          properties.setProperty( key, value );
+        else if( !oldValue.contains( value ) )
+          properties.setProperty( key, oldValue + "," + value );
 
-      return value;
-      }
-    };
+        return oldValue;
+        }
+
+      @Override
+      public String get( String key )
+        {
+        String value = properties.getProperty( key );
+
+        if( value == null || value.isEmpty() )
+          return null;
+
+        return value;
+        }
+      };
     }
 
   @Override

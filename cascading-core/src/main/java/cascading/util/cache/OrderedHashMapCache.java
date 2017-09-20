@@ -76,31 +76,31 @@ public class OrderedHashMapCache<Key, Value> implements CascadingCache<Key, Valu
   public void initialize()
     {
     this.backingMap = new LinkedHashMap<Key, Value>( capacity, 0.75f, true )
-    {
-    @Override
-    protected boolean removeEldestEntry( Map.Entry<Key, Value> eldest )
       {
-      boolean doRemove = size() > capacity;
-      if( doRemove )
+      @Override
+      protected boolean removeEldestEntry( Map.Entry<Key, Value> eldest )
         {
-        callback.evict( eldest );
-        if( flushes % getCapacity() == 0 ) // every multiple, write out data
+        boolean doRemove = size() > capacity;
+        if( doRemove )
           {
-          Runtime runtime = Runtime.getRuntime();
-          long freeMem = runtime.freeMemory() / 1024 / 1024;
-          long maxMem = runtime.maxMemory() / 1024 / 1024;
-          long totalMem = runtime.totalMemory() / 1024 / 1024;
-          LOG.info( "flushed keys num times: {}, with capacity: {}", flushes + 1, capacity );
-          LOG.info( "mem on flush (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
-          float percent = (float) totalMem / (float) maxMem;
-          if( percent < 0.80F )
-            LOG.info( "total mem is {}% of max mem, to better utilize unused memory consider increasing the cache size", (int) ( percent * 100.0F ) );
+          callback.evict( eldest );
+          if( flushes % getCapacity() == 0 ) // every multiple, write out data
+            {
+            Runtime runtime = Runtime.getRuntime();
+            long freeMem = runtime.freeMemory() / 1024 / 1024;
+            long maxMem = runtime.maxMemory() / 1024 / 1024;
+            long totalMem = runtime.totalMemory() / 1024 / 1024;
+            LOG.info( "flushed keys num times: {}, with capacity: {}", flushes + 1, capacity );
+            LOG.info( "mem on flush (mb), free: " + freeMem + ", total: " + totalMem + ", max: " + maxMem );
+            float percent = (float) totalMem / (float) maxMem;
+            if( percent < 0.80F )
+              LOG.info( "total mem is {}% of max mem, to better utilize unused memory consider increasing the cache size", (int) ( percent * 100.0F ) );
+            }
+          flushes++;
           }
-        flushes++;
+        return doRemove;
         }
-      return doRemove;
-      }
-    };
+      };
     }
 
   @Override

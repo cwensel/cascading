@@ -165,19 +165,19 @@ public class TezCoGroupGate extends TezGroupGate
   private SortedListMultiMap<Tuple, Iterable<Tuple>> getSortedMultiMap( final int length )
     {
     return new SortedListMultiMap<Tuple, Iterable<Tuple>>( getKeyComparator(), length )
-    {
-    Iterable<Tuple>[] array = new Iterable[ length ];
-
-    @Override
-    protected List createCollection()
       {
-      List<Iterable<Tuple>> collection = super.createCollection();
+      Iterable<Tuple>[] array = new Iterable[ length ];
 
-      Collections.addAll( collection, array ); // init with nulls
+      @Override
+      protected List createCollection()
+        {
+        List<Iterable<Tuple>> collection = super.createCollection();
 
-      return collection;
-      }
-    };
+        Collections.addAll( collection, array ); // init with nulls
+
+        return collection;
+        }
+      };
     }
 
   @Override

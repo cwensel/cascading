@@ -102,39 +102,39 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
   protected FlowStepStats createStepStats( ClientState clientState )
     {
     return new TezStepStats( flowStep, clientState )
-    {
-    DAGClient timelineClient = null;
-
-    @Override
-    public DAGClient getJobStatusClient()
       {
-      if( timelineClient != null )
-        return timelineClient;
+      DAGClient timelineClient = null;
 
-      synchronized( this )
+      @Override
+      public DAGClient getJobStatusClient()
         {
-        if( isTimelineServiceEnabled( jobConfiguration ) )
-          timelineClient = TezStatsUtil.createTimelineClient( dagClient ); // may return null
+        if( timelineClient != null )
+          return timelineClient;
 
-        if( timelineClient == null )
-          timelineClient = dagClient;
+        synchronized( this )
+          {
+          if( isTimelineServiceEnabled( jobConfiguration ) )
+            timelineClient = TezStatsUtil.createTimelineClient( dagClient ); // may return null
 
-        return timelineClient;
+          if( timelineClient == null )
+            timelineClient = dagClient;
+
+          return timelineClient;
+          }
         }
-      }
 
-    @Override
-    public String getProcessStatusURL()
-      {
-      return TezStatsUtil.getTrackingURL( tezClient, dagClient );
-      }
+      @Override
+      public String getProcessStatusURL()
+        {
+        return TezStatsUtil.getTrackingURL( tezClient, dagClient );
+        }
 
-    @Override
-    public String getProcessStepID()
-      {
-      return dagId;
-      }
-    };
+      @Override
+      public String getProcessStepID()
+        {
+        return dagId;
+        }
+      };
     }
 
   protected void internalNonBlockingStart() throws IOException
@@ -410,14 +410,14 @@ public class Hadoop2TezFlowStepJob extends FlowStepJob<TezConfiguration>
 
       // the Tez LocalClient will frequently hang on #stop(), this causes tests to never complete
       Boolean result = Util.submitWithTimeout( new Callable<Boolean>()
-      {
-      @Override
-      public Boolean call() throws Exception
         {
-        tezClient.stop();
-        return true;
-        }
-      }, 5, TimeUnit.MINUTES );
+        @Override
+        public Boolean call() throws Exception
+          {
+          tezClient.stop();
+          return true;
+          }
+        }, 5, TimeUnit.MINUTES );
 
       if( result == null || !result )
         flowStep.logWarn( "tezClient#stop() timed out after 5 minutes, cancelling call, continuing" );

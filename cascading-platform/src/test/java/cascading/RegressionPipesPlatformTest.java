@@ -576,13 +576,13 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     Pipe pipe = new Pipe( "test" );
 
     pipe = new Each( pipe, new Fields( "line" ), new TestFunction( new Fields( "insert" ), null )
-    {
-    @Override
-    protected void throwIntentionalException()
       {
-      throw new OutOfMemoryError( "fake error" );
-      }
-    } );
+      @Override
+      protected void throwIntentionalException()
+        {
+        throw new OutOfMemoryError( "fake error" );
+        }
+      } );
 
     Tap sink = getPlatform().getTextFile( getOutputPath( "oomepre" ), SinkMode.REPLACE );
 
@@ -628,13 +628,13 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
     Pipe splice = new CoGroup( pipeLower, new Fields( "num" ), pipeUpper, new Fields( "num" ), Fields.size( 4 ) );
 
     splice = new Each( splice, Fields.NONE, new TestFunction( new Fields( "insert" ), null )
-    {
-    @Override
-    protected void throwIntentionalException()
       {
-      throw new OutOfMemoryError( "fake error" );
-      }
-    } );
+      @Override
+      protected void throwIntentionalException()
+        {
+        throw new OutOfMemoryError( "fake error" );
+        }
+      } );
 
     Flow flow = getPlatform().getFlowConnector().connect( sources, sink, splice );
 

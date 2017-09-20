@@ -417,7 +417,7 @@ public class DirTap extends FileTap
 
     PathMatcher pathMatcher = getPathMatcher();
 
-    try (final Stream<Path> pathStream = Files.walk( getPath(), depth ))
+    try( final Stream<Path> pathStream = Files.walk( getPath(), depth ) )
       {
       pathStream
         .filter( path -> !Files.isDirectory( path ) )

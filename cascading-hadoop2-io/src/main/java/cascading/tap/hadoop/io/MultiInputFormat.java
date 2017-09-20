@@ -245,20 +245,20 @@ public class MultiInputFormat implements InputFormat
     try
       {
       return Util.retry( LOG, 3, 20, "unable to get record reader", new Util.RetryOperator<RecordReader>()
-      {
-
-      @Override
-      public RecordReader operate() throws Exception
         {
-        return currentConf.getInputFormat().getRecordReader( multiSplit.inputSplit, currentConf, reporter );
-        }
 
-      @Override
-      public boolean rethrow( Exception exception )
-        {
-        return !( exception.getCause() instanceof S3ServiceException );
-        }
-      } );
+        @Override
+        public RecordReader operate() throws Exception
+          {
+          return currentConf.getInputFormat().getRecordReader( multiSplit.inputSplit, currentConf, reporter );
+          }
+
+        @Override
+        public boolean rethrow( Exception exception )
+          {
+          return !( exception.getCause() instanceof S3ServiceException );
+          }
+        } );
       }
     catch( Exception exception )
       {

@@ -53,28 +53,28 @@ public abstract class TezStepStats extends BaseCachedStepStats<Configuration, DA
     Configuration config = (Configuration) flowStep.getConfig();
 
     this.counterCache = new TezCounterCache<DAGClient>( this, config )
-    {
-    @Override
-    protected DAGClient getJobStatusClient()
       {
-      return TezStepStats.this.getJobStatusClient();
-      }
-
-    protected TezCounters getCounters( DAGClient statusClient ) throws IOException
-      {
-      DAGStatus dagStatus = TezStatsUtil.getDagStatusWithCounters( statusClient );
-
-      if( dagStatus != null )
+      @Override
+      protected DAGClient getJobStatusClient()
         {
-        TezCounters counters = dagStatus.getDAGCounters();
-
-        if( counters != null && counters.countCounters() != 0 )
-          return counters;
+        return TezStepStats.this.getJobStatusClient();
         }
 
-      return null;
-      }
-    };
+      protected TezCounters getCounters( DAGClient statusClient ) throws IOException
+        {
+        DAGStatus dagStatus = TezStatsUtil.getDagStatusWithCounters( statusClient );
+
+        if( dagStatus != null )
+          {
+          TezCounters counters = dagStatus.getDAGCounters();
+
+          if( counters != null && counters.countCounters() != 0 )
+            return counters;
+          }
+
+        return null;
+        }
+      };
 
     Iterator<FlowNode> iterator = flowStep.getFlowNodeGraph().getOrderedTopologicalIterator();
 

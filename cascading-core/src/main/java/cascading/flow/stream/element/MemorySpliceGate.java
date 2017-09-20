@@ -69,15 +69,15 @@ public abstract class MemorySpliceGate extends GroupingSpliceGate
   protected TupleBuilder createDefaultNarrowBuilder( final Fields incomingFields, final Fields narrowFields )
     {
     return new TupleBuilder()
-    {
-    int[] pos = incomingFields.getPos( narrowFields );
-
-    @Override
-    public Tuple makeResult( Tuple input, Tuple output )
       {
-      return createNarrow( pos, input );
-      }
-    };
+      int[] pos = incomingFields.getPos( narrowFields );
+
+      @Override
+      public Tuple makeResult( Tuple input, Tuple output )
+        {
+        return createNarrow( pos, input );
+        }
+      };
     }
 
   @Override
@@ -130,22 +130,22 @@ public abstract class MemorySpliceGate extends GroupingSpliceGate
   protected Map<Tuple, Collection<Tuple>> createTupleMap()
     {
     return new HashMap<Tuple, Collection<Tuple>>()
-    {
-    @Override
-    public Collection<Tuple> get( Object object )
       {
-      Collection<Tuple> value = super.get( object );
-
-      if( value == null )
+      @Override
+      public Collection<Tuple> get( Object object )
         {
-        value = new ArrayList<Tuple>();
+        Collection<Tuple> value = super.get( object );
 
-        super.put( (Tuple) object, value );
+        if( value == null )
+          {
+          value = new ArrayList<Tuple>();
+
+          super.put( (Tuple) object, value );
+          }
+
+        return value;
         }
-
-      return value;
-      }
-    };
+      };
     }
 
   protected abstract boolean isBlockingStreamed();

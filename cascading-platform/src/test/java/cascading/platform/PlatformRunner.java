@@ -263,15 +263,15 @@ public class PlatformRunner extends ParentRunner<Runner>
   private BlockJUnit4ClassRunner makeClassRunner( final Class<?> javaClass, final TestPlatform testPlatform, final String platformName, final boolean useName ) throws InitializationError
     {
     return new BlockJUnit4ClassRunner( javaClass )
-    {
-    @Override
-    protected String getName() // the runner name
-    {
-    if( useName )
-      return String.format( "%s[%s]", super.getName(), platformName );
-    else
-      return super.getName();
-    }
+      {
+      @Override
+      protected String getName() // the runner name
+      {
+      if( useName )
+        return String.format( "%s[%s]", super.getName(), platformName );
+      else
+        return super.getName();
+      }
 
 //        @Override
 //        protected String testName( FrameworkMethod method )
@@ -279,16 +279,16 @@ public class PlatformRunner extends ParentRunner<Runner>
 //          return String.format( "%s[%s]", super.testName( method ), platformName );
 //          }
 
-    @Override
-    protected Object createTest() throws Exception
-      {
-      PlatformTestCase testCase = (PlatformTestCase) super.createTest();
+      @Override
+      protected Object createTest() throws Exception
+        {
+        PlatformTestCase testCase = (PlatformTestCase) super.createTest();
 
-      testCase.installPlatform( testPlatform );
+        testCase.installPlatform( testPlatform );
 
-      return testCase;
-      }
-    };
+        return testCase;
+        }
+      };
     }
 
   @Override

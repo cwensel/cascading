@@ -53,19 +53,19 @@ public class FlowGraph extends SimpleDirectedGraph<Flow, Integer>
 
   public TopologicalOrderIterator<Flow, Integer> getTopologicalIterator()
     {
-    return new TopologicalOrderIterator<Flow, Integer>( this, new PriorityQueue<Flow>( 10, new Comparator<Flow>()
-    {
-    @Override
-    public int compare( Flow lhs, Flow rhs )
+    return new TopologicalOrderIterator<>( this, new PriorityQueue<>( 10, new Comparator<Flow>()
       {
-      return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
-      }
-    } ) );
+      @Override
+      public int compare( Flow lhs, Flow rhs )
+        {
+        return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
+        }
+      } ) );
     }
 
   private void verifyNoCycles()
     {
-    Set<Flow> flows = new HashSet<Flow>();
+    Set<Flow> flows = new HashSet<>();
 
     TopologicalOrderIterator<Flow, Integer> topoIterator = new TopologicalOrderIterator<Flow, Integer>( this );
 

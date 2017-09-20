@@ -43,32 +43,32 @@ public class ElementFlowProcess extends FlowProcessWrapper
 
     this.configDef = configDef;
     this.getter = new ConfigDef.Getter()
-    {
-    @Override
-    public String update( String key, String value )
       {
-      String result = get( key );
+      @Override
+      public String update( String key, String value )
+        {
+        String result = get( key );
 
-      if( result == null )
-        return value;
+        if( result == null )
+          return value;
 
-      if( result.contains( value ) )
-        return result;
+        if( result.contains( value ) )
+          return result;
 
-      return result + "," + value;
-      }
+        return result + "," + value;
+        }
 
-    @Override
-    public String get( String key )
-      {
-      Object value = getDelegate().getProperty( key );
+      @Override
+      public String get( String key )
+        {
+        Object value = getDelegate().getProperty( key );
 
-      if( value == null )
-        return null;
+        if( value == null )
+          return null;
 
-      return value.toString();
-      }
-    };
+        return value.toString();
+        }
+      };
     }
 
   @Override

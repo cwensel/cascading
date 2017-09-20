@@ -88,8 +88,8 @@ public class TempHfs extends Hfs
   public TempHfs( Configuration conf, String name, boolean isNull )
     {
     super( isNull ? new NullScheme() : new SequenceFile()
-    {
-    } );
+      {
+      } );
     this.name = name;
     this.stringPath = initTemporaryPath( conf, true );
     }

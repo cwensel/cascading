@@ -130,14 +130,14 @@ public class FlowStrategiesPlatformTest extends PlatformTestCase
 
     final boolean[] wasApplied = {false};
     flow.setFlowStepStrategy( new FlowStepStrategy()
-    {
-    @Override
-    public void apply( Flow flow, List predecessorSteps, FlowStep flowStep )
       {
-      wasApplied[ 0 ] = true;
-      assertTrue( predecessorSteps.isEmpty() );
-      }
-    } );
+      @Override
+      public void apply( Flow flow, List predecessorSteps, FlowStep flowStep )
+        {
+        wasApplied[ 0 ] = true;
+        assertTrue( predecessorSteps.isEmpty() );
+        }
+      } );
 
     flow.complete();
 

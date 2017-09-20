@@ -531,13 +531,13 @@ public class BaseCascade implements ProcessLogger, Cascade
       return;
 
     thread = new Thread( new Runnable()
-    {
-    @Override
-    public void run()
       {
-      BaseCascade.this.run();
-      }
-    }, ( "cascade " + Util.toNull( getName() ) ).trim() );
+      @Override
+      public void run()
+        {
+        BaseCascade.this.run();
+        }
+      }, ( "cascade " + Util.toNull( getName() ) ).trim() );
 
     thread.start();
     }
@@ -685,21 +685,21 @@ public class BaseCascade implements ProcessLogger, Cascade
       return;
 
     shutdownHook = new ShutdownUtil.Hook()
-    {
-    @Override
-    public Priority priority()
       {
-      return Priority.WORK_PARENT;
-      }
+      @Override
+      public Priority priority()
+        {
+        return Priority.WORK_PARENT;
+        }
 
-    @Override
-    public void execute()
-      {
-      logInfo( "shutdown hook calling stop on cascade" );
+      @Override
+      public void execute()
+        {
+        logInfo( "shutdown hook calling stop on cascade" );
 
-      BaseCascade.this.stop();
-      }
-    };
+        BaseCascade.this.stop();
+        }
+      };
 
     ShutdownUtil.addHook( shutdownHook );
     }

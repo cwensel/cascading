@@ -220,20 +220,20 @@ public class TupleSerialization extends Configured implements Serialization
   public TupleSerialization( final FlowProcess<? extends Configuration> flowProcess )
     {
     super( new Configuration()
-    {
-    @Override
-    public String get( String name )
       {
-      return get( name, null );
-      }
+      @Override
+      public String get( String name )
+        {
+        return get( name, null );
+        }
 
-    @Override
-    public String get( String name, String defaultValue )
-      {
-      Object value = flowProcess.getProperty( name );
-      return value == null ? defaultValue : String.valueOf( value );
-      }
-    } );
+      @Override
+      public String get( String name, String defaultValue )
+        {
+        Object value = flowProcess.getProperty( name );
+        return value == null ? defaultValue : String.valueOf( value );
+        }
+      } );
     }
 
   /**

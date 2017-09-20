@@ -135,27 +135,27 @@ public class TezTimelineClient extends DAGClientTimelineImpl implements Timeline
     LOG.debug( "vertex: {}, retrieved {} tasks", vertexID, entitiesNode.length() );
 
     return new Iterator<TaskStatus>()
-    {
-    int index = 0;
-
-    @Override
-    public boolean hasNext()
       {
-      return entitiesNode.length() != index;
-      }
+      int index = 0;
 
-    @Override
-    public TaskStatus next()
-      {
-      return parseTaskStatus( getJsonObject( entitiesNode, index++ ) );
-      }
+      @Override
+      public boolean hasNext()
+        {
+        return entitiesNode.length() != index;
+        }
 
-    @Override
-    public void remove()
-      {
+      @Override
+      public TaskStatus next()
+        {
+        return parseTaskStatus( getJsonObject( entitiesNode, index++ ) );
+        }
 
-      }
-    };
+      @Override
+      public void remove()
+        {
+
+        }
+      };
     }
 
   @Override

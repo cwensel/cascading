@@ -27,7 +27,6 @@ import java.util.Map;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowStep;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowPlanner;
 import cascading.flow.planner.graph.AnnotatedDecoratedElementGraph;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.FlowElementGraph;

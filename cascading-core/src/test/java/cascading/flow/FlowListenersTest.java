@@ -36,102 +36,102 @@ public class FlowListenersTest extends TestCase
   public void testListeners()
     {
     Flow flow = new BaseFlow<Object>()
-    {
-
-    @Override
-    protected void initConfig( Map<Object, Object> properties, Object parentConfig )
       {
-      }
 
-    @Override
-    protected void setConfigProperty( Object object, Object key, Object value )
-      {
-      }
+      @Override
+      protected void initConfig( Map<Object, Object> properties, Object parentConfig )
+        {
+        }
 
-    @Override
-    protected Object newConfig( Object defaultConfig )
-      {
-      return null;
-      }
+      @Override
+      protected void setConfigProperty( Object object, Object key, Object value )
+        {
+        }
 
-    @Override
-    public Object getConfig()
-      {
-      return null;
-      }
+      @Override
+      protected Object newConfig( Object defaultConfig )
+        {
+        return null;
+        }
 
-    @Override
-    public Object getConfigCopy()
-      {
-      return null;
-      }
+      @Override
+      public Object getConfig()
+        {
+        return null;
+        }
 
-    @Override
-    public Map<Object, Object> getConfigAsProperties()
-      {
-      return null;
-      }
+      @Override
+      public Object getConfigCopy()
+        {
+        return null;
+        }
 
-    @Override
-    public String getProperty( String key )
-      {
-      return null;
-      }
+      @Override
+      public Map<Object, Object> getConfigAsProperties()
+        {
+        return null;
+        }
 
-    @Override
-    public FlowProcess getFlowProcess()
-      {
-      return null;
-      }
+      @Override
+      public String getProperty( String key )
+        {
+        return null;
+        }
 
-    @Override
-    protected void internalStart()
-      {
-      }
+      @Override
+      public FlowProcess getFlowProcess()
+        {
+        return null;
+        }
 
-    @Override
-    protected void internalClean( boolean stop )
-      {
-      }
+      @Override
+      protected void internalStart()
+        {
+        }
 
-    @Override
-    public boolean stepsAreLocal()
-      {
-      return false;
-      }
+      @Override
+      protected void internalClean( boolean stop )
+        {
+        }
 
-    @Override
-    protected int getMaxNumParallelSteps()
-      {
-      return 0;
-      }
+      @Override
+      public boolean stepsAreLocal()
+        {
+        return false;
+        }
 
-    @Override
-    protected void internalShutdown()
-      {
-      }
-    };
+      @Override
+      protected int getMaxNumParallelSteps()
+        {
+        return 0;
+        }
+
+      @Override
+      protected void internalShutdown()
+        {
+        }
+      };
 
     FlowListener listener = new FlowListener()
-    {
-
-    public void onStarting( Flow flow )
       {
-      }
 
-    public void onStopping( Flow flow )
-      {
-      }
+      public void onStarting( Flow flow )
+        {
+        }
 
-    public void onCompleted( Flow flow )
-      {
-      }
+      public void onStopping( Flow flow )
+        {
+        }
 
-    public boolean onThrowable( Flow flow, Throwable throwable )
-      {
-      return false;  //To change body of implemented methods use File | Settings | File Templates.
-      }
-    };
+      public void onCompleted( Flow flow )
+        {
+        }
+
+      public boolean onThrowable( Flow flow, Throwable throwable )
+        {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+      };
 
     flow.addListener( listener );
 

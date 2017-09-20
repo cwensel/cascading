@@ -803,6 +803,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
    * {@link Tap} instance.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStream(Tap, FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param flowProcess represents the current platform configuration
    * @return a Stream of TupleEntry instances
@@ -844,6 +847,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
    * This method returns an TupleEntry instance suitable for caching.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStreamCopy(Tap, FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param flowProcess represents the current platform configuration
    * @return a Stream of TupleEntry instances
@@ -858,6 +864,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
    * {@link Tap} instance.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStream(Tap, FlowProcess, Fields)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param flowProcess represents the current platform configuration
    * @param selector    the fields to select from the underlying TupleEntry
@@ -873,6 +882,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
    * {@link Tap} instance.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStreamCopy(Tap, FlowProcess)}.
+   * <p>
+   * Note, the returned Stream instance must be closed in order to clean up underlying resources. This
+   * is simply accomplished with a try-with-resources statement.
    *
    * @param flowProcess represents the current platform configuration
    * @param selector    the fields to select from the underlying TupleEntry
@@ -953,9 +965,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
       {
       closeable.close();
       }
-    catch( IOException e )
+    catch( IOException exception )
       {
-      throw new UncheckedIOException( e );
+      throw new UncheckedIOException( exception );
       }
     };
     }

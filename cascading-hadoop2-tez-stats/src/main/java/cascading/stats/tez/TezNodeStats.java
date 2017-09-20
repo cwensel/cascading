@@ -112,28 +112,28 @@ public class TezNodeStats extends BaseCachedNodeStats<Configuration, DAGClient, 
     this.kind = getStreamedTaps( flowNode ).isEmpty() ? Kind.PARTITIONED : Kind.SPLIT;
 
     this.counterCache = new TezCounterCache<DAGClient>( this, configuration )
-    {
-    @Override
-    protected DAGClient getJobStatusClient()
       {
-      return parentStepStats.getJobStatusClient();
-      }
+      @Override
+      protected DAGClient getJobStatusClient()
+        {
+        return parentStepStats.getJobStatusClient();
+        }
 
-    protected TezCounters getCounters( DAGClient dagClient ) throws IOException
-      {
-      VertexStatus vertexStatus = updateProgress( dagClient, STATUS_GET_COUNTERS );
+      protected TezCounters getCounters( DAGClient dagClient ) throws IOException
+        {
+        VertexStatus vertexStatus = updateProgress( dagClient, STATUS_GET_COUNTERS );
 
-      if( vertexStatus == null )
-        return null;
+        if( vertexStatus == null )
+          return null;
 
-      TezCounters vertexCounters = vertexStatus.getVertexCounters();
+        TezCounters vertexCounters = vertexStatus.getVertexCounters();
 
-      if( vertexCounters == null )
-        logWarn( "could not retrieve vertex counters in stats status: {}, and vertex state: {}", getStatus(), vertexStatus.getState() );
+        if( vertexCounters == null )
+          logWarn( "could not retrieve vertex counters in stats status: {}, and vertex state: {}", getStatus(), vertexStatus.getState() );
 
-      return vertexCounters;
-      }
-    };
+        return vertexCounters;
+        }
+      };
     }
 
   /**

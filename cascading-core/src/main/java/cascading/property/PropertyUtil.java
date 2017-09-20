@@ -117,19 +117,19 @@ public class PropertyUtil
   public static String getProperty( final Map<Object, Object> properties, ConfigDef configDef, String property )
     {
     return configDef.apply( property, new ConfigDef.Getter()
-    {
-    @Override
-    public String update( String key, String value )
       {
-      return value;
-      }
+      @Override
+      public String update( String key, String value )
+        {
+        return value;
+        }
 
-    @Override
-    public String get( String key )
-      {
-      return getProperty( properties, key );
-      }
-    } );
+      @Override
+      public String get( String key )
+        {
+        return getProperty( properties, key );
+        }
+      } );
     }
 
   public static void setProperty( Map<Object, Object> properties, String key, String value )

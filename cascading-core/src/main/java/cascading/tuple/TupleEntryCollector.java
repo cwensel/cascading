@@ -21,6 +21,7 @@
 
 package cascading.tuple;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.function.Supplier;
 
@@ -47,7 +48,7 @@ import java.util.function.Supplier;
  * <p/>
  * There is currently no way to specify that a deep copy must be performed when making a Tuple copy.
  */
-public abstract class TupleEntryCollector implements AutoCloseable
+public abstract class TupleEntryCollector implements Closeable
   {
   protected TupleEntry tupleEntry = new TupleEntry( Fields.UNKNOWN, null, true );
 

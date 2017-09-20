@@ -33,22 +33,22 @@ import cascading.tuple.io.TupleInputStream;
 public class TupleElementComparator implements StreamComparator<TupleInputStream>, Comparator<Object>
   {
   Comparator comparator = new Comparator<Comparable>()
-  {
-  @Override
-  public int compare( Comparable lhs, Comparable rhs )
     {
-    if( lhs == null && rhs == null )
-      return 0;
+    @Override
+    public int compare( Comparable lhs, Comparable rhs )
+      {
+      if( lhs == null && rhs == null )
+        return 0;
 
-    if( lhs == null )
-      return -1;
+      if( lhs == null )
+        return -1;
 
-    if( rhs == null )
-      return 1;
+      if( rhs == null )
+        return 1;
 
-    return lhs.compareTo( rhs ); // guaranteed to not be null
-    }
-  };
+      return lhs.compareTo( rhs ); // guaranteed to not be null
+      }
+    };
 
   public TupleElementComparator()
     {

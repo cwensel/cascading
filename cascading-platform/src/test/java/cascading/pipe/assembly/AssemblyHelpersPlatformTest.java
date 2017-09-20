@@ -300,7 +300,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 4 ),
       new Tuple( "d", 2 ),
       new Tuple( "e", 1 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -415,7 +415,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 8 ),
       new Tuple( "d", 4 ),
       new Tuple( "e", 2 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -451,7 +451,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 10 ),
       new Tuple( "d", 6 ),
       new Tuple( "e", 5 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -491,7 +491,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 10 ),
       new Tuple( "d", 6 ),
       new Tuple( "e", null ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -534,7 +534,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 20 ),
       new Tuple( "d", 12 ),
       new Tuple( "e", 10 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -570,7 +570,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", (double) 10 / 4 ),
       new Tuple( "d", (double) 6 / 2 ),
       new Tuple( "e", (double) 5 / 1 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -609,7 +609,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", (double) 7 / 3 ),
       new Tuple( "d", (double) 6 / 2 ),
       new Tuple( "e", (double) 5 / 1 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -652,7 +652,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", (double) 20 / 8 ),
       new Tuple( "d", (double) 12 / 4 ),
       new Tuple( "e", (double) 10 / 2 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -914,7 +914,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 20, 8, (double) 20 / 8 ),
       new Tuple( "d", 12, 4, (double) 12 / 4 ),
       new Tuple( "e", 10, 2, (double) 10 / 2 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -949,7 +949,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( 1, 1 ),
       new Tuple( 2, 2 ),
       new Tuple( 4, 2 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1014,7 +1014,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 2 ),
       new Tuple( "d", 2 ),
       new Tuple( "e", 2 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1075,7 +1075,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 1 ),
       new Tuple( "d", 1 ),
       new Tuple( "e", 1 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1111,7 +1111,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 1 ),
       new Tuple( "d", 2 ),
       new Tuple( "e", 5 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1178,7 +1178,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 1 ),
       new Tuple( "d", 2 ),
       new Tuple( "e", 5 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1214,7 +1214,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( 3, "c" ),
       new Tuple( 4, "b" ),
       new Tuple( 5, "a" ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1250,7 +1250,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 4 ),
       new Tuple( "d", 4 ),
       new Tuple( "e", 5 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1288,7 +1288,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "c", 4 ),
       new Tuple( "d", 4 ),
       new Tuple( "e", 5 ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1324,7 +1324,7 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( 3, "c" ),
       new Tuple( 4, "d" ),
       new Tuple( 5, "e" ),
-    };
+      };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;

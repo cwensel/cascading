@@ -56,21 +56,21 @@ public class ShutdownUtil
     }
 
   private static Queue<Hook> queue = new PriorityBlockingQueue<>( 20, new Comparator<Hook>()
-  {
-  @Override
-  public int compare( Hook lhs, Hook rhs )
     {
-    if( lhs == rhs )
-      return 0;
+    @Override
+    public int compare( Hook lhs, Hook rhs )
+      {
+      if( lhs == rhs )
+        return 0;
 
-    if( lhs == null )
-      return -1;
-    else if( rhs == null )
-      return 1;
+      if( lhs == null )
+        return -1;
+      else if( rhs == null )
+        return 1;
 
-    return lhs.priority().compareTo( rhs.priority() );
+      return lhs.priority().compareTo( rhs.priority() );
+      }
     }
-  }
   );
 
   private static Thread shutdownHook;
@@ -98,49 +98,49 @@ public class ShutdownUtil
     final boolean isForceNonDaemon = Boolean.getBoolean( SHUTDOWN_FORCE_NON_DAEMON );
 
     shutdownHook = new Thread( "cascading shutdown hooks" )
-    {
-
-    {
-    if( isForceNonDaemon )
-      this.setDaemon( false );
-    }
-
-    @Override
-    public void run()
       {
-      System.setProperty( SHUTDOWN_EXECUTING, "true" );
 
-      try
+      {
+      if( isForceNonDaemon )
+        this.setDaemon( false );
+      }
+
+      @Override
+      public void run()
         {
-        // These are not threads, so each one will be run in priority order
-        // blocking until the previous is complete
-        while( !queue.isEmpty() )
+        System.setProperty( SHUTDOWN_EXECUTING, "true" );
+
+        try
           {
-          Hook hook = null;
-
-          try
+          // These are not threads, so each one will be run in priority order
+          // blocking until the previous is complete
+          while( !queue.isEmpty() )
             {
-            hook = queue.poll();
+            Hook hook = null;
 
-            // may get removed while shutdown is executing
-            if( hook == null )
-              continue;
+            try
+              {
+              hook = queue.poll();
 
-            hook.execute();
-            }
-          catch( Exception exception )
-            {
-            LOG.error( "failed executing hook: {}, with exception: {}", hook, exception.getMessage() );
-            LOG.debug( "with exception trace", exception );
+              // may get removed while shutdown is executing
+              if( hook == null )
+                continue;
+
+              hook.execute();
+              }
+            catch( Exception exception )
+              {
+              LOG.error( "failed executing hook: {}, with exception: {}", hook, exception.getMessage() );
+              LOG.debug( "with exception trace", exception );
+              }
             }
           }
+        finally
+          {
+          System.setProperty( SHUTDOWN_EXECUTING, "false" );
+          }
         }
-      finally
-        {
-        System.setProperty( SHUTDOWN_EXECUTING, "false" );
-        }
-      }
-    };
+      };
 
     Runtime.getRuntime().addShutdownHook( shutdownHook );
     }

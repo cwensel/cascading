@@ -209,26 +209,26 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
   public Iterator<Process> getTopologicalIterator()
     {
     return getOrderedTopologicalIterator( new Comparator<Process>()
-    {
-    @Override
-    public int compare( Process lhs, Process rhs )
       {
-      return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
-      }
-    } );
+      @Override
+      public int compare( Process lhs, Process rhs )
+        {
+        return Integer.valueOf( lhs.getSubmitPriority() ).compareTo( rhs.getSubmitPriority() );
+        }
+      } );
     }
 
   @Override
   public Iterator<Process> getOrdinalTopologicalIterator()
     {
     return getOrderedTopologicalIterator( new Comparator<Process>()
-    {
-    @Override
-    public int compare( Process lhs, Process rhs )
       {
-      return Integer.valueOf( lhs.getOrdinal() ).compareTo( rhs.getOrdinal() );
-      }
-    } );
+      @Override
+      public int compare( Process lhs, Process rhs )
+        {
+        return Integer.valueOf( lhs.getOrdinal() ).compareTo( rhs.getOrdinal() );
+        }
+      } );
     }
 
   @Override
@@ -442,40 +442,40 @@ public abstract class BaseProcessGraph<Process extends ProcessModel> implements 
       Writer writer = new FileWriter( filename );
 
       Util.writeDOT( writer, graph, new IntegerNameProvider<Process>(), new VertexNameProvider<Process>()
-      {
-      public String getVertexName( Process process )
         {
-        String name = "[" + process.getName() + "]";
-
-        String sourceName = "";
-        Set<Tap> sources = process.getSourceTaps();
-        for( Tap source : sources )
-          sourceName += "\\nsrc:[" + source.getIdentifier() + "]";
-
-        if( sourceName.length() != 0 )
-          name += sourceName;
-
-        Collection<Group> groups = process.getGroups();
-
-        for( Group group : groups )
+        public String getVertexName( Process process )
           {
-          String groupName = group.getName();
+          String name = "[" + process.getName() + "]";
 
-          if( groupName.length() != 0 )
-            name += "\\ngrp:" + groupName;
+          String sourceName = "";
+          Set<Tap> sources = process.getSourceTaps();
+          for( Tap source : sources )
+            sourceName += "\\nsrc:[" + source.getIdentifier() + "]";
+
+          if( sourceName.length() != 0 )
+            name += sourceName;
+
+          Collection<Group> groups = process.getGroups();
+
+          for( Group group : groups )
+            {
+            String groupName = group.getName();
+
+            if( groupName.length() != 0 )
+              name += "\\ngrp:" + groupName;
+            }
+
+          Set<Tap> sinks = process.getSinkTaps();
+          String sinkName = "";
+          for( Tap sink : sinks )
+            sinkName = "\\nsnk:[" + sink.getIdentifier() + "]";
+
+          if( sinkName.length() != 0 )
+            name += sinkName;
+
+          return name.replaceAll( "\"", "\'" );
           }
-
-        Set<Tap> sinks = process.getSinkTaps();
-        String sinkName = "";
-        for( Tap sink : sinks )
-          sinkName = "\\nsnk:[" + sink.getIdentifier() + "]";
-
-        if( sinkName.length() != 0 )
-          name += sinkName;
-
-        return name.replaceAll( "\"", "\'" );
-        }
-      }, null );
+        }, null );
 
       writer.close();
       }

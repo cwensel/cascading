@@ -97,13 +97,13 @@ public class DistanceUseCasePlatformTest extends PlatformTestCase implements Ser
 
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
-    {
-    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
-      TupleEntry input = functionCall.getArguments();
-      functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
-      }
-    };
+      public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+        {
+        TupleEntry input = functionCall.getArguments();
+        functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+        }
+      };
 
     // out: movie, name1, rate1, name2, rate2, score
     pipe = new Each( pipe, new Fields( "rate1", "rate2" ), sqDiff, Fields.ALL );
@@ -112,14 +112,14 @@ public class DistanceUseCasePlatformTest extends PlatformTestCase implements Ser
     pipe = new GroupBy( pipe, new Fields( "name1", "name2" ) );
 
     Sum distance = new Sum( new Fields( "distance" ) )
-    {
-    public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
       {
-      Tuple tuple = super.getResult( aggregatorCall );
+      public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
+        {
+        Tuple tuple = super.getResult( aggregatorCall );
 
-      aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
-      }
-    };
+        aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
+        }
+      };
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 
@@ -172,13 +172,13 @@ public class DistanceUseCasePlatformTest extends PlatformTestCase implements Ser
 
     // calculate square of diff
     Function sqDiff = new Identity( new Fields( "score" ) )
-    {
-    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
       {
-      TupleEntry input = functionCall.getArguments();
-      functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
-      }
-    };
+      public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+        {
+        TupleEntry input = functionCall.getArguments();
+        functionCall.getOutputCollector().add( new Tuple( Math.pow( input.getTuple().getDouble( 0 ) - input.getTuple().getDouble( 1 ), 2 ) ) );
+        }
+      };
 
     // out: movie, name1, rate1, name2, rate2, score
     pipe = new Each( pipe, new Fields( "rate1", "rate2" ), sqDiff, Fields.ALL );
@@ -187,14 +187,14 @@ public class DistanceUseCasePlatformTest extends PlatformTestCase implements Ser
     pipe = new GroupBy( pipe, new Fields( "name1", "name2" ) );
 
     Sum distance = new Sum( new Fields( "distance" ) )
-    {
-    public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
       {
-      Tuple tuple = super.getResult( aggregatorCall );
+      public void complete( FlowProcess flowProcess, AggregatorCall aggregatorCall )
+        {
+        Tuple tuple = super.getResult( aggregatorCall );
 
-      aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
-      }
-    };
+        aggregatorCall.getOutputCollector().add( new Tuple( 1 / ( 1 + tuple.getDouble( 0 ) ) ) );
+        }
+      };
 
     pipe = new Every( pipe, new Fields( "score" ), distance, new Fields( "name1", "name2", "distance" ) );
 

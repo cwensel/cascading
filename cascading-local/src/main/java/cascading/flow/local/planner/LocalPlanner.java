@@ -74,13 +74,13 @@ public class LocalPlanner extends FlowPlanner<LocalFlow, Properties>
   public FlowStepFactory<Properties> getFlowStepFactory()
     {
     return new BaseFlowStepFactory<Properties>( getFlowNodeFactory() )
-    {
-    @Override
-    public FlowStep<Properties> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
       {
-      return new LocalFlowStep( stepElementGraph, flowNodeGraph );
-      }
-    };
+      @Override
+      public FlowStep<Properties> createFlowStep( ElementGraph stepElementGraph, FlowNodeGraph flowNodeGraph )
+        {
+        return new LocalFlowStep( stepElementGraph, flowNodeGraph );
+        }
+      };
     }
 
   @Override

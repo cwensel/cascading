@@ -61,17 +61,17 @@ public abstract class CounterCache<Config, JobStatus, Counters>
   // hardcoded at one thread to force serialization across all requesters in the jvm
   // this likely prevents the deadlocks the futures are safeguards against
   private static ExecutorService futuresPool = Executors.newSingleThreadExecutor( new ThreadFactory()
-  {
-  @Override
-  public Thread newThread( Runnable runnable )
     {
-    Thread thread = new Thread( runnable, "stats-counter-future" );
+    @Override
+    public Thread newThread( Runnable runnable )
+      {
+      Thread thread = new Thread( runnable, "stats-counter-future" );
 
-    thread.setDaemon( true );
+      thread.setDaemon( true );
 
-    return thread;
-    }
-  } );
+      return thread;
+      }
+    } );
 
   private CascadingStats stats;
   private boolean hasCapturedFinalCounters;
@@ -313,20 +313,20 @@ public abstract class CounterCache<Config, JobStatus, Counters>
   private Future<Counters> runFuture( final JobStatus jobStatus )
     {
     Callable<Counters> task = new Callable<Counters>()
-    {
-    @Override
-    public Counters call() throws Exception
       {
-      try
+      @Override
+      public Counters call() throws Exception
         {
-        return getCounters( jobStatus );
+        try
+          {
+          return getCounters( jobStatus );
+          }
+        catch( IOException exception )
+          {
+          throw new FlowException( "unable to get remote counter values", exception );
+          }
         }
-      catch( IOException exception )
-        {
-        throw new FlowException( "unable to get remote counter values", exception );
-        }
-      }
-    };
+      };
 
     return futuresPool.submit( task );
     }

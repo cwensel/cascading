@@ -60,14 +60,14 @@ dependencies {
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
 
   if( hadoop2Version.startsWith( '2.4' ) ) // hadoop 2.4
-  {
+    {
     testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history', version: tezVersion )
-  }
+    }
   else // hadoop 2.5 +
-  {
+    {
     provided( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop2Version )
     testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history-with-acls', version: tezVersion )
-  }
+    }
 }
 
 configurations.all {

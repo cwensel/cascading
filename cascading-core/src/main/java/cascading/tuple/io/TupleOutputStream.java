@@ -72,13 +72,13 @@ public abstract class TupleOutputStream extends DataOutputStream
       return tupleElementWriter;
 
     return new TupleOutputStream.TupleElementWriter()
-    {
-    @Override
-    public void write( TupleOutputStream stream, Object element ) throws IOException
       {
-      elementWriter.write( stream, type, element );
-      }
-    };
+      @Override
+      public void write( TupleOutputStream stream, Object element ) throws IOException
+        {
+        elementWriter.write( stream, type, element );
+        }
+      };
     }
 
   public void writeTuple( Tuple tuple ) throws IOException
