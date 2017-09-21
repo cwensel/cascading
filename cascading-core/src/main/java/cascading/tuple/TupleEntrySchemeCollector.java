@@ -24,6 +24,7 @@ package cascading.tuple;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.ConcreteCall;
@@ -43,9 +44,9 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
   {
   private final FlowProcess<? extends Config> flowProcess;
   private final Scheme scheme;
-  private String loggableIdentifier;
 
   protected final ConcreteCall<Object, Output> sinkCall;
+  private Supplier<String> loggableIdentifier = () -> "'unknown'";
   private boolean prepared = false;
 
   @Deprecated
@@ -71,21 +72,15 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
     this( flowProcess, tap, tap.getScheme(), output, tap.getIdentifier() );
     }
 
-  /**
-   * @param flowProcess
-   * @param scheme
-   * @param output
-   * @param loggableIdentifier is only used for logging purposes
-   */
   @Deprecated
   public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Scheme scheme, Output output, String loggableIdentifier )
     {
-    this( flowProcess, null, scheme, null, null );
+    this( flowProcess, null, scheme, output, loggableIdentifier );
     }
 
   public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme )
     {
-    this( flowProcess, tap, scheme, null, null );
+    this( flowProcess, tap, scheme, null, (Supplier<String>) null );
     }
 
   public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, String loggableIdentifier )
@@ -95,21 +90,22 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
 
   public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, Output output )
     {
-    this( flowProcess, tap, scheme, output, null );
+    this( flowProcess, tap, scheme, output, (Supplier<String>) null );
     }
 
-  /**
-   * @param flowProcess
-   * @param scheme
-   * @param output
-   * @param loggableIdentifier is only used for logging purposes
-   */
   public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, Output output, String loggableIdentifier )
+    {
+    this( flowProcess, tap, scheme, output, loggableIdentifier == null ? null : () -> loggableIdentifier );
+    }
+
+  public TupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap tap, Scheme scheme, Output output, Supplier<String> loggableIdentifier )
     {
     super( Fields.asDeclaration( scheme.getSinkFields() ) );
     this.flowProcess = flowProcess;
     this.scheme = scheme;
-    this.loggableIdentifier = loggableIdentifier; // only used for logging
+
+    if( loggableIdentifier != null )
+      this.loggableIdentifier = loggableIdentifier; // only used for logging
 
     this.sinkCall = new ConcreteCall();
     this.sinkCall.setTap( tap );
@@ -192,10 +188,7 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
       }
     catch( Exception exception )
       {
-      if( loggableIdentifier == null || loggableIdentifier.isEmpty() )
-        loggableIdentifier = "'unknown'";
-
-      throw new TupleException( "unable to sink into output identifier: " + loggableIdentifier, exception );
+      throw new TupleException( "unable to sink into output identifier: " + loggableIdentifier.get(), exception );
       }
     }
 
@@ -214,7 +207,7 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
         }
       catch( IOException exception )
         {
-        throw new TupleException( "unable to cleanup sink for output identifier: " + loggableIdentifier, exception );
+        throw new TupleException( "unable to cleanup sink for output identifier: " + loggableIdentifier.get(), exception );
         }
       }
     finally
