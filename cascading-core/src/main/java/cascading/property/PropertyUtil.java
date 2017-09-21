@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,6 +24,7 @@ package cascading.property;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -198,5 +200,97 @@ public class PropertyUtil
       map.put( property, props.getProperty( property ) );
 
     return map;
+    }
+
+  /**
+   * Merge all properties instances into one.
+   * <p>
+   * Always returns a new Properties instance.
+   * <p>
+   * Subsequent values to not overwrite earlier values, that is, the left most instances
+   * have more precedence, that is, won't be replaced.
+   *
+   * @param properties
+   * @return a new Properties instance.
+   */
+  public static Properties merge( Properties... properties )
+    {
+    Properties results = new Properties();
+
+    for( int i = properties.length - 1; i >= 0; i-- )
+      {
+      Properties current = properties[ i ];
+
+      if( current == null )
+        continue;
+
+      Set<String> currentNames = current.stringPropertyNames();
+
+      for( String currentName : currentNames )
+        results.setProperty( currentName, current.getProperty( currentName ) );
+      }
+
+    return results;
+    }
+
+  public static Properties remove( Properties properties, Properties... remove )
+    {
+    Objects.requireNonNull( properties, "properties may not be null" );
+
+    Set<String> keys = new HashSet<>();
+
+    for( Properties current : remove )
+      keys.addAll( current.stringPropertyNames() );
+
+    return remove( properties, keys );
+    }
+
+  public static Properties remove( Properties properties, Set<String> keys )
+    {
+    Objects.requireNonNull( properties, "properties may not be null" );
+
+    Properties results = new Properties();
+
+    for( String name : properties.stringPropertyNames() )
+      {
+      if( keys.contains( name ) )
+        continue;
+
+      results.setProperty( name, properties.getProperty( name ) );
+      }
+
+    return results;
+    }
+
+  public static Properties retain( Properties properties, Properties... retain )
+    {
+    Objects.requireNonNull( properties, "properties may not be null" );
+
+    Set<String> keys = new HashSet<>();
+
+    for( Properties current : retain )
+      {
+      if( current != null )
+        keys.addAll( current.stringPropertyNames() );
+      }
+
+    return remove( properties, keys );
+    }
+
+  public static Properties retain( Properties properties, Set<String> keys )
+    {
+    Objects.requireNonNull( properties, "properties may not be null" );
+
+    Properties results = new Properties();
+
+    for( String name : properties.stringPropertyNames() )
+      {
+      if( !keys.contains( name ) )
+        continue;
+
+      results.setProperty( name, properties.getProperty( name ) );
+      }
+
+    return results;
     }
   }

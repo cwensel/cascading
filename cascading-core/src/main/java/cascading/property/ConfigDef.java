@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -95,13 +97,35 @@ public class ConfigDef implements Serializable
     return this;
     }
 
+  /**
+   * Method setAllProperties sets all the given properties using the given {@link Mode}.
+   * <p>
+   * Note all the given properties are merged with values in the left most instances having
+   * more precedence.
+   *
+   * @param mode
+   * @param properties
+   * @return
+   */
+  public ConfigDef setAllProperties( Mode mode, Properties... properties )
+    {
+    Map<String, String> map = getMode( mode );
+
+    Properties merged = PropertyUtil.merge( properties );
+
+    for( String property : merged.stringPropertyNames() )
+      map.put( property, merged.getProperty( property ) );
+
+    return this;
+    }
+
   protected Map<String, String> getMode( Mode mode )
     {
     if( config == null )
-      config = new HashMap<Mode, Map<String, String>>();
+      config = new HashMap<>();
 
     if( !config.containsKey( mode ) )
-      config.put( mode, new HashMap<String, String>() );
+      config.put( mode, new HashMap<>() );
 
     return config.get( mode );
     }
@@ -109,10 +133,10 @@ public class ConfigDef implements Serializable
   protected Map<String, String> getModeSafe( Mode mode )
     {
     if( config == null )
-      return Collections.EMPTY_MAP;
+      return Collections.emptyMap();
 
     if( !config.containsKey( mode ) )
-      return Collections.EMPTY_MAP;
+      return Collections.emptyMap();
 
     return config.get( mode );
     }
