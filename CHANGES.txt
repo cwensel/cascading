@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.s.l.TextDelimited to detect if data is being appended to an existing file before writing the header.
+
   Fixed issue where the local mode runner would not gracefully shutdown threads and clean up resources on
   c.f.Flow#stop() and JVM shutdown conditions.
 

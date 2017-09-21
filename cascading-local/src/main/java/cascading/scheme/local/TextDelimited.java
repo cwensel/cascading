@@ -22,6 +22,7 @@
 package cascading.scheme.local;
 
 import java.beans.ConstructorProperties;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,6 +44,7 @@ import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.util.DelimitedParser;
 import cascading.tap.CompositeTap;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.local.FileTap;
@@ -704,14 +706,30 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   @Override
   public void sinkPrepare( FlowProcess<? extends Properties> flowProcess, SinkCall<PrintWriter, OutputStream> sinkCall )
     {
-    sinkCall.setContext( createOutput( sinkCall.getOutput() ) );
+    OutputStream originalOutput = sinkCall.getOutput();
+    sinkCall.setContext( createOutput( originalOutput ) );
 
-    if( writeHeader )
+    if( writeHeader && !isAppendingFile( sinkCall, originalOutput ) )
       {
       Fields fields = sinkCall.getOutgoingEntry().getFields();
       delimitedParser.joinFirstLine( fields, sinkCall.getContext() );
 
       sinkCall.getContext().println();
+      }
+    }
+
+  protected boolean isAppendingFile( SinkCall<PrintWriter, OutputStream> sinkCall, OutputStream originalOutput )
+    {
+    try
+      {
+      return sinkCall.getTap().getSinkMode() == SinkMode.UPDATE &&
+        originalOutput instanceof FileOutputStream &&
+        ( (FileOutputStream) originalOutput ).getChannel().position() != 0;
+      }
+    catch( IOException exception )
+      {
+      // the error will be thrown immediately downstream
+      return false;
       }
     }
 
