@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,16 +18,11 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-expression'
-include 'cascading-nested'
-include 'cascading-nested-json'
-include 'cascading-local'
-include 'cascading-hadoop2-common'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-hadoop2-tez-stats'
-include 'cascading-platform'
+package cascading.nested.json.transform;
 
-rootProject.name = 'cascading'
+/**
+ * Interface JSONPrimitiveTransforms provides a set of convenience {@link Transform} helpers.
+ */
+public interface JSONPrimitiveTransforms extends heretical.pointer.path.json.JSONPrimitiveTransforms
+  {
+  }

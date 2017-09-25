@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,7 +23,9 @@ package cascading.tuple;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cascading.operation.OperationException;
 import cascading.tuple.type.CoercibleType;
@@ -175,6 +178,26 @@ public class Tuples
       destination[ i ] = coercions[ i ].coerce( tuple.getObject( i ), types[ i ] );
 
     return destination;
+    }
+
+  public static Map<String, Object> asMap( Fields fields, TupleEntry arguments )
+    {
+    Map<String, Object> result = new HashMap<>();
+
+    for( Comparable comparable : fields )
+      result.put( comparable.toString(), arguments.getObject( comparable ) );
+
+    return result;
+    }
+
+  public static Map<Comparable, Object> asComparableMap( Fields fields, TupleEntry arguments )
+    {
+    Map<Comparable, Object> result = new HashMap<>();
+
+    for( Comparable comparable : fields )
+      result.put( comparable, arguments.getObject( comparable ) );
+
+    return result;
     }
 
   public static Collection asCollection( Tuple tuple )

@@ -714,6 +714,11 @@ public class Util
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider, vertexAttributeProvider, edgeAttributeProvider ).export( writer, graph );
     }
 
+  public static String asString( Object object )
+    {
+    return object == null ? null : object.toString();
+    }
+
   public static boolean isEmpty( String string )
     {
     return string == null || string.isEmpty();
