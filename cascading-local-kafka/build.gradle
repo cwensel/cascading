@@ -32,7 +32,7 @@ dependencies {
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
 
-  testCompile 'info.batey.kafka:kafka-unit:0.8-SNAPSHOT' // waiting for fix to be published
+  testCompile 'thirdparty:kafka-unit:0.8-SNAPSHOT' // waiting for fix to be officially published
 
   testCompile( 'org.apache.kafka:kafka_2.11:0.11.0.0' ) {
     exclude module: 'slf4j-simple'
