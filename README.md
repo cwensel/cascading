@@ -21,6 +21,8 @@ A full features Tap that can both read and write data from, to, and between Apac
 
 See the `cascading-local-kafka` sub-project for details.
 
+For maven coordinates, see: http://conjars.org/cascading/cascading-local-kafka
+
 ### AWS S3 Tap
 
 A full features Tap that can both read and write data from, to and between AWS S3 buckets. 
@@ -28,6 +30,8 @@ A full features Tap that can both read and write data from, to and between AWS S
 In addition, this tap can restart where it left off on a previous fetch, even across JVM executions. 
 
 See the `cascading-local-s3` sub-project for details.
+
+For maven coordinates, see: http://conjars.org/cascading/cascading-local-s3
 
 ### S3 Log Parser Example
 
