@@ -279,15 +279,17 @@ task buildLatestMeta( dependsOn: buildPackage ) {
   ext.latestArchivePath = null
   ext.latestReleaseTagPath = null
   ext.latestPropertiesPath = null
+  ext.latestJSONPath = null
 }
 
 buildLatestMeta.doLast {
 
   def destination = s3UploadArtifacts.source
   def releaseTar = buildPackage.archivePath.name
+  def releaseURL = "http://${s3UploadArtifacts.destination}${releaseTar}"
 
   latestArchivePath = new File( destination, 'latest.txt' )
-  latestArchivePath.write( "http://${s3UploadArtifacts.destination}${releaseTar}" )
+  latestArchivePath.write( releaseURL )
 
   latestReleaseTagPath = new File( destination, 'latest-tag.txt' )
   latestReleaseTagPath.write( "${releaseTag}" )
@@ -298,6 +300,42 @@ buildLatestMeta.doLast {
     "cascading.release.minor=${minorVersion}\n" +
     "cascading.release.build=${buildNumber}\n" +
     "cascading.release.commit=${currentCommit}\n" +
-    "cascading.release.tag=${releaseTag}"
+    "cascading.release.tag=${releaseTag}\n" +
+    "cascading.release.name=${releaseTar}\n" +
+    "cascading.release.url=${releaseURL}"
+  )
+
+  latestJSONPath = new File( destination, 'latest.json' )
+  latestJSONPath.write( """\
+{
+  "cascading": {
+    "release": {
+      "name": "${releaseTar}",
+      "url": "${releaseURL}",
+      "version": "${releaseVersion}",
+      "major": "${majorVersion}",
+      "minor": "${minorVersion}",
+      "build": "${buildNumber}",
+      "commit": "${currentCommit}",
+      "tag": "${releaseTag}"
+    },
+    "docs": {
+      "userguide": {
+        "url": "http://${s3UploadDocs.destination}userguide/"
+      },
+      "api": {
+        "url": "http://${s3UploadDocs.destination}javadoc/",
+        "names": [
+          "cascading-core",
+          "cascading-local",
+          "cascading-hadoop2-mr1",
+          "cascading-hadoop2-tez",
+          "cascading-xml",
+          "cascading-platform"
+        ]
+      }
+    }
+  }
+}"""
   )
 }
