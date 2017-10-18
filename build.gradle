@@ -222,7 +222,7 @@ task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:bui
                                              'cascading-hadoop2-common:build', 'cascading-hadoop2-io:build',
                                              'cascading-hadoop2-mr1:build',
                                              'cascading-hadoop2-tez:build', 'cascading-hadoop2-tez-stats:build',
-                                             'cascading-expression:build', 'cascading-xml:build',
+                                             'cascading-expression:build',
                                              'cascading-platform:build', ':allJavadoc'] ) {
 
   s3UploadDocs.dependsOn << prepareRelease
@@ -331,7 +331,6 @@ buildLatestMeta.doLast {
           "cascading-local",
           "cascading-hadoop2-mr1",
           "cascading-hadoop2-tez",
-          "cascading-xml",
           "cascading-platform"
         ]
       }

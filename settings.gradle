@@ -20,7 +20,6 @@
  */
 
 include 'cascading-core'
-include 'cascading-xml'
 include 'cascading-expression'
 include 'cascading-local'
 include 'cascading-hadoop2-common'
