@@ -104,6 +104,9 @@ public abstract class SubAssembly extends Pipe
    */
   protected void setPrevious( Pipe... previous )
     {
+    if( this.previous != null )
+      throw new IllegalStateException( "this method may only be called once" );
+
     this.previous = previous;
     }
 
@@ -114,6 +117,9 @@ public abstract class SubAssembly extends Pipe
    */
   protected void setTails( Pipe... tails )
     {
+    if( this.tails != null )
+      throw new IllegalStateException( "this method may only be called once" );
+
     this.tails = tails;
 
     if( previous == null )
