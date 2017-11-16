@@ -34,6 +34,7 @@
 
 plugins {
   id 'nebula.provided-base' version '3.0.3' // if you want provided-base
+  id "net.ltgt.errorprone" version "0.0.13"
 }
 
 apply from: 'etc/version.gradle'
