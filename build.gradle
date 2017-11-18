@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 /*
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
@@ -290,6 +292,10 @@ task buildLatestMeta( dependsOn: buildPackage ) {
 
 buildLatestMeta << {
 
+  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+  df.setTimeZone(TimeZone.getTimeZone("UTC"))
+  String isoUTC = df.format(new Date())
+
   def destination = s3UploadArtifacts.source
   def releaseTar = buildPackage.archivePath.name
   def releaseURL = "http://${s3UploadArtifacts.destination}${releaseTar}"
@@ -308,7 +314,8 @@ buildLatestMeta << {
     "cascading.release.commit=${currentCommit}\n" +
     "cascading.release.tag=${releaseTag}\n" +
     "cascading.release.name=${releaseTar}\n" +
-    "cascading.release.url=${releaseURL}"
+    "cascading.release.url=${releaseURL}\n" +
+    "cascading.release.date=${isoUTC}"
   )
 
   latestJSONPath = new File( destination, 'latest.json' )
@@ -323,7 +330,8 @@ buildLatestMeta << {
       "minor": "${minorVersion}",
       "build": "${buildNumber}",
       "commit": "${currentCommit}",
-      "tag": "${releaseTag}"
+      "tag": "${releaseTag}",
+      "date": "${isoUTC}"
     },
     "docs": {
       "userguide": {
