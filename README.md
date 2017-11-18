@@ -6,7 +6,8 @@ Thanks for using Cascading.
 
 Cascading 4 includes a few major changes and additions from prior major releases:
 
-* TBD
+* Added native JSON support via the `cascading-nested-json` sub-project
+* Removed `cascading-xml` sub-project
 
 ## General Information:
 
@@ -19,6 +20,8 @@ The project includes nine Cascading jar files:
 
 * `cascading-core-x.y.z.jar`              - all Cascading Core class files
 * `cascading-expression-x.y.z.jar`        - all Cascading Janino expression operations class files
+* `cascading-nested-json-x.y.z.jar`       - all Cascading JSON operations
+* `cascading-nested-x.y.z.jar`            - all Cascading base classes for nested data-type operations
 * `cascading-local-x.y.z.jar`             - all Cascading Local in-memory mode class files
 * `cascading-hadoop2-common-x.y.z.jar`    - all Cascading Hadoop 2.x common class files
 * `cascading-hadoop2-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
@@ -148,6 +151,8 @@ You can find the latest public and WIP (work in progress) releases here:
 *  http://conjars.org/cascading/cascading-hadoop2-tez
 *  http://conjars.org/cascading/cascading-hadoop2-tez-stats
 *  http://conjars.org/cascading/cascading-expression
+*  http://conjars.org/cascading/cascading-nested-json
+*  http://conjars.org/cascading/cascading-nested
 
 When creating tests, make sure to add any of the relevant above dependencies to your `test` scope or equivalent
 configuration along with the `cascading-platform` dependency.
@@ -210,6 +215,7 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 /lib/cascading-hadoop2-mr1-x.y.z.jar
 /lib/cascading-hadoop2-io-x.y.z.jar
 /lib/cascading-expression-x.y.z.jar
+/lib/cascading-nested-json-x.y.z.jar
 /lib/<cascading third-party jar files>
 ```
 
