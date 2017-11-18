@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -70,7 +70,7 @@ import cascading.util.jgrapht.DOTExporter;
 import cascading.util.jgrapht.EdgeNameProvider;
 import cascading.util.jgrapht.IntegerNameProvider;
 import cascading.util.jgrapht.VertexNameProvider;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -642,7 +642,7 @@ public class Util
     return String.format( "%s...", string.subSequence( 0, maxSize - 3 ) );
     }
 
-  public static void printGraph( String filename, DirectedGraph graph )
+  public static void printGraph( String filename, Graph graph )
     {
     try
       {
@@ -665,27 +665,21 @@ public class Util
     }
 
   @SuppressWarnings({"unchecked"})
-  private static void printGraph( Writer writer, DirectedGraph graph )
+  private static void printGraph( Writer writer, Graph graph )
     {
-    DOTExporter dot = new DOTExporter( new IntegerNameProvider(), new VertexNameProvider()
-      {
-      public String getVertexName( Object object )
-        {
-        if( object == null )
-          return "none";
+    DOTExporter dot = new DOTExporter( new IntegerNameProvider(), object ->
+    {
+    if( object == null )
+      return "none";
 
-        return object.toString().replaceAll( "\"", "\'" );
-        }
-      }, new EdgeNameProvider<Object>()
-      {
-      public String getEdgeName( Object object )
-        {
-        if( object == null )
-          return "none";
+    return object.toString().replaceAll( "\"", "\'" );
+    }, (EdgeNameProvider<Object>) object ->
+    {
+    if( object == null )
+      return "none";
 
-        return object.toString().replaceAll( "\"", "\'" );
-        }
-      }
+    return object.toString().replaceAll( "\"", "\'" );
+    }
     );
 
     dot.export( writer, graph );
@@ -703,12 +697,12 @@ public class Util
       ;
     }
 
-  public static void writeDOT( Writer writer, DirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
+  public static void writeDOT( Writer writer, Graph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider ).export( writer, graph );
     }
 
-  public static void writeDOT( Writer writer, DirectedGraph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider,
+  public static void writeDOT( Writer writer, Graph graph, IntegerNameProvider vertexIdProvider, VertexNameProvider vertexNameProvider, EdgeNameProvider edgeNameProvider,
                                ComponentAttributeProvider vertexAttributeProvider, ComponentAttributeProvider edgeAttributeProvider )
     {
     new DOTExporter( vertexIdProvider, vertexNameProvider, edgeNameProvider, vertexAttributeProvider, edgeAttributeProvider ).export( writer, graph );

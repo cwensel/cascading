@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,12 +25,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DirectedMaskSubgraph;
-import org.jgrapht.graph.MaskFunctor;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.MaskSubgraph;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
 import static cascading.util.Util.createIdentitySet;
@@ -40,66 +41,70 @@ import static cascading.util.Util.createIdentitySet;
 public class ElementMaskSubGraph extends BaseElementGraph implements ElementGraph
   {
   private ElementGraph elementGraph;
-  private FlowElementMaskFunctor mask;
+  private VertexMask vertexMask;
+  private EdgeMask edgeMask;
 
-  private static class FlowElementMaskFunctor implements MaskFunctor<FlowElement, Scope>
+  private static class VertexMask implements Predicate<FlowElement>
     {
     Set<FlowElement> maskedElements = createIdentitySet();
-    Set<Scope> maskedScopes = new HashSet<>();
 
-    public FlowElementMaskFunctor( Collection<FlowElement> flowElements, Collection<Scope> scopes )
-      {
-      this( flowElements );
-
-      if( scopes != null )
-        maskedScopes.addAll( scopes );
-      }
-
-    public FlowElementMaskFunctor( Collection<FlowElement> flowElements )
+    public VertexMask( Collection<FlowElement> flowElements )
       {
       if( flowElements != null )
         maskedElements.addAll( flowElements );
       }
 
     @Override
-    public boolean isEdgeMasked( Scope scope )
-      {
-      return maskedScopes.contains( scope );
-      }
-
-    @Override
-    public boolean isVertexMasked( FlowElement flowElement )
+    public boolean test( FlowElement flowElement )
       {
       return maskedElements.contains( flowElement );
       }
     }
 
+  private static class EdgeMask implements Predicate<Scope>
+    {
+    Set<Scope> maskedScopes = new HashSet<>();
+
+    public EdgeMask( Collection<Scope> scopes )
+      {
+      if( scopes != null )
+        maskedScopes.addAll( scopes );
+      }
+
+    @Override
+    public boolean test( Scope scope )
+      {
+      return maskedScopes.contains( scope );
+      }
+    }
+
   public ElementMaskSubGraph( ElementGraph elementGraph, FlowElement... maskedFlowElements )
     {
-    this( elementGraph, new FlowElementMaskFunctor( Arrays.asList( maskedFlowElements ) ) );
+    this( elementGraph, new VertexMask( Arrays.asList( maskedFlowElements ) ), new EdgeMask( null ) );
     }
 
   public ElementMaskSubGraph( ElementGraph elementGraph, Collection<FlowElement> maskedFlowElements )
     {
-    this( elementGraph, new FlowElementMaskFunctor( maskedFlowElements ) );
+    this( elementGraph, new VertexMask( maskedFlowElements ), new EdgeMask( null ) );
     }
 
   public ElementMaskSubGraph( ElementGraph elementGraph, Collection<FlowElement> maskedFlowElements, Collection<Scope> maskedScopes )
     {
-    this( elementGraph, new FlowElementMaskFunctor( maskedFlowElements, maskedScopes ) );
+    this( elementGraph, new VertexMask( maskedFlowElements ), new EdgeMask( maskedScopes ) );
     }
 
   public ElementMaskSubGraph( ElementMaskSubGraph graph )
     {
-    this( graph.elementGraph, graph.mask );
+    this( graph.elementGraph, graph.vertexMask, graph.edgeMask );
     }
 
-  protected ElementMaskSubGraph( ElementGraph elementGraph, FlowElementMaskFunctor flowElementMaskFunctor )
+  protected ElementMaskSubGraph( ElementGraph elementGraph, VertexMask vertexMask, EdgeMask edgeMask )
     {
-    this.graph = new DirectedMaskSubGraph( directed( elementGraph ), flowElementMaskFunctor );
+    this.graph = new DirectedMaskSubGraph( directed( elementGraph ), vertexMask, edgeMask );
 
     this.elementGraph = elementGraph;
-    this.mask = flowElementMaskFunctor;
+    this.vertexMask = vertexMask;
+    this.edgeMask = edgeMask;
     }
 
   @Override
@@ -108,11 +113,11 @@ public class ElementMaskSubGraph extends BaseElementGraph implements ElementGrap
     return new ElementMaskSubGraph( ElementMaskSubGraph.this );
     }
 
-  private class DirectedMaskSubGraph extends DirectedMaskSubgraph<FlowElement, Scope>
+  private class DirectedMaskSubGraph extends MaskSubgraph<FlowElement, Scope>
     {
-    public DirectedMaskSubGraph( DirectedGraph<FlowElement, Scope> base, MaskFunctor<FlowElement, Scope> mask )
+    public DirectedMaskSubGraph( Graph<FlowElement, Scope> base, VertexMask vertexMask, EdgeMask edgeMask )
       {
-      super( base, mask );
+      super( base, vertexMask, edgeMask );
       }
     }
   }

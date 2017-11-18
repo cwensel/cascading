@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated project to use JGrapht version 1.1.0.
+
   Added sub-projects cascading-nested and cascading-nested-json providing base support for nested data types and
   direct support for JSON data processing.
 

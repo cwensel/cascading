@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,7 +26,7 @@ import java.util.Set;
 
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedSubgraph;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
@@ -66,7 +67,7 @@ public class ElementSubGraph extends BaseElementGraph implements ElementGraph
 
   private class DirectedSubGraph extends DirectedSubgraph<FlowElement, Scope>
     {
-    public DirectedSubGraph( DirectedGraph<FlowElement, Scope> base, Set<FlowElement> vertexSubset, Set<Scope> edgeSubset )
+    public DirectedSubGraph( Graph<FlowElement, Scope> base, Set<FlowElement> vertexSubset, Set<Scope> edgeSubset )
       {
       super( base, vertexSubset, edgeSubset );
       }

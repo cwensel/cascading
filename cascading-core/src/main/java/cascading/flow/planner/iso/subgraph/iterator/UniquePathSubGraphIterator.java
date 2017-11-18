@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,7 +40,6 @@ import org.jgrapht.GraphPath;
 
 import static cascading.flow.planner.graph.ElementGraphs.*;
 import static cascading.util.Util.getFirst;
-import static org.jgrapht.Graphs.getPathVertexList;
 
 /**
  *
@@ -143,7 +142,7 @@ public class UniquePathSubGraphIterator implements SubGraphIterator
       }
 
     GraphPath<FlowElement, Scope> path = pathsIterator.next();
-    List<FlowElement> vertexList = getPathVertexList( path );
+    List<FlowElement> vertexList = path.getVertexList();
     Collection<Scope> edgeList = path.getEdgeList();
 
     if( multiEdge )

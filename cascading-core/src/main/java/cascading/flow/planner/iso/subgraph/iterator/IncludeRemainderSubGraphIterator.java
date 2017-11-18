@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,7 +39,6 @@ import cascading.flow.planner.iso.subgraph.SubGraphIterator;
 import cascading.util.EnumMultiMap;
 import cascading.util.Pair;
 import org.jgrapht.GraphPath;
-import org.jgrapht.Graphs;
 
 import static cascading.flow.planner.graph.ElementGraphs.*;
 import static cascading.util.Util.createIdentitySet;
@@ -143,7 +142,7 @@ public class IncludeRemainderSubGraphIterator implements SubGraphIterator
 
         for( GraphPath<FlowElement, Scope> path : paths )
           {
-          maskedElements.removeAll( Graphs.getPathVertexList( path ) );
+          maskedElements.removeAll( path.getVertexList() );
 
           Collection<Scope> edgeList = path.getEdgeList();
 

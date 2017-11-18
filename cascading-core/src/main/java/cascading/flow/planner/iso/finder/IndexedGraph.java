@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,16 +30,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.GraphDelegator;
 
 /**
  *
  */
-class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends GraphDelegator
+class IndexedGraph<G extends Graph<Node, Edge>, Node, Edge> extends GraphDelegator
   {
   private SearchOrder searchOrder;
-  private Graph delegate;
+  private G delegate;
   private Object[] index;
   private Map<Node, Integer> reverse;
 
@@ -48,12 +48,12 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
   private int count;
   private Iterator iterator;
 
-  public IndexedGraph( Graph graph )
+  public IndexedGraph( G graph )
     {
     this( null, graph );
     }
 
-  public IndexedGraph( SearchOrder searchOrder, Graph graph )
+  public IndexedGraph( SearchOrder searchOrder, G graph )
     {
     super( graph );
     this.searchOrder = searchOrder;
@@ -64,7 +64,7 @@ class IndexedGraph<Graph extends DirectedGraph<Node, Edge>, Node, Edge> extends 
     this.reverse = new IdentityHashMap<>( index.length );
     }
 
-  public Graph getDelegate()
+  public G getDelegate()
     {
     return delegate;
     }

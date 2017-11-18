@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,8 +26,10 @@ import java.util.IdentityHashMap;
 import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMultigraph;
+import org.jgrapht.graph.specifics.DirectedEdgeContainer;
+import org.jgrapht.graph.specifics.DirectedSpecifics;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
 
@@ -68,7 +70,7 @@ public class ElementMultiGraph extends BaseAnnotatedElementGraph implements Elem
       super( Scope.class );
       }
 
-    public DirectedMultiGraph( DirectedGraph<FlowElement, Scope> parent )
+    public DirectedMultiGraph( Graph<FlowElement, Scope> parent )
       {
       this();
 
@@ -84,9 +86,9 @@ public class ElementMultiGraph extends BaseAnnotatedElementGraph implements Elem
       }
 
     @Override
-    protected DirectedSpecifics createDirectedSpecifics()
+    protected DirectedSpecifics createSpecifics( boolean directed )
       {
-      return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
+      return new DirectedSpecifics( this, new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
       }
     }
   }

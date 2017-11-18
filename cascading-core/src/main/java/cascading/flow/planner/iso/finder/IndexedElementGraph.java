@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,12 +25,12 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.flow.planner.graph.ElementGraph;
 import cascading.flow.planner.graph.ElementGraphs;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 
 /**
  *
  */
-class IndexedElementGraph extends IndexedGraph<DirectedGraph<FlowElement, Scope>, FlowElement, Scope>
+class IndexedElementGraph extends IndexedGraph<Graph<FlowElement, Scope>, FlowElement, Scope>
   {
   private final ElementGraph elementGraph;
 

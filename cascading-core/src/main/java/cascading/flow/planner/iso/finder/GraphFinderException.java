@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,14 +23,14 @@ package cascading.flow.planner.iso.finder;
 
 import cascading.CascadingException;
 import cascading.util.Util;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 
 /**
  *
  */
 public class GraphFinderException extends CascadingException
   {
-  private DirectedGraph graph;
+  private Graph graph;
 
   public GraphFinderException()
     {
@@ -50,13 +51,13 @@ public class GraphFinderException extends CascadingException
     super( throwable );
     }
 
-  public GraphFinderException( String message, DirectedGraph graph )
+  public GraphFinderException( String message, Graph graph )
     {
     this( message );
     this.graph = graph;
     }
 
-  public DirectedGraph getGraph()
+  public Graph getGraph()
     {
     return graph;
     }

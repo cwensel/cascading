@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,7 +24,7 @@ package cascading.flow.planner.iso.finder;
 import java.util.Iterator;
 
 import cascading.flow.planner.graph.Extent;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -53,7 +54,7 @@ public enum SearchOrder
     return isReversed;
     }
 
-  public static <Node, Graph extends DirectedGraph> Iterator<Node> getNodeIterator( SearchOrder searchOrder, Graph graph )
+  public static <Node, G extends Graph> Iterator<Node> getNodeIterator( SearchOrder searchOrder, G graph )
     {
     if( searchOrder == null )
       return new TopologicalOrderIterator( graph ); // faster than getVertexSet().iterator()

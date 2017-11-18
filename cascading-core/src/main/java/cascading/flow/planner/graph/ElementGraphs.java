@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -73,20 +73,21 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.alg.FloydWarshallShortestPaths;
-import org.jgrapht.alg.KShortestPaths;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.alg.shortestpath.FloydWarshallShortestPaths;
+import org.jgrapht.alg.shortestpath.KShortestPaths;
 import org.jgrapht.graph.AbstractGraph;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.specifics.DirectedEdgeContainer;
+import org.jgrapht.graph.specifics.DirectedSpecifics;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.jgrapht.util.TypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static cascading.util.Util.*;
-import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
  * Class ElementGraphs maintains a collection of operations that can be performed on an {@link ElementGraph}.
@@ -148,9 +149,9 @@ public class ElementGraphs
       }
 
     @Override
-    protected DirectedSpecifics createDirectedSpecifics()
+    protected DirectedSpecifics createSpecifics( boolean directed )
       {
-      return new DirectedSpecifics( new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
+      return new DirectedSpecifics( this, new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
       }
     }
 
@@ -162,13 +163,13 @@ public class ElementGraphs
       }
 
     @Override
-    protected DirectedSpecifics createDirectedSpecifics()
+    protected DirectedSpecifics createSpecifics( boolean directed )
       {
-      return new DirectedSpecifics( new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
+      return new DirectedSpecifics( this, new IdentityHashMap<V, DirectedEdgeContainer<V, E>>() );
       }
     }
 
-  public static DirectedGraph<FlowElement, Scope> directed( ElementGraph elementGraph )
+  public static Graph<FlowElement, Scope> directed( ElementGraph elementGraph )
     {
     if( elementGraph == null )
       return null;
@@ -381,7 +382,7 @@ public class ElementGraphs
     List<GraphPath<FlowElement, Scope>> pathsBetween = getAllShortestPathsBetween( graph, from, to );
 
     for( GraphPath<FlowElement, Scope> graphPath : pathsBetween )
-      results.addAll( Graphs.getPathVertexList( graphPath ) );
+      results.addAll( graphPath.getVertexList() );
 
     return results;
     }
@@ -391,9 +392,9 @@ public class ElementGraphs
     return getAllShortestPathsBetween( directed( graph ), from, to );
     }
 
-  public static <V, E> List<GraphPath<V, E>> getAllShortestPathsBetween( DirectedGraph<V, E> graph, V from, V to )
+  public static <V, E> List<GraphPath<V, E>> getAllShortestPathsBetween( Graph<V, E> graph, V from, V to )
     {
-    List<GraphPath<V, E>> paths = new KShortestPaths<>( graph, from, Integer.MAX_VALUE ).getPaths( to );
+    List<GraphPath<V, E>> paths = new KShortestPaths<>( graph, Integer.MAX_VALUE ).getPaths( from, to );
 
     if( paths == null )
       return new ArrayList<>();
@@ -437,7 +438,7 @@ public class ElementGraphs
     return findClosureViaFloydWarshall( full, contracted, null );
     }
 
-  public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( DirectedGraph<V, E> full, DirectedGraph<V, E> contracted, Set<V> excludes )
+  public static <V, E> Pair<Set<V>, Set<E>> findClosureViaFloydWarshall( Graph<V, E> full, Graph<V, E> contracted, Set<V> excludes )
     {
     Set<V> vertices = createIdentitySet( contracted.vertexSet() );
     LinkedList<V> allVertices = new LinkedList<>( full.vertexSet() );
@@ -481,7 +482,7 @@ public class ElementGraphs
         }
       }
 
-    DirectedGraph<V, E> disconnected = disconnectExtentsAndExclude( full, excludeEdges );
+    Graph<V, E> disconnected = disconnectExtentsAndExclude( full, excludeEdges );
 
     FloydWarshallShortestPaths<V, E> paths = new FloydWarshallShortestPaths<>( disconnected );
 
@@ -506,7 +507,7 @@ public class ElementGraphs
     return new Pair<>( vertices, excludeEdges );
     }
 
-  private static <V, E> DirectedGraph<V, E> disconnectExtentsAndExclude( DirectedGraph<V, E> full, Set<E> withoutEdges )
+  private static <V, E> Graph<V, E> disconnectExtentsAndExclude( Graph<V, E> full, Set<E> withoutEdges )
     {
     IdentityMultiGraphGraph<V, E> copy = (IdentityMultiGraphGraph<V, E>) new IdentityMultiGraphGraph<>( Object.class );
 
@@ -530,7 +531,7 @@ public class ElementGraphs
 
   private static <V, E> boolean isBetween( FloydWarshallShortestPaths<V, E> paths, V edgeSource, V edgeTarget, V vertex )
     {
-    return paths.shortestDistance( edgeSource, vertex ) != POSITIVE_INFINITY && paths.shortestDistance( vertex, edgeTarget ) != POSITIVE_INFINITY;
+    return paths.getFirstHop( edgeSource, vertex ) != null && paths.getFirstHop( vertex, edgeTarget ) != null;
     }
 
   public static void removeAndContract( ElementGraph elementGraph, FlowElement flowElement )
@@ -628,7 +629,7 @@ public class ElementGraphs
       Writer writer = new FileWriter( filename );
 
       DOTProcessGraphWriter graphWriter = new DOTProcessGraphWriter(
-        new IntegerNameProvider<Pair<ElementGraph, FlowElement>>(),
+        new IntegerNameProvider<>(),
         new FlowElementVertexNameProvider( graph, null ),
         new ScopeEdgeNameProvider(),
         new VertexAttributeProvider(), new EdgeAttributeProvider(),
@@ -967,7 +968,7 @@ public class ElementGraphs
    */
   public static int shortestDistance( ElementGraph graph, FlowElement lhs, FlowElement rhs )
     {
-    return DijkstraShortestPath.findPathBetween( directed( graph ), lhs, rhs ).size();
+    return DijkstraShortestPath.findPathBetween( directed( graph ), lhs, rhs ).getLength();
     }
 
   private static class FlowElementVertexNameProvider implements VertexNameProvider<FlowElement>

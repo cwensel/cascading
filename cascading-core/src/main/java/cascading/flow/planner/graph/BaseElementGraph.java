@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,6 +32,7 @@ import cascading.flow.FlowElement;
 import cascading.flow.planner.Scope;
 import cascading.util.Util;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
@@ -40,7 +41,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  */
 public abstract class BaseElementGraph implements ElementGraph, Serializable
   {
-  public static final ElementGraph NULL = new BaseElementGraph( new SimpleDirectedGraph<FlowElement, Scope>( Scope.class ) )
+  public static final ElementGraph NULL = new BaseElementGraph( new SimpleDirectedGraph<>( Scope.class ) )
     {
     @Override
     public ElementGraph copyElementGraph()
@@ -49,7 +50,7 @@ public abstract class BaseElementGraph implements ElementGraph, Serializable
       }
     };
 
-  protected DirectedGraph<FlowElement, Scope> graph;
+  protected Graph<FlowElement, Scope> graph;
 
   public BaseElementGraph()
     {

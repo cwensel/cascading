@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +28,8 @@ import cascading.flow.planner.Scope;
 import cascading.util.EnumMultiMap;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.specifics.DirectedEdgeContainer;
+import org.jgrapht.graph.specifics.DirectedSpecifics;
 
 import static cascading.flow.planner.graph.ElementGraphs.directed;
 
@@ -73,7 +76,7 @@ public class ElementDirectedGraph extends BaseAnnotatedElementGraph implements A
       super( Scope.class );
       }
 
-    public DirectedGraph( org.jgrapht.DirectedGraph<FlowElement, Scope> parent )
+    public DirectedGraph( org.jgrapht.Graph<FlowElement, Scope> parent )
       {
       this();
 
@@ -81,9 +84,9 @@ public class ElementDirectedGraph extends BaseAnnotatedElementGraph implements A
       }
 
     @Override
-    protected DirectedSpecifics createDirectedSpecifics()
+    protected DirectedSpecifics createSpecifics( boolean directed )
       {
-      return new DirectedSpecifics( new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
+      return new DirectedSpecifics( this, new IdentityHashMap<FlowElement, DirectedEdgeContainer<FlowElement, Scope>>() );
       }
     }
   }
