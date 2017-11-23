@@ -62,6 +62,8 @@ task prepareDist() {
   project.distDir = mkdir( "${rootDir}/build/dist" )
 }
 
+ext.copyright = '<i>Copyright &#169; 2007-2017 Cascading Maintainers. All Rights Reserved.</i>'
+
 subprojects {
 
   apply plugin: 'java'
@@ -84,7 +86,6 @@ subprojects {
   javadoc.dependsOn << prepareDist
 
   javadoc {
-    def copyright = '<i>Copyright &#169; 2007-2015 Xplenty, Inc. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
@@ -199,8 +200,6 @@ subprojects {
 
 task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
 
-  def copyright = '<i>Copyright &#169; 2007-2015 Xplenty, Inc. All Rights Reserved.</i>'
-
   title = "Cascading ${releaseVersion}"
   destinationDir = file( "${distDir}/javadoc/all/" )
 
@@ -220,12 +219,16 @@ task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
   }
 }
 
-task prepareRelease( type: Copy, dependsOn: [':prepareDist', 'cascading-core:build', 'cascading-local:build',
+task prepareRelease( type: Copy, dependsOn: [':prepareDist',
+                                             'cascading-core:build',
+                                             'cascading-local:build',
                                              'cascading-hadoop2-common:build', 'cascading-hadoop2-io:build',
                                              'cascading-hadoop2-mr1:build',
                                              'cascading-hadoop2-tez:build', 'cascading-hadoop2-tez-stats:build',
                                              'cascading-expression:build',
-                                             'cascading-platform:build', ':allJavadoc'] ) {
+                                             'cascading-nested:build', 'cascading-nested-json:build',
+                                             'cascading-platform:build',
+                                             ':allJavadoc'] ) {
 
   s3UploadDocs.dependsOn << prepareRelease
   s3UploadArtifacts.dependsOn << prepareRelease
@@ -337,8 +340,14 @@ buildLatestMeta.doLast {
         "names": [
           "cascading-core",
           "cascading-local",
+          "cascading-hadoop2-common",
+          "cascading-hadoop2-io",
           "cascading-hadoop2-mr1",
           "cascading-hadoop2-tez",
+          "cascading-hadoop2-tez-stats",
+          "cascading-expression",
+          "cascading-nested",
+          "cascading-nested-json",
           "cascading-platform"
         ]
       }
