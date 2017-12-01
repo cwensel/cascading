@@ -125,22 +125,22 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       return null;
 
     if( to == String.class )
-      return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) write( value );
+      return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) write( node );
 
     if( to == Integer.class || to == Integer.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Integer.valueOf( node.intValue() ) : (Coerce) Coercions.coerce( write( value ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Integer.valueOf( node.intValue() ) : (Coerce) Coercions.coerce( write( node ), to );
 
     if( to == Long.class || to == Long.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Long.valueOf( node.longValue() ) : (Coerce) Coercions.coerce( write( value ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Long.valueOf( node.longValue() ) : (Coerce) Coercions.coerce( write( node ), to );
 
     if( to == Float.class || to == Float.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Float.valueOf( node.floatValue() ) : (Coerce) Coercions.coerce( write( value ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Float.valueOf( node.floatValue() ) : (Coerce) Coercions.coerce( write( node ), to );
 
     if( to == Double.class || to == Double.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Double.valueOf( node.doubleValue() ) : (Coerce) Coercions.coerce( write( value ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Double.valueOf( node.doubleValue() ) : (Coerce) Coercions.coerce( write( node ), to );
 
     if( to == Boolean.class || to == Boolean.TYPE )
-      return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( write( value ), to );
+      return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( write( node ), to );
 
     if( Map.class.isAssignableFrom( (Class<?>) to ) )
       return (Coerce) convert( value, (Class) to );
@@ -156,8 +156,11 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     return mapper.convertValue( value, to );
     }
 
-  private String write( Object value )
+  private String write( JsonNode value )
     {
+    if( value != null && value.isTextual() )
+      return value.textValue();
+
     try
       {
       return mapper.writeValueAsString( value );
