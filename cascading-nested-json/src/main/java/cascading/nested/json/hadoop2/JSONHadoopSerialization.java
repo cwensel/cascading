@@ -33,7 +33,7 @@ import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.Serializer;
 
 /**
- *
+ * Class JSONHadoopSerialization creates a Hadoop {@link Serialization} provider.
  */
 public class JSONHadoopSerialization extends Configured implements Serialization
   {

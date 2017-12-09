@@ -439,7 +439,7 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
     return sourceCall.getInput().next( context[ 0 ], context[ 1 ] );
     }
 
-  protected void sourceHandleInput( SourceCall<Object[], RecordReader> sourceCall )
+  protected void sourceHandleInput( SourceCall<Object[], RecordReader> sourceCall ) throws IOException
     {
     TupleEntry result = sourceCall.getIncomingEntry();
 

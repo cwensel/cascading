@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,6 +30,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import cascading.nested.json.hadoop2.JSONTextLine;
 import cascading.platform.TestPlatform;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.TextDelimited;
@@ -227,6 +229,12 @@ public abstract class BaseHadoopPlatform<Config extends Configuration> extends T
   public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
     {
     return new Hfs( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), safeFileName( filename ), mode );
+    }
+
+  @Override
+  public Tap getJSONFile( Fields fields, String filename, SinkMode mode )
+    {
+    return new Hfs( new JSONTextLine( fields ), safeFileName( filename ), mode );
     }
 
   @Override

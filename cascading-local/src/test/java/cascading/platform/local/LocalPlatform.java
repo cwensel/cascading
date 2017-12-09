@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,6 +32,7 @@ import cascading.flow.FlowProcess;
 import cascading.flow.FlowSession;
 import cascading.flow.local.LocalFlowConnector;
 import cascading.flow.local.LocalFlowProcess;
+import cascading.nested.json.local.JSONTextLine;
 import cascading.platform.TestPlatform;
 import cascading.property.PropertyUtil;
 import cascading.scheme.Scheme;
@@ -155,6 +156,12 @@ public class LocalPlatform extends TestPlatform
   public Tap getDelimitedFile( String delimiter, String quote, FieldTypeResolver fieldTypeResolver, String filename, SinkMode mode )
     {
     return new DirTap( new TextDelimited( true, new DelimitedParser( delimiter, quote, fieldTypeResolver ) ), filename, mode );
+    }
+
+  @Override
+  public Tap getJSONFile( Fields fields, String filename, SinkMode mode )
+    {
+    return new DirTap( new JSONTextLine( fields ), filename, mode );
     }
 
   @Override

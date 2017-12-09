@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,7 +23,7 @@ package data;
 
 public interface InputData
   {
-  public static final String TEST_DATA_PATH = "test.data.path";
+  String TEST_DATA_PATH = "test.data.path";
 
   String inputPath = System.getProperty( TEST_DATA_PATH, "../cascading-platform/src/test/resources/data/" );
 
@@ -60,4 +61,6 @@ public interface InputData
   String testClasspathJarContents = "apache.10.txt";
 
   String inputFileFirstBy = inputPath + "firstby.txt";
+
+  String inputFileJSON = inputPath + "data.json";
   }

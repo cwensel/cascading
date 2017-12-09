@@ -147,7 +147,7 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     verify( sourceFields );
     }
 
-  private void setCharsetName( String charsetName )
+  protected void setCharsetName( String charsetName )
     {
     if( charsetName != null )
       this.charsetName = charsetName;
