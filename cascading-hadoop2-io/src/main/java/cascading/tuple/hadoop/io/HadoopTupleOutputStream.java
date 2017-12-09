@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,327 +40,207 @@ public class HadoopTupleOutputStream extends TupleOutputStream
   /** Field WRITABLE_TOKEN */
   public static final int WRITABLE_TOKEN = 32;
 
-  private static final Map<Class, TupleElementWriter> staticTupleUnTypedElementWriters = new IdentityHashMap<Class, TupleElementWriter>();
-  private static final Map<Class, TupleElementWriter> staticTupleTypedElementWriters = new IdentityHashMap<Class, TupleElementWriter>();
+  private static final Map<Class, TupleElementWriter> staticTupleUnTypedElementWriters = new IdentityHashMap<>();
+  private static final Map<Class, TupleElementWriter> staticTupleTypedElementWriters = new IdentityHashMap<>();
 
   static
     {
     // untyped
 
-    staticTupleUnTypedElementWriters.put( String.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 1 );
-        WritableUtils.writeString( stream, (String) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( String.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 1 );
+    WritableUtils.writeString( stream, (String) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Float.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 2 );
-        stream.writeFloat( (Float) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Float.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 2 );
+    stream.writeFloat( (Float) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Double.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 3 );
-        stream.writeDouble( (Double) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Double.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 3 );
+    stream.writeDouble( (Double) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Integer.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 4 );
-        WritableUtils.writeVInt( stream, (Integer) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Integer.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 4 );
+    WritableUtils.writeVInt( stream, (Integer) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Long.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 5 );
-        WritableUtils.writeVLong( stream, (Long) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Long.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 5 );
+    WritableUtils.writeVLong( stream, (Long) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Boolean.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 6 );
-        stream.writeBoolean( (Boolean) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Boolean.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 6 );
+    stream.writeBoolean( (Boolean) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Short.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 7 );
-        stream.writeShort( (Short) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Short.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 7 );
+    stream.writeShort( (Short) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( Tuple.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 8 );
-        stream.writeTuple( (Tuple) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( Tuple.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 8 );
+    stream.writeTuple( (Tuple) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( TuplePair.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 9 );
-        stream.writeTuplePair( (TuplePair) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( TuplePair.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 9 );
+    stream.writeTuplePair( (TuplePair) element );
+    } );
 
-    staticTupleUnTypedElementWriters.put( IndexTuple.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeVInt( stream, 10 );
-        stream.writeIndexTuple( (IndexTuple) element );
-        }
-      } );
+    staticTupleUnTypedElementWriters.put( IndexTuple.class, ( stream, element ) ->
+    {
+    WritableUtils.writeVInt( stream, 10 );
+    stream.writeIndexTuple( (IndexTuple) element );
+    } );
 
     // typed
 
-    staticTupleTypedElementWriters.put( Void.class, new TupleElementWriter()
+    staticTupleTypedElementWriters.put( Void.class, ( stream, element ) ->
+    {
+    // do nothing
+    } );
+
+    staticTupleTypedElementWriters.put( String.class, ( stream, element ) -> WritableUtils.writeString( stream, (String) element ) );
+
+    staticTupleTypedElementWriters.put( Float.class, ( stream, element ) ->
+    {
+    if( element == null )
       {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        // do nothing
-        }
-      } );
+      stream.writeByte( 0 );
+      return;
+      }
 
-    staticTupleTypedElementWriters.put( String.class, new TupleElementWriter()
+    stream.writeByte( 1 );
+    stream.writeFloat( (Float) element );
+    } );
+
+    staticTupleTypedElementWriters.put( Double.class, ( stream, element ) ->
+    {
+    if( element == null )
       {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        WritableUtils.writeString( stream, (String) element );
-        }
-      } );
+      stream.writeByte( 0 );
+      return;
+      }
 
-    staticTupleTypedElementWriters.put( Float.class, new TupleElementWriter()
+    stream.writeByte( 1 );
+    stream.writeDouble( (Double) element );
+    } );
+
+    staticTupleTypedElementWriters.put( Integer.class, ( stream, element ) ->
+    {
+    if( element == null )
       {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          {
-          stream.writeByte( 0 );
-          return;
-          }
+      stream.writeByte( 0 );
+      return;
+      }
 
-        stream.writeByte( 1 );
-        stream.writeFloat( (Float) element );
-        }
-      } );
+    stream.writeByte( 1 );
+    WritableUtils.writeVInt( stream, (Integer) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Double.class, new TupleElementWriter()
+    staticTupleTypedElementWriters.put( Long.class, ( stream, element ) ->
+    {
+    if( element == null )
       {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          {
-          stream.writeByte( 0 );
-          return;
-          }
+      stream.writeByte( 0 );
+      return;
+      }
 
-        stream.writeByte( 1 );
-        stream.writeDouble( (Double) element );
-        }
-      } );
+    stream.writeByte( 1 );
+    WritableUtils.writeVLong( stream, (Long) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Integer.class, new TupleElementWriter()
+    staticTupleTypedElementWriters.put( Boolean.class, ( stream, element ) ->
+    {
+    if( element == null )
       {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          {
-          stream.writeByte( 0 );
-          return;
-          }
+      stream.writeByte( 0 );
+      return;
+      }
 
-        stream.writeByte( 1 );
-        WritableUtils.writeVInt( stream, (Integer) element );
-        }
-      } );
+    stream.writeByte( 1 );
+    stream.writeBoolean( (Boolean) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Long.class, new TupleElementWriter()
+    staticTupleTypedElementWriters.put( Short.class, ( stream, element ) ->
+    {
+    if( element == null )
       {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          {
-          stream.writeByte( 0 );
-          return;
-          }
+      stream.writeByte( 0 );
+      return;
+      }
 
-        stream.writeByte( 1 );
-        WritableUtils.writeVLong( stream, (Long) element );
-        }
-      } );
+    stream.writeByte( 1 );
+    stream.writeShort( (Short) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Boolean.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          {
-          stream.writeByte( 0 );
-          return;
-          }
+    staticTupleTypedElementWriters.put( Float.TYPE, ( stream, element ) ->
+    {
+    if( element == null )
+      stream.writeFloat( 0 );
+    else
+      stream.writeFloat( (Float) element );
+    } );
 
-        stream.writeByte( 1 );
-        stream.writeBoolean( (Boolean) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( Double.TYPE, ( stream, element ) ->
+    {
+    if( element == null )
+      stream.writeDouble( 0 );
+    else
+      stream.writeDouble( (Double) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Short.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          {
-          stream.writeByte( 0 );
-          return;
-          }
+    staticTupleTypedElementWriters.put( Integer.TYPE, ( stream, element ) ->
+    {
+    if( element == null )
+      WritableUtils.writeVInt( stream, 0 );
+    else
+      WritableUtils.writeVInt( stream, (Integer) element );
+    } );
 
-        stream.writeByte( 1 );
-        stream.writeShort( (Short) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( Long.TYPE, ( stream, element ) ->
+    {
+    if( element == null )
+      WritableUtils.writeVLong( stream, 0 );
+    else
+      WritableUtils.writeVLong( stream, (Long) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Float.TYPE, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          stream.writeFloat( 0 );
-        else
-          stream.writeFloat( (Float) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( Boolean.TYPE, ( stream, element ) ->
+    {
+    if( element == null )
+      stream.writeBoolean( false );
+    else
+      stream.writeBoolean( (Boolean) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Double.TYPE, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          stream.writeDouble( 0 );
-        else
-          stream.writeDouble( (Double) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( Short.TYPE, ( stream, element ) ->
+    {
+    if( element == null )
+      stream.writeShort( 0 );
+    else
+      stream.writeShort( (Short) element );
+    } );
 
-    staticTupleTypedElementWriters.put( Integer.TYPE, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          WritableUtils.writeVInt( stream, 0 );
-        else
-          WritableUtils.writeVInt( stream, (Integer) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( Tuple.class, ( stream, element ) -> stream.writeTuple( (Tuple) element ) );
 
-    staticTupleTypedElementWriters.put( Long.TYPE, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          WritableUtils.writeVLong( stream, 0 );
-        else
-          WritableUtils.writeVLong( stream, (Long) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( TuplePair.class, ( stream, element ) -> stream.writeTuplePair( (TuplePair) element ) );
 
-    staticTupleTypedElementWriters.put( Boolean.TYPE, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          stream.writeBoolean( false );
-        else
-          stream.writeBoolean( (Boolean) element );
-        }
-      } );
-
-    staticTupleTypedElementWriters.put( Short.TYPE, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        if( element == null )
-          stream.writeShort( 0 );
-        else
-          stream.writeShort( (Short) element );
-        }
-      } );
-
-    staticTupleTypedElementWriters.put( Tuple.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        stream.writeTuple( (Tuple) element );
-        }
-      } );
-
-    staticTupleTypedElementWriters.put( TuplePair.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        stream.writeTuplePair( (TuplePair) element );
-        }
-      } );
-
-    staticTupleTypedElementWriters.put( IndexTuple.class, new TupleElementWriter()
-      {
-      @Override
-      public void write( TupleOutputStream stream, Object element ) throws IOException
-        {
-        stream.writeIndexTuple( (IndexTuple) element );
-        }
-      } );
+    staticTupleTypedElementWriters.put( IndexTuple.class, ( stream, element ) -> stream.writeIndexTuple( (IndexTuple) element ) );
     }
 
   public static TupleElementWriter[] getWritersFor( final ElementWriter elementWriter, final Class[] keyClasses )
@@ -380,14 +261,7 @@ public class HadoopTupleOutputStream extends TupleOutputStream
       else
         {
         final int index = i;
-        writers[ i ] = new TupleElementWriter()
-          {
-          @Override
-          public void write( TupleOutputStream stream, Object element ) throws IOException
-            {
-            elementWriter.write( stream, keyClasses[ index ], element );
-            }
-          };
+        writers[ i ] = ( stream, element ) -> elementWriter.write( stream, keyClasses[ index ], element );
         }
       }
 

@@ -71,6 +71,7 @@ import cascading.util.Util;
 import cascading.util.Version;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputFormat;
@@ -117,8 +118,10 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
     conf.setMapRunnerClass( FlowMapper.class );
     conf.setReducerClass( FlowReducer.class );
 
+    Set<String> serializations = getFieldDeclaredSerializations( Serialization.class );
+
     // set for use by the shuffling phase
-    TupleSerialization.setSerializations( conf );
+    TupleSerialization.setSerializations( conf, serializations );
 
     initFromSources( flowProcess, conf );
 

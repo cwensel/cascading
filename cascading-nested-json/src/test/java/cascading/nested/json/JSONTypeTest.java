@@ -32,29 +32,31 @@ import static org.junit.Assert.assertEquals;
 public class JSONTypeTest
   {
   @Test
-  public void stringLiteralCoercions() throws Exception
+  public void stringLiteralCoercions()
     {
     testCoercion( "\"Foo\"", JsonNodeType.STRING, "Foo", String.class );
+    testCoercion( "Foo", JsonNodeType.STRING, "Foo", String.class );
     testCoercion( "100", JsonNodeType.NUMBER, 100, Integer.class );
+    testCoercion( 100, JsonNodeType.NUMBER, 100, Integer.class );
     }
 
-  private void testCoercion( String value, JsonNodeType nodeType, Object resultValue, Class resultType )
+  private void testCoercion( Object value, JsonNodeType nodeType, Object resultValue, Class resultType )
     {
     JsonNode canonical = JSONCoercibleType.TYPE.canonical( value );
 
-    assertEquals( canonical.getNodeType(), nodeType );
+    assertEquals( nodeType, canonical.getNodeType() );
     assertEquals( resultValue, JSONCoercibleType.TYPE.coerce( canonical, resultType ) );
     }
 
   @Test
-  public void objectCoercions() throws Exception
+  public void objectCoercions()
     {
     for( String value : JSONData.objects )
       testContainerCoercion( value, JsonNodeType.OBJECT, String.class );
     }
 
   @Test
-  public void arrayCoercions() throws Exception
+  public void arrayCoercions()
     {
     for( String value : JSONData.arrays )
       testContainerCoercion( value, JsonNodeType.ARRAY, String.class );
@@ -64,7 +66,7 @@ public class JSONTypeTest
     {
     JsonNode canonical = JSONCoercibleType.TYPE.canonical( value );
 
-    assertEquals( canonical.getNodeType(), nodeType );
+    assertEquals( nodeType, canonical.getNodeType() );
     assertEquals( value.replaceAll( "\\s", "" ), JSONCoercibleType.TYPE.coerce( canonical, resultType ) );
     }
   }

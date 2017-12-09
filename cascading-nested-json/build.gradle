@@ -18,7 +18,9 @@
  * limitations under the License.
  */
 
-ext.jacksonDatabindVersion = '2.8.7'
+ext.hadoop2Version = '2.7.3'
+
+ext.jacksonDatabindVersion = '2.9.1'
 ext.jacksonDatatypeGuavaVersion = jacksonDatabindVersion
 ext.jacksonDataFormatsVersion = jacksonDatabindVersion
 
@@ -26,9 +28,17 @@ dependencies {
   compile project( ':cascading-core' )
   compile project( ':cascading-nested' )
 
+  provided project( ':cascading-local' )
+  provided project( ':cascading-hadoop2-io' )
+
   compile group: 'io.heretical', name: 'pointer-path-json', version: '1.0.0-wip-11'
 
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-ion', version: jacksonDatabindVersion
+
+  // for serializers
+  provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
 }

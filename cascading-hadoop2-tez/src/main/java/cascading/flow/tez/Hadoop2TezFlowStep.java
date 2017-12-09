@@ -78,6 +78,7 @@ import cascading.util.Version;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -146,7 +147,9 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
     {
     TezConfiguration stepConf = parentConfig == null ? new TezConfiguration() : new TezConfiguration( parentConfig );
 
-    TupleSerialization.setSerializations( stepConf );
+    Set<String> serializations = getFieldDeclaredSerializations( Serialization.class );
+
+    TupleSerialization.setSerializations( stepConf, serializations );
 
     String versionString = Version.getRelease();
 

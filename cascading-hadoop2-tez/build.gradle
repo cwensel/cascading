@@ -38,6 +38,8 @@ dependencies {
   compile project( ':cascading-hadoop2-io' )
   compile project( ':cascading-hadoop2-tez-stats' )
 
+  provided group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.1'
+
   // forces update of yarn slf4j dependencies
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
   provided group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'

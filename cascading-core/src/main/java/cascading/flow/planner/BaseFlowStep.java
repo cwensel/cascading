@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,6 +23,7 @@ package cascading.flow.planner;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +34,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowElement;
@@ -53,15 +56,19 @@ import cascading.operation.Operation;
 import cascading.pipe.Group;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
+import cascading.pipe.Splice;
 import cascading.pipe.SubAssembly;
 import cascading.property.ConfigDef;
 import cascading.stats.FlowStepStats;
 import cascading.tap.Tap;
+import cascading.tuple.Fields;
+import cascading.tuple.type.SerializableType;
 import cascading.util.EnumMultiMap;
 import cascading.util.ProcessLogger;
 import cascading.util.Util;
 
 import static cascading.flow.planner.graph.ElementGraphs.findAllGroups;
+import static cascading.util.Util.narrowIdentitySet;
 
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
@@ -430,7 +437,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
    */
   public Set<Tap> getAllAccumulatedSources()
     {
-    return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
+    return narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Accumulated ) );
     }
 
   /**
@@ -440,7 +447,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
    */
   public Set<Tap> getAllStreamedSources()
     {
-    return Util.narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Streamed ) );
+    return narrowIdentitySet( Tap.class, getFlowNodeGraph().getFlowElementsFor( StreamMode.Streamed ) );
     }
 
   public void addSource( String name, Tap source )
@@ -747,6 +754,46 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
    * @return
    */
   public abstract Config createInitializedConfig( FlowProcess<Config> flowProcess, Config parentConfig );
+
+  protected Set<String> getFieldDeclaredSerializations( Class base )
+    {
+    Collection<SerializableType> serializableTypes = findAllSerializableTypes();
+
+    return serializableTypes.stream()
+      .map( type -> type.getSerializer( base ) )
+      .filter( Objects::nonNull )
+      .map( Class::getName )
+      .collect( Collectors.toSet() );
+    }
+
+  protected Collection<SerializableType> findAllSerializableTypes()
+    {
+    Set<FlowElement> elements = Util.createIdentitySet();
+
+    //todo mark FlowElements as relying on serialization w/ an annotation
+    elements.addAll( narrowIdentitySet( Tap.class, elementGraph.vertexSet() ) );
+    elements.addAll( narrowIdentitySet( Splice.class, elementGraph.vertexSet() ) );
+
+    Set<SerializableType> types = new HashSet<>();
+
+    for( FlowElement element : elements )
+      {
+      Fields fields = elementGraph.outgoingEdgesOf( element ).iterator().next().getOutValuesFields();
+
+      Type[] fieldTypes = fields.getTypes();
+
+      if( fieldTypes == null )
+        continue;
+
+      for( Type type : fieldTypes )
+        {
+        if( type instanceof SerializableType )
+          types.add( (SerializableType) type );
+        }
+      }
+
+    return types;
+    }
 
   /**
    * Method getPreviousScopes returns the previous Scope instances. If the flowElement is a Group (specifically a CoGroup),

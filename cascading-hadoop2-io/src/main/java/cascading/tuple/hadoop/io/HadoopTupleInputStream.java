@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -20,6 +21,7 @@
 
 package cascading.tuple.hadoop.io;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.IdentityHashMap;
@@ -43,158 +45,39 @@ public class HadoopTupleInputStream extends TupleInputStream
     {
     // typed
 
-    staticTupleTypedElementReaders.put( Void.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return null;
-        }
-      } );
+    staticTupleTypedElementReaders.put( Void.class, (TupleElementReader<HadoopTupleInputStream>) stream -> null );
 
-    staticTupleTypedElementReaders.put( String.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readString();
-        }
-      } );
+    staticTupleTypedElementReaders.put( String.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readString );
 
-    staticTupleTypedElementReaders.put( Float.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readNullFloat();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Float.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readNullFloat );
 
-    staticTupleTypedElementReaders.put( Double.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readNullDouble();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Double.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readNullDouble );
 
-    staticTupleTypedElementReaders.put( Integer.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readNullVInt();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Integer.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readNullVInt );
 
-    staticTupleTypedElementReaders.put( Long.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readNullVLong();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Long.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readNullVLong );
 
-    staticTupleTypedElementReaders.put( Boolean.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readNullBoolean();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Boolean.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readNullBoolean );
 
-    staticTupleTypedElementReaders.put( Short.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readNullShort();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Short.class, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readNullShort );
 
-    staticTupleTypedElementReaders.put( Float.TYPE, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readFloat();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Float.TYPE, (TupleElementReader<HadoopTupleInputStream>) DataInputStream::readFloat );
 
-    staticTupleTypedElementReaders.put( Double.TYPE, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readDouble();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Double.TYPE, (TupleElementReader<HadoopTupleInputStream>) DataInputStream::readDouble );
 
-    staticTupleTypedElementReaders.put( Integer.TYPE, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readVInt();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Integer.TYPE, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readVInt );
 
-    staticTupleTypedElementReaders.put( Long.TYPE, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readVLong();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Long.TYPE, (TupleElementReader<HadoopTupleInputStream>) HadoopTupleInputStream::readVLong );
 
-    staticTupleTypedElementReaders.put( Boolean.TYPE, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readBoolean();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Boolean.TYPE, (TupleElementReader<HadoopTupleInputStream>) DataInputStream::readBoolean );
 
-    staticTupleTypedElementReaders.put( Short.TYPE, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readShort();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Short.TYPE, (TupleElementReader<HadoopTupleInputStream>) DataInputStream::readShort );
 
-    staticTupleTypedElementReaders.put( Tuple.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readTuple();
-        }
-      } );
+    staticTupleTypedElementReaders.put( Tuple.class, (TupleElementReader<HadoopTupleInputStream>) TupleInputStream::readTuple );
 
-    staticTupleTypedElementReaders.put( TuplePair.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readTuplePair();
-        }
-      } );
+    staticTupleTypedElementReaders.put( TuplePair.class, (TupleElementReader<HadoopTupleInputStream>) TupleInputStream::readTuplePair );
 
-    staticTupleTypedElementReaders.put( IndexTuple.class, new TupleElementReader<HadoopTupleInputStream>()
-      {
-      @Override
-      public Object read( HadoopTupleInputStream stream ) throws IOException
-        {
-        return stream.readIndexTuple();
-        }
-      } );
+    staticTupleTypedElementReaders.put( IndexTuple.class, (TupleElementReader<HadoopTupleInputStream>) TupleInputStream::readIndexTuple );
     }
 
   public static TupleElementReader[] getReadersFor( final ElementReader elementReader, final Class[] classes )
@@ -215,14 +98,7 @@ public class HadoopTupleInputStream extends TupleInputStream
       else
         {
         final int index = i;
-        readers[ i ] = new TupleElementReader()
-          {
-          @Override
-          public Object read( TupleInputStream stream ) throws IOException
-            {
-            return elementReader.read( classes[ index ], stream );
-            }
-          };
+        readers[ i ] = stream -> elementReader.read( classes[ index ], stream );
         }
       }
 

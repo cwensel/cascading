@@ -35,11 +35,6 @@ public abstract class NestedSpecBaseOperation<Node, Result, Context> extends Nes
     super( nestedCoercibleType, fieldDeclaration );
     }
 
-  public NestedSpecBaseOperation( NestedCoercibleType<Node, Result> nestedCoercibleType, int numArgs )
-    {
-    super( nestedCoercibleType, numArgs );
-    }
-
   public NestedSpecBaseOperation( NestedCoercibleType<Node, Result> nestedCoercibleType, int numArgs, Fields fieldDeclaration )
     {
     super( nestedCoercibleType, numArgs, fieldDeclaration );

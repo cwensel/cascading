@@ -37,21 +37,15 @@ public class NestedBaseOperation<Node, Result, Context> extends BaseOperation<Co
     this.nestedCoercibleType = nestedCoercibleType;
     }
 
-  public NestedBaseOperation( NestedCoercibleType<Node, Result> nestedCoercibleType, int numArgs )
-    {
-    super( numArgs );
-    this.nestedCoercibleType = nestedCoercibleType;
-    }
-
   public NestedBaseOperation( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration )
     {
-    super( fieldDeclaration );
+    super( fieldDeclaration.hasTypes() ? fieldDeclaration : fieldDeclaration.applyTypeToAll( nestedCoercibleType ) );
     this.nestedCoercibleType = nestedCoercibleType;
     }
 
   public NestedBaseOperation( NestedCoercibleType<Node, Result> nestedCoercibleType, int numArgs, Fields fieldDeclaration )
     {
-    super( numArgs, fieldDeclaration );
+    super( numArgs, fieldDeclaration.hasTypes() ? fieldDeclaration : fieldDeclaration.applyTypeToAll( nestedCoercibleType ) );
     this.nestedCoercibleType = nestedCoercibleType;
     }
 

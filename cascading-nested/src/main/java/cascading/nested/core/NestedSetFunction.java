@@ -50,7 +50,7 @@ public class NestedSetFunction<Node, Result> extends NestedBaseOperation<Node, R
 
   public NestedSetFunction( NestedCoercibleType nestedCoercibleType, Fields fieldDeclaration, Map<Fields, String> pointerMap )
     {
-    super( nestedCoercibleType, fieldDeclaration.hasTypes() ? fieldDeclaration : fieldDeclaration.applyTypeToAll( nestedCoercibleType ) );
+    super( nestedCoercibleType, fieldDeclaration );
 
     this.pointers = new LinkedHashMap<>();
 

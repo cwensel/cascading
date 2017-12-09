@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -144,9 +145,16 @@ public class TupleSerialization extends Configured implements Serialization
    */
   public static void setSerializations( Configuration jobConf )
     {
+    setSerializations( jobConf, Collections.emptySet() );
+    }
+
+  public static void setSerializations( Configuration jobConf, Collection<String> provided )
+    {
     String serializations = getSerializations( jobConf );
 
     LinkedList<String> list = new LinkedList<String>();
+
+    list.addAll( provided );
 
     if( serializations != null && !serializations.isEmpty() )
       Collections.addAll( list, serializations.split( "," ) );

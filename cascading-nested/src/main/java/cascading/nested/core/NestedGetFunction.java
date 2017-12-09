@@ -60,7 +60,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
    */
   public NestedGetFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, boolean failOnMissingNode, String... stringPointers )
     {
-    super( nestedCoercibleType, fieldDeclaration.hasTypes() ? fieldDeclaration : fieldDeclaration.applyTypeToAll( nestedCoercibleType ) );
+    super( nestedCoercibleType, fieldDeclaration );
     this.failOnMissingNode = failOnMissingNode;
 
     if( fieldDeclaration.size() != stringPointers.length )

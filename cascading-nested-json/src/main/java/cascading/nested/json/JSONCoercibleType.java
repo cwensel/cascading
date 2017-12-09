@@ -29,7 +29,9 @@ import cascading.CascadingException;
 import cascading.nested.core.NestedCoercibleType;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.SerializableType;
 import cascading.util.Util;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,10 +48,13 @@ import heretical.pointer.path.json.JSONNestedPointerCompiler;
  * <p>
  * Supported values will be maintained as a {@link JsonNode} canonical type within the {@link cascading.tuple.Tuple}.
  * <p>
- * Note that {@link #canonical(Object)} will always attempt to parse a String value to a new JsonNode, it will never
- * return a {@link com.fasterxml.jackson.databind.node.TextNode} instance. See the {@link #node(Object)}.
+ * Note that {@link #canonical(Object)} will always attempt to parse a String value to a new JsonNode.
+ * If the parse fails, it will return a {@link com.fasterxml.jackson.databind.node.TextNode} instance wrapping the
+ * String value.
+ * <p>
+ * See the {@link #node(Object)}.
  */
-public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNode>
+public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNode>, SerializableType
   {
   public static final JSONCoercibleType TYPE = new JSONCoercibleType();
 
@@ -80,7 +85,7 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       return (JsonNode) value;
 
     if( from == String.class )
-      return parse( (String) value );
+      return nodeOrParse( (String) value );
 
     if( from == Integer.class || from == Integer.TYPE )
       return JsonNodeFactory.instance.numberNode( (Integer) value );
@@ -125,22 +130,22 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       return null;
 
     if( to == String.class )
-      return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) write( node );
+      return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) textOrWrite( node );
 
     if( to == Integer.class || to == Integer.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Integer.valueOf( node.intValue() ) : (Coerce) Coercions.coerce( write( node ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Integer.valueOf( node.intValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
     if( to == Long.class || to == Long.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Long.valueOf( node.longValue() ) : (Coerce) Coercions.coerce( write( node ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Long.valueOf( node.longValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
     if( to == Float.class || to == Float.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Float.valueOf( node.floatValue() ) : (Coerce) Coercions.coerce( write( node ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Float.valueOf( node.floatValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
     if( to == Double.class || to == Double.TYPE )
-      return nodeType == JsonNodeType.NUMBER ? (Coerce) Double.valueOf( node.doubleValue() ) : (Coerce) Coercions.coerce( write( node ), to );
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Double.valueOf( node.doubleValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
     if( to == Boolean.class || to == Boolean.TYPE )
-      return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( write( node ), to );
+      return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
     if( Map.class.isAssignableFrom( (Class<?>) to ) )
       return (Coerce) convert( value, (Class) to );
@@ -156,14 +161,14 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     return mapper.convertValue( value, to );
     }
 
-  private String write( JsonNode value )
+  private String textOrWrite( JsonNode value )
     {
     if( value != null && value.isTextual() )
       return value.textValue();
 
     try
       {
-      return mapper.writeValueAsString( value );
+      return write( value );
       }
     catch( JsonProcessingException exception )
       {
@@ -171,16 +176,30 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       }
     }
 
-  private JsonNode parse( String value )
+  private String write( JsonNode value ) throws JsonProcessingException
+    {
+    return mapper.writeValueAsString( value );
+    }
+
+  private JsonNode nodeOrParse( String value )
     {
     try
       {
-      return mapper.readTree( value );
+      return parse( value ); // presume this is a JSON string
+      }
+    catch( JsonParseException exception )
+      {
+      return JsonNodeFactory.instance.textNode( value );
       }
     catch( IOException exception )
       {
-      throw new CascadingException( "unable to parse json", exception );
+      throw new CascadingException( "unable to read json", exception );
       }
+    }
+
+  private JsonNode parse( String value ) throws IOException
+    {
+    return mapper.readTree( value );
     }
 
   @Override
@@ -202,6 +221,16 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
   public JsonNode newRoot()
     {
     return JsonNodeFactory.instance.objectNode();
+    }
+
+  @Override
+  public Class getSerializer( Class base )
+    {
+    // required to defer classloading
+    if( base == org.apache.hadoop.io.serializer.Serialization.class )
+      return cascading.nested.json.hadoop2.JSONHadoopSerialization.class;
+
+    return null;
     }
 
   @Override
