@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -46,7 +47,7 @@ import org.apache.tez.runtime.api.Writer;
 /**
  * Class HadoopFlowProcess is an implementation of {@link cascading.flow.FlowProcess} for Hadoop. Use this interface to get direct
  * access to the Hadoop JobConf and Reporter interfaces.
- * <p/>
+ * <p>
  * Be warned that coupling to this implementation will cause custom {@link cascading.operation.Operation}s to
  * fail if they are executed on a system other than Hadoop.
  *

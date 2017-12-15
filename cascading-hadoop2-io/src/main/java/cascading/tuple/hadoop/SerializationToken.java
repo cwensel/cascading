@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,10 +29,10 @@ import java.lang.annotation.Target;
 /**
  * Annotation SerializationToken enables {@link cascading.tuple.io.TupleInputStream} and {@link cascading.tuple.io.TupleOutputStream}
  * to substitute Integer values for a class name when writing out nested objects inside a {@link cascading.tuple.Tuple}.
- * <p/>
+ * <p>
  * To use, add this annotation to any custom Hadoop {@link org.apache.hadoop.io.serializer.Serialization} implementation.
- * <p/>
- * For example:<br/>
+ * <p>
+ * For example:<br>
  * <pre>
  * &#64;SerializationToken(tokens={222, 223}, classNames = {"example.PersonObject", "example.SiteObject"})
  * public class MySerialization implements org.apache.hadoop.io.serializer.Serialization
@@ -43,10 +44,10 @@ import java.lang.annotation.Target;
  * ...
  * }
  * </pre>
- * <p/>
+ * <p>
  * The SerializationToken annotation allows for multiple token to className mappings, since a Serialization implementation may
  * {@link org.apache.hadoop.io.serializer.Serialization#accept(Class)} more than one class.
- * <p/>
+ * <p>
  * Note that the token integer value must be 128 or greater to save room for internal types.
  *
  * @see cascading.tuple.io.TupleInputStream

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -56,7 +57,7 @@ public class FlowConnectorProps extends Props
   /**
    * Method setAssertionLevel sets the target planner {@link cascading.operation.AssertionLevel}.
    *
-   * @param properties     of type Map<Object, Object>
+   * @param properties     of type Map
    * @param assertionLevel of type AssertionLevel
    */
   public static void setAssertionLevel( Map<Object, Object> properties, AssertionLevel assertionLevel )
@@ -68,7 +69,7 @@ public class FlowConnectorProps extends Props
   /**
    * Method setDebugLevel sets the target planner {@link cascading.operation.DebugLevel}.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @param debugLevel of type DebugLevel
    */
   public static void setDebugLevel( Map<Object, Object> properties, DebugLevel debugLevel )
@@ -80,7 +81,7 @@ public class FlowConnectorProps extends Props
   /**
    * Method setIntermediateSchemeClass is used for debugging.
    *
-   * @param properties              of type Map<Object, Object>
+   * @param properties              of type Map
    * @param intermediateSchemeClass of type Class
    */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, Class<? extends Scheme> intermediateSchemeClass )
@@ -92,7 +93,7 @@ public class FlowConnectorProps extends Props
   /**
    * Method setIntermediateSchemeClass is used for debugging.
    *
-   * @param properties                  of type Map<Object, Object>
+   * @param properties                  of type Map
    * @param intermediateSchemeClassName of type String
    */
   public static void setIntermediateSchemeClass( Map<Object, Object> properties, String intermediateSchemeClassName )
@@ -104,7 +105,7 @@ public class FlowConnectorProps extends Props
   /**
    * Method temporaryTapDecoratorClassName is used for wrapping a intermediate temporary Tap.
    *
-   * @param properties                     of type Map<Object, Object>
+   * @param properties                     of type Map
    * @param temporaryTapDecoratorClassName of type String
    */
   public static void setTemporaryTapDecoratorClass( Map<Object, Object> properties, String temporaryTapDecoratorClassName )
@@ -116,7 +117,7 @@ public class FlowConnectorProps extends Props
   /**
    * Method checkpointTapDecoratorClassName is used for wrapping a checkpoint Tap.
    *
-   * @param properties                      of type Map<Object, Object>
+   * @param properties                      of type Map
    * @param checkpointTapDecoratorClassName of type String
    */
   public static void setCheckpointTapDecoratorClass( Map<Object, Object> properties, String checkpointTapDecoratorClassName )

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,12 +35,12 @@ import cascading.tuple.TupleEntry;
 
 /**
  * Class First is an {@link Aggregator} that returns the first {@link Tuple} encountered in a grouping.
- * <p/>
+ * <p>
  * By default, it returns the first Tuple of {@link Fields#ARGS} found.
- * <p/>
+ * <p>
  * If {@code firstN} is given, Tuples with each of the first N number of Tuples encountered are returned. That is,
  * this Aggregator will return at maximum N tuples per grouping.
- * <p/>
+ * <p>
  * Be sure to set the {@link cascading.pipe.GroupBy} {@code sortFields} to control which Tuples are seen first.
  */
 public class First extends ExtentBase

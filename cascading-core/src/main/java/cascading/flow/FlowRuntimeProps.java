@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,18 +31,17 @@ import cascading.util.Util;
 /**
  * Class FlowRuntimeProps is a fluent helper class for setting {@link Flow} specific runtime properties through
  * a {@link FlowConnector}.
- * <p/>
+ * <p>
  * These properties apply to the cluster or remote side of the Flow execution. For client (or local) side properties
  * see {@link cascading.flow.FlowProps}.
- * <p/>
+ * <p>
  * Available properties are:
- * <p/>
  * <ul>
  * <li>gather partitions - number of slices (partitions) to gather keys within each {@link cascading.flow.FlowNode}.
  * In MapReduce this is the number of reducers. In Tez DAG this is the scatter gather parallelization.</li>
  * <li>log counters - counter names to log to INFO when a cluster side slice completes.</li>
  * </ul>
- * <p/>
+ * <p>
  * Note, if the num of gather partitions is not set, the Flow may fail during planning or setup, depending on the
  * platform.
  */
@@ -93,7 +93,7 @@ public class FlowRuntimeProps extends Props
 
   /**
    * Method addLogCounter adds a new counter to be logged when a cluster side slice completes.
-   * <p/>
+   * <p>
    * The given counters will be logged using the default cluster side logging mechanism.
    *
    * @param counter the Enum counter to log
@@ -108,7 +108,7 @@ public class FlowRuntimeProps extends Props
 
   /**
    * Method addLogCounter adds a new counter to be logged when a cluster side slice completes.
-   * <p/>
+   * <p>
    * The given counters will be logged using the default cluster side logging mechanism.
    *
    * @param group   the String counter group to log
@@ -129,13 +129,13 @@ public class FlowRuntimeProps extends Props
 
   /**
    * Method setCombineSplits will enable or disable combining of 'splits' on sources.
-   * <p/>
+   * <p>
    * A split is a sub-set of data from a {@link cascading.tap.Tap} source resource. Combining
    * small splits into larger ones both reduce parallelism, but also reduce overhead of starting
    * work on a very small data set.
-   * <p/>
+   * <p>
    * This is commonly done when sourcing large numbers of very small files.
-   * <p/>
+   * <p>
    * Setting this value will change the default, which is a platform dependent value.
    *
    * @param combineSplits

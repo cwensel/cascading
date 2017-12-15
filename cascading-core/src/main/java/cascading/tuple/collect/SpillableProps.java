@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -102,7 +103,7 @@ public class SpillableProps extends Props
 
   /**
    * Method setCompressSpill either enables or disables spill compression. Enabled by default.
-   * <p/>
+   * <p>
    * Spill compression relies on properly configured and available codecs. See {@link #setCodecs(java.util.List)}.
    *
    * @param compressSpill type boolean
@@ -122,7 +123,7 @@ public class SpillableProps extends Props
 
   /**
    * Method setCodecs sets list of possible codec class names to use. They will be loaded in order, if available.
-   * <p/>
+   * <p>
    * This is platform dependent.
    *
    * @param codecs type list
@@ -137,7 +138,7 @@ public class SpillableProps extends Props
 
   /**
    * Method addCodecs adds a list of possible codec class names to use. They will be loaded in order, if available.
-   * <p/>
+   * <p>
    * This is platform dependent.
    *
    * @param codecs type list
@@ -151,7 +152,7 @@ public class SpillableProps extends Props
 
   /**
    * Method addCodec adds a codec class names to use.
-   * <p/>
+   * <p>
    * This is platform dependent.
    *
    * @param codec type String
@@ -188,7 +189,7 @@ public class SpillableProps extends Props
 
   /**
    * Method setMapSpillThreshold the total number of tuple values (not keys) to attempt to keep in memory.
-   * <p/>
+   * <p>
    * The default implementation cannot spill Map keys to disk.
    *
    * @param mapSpillThreshold of type int

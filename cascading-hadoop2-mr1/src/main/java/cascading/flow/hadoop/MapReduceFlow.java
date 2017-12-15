@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,20 +33,20 @@ import org.apache.hadoop.mapred.JobConf;
 /**
  * Class MapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs
  * pre-configured via the {@link JobConf} object.
- * <p/>
+ * <p>
  * Use this class to allow custom MapReduce jobs to participate in the {@link cascading.cascade.Cascade} scheduler. If
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
- * <p/>
+ * <p>
  * Set the parameter {@code deleteSinkOnInit} to {@code true} if the outputPath in the jobConf should be deleted before executing the MapReduce job.
- * <p/>
+ * <p>
  * MapReduceFlow assumes the underlying input and output paths are compatible with the {@link Hfs} Tap.
- * <p/>
+ * <p>
  * If the configured JobConf instance uses some other identifier instead of Hadoop FS paths, you should override the
  * {@link #createSources(org.apache.hadoop.mapred.JobConf)}, {@link #createSinks(org.apache.hadoop.mapred.JobConf)}, and
  * {@link #createTraps(org.apache.hadoop.mapred.JobConf)} methods to properly resolve the configured paths into
  * usable {@link Tap} instances. By default createTraps returns an empty collection and should probably be left alone.
- * <p/>
+ * <p>
  * MapReduceFlow supports both org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* API Jobs.
  */
 public class MapReduceFlow extends BaseMapReduceFlow
@@ -118,7 +119,7 @@ public class MapReduceFlow extends BaseMapReduceFlow
    * @param properties       of type Properties
    * @param name             of type String
    * @param jobConf          of type JobConf
-   * @param flowDescriptor   of type Map<String, String>
+   * @param flowDescriptor   of type Map
    * @param deleteSinkOnInit of type boolean
    */
   @ConstructorProperties({"properties", "name", "jobConf", "flowDescriptor", "deleteSinkOnInit"})
@@ -133,7 +134,7 @@ public class MapReduceFlow extends BaseMapReduceFlow
    * @param properties       of type Properties
    * @param name             of type String
    * @param jobConf          of type JobConf
-   * @param flowDescriptor   of type Map<String, String>
+   * @param flowDescriptor   of type Map
    * @param deleteSinkOnInit of type boolean
    * @param stopJobsOnExit   of type boolean
    */

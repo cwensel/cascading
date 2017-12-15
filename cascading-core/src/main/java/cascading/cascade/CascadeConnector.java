@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,20 +35,19 @@ import static cascading.cascade.CascadeDef.cascadeDef;
 
 /**
  * Class CascadeConnector is used to construct a new {@link Cascade} instance from a collection of {@link cascading.flow.Flow} instance.
- * <p/>
+ * <p>
  * Note order is not significant when adding passing Flow instances to the {@code connect}
  * method. This connector will order them based on their dependencies, if any.
- * <p/>
+ * <p>
  * One Flow is dependent on another if the first sinks (produces) output that the second Flow sources (consumes) as
  * input. A sink and source are considered equivalent if the fully qualified identifier, typically {@link Tap#getFullIdentifier(Object)}
  * from either are {@code equals()}.
- * <p/>
- * <p/>
+ * <p>
  * Note that checkpoint sink Taps from an upstream Flow may be the sources to downstream Flow instances.
- * <p/>
+ * <p>
  * The {@link CascadeDef} is a convenience class for dynamically defining a Cascade that can be passed to the
  * {@link CascadeConnector#connect(CascadeDef)} method.
- * <p/>
+ * <p>
  * Use the {@link CascadeProps} fluent helper class to create global properties to pass to the CascadeConnector
  * constructor.
  *
@@ -67,7 +67,7 @@ public class CascadeConnector
   /**
    * Constructor CascadeConnector creates a new CascadeConnector instance.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    */
   @ConstructorProperties({"properties"})
   public CascadeConnector( Map<Object, Object> properties )
@@ -79,7 +79,7 @@ public class CascadeConnector
    * Given any number of {@link cascading.flow.Flow} objects, it will connect them and return a new {@link Cascade} instance. The name
    * of the Cascade is derived from the given Flow instances.
    *
-   * @param flows of type Collection<Flow>
+   * @param flows of type Collection
    * @return Cascade
    */
   public Cascade connect( Collection<Flow> flows )
@@ -91,7 +91,7 @@ public class CascadeConnector
    * Given any number of {@link cascading.flow.Flow} objects, it will connect them and return a new {@link Cascade} instance.
    *
    * @param name  of type String
-   * @param flows of type Collection<Flow>
+   * @param flows of type Collection
    * @return Cascade
    */
   public Cascade connect( String name, Collection<Flow> flows )

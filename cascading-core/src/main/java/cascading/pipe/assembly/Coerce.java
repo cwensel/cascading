@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,12 +32,12 @@ import cascading.tuple.Fields;
 /**
  * Class Coerce is a {@link SubAssembly} that will coerce all incoming {@link cascading.tuple.Tuple} values to
  * the given types.
- * <p/>
+ * <p>
  * If the given type is a primitive ({@code long}), and the tuple value is null, {@code 0} is returned.
  * If the type is an Object ({@code java.lang.Long}), and the tuple value is {@code null}, {@code null} is returned.
- * <p/>
+ * <p>
  * Coerce encapsulates the {@link Identity} function.
- * <p/>
+ * <p>
  * Note if the resolved coerceFields size does not equal the number of given types there will be a
  * runtime error during execution.
  *
@@ -47,7 +48,7 @@ public class Coerce extends SubAssembly
   {
   /**
    * Constructor Coerce creates a new Coerce instance that will coerce all input Tuple values.
-   * <p/>
+   * <p>
    * Note if the resolved coerceFields size does not equal the number of given types there will be a
    * runtime error during execution. Declaring the fields that must be coerced is a suggested practice.
    *
@@ -67,9 +68,9 @@ public class Coerce extends SubAssembly
 
   /**
    * Constructor Coerce creates a new Coerce instance that will only coerce the given coerceFields Tuple values.
-   * <p/>
+   * <p>
    * Note the resulting output Tuple will contain all the original incoming Fields.
-   * <p/>
+   * <p>
    * Also note if the resolved coerceFields size does not equal the number of given types there will be a
    * runtime error during execution.
    *
@@ -93,10 +94,10 @@ public class Coerce extends SubAssembly
 
   /**
    * Constructor Coerce creates a new Coerce instance that will only coerce the given coerceFields Tuple values.
-   * <p/>
+   * <p>
    * The given {@code coerceFields} instance must contain field type information, otherwise an
    * {@link IllegalArgumentException} will be thrown.
-   * <p/>
+   * <p>
    * Note the resulting output Tuple will contain all the original incoming Fields.
    *
    * @param previous     of type Pipe

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -66,7 +67,7 @@ public abstract class BaseCachedNodeStats<Config, JobStatus, Counters> extends F
   /**
    * Method getCounterGroups returns all of the Hadoop counter groups.
    *
-   * @return the counterGroups (type Collection<String>) of this HadoopStepStats object.
+   * @return the counterGroups (type Collection) of this HadoopStepStats object.
    */
   @Override
   public Collection<String> getCounterGroups()
@@ -78,7 +79,7 @@ public abstract class BaseCachedNodeStats<Config, JobStatus, Counters> extends F
    * Method getCounterGroupsMatching returns all the Hadoop counter groups that match the give regex pattern.
    *
    * @param regex of String
-   * @return Collection<String>
+   * @return Collection
    */
   @Override
   public Collection<String> getCounterGroupsMatching( String regex )
@@ -90,7 +91,7 @@ public abstract class BaseCachedNodeStats<Config, JobStatus, Counters> extends F
    * Method getCountersFor returns the Hadoop counters for the given group.
    *
    * @param group of String
-   * @return Collection<String>
+   * @return Collection
    */
   @Override
   public Collection<String> getCountersFor( String group )

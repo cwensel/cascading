@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,13 +40,13 @@ public class TupleEntrySchemeIteratorProps extends Props
   private Class<? extends Exception>[] permittedExceptions = null;
 
   /**
-   * Method setPermittedExceptions(  Map<Object, Object> properties, Class<? extends Exception>[] ... exceptions )
-   * is used to set an array of exceptions, which are allowed to be ignored in the TupleEntySchemeInterator. If the array
-   * is null, it will be ignored.
-   * <p>Note that the array will be converted to a comma separated String. If you read the the property back, you can
-   * convert it back to classes via the asClasses method.</p>
+   * Method setPermittedExceptions is used to set an array of exceptions, which are allowed to be ignored in the
+   * TupleEntySchemeInterator. If the array is null, it will be ignored.
+   * <p>
+   * Note that the array will be converted to a comma separated String. If you read the the property back, you can
+   * convert it back to classes via the asClasses method.
    *
-   * @param properties a Map<Object, Object>
+   * @param properties a Map
    * @param exceptions an array of exception classes.
    */
   public static void setPermittedExceptions( Map<Object, Object> properties, Class<? extends Exception>... exceptions )
@@ -86,7 +87,7 @@ public class TupleEntrySchemeIteratorProps extends Props
   /**
    * Method setPermittedExceptions is used to set an array of exceptions which are allowed to be ignored in the
    * TupleEntrySchemeIterator.
-   * <p/>
+   * <p>
    * If the array is null, it will be ignored.
    *
    * @param permittedExceptions an array of exception classes.

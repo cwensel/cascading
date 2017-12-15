@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,7 +26,7 @@ import java.io.IOException;
 /**
  * Class FlowSkipIfSinkNotStale is a {@link cascading.flow.FlowSkipStrategy} implementation that returns
  * {@code true} if the Flow sink exists and is not stale in relation to the Flow sources.
- * <p/>
+ * <p>
  * This is the default Cascading strategy.
  *
  * @see cascading.flow.FlowSkipIfSinkExists

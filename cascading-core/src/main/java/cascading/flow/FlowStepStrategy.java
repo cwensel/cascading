@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,16 +26,16 @@ import java.util.List;
 /**
  * The FlowStepStrategy interface allows for on the fly customization of {@link cascading.flow.FlowStep} configuration values
  * before they are submitted to the underlying platform.
- * <p/>
+ * <p>
  * Use a strategy instance to change the display name for a job, or in the case of Hadoop, the number of
  * mapper or reducer instances.
- * <p/>
+ * <p>
  * Note, to change the configuration information, {@link cascading.flow.FlowStep#getConfig()} must be
  * called to get access to the current configuration.
- * <p/>
+ * <p>
  * If any, the completed predecessor steps are provided so that the predecessors can be inspected via the
  * {@link cascading.stats.FlowStepStats} interface for any information that may influence the current job.
- * <p/>
+ * <p>
  * It is also possible to block submission of the job by blocking in this method.
  */
 public interface FlowStepStrategy<Config>

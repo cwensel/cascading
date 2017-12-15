@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,7 +34,7 @@ import cascading.util.Util;
 /**
  * Class TupleSerializationProps is a fluent interface for building properties to be passed to a
  * {@link cascading.flow.FlowConnector} before creating new {@link cascading.flow.Flow} instances.
- * <p/>
+ * <p>
  * See {@link TupleSerialization} for details on these properties.
  *
  * @see TupleSerialization
@@ -112,7 +113,7 @@ public class TupleSerializationProps extends Props
 
   /**
    * Method setSerializationTokens sets the given integer tokens and classNames Map as a serialization properties.
-   * <p/>
+   * <p>
    * During object serialization and deserialization, the given tokens will be used instead of the className when an
    * instance of the className is encountered.
    *
@@ -128,7 +129,7 @@ public class TupleSerializationProps extends Props
 
   /**
    * Method addSerializationTokens adds the given integer tokens and classNames Map as a serialization properties.
-   * <p/>
+   * <p>
    * During object serialization and deserialization, the given tokens will be used instead of the className when an
    * instance of the className is encountered.
    *
@@ -144,7 +145,7 @@ public class TupleSerializationProps extends Props
 
   /**
    * Method addSerializationToken adds the given integer token and classNames as a serialization properties.
-   * <p/>
+   * <p>
    * During object serialization and deserialization, the given tokens will be used instead of the className when an
    * instance of the className is encountered.
    *
@@ -212,9 +213,9 @@ public class TupleSerializationProps extends Props
    * Method setIgnoreTypes forces the {@link TupleSerialization} class to ignore any and all
    * declared types causing the serialization to write each type or {@link SerializationToken}
    * per {@link Tuple} element.
-   * <p/>
+   * <p>
    * This disables the declared type optimizations.
-   * <p/>
+   * <p>
    * See {@link #setRequireTypes(Boolean)} to force a failure if field type information is missing.
    *
    * @param ignoreTypes
@@ -234,9 +235,9 @@ public class TupleSerializationProps extends Props
 
   /**
    * Method setRequireTypes forces {@link TupleSerialization} to fail if field types are not declared.
-   * <p/>
+   * <p>
    * This ensures the field type optimizations are leveraged.
-   * <p/>
+   * <p>
    * See {@link #setIgnoreTypes(Boolean)} to force field type information to be discarded.
    *
    * @param requireTypes
@@ -252,10 +253,10 @@ public class TupleSerializationProps extends Props
   /**
    * Method preventBitWiseComparison will enable/disable bitwise comparisons of grouping keys
    * during ordered partitioning ({@link cascading.pipe.GroupBy} and {@link cascading.pipe.CoGroup}).
-   * <p/>
+   * <p>
    * If natural ordering of grouping/join keys is required, disable bit wise comparisons. They are enabled
    * by default (subject to the below conditions).
-   * <p/>
+   * <p>
    * Bit wise comparisons will only apply if the {@link cascading.tuple.Fields} used in the grouping/join are
    * declared and no custom {@link java.util.Comparator} instances are provided on the grouping/key Fields, or
    * no secondary sorting is being performed on a GroupBy.

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,7 @@ import cascading.management.annotation.Visibility;
 /**
  * Class AssertGroupSizeEquals is an {@link cascading.operation.GroupAssertion} that asserts the number of items in the current group
  * is more than the given size.
- * </p>
+ * <p>
  * If a patternString is given, only grouping keys that match the regular expression will have this assertion applied.
  * Note multiple key values will be delimited by a tab character.
  */

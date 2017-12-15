@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,7 +29,7 @@ import static cascading.flow.planner.rule.PlanPhase.PostNodes;
 /**
  * Throws a planner failure if a Tap, both accumulating and streamed, flows into a single merge within a given
  * pipeline.
- * <p/>
+ * <p>
  * The optimization is to remove the streamed edge between tap and merge, but GraphFinder needs to support marking
  * edges.
  */

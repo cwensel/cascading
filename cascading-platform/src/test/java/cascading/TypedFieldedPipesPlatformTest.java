@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -119,7 +120,7 @@ public class TypedFieldedPipesPlatformTest extends PlatformTestCase
 
   /**
    * comparing streams with comparators isn't possible as Merge performs no comparison.
-   * <p/>
+   * <p>
    * so this will fail if types are not consistent
    *
    * @throws Exception

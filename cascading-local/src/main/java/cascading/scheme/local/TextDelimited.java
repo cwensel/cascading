@@ -56,60 +56,60 @@ import cascading.tuple.util.TupleViews;
 /**
  * Class TextDelimited provides direct support for delimited text files, like
  * TAB (\t) or COMMA (,) delimited files. It also optionally allows for quoted values.
- * <p/>
+ * <p>
  * TextDelimited may also be used to skip the "header" in a file, where the header is defined as the very first line
  * in every input file. That is, if the byte offset of the current line from the input is zero (0), that line will
  * be skipped.
- * <p/>
+ * <p>
  * It is assumed if sink/source {@code fields} is set to either {@link Fields#ALL} or {@link Fields#UNKNOWN} and
  * {@code skipHeader} or {@code hasHeader} is {@code true}, the field names will be retrieved from the header of the
  * file and used during planning. The header will parsed with the same rules as the body of the file.
- * <p/>
+ * <p>
  * By default headers are not skipped.
- * <p/>
+ * <p>
  * TextDelimited may also be used to write a "header" in a file. The fields names for the header are taken directly
  * from the declared fields. Or if the declared fields are {@link Fields#ALL} or {@link Fields#UNKNOWN}, the
  * resolved field names will be used, if any.
- * <p/>
+ * <p>
  * By default headers are not written.
- * <p/>
+ * <p>
  * If {@code hasHeaders} is set to {@code true} on a constructor, both {@code skipHeader} and {@code writeHeader} will
  * be set to {@code true}.
- * <p/>
+ * <p>
  * By default this {@link cascading.scheme.Scheme} is both {@code strict} and {@code safe}.
- * <p/>
+ * <p>
  * Strict meaning if a line of text does not parse into the expected number of fields, this class will throw a
  * {@link TapException}. If strict is {@code false}, then {@link Tuple} will be returned with {@code null} values
  * for the missing fields.
- * <p/>
+ * <p>
  * Safe meaning if a field cannot be coerced into an expected type, a {@code null} will be used for the value.
  * If safe is {@code false}, a {@link TapException} will be thrown.
- * <p/>
+ * <p>
  * Also by default, {@code quote} strings are not searched for to improve processing speed. If a file is
  * COMMA delimited but may have COMMA's in a value, the whole value should be surrounded by the quote string, typically
  * double quotes ({@literal "}).
- * <p/>
+ * <p>
  * Note all empty fields in a line will be returned as {@code null} unless coerced into a new type.
- * <p/>
+ * <p>
  * This Scheme may source/sink {@link Fields#ALL}, when given on the constructor the new instance will automatically
  * default to strict == false as the number of fields parsed are arbitrary or unknown. A type array may not be given
  * either, so all values will be returned as Strings.
- * <p/>
+ * <p>
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
- * <p/>
+ * <p>
  * To override field and line parsing behaviors, sub-class {@link DelimitedParser} or provide a
  * {@link cascading.scheme.util.FieldTypeResolver} implementation.
- * <p/>
+ * <p>
  * Note that there should be no expectation that TextDelimited, or specifically {@link DelimitedParser}, can handle
  * all delimited and quoted combinations reliably. Attempting to do so would impair its performance and maintainability.
- * <p/>
+ * <p>
  * Further, it can be safely said any corrupted files will not be supported for obvious reasons. Corrupted files may
  * result in exceptions or could cause edge cases in the underlying java regular expression engine.
- * <p/>
+ * <p>
  * A large part of Cascading was designed to help users cleans data. Thus the recommendation is to create Flows that
  * are responsible for cleansing large data-sets when faced with the problem
- * <p/>
+ * <p>
  * DelimitedParser maybe sub-classed and extended if necessary.
  *
  * @see TextLine
@@ -126,7 +126,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
    * {@link Fields#ALL} and using TAB as the default delimiter.
-   * <p/>
+   * <p>
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    */
@@ -138,7 +138,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
    * {@link Fields#ALL} and using TAB as the default delimiter.
-   * <p/>
+   * <p>
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
@@ -154,7 +154,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
    * {@link Fields#ALL} and using TAB as the default delimiter.
-   * <p/>
+   * <p>
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
@@ -171,7 +171,7 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
    * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
-   * <p/>
+   * <p>
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
    *
@@ -187,10 +187,10 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
    * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
-   * <p/>
+   * <p>
    * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
    * with a {@link cascading.pipe.Checkpoint} Tap.
-   * <p/>
+   * <p>
    * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
    *
    * @param delimitedParser

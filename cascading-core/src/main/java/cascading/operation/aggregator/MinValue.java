@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,7 +27,7 @@ import cascading.tuple.Fields;
 
 /**
  * Class Min is an {@link cascading.operation.Aggregator} that returns the minimum value encountered in the current group.
- * <p/>
+ * <p>
  * Values are expected to be {@link Comparable} types vs numeric representations and
  * the {@link Comparable#compareTo(Object)} result is use for min comparison.
  */

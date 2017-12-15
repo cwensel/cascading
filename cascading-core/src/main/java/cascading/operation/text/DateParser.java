@@ -41,7 +41,7 @@ import cascading.util.Pair;
 /**
  * Class DateParser is used to convert a text date string to a timestamp, the number of milliseconds
  * since January 1, 1970, 00:00:00 GMT, using the {@link SimpleDateFormat} syntax.
- * <p/>
+ * <p>
  * If given, individual {@link Calendar} fields can be stored in unique fields for a given {@link TimeZone} and {@link Locale}.
  */
 public class DateParser extends DateOperation implements Function<Pair<SimpleDateFormat, TupleEntry>>

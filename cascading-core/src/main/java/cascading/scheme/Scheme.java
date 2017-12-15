@@ -35,27 +35,27 @@ import cascading.util.Traceable;
  * A Scheme defines what is stored in a {@link Tap} instance by declaring the {@link Tuple}
  * field names, and alternately parsing or rendering the incoming or outgoing {@link Tuple}
  * stream, respectively.
- * <p/>
+ * <p>
  * A Scheme defines the type of resource data will be sourced from or sinked to.
- * <p/>
+ * <p>
  * The default sourceFields are {@link Fields#UNKNOWN} and the default sinkFields are {@link Fields#ALL}.
- * <p/>
+ * <p>
  * Any given sourceFields only label the values in the {@link Tuple}s as they are sourced.
  * It does not necessarily filter the output since a given implementation may choose to
  * collapse values and ignore keys depending on the format.
- * <p/>
+ * <p>
  * If the sinkFields are {@link Fields#ALL}, the Cascading planner will attempt to resolve the actual field names
  * and make them available via the {@link cascading.scheme.SinkCall#getOutgoingEntry()} method. Sometimes this may
  * not be possible (in the case the {@link Tap#openForWrite(cascading.flow.FlowProcess)} method is called from user
  * code directly (without planner intervention).
- * <p/>
+ * <p>
  * If the sinkFields are a valid selector, the {@link #sink(cascading.flow.FlowProcess, SinkCall)} method will
  * only see the fields expected.
- * <p/>
+ * <p>
  * Setting the {@code numSinkParts} value to 1 (one) attempts to ensure the output resource has only one part.
  * In the case of MapReduce, this is only a suggestion for the Map side, on the Reduce side it does this by
  * setting the number of reducers to the given value. This may affect performance, so be cautioned.
- * </p>
+ * <p>
  * Note that setting numSinkParts does not force the planner to insert a final Reduce operation in the job, so
  * numSinkParts may be ignored entirely if the final job is Map only. To force the Flow to have a final Reduce,
  * add a {@link cascading.pipe.GroupBy} to the assembly before sinking.
@@ -230,9 +230,9 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method retrieveSourceFields notifies a Scheme when it is appropriate to dynamically
    * update the fields it sources. By default the current declared fields are returned.
-   * <p/>
+   * <p>
    * The {@code FlowProcess} presents all known properties resolved by the current planner.
-   * <p/>
+   * <p>
    * The {@code tap} instance is the parent {@link Tap} for this Scheme instance.
    *
    * @param flowProcess of type FlowProcess
@@ -247,7 +247,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method presentSourceFields is called after the planner is invoked and all fields are resolved. This
    * method presents to the Scheme the actual source fields after any planner intervention.
-   * <p/>
+   * <p>
    * This method is called after {@link #retrieveSourceFields(cascading.flow.FlowProcess, cascading.tap.Tap)}.
    *
    * @param flowProcess of type FlowProcess
@@ -268,9 +268,9 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method retrieveSinkFields notifies a Scheme when it is appropriate to dynamically
    * update the fields it sources. By default the current declared fields are returned.
-   * <p/>
+   * <p>
    * The {@code FlowProcess} presents all known properties resolved by the current planner.
-   * <p/>
+   * <p>
    * The {@code tap} instance is the parent {@link Tap} for this Scheme instance.
    *
    * @param flowProcess of type FlowProcess
@@ -285,7 +285,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method presentSinkFields is called after the planner is invoked and all fields are resolved. This
    * method presents to the Scheme the actual source fields after any planner intervention.
-   * <p/>
+   * <p>
    * This method is called after {@link #retrieveSinkFields(cascading.flow.FlowProcess, cascading.tap.Tap)}.
    *
    * @param flowProcess of type FlowProcess
@@ -305,13 +305,13 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
 
   /**
    * Method sourceInit initializes this instance as a source.
-   * <p/>
+   * <p>
    * This method is executed client side as a means to provide necessary configuration parameters
    * used by the underlying platform.
-   * <p/>
+   * <p>
    * It is not intended to initialize resources that would be necessary during the execution of this
    * class, like a "formatter" or "parser".
-   * <p/>
+   * <p>
    * See {@link #sourcePrepare(cascading.flow.FlowProcess, SourceCall)} if resources much be initialized
    * before use. And {@link #sourceCleanup(cascading.flow.FlowProcess, SourceCall)} if resources must be
    * destroyed after use.
@@ -324,13 +324,13 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
 
   /**
    * Method sinkInit initializes this instance as a sink.
-   * <p/>
+   * <p>
    * This method is executed client side as a means to provide necessary configuration parameters
    * used by the underlying platform.
-   * <p/>
+   * <p>
    * It is not intended to initialize resources that would be necessary during the execution of this
    * class, like a "formatter" or "parser".
-   * <p/>
+   * <p>
    * See {@link #sinkPrepare(cascading.flow.FlowProcess, SinkCall)} if resources much be initialized
    * before use. And {@link #sinkCleanup(cascading.flow.FlowProcess, SinkCall)} if resources must be
    * destroyed after use.
@@ -344,14 +344,14 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method sourcePrepare is used to initialize resources needed during each call of
    * {@link #source(cascading.flow.FlowProcess, SourceCall)}.
-   * <p/>
+   * <p>
    * This method is guaranteed to be called once before the first invocation of {@link #source(FlowProcess, SourceCall)}.
-   * <p/>
+   * <p>
    * Be sure to place any initialized objects in the {@code SourceContext} so each instance
    * will remain thread-safe.
    *
    * @param flowProcess of type FlowProcess
-   * @param sourceCall  of type SourceCall<SourceContext, Input>
+   * @param sourceCall  of type SourceCall
    */
   public void sourcePrepare( FlowProcess<? extends Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
@@ -361,12 +361,12 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method sourceRePrepare is used to re-initialize resources needed during each call of
    * {@link #source(cascading.flow.FlowProcess, SourceCall)} after the {@code Input} object
    * has been changed, if needed.
-   * <p/>
+   * <p>
    * This method may be called zero or more times. Note {@link #sourcePrepare(FlowProcess, SourceCall)} will always
    * be called before any {@link #source(FlowProcess, SourceCall)} invocation.
    *
    * @param flowProcess of type FlowProcess
-   * @param sourceCall  of type SourceCall<SourceContext, Input>
+   * @param sourceCall  of type SourceCall
    */
   public void sourceRePrepare( FlowProcess<? extends Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
@@ -376,12 +376,12 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * Method source will read a new "record" or value from {@link cascading.scheme.SourceCall#getInput()} and populate
    * the available {@link Tuple} via {@link cascading.scheme.SourceCall#getIncomingEntry()} and return {@code true}
    * on success or {@code false} if no more values available.
-   * <p/>
+   * <p>
    * It's ok to set a new Tuple instance on the {@code incomingEntry} {@link cascading.tuple.TupleEntry}, or
    * to simply re-use the existing instance.
-   * <p/>
+   * <p>
    * Note this is only time it is safe to modify a Tuple instance handed over via a method call.
-   * <p/>
+   * <p>
    * This method may optionally throw a {@link cascading.tap.TapException} if it cannot process a particular
    * instance of data. If the payload Tuple is set on the TapException, that Tuple will be written to
    * any applicable failure trap Tap.
@@ -397,7 +397,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * {@link #sourcePrepare(cascading.flow.FlowProcess, SourceCall)}.
    *
    * @param flowProcess of Process
-   * @param sourceCall  of type SourceCall<SourceContext, Input>
+   * @param sourceCall  of type SourceCall
    */
   public void sourceCleanup( FlowProcess<? extends Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
@@ -406,14 +406,14 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method sinkPrepare is used to initialize resources needed during each call of
    * {@link #sink(cascading.flow.FlowProcess, SinkCall)}.
-   * <p/>
+   * <p>
    * This method is guaranteed to be called once before the first invocation of {@link #sink(FlowProcess, SinkCall)}.
    * <p>
    * Be sure to place any initialized objects in the {@code SinkContext} so each instance
    * will remain threadsafe.
    *
    * @param flowProcess of type FlowProcess
-   * @param sinkCall    of type SinkCall<SinkContext, Output>
+   * @param sinkCall    of type SinkCall
    */
   public void sinkPrepare( FlowProcess<? extends Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {
@@ -422,7 +422,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   /**
    * Method sink writes out the given {@link Tuple} found on {@link cascading.scheme.SinkCall#getOutgoingEntry()} to
    * the {@link cascading.scheme.SinkCall#getOutput()}.
-   * <p/>
+   * <p>
    * This method may optionally throw a {@link cascading.tap.TapException} if it cannot process a particular
    * instance of data. If the payload Tuple is set on the TapException, that Tuple will be written to
    * any applicable failure trap Tap. If not set, the incoming Tuple will be written instead.
@@ -437,7 +437,7 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    * {@link #sinkPrepare(cascading.flow.FlowProcess, SinkCall)}.
    *
    * @param flowProcess of type FlowProcess
-   * @param sinkCall    of type SinkCall<SinkContext, Output>
+   * @param sinkCall    of type SinkCall
    */
   public void sinkCleanup( FlowProcess<? extends Config> flowProcess, SinkCall<SinkContext, Output> sinkCall ) throws IOException
     {

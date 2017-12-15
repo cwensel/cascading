@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,7 +34,7 @@ import cascading.flow.planner.rule.util.LogLevel;
  * Class UniquePathRulePartitioner relies on a {@link cascading.flow.planner.rule.RuleExpression} to identify
  * sub-graphs as initial partitions, then will partition the resulting graph into a unique sub-graph for each
  * unique path between the head and tail of the graph.
- * <p/>
+ * <p>
  * This partitioner currently requires the matched sub-graph (per the RuleExpression) to have a single head and single
  * tail. All paths will between the matched head and tail.
  * <p>

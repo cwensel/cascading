@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,78 +28,78 @@ import cascading.tuple.Fields;
 
 /**
  * The CoGroup pipe allows for two or more tuple streams to join into a single stream via an optional {@link Joiner}.
- * <p/>
+ * <p>
  * If followed by an assembly of {@link Every}s to execute one or more {@link cascading.operation.Aggregator}s,
  * they will be guaranteed to receive all values associated with a
  * unique grouping key. In the case of a MapReduce platform, this invokes a {@code Reduce} task to guarantee
  * all values are associated with a given unique grouping key.
- * <p/>
+ * <p>
  * If no aggregations are to be performed, and one or more streams of data are small (may fit in reasonable memory),
  * see the {@link HashJoin} Pipe for partially non-blocking joins.
- * <p/>
+ * <p>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be co-grouped with the other given Pipe instances. If the incoming Pipe instances declare
  * one or more field with the same name, the declaredFields must be given to name all the outgoing Tuple stream fields
  * to overcome field name collisions. That is, if the first pipe has 4 fields, and the second pipe has 3 fields, 7 fields
  * total must be declared having unique field names, if any.
- * <p/>
+ * <p>
  * {@code resultGroupFields} value is a convenience allowing the override of the resulting grouping field names. The
  * size of resultGroupFields must be equal to the total number of grouping keys fields. That is, if joining on two pipes
  * which are grouping on two keys, the resultGroupFields must be 4 fields, each field field name being unique, if any.
  * By default, the resultGroupKeys are retrieved from the declaredFields.
- * <p/>
+ * <p>
  * By default CoGroup performs an inner join via the {@link cascading.pipe.joiner.InnerJoin}
  * {@link cascading.pipe.joiner.Joiner} class.
- * <p/>
+ * <p>
  * To implement a custom join, implement the {@link Joiner} interface. Or, as of Cascading 2.5, use a
  * {@link cascading.pipe.joiner.BufferJoin} and implement the join in a {@link cascading.operation.Buffer}.
- * <p/>
+ * <p>
  * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
  * 1 for numSelfJoins will join the Pipe with itself once.
- * <p/>
+ * <p>
  * The outgoing grouping Tuple stream is sorted by the natural order of the grouping fields. To control this order,
  * at least the first groupingFields value given should be an instance of {@link cascading.tuple.Fields} containing
  * {@link java.util.Comparator} instances for the appropriate fields.
  * This allows fine grained control of the sort grouping order.
- * <p/>
+ * <p>
  * CoGrouping does not scale well when implemented over MapReduce. In Cascading there are two
  * ways to optimize CoGrouping.
- * <p/>
+ * <p>
  * The first is to consider the order of the pipes handed to the CoGroup constructor.
- * <p/>
+ * <p>
  * During co-grouping, for any given unique grouping key, all of the rightmost pipes will accumulate the current
  * grouping values into memory so they may be iterated across for every value in the left hand side pipe. During
  * the accumulation step, if the number of values exceeds the {@link cascading.tuple.collect.SpillableTupleList} threshold
  * value, those values will be spilled to disk so the accumulation may continue.
- * <p/>
+ * <p>
  * See the {@link cascading.tuple.collect.TupleCollectionFactory} and {@link cascading.tuple.collect.TupleMapFactory} for a means
  * to use alternative spillable types.
- * <p/>
+ * <p>
  * There is no accumulation for the left hand side pipe, only for those to the "right".
- * <p/>
+ * <p>
  * Thus, for the pipe that has the largest number of values per unique key grouping, on average, it should be made the
  * "left hand side" pipe ({@code lhs}). And all remaining pipes should be the on the "right hand side" ({@code rhs}) to
  * prevent the likelihood of a spill and to reduce the blocking associated with accumulating the values. If using
  * the {@code Pipe[]} constructor, {@code Pipe[0]} is the left hand sided pipe.
- * <p/>
+ * <p>
  * If spills are happening, consider increasing the spill threshold, see {@link cascading.tuple.collect.SpillableTupleList},
  * if more RAM is available. See the logs for hints on how much more these values can be increased, if any.
- * <p/>
+ * <p>
  * Spills are intended to prevent {@link OutOfMemoryError}'s, so reducing the number of spills is important by
  * increasing the threshold, but memory errors aren't recoverable, so the correct balance will need to be found.
- * <p/>
+ * <p>
  * To customize the spill values for a given CoGroup only, see {@link #getStepConfigDef()}.
- * <p/>
+ * <p>
  * See the {@link cascading.tuple.Hasher} interface when a custom {@link java.util.Comparator} on the grouping keys is
  * being provided that makes two values with differing hashCode values equal. For example,
  * {@code new BigDecimal( 100.0D )} and {@code new Double 100.0D )} are equal using a custom Comparator, but
  * {@link Object#hashCode()} will be different, thus forcing each value into differing partitions.
- * <p/>
+ * <p>
  * Currently "non-equi-joins" are not supported via the Hasher and Comparator interfaces. That is, joining one String
  * key with a lowercase value with another String key with an uppercase value using a "case insensitive" Comparator
  * will not have consistent results. The join will execute and be correct, but the actual values in the key columns may
  * be replaced with "equivalent" values from other streams.
- * <p/>
+ * <p>
  * If the original key values must be retained, consider normalizing the keys with a Function and then joining on the
  * resulting field.
  *

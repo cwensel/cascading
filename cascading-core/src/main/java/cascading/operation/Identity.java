@@ -34,7 +34,7 @@ import cascading.util.Util;
 /**
  * The Identity function simply passes incoming arguments back out again. Optionally argument fields can be renamed, and/or
  * coerced into specific types.
- * <p/>
+ * <p>
  * During coercion, if the given type is a primitive ({@code long}), and the tuple value is null, {@code 0} is returned.
  * If the type is an Object ({@code java.lang.Long}), and the tuple value is {@code null}, {@code null} is returned.
  */

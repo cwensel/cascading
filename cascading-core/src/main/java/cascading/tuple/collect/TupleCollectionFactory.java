@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,12 +31,12 @@ import cascading.tuple.Tuple;
  * used to back in memory "join" and "co-group" operations. Typically these implementations are
  * "spillable", in that to prevent using up all memory in the JVM, after some threshold is met or event
  * is triggered, values are persisted to disk.
- * <p/>
+ * <p>
  * The {@link java.util.Collection} classes returned must take a {@link cascading.tuple.Tuple} as a value.
- * <p/>
+ * <p>
  * If the Collection implementation implements the {@link Spillable} interface, it will receive a {@link Spillable.SpillListener}
  * instance that calls back to the appropriate logging mechanism for the platform.
- * <p/>
+ * <p>
  * The class {@link SpillableTupleList} may be used as a base class.
  *
  * @see cascading.tuple.hadoop.collect.HadoopTupleCollectionFactory

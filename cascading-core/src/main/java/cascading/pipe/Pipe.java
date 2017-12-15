@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -41,14 +42,14 @@ import static java.util.Arrays.asList;
  * Class Pipe is used to name branches in pipe assemblies, and as a base class for core
  * processing model types, specifically {@link Each}, {@link Every}, {@link GroupBy},
  * {@link CoGroup}, {@link Merge}, {@link HashJoin}, and {@link SubAssembly}.
- * <p/>
+ * <p>
  * Pipes are chained together through their constructors.
- * <p/>
+ * <p>
  * To effect a split in the pipe,
  * simply pass a Pipe instance to two or more constructors of subsequent Pipe instances.
- * </p>
+ * <p>
  * A join can be achieved by passing two or more Pipe instances to a {@link CoGroup} or {@link HashJoin} pipe.
- * <p/>
+ * <p>
  * A merge can be achieved by passing two or more Pipe instances to a {@link GroupBy} or {@link Merge} pipe.
  *
  * @see Each
@@ -279,7 +280,7 @@ public class Pipe implements ScopedElement, FlowElement, Serializable, Traceable
   /**
    * Returns a {@link ConfigDef} instance that allows for local properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
-   * <p/>
+   * <p>
    * Any properties set on the configDef will not show up in any {@link cascading.flow.Flow} or
    * {@link cascading.flow.FlowStep} process level configuration, but will override any of those values as seen by the
    * current Pipe instance.
@@ -309,14 +310,14 @@ public class Pipe implements ScopedElement, FlowElement, Serializable, Traceable
   /**
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
-   * <p/>
+   * <p>
    * Any properties set on the nodeConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowNode} (in Apache Tez the Vertex configuration). Any value set in the
    * nodeConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
-   * </p>
+   * <p>
    * Use this method to tweak properties in the process node this pipe instance is planned into. In the case of the
    * Apache Tez platform, when set on a {@link GroupBy} instance, the number of gather partitions can be modified.
-   * <p/>
+   * <p>
    * In the case of any Pipe that spans FlowNode boundaries, like GroupBy and CoGroup may on some platforms,
    * any ConfigDef properties will be applied to the downstream FlowNode. That is, if a GroupBy is the source
    * to a node, any node ConfigDef properties will be applied. If the GroupBy encountered when applying properties
@@ -347,11 +348,11 @@ public class Pipe implements ScopedElement, FlowElement, Serializable, Traceable
   /**
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the pipe is invoked.
-   * <p/>
+   * <p>
    * Any properties set on the stepConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
    * stepConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
-   * </p>
+   * <p>
    * Use this method to tweak properties in the process step this pipe instance is planned into. In the case of the
    * Hadoop platform, when set on a {@link GroupBy} instance, the number of reducers can be modified.
    *

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,7 @@ import static cascading.flow.planner.rule.PlanPhase.BalanceAssembly;
 
 /**
  * Inserts Boundary after split that joins back into a HashJoin.
- * <p/>
+ * <p>
  * this allows testGroupBySplitGroupByJoin to pass, and simplifies testJoinSamePipeAroundGroupBy by preventing
  * the upstream operations to duplicate processing in parallel nodes
  */

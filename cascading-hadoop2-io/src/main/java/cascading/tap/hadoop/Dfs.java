@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,7 +33,7 @@ import org.apache.hadoop.fs.FileSystem;
 
 /**
  * Class Dfs is a {@link cascading.tap.Tap} class that provides access to the Hadoop Distributed File System.
- * <p/>
+ * <p>
  * Use the {@link URI} constructors to specify a different HDFS cluster than the default.
  */
 public class Dfs extends Hfs

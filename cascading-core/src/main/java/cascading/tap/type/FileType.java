@@ -52,7 +52,7 @@ public interface FileType<Config>
 
   /**
    * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
-   * <p/>
+   * <p>
    * This method will skip Hadoop log directories ({@code _log}).
    *
    * @param flowProcess
@@ -63,7 +63,7 @@ public interface FileType<Config>
 
   /**
    * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
-   * <p/>
+   * <p>
    * This method will skip Hadoop log directories ({@code _log}).
    *
    * @param conf of JobConf

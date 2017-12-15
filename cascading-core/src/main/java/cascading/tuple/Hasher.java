@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,11 +24,11 @@ package cascading.tuple;
 /**
  * The Hasher allows a {@link java.util.Comparator} implementation to also be delegated to during hashCode generation
  * during grouping partitioning.
- * <p/>
+ * <p>
  * If a Comparator is used to compare two types during grouping, its likely the {@code hashCode} value between
  * the two objects will not be consistent. This allows to objects being equal to hash to the same bucket (reducer)
  * during partitioning.
- * <p/>
+ * <p>
  * As of Cascading 3.0 null values will be passed to implementations of the Hasher interface.
  */
 public interface Hasher<V>

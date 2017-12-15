@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,7 +25,7 @@ import cascading.flow.FlowProcess;
 
 /**
  * Class ValueAssertion is a kind of {@link Assertion} used with the {@link cascading.pipe.Each} pipe Operator.
- * <p/>
+ * <p>
  * Implementers must also extend {@link BaseOperation}.
  */
 public interface ValueAssertion<C> extends Assertion<C>

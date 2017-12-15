@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,7 +34,7 @@ import cascading.tap.Tap;
 /**
  * Captures a split against a non-safe Operation to prevent the operation from running
  * in parallel mappers.
- * <p/>
+ * <p>
  * THis variant allows a non-safe operation to be followed by any Pipe. this assumes other rules
  * enforce splitting to only be on Each or Pipe types.
  */

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,12 +44,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Class SpillableTupleList is a simple durable Collection that can spill its contents to disk when the
  * {@code threshold} is met.
- * <p/>
+ * <p>
  * Using a {@code threshold } of -1 will disable the spill, all values will remain in memory.
- * <p.></p.>
+ * <p>
  * This class is used by the {@link cascading.pipe.CoGroup} pipe, to set properties specific to a given
  * CoGroup instance, see the {@link cascading.pipe.CoGroup#getConfigDef()} method.
- * <p/>
+ * <p>
  * Use the {@link SpillableProps} fluent helper class to set properties.
  *
  * @see cascading.tuple.hadoop.collect.HadoopSpillableTupleList

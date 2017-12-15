@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,23 +33,23 @@ import static cascading.tuple.coerce.Coercions.asClass;
 /**
  * Class ScriptFunction dynamically resolves a given expression using argument {@link cascading.tuple.Tuple} values.
  * This {@link cascading.operation.Function} is based on the <a href="http://www.janino.net/">Janino</a> compiler.
- * <p/>
+ * <p>
  * This class is different from {@link ScriptTupleFunction} in that it allows any return type instance to be returned
  * by the script. ScriptTupleFunction allows only a single {@code Tuple} instance to be returned.
- * <p/>
+ * <p>
  * Specifically this function uses the {@link org.codehaus.janino.ScriptEvaluator},
  * thus the syntax from that class is inherited here.
- * <p/>
+ * <p>
  * A script may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
- * <p/>
- * Given an argument tuple with the fields "a" and "b", the following script returns true: <br/>
- * <code>boolean result = (a + b == $0 + $1);</code><br/>
- * <code>return boolean;</code><br/>
- * <p/>
+ * <p>
+ * Given an argument tuple with the fields "a" and "b", the following script returns true: <br>
+ * {@code boolean result = (a + b == $0 + $1);}<br>
+ * {@code return boolean;}<br>
+ * <p>
  * Unlike an "expression" used by {@link ExpressionFunction}, a "script" requires each line to end in an semi-colon
  * (@{code ;}) and the final line to be a {@code return} statement.
- * <p/>
+ * <p>
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the script if possible.
  */
@@ -56,10 +57,10 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
   {
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors.
-   * <p/>
+   * <p>
    * The {@code returnType} will be retrieved from the given {@code fieldDeclaration.getTypeClass(0)}.
    *
    * @param fieldDeclaration of type Fields
@@ -75,7 +76,7 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
 
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors.
    *
@@ -93,7 +94,7 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
 
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors, but
    * use {@code expectedTypes} to coerce the incoming types to before passing as parameters to the expression.
@@ -113,7 +114,7 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
 
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor expects all parameter type names to be declared with their types. Positional parameters must
    * be named the same as in the given script with the "$" sign prepended.
    *
@@ -133,7 +134,7 @@ public class ScriptFunction extends ScriptOperation implements Function<ScriptOp
 
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor expects all parameter type names to be declared with their types. Positional parameters must
    * be named the same as in the given script with the "$" sign prepended.
    *

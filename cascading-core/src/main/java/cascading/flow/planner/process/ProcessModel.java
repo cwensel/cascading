@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,7 +44,7 @@ public interface ProcessModel
   /**
    * Method getProcessAnnotations returns an immutable Map of platform specific annotations or meta-data
    * that describe the current model type.
-   * <p/>
+   * <p>
    * Use {@link #addProcessAnnotation(Enum)} or {@link #addProcessAnnotation(String, String)} to insert
    * annotations or meta-data.
    *

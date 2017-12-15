@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -165,7 +166,7 @@ public class BaseCascade implements ProcessLogger, Cascade
 
   /**
    * Method getID returns the ID of this Cascade object.
-   * <p/>
+   * <p>
    * The ID value is a long HEX String used to identify this instance globally. Subsequent Cascade
    * instances created with identical parameters will not return the same ID.
    *
@@ -1032,7 +1033,7 @@ public class BaseCascade implements ProcessLogger, Cascade
 
   /**
    * Class SafeCascadeListener safely calls a wrapped CascadeListener.
-   * <p/>
+   * <p>
    * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
    * can be caught by the calling Thread. Since Cascade is asynchronous, much of the work is done in the run() method
    * which in turn is run in a new Thread.

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,9 +30,9 @@ import cascading.util.Util;
 /**
  * DelimitedPartition is an implementation of the {@link Partition} interface that allows for simple
  * text delimited paths as partitions.
- * <p/>
+ * <p>
  * For example, given the delimiter {@code -} (dash), a partition path will have dashes.
- * <p/>
+ * <p>
  * Note the delimiter must not be naturally present in any of the values making up the partition.
  * <p>
  * The postfix value will be appended to any partition when created, and removed when the partition is parsed. Use

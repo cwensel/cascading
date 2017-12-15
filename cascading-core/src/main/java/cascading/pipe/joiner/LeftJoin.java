@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,10 +30,10 @@ import cascading.tuple.Tuple;
 /**
  * Class LeftJoin will return an {@link Iterator} that will iterate over a given {@link Joiner} and return tuples that represent
  * a left inner, right outer join of the CoGrouper internal grouped tuple collections.
- * <p/>
+ * <p>
  * Note only the farthest right tuple stream will be used as the outer join. All preceding joins to the left will
  * be inner joins. See {@link MixedJoin} for more flexibility.
- * <p/>
+ * <p>
  * Joins perform based on the equality of the join keys. In the case of null values, Java treats two
  * null values as equivalent. SQL does not treat null values as equal. To produce SQL like results in a given
  * join, a new {@link java.util.Comparator} will need to be used on the joined values to prevent null from

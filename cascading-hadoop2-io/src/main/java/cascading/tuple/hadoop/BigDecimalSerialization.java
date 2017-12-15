@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -36,10 +37,9 @@ import org.apache.hadoop.io.serializer.Serializer;
 /**
  * Class BigDecimalSerialization is an implementation of Hadoop's {@link org.apache.hadoop.io.serializer.Serialization} interface for use
  * by {@link BigDecimal} instances.
- * <p/>
- * To use, call<br/>
+ * <p>
+ * To use, call<br>
  * {@code TupleSerializationProps.addSerialization(properties, BigDecimalSerialization.class.getName());}
- * <p/>
  *
  * @see cascading.tuple.hadoop.TupleSerializationProps#addSerialization(java.util.Map, String)
  */

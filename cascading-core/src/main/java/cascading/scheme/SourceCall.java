@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,7 +27,7 @@ import cascading.tuple.TupleEntry;
 /**
  * SourceCall provides access to the current {@link Scheme#source(cascading.flow.FlowProcess, SourceCall)} invocation
  * arguments.
- * <p/>
+ * <p>
  * Use the Context to store thread local values.
  *
  * @param <Context>
@@ -51,13 +52,13 @@ public interface SourceCall<Context, Input>
   /**
    * Method getIncomingEntry returns a pre-prepared {@link TupleEntry} to be populated
    * with the input values from {@link #getInput()}.
-   * <p/>
+   * <p>
    * That is, using the getInput() method, retrieve the current incoming values and
    * place them into the getIncomingEntry() via {@link TupleEntry#setTuple(cascading.tuple.Tuple)}
    * or by modifying the tuple returned from {@link cascading.tuple.TupleEntry#getTuple()}.
-   * <p/>
+   * <p>
    * The returned Tuple entry is guaranteed to be the size of the declared incoming source fields.
-   * <p/>
+   * <p>
    * The returned TupleEntry from this method is modifiable and is intended to be re-used. This is an exception to
    * the general rule that passed TupleEntry instances must not be modified.
    *
@@ -68,7 +69,7 @@ public interface SourceCall<Context, Input>
   /**
    * Method getInput returns the input mechanism for the underlying platform used to retrieve new values (records,
    * lines, etc).
-   * <p/>
+   * <p>
    * Do not cache the returned value as it may change.
    *
    * @return the platform dependent input handler

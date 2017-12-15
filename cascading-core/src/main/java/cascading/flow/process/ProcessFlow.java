@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -45,12 +46,11 @@ import riffle.process.scheduler.ProcessWrapper;
 
 /**
  * Class ProcessFlow is a {@link cascading.flow.Flow} subclass that supports custom Riffle jobs.
- * <p/>
+ * <p>
  * Use this class to allow custom Riffle jobs to participate in the {@link cascading.cascade.Cascade} scheduler. If
  * other Flow instances in the Cascade share resources with this Flow instance, all participants will be scheduled
  * according to their dependencies (topologically).
- * <p/>
- * <p/>
+ * <p>
  * Currently {@link cascading.flow.FlowListener}s are supported but the
  * {@link cascading.flow.FlowListener#onThrowable(cascading.flow.Flow, Throwable)} event is not.
  */
@@ -83,7 +83,7 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
   /**
    * Constructor ProcessFlow creates a new ProcessFlow instance.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @param name       of type String
    * @param process    of type P
    */
@@ -96,10 +96,10 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
   /**
    * Constructor ProcessFlow creates a new ProcessFlow instance.
    *
-   * @param properties     of type Map<Object, Object>
+   * @param properties     of type Map
    * @param name           of type String
    * @param process        of type P
-   * @param flowDescriptor pf type LinkedHashMap<String, String>
+   * @param flowDescriptor pf type LinkedHashMap
    */
   @ConstructorProperties({"properties", "name", "process", "flowDescriptor"})
   public ProcessFlow( Map<Object, Object> properties, String name, Process process, Map<String, String> flowDescriptor )
@@ -138,7 +138,7 @@ public class ProcessFlow<Process, Config> extends BaseFlow<Config>
 
   /**
    * Method setTapFromProcess build {@link Tap} instance for the give process incoming and outgoing dependencies.
-   * <p/>
+   * <p>
    * This method may be called repeatedly to re-configure the source and sink taps.
    */
   public void setTapFromProcess()

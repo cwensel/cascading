@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,11 +32,11 @@ import org.apache.hadoop.fs.FileSystem;
 
 /**
  * Class Lfs is a {@link cascading.tap.Tap} class that provides access to the Local File System via Hadoop.
- * <p/>
+ * <p>
  * Note that using a Lfs {@link cascading.tap.Tap} instance in a {@link cascading.flow.Flow} will force a portion of not the whole Flow to be executed
  * in "local" mode forcing the Flow to execute in the current JVM. Mixing with {@link cascading.tap.hadoop.Dfs} and other Tap
  * types is possible, providing a means to implement complex file/data management functions.
- * <p/>
+ * <p>
  * Use {@link cascading.tap.hadoop.Hfs} if you need a Tap instance that inherits the default {@link FileSystem} used by Hadoop.
  */
 public class Lfs extends Hfs

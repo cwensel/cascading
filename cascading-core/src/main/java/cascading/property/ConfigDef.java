@@ -33,9 +33,8 @@ import java.util.Set;
 /**
  * The ConfigDef class allows for the creation of a configuration properties template to be applied to an existing
  * properties configuration set.
- * <p/>
+ * <p>
  * There are three property modes, {@link Mode#DEFAULT}, {@link Mode#REPLACE}, and {@link Mode#UPDATE}.
- * <p/>
  * <ul>
  * <li>A DEFAULT property is only applied if there is no existing value in the property set.</li>
  * <li>A REPLACE property is always applied overriding any previous values.</li>

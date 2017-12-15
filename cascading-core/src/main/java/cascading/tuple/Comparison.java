@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,16 +26,16 @@ import java.util.Comparator;
 /**
  * The Comparison interface allows specific underlying type mechanisms to additionally return relevant
  * {@link Comparator} implementations when required internally.
- * <p/>
+ * <p>
  * In the case of Hadoop, {@link org.apache.hadoop.io.serializer.Serialization} implementations that present
  * alternative serialization implementations for custom types manged by {@link Tuple}s should also
  * implement the {@link #getComparator(Class)} method.
- * <p/>
+ * <p>
  * During runtime Cascading can identify and use the correct Comparator during grouping operations if it was
  * not given explicitly on the {@link Fields#setComparator(Comparable, java.util.Comparator)} family of methods.
- * <p/>
+ * <p>
  * See the class {@link cascading.tuple.hadoop.BytesSerialization} for an example.
- * <p/>
+ * <p>
  * see cascading.tuple.hadoop.BytesSerialization
  */
 public interface Comparison<T>

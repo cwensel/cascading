@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,16 +23,16 @@ package cascading.management.annotation;
 
 /**
  * Sanitizer is an interface to be used in conjunction with {@link PropertySanitizer}.
- * <p/>
+ * <p>
  * The Sanitizer implementation has the option to provide a different value for each level of
  * {@link cascading.management.annotation.Visibility}.
- * <p/>
+ * <p>
  * For example, if the raw value is an URL, the {@code PUBLIC} sanitized value may just include the URL path. The
  * {@code PROTECTED} value may retain the query string, and the {@code PRIVATE} value may retain the scheme and
  * domain name of the server.
- * <p/>
+ * <p>
  * If a Sanitizer returns {@code null}, no value will be available for that requested visibility.
- * <p/>
+ * <p>
  * Implementations of this interface must provide a default no-args Constructor.
  */
 public interface Sanitizer

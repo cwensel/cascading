@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,7 +24,7 @@ package cascading.operation;
 /**
  * Enum DebugLevel designates the level of a given {@link cascading.operation.Debug} instance. This is used in conjunction with the
  * {@link cascading.flow.FlowConnector} to plan debug operations out of a particular {@link cascading.flow.Flow} instance.
- * </p>
+ * <p>
  * Currently Debug can be denote either DEFAULT or VERBOSE. It is up to the developer to determine if a Debug operation
  * should be at any given level.
  */

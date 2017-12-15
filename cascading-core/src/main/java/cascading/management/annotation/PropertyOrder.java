@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,12 +29,12 @@ import java.lang.annotation.Target;
 /**
  * PropertyOrder is an annotation at the class level that controls the sort order of the Property annotations present
  * on that class.
- * </p>
+ * <p>
  * Order.DECLARED is the default sort order in which the properties are returned in the order they are returned by the
  * reflection API of the JVM. This can be implementation specific and is not guaranteed to be stable.
- * <p/>
+ * <p>
  * Using Order.ALPHABETICAL will cause the properties to be sorted alphabetically.
- * <p/>
+ * <p>
  * Order.GIVEN and an array of Strings containing <em>all</em> properties of that class, will result in a custom order.
  */
 @Retention(RetentionPolicy.RUNTIME)

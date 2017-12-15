@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,9 +44,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Class MultiSinkTap is both a {@link cascading.tap.CompositeTap} and {@link cascading.tap.SinkTap} that can write to
  * multiple child {@link cascading.tap.Tap} instances simultaneously.
- * <p/>
+ * <p>
  * It is the counterpart to {@link cascading.tap.MultiSourceTap}.
- * <p/>
+ * <p>
  * Note all child Tap instances may or may not have the same declared Fields. In the case they do not, all
  * sink fields will be merged into a single Fields instance via {@link Fields#merge(cascading.tuple.Fields...)}.
  */

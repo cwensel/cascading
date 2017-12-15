@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -36,12 +37,12 @@ import cascading.tuple.TupleEntry;
  * {@link cascading.tuple.Tuple} by joining each individual element of the Tuple with a tab character (\t) unless
  * otherwise specified.
  * See {@link AssertMatchesAll} if you need to match the patternString regex against each individual tuple element.
- * <p/>
+ * <p>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
- * <p/>
+ * <p>
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
- * <p/>
+ * <p>
  * Any Object value will be coerced to a String type via any provided {@link cascading.tuple.type.CoercibleType} on
  * the argument selector or via its {@code toString()} method.
  *

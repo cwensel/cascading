@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -50,7 +50,7 @@ public class JSONRegexFilter extends NestedRegexFilter
    * Constructor JSONRegexFilter creates a new JSONRegexFilter instance.
    *
    * @param pointer  of String
-   * @param patterns of List<Pattern>
+   * @param patterns of List
    */
   @ConstructorProperties({"pointer", "patterns"})
   public JSONRegexFilter( String pointer, List<Pattern> patterns )

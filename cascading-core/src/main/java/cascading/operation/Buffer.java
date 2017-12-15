@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,36 +28,36 @@ import cascading.flow.FlowProcess;
  * by the fact that an {@link java.util.Iterator} is provided and it is the responsibility
  * of the {@link #operate(cascading.flow.FlowProcess, BufferCall)} method to iterate overall all the input
  * arguments returned by this Iterator, if any.
- * <p/>
+ * <p>
  * For the case where a Buffer follows a CoGroup, the method {@link #operate(cascading.flow.FlowProcess, BufferCall)}
  * will be called for every unique group whether or not there are values available to iterate over. This may be
  * counter-intuitive for the case of an 'inner join' where the left or right stream may have a null grouping key value.
  * Regardless, the current grouping value can be retrieved through {@link BufferCall#getGroup()}.
- * <p/>
+ * <p>
  * Buffer is very useful when header or footer values need to be inserted into a grouping, or if values need to be
  * inserted into the middle of the group values. For example, consider a stream of timestamps. A Buffer could
  * be used to add missing entries, or to calculate running or moving averages over a smaller "window" within the grouping.
- * <p/>
+ * <p>
  * By default, if a result is emitted from the Buffer before the argumentsIterator is started or after it is
  * completed ({@code argumentsIterator.hasNext() == false}), non-grouping values are forced to null (to allow for header
  * and footer tuple results).
- * <p/>
+ * <p>
  * By setting {@link BufferCall#setRetainValues(boolean)} to {@code true} in the
  * {@link Buffer#prepare(cascading.flow.FlowProcess, OperationCall)} method, the last seen Tuple values will not be
  * nulled after completion and will be treated as the current incoming Tuple when merged with the Buffer result Tuple
  * via the Every outgoing selector.
- * <p/>
+ * <p>
  * There may be only one Buffer after a {@link cascading.pipe.GroupBy} or {@link cascading.pipe.CoGroup}. And there
  * may not be any additional {@link cascading.pipe.Every} pipes before or after the buffers Every pipe instance. A
  * {@link cascading.flow.planner.PlannerException} will be thrown if these rules are violated.
- * <p/>
+ * <p>
  * Buffer implementations should be re-entrant. There is no guarantee a Buffer instance will be executed in a
  * unique vm, or by a single thread. Also, note the Iterator will return the same {@link cascading.tuple.TupleEntry}
  * instance, but with new values in its child {@link cascading.tuple.Tuple}.
- * <p/>
+ * <p>
  * As of Cascading 2.5, if the previous CoGroup uses a {@link cascading.pipe.joiner.BufferJoin} as the
  * {@link cascading.pipe.joiner.Joiner}, a Buffer may be used to implement differing Joiner strategies.
- * <p/>
+ * <p>
  * Instead of calling {@link cascading.operation.BufferCall#getArgumentsIterator()} (which will return null),
  * {@link cascading.operation.BufferCall#getJoinerClosure()} will return an {@link cascading.pipe.joiner.JoinerClosure}
  * instance with direct access to each CoGrouped Iterator.
@@ -67,10 +68,10 @@ public interface Buffer<Context> extends Operation<Context>
    * Method operate is called once for each grouping. {@link BufferCall} passes in an {@link java.util.Iterator}
    * that returns an argument {@link cascading.tuple.TupleEntry} for each value in the grouping defined by the
    * argument selector on the parent Every pipe instance.
-   * <p/>
+   * <p>
    * TupleEntry entry, or entry.getTuple() should not be stored directly in a collection or modified.
    * A copy of the tuple should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
-   * <p/>
+   * <p>
    * This method is called for every unique group, whether or not there are values in the arguments Iterator.
    *
    * @param flowProcess of type FlowProcess

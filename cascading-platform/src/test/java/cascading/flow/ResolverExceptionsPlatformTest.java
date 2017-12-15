@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -36,7 +37,7 @@ import org.junit.Test;
 
 /**
  * This test helps maintain consistent error messages across resolver failures.
- * <p/>
+ * <p>
  * add new resolver usecases to the test suite.
  */
 public class ResolverExceptionsPlatformTest extends PlatformTestCase

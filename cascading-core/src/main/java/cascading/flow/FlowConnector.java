@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,62 +44,62 @@ import static cascading.flow.FlowDef.flowDef;
 
 /**
  * Class FlowConnector is the base class for all platform planners.
- * <p/>
+ * <p>
  * See the {@link FlowDef} class for a fluent way to define a new Flow.
- * <p/>
+ * <p>
  * Use the FlowConnector to link source and sink {@link Tap} instances with an assembly of {@link Pipe} instances into
  * an executable {@link cascading.flow.Flow}.
- * <p/>
+ * <p>
  * FlowConnector invokes a planner for the target execution environment.
- * <p/>
+ * <p>
  * For executing Flows in local memory against local files, see {@link cascading.flow.local.LocalFlowConnector}.
- * <p/>
- * For Apache Hadoop, see the {@link cascading.flow.hadoop.HadoopFlowConnector}.
+ * <p>
+ * For Apache Hadoop, see the {@link cascading.flow.hadoop.Hadoop2MR1FlowConnector}.
  * Or if you have a pre-existing custom Hadoop job to execute, see {@link cascading.flow.hadoop.MapReduceFlow}, which
  * doesn't require a planner.
- * <p/>
+ * <p>
  * Note that all {@code connect} methods take a single {@code tail} or an array of {@code tail} Pipe instances. "tail"
  * refers to the last connected Pipe instances in a pipe-assembly. Pipe-assemblies are graphs of object with "heads"
  * and "tails". From a given "tail", all connected heads can be found, but not the reverse. So "tails" must be
  * supplied by the user.
- * <p/>
+ * <p>
  * The FlowConnector and the underlying execution framework (Hadoop or local mode) can be configured via a
  * {@link Map} or {@link Properties} instance given to the constructor.
- * <p/>
+ * <p>
  * This properties map must be populated before constructing a FlowConnector instance. Many planner specific
  * properties can be set through the {@link FlowConnectorProps} fluent interface.
- * <p/>
+ * <p>
  * Some planners have required properties. Hadoop expects {@link AppProps#setApplicationJarPath(java.util.Map, String)} or
  * {@link AppProps#setApplicationJarClass(java.util.Map, Class)} to be set.
- * <p/>
+ * <p>
  * Any properties set and passed through the FlowConnector constructor will be global to all Flow instances created through
  * the that FlowConnector instance. Some properties are on the {@link FlowDef} and would only be applicable to the
  * resulting Flow instance.
- * <p/>
+ * <p>
  * These properties are used to influence the current planner and are also passed down to the
  * execution framework to override any default values. For example when using the Hadoop planner, the number of reducers
  * or mappers can be set by using platform specific properties.
- * <p/>
+ * <p>
  * Custom operations (Functions, Filter, etc) may also retrieve these property values at runtime through calls to
  * {@link cascading.flow.FlowProcess#getProperty(String)} or {@link FlowProcess#getStringProperty(String)}.
- * <p/>
+ * <p>
  * Most applications will need to call {@link cascading.property.AppProps#setApplicationJarClass(java.util.Map, Class)} or
  * {@link cascading.property.AppProps#setApplicationJarPath(java.util.Map, String)} so that
  * the correct application jar file is passed through to all child processes. The Class or path must reference
  * the custom application jar, not a Cascading library class or jar. The easiest thing to do is give setApplicationJarClass
  * the Class with your static main function and let Cascading figure out which jar to use.
- * <p/>
- * Note that Map<Object,Object> is compatible with the {@link Properties} class, so properties can be loaded at
+ * <p>
+ * Note that {@code Map<Object,Object> }is compatible with the {@link Properties} class, so properties can be loaded at
  * runtime from a configuration file.
- * <p/>
+ * <p>
  * By default, all {@link cascading.operation.Assertion}s are planned into the resulting Flow instance. This can be
  * changed for a given Flow by calling {@link FlowDef#setAssertionLevel(cascading.operation.AssertionLevel)} or globally
  * via {@link FlowConnectorProps#setAssertionLevel(cascading.operation.AssertionLevel)}.
- * <p/>
+ * <p>
  * Also by default, all {@link cascading.operation.Debug}s are planned into the resulting Flow instance. This can be
  * changed for a given flow by calling {@link FlowDef#setDebugLevel(cascading.operation.DebugLevel)} or globally via
  * {@link FlowConnectorProps#setDebugLevel(cascading.operation.DebugLevel)}.
- * <p/>
+ * <p>
  * As of version 3.0, custom {@link cascading.flow.planner.rule.RuleRegistry} instances can be provided to customize
  * a given planner.
  *
@@ -116,7 +117,7 @@ public abstract class FlowConnector
   /**
    * Method getIntermediateSchemeClass is used for debugging.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @return Class
    */
   public Class getIntermediateSchemeClass( Map<Object, Object> properties )
@@ -172,11 +173,11 @@ public abstract class FlowConnector
   /**
    * Method getProperties returns the properties of this FlowConnector object. The returned Map instance
    * is immutable to prevent changes to the underlying property values in this FlowConnector instance.
-   * <p/>
+   * <p>
    * If a {@link Properties} instance was passed to the constructor, the returned object will be a flattened
    * {@link Map} instance.
    *
-   * @return the properties (type Map<Object, Object>) of this FlowConnector object.
+   * @return the properties (type Map) of this FlowConnector object.
    */
   public Map<Object, Object> getProperties()
     {
@@ -314,7 +315,7 @@ public abstract class FlowConnector
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
-   * <p/>
+   * <p>
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
    * So the head pipe does not need to be included as an argument.
    *
@@ -330,7 +331,7 @@ public abstract class FlowConnector
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
-   * <p/>
+   * <p>
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
    * So the head pipe does not need to be included as an argument.
    *
@@ -347,7 +348,7 @@ public abstract class FlowConnector
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
-   * <p/>
+   * <p>
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
    * So the head pipe does not need to be included as an argument.
    *
@@ -363,7 +364,7 @@ public abstract class FlowConnector
 
   /**
    * Method connect links the named source Taps and sink Tap to the given pipe assembly.
-   * <p/>
+   * <p>
    * Since only once source Tap is given, it is assumed to be associated with the 'head' pipe.
    * So the head pipe does not need to be included as an argument.
    *
@@ -460,7 +461,7 @@ public abstract class FlowConnector
 
   /**
    * Returns the configured RuleRegistry, or the default for this platform.
-   * <p/>
+   * <p>
    * The registry is mutable, and will be applied to all subsequent planner operations via {@link #connect(FlowDef)}.
    *
    * @return the current RuleRegistry instance

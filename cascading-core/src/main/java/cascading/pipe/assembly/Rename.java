@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,14 +31,13 @@ import cascading.tuple.Fields;
 
 /**
  * Class Rename is a {@link SubAssembly} that will rename the fromFields to the names in toFields.
- * <p/>
+ * <p>
  * Note that if any input field names are not given, they will retain their names.
  */
 public class Rename extends SubAssembly
   {
   /**
    * Rename the fromFields in the current Tuple to the given toFields.
-   * <p/>
    * <pre>
    * incoming: {"first", "middle", "last"} -> from:{"middle"} to:{"initial"} -> outgoing:{"first", "last", "initial"}
    * </pre>

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,11 +24,11 @@ package cascading.operation;
 /**
  * Enum AssertionLevel designates the level of a given {@link Assertion} instance. This is used in conjunction with the
  * {@link cascading.flow.FlowConnector} to plan assertions out of a particular {@link cascading.flow.Flow} instance.
- * </p>
+ * <p>
  * Currently Assertions can be denote either VALID or STRICT.
- * </p>
+ * <p>
  * VALID assertions are used to validate data during staging testing or for use in a production environment.
- * </p>
+ * <p>
  * STRICT assertions should be used as unit test would be against regression data and during development.
  */
 public enum AssertionLevel implements PlannerLevel

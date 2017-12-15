@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,27 +38,27 @@ import cascading.util.Util;
 /**
  * A Tuple represents a set of values. Consider a Tuple the same as a database record where every value is a column in
  * that table.
- * <p/>
+ * <p>
  * A "tuple stream" is a set of Tuple instances passed consecutively through a Pipe assembly.
- * <p/>
+ * <p>
  * Tuples work in tandem with {@link Fields} and the {@link TupleEntry} classes. A TupleEntry holds an instance of
  * Fields and a Tuple. It allows a tuple to be accessed by its field names, and will help maintain consistent types
  * if any are given on the Fields instance. That is, if a field is specified at an Integer, calling {@link #set(int, Object)}
  * with a String will force the String to be coerced into a Integer instance.
- * <p/>
+ * <p>
  * For managing custom types, see the {@link CoercibleType} interface which extends {@link Type}.
- * <p/>
+ * <p>
  * Tuple instances created by user code, by default, are mutable (or modifiable).
  * Tuple instances created by the system are immutable (or unmodifiable, tested by calling {@link #isUnmodifiable()}).
- * <p/>
+ * <p>
  * For example tuples returned by
  * {@link cascading.operation.FunctionCall#getArguments()}, will always be unmodifiable. Thus they must be copied
  * if they will be changed by user code or cached in the local context. See the Tuple copy constructor, or {@code *Copy()} methods
  * on {@link TupleEntry}.
- * <p/>
+ * <p>
  * Because a Tuple can hold any Object type, it is suitable for storing custom types. But all custom types
  * must have a serialization support per the underlying framework.
- * <p/>
+ * <p>
  * For Hadoop, a {@link org.apache.hadoop.io.serializer.Serialization} implementation
  * must be registered with Hadoop. For further performance improvements, see the
  * {@link cascading.tuple.hadoop.SerializationToken} Java annotation.
@@ -109,11 +110,11 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
 
   /**
    * Returns a reference to the private elements of the given Tuple.
-   * <p/>
+   * <p>
    * This method is for internal use and is subject to change scope in a future release.
    *
    * @param tuple of type Tuple
-   * @return List<Comparable>
+   * @return List
    */
   public static List<Object> elements( Tuple tuple )
     {
@@ -156,7 +157,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
 
   /**
    * Method isUnmodifiable returns true if this Tuple instance is unmodifiable.
-   * <p/>
+   * <p>
    * "Unmodifiable" tuples are generally owned by the system and cannot be changed, nor should they be cached
    * as the internal values may change.
    *
@@ -169,7 +170,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
 
   /**
    * Method get returns the element at the given position.
-   * <p/>
+   * <p>
    * This method will perform no coercion on the element.
    *
    * @param pos of type int
@@ -497,7 +498,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   /**
    * Method setAll sets each element value of the given Tuple instances into the corresponding
    * position of this instance.
-   * <p/>
+   * <p>
    * All given tuple instances after the first will be offset by the length of the prior tuple instances.
    *
    * @param tuples of type Tuple[]
@@ -778,7 +779,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
 
   /**
    * Method set sets the values in the given selector positions to the values from the given Tuple.
-   * <p/>
+   * <p>
    * If type information is given, each incoming value from tuple will be coerced from its canonical type to the
    * current type as declared in the declarator.
    *

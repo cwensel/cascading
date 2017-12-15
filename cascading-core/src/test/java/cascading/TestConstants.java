@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,21 +40,21 @@ public class TestConstants
   public static final int[] APACHE_COMMON_GROUPS = new int[]{1, 2, 3, 4, 5, 6};
 
   /**
-   * Field APACHE_GROUP_FIELDS are the field names of the groups returned by the APACHE_REGEX.<br/>
+   * Field APACHE_GROUP_FIELDS are the field names of the groups returned by the APACHE_REGEX.<br>
    * These fields are: "time", "method", "event", "status", and "size"
    */
   public static final Fields APACHE_COMMON_GROUP_FIELDS = new Fields( "ip", "time", "method", "event", "status", "size" );
   /**
-   * Field APACHE_REGEX is used to parse Apache log files.<br/>
-   * <code>^[^ ]* +[^ ]* +[^ ]* +\[([^]]*)\] +\"([^ ]*) ([^ ]*) [^ ]*\" ([^ ]*) ([^ ]*).*$</code>
+   * Field APACHE_REGEX is used to parse Apache log files.<br>
+   * {@code ^[^ ]* +[^ ]* +[^ ]* +\[([^]]*)\] +\"([^ ]*) ([^ ]*) [^ ]*\" ([^ ]*) ([^ ]*).*$}
    */
   public static final String APACHE_COMMON_REGEX = "^([^ ]*) +[^ ]* +[^ ]* +\\[([^]]*)\\] +\\\"([^ ]*) ([^ ]*) [^ ]*\\\" ([^ ]*) ([^ ]*).*$";
 
   /** Field APACHE_PARSER is a predefined {@link cascading.operation.regex.RegexParser} for parsing Apache log files */
   public static final RegexParser APACHE_COMMON_PARSER = new RegexParser( APACHE_COMMON_GROUP_FIELDS, APACHE_COMMON_REGEX, APACHE_COMMON_GROUPS );
   /**
-   * Field APACHE_DATE_FORMAT is the text date format of date in an Apache log file. <br/>
-   * <code>dd/MMM/yyyy:HH:mm:ss Z</code>
+   * Field APACHE_DATE_FORMAT is the text date format of date in an Apache log file. <br>
+   * {@code dd/MMM/yyyy:HH:mm:ss Z}
    */
   public static final String APACHE_DATE_FORMAT = "dd/MMM/yyyy:HH:mm:ss Z";
   /** Field APACHE_DATE_PARSER is a convenience {@link cascading.operation.text.DateParser} instance for parsing the date from an Apache log file */

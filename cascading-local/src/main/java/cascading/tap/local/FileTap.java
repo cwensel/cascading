@@ -49,7 +49,7 @@ import cascading.tuple.TupleEntrySchemeIterator;
  * Class FileTap is a {@link Tap} sub-class that allows for direct local file access.
  * <p>
  * This class can only open an single file, see {@link DirTap} for reading from a directory tree.
- * <p/>
+ * <p>
  * FileTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
  * {@link cascading.flow.Flow} instances that run in "local" mode.
  */

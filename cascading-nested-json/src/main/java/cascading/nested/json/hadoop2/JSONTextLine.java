@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,7 +46,7 @@ import org.apache.hadoop.mapred.RecordReader;
 /**
  * A JSONTextLine is a type of {@link cascading.scheme.Scheme} for JSON text files. Files are broken into
  * lines, where each line is a JSON object. Either line-feed or carriage-return are used to signal end of line.
- * <p/>
+ * <p>
  * By default, this scheme returns a {@link Tuple} with one field, "json" with the type {@link JSONCoercibleType}.
  * <p>
  * Any {@link Fields} object passed to the constructor will have the JSONCoercibleType.TYPE type applied.

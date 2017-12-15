@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,19 +29,19 @@ import java.io.InputStream;
  * to be grouped on and/or secondary sorted (via {@link cascading.pipe.GroupBy} and/or {@link cascading.pipe.CoGroup})
  * and the underlying serialization implementation enables a useful bit-wise comparison without deserializing the custom
  * type into memory.
- * <p/>
+ * <p>
  * Typically this interface is used to mark a {@link java.util.Comparator} as additionally
  * supporting the ability to compare raw streams in tandem with comparing Object instances.
  * Thus concrete implementations should implement this interface and the Comparator interface when being used
  * as a "grouping" or "sorting" field Comparator
- * <p/>
+ * <p>
  * When used with Hadoop, a {@link cascading.tuple.hadoop.io.BufferedInputStream} is passed into the
  * {@link #compare(java.io.InputStream, java.io.InputStream)}
  * method. This class gives access to the underlying byte[] array so each individual byte need to be
  * {@link java.io.InputStream#read()}.
  * So it is useful to declare an implementation as
  * {@code public class YourCustomComparator implements StreamComparator&lt;BufferedInputStream>, Comparator&lt;YourCustomType>, Serializable}
- * <p/>
+ * <p>
  * Note the method {@link cascading.tuple.hadoop.io.BufferedInputStream#skip(long)} will need to be called with the number
  * of bytes read from the underlying byte buffer before the compare() method returns.
  *

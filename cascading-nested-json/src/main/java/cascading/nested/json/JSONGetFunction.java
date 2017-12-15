@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -38,7 +38,7 @@ public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
   /**
    * Constructor JSONGetFunction creates a new JSONGetFunction instance.
    *
-   * @param pointerMap of Map<Fields, String>
+   * @param pointerMap of Map
    */
   @ConstructorProperties("pointerMap")
   public JSONGetFunction( Map<Fields, String> pointerMap )
@@ -49,7 +49,7 @@ public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
   /**
    * Constructor JSONGetFunction creates a new JSONGetFunction instance.
    *
-   * @param pointerMap        of Map<Fields, String>
+   * @param pointerMap        of Map
    * @param failOnMissingNode of boolean
    */
   @ConstructorProperties({"pointerMap", "failOnMissingNode"})

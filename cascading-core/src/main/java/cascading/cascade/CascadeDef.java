@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,9 +31,9 @@ import cascading.tap.Tap;
 
 /**
  * Class CascadeDef is a fluent interface for defining a {@link Cascade}.
- * <p/>
+ * <p>
  * This allows for ad-hoc building of Cascade data and meta-data like tags.
- * <p/>
+ * <p>
  * Instead of calling one of the {@link CascadeConnector} connect methods, {@link CascadeConnector#connect(CascadeDef)}
  * can be called.
  *
@@ -62,7 +63,7 @@ public class CascadeDef extends UnitOfWorkDef<CascadeDef>
   /**
    * Method getFlows returns the flows of this CascadeDef object.
    *
-   * @return the flows (type Collection<Flow>) of this CascadeDef object.
+   * @return the flows (type Collection) of this CascadeDef object.
    */
   public Collection<Flow> getFlows()
     {
@@ -133,7 +134,7 @@ public class CascadeDef extends UnitOfWorkDef<CascadeDef>
   /**
    * Method addFlows adds many new {@link cascading.flow.Flow} instances intended to participate in a {@link Cascade}.
    *
-   * @param flows of Collection<Flow>
+   * @param flows of Collection
    * @return CascadeDef
    */
   public CascadeDef addFlows( Collection<Flow> flows )

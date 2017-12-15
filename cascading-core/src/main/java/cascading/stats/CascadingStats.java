@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,7 +35,7 @@ import cascading.util.ProcessLogger;
 /**
  * Class CascadingStats is the base class for all Cascading statistics gathering. It also reports the status of
  * core elements that have state.
- * <p/>
+ * <p>
  * There are eight states the stats object reports; PENDING, SKIPPED, STARTED, SUBMITTED, RUNNING, SUCCESSFUL, STOPPED, and FAILED.
  * <ul>
  * <li>{@code pending} - when the Flow or Cascade has yet to start.</li>
@@ -46,7 +47,7 @@ import cascading.util.ProcessLogger;
  * <li>{@code failed} - when the Flow or Cascade threw an error and failed to finish the workload.</li>
  * <li>{@code successful} - when the Flow or Cascade naturally completed its workload without failure.</li>
  * </ul>
- * <p/>
+ * <p>
  * CascadingStats also reports four unique timestamps.
  * <ul>
  * <li>{@code startTime} - when the {@code start()} method was called.</li>
@@ -54,10 +55,10 @@ import cascading.util.ProcessLogger;
  * <li>{@code runTime} - when the unit of work actually began to execute work. This value may be affected by any "polling interval" in place.</li>
  * <li>{@code finishedTime} - when all work has completed successfully, failed, or stopped.</li>
  * </ul>
- * <p/>
+ * <p>
  * A unit of work is considered {@code finished} when the Flow or Cascade is no longer processing a workload and {@code successful},
  * {@code skipped}, {@code failed}, or {@code stopped} is true.
- * <p/>
+ * <p>
  * It is important to note all the timestamps are client side observations. Not values reported by the underlying
  * platform. That said, the transitions are seen by polling the client interface to the underlying platform so are
  * effected by the {@link cascading.flow.FlowProps#getJobPollingInterval()} value.
@@ -190,7 +191,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
 
   /**
    * Method getThrowableTrace returns the throwableTrace of this CascadingStats object.
-   * <p/>
+   * <p>
    * Will return null if not set.
    *
    * @return the throwableTrace (type String[]) of this CascadingStats object.
@@ -212,7 +213,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
 
   /**
    * Method isSkipped returns true when the works was skipped.
-   * <p/>
+   * <p>
    * Flows are skipped if the appropriate {@link cascading.flow.FlowSkipStrategy#skipFlow(Flow)}
    * returns {@code true};
    *
@@ -593,10 +594,10 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
 
   /**
    * Method getDuration returns the duration the work executed before being finished.
-   * <p/>
+   * <p>
    * This method will return zero until the work is finished. See {@link #getCurrentDuration()}
    * if you wish to poll for the current duration value.
-   * <p/>
+   * <p>
    * Duration is calculated as {@code finishedTime - startTime}.
    *
    * @return the duration (type long) of this CascadingStats object.
@@ -612,7 +613,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
   /**
    * Method getCurrentDuration returns the current duration of the current work whether or not
    * the work is finished. When finished, the return value will be the same as {@link #getDuration()}.
-   * <p/>
+   * <p>
    * Duration is calculated as {@code finishedTime - startTime}.
    *
    * @return the currentDuration (type long) of this CascadingStats object.
@@ -636,16 +637,16 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
    * the given regular expression.
    *
    * @param regex of type String
-   * @return Collection<String>
+   * @return Collection
    */
   public abstract Collection<String> getCounterGroupsMatching( String regex );
 
   /**
    * Method captureDetail will recursively capture details about nested systems. Use this method to persist
    * statistics about a given Cascade, Flow, FlowStep, or FlowNode.
-   * <p/>
+   * <p>
    * Each CascadingStats object must be individually inspected for any system specific details.
-   * <p/>
+   * <p>
    * Each call to this method will refresh the internal cache unless the current Stats object is marked finished. One
    * additional refresh will happen after this instance is marked finished.
    */
@@ -658,7 +659,7 @@ public abstract class CascadingStats<Child> implements ProvidesCounters, Seriali
 
   /**
    * For rate limiting access to the backend.
-   * <p/>
+   * <p>
    * Currently used at the Step and below.
    */
   protected boolean isDetailStale()

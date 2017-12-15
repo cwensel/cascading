@@ -36,7 +36,7 @@ import cascading.tap.TapException;
  * Class TupleEntrySchemeCollector is a helper class for wrapping a {@link Scheme} instance, calling
  * {@link Scheme#sink(cascading.flow.FlowProcess, cascading.scheme.SinkCall)} on every call to {@link #add(TupleEntry)}
  * or {@link #add(Tuple)}.
- * <p/>
+ * <p>
  * Use this class inside a custom {@link cascading.tap.Tap} when overriding the
  * {@link cascading.tap.Tap#openForWrite(cascading.flow.FlowProcess)} method.
  */

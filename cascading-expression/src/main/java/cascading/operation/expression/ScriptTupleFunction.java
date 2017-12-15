@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,26 +32,26 @@ import cascading.tuple.Tuple;
 /**
  * Class ScriptTupleFunction dynamically resolves a given expression using argument {@link cascading.tuple.Tuple} values.
  * This {@link cascading.operation.Function} is based on the <a href="http://www.janino.net/">Janino</a> compiler.
- * <p/>
+ * <p>
  * This class is different from {@link ScriptFunction} in that it requires a new {@link Tuple} instance to be returned
  * by the script. ScriptFunction allows only a single value to be returned, which is passed into a result Tuple instance
  * internally.
- * <p/>
+ * <p>
  * Specifically this function uses the {@link org.codehaus.janino.ScriptEvaluator},
  * thus the syntax from that class is inherited here.
- * <p/>
+ * <p>
  * A script may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
- * <p/>
- * Given an argument tuple with the fields "a" and "b", the following script returns true: <br/>
- * {@code boolean result = (a + b == $0 + $1);}<br/>
- * {@code return cascading.tuple.Tuples.tuple( boolean );}<br/>
- * <p/>
+ * <p>
+ * Given an argument tuple with the fields "a" and "b", the following script returns true: <br>
+ * {@code boolean result = (a + b == $0 + $1);}<br>
+ * {@code return cascading.tuple.Tuples.tuple( boolean );}<br>
+ * <p>
  * Unlike an "expression" used by {@link ExpressionFunction}, a "script" requires each line to end in an semi-colon
  * (@{code ;}) and the final line to be a {@code return} statement that returns a new {@link Tuple} instance.
- * <p/>
+ * <p>
  * Since Janino does not support "varargs", see the {@link cascading.tuple.Tuples} class for helper methods.
- * <p/>
+ * <p>
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the script if possible.
  */
@@ -58,10 +59,10 @@ public class ScriptTupleFunction extends ScriptOperation implements Function<Scr
   {
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors.
-   * <p/>
+   * <p>
    * The {@code returnType} will be retrieved from the given {@code fieldDeclaration.getTypeClass(0)}.
    *
    * @param fieldDeclaration of type Fields
@@ -75,7 +76,7 @@ public class ScriptTupleFunction extends ScriptOperation implements Function<Scr
 
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors, but
    * use {@code expectedTypes} to coerce the incoming types to before passing as parameters to the expression.
@@ -92,7 +93,7 @@ public class ScriptTupleFunction extends ScriptOperation implements Function<Scr
 
   /**
    * Constructor ScriptFunction creates a new ScriptFunction instance.
-   * <p/>
+   * <p>
    * This constructor expects all parameter type names to be declared with their types. Positional parameters must
    * be named the same as in the given script with the "$" sign prepended.
    *

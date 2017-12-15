@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,9 +27,9 @@ import cascading.tuple.Fields;
 
 /**
  * Interface Operation is the base interface for all functions applied to {@link cascading.tuple.Tuple} streams.
- * <p/>
+ * <p>
  * Specifically {@link Function}, {@link Filter}, {@link Aggregator}, {@link Buffer}, and {@link Assertion}.
- * <p/>
+ * <p>
  * Use {@link BaseOperation} for a convenient way to create new Operation types.
  *
  * @see cascading.operation.BaseOperation
@@ -47,12 +48,12 @@ public interface Operation<Context> extends DeclaresResults
    * The prepare method is called immediately before the current Operation instance is put into play processing Tuples.
    * This method should initialize any resources that can be shutdown or released in the
    * {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} method.
-   * <p/>
+   * <p>
    * Any resources created should be stored in the {@code Context}, not as instance fields on the class.
-   * <p/>
+   * <p>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a cleanup invocation immediately before subsequent invocations.
-   * <p/>
+   * <p>
    * If the Flow this Operation instance belongs will execute on a remote cluster, this method will be called
    * cluster side, not client side.
    *
@@ -64,7 +65,7 @@ public interface Operation<Context> extends DeclaresResults
   /**
    * The flush method is called when an Operation that is caching values must empty the cache. It is called before
    * {@link #cleanup(cascading.flow.FlowProcess, OperationCall)} is invoked.
-   * <p/>
+   * <p>
    * It is safe to cast the {@link cascading.operation.OperationCall} to a {@link FunctionCall}, or equivalent, and
    * get its {@link cascading.operation.FunctionCall#getOutputCollector()}.
    *
@@ -77,10 +78,10 @@ public interface Operation<Context> extends DeclaresResults
    * The cleanup method is called immediately after the current Operation instance is taken out of play processing Tuples.
    * This method should shutdown any resources created or initialized during the
    * {@link #prepare(cascading.flow.FlowProcess, OperationCall)} method.
-   * <p/>
+   * <p>
    * This method may be called more than once during the life of this instance. But it will never be called multiple times
    * without a prepare invocation before.
-   * <p/>
+   * <p>
    * If the Flow this Operation instance belongs will execute on a remote cluster, this method will be called
    * cluster side, not client side.
    *
@@ -100,7 +101,7 @@ public interface Operation<Context> extends DeclaresResults
   /**
    * The minimum number of arguments this Operation expects from the calling {@link cascading.pipe.Each} or
    * {@link cascading.pipe.Every} Operator.
-   * <p/>
+   * <p>
    * Operations should be willing to receive more arguments than expected, but should ignore them if they are unused,
    * instead of failing.
    *
@@ -111,9 +112,9 @@ public interface Operation<Context> extends DeclaresResults
   /**
    * Returns {@code true} if this Operation instance can safely execute on the same 'record' multiple
    * times, {@code false} otherwise.
-   * <p/>
+   * <p>
    * That is, this Operation is safe if it has no side-effects, or if it does, they are idempotent.
-   * <p/>
+   * <p>
    * If seeing the same 'record' more than once can cause errors (internally or externally),
    * this method must return {@code false}.
    *

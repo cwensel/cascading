@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,7 +27,7 @@ import java.io.IOException;
  * SingleValueIterator is a utility class used for quickly presenting a single value to a consumer
  * expecting both a {@link java.io.Closeable} and an {@link java.util.Iterator} interface. After returning the Value
  * value via {@link #next}, {@link #hasNext()} will return {@code false}.
- * <p/>
+ * <p>
  * This class is especially useful if you do not wish to create a {@link java.util.Collection} to hold a single value
  * in which to create an Iterator.
  *

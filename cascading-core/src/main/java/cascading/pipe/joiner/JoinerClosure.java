@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,13 +30,13 @@ import cascading.tuple.Tuple;
 
 /**
  * Class JoinerClosure wraps all incoming tuple streams with iterator instances allowing for just join implementations.
- * <p/>
+ * <p>
  * This class is provided to a {@link Joiner#getIterator(JoinerClosure)} implementation, or to a {@link cascading.operation.Buffer}
  * via the {@link cascading.operation.BufferCall#getJoinerClosure()} method.
- * <p/>
+ * <p>
  * All iterators returned by {@link #getIterator(int)} may be retrieved more than once to restart them except for the left
  * most iterator at position {@code 0} (zero).
- * <p/>
+ * <p>
  * This iterator may only be iterated across once. All other iterators are backed by memory and possibly disk.
  */
 public abstract class JoinerClosure
@@ -59,7 +60,7 @@ public abstract class JoinerClosure
 
   /**
    * Returns an array of {@link Fields} denoting the join fields or keys uses for each incoming pipe.
-   * <p/>
+   * <p>
    * The most left handed pipe will be in array position 0.
    *
    * @return an array of Fields
@@ -71,7 +72,7 @@ public abstract class JoinerClosure
 
   /**
    * Returns an array of all the incoming fields for each incoming pipe.
-   * <p/>
+   * <p>
    * The most left handed pipe will be in array position 0;
    *
    * @return an array of Fields
@@ -91,7 +92,7 @@ public abstract class JoinerClosure
   /**
    * Returns a Tuple Iterator for the given pipe position. Position 0 is the most left handed pipe passed to the prior
    * {@link cascading.pipe.CoGroup}.
-   * <p/>
+   * <p>
    * To restart an Iterator over a given pipe, this method must be called again.
    *
    * @param pos of type int

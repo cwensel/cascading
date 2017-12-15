@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,14 +34,14 @@ import static cascading.tuple.collect.SpillableProps.defaultMapLoadFactor;
  * SpillableTupleMap is a HashMap that will allow for multiple values per key, and if the number of values for a given
  * key reach a specific threshold, they will be spilled to disk using a {@link SpillableTupleList} instance. Only
  * values are spilled, keys are not spilled and too many keys can result in a {@link OutOfMemoryError}.
- * <p/>
+ * <p>
  * The {@link cascading.tuple.collect.SpillableProps#MAP_THRESHOLD} value sets the number of total values that this map will
  * strive to keep in memory regardless of the number of keys. This is achieved by dynamically calculating the threshold
  * used by each child SpillableTupleList instance using
  * {@code threshold = Min( list_threshold, map_threshold / current_num_keys ) }.
- * <p/>
+ * <p>
  * To set the list threshold, see {@link cascading.tuple.collect.SpillableProps} fluent helper class.
- * <p/>
+ * <p>
  * This class is used by the {@link cascading.pipe.HashJoin} pipe, to set properties specific to a given
  * join instance, see the {@link cascading.pipe.HashJoin#getConfigDef()} method.
  *

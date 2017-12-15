@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,37 +28,36 @@ import cascading.property.Props;
 /**
  * Class TrapProps is a fluent helper class to set properties which control the behaviour of {@link cascading.tap.Tap}
  * instances used as traps on a given {@link cascading.flow.Flow}.
- * <p/>
+ * <p>
  * A Tap trap is used to capture bad data that has triggered an unhandled {@link java.lang.Throwable} within a
  * Cascading {@link cascading.operation.Operation} or {@link cascading.tap.Tap} (either as a source or sink).
- * <p/>
+ * <p>
  * When a trap captures a failure, the {@link cascading.tuple.Tuple} arguments to the Operation or Tap will be
  * captured and the Flow will continue executing with the next Tuple in the stream. Otherwise a Flow would
  * typically fail.
- * <p/>
+ * <p>
  * Due to the variability of data in the stream at any given point, a Tap trap should be configured with a
  * {@link cascading.scheme.Scheme} that sinks {@link cascading.tuple.Fields#ALL}, or is guaranteed to sink known
  * fields common to all Operations within the branch the trap has been bound too.
- * <p/>
+ * <p>
  * Optionally diagnostic information, with the given field names, may be captured along with the argument Tuple.
- * <p/>
  * <ul>
  * <li>{@code element-trace} - the file and line number the failed operation was instantiated</li>
  * <li>{@code throwable-message} - the {@link Throwable#getMessage()} value</li>
  * <li>{@code throwable-stacktrace} - the {@link Throwable#printStackTrace()} value, cleansed</li>
  * </ul>
- * <p/>
+ * <p>
  * By default, if the Throwable stacktrace is captured, each line of the trace will be trimmed (to remove the
  * TAB character ({@code \t}) and each new line ({@code \n}) will be replaced with a pipe character ({@code |}).
- * <p/>
+ * <p>
  * Each value is prepended to the argument Tuple in the order given above. Since the argument Tuple may vary
  * in size, prepending the diagnostic value deterministically allows for simple grep and sed like commands to be
  * applied to the files.
- * <p/>
+ * <p>
  * Trap properties can be applied to a given Flow by calling {@link #buildProperties()} on the properties instance
  * handed to the target {@link cascading.flow.FlowConnector} or directly to any given Tap via the
  * {@link Tap#getConfigDef()} using {@link #setProperties(cascading.property.ConfigDef)}.
- * <p/>
+ * <p>
  * It should be noted that traps are not intended for 'flow control' of a data stream. They are for exceptional
  * cases that when reached should not cause a Flow to fail. Flow control (sending known bad data down a different
  * branch) should be part of the application. Traps capture the values that are unaccounted for and cause errors,
@@ -111,7 +111,7 @@ public class TrapProps extends Props
 
   /**
    * Method setRecordElementTrace will enable recording the element trace value if set to {@code true}.
-   * <p/>
+   * <p>
    * The default is {@code false}.
    *
    * @param recordElementTrace of type boolean
@@ -131,7 +131,7 @@ public class TrapProps extends Props
 
   /**
    * Method setRecordThrowableMessage will enable recording the Throwable message value if set to {@code true}.
-   * <p/>
+   * <p>
    * The default is {@code false}.
    *
    * @param recordThrowableMessage of type boolean
@@ -151,7 +151,7 @@ public class TrapProps extends Props
 
   /**
    * Method setRecordThrowableStackTrace will enable recording the Throwable stacktrace value if set to {@code true}.
-   * <p/>
+   * <p>
    * The default is {@code false}.
    *
    * @param recordThrowableStackTrace of type boolean
@@ -171,7 +171,7 @@ public class TrapProps extends Props
 
   /**
    * Method setLogThrowableStackTrace will disable logging of the Throwable stacktrace value if set to {@code false}.
-   * <p/>
+   * <p>
    * The default is {@code true}.
    *
    * @param logThrowableStackTrace of type boolean
@@ -192,7 +192,7 @@ public class TrapProps extends Props
   /**
    * Method setStackTraceTrimLine will disable trimming of whitespace on every recorded stacktrace line if set to
    * {@code false}.
-   * <p/>
+   * <p>
    * The default is {@code true}.
    *
    * @param stackTraceTrimLine of type boolean
@@ -212,7 +212,7 @@ public class TrapProps extends Props
 
   /**
    * Method setStackTraceLineDelimiter will set the text delimiter used to denote stacktrace lines.
-   * <p/>
+   * <p>
    * The default is {@code |} (the pipe character).
    *
    * @param stackTraceLineDelimiter of type boolean

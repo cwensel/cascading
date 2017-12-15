@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -42,7 +42,7 @@ import cascading.flow.tez.planner.rule.transformer.BoundaryBalanceGroupSplitSpli
 /**
  * The NoHashJoinHadoop2TezRuleRegistry assumes the plan has no {@link cascading.pipe.HashJoin} Pipes in the
  * assembly, otherwise an planner failure will be thrown.
- * <p/>
+ * <p>
  * This rule registry can be used if the default registry is failing or producing less than optimal plans.
  *
  * @see cascading.flow.tez.planner.HashJoinHadoop2TezRuleRegistry

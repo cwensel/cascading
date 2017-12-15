@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,9 +32,9 @@ import org.apache.hadoop.fs.Path;
 /**
  * Class DistCacheTap is a Tap decorator for Hfs and can be used to move a file to the
  * {@link org.apache.hadoop.filecache.DistributedCache} on read when accessed cluster side.
- * <p/>
+ * <p>
  * This is useful for {@link cascading.pipe.HashJoin}s.
- * <p/>
+ * <p>
  * The distributed cache is only used when the Tap is used as a source. If the DistCacheTap is used as a sink,
  * it will delegate to the provided parent instance and not use the DistributedCache.
  */

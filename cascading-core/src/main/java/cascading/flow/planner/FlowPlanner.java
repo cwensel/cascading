@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -76,7 +76,7 @@ import static java.util.Arrays.asList;
 
 /**
  * Class FlowPlanner is the base class for all planner implementations.
- * <p/>
+ * <p>
  * This planner support tracing execution of each rule. See the appropriate properties on this
  * class to enable.
  */
@@ -91,7 +91,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   /**
    * Enables the planner to write out detail level planner information for each rule, including recursive
    * transforms.
-   * <p/>
+   * <p>
    * Use this to debug rules. This does increase overhead during planning.
    */
   public static final String TRACE_PLAN_TRANSFORM_PATH = "cascading.planner.plan.transforms.path";
@@ -117,7 +117,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   /**
    * Method getAssertionLevel returns the configured target planner {@link cascading.operation.AssertionLevel}.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @return AssertionLevel the configured AssertionLevel
    */
   static AssertionLevel getAssertionLevel( Map<Object, Object> properties )
@@ -130,7 +130,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   /**
    * Method getDebugLevel returns the configured target planner {@link cascading.operation.DebugLevel}.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @return DebugLevel the configured DebugLevel
    */
   static DebugLevel getDebugLevel( Map<Object, Object> properties )
@@ -366,7 +366,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
   /**
    * Method verifyTaps ...
    *
-   * @param taps          of type Map<String, Tap>
+   * @param taps          of type Map
    * @param areSources    of type boolean
    * @param mayNotBeEmpty of type boolean
    */
@@ -386,7 +386,7 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
   /**
    * Method verifyEndPoints verifies
-   * <p/>
+   * <p>
    * there aren't dupe names in heads or tails.
    * all the sink and source tap names match up with tail and head pipes
    */

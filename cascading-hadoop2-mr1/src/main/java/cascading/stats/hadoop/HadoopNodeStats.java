@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -92,7 +93,7 @@ public class HadoopNodeStats extends BaseCachedNodeStats<Configuration, FlowNode
    * Retrieves the TaskReports via the mapreduce API.
    *
    * @param kind The kind of TaskReport to retrieve.
-   * @return An array of TaskReports, but never <code>nul</code>.
+   * @return An array of TaskReports, but never {@code nul}.
    * @throws IOException
    */
   private TaskReport[] retrieveTaskReports( HadoopSliceStats.Kind kind ) throws IOException, InterruptedException

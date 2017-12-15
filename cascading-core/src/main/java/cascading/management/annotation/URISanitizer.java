@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,14 +33,14 @@ import org.slf4j.LoggerFactory;
 /**
  * URISanitizer is an implementation of the Sanitizer interface to sanitize URIs of different kinds
  * (file, HTTP, HDFS, JDBC etc.) Depending on the visibility, the Sanitizer will return different values:
- * <p/>
+ * <p>
  * For hierarchical URIs (jdbc://...):
  * <ul>
  * <li>PUBLIC: Only return the path of the URI</li>
  * <li>PROTECTED: Same as PUBLIC + query parameters</li>
  * <li>PRIVATE: Same as PROTECTED + URI scheme and authority (host/port)</li>
  * </ul>
- * <p/>
+ * <p>
  * For opaque URIs (mailto:someone@email.com):
  * <ul>
  * <li>PUBLIC: Only return the scheme of the URI, 'mailto:' etc</li>
@@ -50,13 +51,13 @@ import org.slf4j.LoggerFactory;
  * Parameters containing sensitive information like user-names, passwords, API-keys etc. can be filtered out by setting
  * the {@link cascading.management.annotation.URISanitizer#PARAMETER_FILTER_PROPERTY} System property to a comma separated
  * list of names that should never show up in the {@link cascading.management.DocumentService}. Some systems may use
- * non-standard URIs, which cannot be parsed by {@link java.net.URI}.</p>
- * <p/>
- * <p>If the sanitizer encounters one of those URIs it
+ * non-standard URIs, which cannot be parsed by {@link java.net.URI}.
+ * <p>
+ * If the sanitizer encounters one of those URIs it
  * will catch the Exception and return an empty String. This can be overruled by setting the
- * {@link cascading.management.annotation.URISanitizer#FAILURE_MODE_PASS_THROUGH} System property to <code>true</code>,
+ * {@link cascading.management.annotation.URISanitizer#FAILURE_MODE_PASS_THROUGH} System property to {@code true},
  * which will cause the actual value being returned. <b>Note</b> that this might leak sensitive information to the
- * {@link cascading.management.DocumentService}.</p>
+ * {@link cascading.management.DocumentService}.
  */
 public class URISanitizer implements Sanitizer
   {
@@ -67,7 +68,7 @@ public class URISanitizer implements Sanitizer
 
   /**
    * System property for listing URI parameters to be filtered out (usernames, passwords etc.)
-   * <p/>
+   * <p>
    * Value cases are ignored, thus {@code UserName} will be equivalent to {@code username}.
    */
   public static final String PARAMETER_FILTER_PROPERTY = "cascading.management.annotation.urisanitizer.parameternames";

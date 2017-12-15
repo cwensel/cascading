@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,7 +31,7 @@ import cascading.tuple.TupleEntry;
 /**
  * Computes the euclidean distance between every unique set of first fields,
  * with using the label and value of each element.
- * <p/>
+ * <p>
  * Expects on input three values: item, label, value
  */
 public class EuclideanDistance extends CrossTab

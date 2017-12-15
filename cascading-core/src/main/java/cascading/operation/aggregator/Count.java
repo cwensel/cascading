@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,7 +34,7 @@ import cascading.util.Pair;
 
 /**
  * Class Count is an {@link Aggregator} that calculates the number of items in the current group.
- * </p>
+ * <p>
  * Note the resulting value for count is always a long. So any comparisons should be against a long value.
  */
 public class Count extends BaseOperation<Pair<Long[], Tuple>> implements Aggregator<Pair<Long[], Tuple>>

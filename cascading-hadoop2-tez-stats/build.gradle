@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -115,8 +116,8 @@ javadoc {
   classpath = files( project.sourceSets.test.compileClasspath )
 
   configure( options ) {
-    links << 'http://hadoop.apache.org/docs/r2.4.0/api/'
-    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString()
+    links << "http://hadoop.apache.org/docs/r${hadoop2Version}/api/".toString()
+    links << "http://tez.apache.org/releases/${tezVersion}/tez-api-javadocs/".toString()
 
 //    linksOffline( '../../../../../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
   }

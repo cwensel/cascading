@@ -38,24 +38,24 @@ import cascading.util.Pair;
 
 /**
  * Class RegexParser is used to extract a matched regex from an incoming argument value.
- * <p/>
+ * <p>
  * RegexParser only expects one field value. If more than one argument value is passed, only the
  * first is handled, the remainder are ignored.
- * <p/>
+ * <p>
  * Sometimes its useful to parse out a value from a key/value pair in a string, if the key exists. If the key does
  * not exist, returning an empty string instead of failing is typically expected.
- * <p/>
+ * <p>
  * The following regex can extract a value from {@code key1=value1&key2=value2} if key1 exists, otherwise an
- * empty string is returned:<br/>
- * <pre>(?<=key1=)[^&]*|$</pre>
- * <p/>
+ * empty string is returned:<br>
+ * {@code (?<=key1=)[^&]*|$}
+ * <p>
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
- * <p/>
+ * <p>
  * Any Object value will be coerced to a String type if type information is provided. See the
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.
- * <p/>
+ * <p>
  * Also, any type information on the declaredFields will also be honored by coercing the parsed String value to the
  * canonical declared type. This is useful when creating or using CoercibleType classes, like
  * {@link cascading.tuple.type.DateType}.
@@ -68,10 +68,10 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the argument Tuple value is matched and returned
    * in a new Tuple.
-   * <p/>
+   * <p>
    * If the given patternString declares regular expression groups, each group will be returned as a value in the
    * resulting Tuple. If no groups are declared, the match will be returned as the only value in the resulting Tuple.
-   * <p/>
+   * <p>
    * The fields returned will be {@link Fields#UNKNOWN}, so a variable number of values may be emitted based on the
    * regular expression given.
    *
@@ -86,13 +86,13 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the argument Tuple value is matched and returned
    * as the given Field.
-   * <p/>
+   * <p>
    * If the given patternString declares regular expression groups, each group will be returned as a value in the
    * resulting Tuple. If no groups are declared, the match will be returned as the only value in the resulting Tuple.
-   * <p/>
+   * <p>
    * If the number of fields in the fieldDeclaration does not match the number of groups matched, an {@link OperationException}
    * will be thrown during runtime.
-   * <p/>
+   * <p>
    * To overcome this, either use the constructors that take an array of groups, or use the {@code (?: ...)} sequence
    * to tell the regular expression matcher to not capture the group.
    *
@@ -108,7 +108,7 @@ public class RegexParser extends RegexOperation<Pair<Matcher, TupleEntry>> imple
   /**
    * Constructor RegexParser creates a new RegexParser instance, where the patternString is a regular expression
    * with match groups and whose groups designated by {@code groups} are stored in the appropriate number of new fields.
-   * <p/>
+   * <p>
    * The number of resulting fields will match the number of groups given ({@code groups.length}).
    *
    * @param patternString of type String

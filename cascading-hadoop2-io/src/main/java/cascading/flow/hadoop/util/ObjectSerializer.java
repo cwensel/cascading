@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,7 +26,7 @@ import java.io.IOException;
 /**
  * Class ObjectSerializer is an experimental interface for allowing custom java.lang.Object subclass serialization
  * other than via the java.io.Serializable interface.
- * <p/>
+ * <p>
  * To use, set the {@link #OBJECT_SERIALIZER_PROPERTY} value on the flow configuration.
  */
 public interface ObjectSerializer

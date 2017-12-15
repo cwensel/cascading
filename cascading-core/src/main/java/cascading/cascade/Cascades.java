@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,7 +33,7 @@ import cascading.tap.Tap;
 /**
  * Class Cascades provides useful utilities for use in constructing {@link Cascade} and {@link cascading.flow.Flow}
  * instances via the {@link CascadeConnector} and {@link cascading.flow.FlowConnector}, respectively.
- * <p/>
+ * <p>
  * See the {@link FlowDef} for the recommended alternative to dealing with Maps of Taps.
  */
 public class Cascades

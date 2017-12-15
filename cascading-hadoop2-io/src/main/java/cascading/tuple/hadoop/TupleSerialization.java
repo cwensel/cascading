@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -81,16 +81,16 @@ import static cascading.tuple.hadoop.TupleSerializationProps.HADOOP_IO_SERIALIZA
 
 /**
  * Class TupleSerialization is an implementation of Hadoop's {@link Serialization} interface.
- * <p/>
+ * <p>
  * Typically developers will not use this implementation directly as it is automatically added
  * to any relevant MapReduce jobs via the {@link org.apache.hadoop.conf.Configuration}.
- * <p/>
+ * <p>
  * By default, all primitive types are natively handled, and {@link org.apache.hadoop.io.BytesWritable}
  * has a pre-configured serialization token since byte arrays are not handled natively by {@link Tuple}.
- * <p/>
+ * <p>
  * To add or manipulate Hadoop serializations or Cascading serializations tokens, see
  * {@link TupleSerializationProps} for a fluent property builder class.
- * <p/>
+ * <p>
  * By default this Serialization interface registers the class {@link org.apache.hadoop.io.ByteWritable} as
  * token 127.
  */
@@ -137,8 +137,8 @@ public class TupleSerialization extends Configured implements Serialization
 
   /**
    * Adds this class as a Hadoop Serialization class. This method is safe to call redundantly.
-   * <p/>
-   * This method will guarantee {@link TupleSerialization} and {@link WritableSerialization} are
+   * <p>
+   * This method will guarantee  and {@link WritableSerialization} are
    * first in the list, as both are required.
    *
    * @param jobConf of type JobConf
@@ -727,12 +727,6 @@ public class TupleSerialization extends Configured implements Serialization
     return new IndexTupleSerializer( getElementWriter() );
     }
 
-  /**
-   * Method accept implements {@link Serialization#accept(Class)}.
-   *
-   * @param c of type Class
-   * @return boolean
-   */
   public boolean accept( Class c )
     {
     return Tuple.class == c ||
@@ -741,12 +735,6 @@ public class TupleSerialization extends Configured implements Serialization
       TuplePair.class == c || IndexTuple.class == c;
     }
 
-  /**
-   * Method getDeserializer implements {@link Serialization#getDeserializer(Class)}.
-   *
-   * @param c of type Class
-   * @return Deserializer
-   */
   public Deserializer getDeserializer( Class c )
     {
     if( c == Tuple.class )
@@ -767,12 +755,6 @@ public class TupleSerialization extends Configured implements Serialization
     throw new IllegalArgumentException( "unknown class, cannot deserialize: " + c.getName() );
     }
 
-  /**
-   * Method getSerializer implements {@link Serialization#getSerializer(Class)}.
-   *
-   * @param c of type Class
-   * @return Serializer
-   */
   public Serializer getSerializer( Class c )
     {
     if( c == Tuple.class )

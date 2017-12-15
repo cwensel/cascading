@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -214,12 +215,12 @@ public class IsomorphismTest extends CascadingTestCase
 
   /**
    * Attempts to test the same tap into CoGroup 'self join' case.
-   * <p/>
+   * <p>
    * that is, split on the tap, then by ordinal, emit to the CoGroup so the
    * join can be affected.
-   * <p/>
+   * <p>
    * In Tez, you cannot have a DAG multigraph, two edges between the same vertices.
-   * <p/>
+   * <p>
    * see https://issues.apache.org/jira/browse/TEZ-1190
    */
   @Test

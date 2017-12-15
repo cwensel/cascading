@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,10 +26,10 @@ import java.util.Properties;
 
 /**
  * Class Props is the base class for frameworks specific properties helper classes.
- * <p/>
+ * <p>
  * Use the sub-classes to either create a {@link Properties} instance with custom or default values to be passed
  * to any sub-system that requires a Map or Properties instance of properties and values.
- * <p/>
+ * <p>
  * Note some Props sub-classes have static accessors. It is recommended the fluent instance methods be used instead
  * of the static methods. All static accessors may be deprecated in future versions.
  */
@@ -36,7 +37,7 @@ public abstract class Props
   {
   /**
    * Method buildProperties returns a new {@link Properties} instance with all property values for this type.
-   * <p/>
+   * <p>
    * If no values have been set, all default properties and values will be returned.
    *
    * @return a new Properties instance
@@ -49,7 +50,7 @@ public abstract class Props
   /**
    * Method buildProperties returns a new {@link Properties} instance with all property values for this type
    * using the given Map of property values as defaults. The given Map will not be modified.
-   * <p/>
+   * <p>
    * If no values have been set, all default properties and values will be returned.
    *
    * @return a new Properties instance
@@ -62,7 +63,7 @@ public abstract class Props
   /**
    * Method buildProperties returns a new {@link Properties} instance with all property values for this type
    * using the given Iterable<Map.Entry<String, String>> of property values as defaults. The given Iterable will not be modified.
-   * <p/>
+   * <p>
    * If no values have been set, all default properties and values will be returned.
    *
    * @return a new Properties instance
@@ -75,7 +76,7 @@ public abstract class Props
   /**
    * Method buildProperties returns a new {@link Properties} instance with all property values for this type
    * using the given Properties instance of property values as defaults. The given Map will not be modified.
-   * <p/>
+   * <p>
    * If no values have been set, all default properties and values will be returned.
    *
    * @return a new Properties instance

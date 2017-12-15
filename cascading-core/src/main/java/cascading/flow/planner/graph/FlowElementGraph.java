@@ -127,8 +127,8 @@ public class FlowElementGraph extends ElementMultiGraph implements AnnotatedGrap
    * Constructor ElementGraph creates a new ElementGraph instance.
    *
    * @param pipes   of type Pipe[]
-   * @param sources of type Map<String, Tap>
-   * @param sinks   of type Map<String, Tap>
+   * @param sources of type Map
+   * @param sinks   of type Map
    */
   public FlowElementGraph( PlatformInfo platformInfo, Pipe[] pipes, Map<String, Tap> sources, Map<String, Tap> sinks, Map<String, Tap> traps, Map<String, Tap> checkpoints, boolean requireUniqueCheckpoints )
     {
@@ -328,7 +328,7 @@ public class FlowElementGraph extends ElementMultiGraph implements AnnotatedGrap
 
   /**
    * Performs one rule check, verifies group does not join duplicate tap resources.
-   * <p/>
+   * <p>
    * Scopes are always named after the source side of the source -> target relationship
    */
   private void makeGraph( Pipe current, Map<String, Tap> sources, Map<String, Tap> sinks )
@@ -432,7 +432,7 @@ public class FlowElementGraph extends ElementMultiGraph implements AnnotatedGrap
   /**
    * Method getTopologicalIterator returns the topologicalIterator of this ElementGraph object.
    *
-   * @return the topologicalIterator (type TopologicalOrderIterator<FlowElement, Scope>) of this ElementGraph object.
+   * @return the topologicalIterator (type TopologicalOrderIterator) of this ElementGraph object.
    */
   public TopologicalOrderIterator<FlowElement, Scope> getTopologicalIterator()
     {
@@ -442,7 +442,7 @@ public class FlowElementGraph extends ElementMultiGraph implements AnnotatedGrap
   /**
    * Method getDepthFirstIterator returns the depthFirstIterator of this ElementGraph object.
    *
-   * @return the depthFirstIterator (type DepthFirstIterator<FlowElement, Scope>) of this ElementGraph object.
+   * @return the depthFirstIterator (type DepthFirstIterator) of this ElementGraph object.
    */
   public DepthFirstIterator<FlowElement, Scope> getDepthFirstIterator()
     {

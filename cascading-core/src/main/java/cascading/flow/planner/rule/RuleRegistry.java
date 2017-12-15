@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,22 +34,22 @@ import cascading.flow.planner.rule.util.RuleLogUtil;
  * RuleRegistry contains all planner rules for a given platform. Where a rule is of type
  * {@link cascading.flow.planner.rule.Rule} and allows for either asserts, transforms, and partitioning
  * of pipe assembly process graphs.
- * <p/>
+ * <p>
  * Process graphs are initially a standard Pipe assembly and connected Taps. And depending on the underlying platform
  * are partitioned into units of execution along the process hierarchy of
  * {@link cascading.flow.planner.rule.ProcessLevel#Assembly}, {@link cascading.flow.planner.rule.ProcessLevel#Step},
  * {@link cascading.flow.planner.rule.ProcessLevel#Node}, and {@link cascading.flow.planner.rule.ProcessLevel#Pipeline}.
- * <p/>
+ * <p>
  * Where the Assembly is the user created pipe assembly and taps. The Steps are physical jobs executed by a platform.
  * Nodes are internal elements of work within a job (a Mapper or Reducer in the case of MapReduce). And Pipelines,
  * which are non-blocking streamed paths within a node. These can be optional.
- * <p/>
+ * <p>
  * Rules rely on a 'language' for sub-graph pattern matching and can be applied against a given process type
  * (Assembly, or Step, etc), to test its correctness, or make changes to the graph. Or they can be used to partition a
  * large graph into a smaller graph, converting an Assembly into Steps.
- * <p/>
+ * <p>
  * Debugging rule sets can be done by enabling system properties, see {@link cascading.flow.planner.FlowPlanner}.
- * <p/>
+ * <p>
  * The {@link cascading.flow.planner.rule.RuleExec} class is responsible for executing on a given rule set.
  */
 public class RuleRegistry
@@ -67,9 +67,9 @@ public class RuleRegistry
 
   /**
    * Method enableDebugLogging forces log4j to emit DEBUG level stats for the planner classes.
-   * <p/>
+   * <p>
    * Use {@link #restoreLogging()} to resume normal logging levels.
-   * <p/>
+   * <p>
    * For planner tracing, see {@link cascading.flow.planner.FlowPlanner} properties.
    */
   public void enableDebugLogging()

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,12 +23,12 @@ package cascading.tap;
 
 /**
  * Enum SinkMode identifies supported modes a Tap may utilize when used as a sink.
- * <p/>
+ * <p>
  * Mode KEEP is the default. Typically a failure will result if the resource exists and there is an attempt to
  * write to it.
- * <p/>
+ * <p>
  * Mode REPLACE will delete/remove the resource before any attempts to write.
- * <p/>
+ * <p>
  * Mode UPDATE will attempt to re-use to the resource, if supported, and update data in place.
  */
 public enum SinkMode

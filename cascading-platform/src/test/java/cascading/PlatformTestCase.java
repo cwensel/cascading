@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,25 +40,25 @@ import org.slf4j.LoggerFactory;
 /**
  * PlatformTestCase is the base class for JUnit tests that are platform agnostic. That is using the {@link TestPlatform}
  * interface each test can be run against all supported platform like Hadoop or Cascading local mode.
- * <p/>
+ * <p>
  * It is strongly recommended users look at the source of {@link FieldedPipesPlatformTest} or related tests to see how
  * this class is used.
- * <p/>
+ * <p>
  * This test case uses the {@link PlatformRunner} to inject the available platform providers which implement the
  * TestPlatform base class.
- * <p/>
+ * <p>
  * By default the PlatformRunner looks for "cascading/platform/platform.properties" file in the classpath, and
  * instantiates the class specified by the "platform.classname" property. If more than one "platform.properties"
  * resource is found, each class is instantiated and the whole suite of tests will be run against each instance.
- * <p/>
+ * <p>
  * To limit this, setting the system property "platform.includes" to list the platform names that should be run will
  * cause the PlatformRunner to ignore any unlisted platforms. Thus setting {@code platform.includes=local}, only
  * local mode will run even if the "hadoop" platform was found in the classpath.
- * <p/>
+ * <p>
  * To pass custom properties to each test to be used by the {@link cascading.flow.FlowConnector}, create
  * system properties prefixed by "platform.". These properties, minus the "platform." prefix in the property name,
  * will override any defaults.
- * <p/>
+ * <p>
  * Subclasses of PlatformTestCase can set "{@code useCluster} to {@code true} on the constructor if the underlying
  * platform can boot a cluster for testing. By setting the system property "test.cluster.enabled" to false, this
  * can be deactivated in order to temporarily speed test execution. By default {@code useCluster} is {@code false},

@@ -37,11 +37,11 @@ import cascading.tuple.TupleEntryIterator;
  * FlowProcess implementations provide a call-back interface into the current computing system. Each
  * {@link cascading.operation.Operation} is given a reference to a particular implementation, allowing it
  * to get configuration properties, send a "keep alive" ping, or to set a counter value.
- * <p/>
+ * <p>
  * Depending on the underlying system, FlowProcess instances are not continuous across all operations in a {@link Flow}.
  * Thus, a call to {@link #increment(Enum, long)} may start incrementing from zero if the operation making the call
  * belongs to a subsequent 'job' or 'step' from any previous operations calling increment.
- * <p/>
+ * <p>
  * A FlowProcess is roughly a child of {@link FlowSession}. FlowSession is roughly one to one with a particular {@link Flow}.
  * And every FlowSession will have one or more FlowProcesses.
  *
@@ -222,7 +222,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Copy constructor.
-   * <p/>
+   * <p>
    * Shares the underlying trap collector collection across copies to avoid a static collection.
    *
    * @param flowProcess
@@ -278,7 +278,7 @@ public abstract class FlowProcess<Config>
   /**
    * Method getNumProcessSlices returns the number of parallel slices or tasks allocated
    * for this process execution.
-   * <p/>
+   * <p>
    * For MapReduce platforms, this is the same as the number of tasks for a given MapReduce job.
    *
    * @return an int
@@ -287,7 +287,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getCurrentSliceNum returns an integer representing which slice instance currently running.
-   * <p/>
+   * <p>
    * {@code 0} (zero) is the first slice instance.
    *
    * @return an int
@@ -296,7 +296,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key of type String
@@ -306,7 +306,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getStringProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key of type String,
@@ -324,7 +324,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getStringProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key          of type String,
@@ -343,7 +343,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getIntegerProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key of type String,
@@ -361,7 +361,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getIntegerProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key          of type String,
@@ -380,7 +380,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getBooleanProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key of type Boolean, null if property is not set
@@ -398,7 +398,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getBooleanProperty should be used to return configuration parameters from the underlying system.
-   * <p/>
+   * <p>
    * In the case of Hadoop, the current Configuration will be queried.
    *
    * @param key          of type String
@@ -418,7 +418,7 @@ public abstract class FlowProcess<Config>
   /**
    * Method getPropertyKeys returns an immutable collection of all available property key values.
    *
-   * @return a Collection<String>
+   * @return a Collection
    */
   public abstract Collection<String> getPropertyKeys();
 
@@ -435,7 +435,7 @@ public abstract class FlowProcess<Config>
    * Method keepAlive notifies the system that the current process is still alive. Use this method if a particular
    * {@link cascading.operation.Operation} takes some moments to complete. Each system is different, so calling
    * ping every few seconds to every minute or so would be best.
-   * <p/>
+   * <p>
    * This method will fail silently if the underlying mechanism to notify keepAlive status are not initialized.
    */
   public abstract void keepAlive();
@@ -443,7 +443,7 @@ public abstract class FlowProcess<Config>
   /**
    * Method increment is used to increment a custom counter. Counters must be of type Enum. The amount
    * to increment must be a integer value.
-   * <p/>
+   * <p>
    * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param counter of type Enum
@@ -453,7 +453,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method increment is used to increment a custom counter. The amount to increment must be a integer value.
-   * <p/>
+   * <p>
    * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param group   of type String
@@ -464,7 +464,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getCounterValue is used to retrieve a counter value.
-   * <p/>
+   * <p>
    * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param counter of type Enum
@@ -473,7 +473,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getCounterValue is used to retrieve a counter value.
-   * <p/>
+   * <p>
    * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param group   of type String
@@ -483,7 +483,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method setStatus is used to set the status of the current operation.
-   * <p/>
+   * <p>
    * This method will fail if the underlying counter infrastructure is unavailable. See {@link #isCounterStatusInitialized()}.
    *
    * @param status of type String
@@ -499,7 +499,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method openTapForRead return a {@link cascading.tuple.TupleEntryIterator} for the given Tap instance.
-   * <p/>
+   * <p>
    * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
    * stored in a Collection.
@@ -532,7 +532,7 @@ public abstract class FlowProcess<Config>
 
   /**
    * Method getConfig returns the actual instance of the underlying configuration instance.
-   * <p/>
+   * <p>
    * This instance should not be modified or cached, see {@link #getConfigCopy()} for a modifiable instance.
    *
    * @return an instance of the configuration

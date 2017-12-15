@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,26 +34,26 @@ import cascading.tuple.Tuples;
 /**
  * Class CountBy is used to count duplicates in a tuple stream, where "duplicates" means all tuples with the same
  * values for the groupingFields fields. The resulting count is output as a long value in the specified countField.
- * <p/>
+ * <p>
  * Typically finding the count of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a
  * {@link cascading.operation.aggregator.Count} {@link cascading.operation.Aggregator} operation.
- * <p/>
+ * <p>
  * The CountBy SubAssembly is a (typically) more efficient replacement for these two steps, because it does map-side
  * pre-reduce counting (via {@link CountBy.CountPartials}  {@link AggregateBy.Functor}) before the GroupBy operator;
  * this reduces network I/O from the map to reduce phases.
- * <p/>
+ * <p>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
- * <p/>
+ * <p>
  * The {@code threshold} value tells the underlying CountPartials functions how many unique key counts to accumulate
  * in the LRU cache, before emitting the least recently used entry. This accumulation happens map-side, and thus is
  * bounded by the size of your map task JVM and the typical size of each group key.
- * <p/>
+ * <p>
  * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
  * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
- * <p/>
+ * <p>
  * If {@code include} is {@link Include#NO_NULLS}, argument tuples with all null values will be ignored.
- * <p/>
+ * <p>
  * The values in the argument Tuple are normally all the remaining fields not used for grouping, but this can be
  * narrowed using the valueFields parameter. When counting the occurrence of a single field (when {@code valueFields}
  * is set on the constructor), this is the same behavior as {@code select count(foo) ...} in SQL. If {@code include} is
@@ -71,7 +72,7 @@ public class CountBy extends AggregateBy
 
   /**
    * Class CountPartials is a {@link AggregateBy.Functor} that is used to count observed duplicates from the tuple stream.
-   * <p/>
+   * <p>
    * Use this class typically in tandem with a {@link cascading.operation.aggregator.Sum}
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.

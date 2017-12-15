@@ -419,7 +419,7 @@ public class ElementGraphs
   /**
    * Returns a new ElementGraph (a MaskedSubGraph) of the given ElementGraph that will not contain the {@link Extent}
    * head or tail instances.
-   * <p/>
+   * <p>
    * If the given ElementGraph does not contain head or tail, it will be returned unchanged.
    *
    * @param elementGraph

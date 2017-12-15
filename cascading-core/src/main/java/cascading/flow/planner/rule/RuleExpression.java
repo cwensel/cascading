@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,34 +27,34 @@ import cascading.flow.planner.iso.expression.ExpressionGraph;
  * A RuleExpression describes where a {@link cascading.flow.planner.rule.Rule} is applied in an element graph. Where
  * a Rule can be a {@link cascading.flow.planner.rule.RuleAssert}, {@link cascading.flow.planner.rule.RuleTransformer},
  * or {@link cascading.flow.planner.rule.partitioner.ExpressionRulePartitioner}.
- * <p/>
+ * <p>
  * To pin down how a Rule behaves and where, a RuleExpression relies on the
  * {@link cascading.flow.planner.iso.expression.ExpressionGraph} class, where an ExpressionGraph is an actual graph
  * of {@link cascading.flow.planner.iso.expression.ElementExpression} nodes and
  * {@link cascading.flow.planner.iso.expression.ScopeExpression} edges.
- * <p/>
+ * <p>
  * This expression graph is analogous to a text Regular Expression. A regular expression is used to match a sub-set
  * of text in a string. This enables efficient string replacement and parsing.
- * <p/>
+ * <p>
  * The expression graph is used to match a smaller graph inside a larger one so that the larger graph can be
  * manipulated. As in a regular expression, elements of the captured graph can be addressed and used.
- * <p/>
+ * <p>
  * The simplest application is to use a single ExpressionGraph to match a portion of a larger graph. Once found,
  * the calling rule can fire. Most commonly this is useful for the RuleAssert rule that looks for a given structure,
  * and if founds throws an error pinpointing the element in the graph that violates the assertion rule.
- * <p/>
+ * <p>
  * The second application is to have one ExpressionGraph identify distinguished elements in a larger graph, and
  * remove them. This is called graph contraction. The structure of the original graph is retained where possible.
  * Think of this as hiding elements in the larger graph so that a second ExpressionGraph can be applied to look
  * for a sub-graph.
- * <p/>
+ * <p>
  * If the second sub-graph is found, the calling Rule can execute. This most commonly used to partition a graph into
  * smaller graphs. For example, any sub-graph with source Taps and a single sink Group (Pipe) is a process Node (Mapper).
- * <p/>
+ * <p>
  * The third application is similar to the second. An ExpressionGraph is used to create a contracted graph of only
  * distinguished elements. The second ExpressionGraph finds a sub-graph in the contracted graph. This contracted
  * sub-graph is then isolated and all hidden elements are restored within the bounds of the sub-graph.
- * <p/>
+ * <p>
  * Finally a third ExpressionGraph is used to identify a location within the new sub-graph so the Rule can execute.
  * This is most commonly used to perform transformations within a graph. For example, to insert a temporary Tap into
  * the full assembly element graph to force boundaries between MapReduce jobs.

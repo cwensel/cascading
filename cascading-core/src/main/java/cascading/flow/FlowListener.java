@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,7 +23,7 @@ package cascading.flow;
 
 /**
  * Interface FlowListener provides hooks for receiving events on various stages of a {@link Flow} execution.
- * <p/>
+ * <p>
  * Any {@link RuntimeException} thrown from any of the listener methods will force the given {@code flow} to
  * stop by calling {@link Flow#stop()}.
  */

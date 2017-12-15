@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,22 +24,21 @@ package cascading.management.annotation;
 /**
  * Visibility controls whether a certain {@link cascading.management.annotation.Property} is visible to a certain
  * audience.
- * <p/>
- * <lu>
+ * <ul>
  * <li>{@link #PRIVATE} - recommended that only a developer or team/project member have access to the value</li>
  * <li>{@link #PROTECTED} - recommended for interested and authorized parties</li>
  * <li>{@link #PUBLIC} - recommended for use as general purpose information</li>
- * </lu>
- * <p/>
+ * </ul>
+ * <p>
  * Note {@link cascading.tap.Tap#getIdentifier()} defines the {@link cascading.management.annotation.Sanitizer}
  * implementation {@link cascading.management.annotation.URISanitizer} which attempts to cleanse the URI identifier
  * for each of the above visibilities.
- * <p/>
+ * <p>
  * It is up to the implementation of a {@link cascading.management.DocumentService} to interpret and use these
  * values.
- * <p/>
+ * <p>
  * Cascading does not enforce any restrictions related to the values, they are considered informative.
- * <p/>
+ * <p>
  * To prevent serialization of any value via the registered {@link cascading.management.DocumentService}, do not
  * mark a field with the Property annotation, or configure the service appropriately.
  */

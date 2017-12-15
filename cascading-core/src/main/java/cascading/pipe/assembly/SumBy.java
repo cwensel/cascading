@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,23 +35,23 @@ import cascading.tuple.type.CoercibleType;
 
 /**
  * Class SumBy is used to sum values associated with duplicate keys in a tuple stream.
- * <p/>
+ * <p>
  * Typically finding the sum of field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a {@link cascading.operation.aggregator.Sum}
  * {@link cascading.operation.Aggregator} operation.
- * <p/>
+ * <p>
  * If all the values to be summed are all {@code null}, the result value is a function of how null is coerced by the
  * given {@code sumType}. If a primitive type, {@code 0} will be returned. Otherwise {@code null}.
- * <p/>
+ * <p>
  * This SubAssembly also uses the {@link SumBy.SumPartials} {@link AggregateBy.Functor}
  * to sum field values before the GroupBy operator to reduce IO over the network.
- * <p/>
+ * <p>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
- * <p/>
+ * <p>
  * The {@code threshold} value tells the underlying SumPartials functions how many unique key sums to accumulate
  * in the LRU cache, before emitting the least recently used entry. This accumulation happens map-side, and thus is
  * bounded by the size of your map task JVM and the typical size of each group key.
- * <p/>
+ * <p>
  * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
  * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
  *
@@ -60,7 +61,7 @@ public class SumBy extends AggregateBy
   {
   /**
    * Class SumPartials is a {@link AggregateBy.Functor} that is used to sum observed duplicates from the tuple stream.
-   * <p/>
+   * <p>
    * Use this class typically in tandem with a {@link cascading.operation.aggregator.Sum}
    * {@link cascading.operation.Aggregator} in order to improve counting performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.

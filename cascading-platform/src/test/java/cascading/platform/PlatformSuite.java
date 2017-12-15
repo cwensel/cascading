@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation PlatformSuite marks any PlatformTestCase as having a
  * {@code static junit.framework.Test suite(TestPlatform platform)} method.
- * <p/>
+ * <p>
  * The method name can be overridden by setting the {@link #method()} value.
  */
 @Retention(RetentionPolicy.RUNTIME)

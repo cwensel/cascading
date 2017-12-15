@@ -56,24 +56,24 @@ import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
 /**
  * A TextLine is a type of {@link cascading.scheme.Scheme} for plain text files. Files are broken into
  * lines. Either line-feed or carriage-return are used to signal end of line.
- * <p/>
+ * <p>
  * By default, this scheme returns a {@link Tuple} with two fields, "offset" and "line".
- * <p/>
+ * <p>
  * Many of the constructors take both "sourceFields" and "sinkFields". sourceFields denote the field names
  * to be used instead of the names "offset" and "line". sinkFields is a selector and is by default {@link Fields#ALL}.
  * Any available field names can be given if only a subset of the incoming fields should be used.
- * <p/>
+ * <p>
  * If a {@link Fields} instance is passed on the constructor as sourceFields having only one field, the return tuples
  * will simply be the "line" value using the given field name.
- * <p/>
+ * <p>
  * Note that TextLine will concatenate all the Tuple values for the selected fields with a TAB delimiter before
  * writing out the line.
- * <p/>
+ * <p>
  * Note sink compression is {@link Compress#DISABLE} by default. If {@code null} is passed to the constructor
  * for the compression value, it will remain disabled.
- * <p/>
+ * <p>
  * If any of the input files end with ".zip", an error will be thrown.
- * * <p/>
+ * * <p>
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
  */

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,10 +29,10 @@ import java.lang.annotation.Target;
 /**
  * PropertyRegexSanitizer is an annotation to be used in conjunction with a Property annotation to sanitize values containing
  * sensitive information with a given regular expression.
- * <p/>
+ * <p>
  * For example, if a Property contains an URL, user names, password, API keys etc, one can supply a regular expression
  * (regex) to remove the sensitive parts.
- * <p/>
+ * <p>
  * Unlike the {@link cascading.management.annotation.PropertySanitizer} annotation, the regular expression is applied
  * once and the result is stored as the value for the declared {@link cascading.management.annotation.Visibility}
  * for the property. See PropertySanitizer if different values should be returned for each Visibility type.

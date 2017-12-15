@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -518,7 +518,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -529,7 +529,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -593,7 +593,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -604,7 +604,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -666,7 +666,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -677,7 +677,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -763,7 +763,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -774,7 +774,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -862,7 +862,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -873,7 +873,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -955,7 +955,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -966,7 +966,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -1048,7 +1048,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -1059,7 +1059,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -1127,7 +1127,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -1138,7 +1138,7 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -1243,19 +1243,19 @@ public class CoGroupFieldedPipesPlatformTest extends PlatformTestCase
    * 6 c
    * 5 b
    * 5 e
-   * <p/>
+   * <p>
    * 1 A
    * 2 B
    * 3 C
    * 4 D
    * 5 E
-   * <p/>
+   * <p>
    * 1 a
    * 2 b
    * 3 c
    * 4 d
    * 5 e
-   * <p/>
+   * <p>
    * 1	a	1	A  1  a
    * -  -   2   B  2  b
    * -  -   3   C  3  c

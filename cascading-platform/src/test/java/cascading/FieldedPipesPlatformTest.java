@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -234,7 +234,7 @@ public class FieldedPipesPlatformTest extends PlatformTestCase
 
   /**
    * Specifically tests GroupBy will return the correct grouping fields to the following Every
-   * <p/>
+   * <p>
    * additionally tests secondary sorting during merging
    *
    * @throws Exception

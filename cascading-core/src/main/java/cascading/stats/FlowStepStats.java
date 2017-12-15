@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -134,16 +135,16 @@ public abstract class FlowStepStats extends CascadingStats<FlowNodeStats>
   /**
    * An internal method that will refresh current counters and, if a clientState client is enabled, the child details
    * including node and slice statistics.
-   * <p/>
+   * <p>
    * All results will be then recorded by the clientState implementation.
-   * <p/>
+   * <p>
    * See {@link #captureDetail()} to force all statistics to be cached and locally accessible.
    */
   public abstract void recordChildStats();
 
   /**
    * Method getProcessStepID returns the ID representing the under platform process.
-   * <p/>
+   * <p>
    * A FlowStep represents a unit of work on a remote platform, in the case of MapReduce, a
    * MapReduce job. The step ID would be the job id.
    *

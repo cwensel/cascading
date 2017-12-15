@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -35,11 +36,11 @@ import static cascading.util.Util.join;
  * Class AppProps is a fluent helper for setting various application level properties that every
  * {@link cascading.flow.Flow} may or may not be required to have set. These properties are typically passed to a Flow
  * via a {@link cascading.flow.FlowConnector}.
- * <p/>
+ * <p>
  * New property settings that may be set in Cascading 2 are application name, version, and any tags.
- * <p/>
+ * <p>
  * See {@link #addTag(String)} for examples of using tags to help manage an application.
- * <p/>
+ * <p>
  * In prior releases, the FlowConnector was responsible for setting the "application jar" class or path. Those
  * methods have been deprecated and moved to AppProps.
  */
@@ -80,7 +81,7 @@ public class AppProps extends Props
 
   /**
    * Method setApplicationJarClass is used to set the application jar file.
-   * </p>
+   * <p>
    * All cluster executed Cascading applications
    * need to call setApplicationJarClass(java.util.Map, Class) or
    * {@link #setApplicationJarPath(java.util.Map, String)}, otherwise ClassNotFound exceptions are likely.
@@ -97,7 +98,7 @@ public class AppProps extends Props
   /**
    * Method getApplicationJarClass returns the Class set by the setApplicationJarClass method.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @return Class
    */
   public static Class getApplicationJarClass( Map<Object, Object> properties )
@@ -118,7 +119,7 @@ public class AppProps extends Props
 
   /**
    * Method setApplicationJarPath is used to set the application jar file.
-   * </p>
+   * <p>
    * All cluster executed Cascading applications
    * need to call {@link #setApplicationJarClass(java.util.Map, Class)} or
    * setApplicationJarPath(java.util.Map, String), otherwise ClassNotFound exceptions are likely.
@@ -135,7 +136,7 @@ public class AppProps extends Props
   /**
    * Method getApplicationJarPath return the path set by the setApplicationJarPath method.
    *
-   * @param properties of type Map<Object, Object>
+   * @param properties of type Map
    * @return String
    */
   public static String getApplicationJarPath( Map<Object, Object> properties )
@@ -235,7 +236,7 @@ public class AppProps extends Props
 
   /**
    * Adds a framework "name:version" string to the property set and to the System properties.
-   * <p/>
+   * <p>
    * Properties may be null. Duplicates are removed.
    *
    * @param properties may be null, additionally adds to System properties
@@ -284,7 +285,7 @@ public class AppProps extends Props
 
   /**
    * Method setName sets the application name.
-   * <p/>
+   * <p>
    * By default the application name is derived from the jar name (values before the version in most Maven
    * compatible jars).
    *
@@ -300,7 +301,7 @@ public class AppProps extends Props
 
   /**
    * Method setVersion sets the application version.
-   * <p/>
+   * <p>
    * By default the application version is derived from the jar name (values after the name in most Maven
    * compatible jars).
    *
@@ -321,20 +322,19 @@ public class AppProps extends Props
 
   /**
    * Method addTag will associate a "tag" with this application. Applications can have an unlimited number of tags.
-   * <p/>
+   * <p>
    * Tags allow applications to be searched and organized by management tools.
-   * <p/>
+   * <p>
    * Tag values are opaque, but adopting a simple convention of 'category:value' allows for complex use cases.
-   * <p/>
+   * <p>
    * Some recommendations for categories are:
-   * <p/>
    * <ul>
-   * <lli>cluster: - the cluster name the application is or should be run against. A name could be logical, like QA or PROD.</lli>
-   * <lli>project: - the project name, possibly a JIRA project name this application is managed under.</lli>
-   * <lli>org: - the group, team or organization that is responsible for the application.</lli>
-   * <lli>support: - the email address of the user who should be notified of failures or issues.</lli>
+   * <li>cluster: - the cluster name the application is or should be run against. A name could be logical, like QA or PROD.</li>
+   * <li>project: - the project name, possibly a JIRA project name this application is managed under.</li>
+   * <li>org: - the group, team or organization that is responsible for the application.</li>
+   * <li>support: - the email address of the user who should be notified of failures or issues.</li>
    * </ul>
-   * <p/>
+   * <p>
    * Note that tags should not contain whitespace characters, even though this is not an error, a warning will be
    * issues.
    *
@@ -351,20 +351,19 @@ public class AppProps extends Props
 
   /**
    * Method addTags will associate the given "tags" with this application. Applications can have an unlimited number of tags.
-   * <p/>
+   * <p>
    * Tags allow applications to be searched and organized by management tools.
-   * <p/>
+   * <p>
    * Tag values are opaque, but adopting a simple convention of 'category:value' allows for complex use cases.
-   * <p/>
+   * <p>
    * Some recommendations for categories are:
-   * <p/>
    * <ul>
-   * <lli>cluster: - the cluster name the application is or should be run against. A name could be logical, like QA or PROD.</lli>
-   * <lli>project: - the project name, possibly a JIRA project name this application is managed under.</lli>
-   * <lli>org: - the group, team or organization that is responsible for the application.</lli>
-   * <lli>support: - the email address of the user who should be notified of failures or issues.</lli>
+   * <li>cluster: - the cluster name the application is or should be run against. A name could be logical, like QA or PROD.</li>
+   * <li>project: - the project name, possibly a JIRA project name this application is managed under.</li>
+   * <li>org: - the group, team or organization that is responsible for the application.</li>
+   * <li>support: - the email address of the user who should be notified of failures or issues.</li>
    * </ul>
-   * <p/>
+   * <p>
    * Note that tags should not contain whitespace characters, even though this is not an error, a warning will be
    * issues.
    *
@@ -391,10 +390,10 @@ public class AppProps extends Props
 
   /**
    * Method addFramework adds a new framework name to the list of frameworks used.
-   * <p/>
+   * <p>
    * Higher level tools should register themselves, and preferably with their version,
    * for example {@code foo-flow-builder:1.2.3}.
-   * <p/>
+   * <p>
    * See {@link #addFramework(String, String)}.
    *
    * @param framework A String
@@ -410,7 +409,7 @@ public class AppProps extends Props
 
   /**
    * Method addFramework adds a new framework name and its version to the list of frameworks used.
-   * <p/>
+   * <p>
    * Higher level tools should register themselves, and preferably with their version,
    * for example {@code foo-flow-builder:1.2.3}.
    *
@@ -430,7 +429,7 @@ public class AppProps extends Props
 
   /**
    * Method addFrameworks adds new framework names to the list of frameworks used.
-   * <p/>
+   * <p>
    * Higher level tools should register themselves, and preferably with their version,
    * for example {@code foo-flow-builder:1.2.3}.
    *
@@ -447,7 +446,7 @@ public class AppProps extends Props
 
   /**
    * Method setJarClass is used to set the application jar file.
-   * </p>
+   * <p>
    * All cluster executed Cascading applications
    * need to call setApplicationJarClass(java.util.Map, Class) or
    * {@link #setApplicationJarPath(java.util.Map, String)}, otherwise ClassNotFound exceptions are likely.
@@ -463,7 +462,7 @@ public class AppProps extends Props
 
   /**
    * Method setJarPath is used to set the application jar file.
-   * </p>
+   * <p>
    * All cluster executed Cascading applications
    * need to call {@link #setJarClass(Class)} or
    * setJarPath(java.util.Map, String), otherwise ClassNotFound exceptions are likely.

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,20 +30,20 @@ import cascading.operation.FilterCall;
 /**
  * Class ScriptFilter dynamically resolves a given expression using argument {@link cascading.tuple.Tuple} values.
  * This {@link cascading.operation.Filter} is based on the <a href="http://www.janino.net/">Janino</a> compiler.
- * <p/>
+ * <p>
  * Specifically this filter uses the {@link org.codehaus.janino.ScriptEvaluator},
  * thus the syntax from that class is inherited here.
- * <p/>
+ * <p>
  * A script may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
- * <p/>
- * Given an argument tuple with the fields "a" and "b", the following script returns true: <br/>
- * <code>boolean result = (a + b == $0 + $1);</code><br/>
- * <code>return boolean;</code><br/>
- * <p/>
+ * <p>
+ * Given an argument tuple with the fields "a" and "b", the following script returns true: <br>
+ * {@code boolean result = (a + b == $0 + $1);}<br>
+ * {@code return boolean;}<br>
+ * <p>
  * Unlike an "expression" used by {@link ExpressionFilter}, a "script" requires each line to end in an semi-colon
  * (@{code ;}) and the final line to be a {@code return} statement.
- * <p/>
+ * <p>
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the script if possible.
  */
@@ -74,7 +75,7 @@ public class ScriptFilter extends ScriptOperation implements Filter<ScriptOperat
 
   /**
    * Constructor ScriptFilter creates a new ScriptFilter instance.
-   * <p/>
+   * <p>
    * This constructor will use the runtime {@link cascading.operation.OperationCall#getArgumentFields()}
    * to source the {@code parameterNames} and {@code parameterTypes} required by the other constructors, but
    * use {@code expectedTypes} to coerce the incoming types to before passing as parameters to the expression.

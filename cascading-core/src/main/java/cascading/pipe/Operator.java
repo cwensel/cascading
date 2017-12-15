@@ -34,7 +34,7 @@ import cascading.tuple.TupleException;
 
 /**
  * An Operator is a type of {@link Pipe}. Operators pass specified arguments to a given {@link cascading.operation.BaseOperation}.
- * </p>
+ * <p>
  * The argFields value select the input fields used by the operation. By default the whole input Tuple is passes as arguments.
  * The outFields value select the fields in the result Tuple returned by this Pipe. By default, the operation results
  * of the given operation replace the input Tuple.

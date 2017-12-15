@@ -28,24 +28,24 @@ import java.util.function.Supplier;
 /**
  * Interface TupleEntryCollector is used to allow {@link cascading.operation.BaseOperation} instances to emit
  * one or more result {@link Tuple} values.
- * <p/>
+ * <p>
  * The general rule in Cascading is if you are handed a Tuple, you cannot change or cache it. Attempts at modifying
  * such a Tuple will result in an Exception. Preventing caching is harder, see below.
- * <p/>
+ * <p>
  * If you create the Tuple, you can re-use or modify it.
- * <p/>
+ * <p>
  * When calling {@link #add(Tuple)} or {@link #add(TupleEntry)}, you are passing a Tuple to the down stream pipes and
  * operations. Since no downstream operation may modify or cache the Tuple instance, it is safe to re-use the Tuple
  * instance when {@code add()} returns.
- * <p/>
+ * <p>
  * That said, Tuple copies do get cached in order to perform specific operations in the underlying platforms. Currently
  * only a shallow copy is made (via the {@link Tuple} copy constructor). Thus, any mutable type or collection
  * placed inside a Tuple will not be copied, but will likely be cached if a copy of the Tuple passed downstream is
  * copied.
- * <p/>
+ * <p>
  * So any subsequent changes to that nested type or collection will be reflected in the cached copy, a likely
  * source of hard to find errors.
- * <p/>
+ * <p>
  * There is currently no way to specify that a deep copy must be performed when making a Tuple copy.
  */
 public abstract class TupleEntryCollector implements Closeable
@@ -83,7 +83,7 @@ public abstract class TupleEntryCollector implements Closeable
   /**
    * Method addTupleEntry inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
    * more efficient as it simply calls {@link TupleEntry#getTuple()};
-   * <p/>
+   * <p>
    * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
    *
    * @param supplier of type Supplier
@@ -96,7 +96,7 @@ public abstract class TupleEntryCollector implements Closeable
   /**
    * Method add inserts the given {@link TupleEntry} into the outgoing stream. Note the method {@link #add(Tuple)} is
    * more efficient as it simply calls {@link TupleEntry#getTuple()};
-   * <p/>
+   * <p>
    * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
    *
    * @param tupleEntry of type TupleEntry
@@ -133,7 +133,7 @@ public abstract class TupleEntryCollector implements Closeable
 
   /**
    * Method addTuple inserts the given {@link Tuple} into the outgoing stream.
-   * <p/>
+   * <p>
    * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
    *
    * @param supplier of type Supplier
@@ -145,7 +145,7 @@ public abstract class TupleEntryCollector implements Closeable
 
   /**
    * Method add inserts the given {@link Tuple} into the outgoing stream.
-   * <p/>
+   * <p>
    * See {@link cascading.tuple.TupleEntryCollector} on when and how to re-use a Tuple instance.
    *
    * @param tuple of type Tuple
@@ -185,11 +185,11 @@ public abstract class TupleEntryCollector implements Closeable
 
   /**
    * Method close closes the underlying resource being written to.
-   * <p/>
+   * <p>
    * This method should be called when when an instance is returned via
    * {@link cascading.tap.Tap#openForWrite(cascading.flow.FlowProcess)}
    * and no more {@link Tuple} instances will be written out.
-   * <p/>
+   * <p>
    * This method must not be called when an instance is returned from {@code getOutputCollector()} from any of
    * the relevant {@link cascading.operation.OperationCall} implementations (inside a Function, Aggregator, or Buffer).
    */

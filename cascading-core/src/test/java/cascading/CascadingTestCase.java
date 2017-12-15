@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -61,7 +61,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * Class CascadingTestCase is the base class for all Cascading tests.
- * <p/>
+ * <p>
  * It included a few helpful utility methods for testing Cascading applications.
  */
 @RunWith(BlockJUnit4ClassRunner.class)

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,7 +28,7 @@ import cascading.util.TraceUtil;
 
 /**
  * Class TapException is thrown from {@link Tap} and {@link cascading.scheme.Scheme} subclasses.
- * <p/>
+ * <p>
  * Use the payload {@link Tuple} constructor if being thrown from inside a Scheme and which for specific data
  * to be trapped by a failure trap Tap. If the payload is not null, and there is a trap covering the source or sink
  * Tap in question, it will be written to the trap Tap.

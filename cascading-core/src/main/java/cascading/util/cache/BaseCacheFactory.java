@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,7 +28,7 @@ import cascading.provider.CascadingFactory;
  * Base class for all CacheFactories for creating {@link CascadingCache} instances. Each sub-assembly using
  * the {@link CascadingCache} facilities has it's own sub-class of this factory so that different Caches
  * can be used for different parts of the same flow.
- * <p/>
+ * <p>
  * A {@link cascading.util.cache.CacheEvictionCallback} can be set and it will be given to each Cache instance created
  * by the factory. If none is set, the Factory will use {@link cascading.util.cache.CacheEvictionCallback#NULL}, which
  * is a no-op implementation of the {@link cascading.util.cache.CacheEvictionCallback} interface.

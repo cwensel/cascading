@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -53,7 +53,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
   /**
    * Constructor NestedGetFunction creates a new NestedGetFunction instance.
    *
-   * @param nestedCoercibleType of NestedCoercibleType<Node, Result>
+   * @param nestedCoercibleType of NestedCoercibleType
    * @param fieldDeclaration    of Fields
    * @param failOnMissingNode   of boolean
    * @param stringPointers      of String...

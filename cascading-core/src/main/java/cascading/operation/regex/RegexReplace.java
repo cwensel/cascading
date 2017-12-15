@@ -38,13 +38,13 @@ import cascading.util.Pair;
 
 /**
  * Class RegexReplace is used to replace a matched regex with a replacement value.
- * <p/>
+ * <p>
  * RegexReplace only expects one field value. If more than one argument value is passed, only the
  * first is handled, the remainder are ignored.
- * <p/>
+ * <p>
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
- * <p/>
+ * <p>
  * Any Object value will be coerced to a String type if type information is provided. See the
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.

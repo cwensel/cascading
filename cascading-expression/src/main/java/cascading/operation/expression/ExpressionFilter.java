@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,18 +33,18 @@ import org.codehaus.janino.ExpressionEvaluator;
  * Class ExpressionFilter dynamically resolves a given expression using argument {@link Tuple} values. Any Tuple that
  * returns true for the given expression will be removed from the stream. This {@link Filter}
  * is based on the <a href="http://www.janino.net/">Janino</a> compiler.
- * <p/>
+ * <p>
  * Specifically this filter uses the {@link ExpressionEvaluator}, thus the syntax from that class is inherited here.
- * <p/>
+ * <p>
  * An expression may use field names directly as parameters in the expression, or field positions with the syntax
  * "$n", where n is an integer.
- * <p/>
- * Given an argument tuple with the fields "a" and "b", the following expression returns true: <br/>
- * <code>a + b == $0 + $1</code><br/>
- * <p/>
+ * <p>
+ * Given an argument tuple with the fields "a" and "b", the following expression returns true: <br>
+ * {@code a + b == $0 + $1}<br>
+ * <p>
  * Further, the types of the tuple elements will be coerced into the given parameterTypes. Regardless of the actual
  * tuple element values, they will be converted to the types expected by the expression.
- * <p/>
+ * <p>
  * Field names used in the expression should be valid Java variable names; for example, '+' or '-' are not allowed.
  * Also the use of a field name that begins with an upper-case character is likely to fail and should be avoided.
  */
@@ -51,11 +52,11 @@ public class ExpressionFilter extends ExpressionOperation implements Filter<Scri
   {
   /**
    * Constructor ExpressionFilter creates a new ExpressionFilter instance.
-   * <p/>
+   * <p>
    * This constructor, when used with incoming arguments that have type information, the argument field
    * names can be used directly in the the expression, for example {@code a + b }. The type of {@code a} and {@code b}
    * will be inherited from the incoming argument fields.
-   * <p/>
+   * <p>
    * Or, if the incoming argument selector is {@link cascading.tuple.Fields#NONE}, an expression using only static method calls
    * or constants can be used, for example {@code Math.random() < SomeClass.someValue() }.
    *

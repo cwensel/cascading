@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class MultiInputSplit implements InputSplit, JobConfigurable
   {
   /**
-   * @deprecated see {@link FileType{@link #CASCADING_SOURCE_PATH}}.
+   * @deprecated see {@link FileType#CASCADING_SOURCE_PATH}.
    */
   @Deprecated
   public static final String CASCADING_SOURCE_PATH = FileType.CASCADING_SOURCE_PATH;
@@ -58,7 +58,7 @@ public class MultiInputSplit implements InputSplit, JobConfigurable
 
   /**
    * Method getCurrentTapSourcePath finds and returns the current source Tap filename path, if any.
-   * <p/>
+   * <p>
    * Use this method inside an Operation to find the current file being processed.
    *
    * @param jobConf

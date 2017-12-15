@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -41,22 +42,22 @@ import cascading.tuple.TupleEntrySchemeIterator;
 /**
  * Class PartitionTap can be used to write tuple streams out to files and sub-directories based on the values in the
  * current {@link cascading.tuple.Tuple} instance.
- * <p/>
+ * <p>
  * The constructor takes a {@link cascading.tap.local.FileTap} {@link cascading.tap.Tap} and a {@link Partition}
  * implementation. This allows Tuple values at given positions to be used as directory names during write
  * operations, and directory names as data during read operations.
- * <p/>
+ * <p>
  * The key value here is that there is no need to duplicate data values in the directory names and inside
  * the data files.
- * <p/>
+ * <p>
  * So only values declared in the parent Tap will be read or written to the underlying file system files. But
  * fields declared by the {@link Partition} will only be read or written to the directory names. That is, the
  * PartitionTap instance will sink or source the partition fields, plus the parent Tap fields. The partition
  * fields and parent Tap fields do not need to have common field names.
- * <p/>
+ * <p>
  * {@code openWritesThreshold} limits the number of open files to be output to. This value defaults to 300 files.
  * Each time the threshold is exceeded, 10% of the least recently used open files will be closed.
- * <p/>
+ * <p>
  * PartitionTap will populate a given {@code partition} without regard to case of the values being used. Thus
  * the resulting paths {@code 2012/June/} and {@code 2012/june/} will likely result in two open files into the same
  * location. Forcing the case to be consistent with a custom Partition implementation or an upstream
@@ -80,7 +81,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
   /**
    * Constructor PartitionTap creates a new PartitionTap instance using the given parent {@link cascading.tap.local.FileTap} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the partition.
-   * <p/>
+   * <p>
    * {@code openWritesThreshold} limits the number of open files to be output to.
    *
    * @param parent              of type Hfs
@@ -110,7 +111,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
   /**
    * Constructor PartitionTap creates a new PartitionTap instance using the given parent {@link cascading.tap.local.FileTap} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the partition.
-   * <p/>
+   * <p>
    * {@code keepParentOnDelete}, when set to true, prevents the parent Tap from being deleted when {@link #deleteResource(Object)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
    *
@@ -128,10 +129,10 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
   /**
    * Constructor PartitionTap creates a new PartitionTap instance using the given parent {@link cascading.tap.local.FileTap} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the partition.
-   * <p/>
+   * <p>
    * {@code keepParentOnDelete}, when set to true, prevents the parent Tap from being deleted when {@link #deleteResource(Object)}
    * is called, typically an issue when used inside a {@link cascading.cascade.Cascade}.
-   * <p/>
+   * <p>
    * {@code openWritesThreshold} limits the number of open files to be output to.
    *
    * @param parent              of type Tap

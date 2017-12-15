@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,22 +24,22 @@ package cascading.pipe;
 /**
  * The Checkpoint pipe, if supported by the current planner, will force data to be persisted at the point in
  * the tuple stream an instance of Checkpoint is inserted into the pipe assembly.
- * <p/>
+ * <p>
  * If a checkpoint {@link cascading.tap.Tap} is added to the {@link cascading.flow.FlowDef} via the
  * {@link cascading.flow.FlowDef#addCheckpoint(Checkpoint, cascading.tap.Tap)} method, that Tap instance
  * will be used to capture the intermediate result sets.
- * <p/>
+ * <p>
  * It is required that any Scheme used as a checkpoint must source {@link cascading.tuple.Fields#UNKNOWN} and
  * sink {@link cascading.tuple.Fields#ALL}.
- * <p/>
+ * <p>
  * If used with a {@link cascading.scheme.hadoop.TextDelimited} {@link cascading.scheme.Scheme} class and
  * the {@code hasHeader} value is {@code true}, a header with the resolved field names will be written to the file.
- * <p/>
+ * <p>
  * This is especially useful for debugging complex flows.
- * <p/>
+ * <p>
  * For the {@link cascading.flow.hadoop.HadoopFlowConnector} and Hadoop platform, a Checkpoint will force a new
  * MapReduce job ({@link cascading.flow.hadoop.HadoopFlowStep} into the {@link cascading.flow.Flow} plan.
- * <p/>
+ * <p>
  * This can be important when used in conjunction with a {@link HashJoin} where all the operations upstream
  * from the HashJoin significantly filter out data allowing it to fit in memory.
  */

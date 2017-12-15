@@ -56,22 +56,22 @@ import cascading.util.Util;
 
 /**
  * A Tap represents the physical data source or sink in a connected {@link cascading.flow.Flow}.
- * </p>
+ * <p>
  * That is, a source Tap is the head end of a connected {@link Pipe} and {@link Tuple} stream, and
  * a sink Tap is the tail end. Kinds of Tap types are used to manage files from a local disk,
  * distributed disk, remote storage like Amazon S3, or via FTP. It simply abstracts
  * out the complexity of connecting to these types of data sources.
- * <p/>
+ * <p>
  * A Tap takes a {@link Scheme} instance, which is used to identify the type of resource (text file, binary file, etc).
  * A Tap is responsible for how the resource is reached.
- * <p/>
+ * <p>
  * By default when planning a Flow, Tap equality is a function of the {@link #getIdentifier()} and {@link #getScheme()}
  * values. That is, two Tap instances are the same Tap instance if they sink/source the same resource and sink/source
  * the same fields.
- * <p/>
+ * <p>
  * Some more advanced taps, like a database tap, may need to extend equality to include any filtering, like the
  * {@code where} clause in a SQL statement so two taps reading from the same SQL table aren't considered equal.
- * <p/>
+ * <p>
  * Taps are also used to determine dependencies between two or more {@link Flow} instances when used with a
  * {@link cascading.cascade.Cascade}. In that case the {@link #getFullIdentifier(Object)} value is used and the Scheme
  * is ignored.
@@ -107,7 +107,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   /**
    * Creates and returns a unique ID for the given Tap, this value is cached and may be used to uniquely identify
    * the Tap instance in properties files etc.
-   * <p/>
+   * <p>
    * This value is generally reproducible assuming the Tap identifier and the Scheme source and sink Fields remain consistent.
    *
    * @param tap of type Tap
@@ -161,7 +161,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
    * Method flowInit allows this Tap instance to initialize itself in context of the given {@link cascading.flow.Flow} instance.
    * This method is guaranteed to be called before the Flow is started and the
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)} event is fired.
-   * <p/>
+   * <p>
    * This method will be called once per Flow, and before {@link #sourceConfInit(cascading.flow.FlowProcess, Object)} and
    * {@link #sinkConfInit(cascading.flow.FlowProcess, Object)} methods.
    *
@@ -174,14 +174,14 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method sourceConfInit initializes this instance as a source.
-   * <p/>
+   * <p>
    * This method maybe called more than once if this Tap instance is used outside the scope of a {@link cascading.flow.Flow}
    * instance or if it participates in multiple times in a given Flow or across different Flows in
    * a {@link cascading.cascade.Cascade}.
-   * <p/>
+   * <p>
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
-   * <p/>
+   * <p>
    * Note that no resources or services should be modified by this method.
    *
    * @param flowProcess of type FlowProcess
@@ -194,16 +194,16 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method sinkConfInit initializes this instance as a sink.
-   * <p/>
+   * <p>
    * This method maybe called more than once if this Tap instance is used outside the scope of a {@link cascading.flow.Flow}
    * instance or if it participates in multiple times in a given Flow or across different Flows in
    * a {@link cascading.cascade.Cascade}.
-   * <p/>
+   * <p>
    * Note this method will be called in context of this Tap being used as a traditional 'sink' and as a 'trap'.
-   * <p/>
+   * <p>
    * In the context of a Flow, it will be called after
    * {@link cascading.flow.FlowListener#onStarting(cascading.flow.Flow)}
-   * <p/>
+   * <p>
    * Note that no resources or services should be modified by this method. If this Tap instance returns true for
    * {@link #isReplace()}, then {@link #deleteResource(Object)} will be called by the parent Flow.
    *
@@ -217,10 +217,10 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method getIdentifier returns a String representing the resource this Tap instance represents.
-   * <p/>
+   * <p>
    * Often, if the tap accesses a filesystem, the identifier is nothing more than the path to the file or directory.
    * In other cases it may be a an URL or URI representing a connection string or remote resource.
-   * <p/>
+   * <p>
    * Any two Tap instances having the same value for the identifier are considered equal.
    *
    * @return String
@@ -252,11 +252,11 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method openForRead opens the resource represented by this Tap instance for reading.
-   * <p/>
+   * <p>
    * {@code input} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
    * via {@link Scheme#sourceConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
    * input type and instantiate it before calling {@code super.openForRead()}.
-   * <p/>
+   * <p>
    * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
    * stored in a Collection.
@@ -270,7 +270,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method openForRead opens the resource represented by this Tap instance for reading.
-   * <p/>
+   * <p>
    * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
    * stored in a Collection.
@@ -286,10 +286,10 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance for writing.
-   * <p/>
+   * <p>
    * This method is used internally and does not honor the {@link SinkMode} setting. If SinkMode is
    * {@link SinkMode#REPLACE}, this call may fail. See {@link #openForWrite(cascading.flow.FlowProcess)}.
-   * <p/>
+   * <p>
    * {@code output} value may be null, if so, sub-classes must inquire with the underlying {@link Scheme}
    * via {@link Scheme#sinkConfInit(cascading.flow.FlowProcess, Tap, Object)} to get the proper
    * output type and instantiate it before calling {@code super.openForWrite()}.
@@ -303,10 +303,10 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method openForWrite opens the resource represented by this Tap instance for writing.
-   * <p/>
+   * <p>
    * This method is for user application use and does honor the {@link SinkMode#REPLACE} settings. That is, if
    * SinkMode is set to {@link SinkMode#REPLACE} the underlying resource will be deleted.
-   * <p/>
+   * <p>
    * Note if {@link SinkMode#UPDATE} is set, the resource will not be deleted.
    *
    * @param flowProcess of type FlowProcess
@@ -474,13 +474,13 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method prepareResourceForRead allows the underlying resource to be notified when reading will begin.
-   * <p/>
+   * <p>
    * This method will be called client side so that any remote or external resources can be initialized.
-   * <p/>
+   * <p>
    * If this method returns {@code false}, an exception will be thrown halting the current Flow.
-   * <p/>
+   * <p>
    * In most cases, resource initialization should happen in the {@link #openForRead(FlowProcess, Object)}  method.
-   * <p/>
+   * <p>
    * This allows for initialization of cluster side resources, like a JDBC driver used to read data from a database,
    * that cannot be passed client to cluster.
    *
@@ -495,16 +495,16 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method prepareResourceForWrite allows the underlying resource to be notified when writing will begin.
-   * <p/>
+   * <p>
    * This method will be called once client side so that any remote or external resources can be initialized.
-   * <p/>
+   * <p>
    * If this method returns {@code false}, an exception will be thrown halting the current Flow.
-   * <p/>
+   * <p>
    * In most cases, resource initialization should happen in the {@link #openForWrite(FlowProcess, Object)} method.
-   * <p/>
+   * <p>
    * This allows for initialization of cluster side resources, like a JDBC driver used to write data to a database,
    * that cannot be passed client to cluster.
-   * <p/>
+   * <p>
    * In the above JDBC example, overriding this method will allow for testing for the existence of and/or creating
    * a remote table used by all individual cluster side tasks.
    *
@@ -520,11 +520,11 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   /**
    * Method commitResource allows the underlying resource to be notified when all write processing is
    * successful so that any additional cleanup or processing may be completed.
-   * <p/>
+   * <p>
    * See {@link #rollbackResource(Object)} to handle cleanup in the face of failures.
-   * <p/>
+   * <p>
    * This method is invoked once client side and not in the cluster, if any.
-   * <p/>
+   * <p>
    * If other sink Tap instance in a given Flow fail on commitResource after called on this instance,
    * rollbackResource will not be called.
    *
@@ -540,9 +540,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   /**
    * Method rollbackResource allows the underlying resource to be notified when any write processing has failed or
    * was stopped so that any cleanup may be started.
-   * <p/>
+   * <p>
    * See {@link #commitResource(Object)} to handle cleanup when the write has successfully completed.
-   * <p/>
+   * <p>
    * This method is invoked once client side and not in the cluster, if any.
    *
    * @param conf of type Config
@@ -577,7 +577,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method getModifiedTime returns the date this resource was last modified.
-   * <p/>
+   * <p>
    * If the resource does not exist, returns zero (0).
    * <p>
    * If the resource is continuous, returns {@link Long#MAX_VALUE}.
@@ -593,7 +593,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method getModifiedTime returns the date this resource was last modified.
-   * <p/>
+   * <p>
    * If the resource does not exist, returns zero (0).
    * <p>
    * If the resource is continuous, returns {@link Long#MAX_VALUE}.
@@ -680,12 +680,12 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   /**
    * Returns a {@link cascading.property.ConfigDef} instance that allows for local properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
-   * <p/>
+   * <p>
    * Any properties set on the configDef will not show up in any {@link Flow} or {@link cascading.flow.FlowStep} process
    * level configuration, but will override any of those values as seen by the current Tap instance method call where a
    * FlowProcess is provided except for the {@link #sourceConfInit(cascading.flow.FlowProcess, Object)} and
    * {@link #sinkConfInit(cascading.flow.FlowProcess, Object)} methods.
-   * <p/>
+   * <p>
    * That is, the {@code *confInit} methods are called before any ConfigDef is applied, so any values placed into
    * a ConfigDef instance will not be visible to them.
    *
@@ -712,11 +712,11 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   /**
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
-   * <p/>
+   * <p>
    * Any properties set on the nodeConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowNode} (in Apache Tez the Vertex configuration). Any value set in the
    * nodeConfigDef will be overridden by the pipe local {@code #getConfigDef} instance.
-   * </p>
+   * <p>
    * Use this method to tweak properties in the process node this tap instance is planned into.
    *
    * @return an instance of ConfigDef
@@ -744,13 +744,13 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   /**
    * Returns a {@link ConfigDef} instance that allows for process level properties to be set and made available via
    * a resulting {@link cascading.flow.FlowProcess} instance when the tap is invoked.
-   * <p/>
+   * <p>
    * Any properties set on the stepConfigDef will not show up in any Flow configuration, but will show up in
    * the current process {@link cascading.flow.FlowStep} (in Hadoop the MapReduce jobconf). Any value set in the
    * stepConfigDef will be overridden by the tap local {@code #getConfigDef} instance.
-   * </p>
+   * <p>
    * Use this method to tweak properties in the process step this tap instance is planned into.
-   * <p/>
+   * <p>
    * Note the {@code *confInit} methods are called before any ConfigDef is applied, so any values placed into
    * a ConfigDef instance will not be visible to them.
    *
@@ -800,7 +800,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method entryStream returns a {@link Stream} of {@link TupleEntry} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStream(Tap, FlowProcess)}.
    * <p>
@@ -842,7 +842,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method entryStreamCopy returns a {@link Stream} of {@link TupleEntry} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * This method returns an TupleEntry instance suitable for caching.
    * <p>
@@ -861,7 +861,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method entryStream returns a {@link Stream} of {@link TupleEntry} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStream(Tap, FlowProcess, Fields)}.
    * <p>
@@ -879,7 +879,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method entryStreamCopy returns a {@link Stream} of {@link TupleEntry} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * Also see {@link cascading.tuple.TupleEntryStream#entryStreamCopy(Tap, FlowProcess)}.
    * <p>
@@ -897,7 +897,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method tupleStream returns a {@link Stream} of {@link Tuple} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * Also see {@link cascading.tuple.TupleStream#tupleStream(Tap, FlowProcess)}.
    *
@@ -911,7 +911,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method tupleStreamCopy returns a {@link Stream} of {@link Tuple} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * This method returns an Tuple instance suitable for caching.
    * <p>
@@ -927,7 +927,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method tupleStream returns a {@link Stream} of {@link Tuple} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * Also see {@link cascading.tuple.TupleStream#tupleStream(Tap, FlowProcess, Fields)}.
    *
@@ -942,7 +942,7 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
 
   /**
    * Method tupleStreamCopy returns a {@link Stream} of {@link Tuple} instances from the given
-   * {@link Tap} instance.
+   * Tap instance.
    * <p>
    * This method returns an Tuple instance suitable for caching.
    * <p>

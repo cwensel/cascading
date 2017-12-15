@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,7 +32,7 @@ import cascading.util.TraceUtil;
 
 /**
  * Class PlannerException is thrown when a job planner fails.
- * <p/>
+ * <p>
  * For debugging purposes, the PlannerException holds a copy of the internal job representation which can be
  * written out to disk and visualized with tools that support the
  * <a href="http://en.wikipedia.org/wiki/DOT_language">DOT file format</a> using the {@link #writeDOT(String)}
@@ -119,7 +120,7 @@ public class PlannerException extends FlowException
    * Constructor PlannerException creates a new PlannerException instance.
    *
    * @param string       of type String
-   * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param elementGraph of type SimpleDirectedGraph
    */
   public PlannerException( String string, ElementGraph elementGraph )
     {
@@ -132,7 +133,7 @@ public class PlannerException extends FlowException
    *
    * @param string       of type String
    * @param throwable    of type Throwable
-   * @param elementGraph of type SimpleDirectedGraph<FlowElement, Scope>
+   * @param elementGraph of type SimpleDirectedGraph
    */
   public PlannerException( String string, Throwable throwable, ElementGraph elementGraph )
     {
@@ -193,7 +194,7 @@ public class PlannerException extends FlowException
   /**
    * Method writeCauseDOT writes the underlying {@link cascading.flow.planner.iso.finder.GraphFinderException}
    * intermediate graph as a DOT file.
-   * <p/>
+   * <p>
    * If the cause is not a GraphFinderException, and the underlying graph doesn't provide a 'writeDOT' method,
    * the method does nothing.
    *

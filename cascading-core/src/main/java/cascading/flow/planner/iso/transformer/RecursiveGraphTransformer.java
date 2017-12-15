@@ -41,12 +41,12 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
   /**
    * Graphs must be transformed iteratively. In order to offset rules that may cause a loop, the recursion depth
    * must be tracked.
-   * <p/>
+   * <p>
    * Some complex graphs may require a very deep search, so this value may need to be increased.
-   * <p/>
+   * <p>
    * During debugging, the depth may need to be shallow so that the trace logs can be written to disk before an
    * OOME causes the planner to exit.
-   * <p/>
+   * <p>
    * This property may be either set at the planner ){@link cascading.flow.FlowConnector} or system level
    * {@link System#getProperties()}.
    */
@@ -152,7 +152,7 @@ public abstract class RecursiveGraphTransformer<E extends ElementGraph> extends 
   /**
    * By default, prepareForMatch returns the same graph, but sub-classes may return a sub-graph, one of many
    * requiring sub-sequent matches.
-   * <p/>
+   * <p>
    * if we are searching the whole graph, there is no need to perform a recursion against the new transformed graph
    */
   protected boolean requiresRecursiveSearch()

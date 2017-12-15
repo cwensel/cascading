@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,19 +31,19 @@ import cascading.operation.FilterCall;
 /**
  * Class RegexFilter will apply the regex patternString against every input Tuple value and filter
  * the Tuple stream accordingly.
- * <p/>
+ * <p>
  * By default, Tuples that match the given pattern are kept, and Tuples that do not
  * match are filtered out. This can be changed by setting removeMatch to true.
- * <p/>
+ * <p>
  * Also, by default, the whole Tuple is matched against the given patternString (tab delimited, unless otherwise
  * specified). If matchEachElement is set to true, the pattern is applied to each Tuple value individually.
- * <p/>
+ * <p>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method
  * {@link java.util.regex.Matcher#find()}.
- * <p/>
+ * <p>
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
- * <p/>
+ * <p>
  * Any Object value will be coerced to a String type via any provided {@link cascading.tuple.type.CoercibleType} on
  * the argument selector or via its {@code toString()} method.
  *

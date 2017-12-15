@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -100,7 +101,7 @@ public class FlowStats extends CascadingStats<FlowStepStats>
   /**
    * Method getStepStats returns the stepStats owned by this FlowStats.
    *
-   * @return the stepStats (type List<StepStats>) of this FlowStats object.
+   * @return the stepStats (type List) of this FlowStats object.
    */
   public List<FlowStepStats> getFlowStepStats()
     {

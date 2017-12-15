@@ -32,19 +32,19 @@ import cascading.util.ForeverValueIterator;
 
 /**
  * Class TupleEntry allows a {@link Tuple} instance and its declaring {@link Fields} instance to be used as a single object.
- * <p/>
+ * <p>
  * Once a TupleEntry is created, its Fields cannot be changed, but the Tuple instance it holds can be replaced or
  * modified. The managed Tuple should not have elements added or removed, as this will break the relationship with
  * the associated Fields instance.
- * <p/>
+ * <p>
  * If type information is provided on the Fields instance, all setters on this class will use that information to
  * coerce the given object to the expected type.
- * <p/>
+ * <p>
  * For example, if position is is of type {@code long}, then {@code entry.setString(0, "9" )} will coerce the "9" to a
  * long {@code 9}. Thus, {@code entry.getObject(0) == 9l}.
- * <p/>
+ * <p>
  * No coercion is performed with the {@link #getObject(Comparable)} and {@link #getObject(int)} methods.
- * <p/>
+ * <p>
  * To set a value without coercion, see the {@link #setRaw(Comparable, Object)} and {@link #setRaw(int, Object)}
  * methods.
  *
@@ -233,7 +233,7 @@ public class TupleEntry
 
   /**
    * Constructor TupleEntry creates a new TupleEntry instance that is a safe copy of the given tupleEntry.
-   * <p/>
+   * <p>
    * The new instance is safe to cache and will be modifiable regardless of the given tupleEntry state.
    *
    * @param tupleEntry of type TupleEntry
@@ -377,10 +377,10 @@ public class TupleEntry
 
   /**
    * Method setTuple sets the tuple of this TupleEntry object, no copy will be performed.
-   * <p/>
+   * <p>
    * If the given tuple is "unmodifiable" ({@code Tuple.isUnmodifiable() == true}) and this TupleEntry is
    * not "unmodifiable", an exception will be thrown.
-   * <p/>
+   * <p>
    * Unmodifiable tuples are generally owned by the system and cannot be be changed and must not be cached.
    *
    * @param tuple the tuple of this TupleEntry object.
@@ -401,10 +401,10 @@ public class TupleEntry
   /**
    * Method setCanonicalTuple replaces each value of the current tuple with the given tuple elements after
    * they are coerced.
-   * <p/>
+   * <p>
    * This method will modify the existing Tuple wrapped by this TupleEntry instance even
    * if it is marked as unmodifiable.
-   * <p/>
+   * <p>
    * If tuple argument is {@code null}, the current tuple will be set to {@code null}.
    *
    * @param tuple to replace the current wrapped Tuple instance
@@ -475,7 +475,7 @@ public class TupleEntry
 
   /**
    * Method getObject returns the value in the given position pos.
-   * <p/>
+   * <p>
    * No coercion is performed if there is an associated coercible type.
    *
    * @param pos position of the element to return.
@@ -488,7 +488,7 @@ public class TupleEntry
 
   /**
    * Method getObject returns the value in the given field or position as the requested type.
-   * <p/>
+   * <p>
    * Coercion is performed to the given type.
    *
    * @param pos position of the element to return.
@@ -501,10 +501,10 @@ public class TupleEntry
 
   /**
    * Method getObject returns the value in the given field or position.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
-   * <p/>
+   * <p>
    * No coercion is performed if there is an associated coercible type.
    *
    * @param fieldName field name or position to return
@@ -518,10 +518,10 @@ public class TupleEntry
 
   /**
    * Method getObject returns the value in the given field or position as the requested type.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
-   * <p/>
+   * <p>
    * Coercion is performed to the given type.
    *
    * @param fieldName field name or position to return
@@ -535,7 +535,7 @@ public class TupleEntry
 
   /**
    * Method set sets the value in the given position.
-   * <p/>
+   * <p>
    * No coercion is performed if there is an associated coercible type.
    *
    * @param pos   position to set
@@ -548,7 +548,7 @@ public class TupleEntry
 
   /**
    * Method set sets the value in the given field or position.
-   * <p/>
+   * <p>
    * No coercion is performed if there is an associated coercible type.
    *
    * @param fieldName field name or position to set
@@ -664,7 +664,7 @@ public class TupleEntry
 
   /**
    * Method getString returns the element for the given field name or position as a String.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -678,7 +678,7 @@ public class TupleEntry
 
   /**
    * Method getFloat returns the element for the given field name or position as a float. Zero if null.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -692,7 +692,7 @@ public class TupleEntry
 
   /**
    * Method getDouble returns the element for the given field name or position as a double. Zero if null.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -706,7 +706,7 @@ public class TupleEntry
 
   /**
    * Method getInteger  returns the element for the given field name or position as an int. Zero if null.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -720,7 +720,7 @@ public class TupleEntry
 
   /**
    * Method getLong returns the element for the given field name or position as a long. Zero if null.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -734,7 +734,7 @@ public class TupleEntry
 
   /**
    * Method getShort returns the element for the given field name or position as a short. Zero if null.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -749,7 +749,7 @@ public class TupleEntry
   /**
    * Method getBoolean returns the element for the given field name or position as a boolean.
    * If the value is (case ignored) the string 'true', a {@code true} value will be returned. {@code false} if null.
-   * <br/>
+   * <br>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -769,11 +769,11 @@ public class TupleEntry
   /**
    * Method selectEntry selects the fields specified in the selector from this instance. If {@link Fields#ALL} or the
    * same fields as declared are given, {@code this} will be returned.
-   * <p/>
+   * <p>
    * The returned TupleEntry will be either modifiable or unmodifiable, depending on the state of this TupleEntry instance.
-   * <p/>
+   * <p>
    * See {@link #selectEntryCopy(Fields)} to guarantee a copy suitable for modifying or caching/storing in a collection.
-   * <p/>
+   * <p>
    * Note this is a bug fix and change from 2.0 and 2.1. In previous versions the modifiable state was dependent
    * on the given selector.
    *
@@ -793,9 +793,9 @@ public class TupleEntry
 
   /**
    * Method selectEntry selects the fields specified in selector from this instance.
-   * <p/>
+   * <p>
    * It is guaranteed to return a new modifiable TupleEntry instance at a cost of copying data.
-   * <p/>
+   * <p>
    * The returned instance is safe to cache.
    *
    * @param selector Fields selector that selects the values to return
@@ -815,11 +815,11 @@ public class TupleEntry
   /**
    * Method selectTuple selects the fields specified in the selector from this instance. If {@link Fields#ALL} or the
    * same fields as declared are given, {@code this.getTuple()} will be returned.
-   * <p/>
+   * <p>
    * The returned Tuple will be either modifiable or unmodifiable, depending on the state of this TupleEntry instance.
-   * <p/>
+   * <p>
    * See {@link #selectTupleCopy(Fields)} to guarantee a copy suitable for modifying or caching/storing in a collection.
-   * <p/>
+   * <p>
    * Note this is a bug fix and change from 2.0 and 2.1. In previous versions the modifiable state was dependent
    * on the given selector.
    *
@@ -844,9 +844,9 @@ public class TupleEntry
 
   /**
    * Method selectTupleCopy selects the fields specified in selector from this instance.
-   * <p/>
+   * <p>
    * It is guaranteed to return a new modifiable Tuple instance at a cost of copying data.
-   * <p/>
+   * <p>
    * The returned instance is safe to cache.
    *
    * @param selector Fields selector that selects the values to return
@@ -909,7 +909,7 @@ public class TupleEntry
   /**
    * Method set sets the values from the given tupleEntry into this TupleEntry instance based on the given
    * tupleEntry field names.
-   * <p/>
+   * <p>
    * If type information is given, each incoming value will be coerced from its canonical type to the current type.
    *
    * @param tupleEntry of type TupleEntry
@@ -976,7 +976,7 @@ public class TupleEntry
   /**
    * Method asIterableOf returns an {@link Iterable} instance that will coerce all Tuple elements
    * into the given {@code type} parameter.
-   * <p/>
+   * <p>
    * This method honors any {@link cascading.tuple.type.CoercibleType} instances on the internal
    * Fields instance for the specified Tuple element.
    *

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,7 +29,7 @@ import org.apache.hadoop.mapred.RecordReader;
 /**
  * RecordReaderIterator is a utility class for handing off a single {@link RecordReader} instance
  * via the {@link java.util.Iterator}.
- * <p/>
+ * <p>
  * This class is frequently used with the {@link cascading.tuple.TupleEntrySchemeIterator} where there is only
  * one RecordReader to iterate values over.
  */

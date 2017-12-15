@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,29 +31,29 @@ import cascading.pipe.Pipe;
 
 /**
  * Interface ElementGraph holds a directed acyclic graph of {@link FlowElement} instances.
- * <p/>
+ * <p>
  * An element graph represents an assembly of {@link Pipe} instances bound to source and sink
  * {@link cascading.tap.Tap} instances.
- * <p/>
+ * <p>
  * Typically an element graph is fed to a {@link cascading.flow.planner.FlowPlanner} which in return creates
  * a collection of new element graph instances that represent an executable version of the original graph.
- * <p/>
+ * <p>
  * During the planning, multiple intermediate element graphs will be created representing the full graph down to
  * elemental sub-graphs.
- * <p/>
+ * <p>
  * There are many concrete implementations of the ElementGraph interface to support this process.
- * <p/>
+ * <p>
  * Frequently an element graph will have a single head represented by the singleton {@link Extent#head} and
  * a single tail represented by the singleton {@link Extent#tail}. These are markers to improve the navigability
  * of the element graph. They can be simply masked by wrapping an element graph instance with a
  * {@link ElementMaskSubGraph} class.
- * <p/>
+ * <p>
  * An element graph may be annotated if it implements the {@link AnnotatedGraph} interface.
- * <p/>
+ * <p>
  * Annotated graphs have FlowElement instances that may have {@link Enum} instances associated with them. A given
  * planner may have rules that apply annotations to various elements that inform a given platform during execuction
  * or downstream rules in the planner {@link cascading.flow.planner.rule.RuleRegistry}.
- * <p/>
+ * <p>
  * Any element graph can be written to a DOT file format for visualization via the {@link #writeDOT(String)} method.
  *
  * @see ElementDirectedGraph

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,16 +23,16 @@ package cascading.util;
 
 /**
  * Murmur3 is a fast non cryptographic hash algorithm. This class implements the 32bit version of Murmur 3.
- * <p/>
+ * <p>
  * The code has been taken from the guava project:
  * https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/hash/Murmur3_32HashFunction.java
  */
 
 /*
-* Source:
-* http://code.google.com/p/smhasher/source/browse/trunk/MurmurHash3.cpp
-* (Modified to adapt to Guava coding conventions and to use the HashFunction interface)
-*/
+ * Source:
+ * http://code.google.com/p/smhasher/source/browse/trunk/MurmurHash3.cpp
+ * (Modified to adapt to Guava coding conventions and to use the HashFunction interface)
+ */
 public class Murmur3
   {
   private static final int C1 = 0xcc9e2d51;

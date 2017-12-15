@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,10 +30,10 @@ public interface FunctionCall<C> extends OperationCall<C>
   {
   /**
    * Returns {@link TupleEntry} of argument values.
-   * <p/>
+   * <p>
    * Note that the returned TupleEntry should not be cached (stored in a Collection), nor should the underlying Tuple
    * instance. Where possible Cascading will re-use both TupleEntry and Tuple instances.
-   * <p/>
+   * <p>
    * To get a safe copy that can be cached, use {@link TupleEntry#getTupleCopy()}.
    *
    * @return TupleEntry

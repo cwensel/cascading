@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -44,7 +45,7 @@ import static cascading.util.Util.asList;
 /**
  * Class MultiMapReduceFlow is a {@link cascading.flow.hadoop.HadoopFlow} subclass that supports custom MapReduce jobs
  * pre-configured via one or more {@link JobConf} objects.
- * <p/>
+ * <p>
  * Use this class to group multiple JobConf instances together as a single Flow. MultiMapReduceFlow will automatically
  * topologically order the JobConf instances and schedule them on the cluster once {@link #start()} or {@link #complete()}
  * are called.
@@ -67,7 +68,7 @@ import static cascading.util.Util.asList;
  * {@link #createSources(org.apache.hadoop.mapred.JobConf)}, {@link #createSinks(org.apache.hadoop.mapred.JobConf)}, and
  * {@link #createTraps(org.apache.hadoop.mapred.JobConf)} methods to properly resolve the configured paths into
  * usable {@link Tap} instances. By default createTraps returns an empty collection and should probably be left alone.
- * <p/>
+ * <p>
  * MultiMapReduceFlow supports both org.apache.hadoop.mapred.* and org.apache.hadoop.mapreduce.* API Jobs.
  */
 public class MultiMapReduceFlow extends BaseMapReduceFlow
@@ -98,7 +99,7 @@ public class MultiMapReduceFlow extends BaseMapReduceFlow
   /**
    * Constructor MultiMapReduceFlow creates a new MultiMapReduceFlow instance.
    *
-   * @param properties of Map<Object, Object>
+   * @param properties of Map
    * @param name       of String
    * @param jobConf    of JobConf
    * @param jobConfs   of JobConf...
@@ -113,9 +114,9 @@ public class MultiMapReduceFlow extends BaseMapReduceFlow
   /**
    * Constructor MultiMapReduceFlow creates a new MultiMapReduceFlow instance.
    *
-   * @param properties     of Map<Object, Object>
+   * @param properties     of Map
    * @param name           of String
-   * @param flowDescriptor of Map<String, String>
+   * @param flowDescriptor of Map
    * @param jobConf        of JobConf
    * @param jobConfs       of JobConf...
    */
@@ -129,9 +130,9 @@ public class MultiMapReduceFlow extends BaseMapReduceFlow
   /**
    * Constructor MultiMapReduceFlow creates a new MultiMapReduceFlow instance.
    *
-   * @param properties     of Map<Object, Object>
+   * @param properties     of Map
    * @param name           of String
-   * @param flowDescriptor of Map<String, String>
+   * @param flowDescriptor of Map
    * @param stopJobsOnExit of boolean
    * @param jobConf        of JobConf
    * @param jobConfs       of JobConf...
@@ -148,7 +149,7 @@ public class MultiMapReduceFlow extends BaseMapReduceFlow
    * Constructor MultiMapReduceFlow creates a new MultiMapReduceFlow instance.
    *
    * @param platformInfo of PlatformInfo
-   * @param properties   of Map<Object, Object>
+   * @param properties   of Map
    * @param name         of String
    */
   protected MultiMapReduceFlow( PlatformInfo platformInfo, Map<Object, Object> properties, String name )
@@ -160,9 +161,9 @@ public class MultiMapReduceFlow extends BaseMapReduceFlow
    * Constructor MultiMapReduceFlow creates a new MultiMapReduceFlow instance.
    *
    * @param platformInfo   of PlatformInfo
-   * @param properties     of Map<Object, Object>
+   * @param properties     of Map
    * @param name           of String
-   * @param flowDescriptor of Map<String, String>
+   * @param flowDescriptor of Map
    */
   protected MultiMapReduceFlow( PlatformInfo platformInfo, Map<Object, Object> properties, String name, Map<String, String> flowDescriptor )
     {

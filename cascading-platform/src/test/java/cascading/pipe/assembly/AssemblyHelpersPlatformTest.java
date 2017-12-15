@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -963,7 +964,6 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
   /**
    * Tests chained merge + AggregateBy, which really tests the complete() calls within the pipeline. when failing
    * the map side functor function will fail during a flush
-   * <p/>
    *
    * @throws IOException
    */

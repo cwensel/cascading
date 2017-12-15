@@ -97,8 +97,19 @@ subprojects {
       encoding = "UTF8"
       bottom = copyright
       links = [
-        'http://docs.oracle.com/javase/7/docs/api/',
-        'http://junit.sourceforge.net/javadoc/'
+        'http://docs.oracle.com/javase/8/docs/api/',
+        'http://junit.sourceforge.net/javadoc/',
+        "http://${s3UploadDocs.destination}javadoc/cascading-core".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-local".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-common".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-io".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-mr1".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-tez".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-tez-stats".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-expression".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-nested".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-nested-json".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-platform".toString()
       ]
     }
   }
@@ -213,7 +224,7 @@ task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
     encoding = "UTF8"
     bottom = copyright
     links = [
-      'http://docs.oracle.com/javase/7/docs/api/',
+      'http://docs.oracle.com/javase/8/docs/api/',
       'http://junit.sourceforge.net/javadoc/'
     ]
   }
@@ -290,9 +301,9 @@ task buildLatestMeta( dependsOn: buildPackage ) {
 
 buildLatestMeta.doLast {
 
-  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-  df.setTimeZone(TimeZone.getTimeZone("UTC"))
-  String isoUTC = df.format(new Date())
+  def df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm'Z'" )
+  df.setTimeZone( TimeZone.getTimeZone( "UTC" ) )
+  String isoUTC = df.format( new Date() )
 
   def destination = s3UploadArtifacts.source
   def releaseTar = buildPackage.archivePath.name

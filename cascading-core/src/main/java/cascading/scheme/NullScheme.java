@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,7 +29,7 @@ import cascading.tuple.Fields;
 
 /**
  * Class NullScheme is a {@link Scheme} that neither reads or writes any values.
- * <p/>
+ * <p>
  * It is typically used as a placeholder where a Scheme instance is needed but generally ignored.
  */
 public class NullScheme<Config, Input, Output, SourceContext, SinkContext> extends Scheme<Config, Input, Output, SourceContext, SinkContext>

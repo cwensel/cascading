@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,13 +32,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of the {@link CascadingCache} interface backed by a {@link java.util.LinkedHashMap} configured to
  * evict the least recently used key.
- * <p/>
+ * <p>
  * That is, if duplicate keys are clustered near each other in the incoming tuple stream, this cache will provide the
  * most benefit as keys that begin to occur less frequently or not at all will be evicted as the key capacity is reached.
- * <p/>
+ * <p>
  * If the keys are very random, if not uniformly distributed in the stream, consider using the
  * {@link cascading.util.cache.DirectMappedCache} to reduce the amount of hash and equality comparisons.
- * <p/>
+ * <p>
  * This implementation is used by default by {@link cascading.pipe.assembly.Unique} and
  * {@link cascading.pipe.assembly.AggregateBy} and their subclasses.
  *

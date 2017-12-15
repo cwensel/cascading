@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,14 +41,14 @@ import org.apache.hadoop.mapred.RecordReader;
 /**
  * Class GlobHfs is a type of {@link cascading.tap.MultiSourceTap} that accepts Hadoop style 'file globing' expressions so
  * multiple files that match the given pattern may be used as the input sources for a given {@link cascading.flow.Flow}.
- * <p/>
+ * <p>
  * See {@link FileSystem#globStatus(org.apache.hadoop.fs.Path)} for details on the globing syntax. But in short
  * it is similar to standard regular expressions except alternation is done via {foo,bar} instead of (foo|bar).
- * <p/>
+ * <p>
  * Note that a {@link cascading.flow.Flow} sourcing from GlobHfs is not currently compatible with the {@link cascading.cascade.Cascade}
  * scheduler. GlobHfs expects the files and paths to exist so the wildcards can be resolved into concrete values so
  * that the scheduler can order the Flows properly.
- * <p/>
+ * <p>
  * Note that globing can match files or directories. It may consume less resources to match directories and let
  * Hadoop include all sub-files immediately contained in the directory instead of enumerating every individual file.
  * Ending the glob path with a {@code /} should match only directories.

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,17 +29,17 @@ import cascading.tuple.TupleEntry;
 /**
  * The Partition interface allows for custom partitioning mechanisms to be created with the {@link BasePartitionTap}
  * sub-classes.
- * <p/>
+ * <p>
  * A partition is a directory on a filesystem, where the directory contains data related to the files underneath
  * the partition directory.
- * <p/>
+ * <p>
  * For example, a partition could be {@code "2012/09/01"}, which would contain log files for that day.
  */
 public interface Partition extends Serializable
   {
   /**
    * Returns the directory search depth of the partition.
-   * <p/>
+   * <p>
    * For example, a Partition implementation that returns values like {@code "2012/09/01"} would have a depth of 3.
    *
    * @return an int

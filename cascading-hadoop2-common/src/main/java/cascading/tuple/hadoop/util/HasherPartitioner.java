@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,7 +33,7 @@ import org.apache.hadoop.conf.Configuration;
 
 /**
  * Super class of all Hadoop partitioners.
- * <p/>
+ * <p>
  * As of Cascading 2.7 the hashing used to calculate partitions has been changed to use Murmur3. Users that rely on the
  * old behaviour should set {@link cascading.tuple.hadoop.util.HasherPartitioner#HASHER_PARTITIONER_USE_LEGACY_HASH} to
  * {@code true}.

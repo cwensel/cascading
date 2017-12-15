@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,7 +26,7 @@ import cascading.tuple.TupleEntry;
 
 /**
  * Class GroupAssertion is a kind of {@link Assertion} used with the {@link cascading.pipe.Every} pipe Operator.
- * <p/>
+ * <p>
  * Implementers should also extend {@link BaseOperation}.
  *
  * @see Aggregator
@@ -34,14 +35,14 @@ public interface GroupAssertion<C> extends Assertion<C>
   {
   /**
    * Method start initializes the aggregation procedure and is called for every unique grouping.
-   * <p/>
+   * <p>
    * The AggregatorCall context should be initialized here if necessary.
-   * <p/>
+   * <p>
    * The first time this method is called for a given 'process', the AggregatorCall context will be null. This method should
    * set a new instance of the user defined context object. When the AggregatorCall context is not null, it is up to
    * the developer to create a new instance, or 'recycle' the given instance. If recycled, it must be re-initialized to
    * remove any previous state/values.
-   * <p/>
+   * <p>
    * For example, if a Map is used to hold the intermediate data for each subsequent
    * {@link #aggregate(cascading.flow.FlowProcess, GroupAssertionCall)} call,
    * new HashMap() should be set on the AggregatorCall instance when {@link cascading.operation.AggregatorCall#getContext()} is null.

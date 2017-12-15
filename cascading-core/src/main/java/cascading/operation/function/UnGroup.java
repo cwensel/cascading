@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,17 +41,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class UnGroup is a {@link Function} that will 'un-group' data from a given dataset.
- * <p/>
+ * <p>
  * That is, for the given field positions, this function will emit a new Tuple for every value. For example:
- * <p/>
  * <pre>
  * A, x, y
  * B, x, z
  * C, y, z
  * </pre>
- * <p/>
+ * <p>
  * to:
- * <p/>
  * <pre>
  * A, x
  * A, y

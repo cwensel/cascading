@@ -45,50 +45,50 @@ import cascading.util.Util;
  * Class Fields represents the field names in a {@link Tuple}. A tuple field may be a literal String value representing a
  * name, or it may be a literal Integer value representing a position, where positions start at position 0.
  * A Fields instance may also represent a set of field names and positions.
- * <p/>
+ * <p>
  * Fields are used as both declarators and selectors. A declarator declares that a given {@link Tap} or
  * {@link cascading.operation.Operation} returns the given field names, for a set of values the size of
  * the given Fields instance. A selector is used to select given referenced fields from a Tuple.
- * For example; <br/>
- * <code>Fields fields = new Fields( "a", "b", "c" );</code><br/>
+ * For example; <br>
+ * {@code Fields fields = new Fields( "a", "b", "c" );}<br>
  * This creates a new Fields instance with the field names "a", "b", and "c". This Fields instance can be used as both
  * a declarator or a selector, depending on how it's used.
- * <p/>
- * Or For example; <br/>
- * <code>Fields fields = new Fields( 1, 2, -1 );</code><br/>
+ * <p>
+ * Or For example; <br>
+ * {@code Fields fields = new Fields( 1, 2, -1 );}<br>
  * This creates a new Fields instance that can only be used as a selector. It would select the second, third, and last
  * position from a given Tuple instance, assuming it has at least four positions. Since the original field names for those
  * positions will carry over to the new selected Tuple instance, if the original Tuple only had three positions, the third
  * and last positions would be the same, and would throw an error on there being duplicate field names in the selected
  * Tuple instance.
- * <p/>
+ * <p>
  * Additionally, there are eight predefined Fields sets used for different purposes; {@link #NONE}, {@link #ALL}, {@link #GROUP},
  * {@link #VALUES}, {@link #ARGS}, {@link #RESULTS}, {@link #UNKNOWN}, {@link #REPLACE}, and {@link #SWAP}.
- * <p/>
+ * <p>
  * The {@code NONE} Fields set represents no fields.
- * <p/>
+ * <p>
  * The {@code ALL} Fields set is a "wildcard" that represents all the current available fields.
- * <p/>
+ * <p>
  * The {@code GROUP} Fields set represents all the fields used as grouping values in a previous {@link cascading.pipe.Splice}.
  * If there is no previous Group in the pipe assembly, the GROUP represents all the current field names.
- * <p/>
+ * <p>
  * The {@code VALUES} Fields set represent all the fields not used as grouping fields in a previous Group.
- * <p/>
+ * <p>
  * The {@code ARGS} Fields set is used to let a given Operation inherit the field names of its argument Tuple. This Fields set
  * is a convenience and is typically used when the Pipe output selector is {@code RESULTS} or {@code REPLACE}.
- * <p/>
+ * <p>
  * The {@code RESULTS} Fields set is used to represent the field names of the current Operations return values. This Fields
  * set may only be used as an output selector on a Pipe. It effectively replaces in the input Tuple with the Operation result
  * Tuple.
- * <p/>
+ * <p>
  * The {@code UNKNOWN} Fields set is used when Fields must be declared, but how many and their names is unknown. This allows
  * for arbitrarily length Tuples from an input source or some Operation. Use this Fields set with caution.
- * <p/>
+ * <p>
  * The {@code REPLACE} Fields set is used as an output selector to inline replace values in the incoming Tuple with
  * the results of an Operation. This is a convenience Fields set that allows subsequent Operations to 'step' on the
  * value with a given field name. The current Operation must always use the exact same field names, or the {@code ARGS}
  * Fields set.
- * <p/>
+ * <p>
  * The {@code SWAP} Fields set is used as an output selector to swap out Operation arguments with its results. Neither
  * the argument and result field names or size need to be the same. This is useful for when the Operation arguments are
  * no longer necessary and the result Fields and values should be appended to the remainder of the input field names
@@ -216,9 +216,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Method join joins all given Fields instances into a new Fields instance.
-   * <p/>
+   * <p>
    * Use caution with this method, it does not assume the given Fields are either selectors or declarators. Numeric position fields are left untouched.
-   * <p/>
+   * <p>
    * If the resulting set of fields and ordinals is length zero, {@link Fields#NONE} will be returned.
    *
    * @param fields of type Fields
@@ -326,10 +326,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method merge merges all given Fields instances into a new Fields instance where a merge is a set union of all the
    * given Fields instances.
-   * <p/>
+   * <p>
    * Thus duplicate positions or field names are allowed, they are subsequently discarded in favor of the first
    * occurrence. That is, merging "a" and "a" would yield "a", not "a, a", yet merging "a,b" and "c" would yield "a,b,c".
-   * <p/>
+   * <p>
    * Use caution with this method, it does not assume the given Fields are either selectors or declarators. Numeric position fields are left untouched.
    *
    * @param fields of type Fields
@@ -571,10 +571,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Method asDeclaration returns a new Fields instance for use as a declarator based on the given fields value.
-   * <p/>
+   * <p>
    * Typically this is used to convert a selector to a declarator. Simply, all numeric position fields are replaced
    * by their absolute position.
-   * <p/>
+   * <p>
    * Comparators are preserved in the result.
    *
    * @param fields of type Fields
@@ -917,9 +917,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method hasRelativePos returns true if any ordinal position is relative (< 0)
+   * Method hasRelativePos returns true if any ordinal position is relative (&lt; 0)
    *
-   * @return true if any ordinal position is relative (< 0)
+   * @return true if any ordinal position is relative (&lt; 0)
    */
   public boolean hasRelativePos()
     {
@@ -1180,7 +1180,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Method subtract returns the difference between this instance and the given fields instance.
-   * <p/>
+   * <p>
    * See {@link #append(Fields)} for adding field names.
    *
    * @param fields of type Fields
@@ -1224,12 +1224,12 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance suitable
    * for use as a field declaration.
-   * <p/>
+   * <p>
    * That is, any positional elements (including relative positions like {@code -1}, will be ignored during the
    * append. For example, the second {@code 0} position is lost in the result.
-   * <p/>
+   * <p>
    * {@code assert new Fields( 0, "a" ).append( new Fields( 0, "b" ).equals( new Fields( 0, "a", 2, "b" )}
-   * <p/>
+   * <p>
    * See {@link #subtract(Fields)} for removing field names.
    *
    * @param fields of type Fields
@@ -1243,15 +1243,15 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method is used for appending the given Fields instance to this instance, into a new Fields instance
    * suitable for use as a field selector.
-   * <p/>
+   * <p>
    * That is, any positional elements will be retained during the append. For example, the {@code 5} and {@code 0}
    * are retained in the result.
-   * <p/>
+   * <p>
    * {@code assert new Fields( 5, "a" ).append( new Fields( 0, "b" ).equals( new Fields( 5, "a", 0, "b" )}
-   * <p/>
+   * <p>
    * Note any relative positional elements are retained, thus appending two Fields each declaring {@code -1}
    * position will result in a TupleException noting duplicate fields.
-   * <p/>
+   * <p>
    * See {@link #subtract(Fields)} for removing field names.
    *
    * @param fields of type Fields
@@ -1309,7 +1309,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method rename will rename the from fields to the values in to to fields. Fields may contain field names, or
    * positions.
-   * <p/>
+   * <p>
    * Using positions is useful to remove a field name put keep its place in the Tuple stream.
    *
    * @param from of type Fields
@@ -1636,7 +1636,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method applyFields returns a new Fields instance with the given field names, replacing any existing type
    * information within the new instance.
-   * <p/>
+   * <p>
    * The Comparable array must be the same length as the number for fields in this instance.
    *
    * @param fields the field names of this Fields object.
@@ -1660,7 +1660,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method applyType should be used to associate a {@link java.lang.reflect.Type} with a given field name or position.
    * A new instance of Fields will be returned, this instance will not be modified.
-   * <p/>
+   * <p>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *
@@ -1716,9 +1716,9 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method applyType should be used to associate {@link java.lang.reflect.Type} with a given field name or position
    * as declared in the given Fields parameter.
-   * <p/>
+   * <p>
    * A new instance of Fields will be returned, this instance will not be modified.
-   * <p/>
+   * <p>
    *
    * @param fields of type Fields
    */
@@ -1735,7 +1735,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   /**
    * Method applyTypes returns a new Fields instance with the given types, replacing any existing type
    * information within the new instance.
-   * <p/>
+   * <p>
    * The Class array must be the same length as the number for fields in this instance.
    * <p>
    * If no values are given, the resulting Fields instance will have no type information.
@@ -1798,7 +1798,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Returns the Class for the given position value.
-   * <p/>
+   * <p>
    * If the underlying value is of type {@link CoercibleType}, the result of
    * {@link cascading.tuple.type.CoercibleType#getCanonicalType()} will returned.
    *
@@ -1843,7 +1843,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Returns a copy of the current types Class[] if any, else null.
-   * <p/>
+   * <p>
    * If any underlying value is of type {@link CoercibleType}, the result of
    * {@link cascading.tuple.type.CoercibleType#getCanonicalType()} will returned.
    *
@@ -1894,7 +1894,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
 
   /**
    * Method setComparator should be used to associate a {@link java.util.Comparator} with a given field name or position.
-   * <p/>
+   * <p>
    * {@code fieldName} may optionally be a {@link Fields} instance. Only the first field name or position will
    * be considered.
    *

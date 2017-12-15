@@ -207,7 +207,7 @@ public class Tuples
 
   /**
    * Method frequency behaves the same as {@link Collections#frequency(java.util.Collection, Object)}.
-   * <p/>
+   * <p>
    * This method is a convenient way to test for all null values in a tuple.
    *
    * @param tuple of type Tuple
@@ -221,7 +221,7 @@ public class Tuples
 
   /**
    * Method frequency behaves the same as {@link Collections#frequency(java.util.Collection, Object)}.
-   * <p/>
+   * <p>
    * This method is a convenient way to test for all null values in a tuple.
    *
    * @param tupleEntry of type TupleEntry

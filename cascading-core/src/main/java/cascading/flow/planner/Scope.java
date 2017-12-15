@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -155,7 +155,7 @@ public class Scope implements Serializable
    * @param name                    of type String
    * @param operationDeclaredFields of type Fields
    * @param outGroupingFields       of type Fields
-   * @param keySelectors            of type Map<String, Fields>
+   * @param keySelectors            of type Map
    * @param sortingSelectors        of type Fields
    * @param outValuesFields         of type Fields
    * @param kind                    of type boolean
@@ -346,7 +346,7 @@ public class Scope implements Serializable
   /**
    * Method getGroupingSelectors returns the groupingSelectors of this Scope object.
    *
-   * @return the groupingSelectors (type Map<String, Fields>) of this Scope object.
+   * @return the groupingSelectors (type Map) of this Scope object.
    */
   public Map<String, Fields> getKeySelectors()
     {
@@ -356,7 +356,7 @@ public class Scope implements Serializable
   /**
    * Method getSortingSelectors returns the sortingSelectors of this Scope object.
    *
-   * @return the sortingSelectors (type Map<String, Fields>) of this Scope object.
+   * @return the sortingSelectors (type Map) of this Scope object.
    */
   public Map<String, Fields> getSortingSelectors()
     {

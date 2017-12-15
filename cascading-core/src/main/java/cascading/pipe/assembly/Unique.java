@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -47,27 +48,27 @@ import cascading.util.cache.CascadingCache;
 
 /**
  * Class Unique {@link SubAssembly} is used to filter all duplicates out of a tuple stream.
- * <p/>
+ * <p>
  * Typically finding unique value in a tuple stream relies on a {@link GroupBy} and a {@link FirstNBuffer}
  * {@link cascading.operation.Buffer} operation.
- * <p/>
+ * <p>
  * If the {@code include} value is set to {@link Include#NO_NULLS}, any tuple consisting of only {@code null}
  * values will be removed from the stream.
- * <p/>
+ * <p>
  * This SubAssembly uses the {@link FilterPartialDuplicates} {@link cascading.operation.Filter}
  * to remove as many observed duplicates before the GroupBy operator to reduce IO over the network.
- * <p/>
+ * <p>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
- * <p/>
+ * <p>
  * Unique uses a {@link cascading.util.cache.CascadingCache} or LRU to do the filtering. To tune the cache, set the
  * {@code capacity} value to a high enough value to utilize available memory. Or set a default value via the
  * {@link cascading.pipe.assembly.UniqueProps#UNIQUE_CACHE_CAPACITY} property. The current default is {@code 10, 000} unique keys.
- * <p/>
+ * <p>
  * The LRU cache is pluggable and defaults to {@link cascading.util.cache.LRUHashMapCache}. It can be changed
  * by setting {@link cascading.pipe.assembly.UniqueProps#UNIQUE_CACHE_FACTORY} property to the name of a sub-class of
  * {@link cascading.util.cache.BaseCacheFactory}.
- * <p/>
+ * <p>
  * The {@code capacity} value tells the underlying FilterPartialDuplicates how many values to cache for duplicate
  * comparison before dropping values from the LRU cache.
  *
@@ -94,11 +95,11 @@ public class Unique extends SubAssembly
 
   /**
    * Class FilterPartialDuplicates is a {@link cascading.operation.Filter} that is used to remove observed duplicates from the tuple stream.
-   * <p/>
+   * <p>
    * Use this class typically in tandem with a {@link cascading.operation.aggregator.First}
    * {@link cascading.operation.Aggregator} in order to improve de-duping performance by removing as many values
    * as possible before the intermediate {@link cascading.pipe.GroupBy} operator.
-   * <p/>
+   * <p>
    * The {@code capacity} value is used to maintain a LRU of a constant size. If more than capacity unique values
    * are seen, the oldest cached values will be removed from the cache.
    *

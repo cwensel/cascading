@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -36,18 +37,18 @@ public enum ProcessLevel
 
     /**
      * Applies to generation sub-graphs of steps where is a node is a unit of processing with a step.
-     * <p/>
+     * <p>
      * In MapReduce its a Map or Reduce node (where Map and Reduce are Kinds).
-     * <p/>
+     * <p>
      * In Tez its a Processor.
      */
     Node,
 
     /**
      * Applies to sub-graphs within nodes having a single streamed input, and multiple accumulated inputs.
-     * <p/>
+     * <p>
      * In MapReduce, a Mapper task can arbitrarily process a given input file via the MultiInputSplit.
-     * <p/>
+     * <p>
      * Tez currently does not allow multiply physical inputs per processor.
      */
     Pipeline;

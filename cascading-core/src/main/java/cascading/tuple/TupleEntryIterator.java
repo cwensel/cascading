@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -54,7 +55,7 @@ public abstract class TupleEntryIterator implements Iterator<TupleEntry>, Closea
 
   /**
    * Method getTupleEntry returns the entry of this TupleEntryIterator object.
-   * <p/>
+   * <p>
    * Since {@link TupleEntry} and the underlying {@link Tuple} instances are re-used, you must make a copy if you wish
    * to store the instances in a Collection for later use.
    *

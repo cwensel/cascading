@@ -489,7 +489,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
   /**
    * This should result in a Temp Tap after the Each split.
-   * <p/>
+   * <p>
    * We previously would push the each to the next step, but if there is already data being written, save the cpu.
    */
   @Test
@@ -1284,7 +1284,7 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
    * if the process logically must use the same tap for each branch, then the branch should be split
    *
    * This tests if two pipes can have the same name, and thus logically the same input source.
-   * <p/>
+   * <p>
    * Further, a GroupBy with two inputs would fail if the source was directly associated. but there is a Group
    * function between the source and the merge, so it passes.
    *
@@ -1635,14 +1635,14 @@ public class BuildJobsHadoopPlatformTest extends PlatformTestCase
 
   /**
    * This test verifies splits on Pipe instances are recognized
-   * <p/>
+   * <p>
    * This flow intentionally splits to a Each and a Tap from a Each
    * <pre>
    *
    *  .... E1 - T1 - E2 - T2
    *
    * </pre>
-   * <p/>
+   * <p>
    * this test also verifed T1 feeds E2, instead of a new copy job being created
    *
    * @throws Exception

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,18 +35,18 @@ import cascading.tap.Tap;
 /**
  * Class FlowNode represents the smallest parallelizable unit of work. It is a child to a
  * {@link cascading.flow.FlowStep} and may have many siblings within the FlowStep.
- * <p/>
+ * <p>
  * A FlowNode is commonly executed as one or more slices, where a slice is a JVM executing against a portion
  * of data.
- * <p/>
+ * <p>
  * Most slices within a FlowNode are identical, except for the sub-set of data they will be processing against.
- * <p/>
+ * <p>
  * But on some platforms, like MapReduce, a slice is executing a single flow pipeline. Thus a FlowNode may consist of
  * some set of pipelines (or pipeline graph). One pipeline per 'streamed' input source Tap.
- * <p/>
+ * <p>
  * In a MapReduce model (like Apache Hadoop MapReduce) a FlowNode can by the Map or Reduce side of a job (where a job
  * is a FlowStep).
- * <p/>
+ * <p>
  * In a DAG model (like Apache Tez), a FlowNode is a 'vertex', and the 'DAG' is a FlowStep.
  */
 public interface FlowNode extends ProcessModel
@@ -56,11 +57,11 @@ public interface FlowNode extends ProcessModel
 
   /**
    * Returns an immutable map of properties giving more details about the FlowNode object.
-   * <p/>
+   * <p>
    * FlowNode descriptions provide meta-data to monitoring systems describing the workload a given FlowNode represents.
    * For known description types, see {@link FlowNodeDescriptors}.
    *
-   * @return Map<String,String>
+   * @return Map
    */
   Map<String, String> getFlowNodeDescriptor();
 

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,12 +34,12 @@ import cascading.util.Util;
 
 /**
  * Class DateCoercibleType is an implementation of {@link CoercibleType}.
- * <p/>
+ * <p>
  * Given a {@code dateFormatString}, using the {@link SimpleDateFormat} format, this CoercibleType
  * will convert a value from the formatted string to a {@code Long} canonical type and back.
- * <p/>
+ * <p>
  * This class when presented with a Long timestamp value will assume the value is in UTC.
- * <p/>
+ * <p>
  * See {@link cascading.operation.text.DateParser} and {@link cascading.operation.text.DateFormatter} for similar
  * Operations for use within a pipe assembly.
  */

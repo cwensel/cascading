@@ -43,8 +43,7 @@ javadoc {
   classpath = files( project.sourceSets.test.compileClasspath )
 
   configure( options ) {
-    links << 'http://hadoop.apache.org/docs/r2.2.0/api/'
-    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString()
+    links << "http://hadoop.apache.org/docs/r${hadoop2Version}/api/".toString()
 
 //    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
   }

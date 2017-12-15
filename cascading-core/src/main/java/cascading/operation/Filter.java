@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,9 +25,9 @@ import cascading.flow.FlowProcess;
 
 /**
  * Interface Filter marks a given {@link Operation} as a filter, as opposed to being a {@link Function}.
- * <p/>
+ * <p>
  * A Filter is responsible for testing a Tuple to see if it should be removed from the tuple stream.
- * <p/>
+ * <p>
  * To implement a Filter, (optionally) sub-class {@link BaseOperation} and have the new sub-class {@code implement}
  * this interface.
  */

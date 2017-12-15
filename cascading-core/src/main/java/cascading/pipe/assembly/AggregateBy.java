@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -58,53 +59,53 @@ import cascading.util.cache.CascadingCache;
 
 /**
  * Class AggregateBy is a {@link SubAssembly} that serves two roles for handling aggregate operations.
- * <p/>
+ * <p>
  * The first role is as a base class for composable aggregate operations that have a MapReduce Map side optimization for the
  * Reduce side aggregation. For example 'summing' a value within a grouping can be performed partially Map side and
  * completed Reduce side. Summing is associative and commutative.
- * <p/>
+ * <p>
  * AggregateBy also supports operations that are not associative/commutative like 'counting'. Counting
  * would result in 'counting' value occurrences Map side but summing those counts Reduce side. (Yes, counting can be
  * transposed to summing Map and Reduce sides by emitting 1's before the first sum, but that's three operations over
  * two, and a hack)
- * <p/>
+ * <p>
  * Think of this mechanism as a MapReduce Combiner, but more efficient as no values are serialized,
  * deserialized, saved to disk, and multi-pass sorted in the process, which consume cpu resources in trade of
  * memory and a little or no IO.
- * <p/>
+ * <p>
  * Further, Combiners are limited to only associative/commutative operations.
- * <p/>
+ * <p>
  * Additionally the Cascading planner can move the Map side optimization
  * to the previous Reduce operation further increasing IO performance (between the preceding Reduce and Map phase which
  * is over HDFS).
- * <p/>
+ * <p>
  * The second role of the AggregateBy class is to allow for composition of AggregateBy
  * sub-classes. That is, {@link SumBy} and {@link CountBy} AggregateBy sub-classes can be performed
  * in parallel on the same grouping keys.
- * </p>
+ * <p>
  * Custom AggregateBy classes can be created by sub-classing this class and implementing a special
  * {@link Functor} for use on the Map side. Multiple Functor instances are managed by the {@link CompositeFunction}
  * class allowing them all to share the same LRU value map for more efficiency.
- * <p/>
+ * <p>
  * AggregateBy instances return {@code argumentFields} which are used internally to control the values passed to
  * internal Functor instances. If any argumentFields also have {@link java.util.Comparator}s, they will be used
  * to for secondary sorting (see {@link GroupBy} {@code sortFields}. This feature is used by {@link FirstBy} to
  * control which Tuple is seen first for a grouping.
- * <p/>
+ * <p>
  * To tune the LRU, set the {@code capacity} value to a high enough value to utilize available memory. Or set a
  * default value via the {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} property. The current default
  * ({@link cascading.util.cache.BaseCacheFactory#DEFAULT_CAPACITY})
  * is {@code 10, 000} unique keys.
- * <p/>
+ * <p>
  * The LRU cache is pluggable and defaults to {@link cascading.util.cache.LRUHashMapCache}. It can be changed
  * by setting {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CACHE_FACTORY} property to the name of a sub-class of
  * {@link cascading.util.cache.BaseCacheFactory}.
- * <p/>
+ * <p>
  * Note using a AggregateBy instance automatically inserts a {@link GroupBy} into the resulting {@link cascading.flow.Flow}.
  * And passing multiple AggregateBy instances to a parent AggregateBy instance still results in one GroupBy.
- * <p/>
+ * <p>
  * Also note that {@link Unique} is not a CompositeAggregator and is slightly more optimized internally.
- * <p/>
+ * <p>
  * As of Cascading 2.6 AggregateBy honors the {@link cascading.tuple.Hasher} interface for storing keys in the cache.
  *
  * @see SumBy
@@ -136,7 +137,7 @@ public class AggregateBy extends SubAssembly
 
   /**
    * Interface Functor provides a means to create a simple function for use with the {@link CompositeFunction} class.
-   * <p/>
+   * <p>
    * Note the {@link FlowProcess} argument provides access to the underlying properties and counter APIs.
    */
   public interface Functor extends Serializable
@@ -150,10 +151,10 @@ public class AggregateBy extends SubAssembly
 
     /**
      * Method aggregate operates on the given args in tandem (optionally) with the given context values.
-     * <p/>
+     * <p>
      * The context argument is the result of the previous call to this method. Use it to store values between aggregate
      * calls (the current count, or sum of the args).
-     * <p/>
+     * <p>
      * On the very first invocation of aggregate for a given grouping key, context will be {@code null}. All subsequent
      * invocations context will be the value returned on the previous invocation.
      *
@@ -165,9 +166,9 @@ public class AggregateBy extends SubAssembly
 
     /**
      * Method complete allows the final aggregate computation to be performed before the return value is collected.
-     * <p/>
+     * <p>
      * The number of values in the returned {@link Tuple} instance must match the number of declaredFields.
-     * <p/>
+     * <p>
      * It is safe to return the context object as the result value.
      *
      * @param flowProcess of type FlowProcess
@@ -601,7 +602,7 @@ public class AggregateBy extends SubAssembly
   /**
    * Method getFieldDeclarations returns an array of Fields where each Field element in the array corresponds to the
    * field declaration of the given Aggregator operations.
-   * <p/>
+   * <p>
    * Note the actual Fields values are returned, not planner resolved Fields.
    *
    * @return and array of Fields

@@ -43,23 +43,23 @@ import cascading.tuple.TupleStream;
 /**
  * A Flow is a logical unit of work declared by an assembly of {@link cascading.pipe.Pipe} instances connected to source
  * and sink {@link Tap} instances.
- * <p/>
+ * <p>
  * A Flow is then executed to push the incoming source data through the assembly into one or more sinks.
- * <p/>
+ * <p>
  * A Flow sub-class instance may not be instantiated directly in most cases, see sub-classes of {@link FlowConnector} class
  * for supported platforms.
- * <p/>
+ * <p>
  * Note that {@link cascading.pipe.Pipe} assemblies can be reused in multiple Flow instances. They maintain
  * no state regarding the Flow execution. Subsequently, {@link cascading.pipe.Pipe} assemblies can be given
  * parameters through its calling Flow so they can be built in a generic fashion.
- * <p/>
+ * <p>
  * When a Flow is created, an optimized internal representation is created that is then executed
  * on the underlying execution platform. This is typically done by creating one or more {@link FlowStep} instances.
- * </p>
+ * <p>
  * Flows are submitted in order of dependency when used with a {@link cascading.cascade.Cascade}. If two or more steps do not share the
  * same dependencies and all can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines
  * the order in which all steps will be submitted for execution. The default submit priority is 5.
- * <p/>
+ * <p>
  * Use the {@link FlowListener} to receive any events on the life-cycle of the Flow as it executes. Any
  * {@link Tap} instances owned by the Flow also implementing FlowListener will automatically be added to the
  * set of listeners.
@@ -82,8 +82,8 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method prepare is used by a {@link cascading.cascade.Cascade} to notify the given Flow it should initialize or clear any resources
    * necessary for {@link #start()} to be called successfully.
-   * <p/>
-   * Specifically, this implementation calls {@link BaseFlow#deleteSinksIfNotUpdate()} && {@link BaseFlow#deleteTrapsIfNotUpdate()}.
+   * <p>
+   * Specifically, this implementation calls {@link BaseFlow#deleteSinksIfNotUpdate()} &amp;&amp; {@link BaseFlow#deleteTrapsIfNotUpdate()}.
    *
    * @throws java.io.IOException when
    */
@@ -124,7 +124,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method getConfig returns the internal configuration object.
-   * <p/>
+   * <p>
    * Any changes to this object will not be reflected in child steps. See {@link cascading.flow.FlowConnector} for setting
    * default properties visible to children. Or see {@link cascading.flow.FlowStepStrategy} for setting properties on
    * individual steps before they are executed.
@@ -159,7 +159,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method getID returns the ID of this Flow object.
-   * <p/>
+   * <p>
    * The ID value is a long HEX String used to identify this instance globally. Subsequent Flow
    * instances created with identical parameters will not return the same ID.
    *
@@ -170,13 +170,13 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Returns an immutable map of properties giving more details about the Flow object.
-   * <p/>
+   * <p>
    * See {@link cascading.flow.FlowDef#addDescription(String, String)} to set values on a given Flow.
-   * <p/>
+   * <p>
    * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
    * For known description types, see {@link FlowDescriptors}.
    *
-   * @return Map<String,String>
+   * @return Map
    */
   Map<String, String> getFlowDescriptor();
 
@@ -185,7 +185,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method getSubmitPriority returns the submitPriority of this Flow object.
-   * <p/>
+   * <p>
    * 10 is lowest, 1 is the highest, 5 is the default.
    *
    * @return the submitPriority (type int) of this FlowStep object.
@@ -194,7 +194,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method setSubmitPriority sets the submitPriority of this Flow object.
-   * <p/>
+   * <p>
    * 10 is lowest, 1 is the highest, 5 is the default.
    *
    * @param submitPriority the submitPriority of this FlowStep object.
@@ -269,7 +269,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method getSourcesCollection returns a {@link Collection} of source {@link Tap}s for this Flow object.
    *
-   * @return the sourcesCollection (type Collection<Tap>) of this Flow object.
+   * @return the sourcesCollection (type Collection) of this Flow object.
    */
   Collection<Tap> getSourcesCollection();
 
@@ -287,7 +287,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method getSinksCollection returns a {@link Collection} of sink {@link Tap}s for this Flow object.
    *
-   * @return the sinkCollection (type Collection<Tap>) of this Flow object.
+   * @return the sinkCollection (type Collection) of this Flow object.
    */
   Collection<Tap> getSinksCollection();
 
@@ -301,7 +301,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method getTraps returns the traps of this Flow object.
    *
-   * @return the traps (type Map<String, Tap>) of this Flow object.
+   * @return the traps (type Map) of this Flow object.
    */
   Map<String, Tap> getTraps();
 
@@ -310,14 +310,14 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method getTrapsCollection returns a {@link Collection} of trap {@link Tap}s for this Flow object.
    *
-   * @return the trapsCollection (type Collection<Tap>) of this Flow object.
+   * @return the trapsCollection (type Collection) of this Flow object.
    */
   Collection<Tap> getTrapsCollection();
 
   /**
    * Method getCheckpoints returns the checkpoint taps of this Flow object.
    *
-   * @return the traps (type Map<String, Tap>) of this Flow object.
+   * @return the traps (type Map) of this Flow object.
    */
   Map<String, Tap> getCheckpoints();
 
@@ -326,7 +326,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method getCheckpointsCollection returns a {@link Collection} of checkpoint {@link Tap}s for this Flow object.
    *
-   * @return the trapsCollection (type Collection<Tap>) of this Flow object.
+   * @return the trapsCollection (type Collection) of this Flow object.
    */
   Collection<Tap> getCheckpointsCollection();
 
@@ -339,10 +339,10 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method setFlowSkipStrategy sets a new {@link cascading.flow.FlowSkipStrategy}, the current strategy is returned.
-   * <p/>
+   * <p>
    * FlowSkipStrategy instances define when a Flow instance should be skipped. The default strategy is {@link FlowSkipIfSinkNotStale}.
    * An alternative strategy would be {@link cascading.flow.FlowSkipIfSinkExists}.
-   * <p/>
+   * <p>
    * A FlowSkipStrategy will not be consulted when executing a Flow directly through {@link #start()} or {@link #complete()}. Only
    * when the Flow is executed through a {@link cascading.cascade.Cascade} instance.
    *
@@ -380,7 +380,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method getSinkModified returns the youngest modified date of any sink {@link cascading.tap.Tap} managed by this Flow instance.
-   * <p/>
+   * <p>
    * If zero (0) is returned, at least one of the sink resources does not exist. If minus one (-1) is returned,
    * at least one of the sinks are marked for delete ({@link cascading.tap.Tap#isReplace() returns true}).
    *
@@ -398,7 +398,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Sets a default {@link FlowStepStrategy} instance.
-   * <p/>
+   * <p>
    * Use a FlowStepStrategy to change {@link cascading.flow.FlowStep} configuration properties
    * before the properties are submitted to the underlying platform for the step
    * unit of work.
@@ -410,7 +410,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
   /**
    * Method getFlowSteps returns the flowSteps of this Flow object. They will be in topological order.
    *
-   * @return the steps (type List<FlowStep>) of this Flow object.
+   * @return the steps (type List) of this Flow object.
    */
   List<FlowStep<Config>> getFlowSteps();
 
@@ -476,7 +476,7 @@ public interface Flow<Config> extends UnitOfWork<FlowStats>
 
   /**
    * Method openTapForRead return a {@link cascading.tuple.TupleEntryIterator} for the given Tap instance.
-   * <p/>
+   * <p>
    * Note the returned iterator will return the same instance of {@link cascading.tuple.TupleEntry} on every call,
    * thus a copy must be made of either the TupleEntry or the underlying {@code Tuple} instance if they are to be
    * stored in a Collection.

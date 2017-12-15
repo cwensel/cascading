@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -38,9 +39,9 @@ import cascading.util.Util;
 
 /**
  * Class FlowDef is a fluent interface for defining a {@link Flow}.
- * <p/>
+ * <p>
  * This allows for ad-hoc building of Flow data and meta-data, like tags.
- * <p/>
+ * <p>
  * Instead of calling one of the {@link FlowConnector} connect methods, {@link FlowConnector#connect(FlowDef)}
  * can be called.
  */
@@ -122,7 +123,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getSources returns the sources of this FlowDef object.
    *
-   * @return the sources (type Map<String, Tap>) of this FlowDef object.
+   * @return the sources (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getSources()
     {
@@ -132,7 +133,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getSourcesCopy returns a copy of the sources Map.
    *
-   * @return the sourcesCopy (type Map<String, Tap>) of this FlowDef object.
+   * @return the sourcesCopy (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getSourcesCopy()
     {
@@ -167,7 +168,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
 
   /**
    * Method addSource adds a new source {@link Tap} named after the given {@link Pipe} for use in the resulting {@link Flow}.
-   * <p/>
+   * <p>
    * If the given pipe is not a head pipe, it will be resolved. If more than one is found, an
    * {@link IllegalArgumentException} will be thrown.
    *
@@ -192,7 +193,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addSources adds a map of name and {@link Tap} pairs.
    *
-   * @param sources of Map<String, Tap>
+   * @param sources of Map
    * @return FlowDef
    */
   public FlowDef addSources( Map<String, Tap> sources )
@@ -208,7 +209,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
 
   /**
    * Method addDescription adds a user readable description to the flowDescriptor.
-   * <p/>
+   * <p>
    * This uses the {@link FlowDescriptors#DESCRIPTION} key.
    */
   public FlowDef addDescription( String description )
@@ -220,10 +221,10 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
 
   /**
    * Method addDescription adds a description to the flowDescriptor.
-   * <p/>
+   * <p>
    * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
    * For known description types, see {@link FlowDescriptors}.
-   * <p/>
+   * <p>
    * If an existing key exists, it will be appended to the original value using
    * {@link FlowDescriptors#VALUE_SEPARATOR}.
    *
@@ -252,7 +253,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addProperties adds all properties in the given map in order to the flowDescriptor. If the given Map has
    * an explicit order, it will be preserved.
-   * <p/>
+   * <p>
    * Flow descriptions provide meta-data to monitoring systems describing the workload a given Flow represents.
    * For known description types, see {@link FlowDescriptors}.
    *
@@ -270,7 +271,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getSinks returns the sinks of this FlowDef object.
    *
-   * @return the sinks (type Map<String, Tap>) of this FlowDef object.
+   * @return the sinks (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getSinks()
     {
@@ -280,7 +281,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getSinksCopy returns a copy of the sink Map.
    *
-   * @return the sinksCopy (type Map<String, Tap>) of this FlowDef object.
+   * @return the sinksCopy (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getSinksCopy()
     {
@@ -318,7 +319,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
 
   /**
    * Method addTailSink adds the tail {@link Pipe} and sink {@link Tap} to this FlowDef.
-   * <p/>
+   * <p>
    * This is a convenience method for adding both a tail and sink simultaneously. There isn't a similar method
    * for heads and sources as the head Pipe can always be derived.
    *
@@ -336,7 +337,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addSinks adds a Map of the named and {@link Tap} pairs.
    *
-   * @param sinks of Map<String, Tap>
+   * @param sinks of Map
    * @return FlowDef
    */
   public FlowDef addSinks( Map<String, Tap> sinks )
@@ -353,7 +354,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getTraps returns the traps of this FlowDef object.
    *
-   * @return the traps (type Map<String, Tap>) of this FlowDef object.
+   * @return the traps (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getTraps()
     {
@@ -363,7 +364,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getTrapsCopy returns a copy of the trap Map.
    *
-   * @return the trapsCopy (type Map<String, Tap>) of this FlowDef object.
+   * @return the trapsCopy (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getTrapsCopy()
     {
@@ -402,7 +403,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addTraps adds a Map of the names and {@link Tap} pairs.
    *
-   * @param traps of Map<String, Tap>
+   * @param traps of Map
    * @return FlowDef
    */
   public FlowDef addTraps( Map<String, Tap> traps )
@@ -419,7 +420,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getCheckpoints returns the checkpoint taps of this FlowDef object.
    *
-   * @return the checkpoints (type Map<String, Tap>) of this FlowDef object.
+   * @return the checkpoints (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getCheckpoints()
     {
@@ -429,7 +430,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getCheckpointsCopy returns a copy of the checkpoint tap Map.
    *
-   * @return the checkpointsCopy (type Map<String, Tap>) of this FlowDef object.
+   * @return the checkpointsCopy (type Map) of this FlowDef object.
    */
   public Map<String, Tap> getCheckpointsCopy()
     {
@@ -468,7 +469,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addCheckpoints adds a Map of the names and {@link Tap} pairs.
    *
-   * @param checkpoints of Map<String, Tap>
+   * @param checkpoints of Map
    * @return FlowDef
    */
   public FlowDef addCheckpoints( Map<String, Tap> checkpoints )
@@ -485,7 +486,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method getTails returns all the current pipe assembly tails the FlowDef holds.
    *
-   * @return the tails (type List<Pipe>) of this FlowDef object.
+   * @return the tails (type List) of this FlowDef object.
    */
   public List<Pipe> getTails()
     {
@@ -504,7 +505,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
 
   /**
    * Method addTail adds a new {@link Pipe} to this FlowDef that represents a tail in a pipe assembly.
-   * <p/>
+   * <p>
    * Be sure to add a sink tap that has the same name as this tail.
    *
    * @param tail of Pipe
@@ -521,7 +522,7 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method addTails adds a Collection of tails.
    *
-   * @param tails of Collection<Pipe>
+   * @param tails of Collection
    * @return FlowDef
    */
   public FlowDef addTails( Collection<Pipe> tails )
@@ -573,12 +574,12 @@ public class FlowDef extends UnitOfWorkDef<FlowDef>
   /**
    * Method setRunID sets the checkpoint run or execution ID to be used to find prior failed runs against
    * this runID.
-   * <p/>
+   * <p>
    * When given, and a {@link Flow} fails to execute, a subsequent attempt to run the same Flow with the same
    * runID will allow the Flow instance to start where it left off.
-   * <p/>
+   * <p>
    * Not all planners support this feature.
-   * <p/>
+   * <p>
    * A Flow name is required when using a runID.
    *
    * @param runID of type String

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,9 +31,9 @@ public interface ProvidesCounters
   /**
    * Method getLastSuccessfulCounterFetchTime returns the time, in millis, the last moment counters
    * were successfully retrieved.
-   * <p/>
+   * <p>
    * If -1, counter values were never successfully retrieved.
-   * <p/>
+   * <p>
    * If this return value is less than the {@link CascadingStats#getFinishedTime()} it is likely the
    * counter service became unavailable.
    *
@@ -43,7 +44,7 @@ public interface ProvidesCounters
   /**
    * Method getCounterGroups returns all the available counter group names.
    *
-   * @return the counterGroups (type Collection<String>) of this CascadingStats object.
+   * @return the counterGroups (type Collection) of this CascadingStats object.
    */
   Collection<String> getCounterGroups();
 
@@ -51,7 +52,7 @@ public interface ProvidesCounters
    * Method getCountersFor returns all the counter names for the give group name.
    *
    * @param group
-   * @return Collection<String>
+   * @return Collection
    */
   Collection<String> getCountersFor( String group );
 
@@ -59,7 +60,7 @@ public interface ProvidesCounters
    * Method getCountersFor returns all the counter names for the counter Enum.
    *
    * @param group
-   * @return Collection<String>
+   * @return Collection
    */
   Collection<String> getCountersFor( Class<? extends Enum> group );
 

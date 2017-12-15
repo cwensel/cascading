@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -467,7 +468,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   /**
    * The hash value can be used to determine if two unique Flow instances performed the same work.
-   * <p/>
+   * <p>
    * The source and sink taps are not relevant to the hash.
    *
    * @return a String value
@@ -1121,7 +1122,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   /**
    * Method deleteSinks deletes all sinks, whether or not they are configured for {@link cascading.tap.SinkMode#UPDATE}.
-   * <p/>
+   * <p>
    * Use with caution.
    *
    * @throws IOException when
@@ -1144,9 +1145,9 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   /**
    * Method deleteSinksIfNotUpdate deletes all sinks if they are not configured with the {@link cascading.tap.SinkMode#UPDATE} flag.
-   * <p/>
+   * <p>
    * Typically used by a {@link Cascade} before executing the flow if the sinks are stale.
-   * <p/>
+   * <p>
    * Use with caution.
    *
    * @throws IOException when
@@ -1731,7 +1732,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   /**
    * Class SafeFlowListener safely calls a wrapped FlowListener.
-   * <p/>
+   * <p>
    * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
    * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
    * which in turn is run in a new Thread.

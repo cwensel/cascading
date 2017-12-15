@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,20 +32,20 @@ import cascading.tuple.TupleEntry;
 
 /**
  * Class MinBy is used to find the minimum value in a grouping.
- * <p/>
+ * <p>
  * Typically finding the min value of a field in a tuple stream relies on a {@link cascading.pipe.GroupBy} and a
  * {@link cascading.operation.aggregator.MinValue} {@link cascading.operation.Aggregator} operation.
- * <p/>
+ * <p>
  * This SubAssembly also uses the {@link cascading.pipe.assembly.MinBy.MinPartials} {@link cascading.pipe.assembly.AggregateBy.Functor}
  * to track the minimum value before the GroupBy operator to reduce IO over the network.
- * <p/>
+ * <p>
  * This strategy is similar to using {@code combiners}, except no sorting or serialization is invoked and results
  * in a much simpler mechanism.
- * <p/>
+ * <p>
  * The {@code threshold} value tells the underlying MinPartials functions how many unique key sums to accumulate
  * in the LRU cache, before emitting the least recently used entry. This accumulation happens map-side, and thus is
  * bounded by the size of your map task JVM and the typical size of each group key.
- * <p/>
+ * <p>
  * By default, either the value of {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_CAPACITY} System property
  * or {@link cascading.pipe.assembly.AggregateByProps#AGGREGATE_BY_DEFAULT_CAPACITY} will be used.
  *

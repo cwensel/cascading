@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -40,18 +41,18 @@ public interface BufferCall<C> extends OperationCall<C>
   /**
    * Returns an {@link Iterator} of {@link TupleEntry} instances representing the arguments for the called
    * {@link Buffer#operate(cascading.flow.FlowProcess, BufferCall)} method.
-   * <p/>
+   * <p>
    * The return value may be {@code null} if the previous {@link cascading.pipe.CoGroup} declares
    * {@link cascading.pipe.joiner.BufferJoin} as the {@link cascading.pipe.joiner.Joiner}.
-   * <p/>
+   * <p>
    * See {@link #getJoinerClosure()}.
-   * <p/>
+   * <p>
    * Note that the returned TupleEntry should not be cached (stored in a Collection), nor should the underlying Tuple
    * instance. Where possible Cascading will re-use both TupleEntry and Tuple instances.
-   * <p/>
+   * <p>
    * To get a safe copy that can be cached, use {@link TupleEntry#getTupleCopy()}.
    *
-   * @return Iterator<TupleEntry>
+   * @return Iterator
    */
   Iterator<TupleEntry> getArgumentsIterator();
 
@@ -72,10 +73,10 @@ public interface BufferCall<C> extends OperationCall<C>
   /**
    * Set to {@code false} if at the end of all values iterated over in the argumentsIterator, the last seen argument tuple
    * values should not be nulled out.
-   * <p/>
+   * <p>
    * By default, if a result is emitted from the Buffer before and after the argumentsIterator is started or completed,
    * the last seen non-grouping values are null. When false, the values are not nulled after completion.
-   * <p/>
+   * <p>
    * The default is {@code true}.
    *
    * @param retainValues of type boolean
@@ -92,13 +93,13 @@ public interface BufferCall<C> extends OperationCall<C>
   /**
    * Returns the current instance of a {@link JoinerClosure}, if any. This allows a Buffer to implement its own join
    * strategy against the incoming tuple streams.
-   * <p/>
+   * <p>
    * The return value is always {@code null} unless the declared fields on the {@link cascading.pipe.CoGroup} are
    * {@link Fields#NONE}.
-   * <p/>
+   * <p>
    * Note this method is provided as a means to bypass some of the Cascading internals in order to improve the
    * implementations (performance or maintainability) behind some algorithms.
-   * <p/>
+   * <p>
    * Consider it only if you are an advanced user. Or more robustly, consider implementing a custom
    * {@link cascading.pipe.joiner.Joiner}.
    *

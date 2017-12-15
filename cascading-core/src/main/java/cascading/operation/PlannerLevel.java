@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,7 +23,7 @@ package cascading.operation;
 
 /**
  * Interface PlannerLevel is the base interface for {@link DebugLevel} and {@link AssertionLevel} enum types.
- * <p/>
+ * <p>
  * It should be noted that all enum implementations of this interface must declare a NONE or equivalent instance. This
  * special case type tells the  {@link cascading.flow.planner.FlowPlanner} to remove all {@link PlannedOperation} instances from
  * the final {@link cascading.flow.Flow}.

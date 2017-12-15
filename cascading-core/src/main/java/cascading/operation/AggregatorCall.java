@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,7 +27,7 @@ import cascading.tuple.TupleEntryCollector;
 
 /**
  * Interface AggregatorCall provides access to the current {@link Aggregator} invocation arguments.
- * <p/>
+ * <p>
  * This interface is generic, allowing the user to set a custom 'context' object when {@link Aggregator#start(cascading.flow.FlowProcess, AggregatorCall)}
  * is called. The {@link OperationCall#setContext(Object)} and {@link OperationCall#getContext()} methods are
  * inherited from {@link OperationCall}.
@@ -45,12 +46,12 @@ public interface AggregatorCall<C> extends OperationCall<C>
 
   /**
    * Returns {@link TupleEntry} of argument values.
-   * <p/>
+   * <p>
    * Will return {@code null} unless called in {@link Aggregator#aggregate(cascading.flow.FlowProcess, AggregatorCall)}.
-   * <p/>
+   * <p>
    * Note that the returned TupleEntry should not be cached (stored in a Collection), nor should the underlying Tuple
    * instance. Where possible Cascading will re-use both TupleEntry and Tuple instances.
-   * <p/>
+   * <p>
    * To get a safe copy that can be cached, use {@link TupleEntry#getTupleCopy()}.
    *
    * @return TupleEntry
@@ -66,7 +67,7 @@ public interface AggregatorCall<C> extends OperationCall<C>
 
   /**
    * Returns the {@link cascading.tuple.TupleEntryCollector} used to emit result values.
-   * <p/>
+   * <p>
    * Will return {@code null} unless called in {@link Aggregator#complete(cascading.flow.FlowProcess, AggregatorCall)}.
    *
    * @return TupleCollector

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -51,7 +51,7 @@ public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
    * Constructor JSONSetFunction creates a new JSONSetFunction instance.
    *
    * @param fieldDeclaration of Fields
-   * @param pointerMap       of Map<Fields, String>
+   * @param pointerMap       of Map
    */
   public JSONSetFunction( Fields fieldDeclaration, Map<Fields, String> pointerMap )
     {

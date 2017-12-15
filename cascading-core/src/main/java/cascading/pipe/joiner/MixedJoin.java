@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,9 +31,9 @@ import cascading.tuple.Tuple;
 /**
  * Class MixedJoin will return an {@link java.util.Iterator} that will iterate over a given
  * {@link Joiner} and return tuples that represent a join as defined by the given boolean array.
- * <p/>
+ * <p>
  * So if joining three streams, {@code boolean []{true,false,false}} will result in a 'inner', 'outer', 'outer' join.
- * <p/>
+ * <p>
  * Joins perform based on the equality of the join keys. In the case of null values, Java treats two
  * null values as equivalent. SQL does not treat null values as equal. To produce SQL like results in a given
  * join, a new {@link java.util.Comparator} will need to be used on the joined values to prevent null from

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,22 +28,22 @@ import cascading.pipe.Pipe;
 
 /**
  * Interface AssemblyPlanner is used to allow for lazy evaluation of a pipe assembly during planning of a {@link Flow}.
- * <p/>
+ * <p>
  * This allows for new languages or frameworks that may require additional meta-data from the
  * underlying platform or environment. Specifically field names and type information from incoming source
  * and outgoing sink {@link cascading.tap.Tap}s.
- * <p/>
+ * <p>
  * AssemblyPlanner implementations are handed to a {@link cascading.flow.planner.FlowPlanner}
  * instance in the order they should be evaluated.
  * Every instance has the opportunity to replace any prior tails with new branches and paths.
- * <p/>
+ * <p>
  * Every instance of AssemblyPlanner evaluated is given the current {@link FlowDef} used on the current
  * {@link FlowConnector}, the current Flow instance (only initialized with source and sink Taps provided by the
  * FlowDef), and the tails provided by the FlowDef or those returned by prior AssemblyPlanner instances.
- * <p/>
+ * <p>
  * An AssemblyPlanner cannot change or modify the Flow, or change out any Taps used as sources, sinks, traps, or
  * checkpoints.
- * <p/>
+ * <p>
  * This is an experimental API and subject to change without notice.
  */
 public interface AssemblyPlanner
@@ -69,7 +70,7 @@ public interface AssemblyPlanner
    * Returns a map of properties giving more details about the Flow object. This can be picked up by a Flow object and
    * added to its internal FlowDescriptor.
    *
-   * @return Map<String,String>
+   * @return Map
    */
   Map<String, String> getFlowDescriptor();
   }

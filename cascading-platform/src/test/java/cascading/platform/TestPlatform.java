@@ -56,7 +56,7 @@ public abstract class TestPlatform
 
   /**
    * Method getGlobalProperties fetches all "platform." prefixed system properties.
-   * <p/>
+   * <p>
    * Sub-classes of TestPlatform should use these values as overrides before returning from
    * {@link #getProperties()}.
    *

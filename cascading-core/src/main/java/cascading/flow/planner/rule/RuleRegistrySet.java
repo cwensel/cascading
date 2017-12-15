@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,32 +30,32 @@ import java.util.LinkedList;
 /**
  * Class RuleRegistrySet manages the set of {@link cascading.flow.planner.rule.RuleRegistry} instances that should be
  * applied via the {@link cascading.flow.planner.FlowPlanner} to the given assembly.
- * <p/>
+ * <p>
  * The current RuleRegistrySet can be reached via {@link cascading.flow.FlowConnector#getRuleRegistrySet()}, or set with
  * the appropriate {@link cascading.flow.FlowConnector} constructor sub-class.
- * <p/>
+ * <p>
  * RuleRegistrySet configuration is mutable to address different situations.
- * <p/>
+ * <p>
  * During planner execution, all RuleRegistry instances are applied simultaneously within individual threads.
- * <p/>
+ * <p>
  * If the planner duration exceeds {@link #getPlannerTimeoutSec()} (with default
  * {@link cascading.flow.planner.rule.RuleSetExec#DEFAULT_TIMEOUT}) any incomplete planner executions
  * will be cancelled.
- * <p/>
+ * <p>
  * If no planner executions complete successfully within the timeout period, an exception will be thrown.
- * <p/>
+ * <p>
  * If there are multiple successful completions, the default cost comparator,
  * {@link cascading.flow.planner.rule.RuleSetExec#DEFAULT_PLAN_COMPARATOR}, will be applied to find the lower
  * cost plan. Use {@link #setPlanComparator(java.util.Comparator)} to override.
- * <p/>
+ * <p>
  * If all plans have equivalent costs, the plan corresponding to the first most RuleRegistry, as given to the
  * RuleRegistrySet, will be selected.
- * <p/>
+ * <p>
  * If {@link #setSelect(cascading.flow.planner.rule.RuleRegistrySet.Select)} is set to
  * {@link cascading.flow.planner.rule.RuleRegistrySet.Select#FIRST}, the first RuleRegistry to complete will be used
  * regardless of cost ordering provided by the plan Comparator. All remaining running planner executions will be
  * cancelled.
- * <p/>
+ * <p>
  * If {@link #isIgnoreFailed()} is {@code false}, if any planner execution is times out or fails, an exception will be
  * thrown.
  */
@@ -111,7 +112,7 @@ public class RuleRegistrySet
 
   /**
    * Sets planner timeout, in seconds.
-   * <p/>
+   * <p>
    * Extremely large assemblies may take longer than the default timeout. This allows for increasing
    * that timeout period when necessary.
    *
@@ -135,7 +136,7 @@ public class RuleRegistrySet
 
   /**
    * Sets ignore failed setting. The default is {@code true}.
-   * <p/>
+   * <p>
    * When {@code true}, failures during planning will be ignored unless no registries are successful. When {@code false},
    * any failure will cause the planner to fail.
    *

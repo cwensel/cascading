@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,20 +34,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Subclasses of SubAssembly encapsulate complex assemblies of {@link Pipe}s so they my be reused in the same manner
  * a Pipe is used.
- * <p/>
+ * <p>
  * That is, a typical SubAssembly subclass will accept a 'previous' Pipe instance, and a few
  * arguments for configuring the resulting sub-assembly.
- * <p/>
+ * <p>
  * The previous pipe (or pipes) must be passed on the super constructor, or set via {@link #setPrevious(Pipe...)}. This
  * allows the current SubAssembly to become the parent of any Pipe instances between the previous and the tails,
  * exclusive of the previous, and inclusive of the tails.
- * <p/>
+ * <p>
  * Subsequently all tail Pipes must be set via the {@link #setTails(Pipe...)} method.
- * <p/>
+ * <p>
  * Note if the SubAssembly represents a split in the pipeline process,
  * all the 'tails' of the assembly must be passed to {@link #setTails(Pipe...)}. It is up the the developer to
  * provide any other access to the tails so they may be chained into any subsequent Pipes.
- * <p/>
+ * <p>
  * Any {@link cascading.property.ConfigDef} values on this SubAssembly will be honored by child Pipe instances via the
  * {@link cascading.pipe.Pipe#getParent()} back link described above.
  */

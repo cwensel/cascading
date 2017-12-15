@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -42,16 +43,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Class CascadingServices is the root class for pluggable services Cascading can call out to for distributed
  * monitoring and management systems.
- * <p/>
+ * <p>
  * Be default all services will be loaded from the jar {@code cascading/management/service.properties}
  * ({@link #DEFAULT_PROPERTIES}) resource is found in. If the
  * property {@link #CONTAINER_ENABLED} value is {@code false}, a ClassLoader container will not be created.
- * <p/>
+ * <p>
  * For this to work, all service implementation and dependencies must be archived into a single jar.
- * <p/>
+ * <p>
  * If any packages in the jar should be excluded, set a comma delimited list of names via the {@link #CONTAINER_EXCLUDE}
  * property.
- * <p/>
+ * <p>
  * If the file {@code cascading-service.properties} ({@link CascadingServices#CASCADING_SERVICES}) is found in the
  * CLASSPATH, the {@code cascading.management.service.jar} property value will be used to search for
  * {@code cascading/management/service.properties} resource.

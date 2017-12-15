@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The interface UnitOfWorkSpawnStrategy is a strategy for allowing pluggable thread management services into
  * any {@link UnitOfWork} class.
- * <p/>
+ * <p>
  * The default strategy is {@link UnitOfWorkExecutorStrategy}.
  *
  * @see UnitOfWork

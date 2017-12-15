@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,10 +38,10 @@ import static java.util.Arrays.copyOf;
 /**
  * Class MultiSourceTap is used to tie multiple {@link cascading.tap.Tap} instances into a single resource. Effectively this will allow
  * multiple files to be concatenated into the requesting pipe assembly, if they all share the same {@link Scheme} instance.
- * <p/>
+ * <p>
  * Note that order is not maintained by virtue of the underlying model. If order is necessary, use a unique sequence key
  * to span the resources, like a line number.
- * </p>
+ * <p>
  * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.hadoop.TextLine}), they may not contain
  * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.

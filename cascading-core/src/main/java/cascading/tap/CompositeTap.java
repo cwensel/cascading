@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,7 +25,7 @@ import java.util.Iterator;
 
 /**
  * Interface CompositeTap marks {@link Tap} classes as having child Tap instances.
- * <p/>
+ * <p>
  * This information is required by the planner in order to properly configure the underlying platform.
  */
 public interface CompositeTap<Child extends Tap>

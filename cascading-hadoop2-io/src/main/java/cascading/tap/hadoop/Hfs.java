@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -66,44 +67,44 @@ import org.slf4j.LoggerFactory;
  * Class Hfs is the base class for all Hadoop file system access. Hfs may only be used with the
  * Hadoop {@link cascading.flow.FlowConnector} sub-classes when creating Hadoop executable {@link cascading.flow.Flow}
  * instances.
- * <p/>
+ * <p>
  * Paths typically should point to a directory, where in turn all the "part" files immediately in that directory will
  * be included. This is the practice Hadoop expects. Sub-directories are not included and typically result in a failure.
- * <p/>
+ * <p>
  * To include sub-directories, Hadoop supports "globing". Globing is a frustrating feature and is supported more
  * robustly by {@link GlobHfs} and less so by Hfs.
- * <p/>
+ * <p>
  * Hfs will accept {@code /*} (wildcard) paths, but not all convenience methods like
  * {@code jobConf.getSize} will behave properly or reliably. Nor can the Hfs instance
  * with a wildcard path be used as a sink to write data.
- * <p/>
+ * <p>
  * In those cases use GlobHfs since it is a sub-class of {@link cascading.tap.MultiSourceTap}.
- * <p/>
+ * <p>
  * Optionally use {@link Dfs} or {@link Lfs} for resources specific to Hadoop Distributed file system or
  * the Local file system, respectively. Using Hfs is the best practice when possible, Lfs and Dfs are conveniences.
- * <p/>
+ * <p>
  * Use the Hfs class if the 'kind' of resource is unknown at design time. To use, prefix a scheme to the 'stringPath'. Where
- * <code>hdfs://...</code> will denote Dfs, and <code>file://...</code> will denote Lfs.
- * <p/>
+ * {@code hdfs://...} will denote Dfs, and {@code file://...} will denote Lfs.
+ * <p>
  * Call {@link HfsProps#setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
  * other than the current Hadoop default path.
- * <p/>
+ * <p>
  * By default Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
  * intends to read files from the local client filesystem (for example when using the {@code Lfs} Tap) where the Hadoop
  * job jar is started. Subsequently Cascading will force any MapReduce jobs reading or writing to {@code file://} resources
  * to run in Hadoop "standalone mode" so that the file can be read.
- * <p/>
+ * <p>
  * To change this behavior, {@link HfsProps#setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
  * or to "none" to disable entirely for the case the file to be read is available on every Hadoop processing node
  * in the exact same path.
- * <p/>
+ * <p>
  * When using a MapReduce planner, Hfs can optionally combine multiple small files (or a series of small "blocks") into
  * larger "splits". This reduces the number of resulting map tasks created by Hadoop and can improve application
  * performance.
- * <p/>
+ * <p>
  * This is enabled by calling {@link HfsProps#setUseCombinedInput(boolean)} to {@code true}. By default, merging
  * or combining splits into large ones is disabled.
- * <p/>
+ * <p>
  * Apache Tez planner does not require this setting, it is supported by default and enabled by the application manager.
  */
 public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> implements FileType<Configuration>

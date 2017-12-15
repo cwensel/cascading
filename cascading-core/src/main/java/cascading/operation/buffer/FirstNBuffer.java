@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,12 +38,12 @@ import cascading.tuple.TupleEntry;
  * Class FirstNBuffer will return the first N tuples seen in a given grouping. After the tuples
  * are returned the Buffer stops iterating the arguments unlike the {@link cascading.operation.aggregator.First}
  * {@link cascading.operation.Aggregator} which by contract sees all the values in the grouping.
- * <p/>
+ * <p>
  * By default it returns one Tuple.
- * <p/>
+ * <p>
  * Order can be controlled through the prior {@link cascading.pipe.GroupBy} or {@link cascading.pipe.CoGroup}
  * pipes.
- * <p/>
+ * <p>
  * This class is used by {@link cascading.pipe.assembly.Unique}.
  */
 public class FirstNBuffer extends BaseOperation implements Buffer

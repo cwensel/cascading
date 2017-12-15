@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,7 +40,7 @@ public class PartitionTapProps extends Props
    * Method setFailOnClose(boolean b) controls if the PartitionTap is ignoring all Excpetions, when a TupleEntryCollector
    * is closed or if it should rethrow the Exception.
    *
-   * @param properties  a Map<Object, Object>
+   * @param properties  a Map
    * @param failOnClose boolean controlling the close behaviour
    */
   public static void setFailOnClose( Map<Object, Object> properties, boolean failOnClose )

@@ -37,7 +37,7 @@ import cascading.util.Pair;
 /**
  * Class DateFormatter is used to convert a date timestamp to a formatted string, where a timestamp
  * is the number of milliseconds since January 1, 1970, 00:00:00 GMT,  using the {@link SimpleDateFormat} syntax.
- * <p/>
+ * <p>
  * Note the timezone data is given to the SimpleDateFormat, not the internal Calendar instance which interprets
  * the 'timestamp' value as it is assumed the timestamp is already in GMT.
  */

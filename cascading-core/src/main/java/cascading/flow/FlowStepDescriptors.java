@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -22,7 +23,7 @@ package cascading.flow;
 
 /**
  * Constants to be used as key in {@link FlowStep#getFlowStepDescriptor}.
- * <p/>
+ * <p>
  * See also {@link FlowDescriptors}.
  */
 public interface FlowStepDescriptors

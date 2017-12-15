@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,7 +31,7 @@ import cascading.tuple.Fields;
 
 /**
  * Class Discard is a {@link cascading.pipe.SubAssembly} that will retain all incoming fields except those given on the constructor.
- * <p/>
+ * <p>
  * Use this pipe to narrow a stream of tuples, removing unused data.
  *
  * @see Retain

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,14 +40,13 @@ import cascading.tuple.Tuple;
 /**
  * Class SetValue is a utility {@link Function} that allows for a Tuple value to be returned based on the outcome
  * of a given {@link Filter} operation.
- * <p/>
+ * <p>
  * There are only two possible values, either {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)}
  * returns {@code true} or {@code false}.
- * <p/>
+ * <p>
  * If {@code false} is returned, most commonly the {@link Filter} passed and the Tuple should be kept. SetValue will then return
  * the first value in the given values array, by default {@code true}. If the Filter returns {@code true}, the second
  * value in the values array will be returned, by default {@code false}.
- * <p/>
  */
 public class SetValue extends BaseOperation implements Function
   {

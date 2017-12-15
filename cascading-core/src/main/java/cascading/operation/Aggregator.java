@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,19 +28,19 @@ import cascading.tuple.TupleEntry;
  * An Aggregator takes the set of all values associated with a unique grouping and returns
  * zero or more values. {@link cascading.operation.aggregator.MaxValue}, {@link cascading.operation.aggregator.MinValue},
  * {@link cascading.operation.aggregator.Count}, and {@link cascading.operation.aggregator.Average} are good examples.
- * <p/>
+ * <p>
  * Aggregator implementations should be reentrant. There is no guarantee an Aggregator instance will be executed in a
  * unique vm, or by a single thread. The {@link #start(cascading.flow.FlowProcess, AggregatorCall)}
  * method provides a mechanism for maintaining a 'context' object to hold intermediate values.
- * <p/>
+ * <p>
  * Note {@link TupleEntry} instances are reused internally so should not be stored. Instead use the TupleEntry or Tuple
  * copy constructors to make safe copies.
- * <p/>
+ * <p>
  * Since Aggregators can be chained, and Cascading pipelines all operation results, any Aggregators
  * coming ahead of the current Aggregator must return a value before the {@link #complete(cascading.flow.FlowProcess, AggregatorCall)}
  * method on this Aggregator is called. Subsequently, if any previous Aggregators return more than one Tuple result,
  * this complete() method will be called for each Tuple emitted.
- * <p/>
+ * <p>
  * Thus it is a best practice to implement a {@link Buffer} when emitting more than one, or zero Tuple results.
  *
  * @see AggregatorCall
@@ -49,14 +50,14 @@ public interface Aggregator<Context> extends Operation<Context>
   {
   /**
    * Method start initializes the aggregation procedure and is called for every unique grouping.
-   * <p/>
+   * <p>
    * The AggregatorCall context should be initialized here if necessary.
-   * <p/>
+   * <p>
    * The first time this method is called for a given 'process', the AggregatorCall context will be null. This method should
    * set a new instance of the user defined context object. When the AggregatorCall context is not null, it is up to
    * the developer to create a new instance, or 'recycle' the given instance. If recycled, it must be re-initialized to
    * remove any previous state/values.
-   * <p/>
+   * <p>
    * For example, if a Map is used to hold the intermediate data for each subsequent
    * {@link #aggregate(cascading.flow.FlowProcess, AggregatorCall)} call,
    * new HashMap() should be set on the AggregatorCall instance when {@link cascading.operation.AggregatorCall#getContext()} is null.
@@ -70,7 +71,7 @@ public interface Aggregator<Context> extends Operation<Context>
 
   /**
    * Method aggregate is called for each {@link TupleEntry} value in the current grouping.
-   * <p/>
+   * <p>
    * TupleEntry entry, or entry.getTuple() should not be stored directly in the context. A copy of the tuple
    * should be made via the {@code new Tuple( entry.getTuple() )} copy constructor.
    *

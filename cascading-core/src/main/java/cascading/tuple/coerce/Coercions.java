@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -35,12 +36,12 @@ import cascading.util.Util;
 
 /**
  * Coercions class is a helper class for managing primitive value coercions.
- * <p/>
+ * <p>
  * The {@link Coerce} constants are the default coercions for the specified type.
- * <p/>
+ * <p>
  * To override the behavior, you must create a new {@link CoercibleType} and assign it to the {@link Fields}
  * field position/name the custom behavior should apply.
- * <p/>
+ * <p>
  * Coercions are always used if {@link cascading.tuple.Tuple} elements are accessed via a {@link cascading.tuple.TupleEntry}
  * wrapper instance.
  *
@@ -162,11 +163,11 @@ public final class Coercions
 
   /**
    * Method coercibleTypeFor returns the {@link CoercibleType} for the given {@link Type} instance.
-   * <p/>
+   * <p>
    * If type is null, the {@link #OBJECT} CoercibleType is returned.
-   * <p/>
+   * <p>
    * If type is an instance of CoercibleType, the given type is returned.
-   * <p/>
+   * <p>
    * If no mapping is found, an {@link IllegalStateException} will be thrown.
    *
    * @param type the type to look up
@@ -190,7 +191,7 @@ public final class Coercions
 
   /**
    * Method coerce will coerce the given value to the given type using any {@link CoercibleType} mapping available.
-   * <p/>
+   * <p>
    * If no mapping is found, the {@link #OBJECT} CoercibleType will be use.
    *
    * @param value the value to coerce, may be null.
@@ -210,7 +211,7 @@ public final class Coercions
 
   /**
    * Method coerce will coerce the given value to the given type using the given {@link CoercibleType}.
-   * <p/>
+   * <p>
    * If the given CoercibleType is equivalent ({@link #equals(Object)}) to the given Type, the value
    * is returned. Note the Type can be itself a CoercibleType, so unnecessary work is prevented.
    *
@@ -283,7 +284,7 @@ public final class Coercions
   /**
    * Method asType is a convenience method for looking up a type name (like {@code "int"} or {@code "java.lang.String"}
    * to its corresponding {@link Class} or instance of CoercibleType.
-   * <p/>
+   * <p>
    * If the name is not in the {@link #types} map, the classname will be loaded from the current {@link ClassLoader}.
    *
    * @param typeName a string class or type nam.

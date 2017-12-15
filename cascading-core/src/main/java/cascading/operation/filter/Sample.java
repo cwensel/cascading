@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,21 +35,21 @@ import cascading.operation.OperationCall;
 
 /**
  * Class Sample is a {@link Filter} that only allows the given fraction of {@link cascading.tuple.Tuple} instances to pass.
- * <p/>
+ * <p>
  * Where fraction is between 1 and zero, inclusive. Thus to sample {@code 50%} of the tuples in a stream, use the
  * fraction {@code 0.5}.
- * <p/>
+ * <p>
  * By default, the seed is created at random on the constructor. This implies every branch using the Sample
  * filter will return the same random stream based on that seed. So if this Sample instance is distributed
  * into multiple systems against the same data, the result will be the same tuple stream. The alternative
  * would be to make this Operation "not safe". See {@link cascading.operation.Operation#isSafe()}.
- * <p/>
+ * <p>
  * Conversely, if the same stream of random data is require across application executions, set the seed manually.
- * <p/>
+ * <p>
  * The seed is generated from the following code:
- * <p/>
+ * <p>
  * {@code System.identityHashCode(this) * 2654435761L ^ System.currentTimeMillis()}
- * <p/>
+ * <p>
  * Override {@link #makeSeed()} to customize.
  */
 public class Sample extends BaseOperation<Random> implements Filter<Random>

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -24,9 +25,9 @@ import cascading.flow.FlowProcess;
 
 /**
  * Interface Function marks a given {@link Operation} as a function, as opposed to being a {@link Filter}.
- * <p/>
+ * <p>
  * A Function is responsible for taking Tuple arguments and returning one or more result Tuples.
- * <p/>
+ * <p>
  * To implement a Function, (optionally) sub-class {@link BaseOperation} and have the new sub-class {@code implement}
  * this interface.
  */

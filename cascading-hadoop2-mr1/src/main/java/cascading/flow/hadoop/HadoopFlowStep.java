@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -447,8 +447,6 @@ public class HadoopFlowStep extends BaseFlowStep<JobConf>
 
   /**
    * sources are specific to step, remove all known accumulated sources, if any
-   *
-   * @return
    */
   private Set<Tap> getUniqueStreamedSources()
     {

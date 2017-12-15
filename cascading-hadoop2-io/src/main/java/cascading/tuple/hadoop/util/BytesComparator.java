@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,7 +32,7 @@ import org.apache.hadoop.io.WritableComparator;
 
 /**
  * Class BytesComparator is used to compare arrays of bytes.
- * <p/>
+ * <p>
  * Note that BytesComparator implements {@link Hasher}, but for the Hasher interface to be applied during grouping,
  * sorting or joining, it must be set on a {@link cascading.tuple.Fields} instance via
  * {@link cascading.tuple.Fields#setComparator(Comparable, java.util.Comparator)}.

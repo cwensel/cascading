@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,7 +27,7 @@ import cascading.tuple.TupleEntry;
 /**
  * SinkCall provides access to the current {@link Scheme#sink(cascading.flow.FlowProcess, SinkCall)} invocation
  * arguments.
- * <p/>
+ * <p>
  * Use the Context to store thread local values.
  *
  * @param <Context>
@@ -51,10 +52,10 @@ public interface SinkCall<Context, Output>
   /**
    * Method getOutgoingEntry returns the final {@link TupleEntry} to be passed to the
    * {@link #getOutput()} output handler.
-   * <p/>
+   * <p>
    * That is, the result of calling getOutgoingEntry() should be passed directly to the
    * platform specific output handler returned by getOutput().
-   * <p/>
+   * <p>
    * Note the returned value from this method cannot be modified.
    *
    * @return TupleEntry

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -35,7 +35,7 @@ import static cascading.flow.planner.rule.util.RuleLogUtil.restoreLogging;
 
 /**
  * The RulePartitioner class is responsible for partitioning an element graph into smaller sub-graphs.
- * <p/>
+ * <p>
  * It may also re-partition a given graph, in place replacing it with its children, if any.
  */
 public abstract class RulePartitioner implements Rule

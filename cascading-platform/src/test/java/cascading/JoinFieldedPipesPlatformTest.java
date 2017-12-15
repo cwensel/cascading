@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -441,7 +441,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -452,7 +452,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -516,7 +516,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -527,7 +527,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -616,7 +616,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -627,7 +627,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -708,7 +708,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 7 g4
    * 7 g5
    * null h1
-   * <p/>
+   * <p>
    * 1 A1
    * 1 A2
    * 1 A3
@@ -719,7 +719,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 6 F1
    * 6 F2
    * null H1
-   * <p/>
+   * <p>
    * 1	a1	1	A1
    * 1	a1	1	A2
    * 1	a1	1	A3
@@ -817,19 +817,19 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * 6 c
    * 5 b
    * 5 e
-   * <p/>
+   * <p>
    * 1 A
    * 2 B
    * 3 C
    * 4 D
    * 5 E
-   * <p/>
+   * <p>
    * 1 a
    * 2 b
    * 3 c
    * 4 d
    * 5 e
-   * <p/>
+   * <p>
    * 1	a	1	A  1  a
    * -  -   2   B  2  b
    * -  -   3   C  3  c
@@ -1066,7 +1066,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
   /**
    * Same source as rightmost
-   * <p/>
+   * <p>
    * should be a single job as the same file accumulates into the joins
    *
    * @throws Exception
@@ -1268,14 +1268,14 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
 
   /**
    * here the same file is fed into the same HashJoin.
-   * <p/>
+   * <p>
    * This is three jobs.
-   * <p/>
+   * <p>
    * a temp tap is inserted before the accumulated branch for two reasons on the common HashJoin
-   * <p/>
+   * <p>
    * it is assumed the accumulated side is filtered down, so pushing to disk will preserve io
    * if accumulated side was streamed instead via a fork, only part of the file will accumulate into the HashJoin
-   * <p/>
+   * <p>
    * /-T-\ <-- accumulated
    * T      HJ
    * \---/ <-- streamed
@@ -1371,7 +1371,7 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
   /**
    * Loosely tests for a deadlock when BlockingHashJoinAnnotator rule doesn't excluce the GroupBy from the blocking
    * annotation.
-   * <p/>
+   * <p>
    * the deadlock is random on the order of the paths traversed from the Source Tap + fork.
    *
    * @throws Exception
@@ -1928,7 +1928,6 @@ public class JoinFieldedPipesPlatformTest extends PlatformTestCase
    * <p>
    * The planner nw
    * <p>
-   * <p/>
    * commented code is for troubleshooting.
    *
    * @throws Exception

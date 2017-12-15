@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class StreamGraph is the operation pipeline used during processing. This an internal use only class.
- * <p/>
+ * <p>
  * Under some circumstances it may make sense to see the actual graph plan. To do so, enable one or both dot file
  * properties, {@link #ERROR_DOT_FILE_NAME} and {@link #DOT_FILE_PATH}.
  */

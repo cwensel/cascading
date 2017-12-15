@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,13 +38,13 @@ public class CascadeProps extends Props
 
   /**
    * Method setMaxConcurrentFlows sets the maximum number of Flows that a Cascade can run concurrently.
-   * <p/>
+   * <p>
    * A value of one (1) will run one Flow at a time. A value of zero (0), the default, disables the restriction.
-   * <p/>
+   * <p>
    * By default a Cascade will attempt to run all give Flow instances at the same time. But there are occasions
    * where limiting the number for flows helps manages resources.
    *
-   * @param properties         of type Map<Object, Object>
+   * @param properties         of type Map
    * @param numConcurrentFlows of type int
    */
   public static void setMaxConcurrentFlows( Map<Object, Object> properties, int numConcurrentFlows )
@@ -72,9 +73,9 @@ public class CascadeProps extends Props
 
   /**
    * Method setMaxConcurrentFlows sets the maximum number of Flows that a Cascade can run concurrently.
-   * <p/>
+   * <p>
    * A value of one (1) will run one Flow at a time. A value of zero (0), the default, disables the restriction.
-   * <p/>
+   * <p>
    * By default a Cascade will attempt to run all give Flow instances at the same time, if eligible. But there are
    * occasions where limiting the number for flows helps manages resources.
    *

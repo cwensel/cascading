@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,11 +26,10 @@ import java.util.Map;
 /**
  * Typically CascadingStats objects have an internal state model with timings, the FlowSliceStats is a simplified
  * Stats object and only reports what the underlying platform reports, not the client side observations.
- * <p/>
+ * <p>
  * Implementations may optionally implement the {@link cascading.stats.ProvidesCounters} interface.
- * <p/>
+ * <p>
  * FlowSliceStats is provided as an abstract class so that implementations will be resilient to API additions.
- * <p/>
  * <ul>
  * <li>pendingTime - when the slice is created</li>
  * <li>startTime - when the slice was told to begin work</li>
@@ -37,9 +37,9 @@ import java.util.Map;
  * <li>runTime - when work began</li>
  * <li>finishedTime - when work ended</li>
  * </ul>
- * <p/>
+ * <p>
  * pending is mostly irrelevant and unavailable, start, submit, and runtime are by default synonymous at the slice level
- * <p/>
+ * <p>
  * All methods with the word 'process' like {@link #getProcessID()}, refer to the underlying implementations value.
  * In this example, processID is the task id this slice actually represents, where the id ({@link #getID()} is a local
  * guid not related to the platform implementation id to guarantee uniqueness.

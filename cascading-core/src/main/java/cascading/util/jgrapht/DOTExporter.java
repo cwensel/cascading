@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -210,7 +211,6 @@ public class DOTExporter<V, E>
    * described in http://www.graphviz.org/doc/info/lang.html Quoted from above
    * mentioned source: An ID is valid if it meets one of the following
    * criteria:
-   * <p/>
    * <ul>
    * <li>any string of alphabetic characters, underscores or digits, not
    * beginning with a digit;
@@ -220,7 +220,7 @@ public class DOTExporter<V, E>
    * <li>an HTML string (<...>).
    * </ul>
    *
-   * @throws RuntimeException if the given <code>vertexIDProvider</code>
+   * @throws RuntimeException if the given {@code vertexIDProvider}
    *                          didn't generate a valid vertex ID.
    */
   private String getVertexID( V v )

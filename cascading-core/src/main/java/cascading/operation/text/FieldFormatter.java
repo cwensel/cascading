@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,7 +34,7 @@ import cascading.tuple.Tuple;
 
 /**
  * Class FieldFormatter formats the values in a Tuple with a given format and stuffs the result into a new field.
- * <p/>
+ * <p>
  * This function uses the {@link Formatter} class for formatting the argument tuple values into a new string.
  */
 public class FieldFormatter extends BaseOperation<Tuple> implements Function<Tuple>

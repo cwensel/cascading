@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,24 +32,24 @@ import cascading.tuple.Tuple;
  * used to back in memory "join" and "co-group" operations. Typically these implementations are
  * "spillable", in that to prevent using up all memory in the JVM, after some threshold is met or event
  * is triggered, values are persisted to disk.
- * <p/>
+ * <p>
  * The {@link Map} classes returned must take a {@link cascading.tuple.Tuple} as a key, and a {@link Collection} of Tuples as
  * a value. Further, {@link Map#get(Object)} must never return {@code null}, but on the first call to get() on the map
  * an empty Collection must be created and stored.
- * <p/>
+ * <p>
  * That is, {@link Map#put(Object, Object)} is never called on the map instance internally,
  * only {@code map.get(groupTuple).add(valuesTuple)}.
- * <p/>
+ * <p>
  * Using the {@link TupleCollectionFactory} to create the underlying Tuple Collections would allow that aspect
  * to be pluggable as well.
- * <p/>
+ * <p>
  * If the Map implementation implements the {@link Spillable} interface, it will receive a {@link Spillable.SpillListener}
  * instance that calls back to the appropriate logging mechanism for the platform. This instance should be passed
  * down to any child Spillable types, namely an implementation of {@link SpillableTupleList}.
- * <p/>
+ * <p>
  * The default implementation for the Hadoop platform is the {@link cascading.tuple.hadoop.collect.HadoopTupleMapFactory}
  * which created a {@link cascading.tuple.hadoop.collect.HadoopSpillableTupleMap} instance.
- * <p/>
+ * <p>
  * The class {@link SpillableTupleMap} may be used as a base class.
  *
  * @see SpillableTupleMap

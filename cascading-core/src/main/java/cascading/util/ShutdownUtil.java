@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * ShutdownUtil is a private helper class for registering dependent shutdown hooks to maintain internal state
  * information reliably when a jvm is shutting down.
- * <p/>
+ * <p>
  * This api is not intended for public use.
  */
 public class ShutdownUtil

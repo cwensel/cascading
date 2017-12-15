@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,7 @@ import cascading.tuple.TupleEntryCollector;
 
 /**
  * Class SourceTap is an optional base class for source only Taps.
- * <p/>
+ * <p>
  * Some {@link Tap} instances may only be sources (as opposed
  * to being a sink). These types should subclass SourceTap for convenience or
  * set {@link #isSink()} to {@code false} in a custom Tap sub-class.

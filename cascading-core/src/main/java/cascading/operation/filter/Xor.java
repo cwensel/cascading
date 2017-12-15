@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,10 +32,10 @@ import cascading.tuple.TupleEntry;
 /**
  * Class Xor is a {@link Filter} class that will logically 'xor' (exclusive or) the results of the
  * constructor provided Filter instances.
- * <p/>
+ * <p>
  * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} returns {@code true} for all given instances,
  * or returns {@code false} for all given instances, this filter will return {@code false}.
- * <p/>
+ * <p>
  * Note that Xor can only be applied to two values.
  *
  * @see And

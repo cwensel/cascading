@@ -73,11 +73,11 @@ import static cascading.util.Util.narrowIdentitySet;
 /**
  * Class FlowStep is an internal representation of a given Job to be executed on a remote cluster. During
  * planning, pipe assemblies are broken down into "steps" and encapsulated in this class.
- * <p/>
+ * <p>
  * FlowSteps are submitted in order of dependency. If two or more steps do not share the same dependencies and all
  * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
  * all steps will be submitted for execution. The default submit priority is 5.
- * <p/>
+ * <p>
  * This class is for internal use, there are no stable public methods.
  */
 public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessLogger, Serializable
@@ -800,7 +800,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
    * there will be more than one instance.
    *
    * @param flowElement of type FlowElement
-   * @return Set<Scope>
+   * @return Set
    */
   public Set<Scope> getPreviousScopes( FlowElement flowElement )
     {
@@ -1179,7 +1179,7 @@ public abstract class BaseFlowStep<Config> implements FlowStep<Config>, ProcessL
 
   /**
    * Class SafeFlowStepListener safely calls a wrapped FlowStepListener.
-   * <p/>
+   * <p>
    * This is done for a few reasons, the primary reason is so exceptions thrown by the Listener
    * can be caught by the calling Thread. Since Flow is asynchronous, much of the work is done in the run() method
    * which in turn is run in a new Thread.

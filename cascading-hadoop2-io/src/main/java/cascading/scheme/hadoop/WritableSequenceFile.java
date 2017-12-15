@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -41,15 +42,15 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 /**
  * Class WritableSequenceFile is a sub-class of {@link SequenceFile} that reads and writes values of the given
  * {@code writableType} {@code Class}, instead of {@link Tuple} instances used by default in SequenceFile.
- * <p/>
+ * <p>
  * This Class is a convenience for those who need to read/write specific types from existing sequence files without
  * them being wrapped in a Tuple instance.
- * <p/>
+ * <p>
  * Note due to the nature of sequence files, only one type can be stored in the key and value positions, they they can be
  * uniquely different types (LongWritable, Text).
- * <p/>
+ * <p>
  * If keyType is null, valueType must not be null, and vice versa, assuming you only wish to store a single value.
- * <p/>
+ * <p>
  * {@link NullWritable} is used as the empty type for either a null keyType or valueType.
  */
 public class WritableSequenceFile extends SequenceFile
@@ -61,7 +62,7 @@ public class WritableSequenceFile extends SequenceFile
    * Constructor WritableSequenceFile creates a new WritableSequenceFile instance.
    *
    * @param fields    of type Fields
-   * @param valueType of type Class<? extends Writable>, may not be null
+   * @param valueType of type Class, may not be null
    */
   @ConstructorProperties({"fields", "valueType"})
   public WritableSequenceFile( Fields fields, Class<? extends Writable> valueType )
@@ -73,8 +74,8 @@ public class WritableSequenceFile extends SequenceFile
    * Constructor WritableSequenceFile creates a new WritableSequenceFile instance.
    *
    * @param fields    of type Fields
-   * @param keyType   of type Class<? extends Writable>
-   * @param valueType of type Class<? extends Writable>
+   * @param keyType   of type Class
+   * @param valueType of type Class
    */
   @ConstructorProperties({"fields", "keyType", "valueType"})
   public WritableSequenceFile( Fields fields, Class<? extends Writable> keyType, Class<? extends Writable> valueType )

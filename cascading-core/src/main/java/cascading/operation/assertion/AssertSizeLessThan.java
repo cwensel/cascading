@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,7 +33,7 @@ import cascading.tuple.TupleEntry;
 
 /**
  * Class AssertSizeLessThan asserts that the current {@link cascading.tuple.Tuple} in the stream has a size less than (&lt;) the given size.
- * </p>
+ * <p>
  * On evaluation, {@link cascading.tuple.Tuple#size()} is called (note Tuples may hold {@code null} values).
  */
 public class AssertSizeLessThan extends BaseAssertion implements ValueAssertion

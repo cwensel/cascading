@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -49,7 +50,7 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
 
   /**
    * Constructor TupleListCollector creates a new TupleListCollector instance.
-   * <p/>
+   * <p>
    * Set copyTupleOnCollect to {@code true} if a new Tuple instance should be stored in the
    * underlying list.
    *
@@ -110,7 +111,7 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
   /**
    * Method iterator returns an iterator for this collection.
    *
-   * @return Iterator<Tuple>
+   * @return Iterator
    */
   public Iterator<Tuple> iterator()
     {
@@ -119,10 +120,10 @@ public class TupleListCollector extends TupleEntryCollector implements Iterable<
 
   /**
    * Method entryIterator return a TupleEntry iterator for this collection.
-   * </p>
+   * <p>
    * Note the same TupleEntry will be returned on each next() call.
    *
-   * @return Iterator<TupleEntry>
+   * @return Iterator
    */
   public Iterator<TupleEntry> entryIterator()
     {

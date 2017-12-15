@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class RegexMatcher is the base class for common regular expression operations.
- * <p/>
+ * <p>
  * This operation uses {@link java.util.regex.Matcher} internally, specifically the method {@link java.util.regex.Matcher#find()}.
  *
  * @see java.util.regex.Matcher

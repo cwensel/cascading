@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -35,15 +36,15 @@ import cascading.tuple.TupleEntryIterator;
 
 /**
  * Class DecoratorTap wraps a given {@link Tap} instance, delegating all calls to the original.
- * <p/>
+ * <p>
  * It also provides an additional generic field that may hold any custom type, this allows implementations
  * to attach any meta-info to the tap being decorated.
- * <p/>
+ * <p>
  * Further, sub-classes of DecoratorTap can be used to decorate any Tap instances associated or created for
  * use by the {@link cascading.pipe.Checkpoint} {@link cascading.pipe.Pipe}.
- * <p/>
+ * <p>
  * Sub-classing this is optional if the aim is to simply attach relevant meta-info for use by a given application.
- * <p/>
+ * <p>
  * In order to pass any meta-info to a management service via the {@link cascading.management.annotation.Property}
  * annotation, a sub-class of DecoratorTap must be provided.
  */

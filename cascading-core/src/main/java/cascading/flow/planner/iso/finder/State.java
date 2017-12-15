@@ -48,26 +48,26 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class and algorithm is based on the following research.
- * <p/>
+ * <p>
  * Cordella, L. P., Foggia, P., Sansone, C., & VENTO, M. (2004).
  * A (sub)graph isomorphism algorithm for matching large graphs.
  * IEEE Transactions on Pattern Analysis and Machine Intelligence, 26(10), 1367–1372.
  * doi:10.1109/TPAMI.2004.75
- * <p/>
+ * <p>
  * Implementation in Java, modifications, and bug fixes have been applied.
- * <p/>
+ * <p>
  * Keep variable/field naming schemes mirroring the above paper to improve/retain readability.
  * <p>
  * Thanks to David Jergens for permission allowing use of his VF2State.java in S-Space to help bootstraps this
  * implementation. https://github.com/fozziethebeat/S-Space
- * <p/>
+ * <p>
  * Notes:
- * <p/>
+ * <p>
  * The #areCompatibleEdges does not scale, but it isn't conceived there will be more than a few edges
  * in any given node pair.
- * <p/>
+ * <p>
  * It also accounts for a wild card stating any edge between the nodes is relevant.
- * <p/>
+ * <p>
  * Future versions need the ability to specifically match and capture an edge, or all edges that apply to
  * an expression.
  */
@@ -740,7 +740,7 @@ class State
 
   /**
    * Code below sourced from google guava in order to prevent version issues
-   * <p/>
+   * <p>
    * Copyright (C) 2007 The Guava Authors
    * Licensed under the Apache License, Version 2.0
    */

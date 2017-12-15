@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,7 @@ import cascading.tuple.TupleEntry;
 
 /**
  * Class Last is an {@link Aggregator} that returns the last {@link Tuple} encountered.
- * <p/>
+ * <p>
  * By default, it returns the last Tuple of {@link Fields#ARGS} found.
  */
 public class Last extends ExtentBase

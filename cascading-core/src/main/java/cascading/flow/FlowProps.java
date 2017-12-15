@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -50,11 +51,11 @@ public class FlowProps extends Props
   /**
    * Sets a default {@link java.util.Comparator} to be used if no Comparator can be found for the class via the
    * {@link cascading.tuple.Comparison} interface.
-   * <p/>
+   * <p>
    * In the case of Hadoop, if the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
    * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
    * will be called.
-   * <p/>
+   * <p>
    * In local mode, only the default constructor will be called for the comparator.
    *
    * @param properties
@@ -92,11 +93,11 @@ public class FlowProps extends Props
 
   /**
    * Method setMaxConcurrentSteps sets the maximum number of steps that a Flow can run concurrently.
-   * <p/>
+   * <p>
    * By default a Flow will attempt to run all give steps at the same time. But there are occasions
    * where limiting the number of steps helps manages resources.
    *
-   * @param properties         of type Map<Object, Object>
+   * @param properties         of type Map
    * @param numConcurrentSteps of type int
    */
   public static void setMaxConcurrentSteps( Map<Object, Object> properties, int numConcurrentSteps )
@@ -138,11 +139,11 @@ public class FlowProps extends Props
   /**
    * Sets a default {@link java.util.Comparator} to be used if no Comparator can be found for the class via the
    * {@link cascading.tuple.Comparison} interface.
-   * <p/>
+   * <p>
    * In the case of Hadoop, if the Comparator instance also implements {@link org.apache.hadoop.conf.Configurable}, the
    * {@link org.apache.hadoop.conf.Configurable#setConf(org.apache.hadoop.conf.Configuration)}
    * will be called.
-   * <p/>
+   * <p>
    * In local mode, only the default constructor will be called for the comparator.
    *
    * @param defaultTupleElementComparator
@@ -197,7 +198,7 @@ public class FlowProps extends Props
 
   /**
    * Method setMaxConcurrentSteps sets the maximum number of steps that a Flow can run concurrently.
-   * <p/>
+   * <p>
    * By default a Flow will attempt to run all give steps at the same time. But there are occasions
    * where limiting the number of steps helps manages resources.
    *

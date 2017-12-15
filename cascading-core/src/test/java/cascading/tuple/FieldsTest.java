@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -362,7 +363,7 @@ public class FieldsTest extends CascadingTestCase
    * step -> step -> step
    * dec(sel) -> dec(sel)
    * a,b -> c,d  ->  d,f -> d,f,g
-   * <p/>
+   * <p>
    * the result of a select is always a field declaration
    */
   @Test

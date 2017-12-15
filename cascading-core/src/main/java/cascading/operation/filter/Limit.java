@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,11 +35,11 @@ import cascading.operation.OperationCall;
 /**
  * Class Limit is a {@link Filter} that will limit the number of {@link cascading.tuple.Tuple} instances that it will
  * allow to pass.
- * <br/>
+ * <br>
  * Note that the limit value is roughly a suggestion. It attempts to divide the limit number by the number of concurrent
  * tasks, but knowing the number of tasks isn't easily available from configuration information provided to individual
  * tasks. Further, the number of records/lines available to a task may be less than the limit amount.
- * <br/>
+ * <br>
  * More consistent results will be received from using {@link Sample}.
  *
  * @see Sample

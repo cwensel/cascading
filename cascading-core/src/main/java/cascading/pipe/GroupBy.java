@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,44 +31,44 @@ import cascading.tuple.Tuple;
 
 /**
  * The GroupBy pipe groups the {@link Tuple} stream by the given groupFields.
- * </p>
+ * <p>
  * If more than one {@link Pipe} instance is provided on the constructor, all branches will be merged. It is required
  * that all Pipe instances output the same field names, otherwise the {@link cascading.flow.FlowConnector} will fail to create a
  * {@link cascading.flow.Flow} instance. Again, the Pipe instances are merged together as if one Tuple stream and not joined.
  * See {@link CoGroup} for joining by common fields.
- * </p>
+ * <p>
  * Typically an {@link Every} follows GroupBy to apply an {@link Aggregator} function to every grouping. The
  * {@link Each} operator may also follow GroupBy to apply a {@link Function} or {@link Filter} to the resulting
  * stream. But an Each cannot come immediately before an Every.
- * <p/>
+ * <p>
  * Optionally a stream can be further sorted by providing sortFields. This allows an Aggregator to receive
  * values in the order of the sortedFields.
- * <p/>
+ * <p>
  * Note that local sorting always happens on the groupFields, sortFields are a secondary sorting on the grouped values within the
  * current grouping. sortFields is particularly useful if the Aggregators following the GroupBy would like to see their arguments
  * in order.
- * <p/>
+ * <p>
  * For more control over sorting at the group or secondary sort level, use {@link cascading.tuple.Fields}
  * containing {@link java.util.Comparator} instances for the appropriate fields when setting the groupFields or
  * sortFields values. Fields allows you to set a custom {@link java.util.Comparator} instance for each field name or
  * position. It is required that each Comparator class also be {@link java.io.Serializable}.
- * <p/>
+ * <p>
  * It should be noted for MapReduce systems, distributed group sorting is not 'total'. That is groups are sorted
  * as seen by each Reducer, but they are not sorted across Reducers. See the MapReduce algorithm for details.
- * <p/>
+ * <p>
  * See the {@link cascading.tuple.Hasher} interface when a custom {@link java.util.Comparator} on the grouping keys is
  * being provided that makes two values with differing hashCode values equal. For example,
  * {@code new BigDecimal( 100.0D )} and {@code new Double 100.0D )} are equal using a custom Comparator, but
  * {@link Object#hashCode()} will be different, thus forcing each value into differing partitions.
- * <p/>
+ * <p>
  * Note that grouping one String key with a lowercase value with another String key with an uppercase value using a
  * "case insensitive" Comparator will not have consistent results. The grouping will execute and be correct,
  * but the actual values in the key columns may be replaced with "equivalent" values from other streams.
- * <p/>
+ * <p>
  * That is, if two streams are merged and then grouped on a key, where one stream the key values are uppercase and the
  * other stream values are lowercase, the resulting key value for the grouping may arbitrarily be either upper or
  * lower case.
- * <p/>
+ * <p>
  * If the original key values must be retained, consider normalizing the keys with a Function and then grouping on the
  * resulting field.
  */
@@ -202,10 +203,10 @@ public class GroupBy extends Splice implements Group
 
   /**
    * Creates a new GroupBy instance that will first merge the given pipes, then group on Fields.FIRST.
-   * <p/>
+   * <p>
    * The assumption is that the first fields in all streams are logically the same field, which should be true
    * as merging assumes all incoming streams have the same fields in the same order.
-   * <p/>
+   * <p>
    * To get the best performance, choose a field(s) that has many unique values, by using the constructor that takes
    * a groupFields argument. If the first field has few unique values, data will only be sent to that number of reducers,
    * or less, in the cluster, making the reduce phase a larger bottleneck.

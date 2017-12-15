@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -59,10 +60,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Class ParentRunner is a JUnit {@link Runner} sub-class for injecting different platform and planners
  * into the *PlatformTest classes.
- * <p/>
+ * <p>
  * It works by loading the {@code platform.classname} property from the {@code cascading/platform/platform.properties}
  * resource. Every new platform should provide this resource.
- * <p/>
+ * <p>
  * To test against a specific platform, simply make sure the above resource for the platform in question is in the
  * test CLASSPATH. The simplest way is to add it as a dependency.
  */

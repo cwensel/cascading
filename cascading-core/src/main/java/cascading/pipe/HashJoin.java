@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,44 +29,43 @@ import cascading.tuple.Fields;
 /**
  * The HashJoin pipe allows for two or more tuple streams to join into a single stream via a {@link Joiner} when
  * all but one tuple stream is considered small enough to fit into memory.
- * <p/>
+ * <p>
  * When planned onto MapReduce, this is effectively a non-blocking "asymmetrical join" or "replicated join",
  * where the left-most side will not block (accumulate into memory) in order to complete the join, but the right-most
  * sides will. See below...
- * <p/>
+ * <p>
  * No aggregations can be performed with a HashJoin pipe as there is no guarantee all value will be associated with
  * a given grouping key. In fact, an Aggregator would see the same grouping many times with a partial set of values.
- * <p/>
+ * <p>
  * For every incoming {@link Pipe} instance, a {@link Fields} instance must be specified that denotes the field names
  * or positions that should be joined with the other given Pipe instances. If the incoming Pipe instances declare
  * one or more field with the same name, the declaredFields must be given to name the outgoing Tuple stream fields
  * to overcome field name collisions.
- * <p/>
+ * <p>
  * By default HashJoin performs an inner join via the {@link cascading.pipe.joiner.InnerJoin}
  * {@link cascading.pipe.joiner.Joiner} class.
- * <p/>
+ * <p>
  * Self joins can be achieved by using a constructor that takes a single Pipe and a numSelfJoins value. A value of
  * 1 for numSelfJoins will join the Pipe with itself once. Note that a self join will block until all data is accumulated
  * thus the stream must be reasonably small.
- * <p/>
+ * <p>
  * Note "outer" joins on the left most side will not behave as expected. All observed keys on the right most sides
  * will be emitted with {@code null} for the left most stream, thus when running distributed, duplicate values will
  * emerge from every Map task split on the MapReduce platform.
- * <p/>
+ * <p>
  * HashJoin does not scale well to large data sizes and thus requires streams with more data on the left hand side to
  * join with more sparse data on the right hand side. That is, always attempt to effect M x N joins where M is large
  * and N is small, instead of where M is small and N is large. Right hand side streams will be accumulated, and
  * spilled to disk if the collection reaches a specific threshold when using Hadoop.
- * <p/>
+ * <p>
  * If spills are happening, consider increasing the spill thresholds, see {@link cascading.tuple.collect.SpillableTupleMap}.
- * <p/>
- * <p/>
+ * <p>
  * If one of the right hand side streams starts larger than memory but is filtered (likely by a
  * {@link cascading.operation.Filter} implementation) down to the point it fits into memory, it may be useful to use
  * a {@link Checkpoint} Pipe to persist the stream and force a new FlowStep (MapReduce job) to read the data from
  * disk, instead of applying the filter redundantly. This will minimize the amount of data "replicated" across the
  * network.
- * <p/>
+ * <p>
  * See the {@link cascading.tuple.collect.TupleCollectionFactory} and {@link cascading.tuple.collect.TupleMapFactory} for a means
  * to use alternative spillable types.
  *

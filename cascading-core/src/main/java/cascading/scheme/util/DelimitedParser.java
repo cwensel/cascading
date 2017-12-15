@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,9 +44,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class DelimitedParser is a base class for parsing text delimited files.
- * <p/>
+ * <p>
  * It maybe sub-classed to change its behavior.
- * <p/>
+ * <p>
  * The interface {@link FieldTypeResolver} maybe used to clean and prepare field names
  * for data columns, and to infer type information from column names.
  */
@@ -190,7 +191,7 @@ public class DelimitedParser implements Serializable
 
   /**
    * Method createEscapePatternFor creates a regex {@link java.util.regex.Pattern} cleaning quote escapes from a String.
-   * <p/>
+   * <p>
    * If {@code quote} is null or empty, a null value will be returned;
    *
    * @param quote of type String
@@ -206,7 +207,7 @@ public class DelimitedParser implements Serializable
 
   /**
    * Method createCleanPatternFor creates a regex {@link java.util.regex.Pattern} for removing quote characters from a String.
-   * <p/>
+   * <p>
    * If {@code quote} is null or empty, a null value will be returned;
    *
    * @param quote of type String
@@ -254,7 +255,7 @@ public class DelimitedParser implements Serializable
   /**
    * Method cleanSplit will return a quote free array of String values, the given {@code split} array
    * will be updated in place.
-   * <p/>
+   * <p>
    * If {@code cleanPattern} is null, quote cleaning will not be performed, but all empty String values
    * will be replaces with a {@code null} value.
    *

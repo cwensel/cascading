@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,7 +33,7 @@ import cascading.tap.Tap;
 /**
  * Class FlowStep is an internal representation of a given "job" possibly to be executed on a remote cluster. During
  * planning, pipe assemblies are broken down into "steps" and encapsulated in this class.
- * <p/>
+ * <p>
  * FlowSteps are submitted in order of dependency. If two or more steps do not share the same dependencies and all
  * can be scheduled simultaneously, the {@link #getSubmitPriority()} value determines the order in which
  * all steps will be submitted for execution. The default submit priority is 5.
@@ -59,11 +60,11 @@ public interface FlowStep<Config> extends ProcessModel
 
   /**
    * Returns an immutable map of properties giving more details about the FlowStep object.
-   * <p/>
+   * <p>
    * FlowStep descriptions provide meta-data to monitoring systems describing the workload a given FlowStep represents.
    * For known description types, see {@link FlowStepDescriptors}.
    *
-   * @return Map<String,String>
+   * @return Map
    */
   Map<String, String> getFlowStepDescriptor();
 
@@ -80,7 +81,7 @@ public interface FlowStep<Config> extends ProcessModel
 
   /**
    * Method getConfig returns the current initialized configuration.
-   * <p/>
+   * <p>
    * The returned configuration is mutable and may be changed prior to this step being started
    * or submitted.
    *
@@ -105,7 +106,7 @@ public interface FlowStep<Config> extends ProcessModel
 
   /**
    * Method getSubmitPriority returns the submitPriority of this FlowStep object.
-   * <p/>
+   * <p>
    * 10 is lowest, 1 is the highest, 5 is the default.
    *
    * @return the submitPriority (type int) of this FlowStep object.
@@ -114,7 +115,7 @@ public interface FlowStep<Config> extends ProcessModel
 
   /**
    * Method setSubmitPriority sets the submitPriority of this FlowStep object.
-   * <p/>
+   * <p>
    * 10 is lowest, 1 is the highest, 5 is the default.
    *
    * @param submitPriority the submitPriority of this FlowStep object.

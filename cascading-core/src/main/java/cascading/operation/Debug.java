@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,9 +29,9 @@ import cascading.flow.FlowProcess;
 /**
  * Class Debug is a {@link Filter} that will never remove an item from a stream, but will print the Tuple to either
  * stdout or stderr.
- * <p/>
+ * <p>
  * Currently, if printFields is true, they will print every 10 Tuples.
- * <p/>
+ * <p>
  * The frequency that fields and tuples are printed can be set via {@link #setPrintFieldsEvery(int)} and
  * {@link #setPrintTupleEvery(int)} methods, respectively.
  */

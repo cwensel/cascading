@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * Class TupleEntrySchemeIterator is a helper class for wrapping a {@link Scheme} instance, calling
  * {@link Scheme#source(cascading.flow.FlowProcess, cascading.scheme.SourceCall)} on every call to
  * {@link #next()}. The behavior can be controlled via properties defined in {@link TupleEntrySchemeIteratorProps}.
- * <p/>
+ * <p>
  * Use this class inside a custom {@link cascading.tap.Tap} when overriding the
  * {@link cascading.tap.Tap#openForRead(cascading.flow.FlowProcess)} method.
  */

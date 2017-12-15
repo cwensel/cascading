@@ -35,10 +35,10 @@ import cascading.util.Pair;
 
 /**
  * Class RegexGenerator will emit a new Tuple for every matched regex group.
- * <p/>
+ * <p>
  * Note a {@code null} valued argument passed to the parser will be converted to an empty string ({@code ""}) before
  * the regex is applied.
- * <p/>
+ * <p>
  * Any Object value will be coerced to a String type if type information is provided. See the
  * {@link cascading.tuple.type.CoercibleType} interface to control how custom Object types are converted to String
  * values.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,6 +45,8 @@ dependencies {
 
 javadoc {
   configure( options ) {
+    links << "http://fasterxml.github.io/jackson-core/javadoc/${jacksonDatabindVersion[ 0..-2 ]}/".toString()
+    links << "http://fasterxml.github.io/jackson-databind/javadoc/${jacksonDatabindVersion[ 0..-2 ]}/".toString()
     links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString()
 
 //    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )

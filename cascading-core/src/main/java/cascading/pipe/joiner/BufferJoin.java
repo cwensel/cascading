@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,7 +29,7 @@ import cascading.tuple.Tuple;
 /**
  * Class BufferJoiner notifies the Cascading planner that the next {@link cascading.operation.Buffer} instance
  * will implement a custom join strategy.
- * <p/>
+ * <p>
  * Internally this class simply returns {@link Fields#NONE} from {@link #getFieldDeclaration()} as a flag to
  * the planner.
  */

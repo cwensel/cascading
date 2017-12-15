@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,7 +32,7 @@ import cascading.operation.OperationCall;
 /**
  * Class Not is a {@link Filter} class that will logically 'not' (negation) the results of the constructor provided Filter
  * instance.
- * <p/>
+ * <p>
  * Logically, if {@link Filter#isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} returns {@code true} for the given instance,
  * this filter will return the opposite, {@code false}.
  *

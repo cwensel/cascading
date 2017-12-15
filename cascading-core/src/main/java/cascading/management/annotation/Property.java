@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,14 +30,14 @@ import java.lang.annotation.Target;
  * Property annotations can be used to send additional information about certain aspects of Cascading classes
  * to the {@link cascading.management.DocumentService}.  The properties are present at runtime and allow a
  * DocumentService to inspect, process or persist them.
- * <p/>
+ * <p>
  * Property annotations can be applied to {@link cascading.tap.Tap}s, {@link cascading.scheme.Scheme}s,
  * and any {@link cascading.operation.Operation} sub-classes (like Function or Aggregator).
- * <p/>
+ * <p>
  * Property annotations can be applied to any method or field members, so that they can be accessed via
  * java.lang.Class#getMethods() and java.lang.Class.getFields() respectively. If the member is protected/private,
  * there will be an attempt to bypass the protected/private scope to retrieve the value.
- * <p/>
+ * <p>
  * By default the {@link Visibility} is {@link Visibility#PUBLIC}, and optionality is {@code true}.
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -59,7 +60,7 @@ public @interface Property
 
   /**
    * Whether the field name and null should be displayed if the value is {@code null}.
-   * <p/>
+   * <p>
    * When {@code true}, no data (field name, visibility, and the {@code null} value are sent to the display. The property
    * is ignored.
    *

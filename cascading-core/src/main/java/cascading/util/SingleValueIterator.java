@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,7 +26,7 @@ import java.util.Iterator;
 /**
  * Class SingleValueIterator is a convenience to creating an {@link Iterator} that returns one value for use
  * with interfaces that only accept Iterator instances.
- * <p/>
+ * <p>
  * If given a {@code null} value, it will be assumed this Iterator instance has no value, and {@link #hasNext()}
  * will return false.
  */

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -159,7 +160,7 @@ public class RegressionPipesPlatformTest extends PlatformTestCase
   /**
    * This test allows for Fields.UNKNOWN to propagate from the RegexSplitter through to the UnGroup (or any other
    * operation).
-   * <p/>
+   * <p>
    * This could be dangerous but feels very natural and part of the intentions of having UNKNOWN
    *
    * @throws Exception

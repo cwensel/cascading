@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,17 +35,17 @@ import org.slf4j.LoggerFactory;
 /**
  * DirectMappedCache is an implementation of the {@link cascading.util.cache.CascadingCache} interface following the semantics of
  * http://en.wikipedia.org/wiki/CPU_cache#Direct-mapped_cache. The Cache is backed by an array that stays constant in size.
- * <p/>
+ * <p>
  * Unlike other implementation of a Map a hash collision will lead to the entry being overwritten.
  * The {@link CacheEvictionCallback} is called with the entry that will be overwritten.
- * <p/>
+ * <p>
  * Use this cache if the keys are arriving in a random if not uniformly distributed order in order to reduce the number
  * of hash and equality comparisons.
- * <p/>
+ * <p>
  * If duplicate keys are clustered near each other in the incoming tuple stream, consider the {@link cascading.util.cache.LRUHashMapCache} cache
  * instead.
- * <p/>
- * DirectMappedCache does not permit <code>null</code> keys nor <code>null</code> values
+ * <p>
+ * DirectMappedCache does not permit {@code null} keys nor {@code null} values
  *
  * @see cascading.pipe.assembly.Unique
  * @see cascading.pipe.assembly.AggregateBy

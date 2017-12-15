@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,10 +38,10 @@ import org.apache.hadoop.io.serializer.Serializer;
 /**
  * Class BytesSerialization is an implementation of Hadoop's {@link Serialization} interface for use
  * by {@code byte} arrays ({@code byte[]}).
- * <p/>
- * To use, call<br/>
+ * <p>
+ * To use, call<br>
  * {@code TupleSerializationProps.addSerialization(properties, BytesSerialization.class.getName() );}
- * <p/>
+ * <p>
  * This class also implements {@link Comparison} so it is not required to set a {@link cascading.tuple.hadoop.util.BytesComparator}
  * when attempting to group on a byte array via GroupBy or CoGroup.
  *

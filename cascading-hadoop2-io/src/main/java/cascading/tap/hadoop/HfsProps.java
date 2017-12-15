@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -52,7 +53,7 @@ public class HfsProps extends Props
   /**
    * Method setTemporaryDirectory sets the temporary directory on the given properties object.
    *
-   * @param properties         of type Map<Object,Object>
+   * @param properties         of type Map
    * @param temporaryDirectory of type String
    */
   public static void setTemporaryDirectory( Map<Object, Object> properties, String temporaryDirectory )
@@ -65,7 +66,7 @@ public class HfsProps extends Props
    * MapReduce job should be run in Hadoop local mode. By default the value is {@code "file"}, set to
    * {@code "none"} to disable entirely.
    *
-   * @param properties of type Map<Object,Object>
+   * @param properties of type Map
    * @param scheme     a String
    */
   public static void setLocalModeScheme( Map<Object, Object> properties, String scheme )
@@ -76,12 +77,12 @@ public class HfsProps extends Props
   /**
    * Method setUseCombinedInput provides a means to indicate whether to leverage
    * {@link org.apache.hadoop.mapred.lib.CombineFileInputFormat} for the input format. By default it is false.
-   * <p/>
+   * <p>
    * Use {@link #setCombinedInputMaxSize(long)} to set the max split/combined input size. Other specific
    * properties must be specified directly if needed. Specifically "mapred.min.split.size.per.node" and
    * "mapred.min.split.size.per.rack", which are 0 by default.
    *
-   * @param properties of type Map<Object,Object>
+   * @param properties of type Map
    * @param combine    a boolean
    */
   public static void setUseCombinedInput( Map<Object, Object> properties, Boolean combine )
@@ -95,10 +96,10 @@ public class HfsProps extends Props
    * {@link org.apache.hadoop.mapred.lib.CombineFileInputFormat}. Safe mode will throw an exception if the underlying
    * InputFormat is not of type {@link org.apache.hadoop.mapred.FileInputFormat}. If safeMode is off a warning will
    * be logged instead. safeMode is on by default.
-   * <p/>
+   * <p>
    * Setting this property when not setting {@link #setUseCombinedInput(boolean)} to true has no effect.
    *
-   * @param properties of type Map<Object,Object>
+   * @param properties of type Map
    * @param safeMode   a boolean
    */
   public static void setUseCombinedInputSafeMode( Map<Object, Object> properties, Boolean safeMode )
@@ -109,10 +110,10 @@ public class HfsProps extends Props
 
   /**
    * Method setCombinedInputMaxSize sets the maximum input split size to be used.
-   * <p/>
+   * <p>
    * This property is an alias for the Hadoop property "mapred.max.split.size".
    *
-   * @param properties of type Map<Object,Object>
+   * @param properties of type Map
    * @param size       of type long
    */
   public static void setCombinedInputMaxSize( Map<Object, Object> properties, Long size )
@@ -199,7 +200,7 @@ public class HfsProps extends Props
 
   /**
    * Method setCombinedInputMaxSize sets the maximum input split size to be used.
-   * <p/>
+   * <p>
    * This value is not honored unless {@link #setUseCombinedInput(boolean)} is {@code true}.
    *
    * @param combinedInputMaxSize of type long
@@ -222,7 +223,7 @@ public class HfsProps extends Props
    * {@link org.apache.hadoop.mapred.lib.CombineFileInputFormat}. Safe mode will throw an exception if the underlying
    * InputFormat is not of type {@link org.apache.hadoop.mapred.FileInputFormat}. If safeMode is off a warning will
    * be logged instead. safeMode is on by default.
-   * <p/>
+   * <p>
    * Setting this property when not setting {@link #setUseCombinedInput(boolean)} to true has no effect.
    *
    * @param combinedInputSafeMode boolean

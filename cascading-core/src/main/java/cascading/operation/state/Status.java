@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,10 +32,10 @@ import cascading.operation.OperationCall;
 /**
  * Class Status is a {@link cascading.operation.Filter} that sets the current {@link FlowProcess} 'status' on
  * the first {@link cascading.tuple.Tuple} it sees.
- * <p/>
+ * <p>
  * Internally, the {@link #isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} method calls
  * {@link cascading.flow.FlowProcess#setStatus(String)}.
- * <p/>
+ * <p>
  * No {@link cascading.tuple.Tuple} instances are ever discarded.
  *
  * @see FlowProcess

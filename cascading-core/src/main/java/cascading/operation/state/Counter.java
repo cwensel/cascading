@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,10 +30,10 @@ import cascading.operation.FilterCall;
 
 /**
  * Class Counter is a {@link Filter} that increments a given {@link Enum} counter by 1 or by the given {@code increment} value.
- * <p/>
+ * <p>
  * Internally, the {@link #isRemove(cascading.flow.FlowProcess, cascading.operation.FilterCall)} method calls
  * {@link FlowProcess#increment(Enum, long)}.
- * <p/>
+ * <p>
  * No {@link cascading.tuple.Tuple} instances are ever discarded.
  *
  * @see FlowProcess
