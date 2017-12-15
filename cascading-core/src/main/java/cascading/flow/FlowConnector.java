@@ -104,8 +104,8 @@ import static cascading.flow.FlowDef.flowDef;
  * a given planner.
  *
  * @see cascading.flow.local.LocalFlowConnector
- * @see cascading.flow.hadoop.HadoopFlowConnector
  * @see cascading.flow.hadoop2.Hadoop2MR1FlowConnector
+ * @see cascading.flow.tez.Hadoop2TezFlowConnector
  */
 public abstract class FlowConnector
   {

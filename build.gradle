@@ -98,18 +98,18 @@ subprojects {
       bottom = copyright
       links = [
         'http://docs.oracle.com/javase/8/docs/api/',
-        'http://junit.sourceforge.net/javadoc/',
-        "http://${s3UploadDocs.destination}javadoc/cascading-core".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-local".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-common".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-io".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-mr1".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-tez".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-tez-stats".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-expression".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-nested".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-nested-json".toString(),
-        "http://${s3UploadDocs.destination}javadoc/cascading-platform".toString()
+        'http://junit.org/junit4/javadoc/4.11/',
+        "http://${s3UploadDocs.destination}javadoc/cascading-core/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-local/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-common/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-io/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-mr1/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-tez/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-hadoop2-tez-stats/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-expression/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-nested/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-nested-json/".toString(),
+        "http://${s3UploadDocs.destination}javadoc/cascading-platform/".toString()
       ]
     }
   }

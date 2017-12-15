@@ -32,8 +32,6 @@ dependencies {
 javadoc {
   configure( options ) {
     links << 'http://janino.unkrig.de/javadoc/'
-
-//    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
   }
 }
 

@@ -45,11 +45,8 @@ dependencies {
 
 javadoc {
   configure( options ) {
-    links << "http://fasterxml.github.io/jackson-core/javadoc/${jacksonDatabindVersion[ 0..-2 ]}/".toString()
-    links << "http://fasterxml.github.io/jackson-databind/javadoc/${jacksonDatabindVersion[ 0..-2 ]}/".toString()
-    links << "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString()
-
-//    linksOffline( '../../../cascading-core', "http://${rootProject.s3UploadDocs.destination}javadoc/cascading-core".toString() )
+    links << "http://fasterxml.github.io/jackson-core/javadoc/${jacksonDatabindVersion[ 0..-3 ]}/".toString()
+    links << "http://fasterxml.github.io/jackson-databind/javadoc/${jacksonDatabindVersion[ 0..-3 ]}/".toString()
   }
 }
 
