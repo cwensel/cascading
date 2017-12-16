@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,6 +31,8 @@ import cascading.PlatformTestCase;
 import cascading.TestBuffer;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowException;
+import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
@@ -273,6 +276,35 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
       fail( "flow should have thrown an Exception" );
       }
     catch( Exception exception )
+      {
+      // ignore
+      }
+    }
+
+  @Test
+  public void testTapKeep() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileCrossX2 );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), " ", inputFileCrossX2 );
+
+    String outputPath = getOutputPath( "/sink" );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", outputPath, SinkMode.REPLACE );
+
+    Flow firstFlow = getPlatform().getFlowConnector().connect( "first", source, sink, new Pipe( "head" ) );
+
+    firstFlow.complete();
+
+    sink = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", outputPath, SinkMode.KEEP );
+
+    Flow secondFlow = getPlatform().getFlowConnector().connect( "second", source, sink, new Each( new Pipe( "head" ), new Debug() ) );
+
+    try
+      {
+      secondFlow.complete();
+      fail();
+      }
+    catch( FlowException exception )
       {
       // ignore
       }
