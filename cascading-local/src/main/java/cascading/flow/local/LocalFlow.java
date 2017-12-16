@@ -34,7 +34,6 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.flow.planner.PlatformInfo;
-import cascading.tap.Tap;
 import riffle.process.ProcessConfiguration;
 
 /**
@@ -121,18 +120,6 @@ public class LocalFlow extends BaseFlow<Properties>
       {
       throw new FlowException( "unable to delete sinks", exception );
       }
-    }
-
-  @Override
-  public void deleteSinksIfReplace() throws IOException
-    {
-    for( Tap tap : sinks.values() )
-      {
-      if( tap.isKeep() && tap.resourceExists( getConfig() ) )
-        throw new FlowException( "resource exists and sink mode is KEEP, cannot overwrite: " + tap.getFullIdentifier( getFlowProcess() ) );
-      }
-
-    super.deleteSinksIfReplace();
     }
 
   @Override

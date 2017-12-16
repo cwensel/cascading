@@ -31,7 +31,7 @@ import cascading.PlatformTestCase;
 import cascading.TestBuffer;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
-import cascading.flow.FlowException;
+import cascading.flow.FlowTapException;
 import cascading.operation.Debug;
 import cascading.operation.Identity;
 import cascading.operation.regex.RegexSplitter;
@@ -281,7 +281,7 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
       }
     }
 
-  @Test
+  @Test(expected = FlowTapException.class)
   public void testTapKeep() throws IOException
     {
     getPlatform().copyFromLocal( inputFileCrossX2 );
@@ -299,14 +299,31 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     Flow secondFlow = getPlatform().getFlowConnector().connect( "second", source, sink, new Each( new Pipe( "head" ), new Debug() ) );
 
-    try
-      {
-      secondFlow.complete();
-      fail();
-      }
-    catch( FlowException exception )
-      {
-      // ignore
-      }
+    secondFlow.complete();
+    }
+
+  @Test(expected = FlowTapException.class)
+  public void testPartitionTapKeep() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileCrossX2 );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), " ", inputFileCrossX2 );
+
+    String outputPath = getOutputPath( "/partitioned" );
+    Tap partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", outputPath, SinkMode.REPLACE );
+
+    Partition partition = new DelimitedPartition( new Fields( "lower", "number" ) );
+    partitionTap = getPlatform().getPartitionTap( partitionTap, partition, 1 );
+
+    Flow firstFlow = getPlatform().getFlowConnector().connect( "first", source, partitionTap, new Pipe( "partition" ) );
+
+    firstFlow.complete();
+
+    partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", outputPath, SinkMode.KEEP );
+    partitionTap = getPlatform().getPartitionTap( partitionTap, partition, 1 );
+
+    Flow secondFlow = getPlatform().getFlowConnector().connect( "second", source, partitionTap, new Pipe( "partition" ) );
+
+    secondFlow.complete();
     }
   }

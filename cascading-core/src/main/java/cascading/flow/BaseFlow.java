@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -913,7 +914,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     catch( IOException exception )
       {
-      throw new FlowException( "unable to prepare flow", exception );
+      throw new FlowTapException( "unable to prepare flow", exception );
       }
     }
 
@@ -1139,7 +1140,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       return;
 
     if( !tap.deleteResource( getConfig() ) )
-      throw new FlowException( "unable to delete resource: " + tap.getFullIdentifier( getFlowProcess() ) );
+      throw new FlowTapException( "unable to delete resource: " + tap.getFullIdentifier( getFlowProcess() ) );
     }
 
   /**
@@ -1162,6 +1163,13 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
   public void deleteSinksIfReplace() throws IOException
     {
+    // verify all sinks before incrementally deleting for a replace
+    for( Tap tap : sinks.values() )
+      {
+      if( tap.isKeep() && tap.resourceExists( getConfig() ) )
+        throw new FlowTapException( "resource exists and sink mode is KEEP, cannot overwrite: " + tap.getFullIdentifier( getFlowProcess() ) );
+      }
+
     for( Tap tap : sinks.values() )
       {
       if( tap.isReplace() )
