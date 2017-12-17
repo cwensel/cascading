@@ -10,6 +10,14 @@ Cascading Change Log
 
   Fixed issue where local mode did not honor c.t.SinkMode#KEEP, allowing a c.f.Flow to overwrite existing data.
 
+3.2.1
+
+  Fixed issue when using a c.p.ConfigDef on a sink c.t.Tap could cause a j.l.ClassCastException.
+
+  Added Apache Tez to output comparison tests.
+
+  Added new convenience methods to c.t.Fields.
+
 3.2.0
 
   Updated c.s.Scheme with optional #sourceRePrepare() method allowing the Scheme instance to be notified on Input
