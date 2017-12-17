@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.3.0 [unreleased]
 
+  Updated Apache Hadoop 2 based sub-projects to 2.7.3.
+
   Updated c.f.Flow for all platforms to fail if any sink is c.t.SinkMode#KEEP, and the resource exists. Prior it has
   been the responsibility of any given platform (Hadoop MR or Tez) to determine if the resource existed and to fail
   if true. This firms the c.t.*.PartitionTap contract preventing overwrites of the parent Tap.
