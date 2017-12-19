@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -459,6 +460,8 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   @Override
   public TupleEntryCollector openForWrite( FlowProcess<? extends Configuration> flowProcess, OutputCollector output ) throws IOException
     {
+    resetFileStatuses();
+
     // output may be null when this method is called on the client side or cluster side when creating
     // side files with the PartitionTap
     return new HadoopTupleEntrySchemeCollector( flowProcess, this, output );
@@ -485,6 +488,8 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     {
     if( LOG.isDebugEnabled() )
       LOG.debug( "deleting: {}", fullIdentifier );
+
+    resetFileStatuses();
 
     Path fullPath = new Path( fullIdentifier );
 
@@ -516,6 +521,8 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
 
   public boolean deleteChildResource( Configuration conf, String childIdentifier ) throws IOException
     {
+    resetFileStatuses();
+
     Path childPath = new Path( childIdentifier ).makeQualified( getFileSystem( conf ) );
 
     if( !childPath.toString().startsWith( getFullIdentifier( conf ) ) )
@@ -561,7 +568,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
+    FileStatus fileStatus = getFileStatus( conf );
 
     if( fileStatus.isDir() )
       return 0;
@@ -593,7 +600,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
+    FileStatus fileStatus = getFileStatus( conf );
 
     if( fileStatus.isDir() )
       return 0;
@@ -627,7 +634,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
+    FileStatus fileStatus = getFileStatus( conf );
 
     if( fileStatus.isDir() )
       return 0;
@@ -703,7 +710,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( !resourceExists( conf ) )
       return 0;
 
-    FileStatus fileStatus = getFileSystem( conf ).getFileStatus( getPath() );
+    FileStatus fileStatus = getFileStatus( conf );
 
     if( !fileStatus.isDir() )
       return fileStatus.getModificationTime();
@@ -725,6 +732,11 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       }
 
     return date;
+    }
+
+  public FileStatus getFileStatus( Configuration conf ) throws IOException
+    {
+    return getFileSystem( conf ).getFileStatus( getPath() );
     }
 
   public static Path getTempPath( Configuration conf )

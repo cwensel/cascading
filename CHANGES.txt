@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.3.0 [unreleased]
 
+  Fixed issue where c.t.h.Hfs did not clear the file status cache after locally modifying a resource.
+
   Updated Apache Hadoop 2 based sub-projects to 2.7.3.
 
   Updated c.f.Flow for all platforms to fail if any sink is c.t.SinkMode#KEEP, and the resource exists. Prior it has
