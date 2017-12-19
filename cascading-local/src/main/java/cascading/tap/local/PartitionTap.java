@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,13 +22,18 @@
 package cascading.tap.local;
 
 import java.beans.ConstructorProperties;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.tap.SinkMode;
@@ -158,14 +164,44 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     String[] childIdentifiers = ( (FileTap) parent ).getChildIdentifiers( conf, Integer.MAX_VALUE, false );
 
     if( childIdentifiers.length == 0 )
-      return true;
+      return deleteParent( conf );
 
-    boolean result = false;
+    Path parentPath = Paths.get( parent.getIdentifier() );
+    Set<Path> parents = new HashSet<>();
 
     for( String childIdentifier : childIdentifiers )
-      result |= new File( childIdentifier ).delete();
+      {
+      Path path = Paths.get( childIdentifier );
 
-    return result;
+      parents.add( parentPath.resolve( parentPath.relativize( path ).subpath( 0, 1 ) ) );
+      }
+
+    for( Path subParent : parents )
+      recursiveDelete( subParent );
+
+    return deleteParent( conf );
+    }
+
+  private void recursiveDelete( Path path ) throws IOException
+    {
+    if( path == null )
+      return;
+
+    if( Files.isDirectory( path ) )
+      {
+      try( DirectoryStream<Path> paths = Files.newDirectoryStream( path ) )
+        {
+        for( Path current : paths )
+          recursiveDelete( current );
+        }
+      }
+
+    Files.deleteIfExists( path );
+    }
+
+  private boolean deleteParent( Properties conf ) throws IOException
+    {
+    return keepParentOnDelete || parent.deleteResource( conf );
     }
 
   @Override

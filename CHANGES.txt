@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.3.0 [unreleased]
 
+  Updated c.t.l.PartitionTap to support recursive deletes when calling c.t.Tap#deleteResource().
+
   Updated c.t.h.PartitionTap to use parent c.t.h.Hfs directory status to determine modified time.
 
   Fixed issue where c.t.h.Hfs did not clear the file status cache after locally modifying a resource.

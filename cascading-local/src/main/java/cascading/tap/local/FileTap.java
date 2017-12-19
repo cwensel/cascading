@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,9 +26,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
@@ -121,7 +125,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean deleteResource( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).delete();
+    return Files.deleteIfExists( Paths.get( getIdentifier() ) );
     }
 
   @Override
@@ -133,13 +137,14 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean resourceExists( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).exists();
+    return Files.exists( Paths.get( getIdentifier() ) );
+
     }
 
   @Override
   public long getModifiedTime( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).lastModified();
+    return Files.getLastModifiedTime( Paths.get( getIdentifier() ) ).to( TimeUnit.MILLISECONDS );
     }
 
   @Override
@@ -151,7 +156,7 @@ public class FileTap extends Tap<Properties, InputStream, OutputStream> implemen
   @Override
   public boolean isDirectory( Properties conf ) throws IOException
     {
-    return new File( getIdentifier() ).isDirectory();
+    return Files.isDirectory( Paths.get( getIdentifier() ) );
     }
 
   @Override

@@ -1161,6 +1161,11 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     }
 
+  /**
+   * Method deleteSinksIfReplace deletes all sinks that are configured with the {@link cascading.tap.SinkMode#REPLACE} flag.
+   *
+   * @throws IOException
+   */
   public void deleteSinksIfReplace() throws IOException
     {
     // verify all sinks before incrementally deleting for a replace
