@@ -24,33 +24,33 @@ import java.beans.ConstructorProperties;
 import java.util.Collections;
 import java.util.Map;
 
-import cascading.nested.core.NestedSetFunction;
+import cascading.nested.core.NestedCreateFunction;
 import cascading.tuple.Fields;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
- * Class JSONSetFunction provides for the ability to simply set multiple tuple values onto an existing JSON object.
+ * Class JSONCreateFunction provides for the ability to simply set multiple tuple values onto a new JSON object.
  *
- * @see NestedSetFunction for more details.
+ * @see NestedCreateFunction for more details.
  */
-public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
+public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode>
   {
   /**
-   * Creates a new JSONSetFunction instance that will pivot all resolved arguments fields into
-   * an existing JSON object, where all the JSON object attributes are the argument field names.
+   * Creates a new JSONCreateFunction instance that will pivot all resolved arguments fields into
+   * a new JSON object, where all the JSON object attributes are the argument field names.
    *
    * @param fieldDeclaration of Fields
    */
   @ConstructorProperties({"fieldDeclaration"})
-  public JSONSetFunction( Fields fieldDeclaration )
+  public JSONCreateFunction( Fields fieldDeclaration )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration );
     }
 
   /**
-   * Creates a new JSONSetFunction instance that will pivot all resolved arguments fields into
-   * an existing JSON object, where all the JSON object attributes are the argument field names.
+   * Creates a new JSONCreateFunction instance that will pivot all resolved arguments fields into
+   * a new JSON object, where all the JSON object attributes are the argument field names.
    * <p>
    * The {@code rootPointer} values specifies the base name of the final pointer path. If {@code rootPointer} is
    * "/person" and and argument is passed with field name "fullName", the value will be placed in "/person/fullName".
@@ -59,30 +59,34 @@ public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
    * @param rootPointer      of String
    */
   @ConstructorProperties({"fieldDeclaration", "rootPointer"})
-  public JSONSetFunction( Fields fieldDeclaration, String rootPointer )
+  public JSONCreateFunction( Fields fieldDeclaration, String rootPointer )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, rootPointer );
     }
 
   /**
-   * Creates a new JSONSetFunction instance.
+   * Creates a new JSONCreateFunction instance that maps the given {@code fromFields} value to the location
+   * declared by the {@code stringPointer}.
    *
    * @param fieldDeclaration of Fields
    * @param fromFields       of Fields
    * @param stringPointer    of String
    */
-  public JSONSetFunction( Fields fieldDeclaration, Fields fromFields, String stringPointer )
+  @ConstructorProperties({"fieldDeclaration", "fromFields", "stringPointer"})
+  public JSONCreateFunction( Fields fieldDeclaration, Fields fromFields, String stringPointer )
     {
     this( fieldDeclaration, Collections.singletonMap( fromFields, stringPointer ) );
     }
 
   /**
-   * Creates a new JSONSetFunction instance.
+   * Creates a new JSONCreateFunction instance that maps all the Fields declared in the
+   * {@code pointerMap} to the declared path pointers.
    *
    * @param fieldDeclaration of Fields
    * @param pointerMap       of Map
    */
-  public JSONSetFunction( Fields fieldDeclaration, Map<Fields, String> pointerMap )
+  @ConstructorProperties({"fieldDeclaration", "pointerMap"})
+  public JSONCreateFunction( Fields fieldDeclaration, Map<Fields, String> pointerMap )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, pointerMap );
     }

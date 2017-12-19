@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.n.j.JSONCreateFunction to compliment c.n.j.JSONSetFunction for creating new JSON objects.
+
   Added c.n.j.h.JSONTextLine and c.n.j.l.JSONTextLine c.s.Scheme classes for native JSON text file support.
 
   Added c.t.t.SerializableType annotation to allow for discovery of serialization providers for supported platforms.

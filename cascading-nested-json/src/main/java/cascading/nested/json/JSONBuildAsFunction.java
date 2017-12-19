@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class JSONBuildAsFunction extends NestedBaseBuildFunction<JsonNode, ArrayNode>
   {
   /**
-   * Constructor JSONBuildAsFunction creates a new JSONBuildAsFunction instance.
+   * Creates a new JSONBuildAsFunction instance.
    *
    * @param fieldDeclaration of Fields
    * @param buildSpecs       of BuildSpec...

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class JSONCopyAsFunction extends NestedBaseCopyFunction<JsonNode, ArrayNode>
   {
   /**
-   * Constructor JSONCopyAsFunction creates a new JSONCopyAsFunction instance.
+   * Creates a new JSONCopyAsFunction instance.
    *
    * @param fieldDeclaration of Fields
    * @param copySpecs        of CopySpec...

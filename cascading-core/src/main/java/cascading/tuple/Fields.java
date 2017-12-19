@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import cascading.tap.Tap;
 import cascading.tuple.type.CoercibleType;
@@ -1078,14 +1079,33 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     }
 
   /**
-   * Method iterator return an unmodifiable iterator of field values. if {@link #isSubstitution()} returns true,
+   * Method iterator returns an unmodifiable iterator of field values. If {@link #isSubstitution()} returns true,
    * this iterator will be empty.
    *
-   * @return Iterator
+   * @return Iterator of Comparable instances
    */
   public Iterator iterator()
     {
-    return Collections.unmodifiableList( Arrays.asList( fields ) ).iterator();
+    return Arrays.stream( fields ).iterator();
+    }
+
+  /**
+   * Method fieldsIterator returns an iterator of Fields instances for each unique field declared by this Fields
+   * instance. If {@link #isSubstitution()} returns true,
+   * this iterator will be empty.
+   *
+   * @return Iterator of Fields instances
+   */
+  public Iterator<Fields> fieldsIterator()
+    {
+    if( types == null )
+      return Arrays.stream( fields )
+        .map( Fields::new )
+        .iterator();
+
+    return IntStream.range( 0, fields.length )
+      .mapToObj( pos -> new Fields( fields[ pos ], types[ pos ] ) )
+      .iterator();
     }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,7 +26,6 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleListCollector;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.Test;
 
@@ -35,7 +34,7 @@ import static java.util.Collections.singletonMap;
 /**
  *
  */
-public class JSONGetSetFunctionTest extends CascadingTestCase
+public class JSONGetFunctionTest extends CascadingTestCase
   {
   @Test
   public void testGet() throws Exception
@@ -98,89 +97,5 @@ public class JSONGetSetFunctionTest extends CascadingTestCase
 
     assertNotNull( value );
     assertEquals( "John Doe", ( (TextNode) value ).textValue() );
-    }
-
-  @Test
-  public void testSet() throws Exception
-    {
-    TupleEntry entry = new TupleEntry(
-      new Fields( "json", JSONCoercibleType.TYPE ).append( new Fields( "name", String.class ) ),
-      Tuple.size( 2 )
-    );
-
-    entry.setObject( 0, JSONData.nested );
-    entry.setObject( 1, "Jane Doe" );
-
-    JSONSetFunction function = new JSONSetFunction( new Fields( "result" ), new Fields( "name", String.class ), "/person/otherName" );
-
-    TupleListCollector result = invokeFunction( function, entry, new Fields( "result" ) );
-
-    JsonNode value = (JsonNode) result.iterator().next().getObject( 0 );
-
-    assertNotNull( value );
-    assertEquals( "Jane Doe", value.at( "/person/otherName" ).textValue() );
-    }
-
-  @Test
-  public void testSetReplace() throws Exception
-    {
-    TupleEntry entry = new TupleEntry(
-      new Fields( "json", JSONCoercibleType.TYPE ).append( new Fields( "name", String.class ) ),
-      Tuple.size( 2 )
-    );
-
-    entry.setObject( 0, JSONData.nested );
-    entry.setObject( 1, "Jane Doe" );
-
-    JSONSetFunction function = new JSONSetFunction( new Fields( "result" ), new Fields( "name", String.class ), "/person/name" );
-
-    TupleListCollector result = invokeFunction( function, entry, new Fields( "result" ) );
-
-    JsonNode value = (JsonNode) result.iterator().next().getObject( 0 );
-
-    assertNotNull( value );
-    assertEquals( "Jane Doe", value.at( "/person/name" ).textValue() );
-    }
-
-  @Test
-  public void testSetDeep() throws Exception
-    {
-    TupleEntry entry = new TupleEntry(
-      new Fields( "json", JSONCoercibleType.TYPE ).append( new Fields( "name", String.class ) ),
-      Tuple.size( 2 )
-    );
-
-    entry.setObject( 0, JSONData.nested );
-    entry.setObject( 1, "Jane Doe" );
-
-    JSONSetFunction function = new JSONSetFunction( new Fields( "result" ), new Fields( "name", String.class ), "/person/foo/name" );
-
-    TupleListCollector result = invokeFunction( function, entry, new Fields( "result" ) );
-
-    JsonNode value = (JsonNode) result.iterator().next().getObject( 0 );
-
-    assertNotNull( value );
-    assertEquals( "Jane Doe", value.at( "/person/foo/name" ).textValue() );
-    }
-
-  @Test
-  public void testSetMap() throws Exception
-    {
-    TupleEntry entry = new TupleEntry(
-      new Fields( "json", JSONCoercibleType.TYPE ).append( new Fields( "name", String.class ) ),
-      Tuple.size( 2 )
-    );
-
-    entry.setObject( 0, JSONData.nested );
-    entry.setObject( 1, "Jane Doe" );
-
-    JSONSetFunction function = new JSONSetFunction( new Fields( "result" ), singletonMap( new Fields( "name", String.class ), "/person/name" ) );
-
-    TupleListCollector result = invokeFunction( function, entry, new Fields( "result" ) );
-
-    JsonNode value = (JsonNode) result.iterator().next().getObject( 0 );
-
-    assertNotNull( value );
-    assertEquals( "Jane Doe", value.at( "/person/name" ).textValue() );
     }
   }

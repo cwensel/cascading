@@ -94,6 +94,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
 
       Type declaredType = getFieldDeclaration().getType( i );
       Object value = getCoercibleType().coerce( result, declaredType );
+
       functionCall.getContext().set( i, value );
       }
 

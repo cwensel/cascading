@@ -35,7 +35,7 @@ import cascading.nested.core.NestedRegexFilter;
 public class JSONRegexFilter extends NestedRegexFilter
   {
   /**
-   * Constructor JSONRegexFilter creates a new JSONRegexFilter instance.
+   * Creates a new JSONRegexFilter instance.
    *
    * @param pointer of String
    * @param pattern of Pattern
@@ -47,7 +47,7 @@ public class JSONRegexFilter extends NestedRegexFilter
     }
 
   /**
-   * Constructor JSONRegexFilter creates a new JSONRegexFilter instance.
+   * Creates a new JSONRegexFilter instance.
    *
    * @param pointer  of String
    * @param patterns of List

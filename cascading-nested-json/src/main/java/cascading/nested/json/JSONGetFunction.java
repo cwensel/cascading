@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
   {
   /**
-   * Constructor JSONGetFunction creates a new JSONGetFunction instance.
+   * Creates a new JSONGetFunction instance.
    *
    * @param pointerMap of Map
    */
@@ -47,7 +47,7 @@ public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
     }
 
   /**
-   * Constructor JSONGetFunction creates a new JSONGetFunction instance.
+   * Creates a new JSONGetFunction instance.
    *
    * @param pointerMap        of Map
    * @param failOnMissingNode of boolean
@@ -59,7 +59,7 @@ public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
     }
 
   /**
-   * Constructor JSONGetFunction creates a new JSONGetFunction instance.
+   * Creates a new JSONGetFunction instance.
    *
    * @param fieldDeclaration of Fields
    * @param stringPointers   of String...
@@ -71,7 +71,7 @@ public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
     }
 
   /**
-   * Constructor JSONGetFunction creates a new JSONGetFunction instance.
+   * Creates a new JSONGetFunction instance.
    *
    * @param fieldDeclaration  of Fields
    * @param failOnMissingNode of boolean
