@@ -45,7 +45,8 @@ import cascading.tap.Tap;
  * <p>
  * When a Cascade starts up, if first verifies which Flow instances have stale sinks, if the sinks are not stale, the
  * method {@link cascading.flow.BaseFlow#deleteSinksIfNotUpdate()} is called. Before appends/updates were supported (logically)
- * the Cascade deleted all the sinks in a Flow.
+ * the Cascade deleted all the sinks in a Flow. Then and now, the {@link cascading.tap.SinkMode#KEEP} is not honored
+ * when the Tap is participating in a Cascade.
  * <p>
  * The new consequence of this is if the Cascade fails, but does complete a Flow that appended or updated data, re-running
  * the Cascade (and the successful append/update Flow) will re-update data to the source. Some systems may be idempotent and

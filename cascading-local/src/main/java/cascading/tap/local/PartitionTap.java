@@ -22,12 +22,12 @@
 package cascading.tap.local;
 
 import java.beans.ConstructorProperties;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
@@ -159,14 +159,16 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
     String[] childIdentifiers = ( (FileTap) parent ).getChildIdentifiers( conf, Integer.MAX_VALUE, false );
 
     if( childIdentifiers.length == 0 )
-      return true;
+      return deleteParent( conf );
 
-    boolean result = false;
+    DirTap.deleteChildren( Paths.get( parent.getIdentifier() ), childIdentifiers );
 
-    for( String childIdentifier : childIdentifiers )
-      result |= new File( childIdentifier ).delete();
+    return deleteParent( conf );
+    }
 
-    return result;
+  private boolean deleteParent( Properties conf ) throws IOException
+    {
+    return keepParentOnDelete || parent.deleteResource( conf );
     }
 
   @Override

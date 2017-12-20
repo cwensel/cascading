@@ -51,6 +51,22 @@ Cascading Change Log
   Removed support for all Apache Hadoop 1.x and prior releases, subsequently removing all sub-project interdependencies
   via symlinks.
 
+3.3.0 [unreleased]
+
+  Updated c.t.l.PartitionTap to support recursive deletes when calling c.t.Tap#deleteResource().
+
+  Updated c.t.h.PartitionTap to use parent c.t.h.Hfs directory status to determine modified time.
+
+  Fixed issue where c.t.h.Hfs did not clear the file status cache after locally modifying a resource.
+
+  Updated Apache Hadoop 2 based sub-projects to 2.7.3.
+
+  Updated c.f.Flow for all platforms to fail if any sink is c.t.SinkMode#KEEP, and the resource exists. Prior it has
+  been the responsibility of any given platform (Hadoop MR or Tez) to determine if the resource existed and to fail
+  if true. This firms the c.t.*.PartitionTap contract preventing overwrites of the parent Tap.
+
+  Fixed issue where local mode did not honor c.t.SinkMode#KEEP, allowing a c.f.Flow to overwrite existing data.
+
 3.2.1
 
   Fixed issue when using a c.p.ConfigDef on a sink c.t.Tap could cause a j.l.ClassCastException.

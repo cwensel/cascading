@@ -25,12 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Properties;
@@ -445,27 +446,49 @@ public class DirTap extends FileTap
    */
   public static boolean deleteDirTap( DirTap dirTap, Properties conf ) throws IOException
     {
-    try
-      {
-      Arrays.stream( dirTap.getChildIdentifiers( new Properties() ) ).forEach( DirTap::deleteIfExists );
-      }
-    catch( UncheckedIOException exception )
-      {
-      throw exception.getCause();
-      }
+    deleteChildren( dirTap.getPath() , dirTap.getChildIdentifiers( conf ) );
+
+    Files.deleteIfExists( dirTap.getPath() );
 
     return true;
     }
 
-  private static boolean deleteIfExists( String path )
+  /**
+   * Deletes the child files and their directories. Does not delete the parent path.
+   *
+   * @param parentPath
+   * @param childIdentifiers
+   * @throws IOException
+   */
+  protected static void deleteChildren( Path parentPath, String[] childIdentifiers ) throws IOException
     {
-    try
+    Set<Path> parents = new HashSet<>();
+
+    for( String childIdentifier : childIdentifiers )
       {
-      return Files.deleteIfExists( Paths.get( path ) );
+      Path path = Paths.get( childIdentifier );
+
+      parents.add( parentPath.resolve( parentPath.relativize( path ).subpath( 0, 1 ) ) );
       }
-    catch( IOException exception )
+
+    for( Path subParent : parents )
+      recursiveDelete( subParent );
+    }
+
+  private static void recursiveDelete( Path path ) throws IOException
+    {
+    if( path == null )
+      return;
+
+    if( Files.isDirectory( path ) )
       {
-      throw new UncheckedIOException( exception );
+      try( DirectoryStream<Path> paths = Files.newDirectoryStream( path ) )
+        {
+        for( Path current : paths )
+          recursiveDelete( current );
+        }
       }
+
+    Files.deleteIfExists( path );
     }
   }

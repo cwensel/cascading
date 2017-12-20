@@ -801,6 +801,7 @@ public class Util
           sinkModified = Math.min( sinkModified, sink.getModifiedTime( config ) ); // return youngest mod date
         }
       }
+
     return sinkModified;
     }
 

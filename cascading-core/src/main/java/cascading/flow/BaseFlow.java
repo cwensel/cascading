@@ -914,7 +914,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     catch( IOException exception )
       {
-      throw new FlowException( "unable to prepare flow", exception );
+      throw new FlowTapException( "unable to prepare flow", exception );
       }
     }
 
@@ -1140,7 +1140,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       return;
 
     if( !tap.deleteResource( getConfig() ) )
-      throw new FlowException( "unable to delete resource: " + tap.getFullIdentifier( getFlowProcess() ) );
+      throw new FlowTapException( "unable to delete resource: " + tap.getFullIdentifier( getFlowProcess() ) );
     }
 
   /**
@@ -1161,8 +1161,20 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     }
 
+  /**
+   * Method deleteSinksIfReplace deletes all sinks that are configured with the {@link cascading.tap.SinkMode#REPLACE} flag.
+   *
+   * @throws IOException
+   */
   public void deleteSinksIfReplace() throws IOException
     {
+    // verify all sinks before incrementally deleting for a replace
+    for( Tap tap : sinks.values() )
+      {
+      if( tap.isKeep() && tap.resourceExists( getConfig() ) )
+        throw new FlowTapException( "resource exists and sink mode is KEEP, cannot overwrite: " + tap.getFullIdentifier( getFlowProcess() ) );
+      }
+
     for( Tap tap : sinks.values() )
       {
       if( tap.isReplace() )

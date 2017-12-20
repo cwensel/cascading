@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -197,7 +198,7 @@ public class CascadePlatformTest extends PlatformTestCase
     }
 
   @Test
-  public void testSimpleCascadeFail() throws IOException, InterruptedException
+  public void testSimpleCascadeFail() throws IOException
     {
     getPlatform().copyFromLocal( inputFileIps );
 
