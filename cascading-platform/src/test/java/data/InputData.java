@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -44,6 +45,7 @@ public interface InputData
   String inputFileCrossNulls = inputPath + "lhs+rhs-cross-nulls.txt";
   String inputFileCrossRev = inputPath + "lhs+rhs-cross-rev.txt";
   String inputFileCrossX2 = inputPath + "lhs+rhs-cross-x2.txt";
+  String inputFileCrossX2VarLen = inputPath + "lhs+rhs-cross-x2-var-len.txt";
   String inputFileLhsSparse = inputPath + "lhs-sparse.txt";
   String inputFileRhsSparse = inputPath + "rhs-sparse.txt";
   String inputFileUnexpectedEndOfFile = inputPath + "unexpectedEndOfFile.gz";

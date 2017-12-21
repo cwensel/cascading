@@ -197,7 +197,7 @@ public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, 
       if( flowProcess.getBooleanProperty( HfsProps.COMBINE_INPUT_FILES, false ) )
         throw new TapException( "combined input format support, via '" + HfsProps.COMBINE_INPUT_FILES + "', may not be enabled for use with the PartitionTap" );
 
-      throw new TapException( "unable to retrieve the current file being processed, '" + MultiInputSplit.CASCADING_SOURCE_PATH + "' is not set" );
+      throw new TapException( "unable to retrieve the current file being processed, '" + MultiInputSplit.CASCADING_SOURCE_PATH + "' was lost or not set by " + MultiInputSplit.class.getName() );
       }
 
     return new Path( identifier ).getParent().toString(); // drop part-xxxx

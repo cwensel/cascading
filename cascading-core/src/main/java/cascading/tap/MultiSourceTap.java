@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,6 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Trie;
 import cascading.util.Util;
 
 import static java.util.Arrays.copyOf;
@@ -49,6 +51,9 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
   {
   private final String identifier = "__multisource_placeholder_" + Util.createUniqueID();
   protected Child[] taps;
+
+  protected transient Trie<Child> prefixMap;
+  protected transient String commonPrefix;
 
   private class TupleIterator implements Iterator
     {
@@ -199,7 +204,7 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
   public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Input input ) throws IOException
     {
     if( input != null )
-      return taps[ 0 ].openForRead( flowProcess, input );
+      return findMatchingTap( flowProcess ).openForRead( flowProcess, input );
 
     Iterator iterators[] = new Iterator[ getTaps().length ];
 
@@ -207,6 +212,46 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
       iterators[ i ] = new TupleIterator( getTaps()[ i ].openForRead( flowProcess ) );
 
     return new TupleEntryChainIterator( getSourceFields(), iterators );
+    }
+
+  protected Child findMatchingTap( FlowProcess<? extends Config> flowProcess )
+    {
+    // todo: in Cascading4, this value can be pulled from the FlowProcessContext
+    String identifier = flowProcess.getStringProperty( "cascading.source.path" );
+
+    // we cannot determine the actual file being processed -- this was the default until 3.3
+    if( identifier == null )
+      return taps[ 0 ];
+
+    Trie<Child> prefixMap = getTapPrefixMap( flowProcess );
+    int index = identifier.indexOf( getTapsCommonPrefix( flowProcess ) );
+    Child child = prefixMap.get( identifier.substring( index ) );
+
+    if( child == null )
+      throw new IllegalStateException( "unable to find child having a prefix that matches: " + identifier );
+
+    return child;
+    }
+
+  protected String getTapsCommonPrefix( FlowProcess<? extends Config> flowProcess )
+    {
+    if( commonPrefix == null )
+      commonPrefix = getTapPrefixMap( flowProcess ).getCommonPrefix();
+
+    return commonPrefix;
+    }
+
+  protected Trie<Child> getTapPrefixMap( FlowProcess<? extends Config> flowProcess )
+    {
+    if( prefixMap != null )
+      return prefixMap;
+
+    prefixMap = new Trie<>();
+
+    for( Child tap : taps )
+      prefixMap.put( tap.getFullIdentifier( flowProcess ), tap );
+
+    return prefixMap;
     }
 
   public boolean equals( Object object )
