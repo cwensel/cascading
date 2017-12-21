@@ -39,13 +39,20 @@ import static java.util.Arrays.copyOf;
 /**
  * Class MultiSourceTap is used to tie multiple {@link cascading.tap.Tap} instances into a single resource. Effectively this will allow
  * multiple files to be concatenated into the requesting pipe assembly, if they all share the same {@link Scheme} instance.
- * <p/>
+ * <p>
  * Note that order is not maintained by virtue of the underlying model. If order is necessary, use a unique sequence key
  * to span the resources, like a line number.
- * </p>
+ * <p>
  * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.hadoop.TextLine}), they may not contain
  * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
+ * <p>
+ * As of 3.3, MultiSourceTap can aggregate {@link cascading.scheme.hadoop.PartitionTap} and
+ * {@link cascading.scheme.local.PartitionTap} instances.
+ * <p>
+ * But it may not be safe to aggregate {@link cascading.scheme.hadoop.GlobHfs} and {@link cascading.scheme.hadoop.PartitionTap}
+ * instances as GlobHfs identifiers cannot be fully resolved, preventing the cluster side runtime from distinguishing which
+ * Tap instance to open for reading.
  */
 public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<Config, Input> implements CompositeTap<Child>
   {
@@ -225,6 +232,11 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
 
     Trie<Child> prefixMap = getTapPrefixMap( flowProcess );
     int index = identifier.indexOf( getTapsCommonPrefix( flowProcess ) );
+
+    // the child taps represent relative paths that cannot be resolved -- eg. globs
+    if( index == -1 )
+      return taps[ 0 ];
+
     Child child = prefixMap.get( identifier.substring( index ) );
 
     if( child == null )
