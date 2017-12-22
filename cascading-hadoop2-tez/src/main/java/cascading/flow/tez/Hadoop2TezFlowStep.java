@@ -58,6 +58,7 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Merge;
 import cascading.pipe.Splice;
 import cascading.property.AppProps;
+import cascading.tap.CompositeTaps;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.PartitionTap;
@@ -512,7 +513,7 @@ public class Hadoop2TezFlowStep extends BaseFlowStep<TezConfiguration>
         configBuilder.groupSplits( conf.getBoolean( FlowRuntimeProps.COMBINE_SPLITS, true ) );
 
       // grouping splits loses file name info, breaking partition tap default impl
-      if( flowElement instanceof PartitionTap ) // todo: generify
+      if( !CompositeTaps.unwindNarrow( PartitionTap.class, (Tap) flowElement ).isEmpty() ) // todo: generify
         configBuilder.groupSplits( false );
 
       DataSourceDescriptor dataSourceDescriptor = configBuilder.build();
