@@ -37,7 +37,7 @@ import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
 import cascading.management.annotation.Visibility;
-import cascading.scheme.Scheme;
+import cascading.scheme.FileFormat;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.tap.Tap;
@@ -64,8 +64,14 @@ import cascading.tuple.TupleEntry;
  * <p>
  * By default, all text is encoded/decoded as UTF-8. This can be changed via the {@code charsetName} constructor
  * argument.
+ * <p>
+ * In order to read or write a compressed files, pass a {@link cascading.scheme.local.CompressorScheme.Compressor}
+ * instance to the appropriate constructors. See {@link Compressors} for provided compression algorithms.
+ *
+ * @see TextDelimited
+ * @see Compressors
  */
-public class TextLine extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter>
+public class TextLine extends CompressorScheme<LineNumberReader, PrintWriter> implements FileFormat
   {
   public static final String DEFAULT_CHARSET = "UTF-8";
   public static final Fields DEFAULT_SOURCE_FIELDS = new Fields( "num", "line" ).applyTypes( Integer.TYPE, String.class );
@@ -140,6 +146,85 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
   public TextLine( Fields sourceFields, Fields sinkFields, String charsetName )
     {
     super( sourceFields, sinkFields );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance that sources "num" and "line" fields, and sinks all incoming fields, where
+   * "num" is the line number of the line in the input file.
+   */
+  public TextLine( Compressor compressor )
+    {
+    super( DEFAULT_SOURCE_FIELDS, Fields.ALL, compressor );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   * @param compressor   of type Compressor
+   */
+  @ConstructorProperties({"sourceFields", "compressor"})
+  public TextLine( Fields sourceFields, Compressor compressor )
+    {
+    super( sourceFields, compressor );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   * @param compressor   of type Compressor
+   * @param charsetName  of type String
+   */
+  @ConstructorProperties({"sourceFields", "compressor", "charsetName"})
+  public TextLine( Fields sourceFields, Compressor compressor, String charsetName )
+    {
+    super( sourceFields, compressor );
+
+    // throws an exception if not found
+    setCharsetName( charsetName );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   * @param sinkFields   of Fields
+   * @param compressor   of type Compressor
+   */
+  @ConstructorProperties({"sourceFields", "sinkFields", "compressor"})
+  public TextLine( Fields sourceFields, Fields sinkFields, Compressor compressor )
+    {
+    super( sourceFields, sinkFields, compressor );
+
+    verify( sourceFields );
+    }
+
+  /**
+   * Creates a new TextLine instance. If sourceFields has one field, only the text line will be returned in the
+   * subsequent tuples.
+   *
+   * @param sourceFields of Fields
+   * @param sinkFields   of Fields
+   * @param compressor   of type Compressor
+   * @param charsetName  of type String
+   */
+  @ConstructorProperties({"sourceFields", "sinkFields", "compressor", "charsetName"})
+  public TextLine( Fields sourceFields, Fields sinkFields, Compressor compressor, String charsetName )
+    {
+    super( sourceFields, sinkFields, compressor );
 
     // throws an exception if not found
     setCharsetName( charsetName );
@@ -274,5 +359,11 @@ public class TextLine extends Scheme<Properties, InputStream, OutputStream, Line
     {
     sinkCall.getContext().flush();
     sinkCall.setContext( null );
+    }
+
+  @Override
+  public String getExtension()
+    {
+    return "txt";
     }
   }

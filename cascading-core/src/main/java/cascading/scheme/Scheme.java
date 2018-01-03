@@ -342,6 +342,23 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
   public abstract void sinkConfInit( FlowProcess<? extends Config> flowProcess, Tap<Config, Input, Output> tap, Config conf );
 
   /**
+   * Method sourceWrap allows the current Scheme instance to wrap the incoming Input data source giving the underlying
+   * platform direct access to to manage the object in place of the original.
+   * <p>
+   * If the Input is an InputStream, the stream can be decompressed by wrapping in an appropriate de-compressor
+   * InputStream.
+   *
+   * @param flowProcess of type FlowProcess
+   * @param input       the Input provided by the platform
+   * @return the same or an instance of the Input type wrapping the given parameter
+   * @throws IOException if unable to wrap the parameter
+   */
+  public Input sourceWrap( FlowProcess<? extends Config> flowProcess, Input input ) throws IOException
+    {
+    return input;
+    }
+
+  /**
    * Method sourcePrepare is used to initialize resources needed during each call of
    * {@link #source(cascading.flow.FlowProcess, SourceCall)}.
    * <p>
@@ -401,6 +418,23 @@ public abstract class Scheme<Config, Input, Output, SourceContext, SinkContext> 
    */
   public void sourceCleanup( FlowProcess<? extends Config> flowProcess, SourceCall<SourceContext, Input> sourceCall ) throws IOException
     {
+    }
+
+  /**
+   * Method sinkWrap allows the current Scheme instance to wrap the outgoing Output data source giving the underlying
+   * platform direct access to to manage the object in place of the original.
+   * <p>
+   * If the Output is an OutputStream, the stream can be compressed by wrapping in an appropriate compressor
+   * OutputStream.
+   *
+   * @param flowProcess of type FlowProcess
+   * @param output      the Output provided by the platform
+   * @return the same or an instance of the Input type wrapping the given parameter
+   * @throws IOException if unable to wrap the parameter
+   */
+  public Output sinkWrap( FlowProcess<? extends Config> flowProcess, Output output ) throws IOException
+    {
+    return output;
     }
 
   /**

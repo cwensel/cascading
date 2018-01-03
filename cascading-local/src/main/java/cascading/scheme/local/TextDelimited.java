@@ -39,7 +39,6 @@ import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
 import cascading.management.annotation.Visibility;
 import cascading.scheme.FileFormat;
-import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
 import cascading.scheme.util.DelimitedParser;
@@ -108,13 +107,17 @@ import cascading.tuple.util.TupleViews;
  * result in exceptions or could cause edge cases in the underlying java regular expression engine.
  * <p>
  * A large part of Cascading was designed to help users cleans data. Thus the recommendation is to create Flows that
- * are responsible for cleansing large data-sets when faced with the problem
+ * are responsible for cleansing large data-sets when faced with the problem.
  * <p>
  * DelimitedParser maybe sub-classed and extended if necessary.
+ * <p>
+ * In order to read or write a compressed files, pass a {@link cascading.scheme.local.CompressorScheme.Compressor}
+ * instance to the appropriate constructors. See {@link Compressors} for provided compression algorithms.
  *
  * @see TextLine
+ * @see Compressors
  */
-public class TextDelimited extends Scheme<Properties, InputStream, OutputStream, LineNumberReader, PrintWriter> implements FileFormat
+public class TextDelimited extends CompressorScheme<LineNumberReader, PrintWriter> implements FileFormat
   {
   public static final String DEFAULT_CHARSET = "UTF-8";
 
@@ -516,10 +519,441 @@ public class TextDelimited extends Scheme<Properties, InputStream, OutputStream,
    * @param charsetName     of type String
    * @param delimitedParser of type DelimitedParser
    */
-  @ConstructorProperties({"fields", "skipHeader", "writeHeader", "charsetName", "delimitedParser"})
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "charsetName", "delimitedParser"})
   public TextDelimited( Fields fields, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
     {
-    super( fields, fields );
+    this( fields, null, skipHeader, writeHeader, charsetName, delimitedParser );
+    }
+  ////////
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param compressor of type Compressor, see {@link Compressors}
+   */
+  @ConstructorProperties("compressor")
+  public TextDelimited( Compressor compressor )
+    {
+    this( Fields.ALL, compressor );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader
+   * @param delimiter
+   */
+  @ConstructorProperties({"compressor", "hasHeader", "delimiter"})
+  public TextDelimited( Compressor compressor, boolean hasHeader, String delimiter )
+    {
+    this( Fields.ALL, compressor, hasHeader, delimiter, null, (Class[]) null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using TAB as the default delimiter.
+   * <p>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader
+   * @param delimiter
+   * @param quote
+   */
+  @ConstructorProperties({"compressor", "hasHeader", "delimiter", "quote"})
+  public TextDelimited( Compressor compressor, boolean hasHeader, String delimiter, String quote )
+    {
+    this( Fields.ALL, compressor, hasHeader, delimiter, quote, (Class[]) null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   *
+   * @param compressor      of type Compressor, see {@link Compressors}
+   * @param hasHeader
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"compressor", "hasHeader", "delimitedParser"})
+  public TextDelimited( Compressor compressor, boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, compressor, hasHeader, hasHeader, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking
+   * {@link Fields#ALL} and using the given delimitedParser instance for parsing.
+   * <p>
+   * Use this constructor if the source and sink fields will be resolved during planning, for example, when using
+   * with a {@link cascading.pipe.Checkpoint} Tap.
+   * <p>
+   * This constructor will set {@code skipHeader} and {@code writeHeader} values to true.
+   *
+   * @param compressor      of type Compressor, see {@link Compressors}
+   * @param delimitedParser
+   */
+  @ConstructorProperties({"compressor", "delimitedParser"})
+  public TextDelimited( Compressor compressor, DelimitedParser delimitedParser )
+    {
+    this( Fields.ALL, compressor, true, true, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance with TAB as the default delimiter.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   */
+  @ConstructorProperties({"fields", "compressor"})
+  public TextDelimited( Fields fields, Compressor compressor )
+    {
+    this( fields, compressor, "\t", null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param delimiter  of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "delimiter"})
+  public TextDelimited( Fields fields, Compressor compressor, String delimiter )
+    {
+    this( fields, compressor, delimiter, null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader  of type boolean
+   * @param delimiter  of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter )
+    {
+    this( fields, compressor, hasHeader, hasHeader, delimiter, null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param skipHeader of type boolean
+   * @param delimiter  of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimiter"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String delimiter )
+    {
+    this( fields, compressor, skipHeader, writeHeader, delimiter, null, null );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param delimiter  of type String
+   * @param types      of type Class[]
+   */
+  @ConstructorProperties({"fields", "compressor", "delimiter", "types"})
+  public TextDelimited( Fields fields, Compressor compressor, String delimiter, Class[] types )
+    {
+    this( fields, compressor, delimiter, null, types );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader  of type boolean
+   * @param delimiter  of type String
+   * @param types      of type Class[]
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter", "types"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter, Class[] types )
+    {
+    this( fields, compressor, hasHeader, hasHeader, delimiter, null, types );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param types       of type Class[]
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimiter", "types"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String delimiter, Class[] types )
+    {
+    this( fields, compressor, skipHeader, writeHeader, delimiter, null, types );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param delimiter  of type String
+   * @param quote      of type String
+   * @param types      of type Class[]
+   */
+  @ConstructorProperties({"fields", "compressor", "delimiter", "quote", "types"})
+  public TextDelimited( Fields fields, Compressor compressor, String delimiter, String quote, Class[] types )
+    {
+    this( fields, compressor, false, delimiter, quote, types );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader  of type boolean
+   * @param delimiter  of type String
+   * @param quote      of type String
+   * @param types      of type Class[]
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter", "quote", "types"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter, String quote, Class[] types )
+    {
+    this( fields, compressor, hasHeader, hasHeader, delimiter, quote, types, true );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimiter", "quote", "types"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types )
+    {
+    this( fields, compressor, skipHeader, writeHeader, delimiter, quote, types, true );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param delimiter  of type String
+   * @param quote      of type String
+   * @param types      of type Class[]
+   * @param safe       of type boolean
+   */
+  @ConstructorProperties({"fields", "compressor", "delimiter", "quote", "types", "safe"})
+  public TextDelimited( Fields fields, Compressor compressor, String delimiter, String quote, Class[] types, boolean safe )
+    {
+    this( fields, compressor, false, delimiter, quote, types, safe );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader  of type boolean
+   * @param delimiter  of type String
+   * @param quote      of type String
+   * @param types      of type Class[]
+   * @param safe       of type boolean
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter", "quote", "types", "safe"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe )
+    {
+    this( fields, compressor, hasHeader, hasHeader, delimiter, true, quote, types, safe );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param hasHeader   of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter", "quote", "types", "safe", "charsetName"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter, String quote, Class[] types, boolean safe, String charsetName )
+    {
+    this( fields, compressor, hasHeader, hasHeader, delimiter, true, quote, types, safe, charsetName );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimiter", "quote", "types", "safe"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String delimiter, String quote, Class[] types, boolean safe )
+    {
+    this( fields, compressor, skipHeader, writeHeader, delimiter, true, quote, types, safe );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param delimiter  of type String
+   * @param quote      of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "delimiter", "quote"})
+  public TextDelimited( Fields fields, Compressor compressor, String delimiter, String quote )
+    {
+    this( fields, compressor, false, delimiter, quote, null, true );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields     of type Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   * @param hasHeader  of type boolean
+   * @param delimiter  of type String
+   * @param quote      of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter", "quote"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter, String quote )
+    {
+    this( fields, compressor, hasHeader, delimiter, quote, null, true );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param hasHeader   of type boolean
+   * @param delimiter   of type String
+   * @param quote       of type String
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimiter", "quote", "charsetName"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, String delimiter, String quote, String charsetName )
+    {
+    this( fields, compressor, hasHeader, delimiter, quote, null, true, charsetName );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param strict      of type boolean
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types",
+                          "safe"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe )
+    {
+    this( fields, compressor, skipHeader, writeHeader, delimiter, strict, quote, types, safe, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields      of type Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param skipHeader  of type boolean
+   * @param writeHeader of type boolean
+   * @param delimiter   of type String
+   * @param strict      of type boolean
+   * @param quote       of type String
+   * @param types       of type Class[]
+   * @param safe        of type boolean
+   * @param charsetName of type String
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimiter", "strict", "quote", "types",
+                          "safe", "charsetName"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String delimiter, boolean strict, String quote, Class[] types, boolean safe, String charsetName )
+    {
+    this( fields, compressor, skipHeader, writeHeader, charsetName, new DelimitedParser( delimiter, quote, types, strict, safe ) );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param compressor      of type Compressor, see {@link Compressors}
+   * @param writeHeader     of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, compressor, skipHeader, writeHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param compressor      of type Compressor, see {@link Compressors}
+   * @param hasHeader       of type boolean
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "compressor", "hasHeader", "delimitedParser"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean hasHeader, DelimitedParser delimitedParser )
+    {
+    this( fields, compressor, hasHeader, hasHeader, null, delimitedParser );
+    }
+
+  /**
+   * Constructor TextDelimited creates a new TextDelimited instance.
+   *
+   * @param fields          of type Fields
+   * @param compressor      of type Compressor, see {@link Compressors}
+   * @param compressor      of type Compressor, see {@link Compressors}
+   * @param writeHeader     of type boolean
+   * @param charsetName     of type String
+   * @param delimitedParser of type DelimitedParser
+   */
+  @ConstructorProperties({"fields", "compressor", "skipHeader", "writeHeader", "charsetName", "delimitedParser"})
+  public TextDelimited( Fields fields, Compressor compressor, boolean skipHeader, boolean writeHeader, String charsetName, DelimitedParser delimitedParser )
+    {
+    super( fields, fields, compressor );
 
     this.delimitedParser = delimitedParser;
 

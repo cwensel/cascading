@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.s.l.CompressorScheme base class providing compression support to c.s.l.TextLine and c.s.l.TextDelimited
+  and any sub-classes in local mode.
+
   Added c.n.j.JSONCreateFunction to compliment c.n.j.JSONSetFunction for creating new JSON objects.
 
   Added c.n.j.h.JSONTextLine and c.n.j.l.JSONTextLine c.s.Scheme classes for native JSON text file support.

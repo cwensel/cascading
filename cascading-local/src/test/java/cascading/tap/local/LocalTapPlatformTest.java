@@ -41,6 +41,7 @@ import cascading.pipe.Pipe;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
+import cascading.scheme.local.Compressors;
 import cascading.scheme.local.TextLine;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -195,6 +196,26 @@ public class LocalTapPlatformTest extends PlatformTestCase implements Serializab
     flow.complete();
 
     List<Tuple> list = getSinkAsList( flow );
+
+    assertEquals( 600, list.size() );
+    }
+
+  @Test
+  public void testSchemeCompression() throws Exception
+    {
+    Tap source = new DirTap( new TextLine(), InputData.inputPath, "glob:**/*.txt" );
+    DirTap compressed = new DirTap( new TextLine( Compressors.GZIP ), getOutputPath( "compressed" ), SinkMode.REPLACE );
+    DirTap sink = new DirTap( new TextLine(), getOutputPath( "uncompressed" ), SinkMode.REPLACE );
+
+    Flow first = getPlatform().getFlowConnector().connect( "first", source, compressed, new Pipe( "copy" ) );
+
+    first.complete();
+
+    Flow second = getPlatform().getFlowConnector().connect( "second", compressed, sink, new Pipe( "copy" ) );
+
+    second.complete();
+
+    List<Tuple> list = getSinkAsList( second );
 
     assertEquals( 600, list.size() );
     }

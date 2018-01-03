@@ -63,7 +63,7 @@ public class HadoopTupleEntrySchemeCollector extends TupleEntrySchemeCollector<C
     if( measuredOutputCollector == null )
       measuredOutputCollector = new MeasuredOutputCollector( getFlowProcess(), SliceCounters.Write_Duration );
 
-    measuredOutputCollector.setOutputCollector( outputCollector );
+    measuredOutputCollector.setOutputCollector( super.wrapOutput( outputCollector ) );
 
     return measuredOutputCollector;
     }

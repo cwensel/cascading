@@ -43,7 +43,7 @@ import cascading.tap.TapException;
 public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollector
   {
   private final FlowProcess<? extends Config> flowProcess;
-  private final Scheme scheme;
+  private final Scheme<Config, ?, Output, ?, Object> scheme;
 
   protected final ConcreteCall<Object, Output> sinkCall;
   private Supplier<String> loggableIdentifier = () -> "'unknown'";
@@ -141,7 +141,14 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
 
   protected Output wrapOutput( Output output )
     {
-    return output;
+    try
+      {
+      return scheme.sinkWrap( flowProcess, output );
+      }
+    catch( IOException exception )
+      {
+      throw new TapException( "could not wrap scheme", exception );
+      }
     }
 
   /** Need to defer preparing the scheme till after the fields have been resolved */

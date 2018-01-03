@@ -51,7 +51,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
   private static final Logger LOG = LoggerFactory.getLogger( TupleEntrySchemeIterator.class );
 
   private final FlowProcess<? extends Config> flowProcess;
-  private final Scheme scheme;
+  private final Scheme<Config, Input, ?, Object, ?> scheme;
   private final CloseableIterator<Input> inputIterator;
   private final Set<Class<? extends Exception>> permittedExceptions;
   private ConcreteCall sourceCall;
@@ -159,7 +159,14 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
 
   protected Input wrapInput( Input input )
     {
-    return input;
+    try
+      {
+      return scheme.sourceWrap( flowProcess, input );
+      }
+    catch( IOException exception )
+      {
+      throw new TupleException( "unable to wrap source for input identifier: " + this.loggableIdentifier.get(), exception );
+      }
     }
 
   @Override

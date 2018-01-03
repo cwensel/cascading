@@ -71,7 +71,7 @@ public class HadoopTupleEntrySchemeIterator extends TupleEntrySchemeIterator<Con
     if( measuredRecordReader == null )
       measuredRecordReader = new MeasuredRecordReader( getFlowProcess(), SliceCounters.Read_Duration );
 
-    measuredRecordReader.setRecordReader( recordReader );
+    measuredRecordReader.setRecordReader( super.wrapInput( recordReader ) );
 
     return measuredRecordReader;
     }

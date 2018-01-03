@@ -25,6 +25,8 @@ dependencies {
   compile group: 'com.google.guava', name: 'guava', version: '14.0.1'
   compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
 
+  compile group: 'org.apache.commons', name: 'commons-compress', version: '1.15'
+
   testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
   testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
 }
@@ -34,4 +36,8 @@ javadoc {
   source 'src/test/java/cascading/platform/local/LocalPlatform.java'
 
   classpath = files( project.sourceSets.test.compileClasspath )
+
+  configure( options ) {
+    links << 'http://commons.apache.org/proper/commons-compress/javadocs/api-1.15/'
+  }
 }
