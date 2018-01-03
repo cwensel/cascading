@@ -24,7 +24,6 @@ package cascading.tap.local;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -402,7 +401,7 @@ public class DirTap extends FileTap
         }
       };
 
-    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, this, getScheme(), iterator );
+    return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, this, getScheme(), iterator, () -> flowProcess.getFlowProcessContext().getSourcePath() );
     }
 
   @Override
@@ -446,7 +445,7 @@ public class DirTap extends FileTap
    */
   public static boolean deleteDirTap( DirTap dirTap, Properties conf ) throws IOException
     {
-    deleteChildren( dirTap.getPath() , dirTap.getChildIdentifiers( conf ) );
+    deleteChildren( dirTap.getPath(), dirTap.getChildIdentifiers( conf ) );
 
     Files.deleteIfExists( dirTap.getPath() );
 
