@@ -524,7 +524,6 @@ public class TextDelimited extends CompressorScheme<LineNumberReader, PrintWrite
     {
     this( fields, null, skipHeader, writeHeader, charsetName, delimitedParser );
     }
-  ////////
 
   /**
    * Constructor TextDelimited creates a new TextDelimited instance sourcing {@link Fields#UNKNOWN}, sinking

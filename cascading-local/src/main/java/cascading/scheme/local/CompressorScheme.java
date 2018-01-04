@@ -75,38 +75,39 @@ public abstract class CompressorScheme<SourceContext, SinkContext> extends Schem
 
   public CompressorScheme( Compressor compressor )
     {
-    if( compressor != null )
-      this.compressor = compressor;
+    setCompressor( compressor );
     }
 
   public CompressorScheme( Fields sourceFields, Compressor compressor )
     {
     super( sourceFields );
 
-    if( compressor != null )
-      this.compressor = compressor;
+    setCompressor( compressor );
     }
 
   public CompressorScheme( Fields sourceFields, int numSinkParts, Compressor compressor )
     {
     super( sourceFields, numSinkParts );
 
-    if( compressor != null )
-      this.compressor = compressor;
+    setCompressor( compressor );
     }
 
   public CompressorScheme( Fields sourceFields, Fields sinkFields, Compressor compressor )
     {
     super( sourceFields, sinkFields );
 
-    if( compressor != null )
-      this.compressor = compressor;
+    setCompressor( compressor );
     }
 
   public CompressorScheme( Fields sourceFields, Fields sinkFields, int numSinkParts, Compressor compressor )
     {
     super( sourceFields, sinkFields, numSinkParts );
 
+    setCompressor( compressor );
+    }
+
+  protected void setCompressor( Compressor compressor )
+    {
     if( compressor != null )
       this.compressor = compressor;
     }

@@ -31,6 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.nested.json.JSONCoercibleType;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
+import cascading.scheme.local.Compressors;
 import cascading.scheme.local.TextLine;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -46,6 +47,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * By default, this scheme returns a {@link Tuple} with one field, "json" with the type {@link JSONCoercibleType}.
  * <p>
  * Any {@link Fields} object passed to the constructor will have the JSONCoercibleType.TYPE type applied.
+ * <p>
+ * In order to read or write a compressed files, pass a {@link cascading.scheme.local.CompressorScheme.Compressor}
+ * instance to the appropriate constructors. See {@link Compressors} for provided compression algorithms.
+ *
+ * @see Compressors
  */
 public class JSONTextLine extends TextLine
   {
@@ -88,6 +94,42 @@ public class JSONTextLine extends TextLine
    */
   public JSONTextLine( Fields fields, String charsetName )
     {
+    this( fields, null, charsetName );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector} returning results with the default field named "json".
+   *
+   * @param compressor of type Compressor, see {@link Compressors}
+   */
+  public JSONTextLine( Compressor compressor )
+    {
+    this( DEFAULT_FIELDS, compressor );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector}.
+   *
+   * @param fields     of Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   */
+  public JSONTextLine( Fields fields, Compressor compressor )
+    {
+    this( fields, compressor, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector}.
+   *
+   * @param fields      of Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param charsetName of String
+   */
+  public JSONTextLine( Fields fields, Compressor compressor, String charsetName )
+    {
     if( fields == null )
       throw new IllegalArgumentException( "fields may not be null" );
 
@@ -101,6 +143,8 @@ public class JSONTextLine extends TextLine
 
     setSinkFields( fields );
     setSourceFields( fields );
+
+    setCompressor( compressor );
 
     // throws an exception if not found
     setCharsetName( charsetName );
