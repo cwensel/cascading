@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,7 +42,6 @@ import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -160,17 +158,6 @@ public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, 
   public PartitionTap( Hfs parent, Partition partition, SinkMode sinkMode, boolean keepParentOnDelete, int openWritesThreshold )
     {
     super( parent, partition, sinkMode, keepParentOnDelete, openWritesThreshold );
-    }
-
-  @Override
-  public long getModifiedTime( Configuration conf ) throws IOException
-    {
-    if( !resourceExists( conf ) )
-      return 0;
-
-    FileStatus fileStatus = ( (Hfs) parent ).getFileStatus( conf );
-
-    return fileStatus.getModificationTime();
     }
 
   @Override
