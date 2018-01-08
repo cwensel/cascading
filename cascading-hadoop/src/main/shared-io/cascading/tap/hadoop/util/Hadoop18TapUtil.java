@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -190,6 +191,21 @@ public class Hadoop18TapUtil
   public static void cleanupTapMetaData( Configuration conf, Tap tap ) throws IOException
     {
     cleanTempPath( conf, new Path( tap.getIdentifier() ) );
+    }
+
+  public static void writeSuccessMarker( Configuration conf ) throws IOException
+    {
+    if( conf.getBoolean( "mapreduce.fileoutputcommitter.marksuccessfuljobs", true ) )
+      {
+      Path outputPath = FileOutputFormat.getOutputPath( asJobConfInstance( conf ) );
+
+      LOG.info( "writing success marker to {}", outputPath );
+
+      Path markerPath = new Path( outputPath, "_SUCCESS" );
+      FileSystem fs = markerPath.getFileSystem( conf );
+
+      fs.create( markerPath ).close();
+      }
     }
 
   /**

@@ -2,6 +2,8 @@ Cascading Change Log
 
 3.3.0 [unreleased]
 
+  Updated c.t.h.PartitionTap to write a _SUCCESS marker in the root path on completion.
+
   Fixed issue with c.t.MultiSourceTap that prevented it from aggregating c.t.h.PartitionTap instances reliably.
 
   Updated c.t.l.PartitionTap to support recursive deletes when calling c.t.Tap#deleteResource().
