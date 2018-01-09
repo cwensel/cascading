@@ -195,10 +195,13 @@ public class Hadoop18TapUtil
 
   public static void writeSuccessMarker( Configuration conf ) throws IOException
     {
+    writeSuccessMarker( conf, FileOutputFormat.getOutputPath( asJobConfInstance( conf ) ) );
+    }
+
+  public static void writeSuccessMarker( Configuration conf, Path outputPath ) throws IOException
+    {
     if( conf.getBoolean( "mapreduce.fileoutputcommitter.marksuccessfuljobs", true ) )
       {
-      Path outputPath = FileOutputFormat.getOutputPath( asJobConfInstance( conf ) );
-
       LOG.info( "writing success marker to {}", outputPath );
 
       Path markerPath = new Path( outputPath, "_SUCCESS" );

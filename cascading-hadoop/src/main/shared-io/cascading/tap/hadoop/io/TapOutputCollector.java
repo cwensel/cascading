@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.MapRed;
+import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.util.Hadoop18TapUtil;
@@ -167,7 +168,7 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
           Hadoop18TapUtil.cleanupJob( conf );
 
-          if( needsTaskCommit )
+          if( !HadoopUtil.isInflow( conf ) )
             Hadoop18TapUtil.writeSuccessMarker( conf );
           }
         }

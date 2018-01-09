@@ -34,6 +34,7 @@ import cascading.tap.hadoop.io.CombineInputPartitionTupleEntryIterator;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.hadoop.io.MultiInputSplit;
 import cascading.tap.hadoop.io.TapOutputCollector;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.partition.BasePartitionTap;
 import cascading.tap.partition.Partition;
 import cascading.tuple.Tuple;
@@ -238,5 +239,13 @@ public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, 
 
       return new CombineInputPartitionTupleEntryIterator( flowProcess, getSourceFields(), partition, parentIdentifier, schemeIterator );
       }
+    }
+
+  @Override
+  public boolean commitResource( Configuration conf ) throws IOException
+    {
+    Hadoop18TapUtil.writeSuccessMarker( conf, ( (Hfs) parent ).getPath() );
+
+    return super.commitResource( conf );
     }
   }
