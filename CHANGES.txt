@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.3.0 [unreleased]
 
+  Added c.f.h.FailOnMissingSuccessFlowListener c.f.FlowListener implementation that will prevent a c.f.Flow from
+  executing if any source c.t.Tap that is a directory does not have a _SUCCESS marker.
+
   Updated c.t.h.PartitionTap to write a _SUCCESS marker in the root path on completion.
 
   Fixed issue with c.t.MultiSourceTap that prevented it from aggregating c.t.h.PartitionTap instances reliably.
