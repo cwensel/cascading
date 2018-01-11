@@ -30,11 +30,11 @@ import java.util.Set;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowProcessWrapper;
 import cascading.flow.hadoop.util.HadoopUtil;
-import cascading.tap.local.hadoop.LocalHfs;
+import cascading.tap.local.hadoop.LocalHfsAdaptor;
 import org.apache.hadoop.mapred.JobConf;
 
 /**
- * Class LocalHadoopFlowProcess is for use with the {@link LocalHfs} implementation.
+ * Class LocalHadoopFlowProcess is for use with the {@link LocalHfsAdaptor} implementation.
  */
 public class LocalHadoopFlowProcess extends FlowProcessWrapper<JobConf>
   {

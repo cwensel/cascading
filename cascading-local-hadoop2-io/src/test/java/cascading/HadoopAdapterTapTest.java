@@ -29,7 +29,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.local.FileTap;
-import cascading.tap.local.hadoop.LocalHfs;
+import cascading.tap.local.hadoop.LocalHfsAdaptor;
 import cascading.tuple.Fields;
 import org.junit.Test;
 
@@ -50,7 +50,7 @@ public class HadoopAdapterTapTest extends PlatformTestCase
   public void testWriteReadHDFS() throws Exception
     {
     Tap source = new FileTap( new cascading.scheme.local.TextLine( new Fields( "offset", "line" ) ), inputFileApache );
-    Tap intermediate = new LocalHfs( new Hfs( new cascading.scheme.hadoop.TextLine(), getOutputPath( "/intermediate" ), SinkMode.REPLACE ) );
+    Tap intermediate = new LocalHfsAdaptor( new Hfs( new cascading.scheme.hadoop.TextLine(), getOutputPath( "/intermediate" ), SinkMode.REPLACE ) );
     Tap sink = new FileTap( new cascading.scheme.local.TextLine(), getOutputPath( "/final" ), SinkMode.REPLACE );
 
     Pipe pipe = new Pipe( "test" );

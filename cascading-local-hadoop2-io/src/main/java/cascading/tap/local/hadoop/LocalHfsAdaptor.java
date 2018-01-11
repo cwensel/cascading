@@ -34,16 +34,19 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
 
 /**
- * Class LocalHfs adapts the Hadoop {@link cascading.tap.hadoop.Hfs} {@link Tap} for use with the
+ * Class LocalHfsAdaptor adapts the Hadoop {@link cascading.tap.hadoop.Hfs} {@link Tap} for use with the
  * {@link cascading.flow.local.LocalFlowConnector} and {@link cascading.flow.local.planner.LocalPlanner}.
  * <p>
  * That is, "local mode" Cascading application can access data on an Apache Hadoop HDFS cluster if the proper
  * Hadoop properties on are set on the LocalFlowConnector instance.
+ * <p>
+ * Use this class in order to leverage existing {@link cascading.scheme.Scheme} implementations that wrap Hadoop
+ * {@link org.apache.hadoop.mapred.InputFormat} and {@link org.apache.hadoop.mapred.OutputFormat} implementations.
  */
-public class LocalHfs extends FileAdaptorTap<Properties, InputStream, OutputStream, Configuration, RecordReader, OutputCollector>
+public class LocalHfsAdaptor extends FileAdaptorTap<Properties, InputStream, OutputStream, Configuration, RecordReader, OutputCollector>
   {
   @ConstructorProperties("original")
-  public LocalHfs( Tap<Configuration, RecordReader, OutputCollector> original )
+  public LocalHfsAdaptor( Tap<Configuration, RecordReader, OutputCollector> original )
     {
     super( original, LocalHadoopFlowProcess::new, HadoopUtil::createJobConf );
     }
