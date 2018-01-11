@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,6 +29,7 @@ include 'cascading-hadoop2-io'
 include 'cascading-hadoop2-mr1'
 include 'cascading-hadoop2-tez'
 include 'cascading-hadoop2-tez-stats'
+include 'cascading-local-hadoop2-io'
 include 'cascading-platform'
 
 rootProject.name = 'cascading'

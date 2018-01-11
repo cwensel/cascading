@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -127,25 +127,33 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public void increment( Enum counter, long amount )
     {
-    stepStats.increment( counter, amount );
+    if( stepStats != null )
+      stepStats.increment( counter, amount );
     }
 
   @Override
   public void increment( String group, String counter, long amount )
     {
-    stepStats.increment( group, counter, amount );
+    if( stepStats != null )
+      stepStats.increment( group, counter, amount );
     }
 
   @Override
   public long getCounterValue( Enum counter )
     {
-    return stepStats.getCounterValue( counter );
+    if( stepStats != null )
+      return stepStats.getCounterValue( counter );
+
+    return 0;
     }
 
   @Override
   public long getCounterValue( String group, String counter )
     {
-    return stepStats.getCounterValue( group, counter );
+    if( stepStats != null )
+      return stepStats.getCounterValue( group, counter );
+
+    return 0;
     }
 
   @Override

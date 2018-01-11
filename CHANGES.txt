@@ -2,6 +2,12 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.t.l.h.LocalHfs, a c.t.FileAdaptorTap implementation, to provide Apache HDFS access, via c.t.h.Hfs, to
+  local mode c.f.Flow instances.
+
+  Added c.t.AdaptorTap and c.t.FileAdaptorTap implementations to ease adapting a c.t.Tap implementation from its
+  original intended target platform for execution on another.
+
   Added c.s.l.CompressorScheme base class providing compression support to c.s.l.TextLine, c.s.l.TextDelimited,
   c.n.j.l.JSONTextLine and any sub-classes in local mode.
 
