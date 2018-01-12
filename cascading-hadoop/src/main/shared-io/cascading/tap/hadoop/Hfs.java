@@ -368,14 +368,6 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     sourceConfInitComplete( process, conf );
     }
 
-//  protected void applySourceConfInitIdentifiers( FlowProcess<? extends Configuration> process, Configuration conf, String... fullIdentifiers )
-//    {
-//    for( String fullIdentifier : fullIdentifiers )
-//      sourceConfInitAddInputPath( conf, new Path( fullIdentifier ) );
-//
-//    sourceConfInitComplete( process, conf );
-//    }
-
   protected void sourceConfInitAddInputPaths( Configuration conf, Iterable<Path> qualifiedPaths )
     {
     HadoopUtil.addInputPaths( conf, qualifiedPaths );
