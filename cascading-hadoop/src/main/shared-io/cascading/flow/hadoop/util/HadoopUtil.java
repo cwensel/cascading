@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -841,6 +842,28 @@ public class HadoopUtil
       throw new IllegalStateException( "cannot determine if class denotes stable or new api, please set 'mapred.mapper.new-api' to the appropriate value" );
 
     return true;
+    }
+
+  public static void addInputPaths( Configuration conf, Iterable<Path> paths )
+    {
+    Path workingDirectory = getWorkingDirectory( conf );
+    String dirs = conf.get( "mapred.input.dir" );
+    StringBuilder buffer = new StringBuilder( dirs == null ? "" : dirs );
+
+    for( Path path : paths )
+      {
+      if( !path.isAbsolute() )
+        path = new Path( workingDirectory, path );
+
+      String dirStr = StringUtils.escapeString( path.toString() );
+
+      if( buffer.length() != 0 )
+        buffer.append( ',' );
+
+      buffer.append( dirStr );
+      }
+
+    conf.set( "mapred.input.dir", buffer.toString() );
     }
 
   public static void addInputPath( Configuration conf, Path path )

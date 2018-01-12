@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,6 +30,7 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tap.MultiSourceTap;
 import cascading.tap.TapException;
+import cascading.util.LazyIterable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -156,8 +158,14 @@ public class GlobHfs extends MultiSourceTap<Hfs, Configuration, RecordReader>
     {
     Hfs[] taps = initTapsInternal( conf );
 
-    for( Hfs tap : taps )
-      taps[ 0 ].sourceConfInitAddInputPath( conf, tap.getPath() ); // we are building fully qualified paths above
+    taps[ 0 ].sourceConfInitAddInputPaths( conf, new LazyIterable<Hfs, Path>( taps )
+      {
+      @Override
+      protected Path convert( Hfs next )
+        {
+        return next.getPath(); // we are building fully qualified paths above
+        }
+      } );
 
     taps[ 0 ].sourceConfInitComplete( process, conf );
     }

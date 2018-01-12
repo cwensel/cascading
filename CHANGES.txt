@@ -2,6 +2,9 @@ Cascading Change Log
 
 3.3.0 [unreleased]
 
+  Fixed issue where c.t.h.PartitionTap could not initialize with more than a few thousand input partitions in a
+  reasonable time frame. Fix supports PartitionTap initialization in under 10sec w/ 1 million paths.
+
   Added c.f.h.FailOnMissingSuccessFlowListener c.f.FlowListener implementation that will prevent a c.f.Flow from
   executing if any source c.t.Tap that is a directory does not have a _SUCCESS marker.
 
