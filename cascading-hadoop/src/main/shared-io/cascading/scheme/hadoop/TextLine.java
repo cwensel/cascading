@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,7 +24,7 @@ package cascading.scheme.hadoop;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -38,11 +39,10 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.InputFormat;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
@@ -89,9 +89,13 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
   /** Field DEFAULT_SOURCE_FIELDS */
   public static final Fields DEFAULT_SOURCE_FIELDS = new Fields( "offset", "line" ).applyTypes( Long.TYPE, String.class );
 
+  /** Field zipPattern */
+  private static final Pattern zipPattern = Pattern.compile( "\\.[zZ][iI][pP]([ ,]|$)" );
+
   /** Field sinkCompression */
   Compress sinkCompression = Compress.DISABLE;
 
+  /** Field charsetName */
   String charsetName = DEFAULT_CHARSET;
 
   /**
@@ -355,27 +359,22 @@ public class TextLine extends Scheme<Configuration, RecordReader, OutputCollecto
   @Override
   public void sourceConfInit( FlowProcess<? extends Configuration> flowProcess, Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf )
     {
-    if( hasZippedFiles( FileInputFormat.getInputPaths( asJobConfInstance( conf ) ) ) )
-      throw new IllegalStateException( "cannot read zip files: " + Arrays.toString( FileInputFormat.getInputPaths( asJobConfInstance( conf ) ) ) );
+    JobConf jobConf = asJobConfInstance( conf );
+    String paths = jobConf.get( "mapred.input.dir", "" );
+
+    if( hasZippedFiles( paths ) )
+      throw new IllegalStateException( "cannot read zip files: " + paths );
 
     conf.setBoolean( "mapred.mapper.new-api", false );
     conf.setClass( "mapred.input.format.class", TextInputFormat.class, InputFormat.class );
     }
 
-  private boolean hasZippedFiles( Path[] paths )
+  private boolean hasZippedFiles( String paths )
     {
-    if( paths == null || paths.length == 0 )
+    if( paths == null || paths.length() == 0 )
       return false;
 
-    boolean isZipped = paths[ 0 ].getName().endsWith( ".zip" );
-
-    for( int i = 1; i < paths.length; i++ )
-      {
-      if( isZipped != paths[ i ].getName().endsWith( ".zip" ) )
-        throw new IllegalStateException( "cannot mix zipped and upzipped files" );
-      }
-
-    return isZipped;
+    return zipPattern.matcher( paths ).find();
     }
 
   @Override
