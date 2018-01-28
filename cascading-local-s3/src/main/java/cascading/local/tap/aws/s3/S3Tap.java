@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -83,6 +83,8 @@ import org.slf4j.LoggerFactory;
  * The {@link S3Checkpointer#commit()} method is only called during a graceful shutdown of the Flow or JVM, but every
  * consumed key is passed to the S3Checkpointer, so custom implementations can choose to persist the key more
  * frequently.
+ * <p>
+ * AWS Credentials are handled by {@link com.amazonaws.services.s3.S3CredentialsProviderChain}.
  */
 public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements FileType<Properties>
   {

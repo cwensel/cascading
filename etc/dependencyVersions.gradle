@@ -24,7 +24,7 @@ configurations.all {
 
 ext.cascadingVersion = '4.0.0-wip-18'
 
-ext.awsVersion = '1.11.135'
+ext.awsVersion = '1.11.271'
 ext.awsS3Version = awsVersion
 
 ext.s3ProxyVersion = '1.5.3'

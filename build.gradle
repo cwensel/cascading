@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -66,7 +66,7 @@ subprojects {
   javadoc.dependsOn << prepareDist
 
   javadoc {
-    def copyright = '<i>Copyright &#169; 21017 Chris K Wensel. All Rights Reserved.</i>'
+    def copyright = '<i>Copyright &#169; 2017-2018 Chris K Wensel. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
