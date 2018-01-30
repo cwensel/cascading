@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added support for collections to c.n.j.JSONCoercibleType.
+
   Added c.t.l.h.LocalHfsAdaptor, a c.t.FileAdaptorTap implementation, to provide Apache HDFS access, via c.t.h.Hfs
   and existing Apache Hadoop c.s.Scheme implementations, to local mode c.f.Flow instances.
 

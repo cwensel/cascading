@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,6 +19,12 @@
  */
 
 package cascading.nested.json;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -60,6 +66,34 @@ public class JSONTypeTest
     {
     for( String value : JSONData.arrays )
       testContainerCoercion( value, JsonNodeType.ARRAY, String.class );
+    }
+
+  @Test
+  public void mapCoercions()
+    {
+    Map<String, Object> map = new LinkedHashMap<>();
+
+    map.put( "name", "John Doe" );
+    map.put( "list", Arrays.asList( "John", "Jane" ) );
+
+    JsonNode canonical = JSONCoercibleType.TYPE.canonical( map );
+
+    assertEquals( JsonNodeType.OBJECT, canonical.getNodeType() );
+    assertEquals( map, JSONCoercibleType.TYPE.coerce( canonical, Map.class ) );
+    }
+
+  @Test
+  public void listCoercions()
+    {
+    List<Object> list = new LinkedList<>();
+
+    list.add( "John Doe" );
+    list.add( Arrays.asList( "John", "Jane" ) );
+
+    JsonNode canonical = JSONCoercibleType.TYPE.canonical( list );
+
+    assertEquals( JsonNodeType.ARRAY, canonical.getNodeType() );
+    assertEquals( list, JSONCoercibleType.TYPE.coerce( canonical, List.class ) );
     }
 
   private void testContainerCoercion( String value, JsonNodeType nodeType, Class resultType )

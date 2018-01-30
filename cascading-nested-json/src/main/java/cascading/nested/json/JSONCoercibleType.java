@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,6 +22,7 @@ package cascading.nested.json;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -101,6 +102,9 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
 
     if( from == Boolean.class || from == Boolean.TYPE )
       return JsonNodeFactory.instance.booleanNode( (Boolean) value );
+
+    if( Collection.class.isAssignableFrom( from ) || Map.class.isAssignableFrom( from ) )
+      return mapper.valueToTree( value );
 
     throw new CascadingException( "unknown type coercion requested from: " + Util.getTypeName( from ) );
     }
