@@ -78,8 +78,9 @@ subprojects {
       encoding = "UTF8"
       bottom = copyright
       links = [
-        'http://docs.oracle.com/javase/7/docs/api/',
-        'http://junit.sourceforge.net/javadoc/'
+        'http://docs.oracle.com/javase/8/docs/api/',
+        'http://junit.sourceforge.net/javadoc/',
+        'https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/'
       ]
     }
   }

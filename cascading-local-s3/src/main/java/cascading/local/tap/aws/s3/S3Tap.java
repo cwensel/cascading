@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
  * consumed key is passed to the S3Checkpointer, so custom implementations can choose to persist the key more
  * frequently.
  * <p>
- * AWS Credentials are handled by {@link com.amazonaws.services.s3.S3CredentialsProviderChain}.
+ * AWS Credentials are handled by {@link com.amazonaws.auth.DefaultAWSCredentialsProviderChain}.
  */
 public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements FileType<Properties>
   {
@@ -687,11 +687,13 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
 
         identifier[ 0 ] = makeStringIdentifier( objectSummary.getBucketName(), objectSummary.getKey() );
 
-        if( LOG.isDebugEnabled() )
-          LOG.debug( "opening: {}", identifier[ 0 ] );
-
         flowProcess.getFlowProcessContext().setSourcePath( identifier[ 0 ] );
 
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "s3 retrieving: {}/{}, with size: {}", objectSummary.getBucketName(), objectSummary.getKey(), objectSummary.getSize() );
+
+        // getObject does not seem to fill the InputStream, nor does the InputStream support marking
+        // may make sense to wrap this iterator in a iterate ahead iterator that attempts to pre-fetch objects in a different thread
         lastInputStream = new CheckedFilterInputStream( s3Client.getObject( objectSummary.getBucketName(), objectSummary.getKey() ).getObjectContent() )
           {
           @Override
@@ -721,7 +723,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
         }
 
       @Override
-      public void close() throws IOException
+      public void close()
         {
         safeClose();
         commitMarker();

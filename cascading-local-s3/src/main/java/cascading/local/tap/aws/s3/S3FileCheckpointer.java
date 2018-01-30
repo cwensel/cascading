@@ -109,7 +109,7 @@ public class S3FileCheckpointer implements S3Checkpointer
   /**
    * Constructor S3FileCheckpointer creates a new S3FileCheckpointer instance.
    *
-   * @param filename of Function<String, String>
+   * @param filename of Function
    */
   public S3FileCheckpointer( Function<String, String> filename )
     {
@@ -120,7 +120,7 @@ public class S3FileCheckpointer implements S3Checkpointer
    * Constructor S3FileCheckpointer creates a new S3FileCheckpointer instance.
    *
    * @param path     of Path
-   * @param filename of Function<String, String>
+   * @param filename of Function
    */
   public S3FileCheckpointer( Path path, Function<String, String> filename )
     {

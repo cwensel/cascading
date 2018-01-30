@@ -20,6 +20,7 @@
 
 package cascading.local.tap.aws.s3;
 
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,9 +32,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class S3Iterable implements Iterable<S3ObjectSummary>
   {
+  private static final Logger LOG = LoggerFactory.getLogger( S3Iterable.class );
+
   private AmazonS3 client;
   private String bucketName;
   private String prefix;
@@ -81,14 +86,21 @@ class S3Iterable implements Iterable<S3ObjectSummary>
         if( current != null && !iterator.hasNext() && !current.isTruncated() && !prefixes.isEmpty() )
           current = null;
 
+        long startTime = System.currentTimeMillis();
+
         if( current == null )
           current = getClient().listObjects( createRequest() );
         else
           current = getClient().listNextBatchOfObjects( current );
 
+        long duration = System.currentTimeMillis() - startTime;
+
         prefixes.addAll( current.getCommonPrefixes() );
 
         List<S3ObjectSummary> objectSummaries = current.getObjectSummaries();
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "s3 {}/{} listed items: {}, with max: {}, in: {}", bucketName, prefix == null ? "" : prefix, objectSummaries.size(), current.getMaxKeys(), Duration.ofMillis( duration ) );
 
         if( filter != null )
           iterator = objectSummaries.stream().filter( s -> filter.test( s.getKey() ) ).iterator();
