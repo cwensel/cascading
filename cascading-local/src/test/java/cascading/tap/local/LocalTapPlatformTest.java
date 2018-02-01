@@ -197,7 +197,7 @@ public class LocalTapPlatformTest extends PlatformTestCase implements Serializab
 
     List<Tuple> list = getSinkAsList( flow );
 
-    assertEquals( 600, list.size() );
+    assertEquals( 674, list.size() );
     }
 
   @Test
@@ -217,6 +217,6 @@ public class LocalTapPlatformTest extends PlatformTestCase implements Serializab
 
     List<Tuple> list = getSinkAsList( second );
 
-    assertEquals( 600, list.size() );
+    assertEquals( 674, list.size() );
     }
   }

@@ -34,6 +34,7 @@ import cascading.tap.TapException;
 import cascading.tap.hadoop.io.CombineInputPartitionTupleEntryIterator;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.hadoop.io.TapOutputCollector;
+import cascading.tap.hadoop.util.Hadoop18TapUtil;
 import cascading.tap.partition.BasePartitionTap;
 import cascading.tap.partition.Partition;
 import cascading.tap.type.FileType;
@@ -43,7 +44,6 @@ import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
@@ -163,17 +163,6 @@ public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, 
     }
 
   @Override
-  public long getModifiedTime( Configuration conf ) throws IOException
-    {
-    if( !resourceExists( conf ) )
-      return 0;
-
-    FileStatus fileStatus = ( (Hfs) parent ).getFileStatus( conf );
-
-    return fileStatus.getModificationTime();
-    }
-
-  @Override
   protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Configuration> flowProcess, Tap parent, String path, long sequence ) throws IOException
     {
     TapOutputCollector outputCollector = new TapOutputCollector( flowProcess, parent, path, sequence );
@@ -251,5 +240,13 @@ public class PartitionTap extends BasePartitionTap<Configuration, RecordReader, 
 
       return new CombineInputPartitionTupleEntryIterator( flowProcess, getSourceFields(), partition, parentIdentifier, schemeIterator );
       }
+    }
+
+  @Override
+  public boolean commitResource( Configuration conf ) throws IOException
+    {
+    Hadoop18TapUtil.writeSuccessMarker( conf, ( (Hfs) parent ).getPath() );
+
+    return super.commitResource( conf );
     }
   }

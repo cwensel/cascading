@@ -23,6 +23,8 @@ package cascading.tap;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -233,8 +235,8 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
 
     List<Tuple> tuples = asList( firstFlow, partitionTap );
 
-    assertTrue( tuples.contains( new Tuple( "A", "a", "1" ) ) );
-    assertTrue( tuples.contains( new Tuple( "B", "b", "2" ) ) );
+    assertEquals( 2, Collections.frequency( tuples, new Tuple( "A", "a", "1" ) ) );
+    assertEquals( 2, Collections.frequency( tuples, new Tuple( "B", "b", "2" ) ) );
 
     test = getPlatform().getTextFile( new Fields( "line" ), sink.getIdentifier() );
     validateLength( secondFlow.openTapForRead( test ), 74, Pattern.compile( "[0-9]\\+[a-z]\\+[A-Z]" ) );
@@ -336,5 +338,55 @@ public class TapPlatformTest extends PlatformTestCase implements Serializable
     Flow secondFlow = getPlatform().getFlowConnector().connect( "second", source, partitionTap, new Pipe( "partition" ) );
 
     secondFlow.complete();
+    }
+
+  @Test
+  public void testPartitionTapMultiSource() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileCrossX2VarLen );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "number", "lower", "upper" ), " ", inputFileCrossX2VarLen );
+
+    Tap sinkPartitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned" ), SinkMode.REPLACE );
+
+    Partition sinkPartition = new DelimitedPartition( new Fields( "lower", "upper", "number" ) );
+    sinkPartitionTap = getPlatform().getPartitionTap( sinkPartitionTap, sinkPartition, 1 );
+
+    Flow firstFlow = getPlatform().getFlowConnector().connect( source, sinkPartitionTap, new Pipe( "partition" ) );
+
+    firstFlow.complete();
+
+    Partition sourcePartition = new DelimitedPartition( new Fields( "upper", "number" ) );
+
+    List<Tap> taps = new ArrayList<>();
+
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/a" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/aa" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/aaa" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/b" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/bb" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/bbb" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/c" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/cc" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/ccc" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/d" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/dd" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/ddd" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/e" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/ee" ) ), sourcePartition, 1 ) );
+    taps.add( getPlatform().getPartitionTap( getPlatform().getDelimitedFile( new Fields( "upper" ), "+", getOutputPath( "/partitioned/eee" ) ), sourcePartition, 1 ) );
+
+    MultiSourceTap multiSourceTap = new MultiSourceTap( taps.toArray( new Tap[ taps.size() ] ) );
+
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "number", "upper" ), "+", getOutputPath( "/final" ), SinkMode.REPLACE );
+
+    Flow secondFlow = getPlatform().getFlowConnector().connect( multiSourceTap, sink, new Pipe( "copy" ) );
+
+    secondFlow.complete();
+
+    List<Tuple> tuples = asList( secondFlow, multiSourceTap );
+    assertEquals( 6, Collections.frequency( tuples, new Tuple( "A", "1" ) ) );
+    assertEquals( 6, Collections.frequency( tuples, new Tuple( "B", "1" ) ) );
+    assertEquals( 6, Collections.frequency( tuples, new Tuple( "B", "2" ) ) );
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -32,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 import cascading.PlatformTestCase;
 import cascading.flow.FailingFlowListener;
 import cascading.flow.Flow;
+import cascading.flow.FlowException;
+import cascading.flow.FlowListener;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowStep;
 import cascading.flow.Flows;
@@ -60,6 +62,7 @@ import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -503,5 +506,48 @@ public class FlowPlatformTest extends PlatformTestCase
     flow.start();
 
     assertTrue( listener.completed.tryAcquire( 90, TimeUnit.SECONDS ) );
+    }
+
+  @Test
+  public void testFailOnMissingSuccessFlowListener() throws Exception
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    FlowListener listener = new FailOnMissingSuccessFlowListener();
+
+    Hfs source = new Hfs( new TextLine( new Fields( "offset", "line" ) ), inputFileLower );
+    Hfs success = new Hfs( new TextLine(), getOutputPath( "withsuccess" ), SinkMode.REPLACE );
+    Hfs without = new Hfs( new TextLine(), getOutputPath( "withoutsuccess" ), SinkMode.REPLACE );
+    Hfs sink = new Hfs( new TextLine(), getOutputPath( "final" ), SinkMode.REPLACE );
+
+    Flow firstFlow = getPlatform().getFlowConnector( getProperties() ).connect( source, success, new Pipe( "lower" ) );
+
+    firstFlow.addListener( listener );
+
+    firstFlow.complete();
+
+    Flow secondFlow = getPlatform().getFlowConnector( getProperties() ).connect( success, without, new Pipe( "lower" ) );
+
+    secondFlow.addListener( listener );
+
+    secondFlow.complete();
+
+    Hfs successTap = new Hfs( new TextLine(), new Path( without.getPath(), "_SUCCESS" ).toString() );
+
+    assertTrue( successTap.deleteResource( getPlatform().getFlowProcess() ) );
+
+    Flow thirdFlow = getPlatform().getFlowConnector( getProperties() ).connect( without, sink, new Pipe( "lower" ) );
+
+    thirdFlow.addListener( listener );
+
+    try
+      {
+      thirdFlow.complete();
+      fail( "listener did not fail flow" );
+      }
+    catch( FlowException exception )
+      {
+      // do nothing
+      }
     }
   }

@@ -359,6 +359,7 @@ buildLatestMeta.doLast {
           "cascading-expression",
           "cascading-nested",
           "cascading-nested-json",
+          "cascading-expression",
           "cascading-platform"
         ]
       }

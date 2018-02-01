@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,6 +24,9 @@ import java.io.IOException;
 
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
+import cascading.flow.FlowSkipIfSinkExists;
+import cascading.flow.FlowSkipIfSinkNotStale;
+import cascading.flow.FlowSkipStrategy;
 import cascading.pipe.Pipe;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
@@ -62,7 +65,7 @@ public class CascadeStalePlatformTest extends PlatformTestCase
         {
         return getPlatform().getDelimitedFile( new Fields( "upper" ), "+", outputPath, mode );
         }
-      } );
+      }, new FlowSkipIfSinkNotStale() );
     }
 
   @Test
@@ -82,10 +85,30 @@ public class CascadeStalePlatformTest extends PlatformTestCase
 
         return partitionTap;
         }
-      } );
+      }, new FlowSkipIfSinkNotStale() );
     }
 
-  private void runCascade( TapSupplier supplier ) throws IOException
+  @Test
+  public void testCascadePartitionSkipExists() throws IOException
+    {
+    final String outputPath = getOutputPath( "output" );
+
+    runCascade( new TapSupplier()
+      {
+      @Override
+      public Tap supply( SinkMode mode )
+        {
+        Tap partitionTap = getPlatform().getDelimitedFile( new Fields( "upper" ), "+", outputPath, mode );
+        Partition partition = new DelimitedPartition( new Fields( "lower", "number" ) );
+
+        partitionTap = getPlatform().getPartitionTap( partitionTap, partition, 1 );
+
+        return partitionTap;
+        }
+      }, new FlowSkipIfSinkExists() );
+    }
+
+  private void runCascade( TapSupplier supplier, FlowSkipStrategy skipStrategy ) throws IOException
     {
     String inputPath = getOutputPath( "input.txt" );
 
@@ -105,20 +128,19 @@ public class CascadeStalePlatformTest extends PlatformTestCase
 
     firstFlow.complete();
 
-    System.out.println( "sinkTap.getModifiedTime = " + sinkTap.getModifiedTime( firstFlow.getFlowProcess() ) );
-
     sinkTap = supplier.supply( SinkMode.KEEP );
 
     Flow secondFlow = getPlatform().getFlowConnector().connect( "second", source, sinkTap, new Pipe( "copy" ) );
+
+    secondFlow.setFlowSkipStrategy( skipStrategy );
 
     Cascade firstCascade = new CascadeConnector().connect( secondFlow );
 
     firstCascade.complete();
 
-    System.out.println( "sinkTap.getModifiedTime = " + sinkTap.getModifiedTime( secondFlow.getFlowProcess() ) );
-
     assertTrue( secondFlow.getStats().isSkipped() );
 
+    // refresh source and force the flow to run even though the sink exists
     assertTrue( "unable to delete resource", source.deleteResource( secondFlow.getFlowProcess() ) );
 
     Util.safeSleep( 1000 ); // be safe, delay execution

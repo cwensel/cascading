@@ -849,6 +849,28 @@ public class HadoopUtil
     return true;
     }
 
+  public static void addInputPaths( Configuration conf, Iterable<Path> paths )
+    {
+    Path workingDirectory = getWorkingDirectory( conf );
+    String dirs = conf.get( "mapred.input.dir" );
+    StringBuilder buffer = new StringBuilder( dirs == null ? "" : dirs );
+
+    for( Path path : paths )
+      {
+      if( !path.isAbsolute() )
+        path = new Path( workingDirectory, path );
+
+      String dirStr = StringUtils.escapeString( path.toString() );
+
+      if( buffer.length() != 0 )
+        buffer.append( ',' );
+
+      buffer.append( dirStr );
+      }
+
+    conf.set( "mapred.input.dir", buffer.toString() );
+    }
+
   public static void addInputPath( Configuration conf, Path path )
     {
     Path workingDirectory = getWorkingDirectory( conf );

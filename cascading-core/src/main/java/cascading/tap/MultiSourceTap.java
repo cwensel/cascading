@@ -31,6 +31,7 @@ import cascading.flow.FlowProcess;
 import cascading.scheme.Scheme;
 import cascading.tuple.TupleEntryChainIterator;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Trie;
 import cascading.util.Util;
 
 import static java.util.Arrays.copyOf;
@@ -45,11 +46,21 @@ import static java.util.Arrays.copyOf;
  * Note that if multiple input files have the same Scheme (like {@link cascading.scheme.hadoop.TextLine}), they may not contain
  * the same semi-structure internally. For example, one file might be an Apache log file, and another might be a Log4J
  * log file. If each one should be parsed differently, then they must be handled by different pipe assembly branches.
+ * <p>
+ * As of 3.3, MultiSourceTap can aggregate {@link cascading.scheme.hadoop.PartitionTap} and
+ * {@link cascading.scheme.local.PartitionTap} instances.
+ * <p>
+ * But it may not be safe to aggregate {@link cascading.scheme.hadoop.GlobHfs} and {@link cascading.scheme.hadoop.PartitionTap}
+ * instances as GlobHfs identifiers cannot be fully resolved, preventing the cluster side runtime from distinguishing which
+ * Tap instance to open for reading.
  */
 public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<Config, Input> implements CompositeTap<Child>
   {
   private final String identifier = "__multisource_placeholder_" + Util.createUniqueID();
   protected Child[] taps;
+
+  protected transient Trie<Child> prefixMap;
+  protected transient String commonPrefix;
 
   private class TupleIterator implements Iterator
     {
@@ -200,7 +211,7 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
   public TupleEntryIterator openForRead( FlowProcess<? extends Config> flowProcess, Input input ) throws IOException
     {
     if( input != null )
-      return taps[ 0 ].openForRead( flowProcess, input );
+      return findMatchingTap( flowProcess ).openForRead( flowProcess, input );
 
     Iterator iterators[] = new Iterator[ getTaps().length ];
 
@@ -208,6 +219,51 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
       iterators[ i ] = new TupleIterator( getTaps()[ i ].openForRead( flowProcess ) );
 
     return new TupleEntryChainIterator( getSourceFields(), iterators );
+    }
+
+  protected Child findMatchingTap( FlowProcess<? extends Config> flowProcess )
+    {
+    // todo: in Cascading4, this value can be pulled from the FlowProcessContext
+    String identifier = flowProcess.getStringProperty( "cascading.source.path" );
+
+    // we cannot determine the actual file being processed -- this was the default until 3.3
+    if( identifier == null )
+      return taps[ 0 ];
+
+    Trie<Child> prefixMap = getTapPrefixMap( flowProcess );
+    int index = identifier.indexOf( getTapsCommonPrefix( flowProcess ) );
+
+    // the child taps represent relative paths that cannot be resolved -- eg. globs
+    if( index == -1 )
+      return taps[ 0 ];
+
+    Child child = prefixMap.get( identifier.substring( index ) );
+
+    if( child == null )
+      throw new IllegalStateException( "unable to find child having a prefix that matches: " + identifier );
+
+    return child;
+    }
+
+  protected String getTapsCommonPrefix( FlowProcess<? extends Config> flowProcess )
+    {
+    if( commonPrefix == null )
+      commonPrefix = getTapPrefixMap( flowProcess ).getCommonPrefix();
+
+    return commonPrefix;
+    }
+
+  protected Trie<Child> getTapPrefixMap( FlowProcess<? extends Config> flowProcess )
+    {
+    if( prefixMap != null )
+      return prefixMap;
+
+    prefixMap = new Trie<>();
+
+    for( Child tap : taps )
+      prefixMap.put( tap.getFullIdentifier( flowProcess ), tap );
+
+    return prefixMap;
     }
 
   public boolean equals( Object object )

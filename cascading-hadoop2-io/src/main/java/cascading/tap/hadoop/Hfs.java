@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -43,6 +43,7 @@ import cascading.tap.type.FileType;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.TupleSerialization;
+import cascading.util.LazyIterable;
 import cascading.util.Util;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -353,14 +354,34 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       }
     }
 
-  protected void applySourceConfInitIdentifiers( FlowProcess<? extends Configuration> process, Configuration conf, String... fullIdentifiers )
+  protected void applySourceConfInitIdentifiers( FlowProcess<? extends Configuration> process, Configuration conf, final String... fullIdentifiers )
     {
-    for( String fullIdentifier : fullIdentifiers )
-      sourceConfInitAddInputPath( conf, new Path( fullIdentifier ) );
+    sourceConfInitAddInputPaths( conf, new LazyIterable<String, Path>( fullIdentifiers )
+      {
+      @Override
+      protected Path convert( String next )
+        {
+        return new Path( next );
+        }
+      } );
 
     sourceConfInitComplete( process, conf );
     }
 
+  protected void sourceConfInitAddInputPaths( Configuration conf, Iterable<Path> qualifiedPaths )
+    {
+    HadoopUtil.addInputPaths( conf, qualifiedPaths );
+
+    for( Path qualifiedPath : qualifiedPaths )
+      {
+      boolean stop = !makeLocal( conf, qualifiedPath, "forcing job to stand-alone mode, via source: " );
+
+      if( stop )
+        break;
+      }
+    }
+
+  @Deprecated
   protected void sourceConfInitAddInputPath( Configuration conf, Path qualifiedPath )
     {
     HadoopUtil.addInputPath( conf, qualifiedPath );
@@ -432,11 +453,11 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     TupleSerialization.setSerializations( conf ); // allows Hfs to be used independent of Flow
     }
 
-  private void makeLocal( Configuration conf, Path qualifiedPath, String infoMessage )
+  private boolean makeLocal( Configuration conf, Path qualifiedPath, String infoMessage )
     {
     // don't change the conf or log any messages if running cluster side
     if( HadoopUtil.isInflow( conf ) )
-      return;
+      return false;
 
     String scheme = getLocalModeScheme( conf, "file" );
 
@@ -446,7 +467,11 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
         LOG.info( infoMessage + toString() );
 
       HadoopUtil.setLocal( conf ); // force job to run locally
+
+      return false; // only need to set local once
       }
+
+    return true;
     }
 
   @Override
