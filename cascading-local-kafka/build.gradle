@@ -22,7 +22,7 @@ dependencies {
 
   compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
 
-  compile group: 'org.apache.kafka', name: 'kafka-clients', version: '0.11.0.0'
+  compile group: 'org.apache.kafka', name: 'kafka-clients', version: kafkaVersion
 
   compileOnly group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 
@@ -34,7 +34,7 @@ dependencies {
 
   testCompile 'thirdparty:kafka-unit:0.8-SNAPSHOT' // waiting for fix to be officially published
 
-  testCompile( 'org.apache.kafka:kafka_2.11:0.11.0.0' ) {
+  testCompile( group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion ) {
     exclude module: 'slf4j-simple'
     exclude module: 'slf4j-log4j12'
     exclude module: 'jmxtools'
