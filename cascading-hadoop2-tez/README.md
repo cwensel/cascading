@@ -189,3 +189,6 @@ Some notes and issues with running Cascading on Apache Tez. JIRA issues will be 
   applications above).
 
 * Currently no way to algorithmically set node parallelization during runtime.
+
+* Does not provide a plan supporting `MergePipesPlatformTest#testHashJoinHashJoinMerge` and 
+`MergePipesPlatformTest#testHashJoinHashJoinHashJoinMergeMerge`.
