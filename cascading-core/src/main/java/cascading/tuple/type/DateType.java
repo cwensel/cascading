@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -155,7 +155,7 @@ public class DateType implements CoercibleType<Long>
       throw new IllegalStateException( "was not normalized" );
 
     // no coercion, or already in canonical form
-    if( to == Long.class || to == long.class || to == Object.class )
+    if( to == Long.class || to == long.class || to == Object.class || DateType.class == to.getClass() )
       return value;
 
     if( to == String.class )
