@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright 2011 Splunk, Inc.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -18,21 +18,12 @@
  * limitations under the License.
  */
 
-configurations.all {
-  resolutionStrategy.cacheDynamicVersionsFor 5, 'minutes'
-}
+package com.splunk;
 
-ext.cascadingVersion = '4.0.0-wip-38'
-
-ext.awsVersion = '1.11.271'
-ext.awsS3Version = awsVersion
-ext.s3ProxyVersion = '1.5.3'
-
-ext.kafkaVersion = '0.11.0.0'
-
-ext.splunkVersion = '1.6.3.0'
-
-ext.junitVersion = '4.12'
-ext.log4jVersion = '1.2.17'
-ext.slf4jVersion = '1.7.5'
-
+/**
+ * This is a class used solely to get the path to resource like XML and JSON
+ * files in the test suite in static methods of other classes.
+ */
+class ResourceRoot
+  {
+  }

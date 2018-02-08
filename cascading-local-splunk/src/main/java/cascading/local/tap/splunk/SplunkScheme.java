@@ -18,21 +18,11 @@
  * limitations under the License.
  */
 
-configurations.all {
-  resolutionStrategy.cacheDynamicVersionsFor 5, 'minutes'
-}
+package cascading.local.tap.splunk;
 
-ext.cascadingVersion = '4.0.0-wip-38'
-
-ext.awsVersion = '1.11.271'
-ext.awsS3Version = awsVersion
-ext.s3ProxyVersion = '1.5.3'
-
-ext.kafkaVersion = '0.11.0.0'
-
-ext.splunkVersion = '1.6.3.0'
-
-ext.junitVersion = '4.12'
-ext.log4jVersion = '1.2.17'
-ext.slf4jVersion = '1.7.5'
-
+/**
+ *
+ */
+public interface SplunkScheme
+  {
+  }

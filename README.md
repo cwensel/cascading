@@ -17,7 +17,7 @@ Cascading mail-list (see below).
 
 ### Apache Kafka Tap
 
-A full features Tap that can both read and write data from, to, and between Apache Kafka topics/queues.
+A full featured Tap that can both read and write data from, to, and between Apache Kafka topics/queues.
 
 See the `cascading-local-kafka` sub-project for details.
 
@@ -25,13 +25,21 @@ For maven coordinates, see: http://conjars.org/cascading/cascading-local-kafka
 
 ### AWS S3 Tap
 
-A full features Tap that can both read and write data from, to and between AWS S3 buckets. 
+A full featured Tap that can both read and write data from, to and between AWS S3 buckets. 
 
 In addition, this tap can restart where it left off on a previous fetch, even across JVM executions. 
 
 See the `cascading-local-s3` sub-project for details.
 
 For maven coordinates, see: http://conjars.org/cascading/cascading-local-s3
+
+### Splunk Tap
+
+A full featured Tap that can both read and write data from, to and between Splunk instances. 
+
+See the `cascading-local-splunk` sub-project for details.
+
+For maven coordinates, see: http://conjars.org/cascading/cascading-local-splunk
 
 ### S3 Log Parser Example
 

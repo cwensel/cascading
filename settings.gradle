@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,11 +19,8 @@
  */
 
 include 'cascading-local-s3'
-//include 'cascading-local-s3-example'
-
 include 'cascading-local-kafka'
-//include 'cascading-local-kafka-example'
-
+include 'cascading-local-splunk'
 include 'cascading-local-example'
 
 rootProject.name = 'cascading-local'
