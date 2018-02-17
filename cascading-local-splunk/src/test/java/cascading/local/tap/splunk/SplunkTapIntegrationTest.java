@@ -21,6 +21,9 @@
 package cascading.local.tap.splunk;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -33,10 +36,13 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import com.splunk.Index;
 import com.splunk.SDKTestCase;
+import com.splunk.Service;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
+import org.testcontainers.containers.GenericContainer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,6 +51,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class SplunkTapIntegrationTest extends SDKTestCase
   {
+  public static final int PORT = 8000;
+
+  @ClassRule
+  public static GenericContainer splunk = new GenericContainer( "splunk/splunk:7.0.0" )
+    .withExposedPorts( PORT )
+    .withEnv( "SPLUNK_START_ARGS", "--accept-license" )
+    .withEnv( "SPLUNK_CMD", "edit user admin -password admin -role admin -auth admin:changeme" )
+    .withStartupTimeout( Duration.ofMinutes( 3 ) );
+
   private String indexName;
   private Index index;
 
@@ -52,6 +67,15 @@ public class SplunkTapIntegrationTest extends SDKTestCase
   @Override
   public void setUp() throws Exception
     {
+    Map<String, Object> args = new HashMap<>();
+
+    args.put( "host", splunk.getContainerIpAddress() );
+    args.put( "port", splunk.getMappedPort( 8089 ) );
+    args.put( "username", "admin" );
+    args.put( "password", "admin" );
+
+    service = new Service( args );
+
     super.setUp();
 
     indexName = createTemporaryName();

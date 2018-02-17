@@ -122,7 +122,9 @@ public abstract class SDKTestCase
     // TLSv1_2 required for splunk 7
     HttpService.setSslSecurityProtocol( SSLSecurityProtocol.TLSv1_2 );
 
-    command = Command.splunk();
+    if( service == null )
+      command = Command.splunk();
+
     connect();
     if( restartRequired() )
       {
