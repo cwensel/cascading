@@ -56,7 +56,7 @@ public class Compressors
   /**
    * The {@link CompressorStreamFactory#SNAPPY_FRAMED} compressor.
    */
-  public static final ApacheCompressor SNAPPY_FRAMED = new ApacheCompressor( CompressorStreamFactory.SNAPPY_FRAMED );
+  public static final ApacheCompressor SNAPPY_FRAMED = new ApacheCompressor( CompressorStreamFactory.SNAPPY_FRAMED, "snappy" );
 
   /**
    * The {@link CompressorStreamFactory#SNAPPY_RAW} compressor.
@@ -81,17 +81,25 @@ public class Compressors
   /**
    * The {@link CompressorStreamFactory#LZ4_FRAMED} compressor.
    */
-  public static final ApacheCompressor LZ4_FRAMED = new ApacheCompressor( CompressorStreamFactory.LZ4_FRAMED );
+  public static final ApacheCompressor LZ4_FRAMED = new ApacheCompressor( CompressorStreamFactory.LZ4_FRAMED, "lz4" );
 
   private static CompressorStreamFactory factory = new CompressorStreamFactory();
 
   static class ApacheCompressor implements CompressorScheme.Compressor
     {
     String algorithm;
+    String defaultExtension;
 
     public ApacheCompressor( String algorithm )
       {
       this.algorithm = algorithm;
+      this.defaultExtension = algorithm;
+      }
+
+    public ApacheCompressor( String algorithm, String defaultExtension )
+      {
+      this.algorithm = algorithm;
+      this.defaultExtension = defaultExtension;
       }
 
     @Override
@@ -121,6 +129,12 @@ public class Compressors
       }
 
     @Override
+    public String getExtension()
+      {
+      return defaultExtension;
+      }
+
+    @Override
     public boolean equals( Object object )
       {
       if( this == object )
@@ -128,13 +142,14 @@ public class Compressors
       if( !( object instanceof ApacheCompressor ) )
         return false;
       ApacheCompressor that = (ApacheCompressor) object;
-      return Objects.equals( algorithm, that.algorithm );
+      return Objects.equals( algorithm, that.algorithm ) &&
+        Objects.equals( defaultExtension, that.defaultExtension );
       }
 
     @Override
     public int hashCode()
       {
-      return Objects.hash( algorithm );
+      return Objects.hash( algorithm, defaultExtension );
       }
 
     @Override
@@ -142,8 +157,10 @@ public class Compressors
       {
       final StringBuilder sb = new StringBuilder( "Compressor{" );
       sb.append( "algorithm='" ).append( algorithm ).append( '\'' );
+      sb.append( ", defaultExtension='" ).append( defaultExtension ).append( '\'' );
       sb.append( '}' );
       return sb.toString();
       }
+
     }
   }

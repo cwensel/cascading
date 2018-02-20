@@ -51,6 +51,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.util.TupleViews;
+import cascading.util.Util;
 
 /**
  * Class TextDelimited provides direct support for delimited text files, like
@@ -1063,7 +1064,7 @@ public class TextDelimited extends CompressorScheme<LineNumberReader, PrintWrite
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
     // can read either a single file, or search the directory for a file
-    tap = new DirTap( new TextLine( new Fields( "line" ), charsetName ), tap.getIdentifier() );
+    tap = new DirTap( new TextLine( new Fields( "line" ), compressor, charsetName ), tap.getIdentifier() );
 
     setSourceFields( delimitedParser.parseFirstLine( process, tap ) );
 
@@ -1189,15 +1190,25 @@ public class TextDelimited extends CompressorScheme<LineNumberReader, PrintWrite
   @Override
   public String getExtension()
     {
+    String extension;
     switch( getDelimiter().trim() )
       {
       case "\t":
-        return "tsv";
+        extension = "tsv";
+        break;
 
       case ",":
-        return "csv";
+        extension = "csv";
+        break;
+
+      default:
+        extension = "txt";
+        break;
       }
 
-    return "txt";
+    if( compressor != null && !Util.isEmpty( compressor.getExtension() ) )
+      extension += "." + compressor.getExtension();
+
+    return extension;
     }
   }

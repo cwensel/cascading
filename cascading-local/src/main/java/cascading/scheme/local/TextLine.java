@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -44,6 +44,7 @@ import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
+import cascading.util.Util;
 
 /**
  * A TextLine is a type of {@link cascading.scheme.Scheme} for plain text files. Files are broken into
@@ -364,6 +365,11 @@ public class TextLine extends CompressorScheme<LineNumberReader, PrintWriter> im
   @Override
   public String getExtension()
     {
-    return "txt";
+    String extension = "txt";
+
+    if( compressor != null && !Util.isEmpty( compressor.getExtension() ) )
+      extension += "." + compressor.getExtension();
+
+    return extension;
     }
   }

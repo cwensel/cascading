@@ -38,6 +38,12 @@ public abstract class CompressorScheme<SourceContext, SinkContext> extends Schem
       {
       return outputStream;
       }
+
+    @Override
+    public String getExtension()
+      {
+      return "";
+      }
     };
 
   public interface Compressor extends Serializable
@@ -45,6 +51,11 @@ public abstract class CompressorScheme<SourceContext, SinkContext> extends Schem
     InputStream inputStream( InputStream inputStream ) throws IOException;
 
     OutputStream outputStream( OutputStream outputStream ) throws IOException;
+
+    /**
+     * @return null, empty string, or the default extension used for this compression type without a dot.
+     */
+    String getExtension();
     }
 
   protected Compressor compressor = NO_COMPRESSOR;
