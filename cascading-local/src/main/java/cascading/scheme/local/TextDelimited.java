@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -46,7 +46,7 @@ import cascading.tap.CompositeTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
-import cascading.tap.local.FileTap;
+import cascading.tap.local.DirTap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -1062,7 +1062,8 @@ public class TextDelimited extends CompressorScheme<LineNumberReader, PrintWrite
     if( tap instanceof CompositeTap )
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
-    tap = new FileTap( new TextLine( new Fields( "line" ), charsetName ), tap.getIdentifier() );
+    // can read either a single file, or search the directory for a file
+    tap = new DirTap( new TextLine( new Fields( "line" ), charsetName ), tap.getIdentifier() );
 
     setSourceFields( delimitedParser.parseFirstLine( process, tap ) );
 
