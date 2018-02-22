@@ -144,19 +144,19 @@ public class Hadoop18TapUtil
    *
    * @param conf
    */
-  public static void commitTask( Configuration conf ) throws IOException
+  public static boolean commitTask( Configuration conf ) throws IOException
     {
     Path taskOutputPath = new Path( conf.get( "mapred.work.output.dir" ) );
 
     FileSystem fs = getFSSafe( conf, taskOutputPath );
 
     if( fs == null )
-      return;
+      return false;
 
     AtomicInteger integer = pathCounts.get( taskOutputPath.toString() );
 
     if( integer.decrementAndGet() != 0 )
-      return;
+      return false;
 
     String taskId = conf.get( "mapred.task.id", conf.get( "mapreduce.task.id" ) );
 
@@ -165,7 +165,7 @@ public class Hadoop18TapUtil
     if( taskOutputPath != null )
       {
       if( writeDirectlyToWorkingPath( conf, taskOutputPath ) )
-        return;
+        return true;
 
       if( fs.exists( taskOutputPath ) )
         {
@@ -180,6 +180,8 @@ public class Hadoop18TapUtil
         LOG.info( "saved output of task '{}' to {}", taskId, jobOutputPath );
         }
       }
+
+    return true;
     }
 
   /**

@@ -163,10 +163,13 @@ public class TapOutputCollector implements OutputCollector, Closeable
           {
           boolean needsTaskCommit = Hadoop18TapUtil.needsTaskCommit( conf );
 
-          if( needsTaskCommit )
-            Hadoop18TapUtil.commitTask( conf );
+          boolean cleanJob = true;
 
-          Hadoop18TapUtil.cleanupJob( conf );
+          if( needsTaskCommit )
+            cleanJob = Hadoop18TapUtil.commitTask( conf );
+
+          if( cleanJob ) // don't delete _temporary if still contents
+            Hadoop18TapUtil.cleanupJob( conf );
 
           if( !HadoopUtil.isInflow( conf ) )
             Hadoop18TapUtil.writeSuccessMarker( conf );
