@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated c.t.p.BasePartitionTap to implements c.t.t.FileType so that it may be used with a c.t.FileAdaptorTap.
+  Specifically the Hadoop c.t.h.PartitionTap can be used with the c.t.l.h.LocalHfsAdaptor class.
+
   Fixed issue with c.t.h.i.TapOutputCollector where _temporary folders would be deleted prematurely under some
   conditions.
 

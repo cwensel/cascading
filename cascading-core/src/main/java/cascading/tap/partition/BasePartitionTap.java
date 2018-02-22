@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config, Input, Output>
+public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config, Input, Output> implements FileType<Config>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( BasePartitionTap.class );
@@ -315,7 +315,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
    */
   public String[] getChildPartitionIdentifiers( FlowProcess<? extends Config> flowProcess, boolean fullyQualified ) throws IOException
     {
-    String[] childIdentifiers = ( (FileType) parent ).getChildIdentifiers(
+    String[] childIdentifiers = ( castFileType() ).getChildIdentifiers(
       flowProcess.getConfig(),
       partition.getPathDepth(),
       fullyQualified
@@ -461,6 +461,62 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     }
 
   @Override
+  public boolean isDirectory( FlowProcess<? extends Config> flowProcess ) throws IOException
+    {
+    return castFileType().isDirectory( flowProcess );
+    }
+
+  @Override
+  public boolean isDirectory( Config conf ) throws IOException
+    {
+    return castFileType().isDirectory( conf );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( FlowProcess<? extends Config> flowProcess ) throws IOException
+    {
+    return castFileType().getChildIdentifiers( flowProcess );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( Config conf ) throws IOException
+    {
+    return castFileType().getChildIdentifiers( conf );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( FlowProcess<? extends Config> flowProcess, int depth, boolean fullyQualified ) throws IOException
+    {
+    return castFileType().getChildIdentifiers( flowProcess, depth, fullyQualified );
+    }
+
+  @Override
+  public String[] getChildIdentifiers( Config conf, int depth, boolean fullyQualified ) throws IOException
+    {
+    return getChildIdentifiers( conf, depth, fullyQualified );
+    }
+
+  @Override
+  public long getSize( FlowProcess<? extends Config> flowProcess ) throws IOException
+    {
+    return castFileType().getSize( flowProcess );
+    }
+
+  @Override
+  public long getSize( Config conf ) throws IOException
+    {
+    return castFileType().getSize( conf );
+    }
+
+  protected FileType<Config> castFileType()
+    {
+    if( parent instanceof FileType )
+      return (FileType<Config>) parent;
+
+    throw new UnsupportedOperationException( "parent is not an implementation of " + FileType.class.getName() + ", is type: " + parent.getClass().getName() );
+    }
+
+  @Override
   public boolean equals( Object object )
     {
     if( this == object )
@@ -532,6 +588,18 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     public void setSinkFields( Fields sinkFields )
       {
       scheme.setSinkFields( sinkFields );
+      }
+
+    @Override
+    public Fields retrieveSourceFields( FlowProcess<? extends Config> flowProcess, Tap tap )
+      {
+      return scheme.retrieveSourceFields( flowProcess, tap );
+      }
+
+    @Override
+    public Fields retrieveSinkFields( FlowProcess<? extends Config> flowProcess, Tap tap )
+      {
+      return scheme.retrieveSinkFields( flowProcess, tap );
       }
 
     public Fields getSourceFields()

@@ -66,7 +66,7 @@ public class LocalHadoopFlowProcess extends FlowProcessWrapper<JobConf>
   @Override
   public Object getProperty( String key )
     {
-    return conf.get( key );
+    return getConfig().get( key );
     }
 
   @Override
@@ -74,7 +74,7 @@ public class LocalHadoopFlowProcess extends FlowProcessWrapper<JobConf>
     {
     Set<String> keys = new HashSet<String>();
 
-    for( Map.Entry<String, String> entry : conf )
+    for( Map.Entry<String, String> entry : getConfig() )
       keys.add( entry.getKey() );
 
     return Collections.unmodifiableSet( keys );
