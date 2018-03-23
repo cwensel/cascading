@@ -1,6 +1,6 @@
 Cascading Change Log
 
-3.3.0 [unreleased]
+3.3.0
 
   Fixed issue where planning with a c.p.Merge of two or more c.p.HashJoins would fail. Currently unresolved for the
   Apache Tez planner.
