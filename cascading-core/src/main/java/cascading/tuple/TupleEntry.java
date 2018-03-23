@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -465,6 +465,9 @@ public class TupleEntry
    */
   public Object getObject( int pos, Type type )
     {
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     return Coercions.coerce( coercions[ pos ], tuple.getObject( pos ), type );
     }
 
@@ -499,6 +502,10 @@ public class TupleEntry
   public Object getObject( Comparable fieldName, Type type )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
+
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     return Coercions.coerce( coercions[ pos ], tuple.getObject( pos ), type );
     }
 
@@ -538,6 +545,9 @@ public class TupleEntry
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
 
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
 
@@ -550,6 +560,9 @@ public class TupleEntry
   public void setBoolean( Comparable fieldName, boolean value )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
+
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
 
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
@@ -564,6 +577,9 @@ public class TupleEntry
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
 
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
 
@@ -576,6 +592,9 @@ public class TupleEntry
   public void setInteger( Comparable fieldName, int value )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
+
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
 
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
@@ -590,6 +609,9 @@ public class TupleEntry
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
 
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
 
@@ -602,6 +624,9 @@ public class TupleEntry
   public void setFloat( Comparable fieldName, float value )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
+
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
 
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
@@ -616,6 +641,9 @@ public class TupleEntry
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
 
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
 
@@ -628,6 +656,10 @@ public class TupleEntry
   public void setString( Comparable fieldName, String value )
     {
     int pos = fields.getPos( asFieldName( fieldName ) );
+
+    if( pos > coercions.length - 1 )
+      throw new TupleException( "position value is too large: " + pos + ", positions in field: " + tuple.size() );
+
     tuple.set( pos, coercions[ pos ].canonical( value ) );
     }
 
