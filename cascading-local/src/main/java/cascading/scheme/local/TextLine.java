@@ -365,11 +365,26 @@ public class TextLine extends CompressorScheme<LineNumberReader, PrintWriter> im
   @Override
   public String getExtension()
     {
-    String extension = "txt";
+    String extension = getBaseFileExtension();
 
-    if( compressor != null && !Util.isEmpty( compressor.getExtension() ) )
-      extension += "." + compressor.getExtension();
+    String compressorExtension = getBaseCompressorExtension();
+
+    if( !Util.isEmpty( compressorExtension ) )
+      extension += "." + compressorExtension;
 
     return extension;
+    }
+
+  protected String getBaseCompressorExtension()
+    {
+    if( compressor != null && !Util.isEmpty( compressor.getExtension() ) )
+      return compressor.getExtension();
+
+    return null;
+    }
+
+  protected String getBaseFileExtension()
+    {
+    return "txt";
     }
   }

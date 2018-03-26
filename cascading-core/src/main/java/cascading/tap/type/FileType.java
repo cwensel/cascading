@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -44,7 +44,7 @@ public interface FileType<Config>
    * Method isDirectory returns true if the underlying resource represents a directory or folder instead
    * of an individual file.
    *
-   * @param conf of JobConf
+   * @param conf of Conf
    * @return boolean
    * @throws java.io.IOException
    */
@@ -55,7 +55,7 @@ public interface FileType<Config>
    * <p>
    * This method will skip Hadoop log directories ({@code _log}).
    *
-   * @param flowProcess
+   * @param flowProcess of type FlowProcess
    * @return String[]
    * @throws java.io.IOException
    */
@@ -66,14 +66,42 @@ public interface FileType<Config>
    * <p>
    * This method will skip Hadoop log directories ({@code _log}).
    *
-   * @param conf of JobConf
+   * @param conf of type Conf
    * @return String[]
-   * @throws java.io.IOException
+   * @throws IOException
    */
   String[] getChildIdentifiers( Config conf ) throws IOException;
 
+  /**
+   * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
+   * <p>
+   * This method will skip Hadoop log directories ({@code _log}).
+   * <p>
+   * Note that all files encountered up to depth will be returned, and no directories unless
+   * the directory is the final path at max depth.
+   *
+   * @param flowProcess
+   * @param depth
+   * @param fullyQualified
+   * @return String{}
+   * @throws IOException
+   */
   String[] getChildIdentifiers( FlowProcess<? extends Config> flowProcess, int depth, boolean fullyQualified ) throws IOException;
 
+  /**
+   * Method getChildIdentifiers returns an array of child identifiers if this resource is a directory.
+   * <p>
+   * This method will skip Hadoop log directories ({@code _log}).
+   * <p>
+   * Note that all files encountered up to depth will be returned, and no directories unless
+   * the directory is the final path at max depth.
+   *
+   * @param conf           of type Conf
+   * @param depth          the max depth to return.
+   * @param fullyQualified true if the returned paths should be fully qualified
+   * @return String[]
+   * @throws IOException
+   */
   String[] getChildIdentifiers( Config conf, int depth, boolean fullyQualified ) throws IOException;
 
   /**

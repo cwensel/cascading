@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,7 +23,6 @@ package cascading.tap.local;
 
 import java.beans.ConstructorProperties;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,11 +30,15 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.FlowProcessWrapper;
+import cascading.flow.local.LocalFlowProcess;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.local.io.TapFileOutputStream;
 import cascading.tap.partition.BasePartitionTap;
 import cascading.tap.partition.Partition;
+import cascading.tap.type.FileType;
+import cascading.tap.type.TapWith;
 import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
 
@@ -63,8 +66,11 @@ import cascading.tuple.TupleEntrySchemeIterator;
  * location. Forcing the case to be consistent with a custom Partition implementation or an upstream
  * {@link cascading.operation.Function} is recommended, see {@link cascading.operation.expression.ExpressionFunction}.
  */
+@SuppressWarnings("JavadocReference")
 public class PartitionTap extends BasePartitionTap<Properties, InputStream, OutputStream>
   {
+  public static final String PART_NUM_PROPERTY = "cascading.local.tap.partition.seq";
+
   /**
    * Constructor PartitionTap creates a new PartitionTap instance using the given parent {@link cascading.tap.local.FileTap} Tap as the
    * base path and default {@link cascading.scheme.Scheme}, and the partition.
@@ -73,7 +79,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * @param partition of type Partition
    */
   @ConstructorProperties({"parent", "partition"})
-  public PartitionTap( FileTap parent, Partition partition )
+  public PartitionTap( Tap parent, Partition partition )
     {
     this( parent, partition, OPEN_WRITES_THRESHOLD_DEFAULT );
     }
@@ -89,7 +95,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * @param openWritesThreshold of type int
    */
   @ConstructorProperties({"parent", "partition", "openWritesThreshold"})
-  public PartitionTap( FileTap parent, Partition partition, int openWritesThreshold )
+  public PartitionTap( Tap parent, Partition partition, int openWritesThreshold )
     {
     super( parent, partition, openWritesThreshold );
     }
@@ -103,7 +109,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * @param sinkMode  of type SinkMode
    */
   @ConstructorProperties({"parent", "partition", "sinkMode"})
-  public PartitionTap( FileTap parent, Partition partition, SinkMode sinkMode )
+  public PartitionTap( Tap parent, Partition partition, SinkMode sinkMode )
     {
     super( parent, partition, sinkMode );
     }
@@ -121,7 +127,7 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * @param keepParentOnDelete of type boolean
    */
   @ConstructorProperties({"parent", "partition", "sinkMode", "keepParentOnDelete"})
-  public PartitionTap( FileTap parent, Partition partition, SinkMode sinkMode, boolean keepParentOnDelete )
+  public PartitionTap( Tap parent, Partition partition, SinkMode sinkMode, boolean keepParentOnDelete )
     {
     this( parent, partition, sinkMode, keepParentOnDelete, OPEN_WRITES_THRESHOLD_DEFAULT );
     }
@@ -142,9 +148,12 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
    * @param openWritesThreshold of type int
    */
   @ConstructorProperties({"parent", "partition", "sinkMode", "keepParentOnDelete", "openWritesThreshold"})
-  public PartitionTap( FileTap parent, Partition partition, SinkMode sinkMode, boolean keepParentOnDelete, int openWritesThreshold )
+  public PartitionTap( Tap parent, Partition partition, SinkMode sinkMode, boolean keepParentOnDelete, int openWritesThreshold )
     {
     super( parent, partition, sinkMode, keepParentOnDelete, openWritesThreshold );
+
+    if( !( parent instanceof FileType ) )
+      throw new IllegalArgumentException( "parent Tap must be of type: " + FileType.class.getName() );
     }
 
   @Override
@@ -174,14 +183,28 @@ public class PartitionTap extends BasePartitionTap<Properties, InputStream, Outp
   @Override
   protected TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Properties> flowProcess, Tap parent, String path, long sequence ) throws IOException
     {
+    if( sequence != -1 && flowProcess.getConfig() != null )
+      ( (LocalFlowProcess) FlowProcessWrapper.undelegate( flowProcess ) ).getConfig().setProperty( PART_NUM_PROPERTY, Long.toString( sequence ) );
+
+    if( parent instanceof TapWith )
+      return (TupleEntrySchemeCollector) ( (TapWith) parent )
+        .withChildIdentifier( path )
+        .withSinkMode( SinkMode.UPDATE )
+        .asTap().openForWrite( flowProcess );
+
     TapFileOutputStream output = new TapFileOutputStream( parent, path, true ); // always append
 
     return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, parent, output );
     }
 
   @Override
-  protected TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<? extends Properties> flowProcess, Tap parent, String path, InputStream input ) throws FileNotFoundException
+  protected TupleEntrySchemeIterator createTupleEntrySchemeIterator( FlowProcess<? extends Properties> flowProcess, Tap parent, String path, InputStream input ) throws IOException
     {
+    if( parent instanceof TapWith )
+      return (TupleEntrySchemeIterator) ( (TapWith) parent )
+        .withChildIdentifier( path )
+        .asTap().openForRead( flowProcess, input );
+
     if( input == null )
       input = new FileInputStream( path );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -133,7 +133,9 @@ public abstract class Tap<Config, Input, Output> implements ScopedElement, FlowE
   protected Tap( Scheme<Config, Input, Output, ?, ?> scheme, SinkMode sinkMode )
     {
     this.setScheme( scheme );
-    this.sinkMode = sinkMode;
+
+    if( sinkMode != null )
+      this.sinkMode = sinkMode;
     }
 
   protected void setScheme( Scheme<Config, Input, Output, ?, ?> scheme )

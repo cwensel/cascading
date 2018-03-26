@@ -225,6 +225,14 @@ public class LocalFlowProcess extends FlowProcess<Properties>
   @Override
   public Properties mergeMapIntoConfig( Properties defaultConfig, Map<String, String> map )
     {
-    return null;
+    Properties results = new Properties( defaultConfig );
+
+    if( map == null )
+      return results;
+
+    for( Map.Entry<String, String> entry : map.entrySet() )
+      results.put( entry.getKey(), entry.getValue() );
+
+    return results;
     }
   }

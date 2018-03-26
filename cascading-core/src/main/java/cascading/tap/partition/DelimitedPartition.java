@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -38,6 +38,10 @@ import cascading.util.Util;
  * The postfix value will be appended to any partition when created, and removed when the partition is parsed. Use
  * this value to add static filenames to the output path. It is safe to include the delimiter in the postfix value
  * (e.g '/somepath/filename.csv' where the delimiter is the default '/').
+ * <p>
+ * Note some platforms do not allow for referencing files directly on write, only allowing for partitioning into
+ * directories where the actual filename is generated. In this case, if the postfix is intended to be a filename, it
+ * will be interpreted as a directory.
  */
 public class DelimitedPartition implements Partition
   {

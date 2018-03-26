@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -36,6 +36,7 @@ import cascading.tap.CompositeTap;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.hadoop.Hfs;
+import cascading.tap.type.TapWith;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -971,7 +972,10 @@ public class TextDelimited extends TextLine
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
     // should revert to file:// (Lfs) if tap is Lfs
-    tap = new Hfs( new TextLine( new Fields( "line" ), charsetName ), tap.getFullIdentifier( flowProcess ) );
+    if( tap instanceof TapWith )
+      tap = ( (TapWith) tap ).withScheme( new TextLine( new Fields( "line" ), charsetName ) ).asTap();
+    else
+      tap = new Hfs( new TextLine( new Fields( "line" ), charsetName ), tap.getFullIdentifier( flowProcess ) );
 
     setSourceFields( delimitedParser.parseFirstLine( flowProcess, tap ) );
 

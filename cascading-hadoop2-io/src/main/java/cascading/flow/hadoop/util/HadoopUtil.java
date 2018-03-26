@@ -440,7 +440,8 @@ public class HadoopUtil
 
     for( String key : config.keySet() )
       {
-      LOG.debug( "merging key: {} value: {}", key, config.get( key ) );
+      if( LOG.isDebugEnabled() )
+        LOG.debug( "merging key: {} value: {}", key, config.get( key ) );
 
       currentConf.set( key, config.get( key ) );
       }

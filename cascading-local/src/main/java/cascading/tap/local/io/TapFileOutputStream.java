@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -46,7 +47,8 @@ public class TapFileOutputStream extends FileOutputStream
     {
     File file;
 
-    if( parent == null )
+    // is the current tap path embedded in the
+    if( parent == null || path.startsWith( parent.getIdentifier() ) )
       file = new File( path );
     else
       file = new File( parent.getIdentifier(), path );

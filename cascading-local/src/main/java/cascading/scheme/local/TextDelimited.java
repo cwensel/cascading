@@ -47,6 +47,7 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tap.local.DirTap;
+import cascading.tap.type.TapWith;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -1064,7 +1065,10 @@ public class TextDelimited extends CompressorScheme<LineNumberReader, PrintWrite
       tap = (Tap) ( (CompositeTap) tap ).getChildTaps().next();
 
     // can read either a single file, or search the directory for a file
-    tap = new DirTap( new TextLine( new Fields( "line" ), compressor, charsetName ), tap.getIdentifier() );
+    if( tap instanceof TapWith )
+      tap = ( (TapWith) tap ).withScheme( new TextLine( new Fields( "line" ), compressor, charsetName ) ).asTap();
+    else
+      tap = new DirTap( new TextLine( new Fields( "line" ), compressor, charsetName ), tap.getIdentifier() );
 
     setSourceFields( delimitedParser.parseFirstLine( process, tap ) );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,7 +32,6 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -56,10 +55,10 @@ import org.slf4j.LoggerFactory;
  * When used as a source, the given pattern and depth are used to identify input files from the filesystem.
  * <p>
  * When used as a sink, a single file is created in the directory for all the output data. The file is name is
- * returned by {@link #getOutputIdentifier()} and can be overridden (see {@link #getOutputFilename()} and
+ * returned by {@link FileTap#getOutputIdentifier(FlowProcess)} and can be overridden (see {@link #getOutputFilename(FlowProcess)} and
  * {@link #getOutputFileBasename()}).
  * <p>
- * When deleting the resource identified by this Tap, the value of {@link #getOutputIdentifier()} will
+ * When deleting the resource identified by this Tap, the value of {@link FileTap#getOutputIdentifier(FlowProcess)} will
  * be deleted, if it exists.
  * <p>
  * DirTap must be used with the {@link cascading.flow.local.LocalFlowConnector} to create
@@ -293,17 +292,24 @@ public class DirTap extends FileTap
     }
 
   @Override
-  public String getOutputIdentifier()
+  protected String getOutputIdentifier( FlowProcess<? extends Properties> flowProcess )
     {
-    return getPath().resolve( getOutputFilename() ).toString();
+    return getPath().resolve( getOutputFilename( flowProcess ) ).toString();
     }
 
-  public String getOutputFilename()
+  protected String getOutputFilename( FlowProcess<? extends Properties> flowProcess )
     {
-    if( getScheme() instanceof FileFormat )
-      return getOutputFileBasename() + "." + ( (FileFormat) getScheme() ).getExtension();
+    int partNum = flowProcess.getIntegerProperty( PartitionTap.PART_NUM_PROPERTY, -1 );
 
-    return getOutputFileBasename() + ".tap";
+    String outputFileBasename = getOutputFileBasename();
+
+    if( partNum != -1 )
+      outputFileBasename = String.format( "%s.%05d", outputFileBasename, partNum );
+
+    if( getScheme() instanceof FileFormat )
+      return outputFileBasename + "." + ( (FileFormat) getScheme() ).getExtension();
+
+    return outputFileBasename;
     }
 
   protected String getOutputFileBasename()
@@ -402,30 +408,6 @@ public class DirTap extends FileTap
       };
 
     return new TupleEntrySchemeIterator<Properties, InputStream>( flowProcess, this, getScheme(), iterator, () -> flowProcess.getFlowProcessContext().getSourcePath() );
-    }
-
-  @Override
-  public String[] getChildIdentifiers( Properties conf, int depth, boolean fullyQualified ) throws IOException
-    {
-    if( !resourceExists( conf ) )
-      return new String[ 0 ];
-
-    if( !Files.isDirectory( getPath() ) )
-      throw new IllegalStateException( "given path is not a directory: " + getPath() );
-
-    Set<String> results = new LinkedHashSet<String>();
-
-    PathMatcher pathMatcher = getPathMatcher();
-
-    try( final Stream<Path> pathStream = Files.walk( getPath(), depth ) )
-      {
-      pathStream
-        .filter( path -> !Files.isDirectory( path ) )
-        .filter( pathMatcher::matches )
-        .forEach( path -> results.add( fullyQualified ? path.toAbsolutePath().toString() : path.toString() ) );
-      }
-
-    return results.toArray( new String[ results.size() ] );
     }
 
   protected PathMatcher getPathMatcher()

@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.t.t.TapWith interface to provide fluent factories for creating new immutable instance of the current
+  c.t.Tap type. This allows Tap instances to be their own factory type.
+
   Updated c.t.p.BasePartitionTap to implements c.t.t.FileType so that it may be used with a c.t.FileAdaptorTap.
   Specifically the Hadoop c.t.h.PartitionTap can be used with the c.t.l.h.LocalHfsAdaptor class.
 

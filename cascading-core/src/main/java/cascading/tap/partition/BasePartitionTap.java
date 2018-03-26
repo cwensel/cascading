@@ -68,7 +68,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       {
       super( getSourceFields() );
 
-      List<Iterator<Tuple>> iterators = new ArrayList<Iterator<Tuple>>();
+      List<Iterator<Tuple>> iterators = new ArrayList<>();
 
       if( input != null )
         {
@@ -128,7 +128,8 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
       try
         {
-        LOG.debug( "creating collector for parent: {}, path: {}", parent.getFullIdentifier( conf ), path );
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "creating collector for parent: {}, path: {}", parent.getFullIdentifier( conf ), path );
 
         collector = createTupleEntrySchemeCollector( flowProcess, parent, path, openedCollectors );
 
@@ -158,7 +159,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       if( LOG.isInfoEnabled() )
         LOG.info( "removing {} open Taps from cache of size {}", numToClose, collectors.size() );
 
-      Set<String> removeKeys = new HashSet<String>();
+      Set<String> removeKeys = new HashSet<>();
       Set<String> keys = collectors.keySet();
 
       for( String key : keys )
@@ -185,7 +186,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
       try
         {
-        for( String path : new ArrayList<String>( collectors.keySet() ) )
+        for( String path : new ArrayList<>( collectors.keySet() ) )
           closeCollector( path );
         }
       finally
@@ -246,7 +247,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   /** Field openedCollectors */
   private long openedCollectors = 0;
   /** Field collectors */
-  private final Map<String, TupleEntryCollector> collectors = new LinkedHashMap<String, TupleEntryCollector>( 1000, .75f, true );
+  private final Map<String, TupleEntryCollector> collectors = new LinkedHashMap<>( 1000, .75f, true );
 
   protected abstract TupleEntrySchemeCollector createTupleEntrySchemeCollector( FlowProcess<? extends Config> flowProcess, Tap parent, String path, long sequence ) throws IOException;
 
@@ -493,7 +494,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
   @Override
   public String[] getChildIdentifiers( Config conf, int depth, boolean fullyQualified ) throws IOException
     {
-    return getChildIdentifiers( conf, depth, fullyQualified );
+    return castFileType().getChildIdentifiers( conf, depth, fullyQualified );
     }
 
   @Override

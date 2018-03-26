@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowRuntimeProps;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -40,6 +41,7 @@ import cascading.tap.hadoop.io.CombineFileRecordReaderWrapper;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeCollector;
 import cascading.tap.hadoop.io.HadoopTupleEntrySchemeIterator;
 import cascading.tap.type.FileType;
+import cascading.tap.type.TapWith;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.hadoop.TupleSerialization;
@@ -108,7 +110,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Apache Tez planner does not require this setting, it is supported by default and enabled by the application manager.
  */
-public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> implements FileType<Configuration>
+public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> implements FileType<Configuration>, TapWith<Configuration, RecordReader, OutputCollector>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hfs.class );
@@ -124,20 +126,17 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
 
   private transient String cachedPath = null;
 
-  private static final PathFilter HIDDEN_FILES_FILTER = new PathFilter()
-    {
-    public boolean accept( Path path )
-      {
-      String name = path.getName();
+  private static final PathFilter HIDDEN_FILES_FILTER = path ->
+  {
+  String name = path.getName();
 
-      if( name.isEmpty() ) // should never happen
-        return true;
+  if( name.isEmpty() ) // should never happen
+    return true;
 
-      char first = name.charAt( 0 );
+  char first = name.charAt( 0 );
 
-      return first != '_' && first != '.';
-      }
-    };
+  return first != '_' && first != '.';
+  };
 
   protected static String getLocalModeScheme( Configuration conf, String defaultValue )
     {
@@ -214,6 +213,41 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     {
     super( scheme, sinkMode );
     setStringPath( stringPath );
+    }
+
+  @Override
+  public TapWith<Configuration, RecordReader, OutputCollector> withChildIdentifier( String identifier )
+    {
+    Path path = new Path( identifier );
+
+    if( !path.toString().startsWith( getPath().toString() ) )
+      path = new Path( getPath(), path );
+
+    return create( getScheme(), path, getSinkMode() );
+    }
+
+  @Override
+  public TapWith<Configuration, RecordReader, OutputCollector> withScheme( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme )
+    {
+    return create( scheme, getPath(), getSinkMode() );
+    }
+
+  @Override
+  public TapWith<Configuration, RecordReader, OutputCollector> withSinkMode( SinkMode sinkMode )
+    {
+    return create( getScheme(), getPath(), sinkMode );
+    }
+
+  protected TapWith<Configuration, RecordReader, OutputCollector> create( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, Path path, SinkMode sinkMode )
+    {
+    try
+      {
+      return Util.newInstance( getClass(), new Object[]{scheme, path, sinkMode} );
+      }
+    catch( CascadingException exception )
+      {
+      throw new TapException( "unable to create a new instance of: " + getClass().getName(), exception );
+      }
     }
 
   protected void setStringPath( String stringPath )
