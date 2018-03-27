@@ -215,6 +215,33 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     setStringPath( stringPath );
     }
 
+  /**
+   * Constructor Hfs creates a new Hfs instance.
+   *
+   * @param scheme of type Scheme
+   * @param path   of type Path
+   */
+  @ConstructorProperties({"scheme", "path"})
+  public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, Path path )
+    {
+    super( scheme );
+    setStringPath( path.toString() );
+    }
+
+  /**
+   * Constructor Hfs creates a new Hfs instance.
+   *
+   * @param scheme   of type Scheme
+   * @param path     of type Path
+   * @param sinkMode of type SinkMode
+   */
+  @ConstructorProperties({"scheme", "path", "sinkMode"})
+  public Hfs( Scheme<Configuration, RecordReader, OutputCollector, ?, ?> scheme, Path path, SinkMode sinkMode )
+    {
+    super( scheme, sinkMode );
+    setStringPath( path.toString() );
+    }
+
   @Override
   public TapWith<Configuration, RecordReader, OutputCollector> withChildIdentifier( String identifier )
     {
