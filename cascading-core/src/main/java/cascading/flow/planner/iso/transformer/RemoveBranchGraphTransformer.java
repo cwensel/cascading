@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -55,18 +55,19 @@ public class RemoveBranchGraphTransformer extends MutateGraphTransformer
     if( primary.isEmpty() )
       return false;
 
-    if( primary.size() != 1 )
-      throw new IllegalStateException( "too many captured primary elements" );
-
     if( secondary.isEmpty() )
       {
-      boolean found = ElementGraphs.removeBranchContaining( graph, Util.getFirst( primary ) );
+      for( FlowElement flowElement : primary )
+        {
+        boolean found = ElementGraphs.removeBranchContaining( graph, flowElement );
 
-      if( !found )
-        throw new IllegalStateException( "no branch found at: " + Util.getFirst( primary ) );
+        if( !found )
+          throw new IllegalStateException( "no branch found at: " + flowElement );
+        }
       }
     else
       {
+      // RemoveStreamedBranchTransformer uses a Secondary match to identify a branch but is currently unused
       if( secondary.size() != 1 )
         throw new IllegalStateException( "too many captured secondary elements" );
 

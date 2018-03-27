@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -893,5 +893,128 @@ public class MergePipesPlatformTest extends PlatformTestCase
     flow.complete();
 
     validateLength( flow, 10 );
+    }
+
+  /**
+   * Currently not supported by Tez
+   */
+  @Test
+  public void testHashJoinHashJoinMerge() throws Exception
+    {
+    if( getPlatform().isDAG() )
+      return;
+
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+
+    Tap lhsLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap lhsUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+    Tap rhsLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap rhsUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhsLowerPipe = new Pipe( "lhsLower" );
+    Pipe lhsUpperPipe = new Pipe( "lhsUpper" );
+    Pipe rhsLowerPipe = new Pipe( "rhsLower" );
+    Pipe rhsUpperPipe = new Pipe( "rhsUpper" );
+
+    lhsUpperPipe = new Rename( lhsUpperPipe, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe lhs = new HashJoin( lhsLowerPipe, new Fields( "num" ), lhsUpperPipe, new Fields( "num2" ) );
+
+    lhs = new Retain( lhs, new Fields( "num", "char" ) );
+
+    rhsUpperPipe = new Rename( rhsUpperPipe, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe rhs = new HashJoin( rhsLowerPipe, new Fields( "num" ), rhsUpperPipe, new Fields( "num2" ) );
+
+    rhs = new Retain( rhs, new Fields( "num", "char" ) );
+
+    Pipe merge = new Merge( "merge", lhs, rhs );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( lhsLowerPipe, lhsLower )
+      .addSource( lhsUpperPipe, lhsUpper )
+      .addSource( rhsLowerPipe, rhsLower )
+      .addSource( rhsUpperPipe, rhsUpper )
+      .addTailSink( merge, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 10 );
+    }
+
+  /**
+   * Tests for https://github.com/cwensel/cascading/issues/61
+   * Currently not supported by Tez
+   */
+  @Test
+  public void testHashJoinHashJoinHashJoinMergeMerge() throws Exception
+    {
+    if( getPlatform().isDAG() )
+      return;
+
+    getPlatform().copyFromLocal( inputFileLower );
+    getPlatform().copyFromLocal( inputFileUpper );
+    getPlatform().copyFromLocal( inputFileLowerOffset );
+
+    Tap lhsLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap lhsUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+    Tap midLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap midUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+    Tap rhsLower = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLower );
+    Tap rhsUpper = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileUpper );
+    Tap far = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLowerOffset );
+
+    Tap sink = getPlatform().getTextFile( getOutputPath(), SinkMode.REPLACE );
+
+    Pipe lhsLowerPipe = new Pipe( "lhsLower" );
+    Pipe lhsUpperPipe = new Pipe( "lhsUpper" );
+    Pipe midLowerPipe = new Pipe( "midLower" );
+    Pipe midUpperPipe = new Pipe( "midUpper" );
+    Pipe rhsLowerPipe = new Pipe( "rhsLower" );
+    Pipe rhsUpperPipe = new Pipe( "rhsUpper" );
+    Pipe farPipe = new Pipe( "far" );
+
+    lhsUpperPipe = new Rename( lhsUpperPipe, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe lhs = new HashJoin( lhsLowerPipe, new Fields( "num" ), lhsUpperPipe, new Fields( "num2" ) );
+
+    lhs = new Retain( lhs, new Fields( "num", "char" ) );
+
+    midUpperPipe = new Rename( midUpperPipe, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe mid = new HashJoin( midLowerPipe, new Fields( "num" ), midUpperPipe, new Fields( "num2" ) );
+
+    mid = new Retain( mid, new Fields( "num", "char" ) );
+
+    rhsUpperPipe = new Rename( rhsUpperPipe, Fields.ALL, new Fields( "num2", "char2" ) );
+
+    Pipe rhs = new HashJoin( rhsLowerPipe, new Fields( "num" ), rhsUpperPipe, new Fields( "num2" ) );
+
+    rhs = new Retain( rhs, new Fields( "num", "char" ) );
+
+    Pipe merge = new Merge( "merge", lhs, mid, rhs );
+
+    merge = new Merge( "next merge", merge, farPipe );
+
+    FlowDef flowDef = FlowDef.flowDef()
+      .addSource( lhsLowerPipe, lhsLower )
+      .addSource( lhsUpperPipe, lhsUpper )
+      .addSource( midLowerPipe, midLower )
+      .addSource( midUpperPipe, midUpper )
+      .addSource( rhsLowerPipe, rhsLower )
+      .addSource( rhsUpperPipe, rhsUpper )
+      .addSource( farPipe, far )
+      .addTailSink( merge, sink );
+
+    Flow flow = getPlatform().getFlowConnector().connect( flowDef );
+
+    flow.complete();
+
+    validateLength( flow, 19 );
     }
   }

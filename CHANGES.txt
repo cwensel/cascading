@@ -71,7 +71,10 @@ Cascading Change Log
   Removed support for all Apache Hadoop 1.x and prior releases, subsequently removing all sub-project interdependencies
   via symlinks.
 
-3.3.0 [unreleased]
+3.3.0
+
+  Fixed issue where planning with a c.p.Merge of two or more c.p.HashJoins would fail. Currently unresolved for the
+  Apache Tez planner.
 
   Fixed issue where c.t.h.PartitionTap could not initialize with more than a few thousand input partitions in a
   reasonable time frame. Fix supports PartitionTap initialization in under 10sec w/ 1 million paths.

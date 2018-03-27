@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -256,6 +257,32 @@ public class TupleEntryTest extends CascadingTestCase
     }
 
   @Test
+  public void testCoerceCanonicalUnknown()
+    {
+    Tuple tuple = new Tuple( 1 );
+
+    TupleEntry results = new TupleEntry( Fields.UNKNOWN, tuple );
+
+    assertEquals( 1, results.getObject( 0 ) );
+    assertEquals( 1, results.getInteger( 0 ) );
+    assertEquals( 1, results.getShort( 0 ) );
+    assertEquals( 1L, results.getLong( 0 ) );
+    assertEquals( 1.0F, results.getFloat( 0 ) );
+    assertEquals( 1.0D, results.getDouble( 0 ) );
+    assertEquals( "1", results.getString( 0 ) );
+    }
+
+  @Test(expected = TupleException.class)
+  public void testCoerceCanonicalUnknownFail()
+    {
+    Tuple tuple = new Tuple( 1 );
+
+    TupleEntry results = new TupleEntry( Fields.UNKNOWN, tuple );
+
+    assertEquals( 1, results.getInteger( 1 ) );
+    }
+
+  @Test
   public void testCoerceOnSet()
     {
     final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
@@ -357,6 +384,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( count, results.size() );
     }
 
+  @Test
   public void testSet()
     {
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
@@ -371,6 +399,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(2)", "C", tuple.getObject( 2 ) );
     }
 
+  @Test
   public void testSetNull()
     {
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
@@ -380,6 +409,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertTrue( entryA.getTuple() == null );
     }
 
+  @Test
   public void testSetCanonicalNull()
     {
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );
@@ -389,6 +419,7 @@ public class TupleEntryTest extends CascadingTestCase
     assertTrue( entryA.getTuple() == null );
     }
 
+  @Test
   public void testSetCoerce()
     {
     Fields fieldsA = new Fields( "a", "b", "c" ).applyTypes( String.class, String.class, String.class );
