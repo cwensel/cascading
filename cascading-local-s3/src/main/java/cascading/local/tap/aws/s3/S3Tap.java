@@ -36,9 +36,13 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
+import cascading.scheme.FileFormat;
 import cascading.scheme.Scheme;
+import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.local.PartitionTap;
 import cascading.tap.type.FileType;
+import cascading.tap.type.TapWith;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.TupleEntrySchemeCollector;
@@ -57,9 +61,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class S3Tap is a Cascading local mode tap providing read and write access to data stored in Amazon S3 buckets.
+ * Class S3Tap is a Cascading local-mode {@link Tap} providing read and write access to data stored in Amazon S3 buckets.
  * <p>
- * This Tap is not intended to be used with any of the other Cascading planners unless they specify they are local mode
+ * This Tap is not intended to be used with any of the other Cascading planners unless they specify they are local-mode
  * compatible.
  * <p>
  * S3Tap can read a single key, all objects underneath a key-prefix, or all objects under a key-prefix that match
@@ -86,11 +90,13 @@ import org.slf4j.LoggerFactory;
  * <p>
  * AWS Credentials are handled by {@link com.amazonaws.auth.DefaultAWSCredentialsProviderChain}.
  */
-public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements FileType<Properties>
+public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements FileType<Properties>, TapWith<Properties, InputStream, OutputStream>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( S3Tap.class );
 
+  /** Field SEQUENCE_TOKEN */
+  public static final String SEQUENCE_TOKEN = "{sequence}";
   /** Field MIME_DIRECTORY */
   public static final String MIME_DIRECTORY = "application/x-directory";
   /** Field DEFAULT_DELIMITER */
@@ -136,12 +142,11 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     if( bucketName == null )
       throw new IllegalArgumentException( "bucketName may not be null" );
 
-    if( keyPrefix == null )
-      throw new IllegalArgumentException( "keyPrefix may not be null" );
-
     try
       {
-      if( !keyPrefix.startsWith( "/" ) )
+      if( keyPrefix == null )
+        keyPrefix = "/";
+      else if( !keyPrefix.startsWith( "/" ) )
         keyPrefix = "/" + keyPrefix;
 
       return new URI( "s3", bucketName, keyPrefix, glob, null );
@@ -160,7 +165,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName )
     {
-    this( scheme, bucketName, null, null, null );
+    this( scheme, bucketName, null, null, null, SinkMode.KEEP );
     }
 
   /**
@@ -172,7 +177,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key )
     {
-    this( scheme, bucketName, key, DEFAULT_DELIMITER );
+    this( scheme, bucketName, key, DEFAULT_DELIMITER, SinkMode.KEEP );
     }
 
   /**
@@ -185,7 +190,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, String delimiter )
     {
-    this( scheme, null, null, bucketName, key, delimiter );
+    this( scheme, null, null, bucketName, key, delimiter, SinkMode.KEEP );
     }
 
   /**
@@ -197,7 +202,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, Predicate<String> filter )
     {
-    this( scheme, bucketName, null, filter );
+    this( scheme, bucketName, null, filter, SinkMode.KEEP );
     }
 
   /**
@@ -210,7 +215,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, Predicate<String> filter )
     {
-    this( scheme, bucketName, key, DEFAULT_DELIMITER, filter );
+    this( scheme, bucketName, key, DEFAULT_DELIMITER, filter, SinkMode.KEEP );
     }
 
   /**
@@ -224,7 +229,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, String delimiter, Predicate<String> filter )
     {
-    this( scheme, null, null, bucketName, key, delimiter, filter );
+    this( scheme, null, null, bucketName, key, delimiter, filter, SinkMode.KEEP );
     }
 
   /**
@@ -236,7 +241,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName )
     {
-    this( scheme, s3Client, bucketName, null );
+    this( scheme, s3Client, bucketName, null, SinkMode.KEEP );
     }
 
   /**
@@ -249,7 +254,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key )
     {
-    this( scheme, s3Client, bucketName, key, DEFAULT_DELIMITER );
+    this( scheme, s3Client, bucketName, key, DEFAULT_DELIMITER, SinkMode.KEEP );
     }
 
   /**
@@ -263,7 +268,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, String delimiter )
     {
-    this( scheme, s3Client, bucketName, key, delimiter, null );
+    this( scheme, s3Client, bucketName, key, delimiter, null, SinkMode.KEEP );
     }
 
   /**
@@ -278,7 +283,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, String delimiter, Predicate<String> filter )
     {
-    this( scheme, s3Client, null, bucketName, key, delimiter, filter );
+    this( scheme, s3Client, null, bucketName, key, delimiter, filter, SinkMode.KEEP );
     }
 
   /**
@@ -290,7 +295,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName )
     {
-    this( scheme, checkpointer, bucketName, null, null, null );
+    this( scheme, checkpointer, bucketName, null, null, null, SinkMode.KEEP );
     }
 
   /**
@@ -303,7 +308,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key )
     {
-    this( scheme, checkpointer, bucketName, key, DEFAULT_DELIMITER );
+    this( scheme, checkpointer, bucketName, key, DEFAULT_DELIMITER, SinkMode.KEEP );
     }
 
   /**
@@ -317,7 +322,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, String delimiter )
     {
-    this( scheme, null, checkpointer, bucketName, key, delimiter );
+    this( scheme, null, checkpointer, bucketName, key, delimiter, SinkMode.KEEP );
     }
 
   /**
@@ -330,7 +335,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, Predicate<String> filter )
     {
-    this( scheme, checkpointer, bucketName, null, filter );
+    this( scheme, checkpointer, bucketName, null, filter, SinkMode.KEEP );
     }
 
   /**
@@ -344,7 +349,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, Predicate<String> filter )
     {
-    this( scheme, checkpointer, bucketName, key, DEFAULT_DELIMITER, filter );
+    this( scheme, checkpointer, bucketName, key, DEFAULT_DELIMITER, filter, SinkMode.KEEP );
     }
 
   /**
@@ -359,7 +364,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, String delimiter, Predicate<String> filter )
     {
-    this( scheme, null, checkpointer, bucketName, key, delimiter, filter );
+    this( scheme, null, checkpointer, bucketName, key, delimiter, filter, SinkMode.KEEP );
     }
 
   /**
@@ -372,7 +377,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName )
     {
-    this( scheme, s3Client, checkpointer, bucketName, null );
+    this( scheme, s3Client, checkpointer, bucketName, null, SinkMode.KEEP );
     }
 
   /**
@@ -386,7 +391,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, String key )
     {
-    this( scheme, s3Client, checkpointer, bucketName, key, DEFAULT_DELIMITER );
+    this( scheme, s3Client, checkpointer, bucketName, key, DEFAULT_DELIMITER, SinkMode.KEEP );
     }
 
   /**
@@ -401,7 +406,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, String key, String delimiter )
     {
-    this( scheme, s3Client, checkpointer, bucketName, key, delimiter, null );
+    this( scheme, s3Client, checkpointer, bucketName, key, delimiter, null, SinkMode.KEEP );
     }
 
   /**
@@ -417,7 +422,290 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, String key, String delimiter, Predicate<String> filter )
     {
-    super( scheme );
+    this( scheme, s3Client, checkpointer, bucketName, key, delimiter, filter, SinkMode.KEEP );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param bucketName of String
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, SinkMode sinkMode )
+    {
+    this( scheme, bucketName, null, null, null, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param bucketName of String
+   * @param key        of String
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, SinkMode sinkMode )
+    {
+    this( scheme, bucketName, key, DEFAULT_DELIMITER );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param bucketName of String
+   * @param key        of String
+   * @param delimiter  of String
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, String delimiter, SinkMode sinkMode )
+    {
+    this( scheme, null, null, bucketName, key, delimiter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param bucketName of String
+   * @param filter     of Predicate
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, bucketName, null, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param bucketName of String
+   * @param key        of String
+   * @param filter     of Predicate
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, bucketName, key, DEFAULT_DELIMITER, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param bucketName of String
+   * @param key        of String
+   * @param delimiter  of String
+   * @param filter     of Predicate
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, String delimiter, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, null, null, bucketName, key, delimiter, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param s3Client   of AmazonS3
+   * @param bucketName of String
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, bucketName, null, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param s3Client   of AmazonS3
+   * @param bucketName of String
+   * @param key        of String
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, bucketName, key, DEFAULT_DELIMITER, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param s3Client   of AmazonS3
+   * @param bucketName of String
+   * @param key        of String
+   * @param delimiter  of String
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, String delimiter, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, bucketName, key, delimiter, null, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param s3Client   of AmazonS3
+   * @param bucketName of String
+   * @param key        of String
+   * @param delimiter  of String
+   * @param filter     of Predicate
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, String delimiter, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, null, bucketName, key, delimiter, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, SinkMode sinkMode )
+    {
+    this( scheme, checkpointer, bucketName, null, null, null, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, SinkMode sinkMode )
+    {
+    this( scheme, checkpointer, bucketName, key, DEFAULT_DELIMITER, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param delimiter    of String
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, String delimiter, SinkMode sinkMode )
+    {
+    this( scheme, null, checkpointer, bucketName, key, delimiter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param filter       of Predicate
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, checkpointer, bucketName, null, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param filter       of Predicate
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, checkpointer, bucketName, key, DEFAULT_DELIMITER, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param delimiter    of String
+   * @param filter       of Predicate
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, String bucketName, String key, String delimiter, Predicate<String> filter, SinkMode sinkMode )
+    {
+    this( scheme, null, checkpointer, bucketName, key, delimiter, filter, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param s3Client     of AmazonS3
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, checkpointer, bucketName, null, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param s3Client     of AmazonS3
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, String key, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, checkpointer, bucketName, key, DEFAULT_DELIMITER, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param s3Client     of AmazonS3
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param delimiter    of String
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, String key, String delimiter, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, checkpointer, bucketName, key, delimiter, null, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param s3Client     of AmazonS3
+   * @param checkpointer of S3Checkpointer
+   * @param bucketName   of String
+   * @param key          of String
+   * @param delimiter    of String
+   * @param filter       of Predicate
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, String bucketName, String key, String delimiter, Predicate<String> filter, SinkMode sinkMode )
+    {
+    super( scheme, sinkMode );
     this.s3Client = s3Client;
     this.checkpointer = checkpointer;
     this.bucketName = bucketName;
@@ -434,7 +722,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, URI identifier )
     {
-    this( scheme, null, null, identifier );
+    this( scheme, null, null, identifier, SinkMode.KEEP );
     }
 
   /**
@@ -446,7 +734,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, URI identifier )
     {
-    this( scheme, s3Client, null, identifier );
+    this( scheme, s3Client, null, identifier, SinkMode.KEEP );
     }
 
   /**
@@ -458,7 +746,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, URI identifier )
     {
-    this( scheme, null, checkpointer, identifier );
+    this( scheme, null, checkpointer, identifier, SinkMode.KEEP );
     }
 
   /**
@@ -471,7 +759,59 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, URI identifier )
     {
-    super( scheme );
+    this( scheme, s3Client, checkpointer, identifier, SinkMode.KEEP );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param identifier of URI
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, URI identifier, SinkMode sinkMode )
+    {
+    this( scheme, null, null, identifier, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme     of Scheme
+   * @param s3Client   of AmazonS3
+   * @param identifier of URI
+   * @param sinkMode   of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, URI identifier, SinkMode sinkMode )
+    {
+    this( scheme, s3Client, null, identifier, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param checkpointer of S3Checkpointer
+   * @param identifier   of URI
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, S3Checkpointer checkpointer, URI identifier, SinkMode sinkMode )
+    {
+    this( scheme, null, checkpointer, identifier, sinkMode );
+    }
+
+  /**
+   * Constructor S3Tap creates a new S3Tap instance.
+   *
+   * @param scheme       of Scheme
+   * @param s3Client     of AmazonS3
+   * @param checkpointer of S3Checkpointer
+   * @param identifier   of URI
+   * @param sinkMode     of SinkMode
+   */
+  public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, S3Checkpointer checkpointer, URI identifier, SinkMode sinkMode )
+    {
+    super( scheme, sinkMode );
     this.s3Client = s3Client;
     this.checkpointer = checkpointer;
 
@@ -504,6 +844,36 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
       new Object[]{glob},
       new Class[]{String.class}
     );
+    }
+
+  @Override
+  public TapWith<Properties, InputStream, OutputStream> withScheme( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme )
+    {
+    // don't lazily create s3Client
+    return new S3Tap( scheme, s3Client, getBucketName(), getKey(), getDelimiter(), getFilter(), getSinkMode() );
+    }
+
+  @Override
+  public TapWith<Properties, InputStream, OutputStream> withChildIdentifier( String identifier )
+    {
+    URI uri;
+
+    if( identifier.startsWith( "s3://" ) )
+      uri = URI.create( identifier );
+    else if( identifier.startsWith( getBucketName() ) )
+      uri = makeURI( identifier, null );
+    else
+      uri = makeURI( getBucketName(), getKey() + ( identifier.startsWith( delimiter ) ? identifier : delimiter + identifier ) );
+
+    // don't lazily create s3Client
+    return new S3Tap( getScheme(), s3Client, uri, getSinkMode() );
+    }
+
+  @Override
+  public TapWith<Properties, InputStream, OutputStream> withSinkMode( SinkMode sinkMode )
+    {
+    // don't lazily create s3Client
+    return new S3Tap( getScheme(), s3Client, getBucketName(), getKey(), getDelimiter(), getFilter(), sinkMode );
     }
 
   protected String cleanKey( URI identifier )
@@ -751,9 +1121,11 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     if( LOG.isDebugEnabled() )
       LOG.debug( "starting upload: {}", getIdentifier() );
 
-    Upload upload = transferManager.upload( getBucketName(), getKey(), pipedInputStream, metadata );
+    final String key = resolveKey( flowProcess, getKey() );
 
-    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, this, getScheme(), pipedOutputStream, getIdentifier() )
+    Upload upload = transferManager.upload( getBucketName(), key, pipedInputStream, metadata );
+
+    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, this, getScheme(), pipedOutputStream, makeStringIdentifier( getBucketName(), key ) )
       {
       @Override
       public void close()
@@ -773,6 +1145,18 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
           }
         }
       };
+    }
+
+  protected String resolveKey( FlowProcess<? extends Properties> flowProcess, String key )
+    {
+    int partNum = flowProcess.getIntegerProperty( PartitionTap.PART_NUM_PROPERTY, 0 );
+
+    key = key.replace( SEQUENCE_TOKEN, String.format( ".%05d", partNum ) );
+
+    if( getScheme() instanceof FileFormat )
+      return key + "." + ( (FileFormat) getScheme() ).getExtension();
+
+    return key;
     }
 
   @Override

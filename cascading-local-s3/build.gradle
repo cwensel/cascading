@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -37,7 +37,7 @@ dependencies {
 // makes tests pass
 configurations.all {
   resolutionStrategy {
-    force 'com.google.guava:guava:16.0.1'
+    force 'com.google.guava:guava:24.0-jre'
   }
 }
 

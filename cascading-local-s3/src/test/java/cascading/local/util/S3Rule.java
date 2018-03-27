@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -84,6 +84,12 @@ public class S3Rule extends ExternalResource
   public S3Rule( String storageDir )
     {
     this( () -> storageDir );
+    }
+
+  public S3Rule( String storageDir, String bucketName )
+    {
+    this( () -> storageDir );
+    this.bucketName = bucketName;
     }
 
   public AmazonS3 get3Client()

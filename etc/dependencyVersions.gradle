@@ -22,11 +22,11 @@ configurations.all {
   resolutionStrategy.cacheDynamicVersionsFor 5, 'minutes'
 }
 
-ext.cascadingVersion = '4.0.0-wip-38'
+ext.cascadingVersion = '4.0.0-wip-46'
 
 ext.awsVersion = '1.11.271'
 ext.awsS3Version = awsVersion
-ext.s3ProxyVersion = '1.5.3'
+ext.s3ProxyVersion = '1.6.0'
 
 ext.kafkaVersion = '0.11.0.0'
 
