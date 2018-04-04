@@ -57,10 +57,20 @@ subprojects {
   group = 'cascading'
   version = releaseVersion
 
+  // generate Java 9 module names
+  ext.moduleName = name.replaceAll( '-', '.' )
+
   configurations {
 
     testArtifacts {
       extendsFrom testRuntime
+    }
+  }
+
+  jar {
+    inputs.property( "moduleName", moduleName )
+    manifest {
+      attributes( 'Automatic-Module-Name': moduleName )
     }
   }
 
