@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated all jars to include the Automatic-Module-Name property.
+
   Added c.t.t.TapWith interface to provide fluent factories for creating new immutable instance of the current
   c.t.Tap type. This allows Tap instances to be their own factory type.
 
