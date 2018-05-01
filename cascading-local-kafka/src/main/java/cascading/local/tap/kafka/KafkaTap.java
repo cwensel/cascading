@@ -147,9 +147,9 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
   /** Field defaultProperties */
   Properties defaultProperties = PropertyUtil.merge( CONSUME_AUTO_COMMIT_EARLIEST, PRODUCE_ACK_ALL_NO_RETRY );
   /** Field hostname */
-  final String hostname;
+  String hostname;
   /** Field topics */
-  final String[] topics;
+  String[] topics;
   /** Field numPartitions */
   int numPartitions = DEFAULT_NUM_PARTITIONS;
   /** Field replicationFactor */
@@ -409,8 +409,11 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
 
     this.hostname = identifier.getHost();
 
-    if( identifier.getQuery() != null )
-      throw new IllegalArgumentException( "must have at least one topic" );
+    if( identifier.getPort() != -1 )
+      this.hostname += ":" + identifier.getPort();
+
+    if( identifier.getQuery() == null )
+      throw new IllegalArgumentException( "must have at least one topic in the query part of the URI" );
 
     if( groupID != null )
       this.groupID = groupID;
