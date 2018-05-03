@@ -154,6 +154,8 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
   int numPartitions = DEFAULT_NUM_PARTITIONS;
   /** Field replicationFactor */
   short replicationFactor = DEFAULT_REPLICATION_FACTOR;
+  /** Field clientID */
+  String clientID = null;
   /** Field groupID */
   String groupID = Tap.id( this );
   /** Field pollTimeout */
@@ -293,11 +295,25 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param identifier        of URI
+   * @param clientID          of String
+   */
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID )
+    {
+    this( defaultProperties, scheme, identifier, clientID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
+    }
+
+  /**
+   * Constructor KafkaTap creates a new KafkaTap instance.
+   *
+   * @param defaultProperties of Properties
+   * @param scheme            of KafkaScheme
+   * @param identifier        of URI
+   * @param clientID          of String
    * @param groupID           of String
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, String groupID )
     {
-    this( defaultProperties, scheme, identifier, groupID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
+    this( defaultProperties, scheme, identifier, clientID, groupID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
     }
 
   /**
@@ -305,12 +321,12 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme      of KafkaScheme
    * @param identifier  of URI
-   * @param groupID     of String
+   * @param clientID    of String
    * @param pollTimeout of int
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID, int pollTimeout )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, int pollTimeout )
     {
-    this( scheme, identifier, groupID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
+    this( scheme, identifier, clientID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
     }
 
   /**
@@ -318,13 +334,13 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme            of KafkaScheme
    * @param identifier        of URI
-   * @param groupID           of String
+   * @param clientID          of String
    * @param numPartitions     of int
    * @param replicationFactor of short
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID, int numPartitions, short replicationFactor )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, int numPartitions, short replicationFactor )
     {
-    this( scheme, identifier, groupID, DEFAULT_POLL_TIMEOUT, numPartitions, replicationFactor );
+    this( scheme, identifier, clientID, DEFAULT_POLL_TIMEOUT, numPartitions, replicationFactor );
     }
 
   /**
@@ -332,14 +348,14 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme            of KafkaScheme
    * @param identifier        of URI
-   * @param groupID           of String
+   * @param clientID          of String
    * @param pollTimeout       of int
    * @param numPartitions     of int
    * @param replicationFactor of short
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID, int pollTimeout, int numPartitions, short replicationFactor )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, int pollTimeout, int numPartitions, short replicationFactor )
     {
-    this( null, scheme, identifier, groupID, pollTimeout, numPartitions, replicationFactor );
+    this( null, scheme, identifier, clientID, pollTimeout, numPartitions, replicationFactor );
     }
 
   /**
@@ -347,11 +363,24 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme     of KafkaScheme
    * @param identifier of URI
+   * @param clientID   of String
+   */
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID )
+    {
+    this( scheme, identifier, clientID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
+    }
+
+  /**
+   * Constructor KafkaTap creates a new KafkaTap instance.
+   *
+   * @param scheme     of KafkaScheme
+   * @param identifier of URI
+   * @param clientID   of String
    * @param groupID    of String
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, String groupID )
     {
-    this( scheme, identifier, groupID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
+    this( null, scheme, identifier, clientID, groupID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
     }
 
   /**
@@ -360,12 +389,12 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param identifier        of URI
-   * @param groupID           of String
+   * @param clientID          of String
    * @param pollTimeout       of int
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID, int pollTimeout )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, int pollTimeout )
     {
-    this( defaultProperties, scheme, identifier, groupID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
+    this( defaultProperties, scheme, identifier, clientID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR );
     }
 
   /**
@@ -374,13 +403,13 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param identifier        of URI
-   * @param groupID           of String
+   * @param clientID          of String
    * @param numPartitions     of int
    * @param replicationFactor of short
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID, int numPartitions, short replicationFactor )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, int numPartitions, short replicationFactor )
     {
-    this( defaultProperties, scheme, identifier, groupID, DEFAULT_POLL_TIMEOUT, numPartitions, replicationFactor );
+    this( defaultProperties, scheme, identifier, clientID, DEFAULT_POLL_TIMEOUT, numPartitions, replicationFactor );
     }
 
   /**
@@ -389,12 +418,29 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param identifier        of URI
+   * @param clientID          of String
+   * @param pollTimeout       of int
+   * @param numPartitions     of int
+   * @param replicationFactor of short
+   */
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, int pollTimeout, int numPartitions, short replicationFactor )
+    {
+    this( defaultProperties, scheme, identifier, clientID, null, pollTimeout, numPartitions, replicationFactor );
+    }
+
+  /**
+   * Constructor KafkaTap creates a new KafkaTap instance.
+   *
+   * @param defaultProperties of Properties
+   * @param scheme            of KafkaScheme
+   * @param identifier        of URI
+   * @param clientID          of String
    * @param groupID           of String
    * @param pollTimeout       of int
    * @param numPartitions     of int
    * @param replicationFactor of short
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String groupID, int pollTimeout, int numPartitions, short replicationFactor )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, URI identifier, String clientID, String groupID, int pollTimeout, int numPartitions, short replicationFactor )
     {
     super( scheme, SinkMode.UPDATE );
 
@@ -414,6 +460,9 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
 
     if( identifier.getQuery() == null )
       throw new IllegalArgumentException( "must have at least one topic in the query part of the URI" );
+
+    if( clientID != null )
+      this.clientID = clientID;
 
     if( groupID != null )
       this.groupID = groupID;
@@ -516,12 +565,12 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme   of KafkaScheme
    * @param hostname of String
-   * @param groupID  of String
+   * @param clientID of String
    * @param topics   of String...
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, String... topics )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, String... topics )
     {
-    this( scheme, hostname, groupID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
+    this( scheme, hostname, clientID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
     }
 
   /**
@@ -529,13 +578,13 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme      of KafkaScheme
    * @param hostname    of String
-   * @param groupID     of String
+   * @param clientID    of String
    * @param pollTimeout of int
    * @param topics      of String...
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, int pollTimeout, String... topics )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, int pollTimeout, String... topics )
     {
-    this( scheme, hostname, groupID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
+    this( scheme, hostname, clientID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
     }
 
   /**
@@ -543,15 +592,15 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    *
    * @param scheme            of KafkaScheme
    * @param hostname          of String
-   * @param groupID           of String
+   * @param clientID          of String
    * @param pollTimeout       of int
    * @param numPartitions     of int
    * @param replicationFactor of short
    * @param topics            of String...
    */
-  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, int pollTimeout, int numPartitions, short replicationFactor, String... topics )
+  public KafkaTap( KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, int pollTimeout, int numPartitions, short replicationFactor, String... topics )
     {
-    this( null, scheme, hostname, groupID, pollTimeout, numPartitions, replicationFactor, topics );
+    this( null, scheme, hostname, clientID, pollTimeout, numPartitions, replicationFactor, topics );
     }
 
   /**
@@ -560,14 +609,14 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param hostname          of String
-   * @param groupID           of String
+   * @param clientID          of String
    * @param numPartitions     of int
    * @param replicationFactor of short
    * @param topics            of String...
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, int numPartitions, short replicationFactor, String... topics )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, int numPartitions, short replicationFactor, String... topics )
     {
-    this( defaultProperties, scheme, hostname, groupID, DEFAULT_POLL_TIMEOUT, numPartitions, replicationFactor, topics );
+    this( defaultProperties, scheme, hostname, clientID, DEFAULT_POLL_TIMEOUT, numPartitions, replicationFactor, topics );
     }
 
   /**
@@ -576,12 +625,12 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param hostname          of String
-   * @param groupID           of String
+   * @param clientID          of String
    * @param topics            of String...
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, String... topics )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, String... topics )
     {
-    this( defaultProperties, scheme, hostname, groupID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
+    this( defaultProperties, scheme, hostname, clientID, DEFAULT_POLL_TIMEOUT, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
     }
 
   /**
@@ -590,13 +639,13 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param hostname          of String
-   * @param groupID           of String
+   * @param clientID          of String
    * @param pollTimeout       of int
    * @param topics            of String...
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, int pollTimeout, String... topics )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, int pollTimeout, String... topics )
     {
-    this( defaultProperties, scheme, hostname, groupID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
+    this( defaultProperties, scheme, hostname, clientID, pollTimeout, DEFAULT_NUM_PARTITIONS, DEFAULT_REPLICATION_FACTOR, topics );
     }
 
   /**
@@ -605,13 +654,18 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
    * @param defaultProperties of Properties
    * @param scheme            of KafkaScheme
    * @param hostname          of String
-   * @param groupID           of String
+   * @param clientID          of String
    * @param pollTimeout       of int
    * @param numPartitions     of int
    * @param replicationFactor of short
    * @param topics            of String...
    */
-  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String groupID, int pollTimeout, int numPartitions, short replicationFactor, String... topics )
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, int pollTimeout, int numPartitions, short replicationFactor, String... topics )
+    {
+    this( defaultProperties, scheme, hostname, clientID, null, pollTimeout, numPartitions, replicationFactor, topics );
+    }
+
+  public KafkaTap( Properties defaultProperties, KafkaScheme<K, V, ?, ?> scheme, String hostname, String clientID, String groupID, int pollTimeout, int numPartitions, short replicationFactor, String... topics )
     {
     super( scheme, SinkMode.UPDATE );
 
@@ -619,6 +673,9 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
       this.defaultProperties = new Properties( defaultProperties );
 
     this.hostname = hostname;
+
+    if( clientID != null )
+      this.clientID = clientID;
 
     if( groupID != null )
       this.groupID = groupID;
@@ -637,6 +694,26 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
   public String getHostname()
     {
     return hostname;
+    }
+
+  /**
+   * Method getClientID returns the clientID of this KafkaTap object.
+   *
+   * @return the clientID (type String) of this KafkaTap object.
+   */
+  public String getClientID()
+    {
+    return clientID;
+    }
+
+  /**
+   * Method getGroupID returns the groupID of this KafkaTap object.
+   *
+   * @return the groupID (type String) of this KafkaTap object.
+   */
+  public String getGroupID()
+    {
+    return groupID;
     }
 
   /**
@@ -663,6 +740,9 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     props.setProperty( ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, hostname );
 
     Set<String> keys = props.stringPropertyNames();
+
+    if( clientID != null && !keys.contains( ConsumerConfig.CLIENT_ID_CONFIG ) )
+      props.setProperty( ConsumerConfig.CLIENT_ID_CONFIG, clientID );
 
     // allows all calls from this instance to share a group
     if( !keys.contains( ConsumerConfig.GROUP_ID_CONFIG ) )
