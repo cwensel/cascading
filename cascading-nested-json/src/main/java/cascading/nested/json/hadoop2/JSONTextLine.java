@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -53,6 +53,9 @@ import org.apache.hadoop.mapred.RecordReader;
  * <p>
  * To create a binary JSON file, use the {@link cascading.scheme.hadoop.SequenceFile} Scheme with one or more
  * fields having the JSONCoercibleType type.
+ * <p>
+ * Note, when supplying a custom {@link ObjectMapper}, the default {@link JSONCoercibleType#TYPE} and ObjectMapper
+ * sets the {@link DeserializationFeature#FAIL_ON_READING_DUP_TREE_KEY} Jackson property.
  */
 public class JSONTextLine extends TextLine
   {
@@ -121,7 +124,62 @@ public class JSONTextLine extends TextLine
    */
   public JSONTextLine( Fields fields, Compress sinkCompression, String charsetName )
     {
+    this( null, fields, sinkCompression, charsetName );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with any of the
+   * Hadoop based {@link cascading.flow.FlowConnector} instances.
+   *
+   * @param mapper of ObjectMapper
+   * @param fields of Fields
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields )
+    {
+    this( mapper, fields, null, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with any of the
+   * Hadoop based {@link cascading.flow.FlowConnector} instances.
+   *
+   * @param mapper      of ObjectMapper
+   * @param fields      of Fields
+   * @param charsetName of String
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields, String charsetName )
+    {
+    this( mapper, fields, null, charsetName );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with any of the
+   * Hadoop based {@link cascading.flow.FlowConnector} instances.
+   *
+   * @param mapper          of ObjectMapper
+   * @param fields          of Fields
+   * @param sinkCompression of Compress
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields, Compress sinkCompression )
+    {
+    this( mapper, fields, sinkCompression, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with any of the
+   * Hadoop based {@link cascading.flow.FlowConnector} instances.
+   *
+   * @param mapper          of ObjectMapper
+   * @param fields          of Fields
+   * @param sinkCompression of Compress
+   * @param charsetName     of String
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields, Compress sinkCompression, String charsetName )
+    {
     super( sinkCompression );
+
+    if( mapper != null )
+      this.mapper = mapper;
 
     if( fields == null )
       throw new IllegalArgumentException( "fields may not be null" );
@@ -132,7 +190,7 @@ public class JSONTextLine extends TextLine
     if( fields.size() != 1 )
       throw new IllegalArgumentException( "may only declare a single source/sink field in the fields argument" );
 
-    fields = fields.hasTypes() ? fields : fields.applyTypes( JSONCoercibleType.TYPE );
+    fields = fields.hasTypes() ? fields : fields.applyTypes( new JSONCoercibleType( this.mapper ) );
 
     setSinkFields( fields );
     setSourceFields( fields );

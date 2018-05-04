@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -82,8 +82,66 @@ public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
    * @param fieldDeclaration of Fields
    * @param pointerMap       of Map
    */
+  @ConstructorProperties({"fieldDeclaration", "pointerMap"})
   public JSONSetFunction( Fields fieldDeclaration, Map<Fields, String> pointerMap )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, pointerMap );
+    }
+
+  /**
+   * Creates a new JSONSetFunction instance that will pivot all resolved arguments fields into
+   * an existing JSON object, where all the JSON object attributes are the argument field names.
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration"})
+  public JSONSetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration )
+    {
+    super( coercibleType, fieldDeclaration );
+    }
+
+  /**
+   * Creates a new JSONSetFunction instance that will pivot all resolved arguments fields into
+   * an existing JSON object, where all the JSON object attributes are the argument field names.
+   * <p>
+   * The {@code rootPointer} values specifies the base name of the final pointer path. If {@code rootPointer} is
+   * "/person" and and argument is passed with field name "fullName", the value will be placed in "/person/fullName".
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   * @param rootPointer      of String
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "rootPointer"})
+  public JSONSetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, String rootPointer )
+    {
+    super( coercibleType, fieldDeclaration, rootPointer );
+    }
+
+  /**
+   * Creates a new JSONSetFunction instance.
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   * @param fromFields       of Fields
+   * @param stringPointer    of String
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "fromFields", "stringPointer"})
+  public JSONSetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, Fields fromFields, String stringPointer )
+    {
+    this( coercibleType, fieldDeclaration, Collections.singletonMap( fromFields, stringPointer ) );
+    }
+
+  /**
+   * Creates a new JSONSetFunction instance.
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   * @param pointerMap       of Map
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "pointerMap"})
+  public JSONSetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, Map<Fields, String> pointerMap )
+    {
+    super( coercibleType, fieldDeclaration, pointerMap );
     }
   }

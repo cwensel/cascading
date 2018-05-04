@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,6 +45,19 @@ public class JSONBuildAsFunction extends NestedBaseBuildFunction<JsonNode, Array
   public JSONBuildAsFunction( Fields fieldDeclaration, BuildSpec... buildSpecs )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, buildSpecs );
+    }
+
+  /**
+   * Creates a new JSONBuildAsFunction instance.
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   * @param buildSpecs       of BuildSpec...
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "buildSpecs"})
+  public JSONBuildAsFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, BuildSpec... buildSpecs )
+    {
+    super( coercibleType, fieldDeclaration, buildSpecs );
     }
 
   /**

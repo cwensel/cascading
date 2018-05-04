@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -46,6 +46,19 @@ public class JSONCopyIntoFunction extends NestedBaseCopyFunction<JsonNode, Array
   public JSONCopyIntoFunction( Fields fieldDeclaration, CopySpec... copySpecs )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, copySpecs );
+    }
+
+  /**
+   * Creates a new JSONCopyIntoFunction instance.
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   * @param copySpecs        of CopySpec...
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "copySpecs"})
+  public JSONCopyIntoFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, CopySpec... copySpecs )
+    {
+    super( coercibleType, fieldDeclaration, copySpecs );
     }
 
   @Override

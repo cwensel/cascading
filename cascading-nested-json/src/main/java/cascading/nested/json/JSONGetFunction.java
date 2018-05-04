@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -81,5 +81,57 @@ public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>
   public JSONGetFunction( Fields fieldDeclaration, boolean failOnMissingNode, String... stringPointers )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, failOnMissingNode, stringPointers );
+    }
+
+  /**
+   * Creates a new JSONGetFunction instance.
+   *
+   * @param coercibleType of JSONCoercibleType
+   * @param pointerMap    of Map
+   */
+  @ConstructorProperties({"coercibleType", "pointerMap"})
+  public JSONGetFunction( JSONCoercibleType coercibleType, Map<Fields, String> pointerMap )
+    {
+    this( coercibleType, asFields( pointerMap.keySet() ), asArray( pointerMap.values() ) );
+    }
+
+  /**
+   * Creates a new JSONGetFunction instance.
+   *
+   * @param coercibleType     of JSONCoercibleType
+   * @param pointerMap        of Map
+   * @param failOnMissingNode of boolean
+   */
+  @ConstructorProperties({"coercibleType", "pointerMap", "failOnMissingNode"})
+  public JSONGetFunction( JSONCoercibleType coercibleType, Map<Fields, String> pointerMap, boolean failOnMissingNode )
+    {
+    this( coercibleType, asFields( pointerMap.keySet() ), failOnMissingNode, asArray( pointerMap.values() ) );
+    }
+
+  /**
+   * Creates a new JSONGetFunction instance.
+   *
+   * @param coercibleType    of JSONCoercibleType
+   * @param fieldDeclaration of Fields
+   * @param stringPointers   of String...
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "stringPointers"})
+  public JSONGetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, String... stringPointers )
+    {
+    this( coercibleType, fieldDeclaration, false, stringPointers );
+    }
+
+  /**
+   * Creates a new JSONGetFunction instance.
+   *
+   * @param coercibleType     of JSONCoercibleType
+   * @param fieldDeclaration  of Fields
+   * @param failOnMissingNode of boolean
+   * @param stringPointers    of String...
+   */
+  @ConstructorProperties({"coercibleType", "fieldDeclaration", "failOnMissingNode", "stringPointers"})
+  public JSONGetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, boolean failOnMissingNode, String... stringPointers )
+    {
+    super( coercibleType, fieldDeclaration, failOnMissingNode, stringPointers );
     }
   }

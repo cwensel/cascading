@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -50,6 +50,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p>
  * In order to read or write a compressed files, pass a {@link cascading.scheme.local.CompressorScheme.Compressor}
  * instance to the appropriate constructors. See {@link Compressors} for provided compression algorithms.
+ * <p>
+ * Note, when supplying a custom {@link ObjectMapper}, the default {@link JSONCoercibleType#TYPE} and ObjectMapper
+ * sets the {@link DeserializationFeature#FAIL_ON_READING_DUP_TREE_KEY} Jackson property.
  *
  * @see Compressors
  */
@@ -130,6 +133,73 @@ public class JSONTextLine extends TextLine
    */
   public JSONTextLine( Fields fields, Compressor compressor, String charsetName )
     {
+    this( null, fields, compressor, charsetName );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector}.
+   *
+   * @param mapper of ObjectMapper
+   * @param fields of Fields
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields )
+    {
+    this( mapper, fields, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector}.
+   *
+   * @param mapper      of ObjectMapper
+   * @param fields      of Fields
+   * @param charsetName of String
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields, String charsetName )
+    {
+    this( mapper, fields, null, charsetName );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector} returning results with the default field named "json".
+   *
+   * @param mapper     of ObjectMapper
+   * @param compressor of type Compressor, see {@link Compressors}
+   */
+  public JSONTextLine( ObjectMapper mapper, Compressor compressor )
+    {
+    this( mapper, DEFAULT_FIELDS, compressor );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector}.
+   *
+   * @param mapper     of ObjectMapper
+   * @param fields     of Fields
+   * @param compressor of type Compressor, see {@link Compressors}
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields, Compressor compressor )
+    {
+    this( mapper, fields, compressor, DEFAULT_CHARSET );
+    }
+
+  /**
+   * Constructor JSONTextLine creates a new JSONTextLine instance for use with the
+   * {@link cascading.flow.local.LocalFlowConnector}.
+   *
+   * @param mapper      of ObjectMapper
+   * @param fields      of Fields
+   * @param compressor  of type Compressor, see {@link Compressors}
+   * @param charsetName of String
+   */
+  public JSONTextLine( ObjectMapper mapper, Fields fields, Compressor compressor, String charsetName )
+    {
+    if( mapper != null )
+      this.mapper = mapper;
+
     if( fields == null )
       throw new IllegalArgumentException( "fields may not be null" );
 
@@ -139,7 +209,7 @@ public class JSONTextLine extends TextLine
     if( fields.size() != 1 )
       throw new IllegalArgumentException( "may only declare a single source/sink field in the fields argument" );
 
-    fields = fields.hasTypes() ? fields : fields.applyTypes( JSONCoercibleType.TYPE );
+    fields = fields.hasTypes() ? fields : fields.applyTypes( new JSONCoercibleType( this.mapper ) );
 
     setSinkFields( fields );
     setSourceFields( fields );
@@ -163,7 +233,7 @@ public class JSONTextLine extends TextLine
     JsonNode jsonNode = null;
 
     if( !line.isEmpty() )
-      jsonNode = mapper.readTree( line.getBytes() );
+      jsonNode = mapper.readTree( line );
 
     incomingEntry.setObject( 0, jsonNode );
 

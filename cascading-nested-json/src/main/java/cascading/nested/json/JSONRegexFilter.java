@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -56,5 +56,31 @@ public class JSONRegexFilter extends NestedRegexFilter
   public JSONRegexFilter( String pointer, List<Pattern> patterns )
     {
     super( JSONCoercibleType.TYPE, pointer, patterns );
+    }
+
+  /**
+   * Creates a new JSONRegexFilter instance.
+   *
+   * @param coercibleType of JSONCoercibleType
+   * @param pointer       of String
+   * @param pattern       of Pattern
+   */
+  @ConstructorProperties({"coercibleType", "pointer", "pattern"})
+  public JSONRegexFilter( JSONCoercibleType coercibleType, String pointer, Pattern pattern )
+    {
+    this( coercibleType, pointer, Collections.singletonList( pattern ) );
+    }
+
+  /**
+   * Creates a new JSONRegexFilter instance.
+   *
+   * @param coercibleType of JSONCoercibleType
+   * @param pointer       of String
+   * @param patterns      of List
+   */
+  @ConstructorProperties({"coercibleType", "pointer", "patterns"})
+  public JSONRegexFilter( JSONCoercibleType coercibleType, String pointer, List<Pattern> patterns )
+    {
+    super( coercibleType, pointer, patterns );
     }
   }
