@@ -20,6 +20,7 @@
 
 package cascading.nested.json;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -27,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -94,6 +97,24 @@ public class JSONTypeTest
 
     assertEquals( JsonNodeType.ARRAY, canonical.getNodeType() );
     assertEquals( list, JSONCoercibleType.TYPE.coerce( canonical, List.class ) );
+    }
+
+  @Test
+  public void pojoCoercions()
+    {
+    ObjectMapper mapper = new ObjectMapper();
+
+    mapper.registerModule( new JavaTimeModule() );
+
+    JSONCoercibleType type = new JSONCoercibleType( mapper );
+
+    Instant instant = Instant.ofEpochSecond( 1525456424, 337000000 );
+
+    JsonNode canonical = type.canonical( instant );
+
+    String coerce = type.coerce( canonical, String.class );
+
+    assertEquals( "1525456424.337000000", coerce );
     }
 
   private void testContainerCoercion( String value, JsonNodeType nodeType, Class resultType )

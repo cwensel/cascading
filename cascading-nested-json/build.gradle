@@ -41,6 +41,7 @@ dependencies {
   provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
 
   testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testCompile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatabindVersion
 }
 
 javadoc {

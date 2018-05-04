@@ -36,6 +36,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -53,6 +54,9 @@ import heretical.pointer.path.json.JSONNestedPointerCompiler;
  * If the parse fails, it will return a {@link com.fasterxml.jackson.databind.node.TextNode} instance wrapping the
  * String value.
  * <p>
+ * Note the default instance (@link {@link #TYPE}), sets the {@link DeserializationFeature#FAIL_ON_READING_DUP_TREE_KEY}
+ * Jackson property.
+ * <p>
  * See the {@link #node(Object)}.
  */
 public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNode>, SerializableType
@@ -66,6 +70,21 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     // prevents json object from being created with duplicate names at the same level
     mapper.setConfig( mapper.getDeserializationConfig()
       .with( DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY ) );
+    }
+
+  /**
+   * Instantiates a new Json coercible type with the given {@link ObjectMapper} instance.
+   * <p>
+   * Use this constructor in order to leverage {@link Module} instances.
+   * <p>
+   * Note the default instance (@link {@link #TYPE}), sets the {@link DeserializationFeature#FAIL_ON_READING_DUP_TREE_KEY}
+   * Jackson property.
+   *
+   * @param mapper the mapper
+   */
+  public JSONCoercibleType( ObjectMapper mapper )
+    {
+    this.mapper = mapper;
     }
 
   @Override
@@ -106,7 +125,7 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     if( Collection.class.isAssignableFrom( from ) || Map.class.isAssignableFrom( from ) )
       return mapper.valueToTree( value );
 
-    throw new CascadingException( "unknown type coercion requested from: " + Util.getTypeName( from ) );
+    return JsonNodeFactory.instance.pojoNode( value );
     }
 
   @Override
