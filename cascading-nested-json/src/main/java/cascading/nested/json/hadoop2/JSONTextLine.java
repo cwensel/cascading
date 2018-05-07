@@ -246,4 +246,10 @@ public class JSONTextLine extends TextLine
     // it's ok to use NULL here so the collector does not write anything
     sinkCall.getOutput().collect( null, text );
     }
+
+  @Override
+  public String getExtension()
+    {
+    return "json";
+    }
   }

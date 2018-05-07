@@ -256,4 +256,10 @@ public class JSONTextLine extends TextLine
       sinkCall.getContext().println( string );
       }
     }
+
+  @Override
+  protected String getBaseFileExtension()
+    {
+    return "json";
+    }
   }
