@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -298,7 +298,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
     FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields(), function.getFieldDeclaration() );
     TupleListCollector collector = new TupleListCollector( resultFields, true );
 
     function.prepare( flowProcess, operationCall );
@@ -421,7 +421,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
     FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields(), aggregator.getFieldDeclaration() );
 
     operationCall.setGroup( group );
 
@@ -477,7 +477,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
     FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
+    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields(), buffer.getFieldDeclaration() );
 
     operationCall.setGroup( group );
 
