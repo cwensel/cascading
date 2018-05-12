@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.o.h.Base64HashFunction, c.o.h.Base64URLHashFunction, and c.o.h.Base10HashFunction functions to provide
+  cryptographic digest based hashing. The default algorithm is SHA-1.
+
   Updated all jars to include the Automatic-Module-Name property.
 
   Added c.t.t.TapWith interface to provide fluent factories for creating new immutable instance of the current
