@@ -43,7 +43,7 @@ public class KafkaTapTest extends CascadingTestCase
     String hostname = kafkaUnitRule.getKafkaUnit().getKafkaConnect();
 
     TextKafkaScheme text = new TextKafkaScheme();
-    KafkaTap<String, String> tap = new KafkaTap<>( text, hostname, "test-group", "my-test-topic" );
+    KafkaTap<String, String> tap = new KafkaTap<>( text, hostname, "test-client", "my-test-topic" );
 
     try( TupleEntryCollector collector = tap.openForWrite( FlowProcess.nullFlowProcess() ) )
       {
@@ -71,6 +71,19 @@ public class KafkaTapTest extends CascadingTestCase
       }
 
     assertEquals( 0, count );
+    }
+
+    tap = new KafkaTap<>( text, hostname, "test-client-2", "/my-test-.*/" );
+
+    {
+    int count = 0;
+    try( TupleEntryIterator iterator = tap.openForRead( FlowProcess.nullFlowProcess() ) )
+      {
+      while( iterator.hasNext() && iterator.next() != null )
+        count++;
+      }
+
+    assertEquals( 99, count );
     }
     }
   }

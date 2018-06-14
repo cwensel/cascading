@@ -32,6 +32,7 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
 import cascading.property.PropertyUtil;
@@ -51,9 +52,11 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.internals.NoOpConsumerRebalanceListener;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -62,12 +65,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class KafkaTap is a Cascading local mode tap providing read and write access to data stored in Apache Kafka queues.
+ * Class KafkaTap is a Cascading local mode Tap providing read and write access to data stored in Apache Kafka topics.
  * <p>
  * This Tap is not intended to be used with any of the other Cascading planners unless they specify they are local mode
  * compatible.
  * <p>
- * Unfortunately the Kafka producer and consumer interfaces are not Input/OutputStream based, subsequently the
+ * The Kafka producer and consumer interfaces are not Input/OutputStream based, subsequently the
  * KafkaTap must be used with a {@link KafkaScheme} sub-class which encapsulates the mechanics of reading/writing
  * from/to a Kafka topic.
  * <p>
@@ -79,6 +82,9 @@ import org.slf4j.LoggerFactory;
  * {@code kafka://[hostname]<:port>/[topic]<,topic>}.
  * <p>
  * Where hostname and at least one topic is required.
+ * <p>
+ * If the first topic is wrapped by slash ({@code /}), e.g. {@code /some-.*-topic/}, the string within the slashes
+ * will be considered a regular-expression. Any subsequent topics will be ignored.
  * <p>
  * Note on read, the KafkaTap will continue to retrieve data until the {@code pollTimeout} is reached, where the
  * default is 10 seconds.
@@ -150,6 +156,8 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
   String hostname;
   /** Field topics */
   String[] topics;
+  /** Field topicIsPattern */
+  boolean isTopicPattern = false;
   /** Field numPartitions */
   int numPartitions = DEFAULT_NUM_PARTITIONS;
   /** Field replicationFactor */
@@ -471,7 +479,7 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     this.numPartitions = numPartitions;
     this.replicationFactor = replicationFactor;
 
-    this.topics = identifier.getQuery().split( "," );
+    applyTopics( identifier.getQuery().split( "," ) );
     }
 
   /**
@@ -681,9 +689,24 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
       this.groupID = groupID;
 
     this.pollTimeout = pollTimeout;
-    this.topics = topics;
     this.numPartitions = numPartitions;
     this.replicationFactor = replicationFactor;
+
+    applyTopics( topics );
+    }
+
+  protected void applyTopics( String[] topics )
+    {
+    if( topics[ 0 ].matches( "^/([^/]|//)*/$" ) )
+      {
+      this.topics = new String[]{topics[ 0 ].substring( 1, topics[ 0 ].length() - 1 )};
+      this.isTopicPattern = true;
+      }
+    else
+      {
+      this.topics = new String[ topics.length ];
+      System.arraycopy( topics, 0, this.topics, 0, topics.length );
+      }
     }
 
   /**
@@ -726,6 +749,16 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     return topics;
     }
 
+  /**
+   * Method isTopicPattern returns true if the topic is a regular expression.
+   *
+   * @return true if the topic is a regular expression.
+   */
+  public boolean isTopicPattern()
+    {
+    return isTopicPattern;
+    }
+
   @Override
   public String getIdentifier()
     {
@@ -752,7 +785,10 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
 
     Consumer<K, V> consumer = new KafkaConsumer<>( PropertyUtil.retain( props, ConsumerConfig.configNames() ) );
 
-    consumer.subscribe( Arrays.asList( getTopics() ) );
+    if( isTopicPattern )
+      consumer.subscribe( Pattern.compile( topics[ 0 ] ), getConsumerRebalanceListener() );
+    else
+      consumer.subscribe( Arrays.asList( getTopics() ), getConsumerRebalanceListener() );
 
     CloseableIterator<Iterator<ConsumerRecord<K, V>>> iterator = new CloseableIterator<Iterator<ConsumerRecord<K, V>>>()
       {
@@ -798,7 +834,7 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
         }
 
       @Override
-      public void close() throws IOException
+      public void close()
         {
         try
           {
@@ -812,6 +848,18 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
       };
 
     return new TupleEntrySchemeIterator<Properties, Iterator<ConsumerRecord<K, V>>>( flowProcess, this, getScheme(), iterator );
+    }
+
+  /**
+   * Returns a {@link NoOpConsumerRebalanceListener} instance.
+   * <p>
+   * Override to supply a customer listener.
+   *
+   * @return a NoOpConsumerRebalanceListener instance.
+   */
+  protected ConsumerRebalanceListener getConsumerRebalanceListener()
+    {
+    return new NoOpConsumerRebalanceListener();
     }
 
   @Override
@@ -838,7 +886,7 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     }
 
   @Override
-  public boolean createResource( Properties conf ) throws IOException
+  public boolean createResource( Properties conf )
     {
     AdminClient client = createAdminClient( conf );
 
@@ -866,7 +914,7 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     }
 
   @Override
-  public boolean deleteResource( Properties conf ) throws IOException
+  public boolean deleteResource( Properties conf )
     {
     AdminClient client = createAdminClient( conf );
 
@@ -889,7 +937,7 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     }
 
   @Override
-  public boolean resourceExists( Properties conf ) throws IOException
+  public boolean resourceExists( Properties conf )
     {
     AdminClient client = createAdminClient( conf );
 
