@@ -785,10 +785,14 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
 
     Consumer<K, V> consumer = new KafkaConsumer<>( PropertyUtil.retain( props, ConsumerConfig.configNames() ) );
 
+    preConsumerSubscribe( consumer );
+
     if( isTopicPattern )
-      consumer.subscribe( Pattern.compile( topics[ 0 ] ), getConsumerRebalanceListener() );
+      consumer.subscribe( Pattern.compile( topics[ 0 ] ), getConsumerRebalanceListener( consumer ) );
     else
-      consumer.subscribe( Arrays.asList( getTopics() ), getConsumerRebalanceListener() );
+      consumer.subscribe( Arrays.asList( getTopics() ), getConsumerRebalanceListener( consumer ) );
+
+    postConsumerSubscribe( consumer );
 
     CloseableIterator<Iterator<ConsumerRecord<K, V>>> iterator = new CloseableIterator<Iterator<ConsumerRecord<K, V>>>()
       {
@@ -851,13 +855,34 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     }
 
   /**
+   * Prepare {@link Consumer} prior to any topic subscription.
+   *
+   * @param consumer the current Consumer
+   */
+  protected void preConsumerSubscribe( Consumer<K, V> consumer )
+    {
+
+    }
+
+  /**
+   * Prepare {@link Consumer} post to any topic subscription and prior to any {@link Consumer#poll(long)} request.
+   *
+   * @param consumer the current Consumer
+   */
+  protected void postConsumerSubscribe( Consumer<K, V> consumer )
+    {
+
+    }
+
+  /**
    * Returns a {@link NoOpConsumerRebalanceListener} instance.
    * <p>
    * Override to supply a customer listener.
    *
+   * @param consumer
    * @return a NoOpConsumerRebalanceListener instance.
    */
-  protected ConsumerRebalanceListener getConsumerRebalanceListener()
+  protected ConsumerRebalanceListener getConsumerRebalanceListener( Consumer<K, V> consumer )
     {
     return new NoOpConsumerRebalanceListener();
     }
