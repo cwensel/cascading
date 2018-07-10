@@ -31,7 +31,7 @@ dependencies {
   provided project( ':cascading-local' )
   provided project( ':cascading-hadoop2-io' )
 
-  compile group: 'io.heretical', name: 'pointer-path-json', version: '1.0.0-wip-11'
+  compile group: 'io.heretical', name: 'pointer-path-json', version: '1.0.0-wip-13'
 
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
 

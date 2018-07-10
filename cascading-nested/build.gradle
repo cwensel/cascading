@@ -22,7 +22,7 @@
 dependencies {
   compile project( ':cascading-core' )
 
-  compile group: 'io.heretical', name: 'pointer-path-core', version: '1.0.0-wip-11'
+  compile group: 'io.heretical', name: 'pointer-path-core', version: '1.0.0-wip-13'
 
   provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
 
