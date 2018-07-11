@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,6 +24,7 @@ package cascading.flow.stream.element;
 import cascading.flow.FlowElement;
 import cascading.flow.FlowProcess;
 import cascading.flow.StepCounters;
+import cascading.flow.stream.StopDataNotificationException;
 import cascading.flow.stream.TrapException;
 import cascading.flow.stream.duct.DuctException;
 import cascading.tap.Tap;
@@ -129,6 +131,9 @@ public class TrapHandler
 
   protected void handleException( String trapName, Tap trap, Throwable throwable, TupleEntry tupleEntry )
     {
+    if( throwable instanceof StopDataNotificationException )
+      throw (StopDataNotificationException) throwable;
+
     Throwable cause = throwable.getCause();
 
     if( cause instanceof OutOfMemoryError )

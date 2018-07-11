@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,12 +30,14 @@ import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
 import cascading.flow.hadoop.HadoopCoGroupClosure;
 import cascading.flow.hadoop.util.TimedIterator;
+import cascading.flow.stream.StopDataNotificationException;
 import cascading.flow.stream.duct.DuctException;
 import cascading.flow.stream.graph.IORole;
 import cascading.flow.tez.TezCoGroupClosure;
 import cascading.pipe.CoGroup;
 import cascading.tuple.Tuple;
 import cascading.tuple.io.TuplePair;
+import cascading.util.LogUtil;
 import cascading.util.SortedListMultiMap;
 import org.apache.tez.runtime.api.LogicalInput;
 import org.apache.tez.runtime.api.LogicalOutput;
@@ -86,7 +89,14 @@ public class TezCoGroupGate extends TezGroupGate
         for( int i = 0; i < timedIterators.length; i++ )
           timedIterators[ i ].reset( currentValues.get( i ) );
 
-        accept( current.getKey(), timedIterators );
+        try
+          {
+          accept( current.getKey(), timedIterators );
+          }
+        catch( StopDataNotificationException exception )
+          {
+          LogUtil.logWarnOnce( LOG, "received unsupported stop data notification, ignoring: {}", exception.getMessage() );
+          }
 
         current = forwardToNext( readers, iterables, currentValues );
         }

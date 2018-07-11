@@ -2,6 +2,12 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.o.f.Stop, a c.o.Filter sub-class, that allows for nesting of other Filter instances, but when the child filter
+  specifies a c.t.Tuple should be removed from the stream, a c.f.s.StopDataNotificationException is thrown.
+
+  Added c.f.s.StopDataNotificationException to support notification by c.o.Operation instances that data should stop
+  being read but read data should continue to be handled downstream. Only works reliably in Cascading local-mode.
+
   Added c.o.h.Base64HashFunction, c.o.h.Base64URLHashFunction, and c.o.h.Base10HashFunction functions to provide
   cryptographic digest based hashing. The default algorithm is SHA-1.
 

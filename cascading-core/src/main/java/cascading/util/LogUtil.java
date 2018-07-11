@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -20,6 +20,9 @@
  */
 
 package cascading.util;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.FlowRuntimeProps;
@@ -106,5 +109,13 @@ public class LogUtil
 
       logger.info( "{} {}.{}={}", message, counter[ 0 ], counter[ 1 ], flowProcess.getCounterValue( counter[ 0 ], counter[ 1 ] ) );
       }
+    }
+
+  static Set<String> cache = new HashSet<>();
+
+  public static void logWarnOnce( Logger log, String message, Object arg )
+    {
+    if( cache.add( log.getName() + message ) )
+      log.warn( message, arg );
     }
   }

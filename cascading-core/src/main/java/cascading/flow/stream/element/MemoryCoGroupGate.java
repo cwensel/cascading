@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -28,17 +28,22 @@ import java.util.Iterator;
 import java.util.Set;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.stream.StopDataNotificationException;
 import cascading.flow.stream.duct.Duct;
 import cascading.pipe.Splice;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class MemoryCoGroupGate extends MemorySpliceGate
   {
+  private static final Logger LOG = LoggerFactory.getLogger( MemoryCoGroupGate.class );
+
   public MemoryCoGroupGate( FlowProcess flowProcess, Splice splice )
     {
     super( flowProcess, splice );
@@ -106,7 +111,15 @@ public class MemoryCoGroupGate extends MemorySpliceGate
 
           collections[ i ] = values;
 
-          push( collections, keysTuple );
+          try
+            {
+            push( collections, keysTuple );
+            }
+          catch( StopDataNotificationException exception )
+            {
+            LOG.info( "received stop data notification: {}", exception.getMessage() );
+            break;
+            }
           }
         }
       else
@@ -120,7 +133,15 @@ public class MemoryCoGroupGate extends MemorySpliceGate
             collections[ i ] = Collections.emptyList();
           }
 
-        push( collections, keysTuple );
+        try
+          {
+          push( collections, keysTuple );
+          }
+        catch( StopDataNotificationException exception )
+          {
+          LOG.info( "received stop data notification: {}", exception.getMessage() );
+          break;
+          }
         }
       }
 

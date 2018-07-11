@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.stream.StopDataNotificationException;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.element.MemorySpliceGate;
 import cascading.pipe.Splice;
@@ -34,12 +35,16 @@ import cascading.tuple.TupleEntry;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class LocalGroupByGate extends MemorySpliceGate
   {
+  private static final Logger LOG = LoggerFactory.getLogger( LocalGroupByGate.class );
+
   private ListMultimap<Tuple, Tuple> valueMap;
 
   public LocalGroupByGate( FlowProcess flowProcess, Splice splice )
@@ -111,7 +116,15 @@ public class LocalGroupByGate extends MemorySpliceGate
 
       tupleEntryIterator.reset( tuples.iterator() );
 
-      next.receive( this, 0, grouping );
+      try
+        {
+        next.receive( this, 0, grouping );
+        }
+      catch( StopDataNotificationException exception )
+        {
+        LOG.info( "received stop data notification: {}", exception.getMessage() );
+        break;
+        }
 
       tuples.clear();
       }

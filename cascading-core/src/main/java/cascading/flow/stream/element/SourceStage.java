@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +27,7 @@ import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
 import cascading.flow.StepCounters;
+import cascading.flow.stream.StopDataNotificationException;
 import cascading.flow.stream.duct.Duct;
 import cascading.flow.stream.duct.DuctException;
 import cascading.tap.Tap;
@@ -111,7 +112,15 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
           continue;
           }
 
-        next.receive( this, 0, tupleEntry );
+        try
+          {
+          next.receive( this, 0, tupleEntry );
+          }
+        catch( StopDataNotificationException exception )
+          {
+          LOG.info( "received stop data notification: {}", exception.getMessage() );
+          break;
+          }
         }
 
       next.complete( this );
