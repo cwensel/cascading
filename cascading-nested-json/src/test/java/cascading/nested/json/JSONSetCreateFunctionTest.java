@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,6 +19,8 @@
  */
 
 package cascading.nested.json;
+
+import java.util.Objects;
 
 import cascading.CascadingTestCase;
 import cascading.tuple.Fields;
@@ -304,5 +306,27 @@ public class JSONSetCreateFunctionTest extends CascadingTestCase
 
     assertNotNull( value );
     assertEquals( "Jane Doe", value.at( "/person/name" ).textValue() );
+    }
+
+  @Test
+  public void testCreatePredicate() throws Exception
+    {
+    TupleEntry entry = new TupleEntry(
+      new Fields( "first", String.class ).append( new Fields( "last", String.class ) ),
+      Tuple.size( 2 )
+    );
+
+    entry.setObject( 0, "John" );
+    entry.setObject( 1, null );
+
+    JSONCreateFunction function = new JSONCreateFunction( new Fields( "result" ), Objects::nonNull );
+
+    TupleListCollector result = invokeFunction( function, entry, new Fields( "result" ) );
+
+    JsonNode node = (JsonNode) result.iterator().next().getObject( 0 );
+
+    assertNotNull( node );
+    assertEquals( "John", node.at( "/first" ).textValue() );
+    assertFalse( node.has( "/last" ) );
     }
   }

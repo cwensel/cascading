@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -33,6 +34,7 @@ import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import cascading.util.Pair;
 import heretical.pointer.path.NestedPointerCompiler;
 import heretical.pointer.path.Pointer;
 
@@ -44,9 +46,9 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
   protected class Context
     {
     public Tuple result;
-    public Map<Fields, Pointer<Node>> pointers;
+    public Map<Fields, Pair<Predicate<?>, Pointer<Node>>> pointers;
 
-    public Context( Map<Fields, Pointer<Node>> pointers, Tuple result )
+    public Context( Map<Fields, Pair<Predicate<?>, Pointer<Node>>> pointers, Tuple result )
       {
       this.result = result;
       this.pointers = pointers;
@@ -54,6 +56,7 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
     }
 
   protected String rootPointer = "";
+  protected Predicate<?> defaultValueFilter = ( v ) -> true;
   protected Map<Fields, Pointer<Node>> pointers = new LinkedHashMap<>();
 
   public NestedBaseFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration )
@@ -61,33 +64,56 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
     this( nestedCoercibleType, fieldDeclaration, Collections.emptyMap() );
     }
 
+  public NestedBaseFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter )
+    {
+    this( nestedCoercibleType, fieldDeclaration, defaultValueFilter, Collections.emptyMap() );
+    }
+
   public NestedBaseFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, String rootPointer )
     {
     this( nestedCoercibleType, fieldDeclaration, Collections.emptyMap() );
-    this.rootPointer = rootPointer;
+
+    if( rootPointer != null )
+      this.rootPointer = rootPointer;
+    }
+
+  public NestedBaseFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, String rootPointer, Predicate<?> defaultValueFilter )
+    {
+    this( nestedCoercibleType, fieldDeclaration, defaultValueFilter, Collections.emptyMap() );
+
+    if( rootPointer != null )
+      this.rootPointer = rootPointer;
     }
 
   public NestedBaseFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, Map<Fields, String> pointerMap )
     {
+    this( nestedCoercibleType, fieldDeclaration, null, pointerMap );
+    }
+
+  public NestedBaseFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
+    {
     super( nestedCoercibleType, fieldDeclaration );
 
-    if( pointerMap == null || pointerMap.isEmpty() )
-      return;
+    if( defaultValueFilter != null )
+      this.defaultValueFilter = defaultValueFilter;
 
-    NestedPointerCompiler<Node, Result> compiler = getNestedPointerCompiler();
+    if( pointerMap != null && !pointerMap.isEmpty() )
+      {
+      NestedPointerCompiler<Node, Result> compiler = getNestedPointerCompiler();
 
-    for( Map.Entry<Fields, String> entry : pointerMap.entrySet() )
-      this.pointers.put( entry.getKey(), compiler.compile( entry.getValue() ) );
+      for( Map.Entry<Fields, String> entry : pointerMap.entrySet() )
+        this.pointers.put( entry.getKey(), compiler.compile( entry.getValue() ) );
+      }
     }
 
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<NestedBaseFunction.Context> operationCall )
     {
-    Map<Fields, Pointer<Node>> resolvedPointers = new LinkedHashMap<>();
+    Map<Fields, Pair<Predicate<?>, Pointer<Node>>> resolvedPointers = new LinkedHashMap<>();
     Fields argumentFields = operationCall.getArgumentFields();
 
     for( Map.Entry<Fields, Pointer<Node>> entry : this.pointers.entrySet() )
-      resolvedPointers.put( argumentFields.select( entry.getKey() ), entry.getValue() );
+      resolvedPointers.put( argumentFields.select( entry.getKey() ), new Pair<>( defaultValueFilter, entry.getValue() ) );
 
     if( resolvedPointers.isEmpty() ) // use resolved argument fields
       {
@@ -97,7 +123,8 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
         {
         Fields argument = iterator.next();
 
-        resolvedPointers.put( argument, compiler.compile( rootPointer + "/" + argument.get( 0 ).toString() ) );
+        Pointer<Node> pointer = compiler.compile( rootPointer + "/" + argument.get( 0 ).toString() );
+        resolvedPointers.put( argument, new Pair<>( defaultValueFilter, pointer ) );
         }
       }
 
@@ -109,17 +136,22 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
     {
     Node node = getNode( functionCall.getArguments() );
 
-    Set<Map.Entry<Fields, Pointer<Node>>> entries = functionCall.getContext().pointers.entrySet();
+    Set<Map.Entry<Fields, Pair<Predicate<?>, Pointer<Node>>>> entries = functionCall.getContext().pointers.entrySet();
 
-    for( Map.Entry<Fields, Pointer<Node>> entry : entries )
+    for( Map.Entry<Fields, Pair<Predicate<?>, Pointer<Node>>> entry : entries )
       {
       Fields key = entry.getKey();
-      Pointer<Node> value = entry.getValue();
+      Predicate<Object> predicate = (Predicate<Object>) entry.getValue().getLhs();
+      Pointer<Node> pointer = entry.getValue().getRhs();
 
       Object argumentValue = functionCall.getArguments().getObject( key );
-      Node result = getLiteralNode( argumentValue );
 
-      value.set( node, result );
+      if( predicate.test( argumentValue ) )
+        {
+        Node result = getLiteralNode( argumentValue );
+
+        pointer.set( node, result );
+        }
       }
 
     functionCall.getContext().result.set( 0, node );
@@ -128,5 +160,4 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
     }
 
   protected abstract Node getNode( TupleEntry arguments );
-
   }
