@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -136,7 +136,7 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       return;
       }
 
-    sourceCall = new ConcreteCall();
+    sourceCall = createSourceCall();
 
     sourceCall.setTap( tap );
     sourceCall.setIncomingEntry( getTupleEntry() );
@@ -150,6 +150,16 @@ public class TupleEntrySchemeIterator<Config, Input> extends TupleEntryIterator
       {
       throw new TupleException( "unable to prepare source for input identifier: " + this.loggableIdentifier.get(), exception );
       }
+    }
+
+  /**
+   * Override to provide custom ConcreteCall implementation to expose Tap level resources to the underlying Scheme.
+   *
+   * @return a new ConcreteCall instance
+   */
+  protected <Context, IO> ConcreteCall<Context, IO> createSourceCall()
+    {
+    return new ConcreteCall<>();
     }
 
   protected FlowProcess<? extends Config> getFlowProcess()

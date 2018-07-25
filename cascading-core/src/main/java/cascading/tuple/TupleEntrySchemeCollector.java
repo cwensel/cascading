@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -107,12 +107,22 @@ public class TupleEntrySchemeCollector<Config, Output> extends TupleEntryCollect
     if( loggableIdentifier != null )
       this.loggableIdentifier = loggableIdentifier; // only used for logging
 
-    this.sinkCall = new ConcreteCall();
+    this.sinkCall = createSinkCall();
     this.sinkCall.setTap( tap );
     this.sinkCall.setOutgoingEntry( this.tupleEntry ); // created in super ctor
 
     if( output != null )
       setOutput( output );
+    }
+
+  /**
+   * Override to provide custom ConcreteCall implementation to expose Tap level resources to the underlying Scheme.
+   *
+   * @return a new ConcreteCall instance
+   */
+  protected <Context, IO> ConcreteCall<Context, IO> createSinkCall()
+    {
+    return new ConcreteCall<>();
     }
 
   protected FlowProcess<? extends Config> getFlowProcess()
