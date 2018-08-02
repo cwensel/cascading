@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2016 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
+* Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+* Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -96,7 +96,7 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
     {
     try
       {
-      collector.add( tupleEntry );
+      timedAdd( StepCounters.Write_Duration, tupleEntry );
       flowProcess.increment( StepCounters.Tuples_Written, 1 );
       flowProcess.increment( SliceCounters.Tuples_Written, 1 );
       }
@@ -114,6 +114,20 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
       }
     }
 
+  protected void timedAdd( StepCounters durationCounter, TupleEntry tupleEntry )
+    {
+    long start = System.currentTimeMillis();
+
+    try
+      {
+      collector.add( tupleEntry );
+      }
+    finally
+      {
+      flowProcess.increment( durationCounter, System.currentTimeMillis() - start );
+      }
+    }
+
   @Override
   public void complete( Duct previous )
     {
@@ -126,7 +140,18 @@ public class SinkStage extends ElementStage<TupleEntry, Void>
     try
       {
       if( collector != null )
-        collector.close();
+        {
+        long start = System.currentTimeMillis();
+
+        try
+          {
+          collector.close(); // may flush underlying system
+          }
+        finally
+          {
+          flowProcess.increment( StepCounters.Write_Duration, System.currentTimeMillis() - start );
+          }
+        }
 
       collector = null;
       }

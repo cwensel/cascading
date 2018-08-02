@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,5 +24,5 @@ package cascading.flow;
 /** Enum StepCounters lists all counters */
 public enum StepCounters
   {
-    Tuples_Read, Tuples_Written, Tuples_Trapped
+    Tuples_Read, Tuples_Written, Tuples_Trapped, Read_Duration, Write_Duration
   }

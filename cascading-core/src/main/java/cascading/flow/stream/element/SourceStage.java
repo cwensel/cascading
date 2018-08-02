@@ -92,7 +92,7 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
 
         try
           {
-          tupleEntry = iterator.next();
+          tupleEntry = timedNext( StepCounters.Read_Duration, iterator );
           flowProcess.increment( StepCounters.Tuples_Read, 1 );
           flowProcess.increment( SliceCounters.Tuples_Read, 1 );
           }
@@ -153,6 +153,20 @@ public class SourceStage extends ElementStage<Void, TupleEntry> implements Calla
       }
 
     return localThrowable;
+    }
+
+  private TupleEntry timedNext( StepCounters durationCounter, TupleEntryIterator iterator )
+    {
+    long start = System.currentTimeMillis();
+
+    try
+      {
+      return iterator.next();
+      }
+    finally
+      {
+      flowProcess.increment( durationCounter, System.currentTimeMillis() - start );
+      }
     }
 
   @Override

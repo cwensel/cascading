@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.f.StepCounters Read_Duration and Write_Duration counters to the Flow metrics.
+
   Added c.o.f.Stop, a c.o.Filter sub-class, that allows for nesting of other Filter instances, but when the child filter
   specifies a c.t.Tuple should be removed from the stream, a c.f.s.StopDataNotificationException is thrown.
 
