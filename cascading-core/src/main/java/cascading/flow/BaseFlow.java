@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -979,8 +979,27 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     finally
       {
-      flowStats.cleanup();
-      stopLock.unlock();
+      try
+        {
+        flowStats.cleanup();
+        }
+      finally
+        {
+        stopLock.unlock();
+
+        if( thread != null )
+          {
+          try
+            {
+            thread.interrupt();
+            thread.join();
+            }
+          catch( InterruptedException exception )
+            {
+            // ignore
+            }
+          }
+        }
       }
     }
 
@@ -1012,14 +1031,7 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
         }
 
       // if in #stop and stopping, lets wait till its done in this thread
-      try
-        {
-        stopLock.lock();
-        }
-      finally
-        {
-        stopLock.unlock();
-        }
+      ifStoppingBlockUntilComplete();
 
       // if multiple threads enter #complete, each will get a copy of the exception, if any
       if( throwable instanceof FlowException )
@@ -1048,6 +1060,21 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       completed = true;
       thread = null;
       throwable = null;
+      }
+    }
+
+  protected void ifStoppingBlockUntilComplete()
+    {
+    if( !stopLock.isLocked() )
+      return;
+
+    try
+      {
+      stopLock.lock();
+      }
+    finally
+      {
+      stopLock.unlock();
       }
     }
 
@@ -1272,6 +1299,8 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       }
     finally
       {
+      ifStoppingBlockUntilComplete();
+
       handleThrowableAndMarkFailed();
 
       if( !stop && !flowStats.isFinished() )
@@ -1335,7 +1364,14 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
 
     for( Future<Throwable> future : futures )
       {
-      throwable = future.get();
+      try
+        {
+        throwable = future.get();
+        }
+      catch( InterruptedException exception )
+        {
+        // we are probably in a stop state, lets cycle through the remaining
+        }
 
       if( throwable != null )
         {

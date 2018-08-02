@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -35,6 +35,7 @@ import java.util.concurrent.Semaphore;
 
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
+import cascading.flow.SliceCounters;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.local.stream.graph.LocalStepStreamGraph;
 import cascading.flow.stream.duct.Duct;
@@ -126,6 +127,7 @@ public class LocalStepRunner implements Callable<Throwable>
     {
     started = true;
     boolean attemptedCleanup = false;
+    long processBeginTime = 0;
 
     try
       {
@@ -160,6 +162,10 @@ public class LocalStepRunner implements Callable<Throwable>
 
         return null;
         }
+
+      processBeginTime = System.currentTimeMillis();
+
+      currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
 
       try
         {
@@ -230,6 +236,11 @@ public class LocalStepRunner implements Callable<Throwable>
         }
       finally
         {
+        long processEndTime = System.currentTimeMillis();
+
+        currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+
         markComplete.release();
         }
 
