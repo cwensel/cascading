@@ -60,6 +60,8 @@ import com.amazonaws.services.s3.transfer.Upload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static cascading.util.Util.isEmpty;
+
 /**
  * Class S3Tap is a Cascading local-mode {@link Tap} providing read and write access to data stored in Amazon S3 buckets.
  * <p>
@@ -709,6 +711,10 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     this.s3Client = s3Client;
     this.checkpointer = checkpointer;
     this.bucketName = bucketName;
+
+    if( isEmpty( this.bucketName ) )
+      throw new IllegalArgumentException( "bucket name may not be null or empty" );
+
     this.key = key;
     this.delimiter = delimiter;
     this.filter = filter;
@@ -821,11 +827,30 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     if( !identifier.getScheme().equalsIgnoreCase( "s3" ) )
       throw new IllegalArgumentException( "identifier does not have s3 scheme" );
 
-    this.bucketName = identifier.getHost();
+    this.bucketName = getBucketNameFor( identifier );
+
+    if( isEmpty( this.bucketName ) )
+      throw new IllegalArgumentException( "bucket name may not be null or empty" + identifier );
+
     this.key = cleanKey( identifier );
 
     if( identifier.getQuery() != null )
       filter = globPredicate( identifier.getQuery() );
+    }
+
+  protected String getBucketNameFor( URI identifier )
+    {
+    String authority = identifier.getAuthority();
+
+    if( isEmpty( authority ) )
+      throw new IllegalArgumentException( "identifier must have an authority: " + identifier );
+
+    int pos = authority.indexOf( '@' );
+
+    if( pos != -1 )
+      return authority.substring( pos + 1 );
+
+    return authority;
     }
 
   private static Predicate<String> globPredicate( String glob )
@@ -903,6 +928,9 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
         standard.withEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration( endpoint, region ) );
       else
         standard.setRegion( region );
+
+      if( Boolean.parseBoolean( properties.getProperty( S3TapProps.S3_PATH_STYLE_ACCESS, "false" ) ) )
+        standard.enablePathStyleAccess();
       }
 
     return standard.build();
@@ -1253,7 +1281,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
 
   protected static String makeStringIdentifier( String bucketName, String keyPrefix )
     {
-    if( Util.isEmpty( keyPrefix ) )
+    if( isEmpty( keyPrefix ) )
       return String.format( "s3://%s/", bucketName );
 
     return String.format( "s3://%s/%s", bucketName, keyPrefix );

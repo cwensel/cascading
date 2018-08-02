@@ -34,11 +34,15 @@ public class S3TapProps extends Props
   public static final String S3_ENDPOINT = "cascading.tap.aws.s3.endpoint";
   /** Field S3_REGION */
   public static final String S3_REGION = "cascading.tap.aws.s3.region";
+  /** Field S3_PATH_STYLE_ACCESS */
+  public static final String S3_PATH_STYLE_ACCESS = "cascading.tap.aws.s3.path_style_access";
 
   /** Field endpoint */
   String endpoint;
   /** Field region */
   String region;
+  /** pathStyleAccess */
+  boolean pathStyleAccess = false;
 
   /**
    * Constructor S3TapProps creates a new S3TapProps instance.
@@ -93,6 +97,32 @@ public class S3TapProps extends Props
     return this;
     }
 
+  /**
+   * Method isPathStyleAccess returns true if the underlying S3 client should use
+   * path style access to the S3 host.
+   *
+   * @return true if path style access should be used
+   */
+  public boolean isPathStyleAccess()
+    {
+    return pathStyleAccess;
+    }
+
+  /**
+   * Method setPathStyleAccess should be called if the underlying S3 client should
+   * use path style access to reach the target S3 host.
+   *
+   * @param pathStyleAccess true if path style access should be used.
+   * @return S3TapProps
+   * @see <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/VirtualHosting.html">Virtual Hosting</a>
+   */
+  public S3TapProps setPathStyleAccess( boolean pathStyleAccess )
+    {
+    this.pathStyleAccess = pathStyleAccess;
+
+    return this;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -101,5 +131,8 @@ public class S3TapProps extends Props
 
     if( region != null )
       properties.setProperty( S3_REGION, region );
+
+    if( pathStyleAccess )
+      properties.setProperty( S3_PATH_STYLE_ACCESS, "true" );
     }
   }

@@ -46,6 +46,8 @@ import org.junit.Test;
  */
 public class S3TapTest extends CascadingTestCase
   {
+  private final String bucketName = "bucket";
+
   @Rule
   public S3Rule s3Rule = new S3Rule( this::getOutputPath );
 
@@ -59,7 +61,7 @@ public class S3TapTest extends CascadingTestCase
 
     for( int i = 0; i < totalItems; i++ )
       {
-      S3Tap output = new S3Tap( textDelimited, s3Rule.get3Client(), "bucket", key + i );
+      S3Tap output = new S3Tap( textDelimited, s3Rule.get3Client(), bucketName, key + i );
 
       try( TupleEntryCollector collector = output.openForWrite( FlowProcess.nullFlowProcess() ) )
         {
@@ -67,7 +69,7 @@ public class S3TapTest extends CascadingTestCase
         }
       }
 
-    S3Tap tap = new S3Tap( textDelimited, s3Rule.get3Client(), "bucket", key );
+    S3Tap tap = new S3Tap( textDelimited, s3Rule.get3Client(), bucketName, key );
     String[] childIdentifiers = tap.getChildIdentifiers( FlowProcess.nullFlowProcess(), Integer.MAX_VALUE, false );
 
     assertEquals( totalItems, childIdentifiers.length );
@@ -89,15 +91,15 @@ public class S3TapTest extends CascadingTestCase
   public void writeReadPartitioned() throws Exception
     {
     String key = "write-read-partitioned/";
-    TextDelimited textDelimited = new TextDelimited( new Fields("char","value").applyTypes( String.class, int.class ) );
+    TextDelimited textDelimited = new TextDelimited( new Fields( "char", "value" ).applyTypes( String.class, int.class ) );
 
     int totalItems = 100;
 
     for( int i = 0; i < totalItems; i++ )
       {
-      Tap output = new S3Tap( textDelimited, s3Rule.get3Client(), "bucket", key + i );
+      Tap output = new S3Tap( textDelimited, s3Rule.get3Client(), bucketName, key + i );
 
-      output = new PartitionTap( output, new DelimitedPartition( new Fields("char"), "/" ) );
+      output = new PartitionTap( output, new DelimitedPartition( new Fields( "char" ), "/" ) );
 
       try( TupleEntryCollector collector = output.openForWrite( FlowProcess.nullFlowProcess() ) )
         {
@@ -105,7 +107,7 @@ public class S3TapTest extends CascadingTestCase
         }
       }
 
-    S3Tap tap = new S3Tap( textDelimited, s3Rule.get3Client(), "bucket", key );
+    S3Tap tap = new S3Tap( textDelimited, s3Rule.get3Client(), bucketName, key );
     String[] childIdentifiers = tap.getChildIdentifiers( FlowProcess.nullFlowProcess(), Integer.MAX_VALUE, false );
 
     assertEquals( totalItems, childIdentifiers.length );
@@ -128,17 +130,18 @@ public class S3TapTest extends CascadingTestCase
     {
     String key = "glob/";
     TextLine textLine = new TextLine( new Fields( "line" ) );
-    TextLine jsonLine = new TextLine( new Fields( "line" ) ){
-    @Override
-    protected String getBaseFileExtension()
+    TextLine jsonLine = new TextLine( new Fields( "line" ) )
       {
-      return "json";
-      }
-    };
+      @Override
+      protected String getBaseFileExtension()
+        {
+        return "json";
+        }
+      };
 
     for( int i = 0; i < 100; i++ )
       {
-      S3Tap output = new S3Tap( ( ( i % 2 ) == 0 ? textLine : jsonLine ), s3Rule.get3Client(), "bucket", key + "foo/bar/" + i );
+      S3Tap output = new S3Tap( ( ( i % 2 ) == 0 ? textLine : jsonLine ), s3Rule.get3Client(), bucketName, key + "foo/bar/" + i );
 
       try( TupleEntryCollector collector = output.openForWrite( FlowProcess.nullFlowProcess() ) )
         {
@@ -146,7 +149,7 @@ public class S3TapTest extends CascadingTestCase
         }
       }
 
-    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), S3Tap.makeURI( "bucket", key, "**/*.txt" ) );
+    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), S3Tap.makeURI( bucketName, key, "**/*.txt" ) );
     String[] childIdentifiers = tap.getChildIdentifiers( FlowProcess.nullFlowProcess(), Integer.MAX_VALUE, true );
 
     assertEquals( 50, childIdentifiers.length );
@@ -197,7 +200,7 @@ public class S3TapTest extends CascadingTestCase
 
     for( int i = 0; i < totalItems; i++ )
       {
-      S3Tap output = new S3Tap( textLine, s3Rule.get3Client(), "bucket", String.format( "%s%04d", key, i ) );
+      S3Tap output = new S3Tap( textLine, s3Rule.get3Client(), bucketName, String.format( "%s%04d", key, i ) );
 
       try( TupleEntryCollector collector = output.openForWrite( FlowProcess.nullFlowProcess() ) )
         {
@@ -207,7 +210,7 @@ public class S3TapTest extends CascadingTestCase
 
     TestS3Checkpoint checkpoint = new TestS3Checkpoint( "write-read-checkpoint/0050.txt" );
 
-    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), checkpoint, "bucket", key );
+    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), checkpoint, bucketName, key );
     String[] childIdentifiers = tap.getChildIdentifiers( FlowProcess.nullFlowProcess(), Integer.MAX_VALUE, false );
 
     assertEquals( 49, childIdentifiers.length );
@@ -236,7 +239,7 @@ public class S3TapTest extends CascadingTestCase
 
     for( int i = 0; i < totalItems; i++ )
       {
-      S3Tap output = new S3Tap( textLine, s3Rule.get3Client(), "bucket", String.format( "%s%04d", key, i ) );
+      S3Tap output = new S3Tap( textLine, s3Rule.get3Client(), bucketName, String.format( "%s%04d", key, i ) );
 
       try( TupleEntryCollector collector = output.openForWrite( FlowProcess.nullFlowProcess() ) )
         {
@@ -247,7 +250,7 @@ public class S3TapTest extends CascadingTestCase
     Path path = Paths.get( getOutputPath() ).resolve( "checkpoints-" + SecureRandom.getInstanceStrong().nextInt() );
 
     {
-    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), new S3FileCheckpointer( path ), "bucket", key );
+    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), new S3FileCheckpointer( path ), bucketName, key );
 
     try( Stream<Tuple> tupleStream = TupleStream.tupleStream( tap, FlowProcess.nullFlowProcess() ) )
       {
@@ -261,7 +264,7 @@ public class S3TapTest extends CascadingTestCase
     }
 
     {
-    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), new S3FileCheckpointer( path ), "bucket", key );
+    S3Tap tap = new S3Tap( textLine, s3Rule.get3Client(), new S3FileCheckpointer( path ), bucketName, key );
 
     try( Stream<Tuple> tupleStream = TupleStream.tupleStream( tap, FlowProcess.nullFlowProcess() ) )
       {
