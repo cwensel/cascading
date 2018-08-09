@@ -110,10 +110,12 @@ public class TapOutputCollector implements OutputCollector, Closeable
 
       int partition = conf.getInt( "mapred.task.partition", conf.getInt( "mapreduce.task.partition", 0 ) );
 
+      long localSequence = sequence == -1 ? 0 : sequence;
+
       if( prefix != null )
-        filename = String.format( filenamePattern, prefix, "/", partition, sequence );
+        filename = String.format( filenamePattern, prefix, "/", partition, localSequence );
       else
-        filename = String.format( filenamePattern, "", "", partition, sequence );
+        filename = String.format( filenamePattern, "", "", partition, localSequence );
       }
 
     LOG.info( "creating path: {}", filename );
