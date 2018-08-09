@@ -1179,7 +1179,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     {
     int partNum = flowProcess.getIntegerProperty( PartitionTap.PART_NUM_PROPERTY, 0 );
 
-    key = key.replace( SEQUENCE_TOKEN, String.format( ".%05d", partNum ) );
+    key = key.replace( SEQUENCE_TOKEN, String.format( "%05d", partNum ) );
 
     if( getScheme() instanceof FileFormat )
       return key + "." + ( (FileFormat) getScheme() ).getExtension();
