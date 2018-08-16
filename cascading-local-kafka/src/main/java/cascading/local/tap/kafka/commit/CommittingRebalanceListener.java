@@ -21,6 +21,7 @@
 package cascading.local.tap.kafka.commit;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import cascading.local.tap.kafka.decorator.ForwardingConsumerRebalanceListener;
@@ -58,16 +59,30 @@ public class CommittingRebalanceListener<K, V> extends ForwardingConsumerRebalan
     {
     super.onPartitionsRevoked( collection );
 
-    commitListener.onRevoke( consumer, currentOffsets );
+    // only commit those revoked and clean up current offsets to prevent them being committed again when
+    // not currently assigned to the consumer
+    Map<TopicPartition, OffsetAndMetadata> revoked = new HashMap<>();
+
+    for( TopicPartition topicPartition : collection )
+      {
+      OffsetAndMetadata removed = currentOffsets.remove( topicPartition );
+
+      if( removed != null )
+        revoked.put( topicPartition, removed );
+      }
+
+    commitListener.onRevoke( consumer, revoked );
 
     try
       {
-      consumer.commitSync( currentOffsets );
+      consumer.commitSync( revoked );
       }
     catch( RuntimeException exception )
       {
-      if( commitListener.onFail( consumer, exception, currentOffsets ) )
+      if( commitListener.onFail( consumer, exception, revoked ) )
         throw exception;
+
+      currentOffsets.putAll( revoked ); // return offsets so we can try later
       }
     }
   }

@@ -51,6 +51,7 @@ import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -788,7 +789,8 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
 
     sourceConfInit( flowProcess, props );
 
-    Consumer<K, V> consumer = createKafkaConsumer( PropertyUtil.retain( props, ConsumerConfig.configNames() ) );
+    Properties consumerProperties = PropertyUtil.retain( props, ConsumerConfig.configNames() );
+    Consumer<K, V> consumer = createKafkaConsumer( consumerProperties );
 
     preConsumerSubscribe( consumer );
 
@@ -803,6 +805,9 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
       {
       boolean completed = false;
       ConsumerRecords<K, V> records;
+      long lastPollStartedMillis = 0;
+      long lastPollCompletedMillis = -1;
+      int lastRecordsCount = 0;
 
       @Override
       public boolean hasNext()
@@ -813,9 +818,11 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
         if( completed )
           return false;
 
-        records = consumer.poll( pollTimeout );
+        pollConsumerForRecords();
 
-        LOG.debug( "kafka records polled: {}", records.count() );
+        lastPollCompletedMillis = System.currentTimeMillis();
+
+        LOG.debug( "kafka records polled: {}", lastRecordsCount );
 
         if( records.isEmpty() )
           {
@@ -824,6 +831,48 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
           }
 
         return records != null;
+        }
+
+      protected void pollConsumerForRecords()
+        {
+        try
+          {
+          lastPollStartedMillis = System.currentTimeMillis();
+          records = consumer.poll( pollTimeout );
+          lastRecordsCount = records.count();
+          }
+        catch( CommitFailedException exception )
+          {
+          if( lastPollCompletedMillis == -1 )
+            {
+            LOG.error( "poll() has never been called", exception );
+            throw exception;
+            }
+
+          int duration = (int) ( lastPollCompletedMillis - lastPollStartedMillis );
+
+          int maxPollInterval = PropertyUtil.getIntProperty( consumerProperties, ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 300000 );
+          int sessionTimeout = PropertyUtil.getIntProperty( consumerProperties, ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 10000 );
+          int heartbeatInterval = PropertyUtil.getIntProperty( consumerProperties, ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 3000 );
+          int maxPollRecords = PropertyUtil.getIntProperty( consumerProperties, ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500 );
+
+          LOG.error( "unable to commit offsets, records received on last poll(): %s, with %s = %s", lastRecordsCount, ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords );
+
+          String message = "unable to commit offsets, duration between poll() calls: %s, greater than %s = %s";
+
+          if( duration > maxPollInterval )
+            LOG.error( message, duration, ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval );
+
+          if( duration > sessionTimeout )
+            LOG.error( message, duration, ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout );
+
+          if( duration > heartbeatInterval )
+            LOG.error( message, duration, ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval );
+
+          LOG.error( "unable to commit offsets", exception );
+
+          throw exception;
+          }
         }
 
       @Override
