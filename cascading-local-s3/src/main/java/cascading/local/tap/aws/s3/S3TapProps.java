@@ -36,6 +36,10 @@ public class S3TapProps extends Props
   public static final String S3_REGION = "cascading.tap.aws.s3.region";
   /** Field S3_PATH_STYLE_ACCESS */
   public static final String S3_PATH_STYLE_ACCESS = "cascading.tap.aws.s3.path_style_access";
+  /** Field S3_PROXY_HOST */
+  public static final String S3_PROXY_HOST = "cascading.tap.aws.s3.proxy.host";
+  /** Field S3_PROXY_PORT */
+  public static final String S3_PROXY_PORT = "cascading.tap.aws.s3.proxy.port";
 
   /** Field endpoint */
   String endpoint;
@@ -43,6 +47,10 @@ public class S3TapProps extends Props
   String region;
   /** pathStyleAccess */
   boolean pathStyleAccess = false;
+  /** Field proxyHost */
+  String proxyHost;
+  /** Field proxyPort */
+  int proxyPort;
 
   /**
    * Constructor S3TapProps creates a new S3TapProps instance.
@@ -123,6 +131,52 @@ public class S3TapProps extends Props
     return this;
     }
 
+  /**
+   * Method getProxyHost returns the optional S3 proxy host of this S3TapProps object.
+   *
+   * @return the S3 proxy host (type String) of this S3TapProps object.
+   */
+  public String getProxyHost()
+    {
+    return proxyHost;
+    }
+
+  /**
+   * Method setProxyHost sets the optional proxy host this S3TapProps object will connect through.
+   *
+   * @param proxyHost the proxy host this S3TapProps object will connect through .
+   * @return S3TapProps
+   */
+  public S3TapProps setProxyHost( String proxyHost )
+    {
+    this.proxyHost = proxyHost;
+
+    return this;
+    }
+
+  /**
+   * Method getProxyPort returns the optional S3 proxy port this S3TapProps object will connect through
+   *
+   * @return the S3 proxy port (type int) this S3TapProps object will connect through.
+   */
+  public int getProxyPort()
+    {
+    return proxyPort;
+    }
+
+  /**
+   * Method setProxyPort sets the optional proxy port this S3TapProps object will connect through.
+   *
+   * @param proxyPort the proxy host this S3TapProps object will connect through .
+   * @return S3TapProps
+   */
+  public S3TapProps setProxyPort( int proxyPort )
+    {
+    this.proxyPort = proxyPort;
+
+    return this;
+    }
+
   @Override
   protected void addPropertiesTo( Properties properties )
     {
@@ -134,5 +188,11 @@ public class S3TapProps extends Props
 
     if( pathStyleAccess )
       properties.setProperty( S3_PATH_STYLE_ACCESS, "true" );
+
+    if( proxyHost != null )
+      properties.setProperty( S3_PROXY_HOST, proxyHost );
+
+    if( proxyPort > 0 )
+      properties.setProperty( S3_PROXY_PORT, String.valueOf( proxyPort ) );
     }
   }

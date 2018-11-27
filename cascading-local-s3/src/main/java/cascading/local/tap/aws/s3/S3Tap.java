@@ -36,6 +36,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
+import cascading.property.PropertyUtil;
 import cascading.scheme.FileFormat;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
@@ -49,6 +50,7 @@ import cascading.tuple.TupleEntrySchemeCollector;
 import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.CloseableIterator;
 import cascading.util.Util;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -924,6 +926,15 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
       {
       String endpoint = properties.getProperty( S3TapProps.S3_ENDPOINT );
       String region = properties.getProperty( S3TapProps.S3_REGION, "us-east-1" );
+
+      if( properties.containsKey( S3TapProps.S3_PROXY_HOST ) )
+        {
+        ClientConfiguration config = new ClientConfiguration()
+          .withProxyHost( properties.getProperty( S3TapProps.S3_PROXY_HOST ) )
+          .withProxyPort( PropertyUtil.getIntProperty( properties, S3TapProps.S3_PROXY_PORT, -1 ) );
+
+        standard.withClientConfiguration( config );
+        }
 
       if( endpoint != null )
         standard.withEndpointConfiguration( new AwsClientBuilder.EndpointConfiguration( endpoint, region ) );
