@@ -32,11 +32,13 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import cascading.flow.FlowProcess;
 import cascading.local.tap.kafka.decorator.ForwardingConsumer;
 import cascading.property.PropertyUtil;
+import cascading.scheme.SourceCall;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.TupleEntryCollector;
@@ -103,6 +105,9 @@ import org.slf4j.LoggerFactory;
  * <li>{@code ProducerConfig.ACKS_CONFIG} is {@code "all }</li>
  * <li>{@code ProducerConfig.RETRIES_CONFIG} is {@code 0 }</li>
  * </ul>
+ * Note, calling @{code close()} on the ConsumerRecord Iterator from the {@link KafkaScheme#source(FlowProcess, SourceCall)}
+ * method will close the Kafka consumer and notify the parent {@link TupleEntrySchemeIterator} to stop providing
+ * new values.
  *
  * @see #CONSUME_AUTO_COMMIT_EARLIEST
  * @see #CONSUME_AUTO_COMMIT_LATEST
@@ -836,7 +841,32 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
 
         try
           {
-          return records.iterator();
+          CloseableIterator<Iterator<ConsumerRecord<K, V>>> parent = this;
+
+          return new CloseableIterator<ConsumerRecord<K, V>>()
+            {
+            Iterator<ConsumerRecord<K, V>> delegate = records.iterator();
+            Supplier<Boolean> hasNext = () -> delegate.hasNext();
+
+            @Override
+            public void close() throws IOException
+              {
+              hasNext = () -> false;
+              parent.close();
+              }
+
+            @Override
+            public boolean hasNext()
+              {
+              return hasNext.get();
+              }
+
+            @Override
+            public ConsumerRecord<K, V> next()
+              {
+              return delegate.next();
+              }
+            };
           }
         finally
           {
