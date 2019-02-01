@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2018-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,10 +22,13 @@ dependencies {
 
   compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
 
-  compile group: 'com.splunk', name: 'splunk', version: splunkVersion
+  compile group: 'io.heretical', name: 'pointer-path-json', version: pointerPathVersion
 
-  compile group: 'com.google.code.gson', name: 'gson', version: '2.4'
-  compile group: 'com.opencsv', name: 'opencsv', version: '4.1'
+  compile 'org.neo4j.driver:neo4j-java-driver:1.7.2'
+  compile (group: 'net.iot-solutions.graphdb', name: 'jcypher', version: '4.1.1') {
+    exclude group: 'org.glassfish.jersey.core', module: 'jersey-client'
+    exclude group: 'org.neo4j'
+  }
 
   compileOnly group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 
@@ -33,9 +36,8 @@ dependencies {
   testRuntime group: 'log4j', name: 'log4j', version: log4jVersion
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+  testCompile group: 'cascading', name: 'cascading-nested-json', version: cascadingVersion
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
 
   testCompile group: 'org.testcontainers', name: 'testcontainers', version: testContainersVersion
-
-  testCompile group: 'commons-cli', name: 'commons-cli', version: '1.2'
 }

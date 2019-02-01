@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2018-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -18,24 +18,31 @@
  * limitations under the License.
  */
 
-configurations.all {
-  resolutionStrategy.cacheDynamicVersionsFor 5, 'minutes'
-}
+package cascading.local.tap.neo4j;
 
-ext.cascadingVersion = '4.0.0-wip-61'
+import java.util.Properties;
 
-ext.pointerPathVersion = '1.0.0-wip-12'
+import cascading.scheme.Scheme;
+import cascading.tuple.Fields;
+import org.neo4j.driver.v1.Session;
 
-ext.awsVersion = '1.11.271'
-ext.awsS3Version = awsVersion
-ext.s3ProxyVersion = '1.6.0'
+/**
+ *
+ */
+public abstract class Neo4jScheme extends Scheme<Properties, Void, Session, Neo4jScheme.Context, Neo4jScheme.Context>
+  {
+  class Context<T>
+    {
+    Neo4jStatement<T> statement;
 
-ext.kafkaVersion = '0.11.0.0'
+    public Context( Neo4jStatement<T> statement )
+      {
+      this.statement = statement;
+      }
+    }
 
-ext.splunkVersion = '1.6.3.0'
-
-ext.junitVersion = '4.12'
-ext.log4jVersion = '1.2.17'
-ext.slf4jVersion = '1.7.5'
-ext.testContainersVersion = '1.10.1'
-
+  public Neo4jScheme( Fields sourceFields, Fields sinkFields )
+    {
+    super( sourceFields, sinkFields );
+    }
+  }

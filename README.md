@@ -41,6 +41,14 @@ See the `cascading-local-splunk` sub-project for details.
 
 For maven coordinates, see: http://conjars.org/cascading/cascading-local-splunk
 
+### Neo4j Tap
+
+An experimental Tap that can write JSON data to Neo4j Database instances. 
+
+See the `cascading-local-neo4j` sub-project for details.
+
+For maven coordinates, see: http://conjars.org/cascading/cascading-local-neo4j
+
 ### S3 Log Parser Example
 
 A trivial example where S3 access logs are both read, parsed, and stored directly into a Kafka queue, and where
