@@ -44,7 +44,8 @@ public class Neo4jTapIntegrationTest extends Neo4jIntegrationTestCase
     {
       "{\"trace_id\":\"e2366267f86db8f4\", \"id\": 1, \"description\":\"Start\", \"tag\":{\"duration\":0, \"earliest_start\":0, \"earliest_finish\":0, \"latest_start\":0, \"latest_finish\":0}}",
       "{\"trace_id\":\"e2366267f86db8f4\", \"parent_id\": 1, \"id\": 2, \"description\":\"Perform needs analysis\", \"tag\":{\"duration\":10}}",
-      "{\"trace_id\":\"e2366267f86db8f4\", \"parent_id\": 1, \"id\": 3, \"description\":\"Perform dependency analysis\", \"annotations\":[{\"timestamp\":1548968531962000,\"value\":\"ws\"},{\"timestamp\":1548968531963000,\"value\":\"wr\"}], \"tag\":{\"duration\":10}}"
+      "{\"trace_id\":\"e2366267f86db8f4\", \"parent_id\": 2, \"id\": 3, \"description\":\"Perform dependency analysis\", \"annotations\":[{\"timestamp\":1548968531962000,\"value\":\"ws\"},{\"timestamp\":1548968531963000,\"value\":\"wr\"}], \"tag\":{\"duration\":10}}",
+      "{\"trace_id\":\"e2366267f86db8f4\", \"parent_id\": 3, \"id\": 4, \"description\":\"More analysis\", \"tag\":{\"role/version\": \"1.1.0\"}}"
     };
 
   @Test
@@ -94,6 +95,6 @@ public class Neo4jTapIntegrationTest extends Neo4jIntegrationTestCase
           .asInt() );
       }
 
-    assertEquals( 3, result.intValue() );
+    assertEquals( 4, result.intValue() );
     }
   }

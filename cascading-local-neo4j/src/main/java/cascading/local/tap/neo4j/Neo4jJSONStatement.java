@@ -170,7 +170,7 @@ public class Neo4jJSONStatement extends Neo4jStatement<JsonNode>
     {
     for( Map.Entry<String, Object> entry : map.entrySet() )
       {
-      String currentKey = clean( entry.getKey() );
+      String currentKey = cleanKey( entry.getKey() );
       Object value = entry.getValue();
 
       String nestedKey = prefix == null ? currentKey : prefix + "." + currentKey;
@@ -182,8 +182,11 @@ public class Neo4jJSONStatement extends Neo4jStatement<JsonNode>
       }
     }
 
-  private String clean( String key )
+  // todo: turn into a strategy owned by the GraphSpec instance
+  protected String cleanKey( String key )
     {
-    return key.replace( ':', '-' ).replace( '-', '_' );
+    return key.replace( ':', '-' )
+      .replace( '-', '_' )
+      .replace( '/', '.' );
     }
   }
