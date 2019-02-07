@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import cascading.CascadingException;
@@ -180,6 +181,25 @@ public class DateType implements CoercibleType<Long>
       {
       throw new CascadingException( "unable to parse value: " + value + " with format: " + dateFormatString );
       }
+    }
+
+  @Override
+  public boolean equals( Object object )
+    {
+    if( this == object )
+      return true;
+    if( !( object instanceof DateType ) )
+      return false;
+    DateType dateType = (DateType) object;
+    return Objects.equals( zone, dateType.zone ) &&
+      Objects.equals( locale, dateType.locale ) &&
+      Objects.equals( dateFormatString, dateType.dateFormatString );
+    }
+
+  @Override
+  public int hashCode()
+    {
+    return Objects.hash( zone, locale, dateFormatString );
     }
 
   @Override
