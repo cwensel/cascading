@@ -30,6 +30,7 @@ allprojects {
   repositories {
     mavenLocal()
     mavenCentral()
+    jcenter()
     maven {url = 'http://conjars.org/repo/'}
     maven {url = 'https://repository.apache.org'}
     maven {url = 'http://splunk.jfrog.io/splunk/ext-releases-local'}
