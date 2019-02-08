@@ -25,9 +25,9 @@ import cascading.flow.FlowProcess;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
-import info.batey.kafka.unit.KafkaUnitRule;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.testcontainers.containers.KafkaContainer;
 
 /**
  *
@@ -35,12 +35,12 @@ import org.junit.Test;
 public class KafkaTapTest extends CascadingTestCase
   {
   @ClassRule
-  public static KafkaUnitRule kafkaUnitRule = new KafkaUnitRule( 6666, 6677, 32 );
+  public static KafkaContainer kafka = new KafkaContainer("5.1.0");
 
   @Test
   public void writeRead() throws Exception
     {
-    String hostname = kafkaUnitRule.getKafkaUnit().getKafkaConnect();
+    String hostname = kafka.getBootstrapServers();
 
     TextKafkaScheme text = new TextKafkaScheme();
     KafkaTap<String, String> tap = new KafkaTap<>( text, hostname, "test-client", "my-test-topic" );

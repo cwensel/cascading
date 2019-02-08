@@ -20,6 +20,7 @@
 
 package cascading.local.tap.kafka.decorator;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -99,15 +100,28 @@ public class ForwardingConsumer<K, V> implements Consumer<K, V>
     }
 
   @Override
+  public void subscribe( Pattern pattern )
+    {
+    consumer.subscribe( pattern );
+    }
+
+  @Override
   public void unsubscribe()
     {
     consumer.unsubscribe();
     }
 
+  @Deprecated
   @Override
   public ConsumerRecords<K, V> poll( long l )
     {
     return consumer.poll( l );
+    }
+
+  @Override
+  public ConsumerRecords<K, V> poll( Duration duration )
+    {
+    return consumer.poll( duration );
     }
 
   @Override
@@ -117,9 +131,21 @@ public class ForwardingConsumer<K, V> implements Consumer<K, V>
     }
 
   @Override
+  public void commitSync( Duration duration )
+    {
+    consumer.commitSync( duration );
+    }
+
+  @Override
   public void commitSync( Map<TopicPartition, OffsetAndMetadata> map )
     {
     consumer.commitSync( map );
+    }
+
+  @Override
+  public void commitSync( Map<TopicPartition, OffsetAndMetadata> map, Duration duration )
+    {
+    consumer.commitSync( map, duration );
     }
 
   @Override
@@ -165,9 +191,21 @@ public class ForwardingConsumer<K, V> implements Consumer<K, V>
     }
 
   @Override
+  public long position( TopicPartition topicPartition, Duration duration )
+    {
+    return consumer.position( topicPartition, duration );
+    }
+
+  @Override
   public OffsetAndMetadata committed( TopicPartition topicPartition )
     {
     return consumer.committed( topicPartition );
+    }
+
+  @Override
+  public OffsetAndMetadata committed( TopicPartition topicPartition, Duration duration )
+    {
+    return consumer.committed( topicPartition, duration );
     }
 
   @Override
@@ -183,9 +221,21 @@ public class ForwardingConsumer<K, V> implements Consumer<K, V>
     }
 
   @Override
+  public List<PartitionInfo> partitionsFor( String string, Duration duration )
+    {
+    return consumer.partitionsFor( string, duration );
+    }
+
+  @Override
   public Map<String, List<PartitionInfo>> listTopics()
     {
     return consumer.listTopics();
+    }
+
+  @Override
+  public Map<String, List<PartitionInfo>> listTopics( Duration duration )
+    {
+    return consumer.listTopics( duration );
     }
 
   @Override
@@ -213,9 +263,21 @@ public class ForwardingConsumer<K, V> implements Consumer<K, V>
     }
 
   @Override
+  public Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes( Map<TopicPartition, Long> map, Duration duration )
+    {
+    return consumer.offsetsForTimes( map, duration );
+    }
+
+  @Override
   public Map<TopicPartition, Long> beginningOffsets( Collection<TopicPartition> collection )
     {
     return consumer.beginningOffsets( collection );
+    }
+
+  @Override
+  public Map<TopicPartition, Long> beginningOffsets( Collection<TopicPartition> collection, Duration duration )
+    {
+    return consumer.beginningOffsets( collection, duration );
     }
 
   @Override
@@ -225,15 +287,28 @@ public class ForwardingConsumer<K, V> implements Consumer<K, V>
     }
 
   @Override
+  public Map<TopicPartition, Long> endOffsets( Collection<TopicPartition> collection, Duration duration )
+    {
+    return consumer.endOffsets( collection, duration );
+    }
+
+  @Override
   public void close()
     {
     consumer.close();
     }
 
+  @Deprecated
   @Override
   public void close( long l, TimeUnit timeUnit )
     {
     consumer.close( l, timeUnit );
+    }
+
+  @Override
+  public void close( Duration duration )
+    {
+    consumer.close( duration );
     }
 
   @Override

@@ -54,10 +54,11 @@ public class SplunkTapIntegrationTest extends SDKTestCase
   public static final int PORT = 8000;
 
   @ClassRule
-  public static GenericContainer splunk = new GenericContainer( "splunk/splunk:7.0.0" )
+  public static GenericContainer splunk = new GenericContainer( "splunk/splunk:7.2.0" )
     .withExposedPorts( PORT )
     .withEnv( "SPLUNK_START_ARGS", "--accept-license" )
-    .withEnv( "SPLUNK_CMD", "edit user admin -password admin -role admin -auth admin:changeme" )
+    .withEnv( "SPLUNK_PASSWORD", "helloworld" )
+    .withEnv( "NO_HEALTHCHECK", "true" )
     .withStartupTimeout( Duration.ofMinutes( 3 ) );
 
   private String indexName;
@@ -72,7 +73,7 @@ public class SplunkTapIntegrationTest extends SDKTestCase
     args.put( "host", splunk.getContainerIpAddress() );
     args.put( "port", splunk.getMappedPort( 8089 ) );
     args.put( "username", "admin" );
-    args.put( "password", "admin" );
+    args.put( "password", "helloworld" );
 
     service = new Service( args );
 

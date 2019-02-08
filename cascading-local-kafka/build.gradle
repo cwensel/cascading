@@ -32,8 +32,13 @@ dependencies {
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
 
-  testCompile 'thirdparty:kafka-unit:0.8-SNAPSHOT' // waiting for fix to be officially published
+//  testCompile 'thirdparty:kafka-unit:0.8-SNAPSHOT' // waiting for fix to be officially published
 
+//  testCompile 'info.batey.kafka:kafka-unit:1.0'
+
+  testCompile group: 'org.testcontainers', name: 'testcontainers', version: testContainersVersion
+  testCompile group: 'org.testcontainers', name: 'kafka', version: testContainersVersion
+  
   testCompile( group: 'org.apache.kafka', name: 'kafka_2.11', version: kafkaVersion ) {
     exclude module: 'slf4j-simple'
     exclude module: 'slf4j-log4j12'
