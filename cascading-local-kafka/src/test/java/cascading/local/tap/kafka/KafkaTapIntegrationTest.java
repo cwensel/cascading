@@ -32,7 +32,7 @@ import org.testcontainers.containers.KafkaContainer;
 /**
  *
  */
-public class KafkaTapTest extends CascadingTestCase
+public class KafkaTapIntegrationTest extends CascadingTestCase
   {
   @ClassRule
   public static KafkaContainer kafka = new KafkaContainer("5.1.0");
