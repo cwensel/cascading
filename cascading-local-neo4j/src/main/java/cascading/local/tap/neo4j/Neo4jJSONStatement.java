@@ -173,7 +173,7 @@ public class Neo4jJSONStatement extends Neo4jStatement<JsonNode>
       String currentKey = cleanKey( entry.getKey() );
       Object value = entry.getValue();
 
-      String nestedKey = prefix == null ? currentKey : prefix + "." + currentKey;
+      String nestedKey = prefix == null ? currentKey : prefix + "_" + currentKey;
 
       if( value instanceof Map )
         nest( result, nestedKey, (Map<String, Object>) value );
@@ -187,6 +187,7 @@ public class Neo4jJSONStatement extends Neo4jStatement<JsonNode>
     {
     return key.replace( ':', '-' )
       .replace( '-', '_' )
-      .replace( '/', '.' );
+      .replace( '/', '_' )
+      .replace( '.', '_' );
     }
   }
