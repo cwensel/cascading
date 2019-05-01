@@ -43,8 +43,10 @@ import org.apache.kafka.common.serialization.StringSerializer;
  * <p>
  * It consumes and produces text/string based keys and values.
  * <p>
- * As a source, it produces four fields: {@link #TOPIC_FIELDS}, {@link #OFFSET_FIELDS}, {@link #KEY_FIELDS}, and
- * {@link #VALUE_FIELDS}.
+ * As a source, it produces four fields: {@link #TOPIC_FIELDS} typed String, {@link #OFFSET_FIELDS} typed long,
+ * {@link #KEY_FIELDS} typed String, and {@link #VALUE_FIELDS} typed String.
+ * <p>
+ * If alternate source fields are given, any type information will be honored.
  * <p>
  * As a sink, the first field encountered will be used as the topic key, and the second field encountered will be
  * used as the value.
@@ -129,10 +131,10 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
       ConsumerRecord<String, String> record = input.next();
       TupleEntry incomingEntry = sourceCall.getIncomingEntry();
 
-      incomingEntry.setString( 0, record.topic() );
-      incomingEntry.setLong( 1, record.offset() );
-      incomingEntry.setString( 2, record.key() );
-      incomingEntry.setString( 3, record.value() );
+      incomingEntry.setObject( 0, record.topic() );
+      incomingEntry.setObject( 1, record.offset() );
+      incomingEntry.setObject( 2, record.key() );
+      incomingEntry.setObject( 3, record.value() );
       }
 
     return input.hasNext();
