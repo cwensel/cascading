@@ -24,7 +24,7 @@ configurations.all {
 
 ext.cascadingVersion = '4.0.0-wip-66'
 
-ext.pointerPathVersion = '1.0.0-wip-12'
+ext.pointerPathVersion = '1.0.0'
 
 ext.awsVersion = '1.11.271'
 ext.awsS3Version = awsVersion
@@ -37,5 +37,5 @@ ext.splunkVersion = '1.6.3.0'
 ext.junitVersion = '4.12'
 ext.log4jVersion = '1.2.17'
 ext.slf4jVersion = '1.7.5'
-ext.testContainersVersion = '1.10.6'
+ext.testContainersVersion = '1.11.2'
 
