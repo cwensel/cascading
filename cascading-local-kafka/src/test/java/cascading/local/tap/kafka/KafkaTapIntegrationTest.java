@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -78,7 +78,7 @@ public class KafkaTapIntegrationTest extends CascadingTestCase
         count++;
       }
 
-    assertEquals( 99, count );
+    assertEquals( 100, count );
     }
 
     {
@@ -102,7 +102,7 @@ public class KafkaTapIntegrationTest extends CascadingTestCase
         count++;
       }
 
-    assertEquals( 99, count );
+    assertEquals( 100, count );
     }
     }
   }

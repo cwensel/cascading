@@ -131,21 +131,21 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
     {
     Iterator<ConsumerRecord<String, String>> input = sourceCall.getInput();
 
-    if( input.hasNext() )
-      {
-      ConsumerRecord<String, String> record = input.next();
-      TupleEntry incomingEntry = sourceCall.getIncomingEntry();
+    if( !input.hasNext() )
+      return false;
 
-      // honor declared type information via #setObject()
-      incomingEntry.setObject( 0, record.topic() );
-      incomingEntry.setObject( 1, record.offset() );
-      incomingEntry.setObject( 2, record.key() );
-      incomingEntry.setObject( 3, record.value() );
-      incomingEntry.setObject( 4, record.timestamp() );
-      incomingEntry.setObject( 5, record.timestampType() );
-      }
+    ConsumerRecord<String, String> record = input.next();
+    TupleEntry incomingEntry = sourceCall.getIncomingEntry();
 
-    return input.hasNext();
+    // honor declared type information via #setObject()
+    incomingEntry.setObject( 0, record.topic() );
+    incomingEntry.setObject( 1, record.offset() );
+    incomingEntry.setObject( 2, record.key() );
+    incomingEntry.setObject( 3, record.value() );
+    incomingEntry.setObject( 4, record.timestamp() );
+    incomingEntry.setObject( 5, record.timestampType() );
+
+    return true;
     }
 
   @Override
