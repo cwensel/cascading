@@ -52,7 +52,8 @@ public class KafkaTapIntegrationTest extends CascadingTestCase
   public void writeReadTyped() throws Exception
     {
     Fields sourceFields = new Fields( "topic", String.class ).append( new Fields( "offset", Long.class ) )
-      .append( new Fields( "key", Integer.class ).append( new Fields( "value", Integer.class ) ) );
+      .append( new Fields( "key", Integer.class ).append( new Fields( "value", Integer.class ) )
+        .append( new Fields( "timestamp", Long.class ) ).append( new Fields( "tsType", String.class ) ) );
 
     handle( new TextKafkaScheme( sourceFields ), tupleEntry -> tupleEntry.getObject( 2 ) instanceof Integer, "my-test-typed" );
     }

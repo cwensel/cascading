@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -43,8 +43,9 @@ import org.apache.kafka.common.serialization.StringSerializer;
  * <p>
  * It consumes and produces text/string based keys and values.
  * <p>
- * As a source, it produces four fields: {@link #TOPIC_FIELDS} typed String, {@link #OFFSET_FIELDS} typed long,
- * {@link #KEY_FIELDS} typed String, and {@link #VALUE_FIELDS} typed String.
+ * As a source, it produces six fields: {@link #TOPIC_FIELDS} typed String, {@link #OFFSET_FIELDS} typed long,
+ * {@link #KEY_FIELDS} typed String, and {@link #VALUE_FIELDS} typed String,
+ * {@link #TIMESTAMP_FIELDS} typed long, {@link #TIMESTAMP_TYPE_FIELDS} typed String
  * <p>
  * If alternate source fields are given, any type information will be honored.
  * <p>
@@ -61,8 +62,12 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
   public static final Fields KEY_FIELDS = new Fields( "key", String.class );
   /** Field VALUE_FIELDS */
   public static final Fields VALUE_FIELDS = new Fields( "value", String.class );
+  /** Field TIMESTAMP_FIELDS */
+  public static final Fields TIMESTAMP_FIELDS = new Fields( "timestamp", long.class );
+  /** Field TIMESTAMP_TYPE_FIELDS */
+  public static final Fields TIMESTAMP_TYPE_FIELDS = new Fields( "timestampType", String.class );
   /** Field DEFAULT_SOURCE_FIELDS */
-  public static final Fields DEFAULT_SOURCE_FIELDS = TOPIC_FIELDS.append( OFFSET_FIELDS ).append( KEY_FIELDS ).append( VALUE_FIELDS );
+  public static final Fields DEFAULT_SOURCE_FIELDS = TOPIC_FIELDS.append( OFFSET_FIELDS ).append( KEY_FIELDS ).append( VALUE_FIELDS ).append( TIMESTAMP_FIELDS ).append( TIMESTAMP_TYPE_FIELDS );
 
   class Context
     {
@@ -91,8 +96,8 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
     {
     super( sourceFields );
 
-    if( sourceFields.size() != 4 )
-      throw new IllegalArgumentException( "wrong number of source fields, requires 4, got: " + sourceFields );
+    if( sourceFields.size() != 6 )
+      throw new IllegalArgumentException( "wrong number of source fields, requires 6, got: " + sourceFields );
     }
 
   @Override
@@ -131,10 +136,13 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
       ConsumerRecord<String, String> record = input.next();
       TupleEntry incomingEntry = sourceCall.getIncomingEntry();
 
+      // honor declared type information via #setObject()
       incomingEntry.setObject( 0, record.topic() );
       incomingEntry.setObject( 1, record.offset() );
       incomingEntry.setObject( 2, record.key() );
       incomingEntry.setObject( 3, record.value() );
+      incomingEntry.setObject( 4, record.timestamp() );
+      incomingEntry.setObject( 5, record.timestampType() );
       }
 
     return input.hasNext();
