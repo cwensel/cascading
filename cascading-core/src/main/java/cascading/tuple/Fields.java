@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -124,6 +125,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   private static final int[] EMPTY_INT = new int[ 0 ];
 
   /**
+   *
    */
   enum Kind
     {
@@ -950,10 +952,10 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
     return pos;
     }
 
-  private final Map<Fields, int[]> getPosCache()
+  private Map<Fields, int[]> getPosCache()
     {
     if( posCache == null )
-      posCache = new HashMap<Fields, int[]>();
+      posCache = new IdentityHashMap<>();
 
     return posCache;
     }
@@ -2049,7 +2051,7 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
   public int hashCode()
     {
     if( hashCode == 0 )
-      hashCode = get() != null ? Arrays.hashCode( get() ) : 0;
+      hashCode = Arrays.hashCode( get() ); // returns zero on null
 
     return hashCode;
     }

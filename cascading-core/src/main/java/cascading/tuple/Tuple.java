@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -100,10 +100,10 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
    */
   public static Tuple size( int size, Comparable value )
     {
-    Tuple result = new Tuple( new ArrayList<Object>( size ) );
+    Tuple result = new Tuple( new ArrayList<>( size ) );
 
     for( int i = 0; i < size; i++ )
-      result.add( value );
+      result.elements.add( value ); // skip modifiable check
 
     return result;
     }
@@ -129,7 +129,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   /** Constructor Tuple creates a new Tuple instance. */
   public Tuple()
     {
-    this( new ArrayList<Object>() );
+    this( new ArrayList<>() );
     }
 
   /**
@@ -140,7 +140,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   @ConstructorProperties({"tuple"})
   public Tuple( Tuple tuple )
     {
-    this( new ArrayList<Object>( tuple.elements ) );
+    this( new ArrayList<>( tuple.elements ) );
     }
 
   /**
@@ -151,7 +151,7 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   @ConstructorProperties({"values"})
   public Tuple( Object... values )
     {
-    this( new ArrayList<Object>( values.length ) );
+    this( new ArrayList<>( values.length ) );
     Collections.addAll( elements, values );
     }
 
@@ -281,10 +281,10 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
     if( pos == null || pos.length == 0 )
       return new Tuple( this );
 
-    Tuple results = new Tuple();
+    Tuple results = new Tuple( new ArrayList<>( pos.length ) );
 
     for( int i : pos )
-      results.add( elements.get( i ) );
+      results.elements.add( elements.get( i ) ); // skip modifiable check
 
     return results;
     }
