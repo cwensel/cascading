@@ -26,7 +26,7 @@ ext.cascadingVersion = '4.0.0-wip-66'
 
 ext.pointerPathVersion = '1.0.0'
 
-ext.awsVersion = '1.11.271'
+ext.awsVersion = '1.11.546'
 ext.awsS3Version = awsVersion
 ext.s3ProxyVersion = '1.6.0'
 
