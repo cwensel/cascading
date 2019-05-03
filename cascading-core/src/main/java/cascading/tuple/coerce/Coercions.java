@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -204,7 +204,12 @@ public final class Coercions
     Coerce<T> coerce = coercionsPrivate.get( type );
 
     if( coerce == null )
+      {
+      if( type instanceof CoercibleType )
+        return (T) ( (CoercibleType) type ).canonical( value );
+
       return (T) OBJECT.coerce( value );
+      }
 
     return coerce.coerce( value );
     }
@@ -216,16 +221,16 @@ public final class Coercions
    * is returned. Note the Type can be itself a CoercibleType, so unnecessary work is prevented.
    *
    * @param currentType the current Type of the value.
-   * @param value       the value to coerce, may be null.
+   * @param canonical   the value to coerce, may be null.
    * @param type        the type to coerce to via any mapped CoercibleType
    * @return the coerced value
    */
-  public static final Object coerce( CoercibleType currentType, Object value, Type type )
+  public static final Object coerce( CoercibleType currentType, Object canonical, Type type )
     {
     if( currentType.equals( type ) )
-      return value;
+      return canonical;
 
-    return currentType.coerce( value, type );
+    return currentType.coerce( canonical, type );
     }
 
   /**

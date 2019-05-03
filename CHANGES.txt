@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Fixed issue where underlying coercion to a c.t.t.CoercibleType from a primitive type was not honored. This resolves
+  issues with c.o.Identity and c.p.a.Coerce not properly coercing custom types.
+
   Updated c.f.Flow stopping logic to allow the #complete method to finish when stopping from a shutdown hook.
 
   Added c.f.StepCounters Read_Duration and Write_Duration counters to the Flow metrics.

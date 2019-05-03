@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import cascading.tuple.coerce.Coercions;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -120,6 +121,24 @@ public class JSONTypeTest
   private void testContainerCoercion( String value, JsonNodeType nodeType, Class resultType )
     {
     JsonNode canonical = JSONCoercibleType.TYPE.canonical( value );
+
+    assertEquals( nodeType, canonical.getNodeType() );
+    assertEquals( value.replaceAll( "\\s", "" ), JSONCoercibleType.TYPE.coerce( canonical, resultType ) );
+    }
+
+  /**
+   * Confirms the coercion helper properly uses the CoercibleType when an primitive coercion is not found
+   */
+  @Test
+  public void stringCoercions()
+    {
+    for( String value : JSONData.objects )
+      testContainerStringCoercion( value, JsonNodeType.OBJECT, String.class );
+    }
+
+  private void testContainerStringCoercion( String value, JsonNodeType nodeType, Class resultType )
+    {
+    JsonNode canonical = (JsonNode) Coercions.coerce( Coercions.STRING, value, JSONCoercibleType.TYPE );
 
     assertEquals( nodeType, canonical.getNodeType() );
     assertEquals( value.replaceAll( "\\s", "" ), JSONCoercibleType.TYPE.coerce( canonical, resultType ) );
