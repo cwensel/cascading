@@ -37,6 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import cascading.tap.Tap;
@@ -1370,6 +1372,70 @@ public class Fields implements Comparable, Iterable<Comparable>, Serializable, C
       }
 
     return new Fields( newFields, newTypes );
+    }
+
+  /**
+   * Method rename will apply the given {@link BiFunction} to each field position and return
+   * a new Fields instance with the new position names and retain the original type information.
+   *
+   * @param function a function to apply to each existing field position.
+   * @return a new Fields instance with the renamed positions
+   */
+  public Fields rename( BiFunction<Comparable, Type, Comparable> function )
+    {
+    if( this.isSubstitution() || this.isUnknown() )
+      throw new TupleException( "cannot rename fields in a substitution or unknown Fields instance: " + this.print() );
+
+    Comparable[] newFields = new Comparable[ this.fields.length ];
+
+    for( int i = 0; i < newFields.length; i++ )
+      newFields[ i ] = function.apply( this.fields[ i ], this.types != null ? this.types[ i ] : null );
+
+    return new Fields( newFields, this.types );
+    }
+
+  /**
+   * Method rename will apply the given {@link Function} to each field position and return
+   * a new Fields instance with the new position names and retain the original type information.
+   *
+   * @param function a function to apply to each existing field position.
+   * @return a new Fields instance with the renamed positions
+   */
+  public Fields rename( Function<Comparable, Comparable> function )
+    {
+    if( this.isSubstitution() || this.isUnknown() )
+      throw new TupleException( "cannot rename fields in a substitution or unknown Fields instance: " + this.print() );
+
+    Comparable[] newFields = new Comparable[ this.fields.length ];
+
+    for( int i = 0; i < newFields.length; i++ )
+      newFields[ i ] = function.apply( this.fields[ i ] );
+
+    return new Fields( newFields, this.types );
+    }
+
+  /**
+   * Method renameString will apply the given {@link Function} to each field position and return
+   * a new Fields instance with the new position names and retain the original type information.
+   * <p>
+   * This method is a convenience over {@link #rename(Function)} where the function would expect a String.
+   * <p>
+   * {@code Fields renamed = fields.renameString( String::toUpperCase ); }
+   *
+   * @param function a function to apply to each existing field position.
+   * @return a new Fields instance with the renamed positions
+   */
+  public Fields renameString( Function<String, Comparable> function )
+    {
+    if( this.isSubstitution() || this.isUnknown() )
+      throw new TupleException( "cannot rename fields in a substitution or unknown Fields instance: " + this.print() );
+
+    Comparable[] newFields = new Comparable[ this.fields.length ];
+
+    for( int i = 0; i < newFields.length; i++ )
+      newFields[ i ] = function.apply( this.fields[ i ].toString() );
+
+    return new Fields( newFields, this.types );
     }
 
   /**

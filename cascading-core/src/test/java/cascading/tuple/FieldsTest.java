@@ -1111,6 +1111,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( "not equal: ", int.class, appended.getType( 1 ) );
     }
 
+  @Test
   public void testMergeWithSelectors()
     {
     Fields f1 = new Fields( "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" );
@@ -1120,6 +1121,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( 20, merged.size() );
     }
 
+  @Test
   public void testMergeWithSelectorsWithTypes()
     {
     Type[] types = new Type[ 10 ];
@@ -1137,6 +1139,7 @@ public class FieldsTest extends CascadingTestCase
     assertEquals( long.class, merged.getTypes()[ 11 ] );
     }
 
+  @Test
   public void testResolveWithTypes()
     {
     Fields selector = new Fields( "ip" );
@@ -1147,6 +1150,7 @@ public class FieldsTest extends CascadingTestCase
     assertTrue( resolved.hasTypes() );
     }
 
+  @Test
   public void testConstructorWithNullComparableInArray()
     {
     try
@@ -1160,6 +1164,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testConstructorWithNullComparable()
     {
     try
@@ -1174,6 +1179,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testConstructorWithNullTypes()
     {
     try
@@ -1187,6 +1193,7 @@ public class FieldsTest extends CascadingTestCase
       }
     }
 
+  @Test
   public void testConstructorWithNullType()
     {
     try
@@ -1199,5 +1206,64 @@ public class FieldsTest extends CascadingTestCase
       {
       //expected
       }
+    }
+
+
+  @Test
+  public void testRenameStringFunction()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+
+    Fields renamed = fields.renameString( String::toUpperCase );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", "A", renamed.get( 0 ) );
+    assertEquals( "not equal: ", "B", renamed.get( 1 ) );
+    assertEquals( "not equal: ", "C", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "D", renamed.get( 3 ) );
+    }
+
+  @Test
+  public void testRenameFunction()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+
+    Fields renamed = fields.rename( n -> n.toString().toUpperCase() );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", "A", renamed.get( 0 ) );
+    assertEquals( "not equal: ", "B", renamed.get( 1 ) );
+    assertEquals( "not equal: ", "C", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "D", renamed.get( 3 ) );
+    }
+
+  @Test
+  public void testRenameBiFunction()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+
+    Fields renamed = fields.rename( (n,t)-> "prefix."+n.toString().toUpperCase() );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", "prefix.A", renamed.get( 0 ) );
+    assertEquals( "not equal: ", "prefix.B", renamed.get( 1 ) );
+    assertEquals( "not equal: ", "prefix.C", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "prefix.D", renamed.get( 3 ) );
+    }
+
+  @Test
+  public void testRenameBiFunctionWithTypes()
+    {
+    Fields fields = new Fields( "a", "b", "c", "d" );
+
+    fields = fields.applyTypes( String.class, String.class, String.class, String.class );
+
+    Fields renamed = fields.rename( (n,t)-> "prefix."+t.getTypeName()+n.toString().toUpperCase() );
+
+    assertEquals( "not equal: ", 4, renamed.size() );
+    assertEquals( "not equal: ", "prefix.java.lang.StringA", renamed.get( 0 ) );
+    assertEquals( "not equal: ", "prefix.java.lang.StringB", renamed.get( 1 ) );
+    assertEquals( "not equal: ", "prefix.java.lang.StringC", renamed.get( 2 ) );
+    assertEquals( "not equal: ", "prefix.java.lang.StringD", renamed.get( 3 ) );
     }
   }
