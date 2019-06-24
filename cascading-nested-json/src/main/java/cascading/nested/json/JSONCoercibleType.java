@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -152,29 +152,39 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     if( nodeType == JsonNodeType.NULL )
       return null;
 
-    if( to == String.class )
+    Class actual;
+
+    if( to instanceof CoercibleType )
+      actual = ( (CoercibleType) to ).getCanonicalType();
+    else
+      actual = (Class) to;
+
+    if( actual == String.class )
       return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) textOrWrite( node );
 
-    if( to == Integer.class || to == Integer.TYPE )
+    if( actual == Integer.class || actual == Integer.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Integer.valueOf( node.intValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( to == Long.class || to == Long.TYPE )
+    if( actual == Long.class || actual == Long.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Long.valueOf( node.longValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( to == Float.class || to == Float.TYPE )
+    if( actual == Float.class || actual == Float.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Float.valueOf( node.floatValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( to == Double.class || to == Double.TYPE )
+    if( actual == Double.class || actual == Double.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Double.valueOf( node.doubleValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( to == Boolean.class || to == Boolean.TYPE )
+    if( actual == Boolean.class || actual == Boolean.TYPE )
       return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( Map.class.isAssignableFrom( (Class<?>) to ) )
-      return (Coerce) convert( value, (Class) to );
+    if( Map.class.isAssignableFrom( (Class<?>) actual ) )
+      return (Coerce) convert( value, actual );
 
-    if( List.class.isAssignableFrom( (Class<?>) to ) )
-      return (Coerce) convert( value, (Class) to );
+    if( List.class.isAssignableFrom( (Class<?>) actual ) )
+      return (Coerce) convert( value, actual );
+
+    if( to instanceof CoercibleType )
+      return (Coerce) ( (CoercibleType) to ).canonical( textOrWrite( node ) );
 
     throw new CascadingException( "unknown type coercion requested, from: " + Util.getTypeName( from ) + " to: " + Util.getTypeName( to ) );
     }
