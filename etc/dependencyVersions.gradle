@@ -22,7 +22,7 @@ configurations.all {
   resolutionStrategy.cacheDynamicVersionsFor 5, 'minutes'
 }
 
-ext.cascadingVersion = '4.0.0-wip-66'
+ext.cascadingVersion = '4.0.0-wip-70'
 
 ext.pointerPathVersion = '1.0.0'
 
