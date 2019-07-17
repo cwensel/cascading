@@ -59,6 +59,6 @@ task integrationTest( type: Test ) {
   }
 }
 
-//check {
-//  dependsOn << platformTest
-//}
+check {
+  dependsOn << integrationTest
+}

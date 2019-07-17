@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+plugins {
+  id "io.spring.bintray" version "0.11.1" apply false
+}
+
 apply from: 'etc/dependencyVersions.gradle'
 apply from: 'etc/version.gradle'
 apply from: "etc/s3Upload.gradle"
@@ -48,8 +52,9 @@ task prepareDist() {
 
 subprojects {
 
-  apply plugin: 'java'
-  apply plugin: 'maven'
+  apply plugin: "io.spring.bintray"
+  apply plugin: 'java-library'
+  apply plugin: 'maven-publish'
   apply from: '../etc/testing.gradle'
 
   sourceCompatibility = 1.8
@@ -62,10 +67,29 @@ subprojects {
   ext.moduleName = name.replaceAll( '-', '.' )
 
   configurations {
-
     testArtifacts {
       extendsFrom testRuntime
     }
+  }
+
+  bintray {
+    bintrayUser = repoUserName
+    bintrayKey = repoPassword
+
+    org = 'superflow'
+    repo =  isFinalRelease ? 'release' : 'wip'
+
+    overrideOnUpload = true
+
+    publication = 'mavenJava'
+
+    licenses = ['Apache-2.0']
+    websiteUrl = 'http://cascading.org/'
+    issueTrackerUrl = 'https://github.com/cwensel/cascading-local/issues'
+    vcsUrl = 'https://github.com/cwensel/cascading-local.git'
+  }
+
+  task bintrayPublishBuild( dependsOn: [bintrayUpload, bintrayPublish]) {
   }
 
   jar {
@@ -78,7 +102,7 @@ subprojects {
   javadoc.dependsOn << prepareDist
 
   javadoc {
-    def copyright = '<i>Copyright &#169; 2017-2018 Chris K Wensel. All Rights Reserved.</i>'
+    def copyright = '<i>Copyright &#169; 2017-2019 Chris K Wensel. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
@@ -155,43 +179,45 @@ subprojects {
     }
   }
 
-  uploadArchives {
+  publishing {
+    publications {
+      mavenJava( MavenPublication ) {
+        artifact sourcesJar
+        artifact javadocJar
 
-    def deployer = repositories.mavenDeployer {
-      configuration = configurations.archives
+        from components.java
 
-      repository( url: repoUrl ) {
-        authentication( userName: repoUserName, password: repoPassword )
-      }
-
-      pom.project {
-        description 'An API for data management, analytics, and machine learning on parallel computing clusters.'
-        inceptionYear '2017'
-        url 'http://cascading.org/'
-        scm {
-          url 'https://github.com/cwensel/cascading-local.git'
-        }
-        licenses {
-          license {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution 'repo'
+        pom {
+          name = 'cascading-local'
+          description = 'An API for data management, analytics, and machine learning on parallel computing clusters.'
+          url = 'http://cascading.org/'
+          inceptionYear = '2017'
+          licenses {
+            license {
+              name = 'The Apache Software License, Version 2.0'
+              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+              distribution = 'repo'
+            }
+          }
+          developers {
+            developer {
+              id = 'cwensel'
+              name = 'Chris K Wensel'
+              email = 'chris@wensel.net'
+            }
+          }
+          scm {
+            url = 'https://github.com/cwensel/cascading-local.git'
           }
         }
       }
-    }
-    // make sure test dependencies come first, so that maven isn't getting
-    // confused, when reading the generated pom
-    [install.repositories.mavenInstaller, deployer]*.pom*.whenConfigured {pom ->
-      def scopeOrder = [test: 1, runtime: 2, provided: 3, compile: 4].withDefault {100}
-      pom.dependencies = pom.dependencies.sort {scopeOrder[ it.scope ]}
     }
   }
 }
 
 task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
 
-  def copyright = '<i>Copyright &#169; 2017 Chris K Wensel. All Rights Reserved.</i>'
+  def copyright = '<i>Copyright &#169; 2017-2019 Chris K Wensel. All Rights Reserved.</i>'
 
   title = "Cascading ${releaseVersion}"
   destinationDir = file( "${distDir}/javadoc/all/" )

@@ -20,7 +20,8 @@
 
 apply from: './etc/properties.gradle'
 
-project.ext.currentCommit = System.properties[ 'build.vcs.number' ];
+ext.currentCommit = System.properties[ 'build.vcs.number' ]
+ext.currentBranch = System.properties[ 'build.vcs.branch' ]
 
 if( !currentCommit )
   {
@@ -43,9 +44,11 @@ ext.minorVersion = versionProperties[ "${rootProject.name}.release.minor" ]
 
 ext.buildNumber = System.getProperty( 'build.number', 'dev' ) // local dev or build server build
 
+ext.isFinalRelease = Boolean.getBoolean( "${rootProject.name}.release.final" ) || currentBranch != null ? !currentBranch.contains('wip-') : false
+
 if( System.properties[ "${rootProject.name}.release.private" ] )
   buildNumber = "priv-${buildNumber}"
-else if( !System.properties[ "${rootProject.name}.release.final" ] )
+else if( !isFinalRelease )
   buildNumber = "wip-${buildNumber}"
 
 ext.releaseVersion = majorVersion
@@ -53,7 +56,7 @@ ext.releaseVersion = majorVersion
 if( minorVersion )
   releaseVersion = "${majorVersion}.${minorVersion}"
 
-if( !System.properties[ "${rootProject.name}.release.final" ] ) // is wip
+if( !isFinalRelease ) // is wip
   releaseVersion = "${releaseVersion}-${buildNumber}"
 
 ext.releaseTag = "${releaseVersion}"
@@ -61,5 +64,5 @@ ext.releaseTag = "${releaseVersion}"
 if( !System.properties[ 'build.number' ] ) // is dev
   releaseTag = "wip-${majorVersion}"
 
-if( !System.properties[ "${rootProject.name}.release.final" ] ) // is wip
+if( !isFinalRelease ) // is wip
   releaseTag = "${majorVersion}-${buildNumber}"

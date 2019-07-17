@@ -38,22 +38,6 @@ shadowJar {
   exclude 'META-INF/LICENSE*'
 }
 
-uploadShadow {
-  def deployer = repositories.mavenDeployer {
-    configuration = configurations.shadow
-
-    repository( url: repoUrl ) {
-      authentication( userName: repoUserName, password: repoPassword )
-    }
-
-    pom.project {
-      inceptionYear '2017'
-      url 'http://www.cascding.org/'
-    }
-  }
-  deployer.pom.whenConfigured {pom -> pom.dependencies = []}
-}
-
 task installShadowArchives( type: Upload ) {
   configuration = configurations[ 'shadedArchives' ]
   def installer = repositories.mavenInstaller {
@@ -69,7 +53,5 @@ task installShadowArchives( type: Upload ) {
 artifacts {
   shadedArchives shadowJar
 }
-
-uploadArchives.dependsOn( uploadShadow )
 
 install.dependsOn( installShadowArchives )
