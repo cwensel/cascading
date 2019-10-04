@@ -30,7 +30,7 @@ ext.awsVersion = '1.11.546'
 ext.awsS3Version = awsVersion
 ext.s3ProxyVersion = '1.6.0'
 
-ext.kafkaVersion = '2.1.0'
+ext.kafkaVersion = '2.1.1'
 
 ext.splunkVersion = '1.6.3.0'
 
