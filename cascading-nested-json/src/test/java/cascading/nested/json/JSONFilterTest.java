@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,6 +23,7 @@ package cascading.nested.json;
 import java.util.regex.Pattern;
 
 import cascading.CascadingTestCase;
+import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -34,17 +35,53 @@ import org.junit.Test;
 public class JSONFilterTest extends CascadingTestCase
   {
   @Test
-  public void testRegexFilter() throws Exception
+  public void testRegexFilter()
     {
     TupleEntry entry = new TupleEntry( new Fields( "json", JSONCoercibleType.TYPE ), Tuple.size( 1 ) );
 
     entry.setObject( 0, JSONData.nested );
 
+    // pattern does not match
     assertTrue( invokeFilter( new JSONRegexFilter( "/person/name", Pattern.compile( "John D Doe" ) ), entry ) );
     assertTrue( invokeFilter( new JSONRegexFilter( "/person/name", Pattern.compile( "^John$" ) ), entry ) );
 
+    // pattern does match
     assertFalse( invokeFilter( new JSONRegexFilter( "/person/name", Pattern.compile( "^John Doe$" ) ), entry ) );
     assertFalse( invokeFilter( new JSONRegexFilter( "/person/name", Pattern.compile( "John Doe" ) ), entry ) );
     assertFalse( invokeFilter( new JSONRegexFilter( "/person/name", Pattern.compile( "John[ ]Doe$" ) ), entry ) );
+    }
+
+  @Test
+  public void testRegexFilterArray()
+    {
+    TupleEntry entry = new TupleEntry( new Fields( "json", JSONCoercibleType.TYPE ), Tuple.size( 1 ) );
+
+    entry.setObject( 0, JSONData.nestedArray );
+
+    // pattern does match
+    assertFalse( invokeFilter( new JSONRegexFilter( "/annotations/*/name", Pattern.compile( "begin" ) ), entry ) );
+    assertFalse( invokeFilter( new JSONRegexFilter( "/annotations/*/name", Pattern.compile( "end" ) ), entry ) );
+    }
+
+  @Test(expected = OperationException.class)
+  public void testRegexFilterArrayException()
+    {
+    TupleEntry entry = new TupleEntry( new Fields( "json", JSONCoercibleType.TYPE ), Tuple.size( 1 ) );
+
+    entry.setObject( 0, JSONData.nestedArray );
+
+    // path does not exist
+    assertFalse( invokeFilter( new JSONRegexFilter( "/annotations/name", Pattern.compile( "begin" ) ), entry ) );
+    }
+
+  @Test
+  public void testRegexFilterArrayNoException()
+    {
+    TupleEntry entry = new TupleEntry( new Fields( "json", JSONCoercibleType.TYPE ), Tuple.size( 1 ) );
+
+    entry.setObject( 0, JSONData.nestedArray );
+
+    // pattern does match
+    assertFalse( invokeFilter( new JSONRegexFilter( "/annotations/name", Pattern.compile( "^$" ), false ), entry ) );
     }
   }

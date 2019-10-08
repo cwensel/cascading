@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -55,7 +55,7 @@ public class JSONRegexFilter extends NestedRegexFilter
   @ConstructorProperties({"pointer", "patterns"})
   public JSONRegexFilter( String pointer, List<Pattern> patterns )
     {
-    super( JSONCoercibleType.TYPE, pointer, patterns );
+    super( JSONCoercibleType.TYPE, pointer, patterns, true );
     }
 
   /**
@@ -81,6 +81,60 @@ public class JSONRegexFilter extends NestedRegexFilter
   @ConstructorProperties({"coercibleType", "pointer", "patterns"})
   public JSONRegexFilter( JSONCoercibleType coercibleType, String pointer, List<Pattern> patterns )
     {
-    super( coercibleType, pointer, patterns );
+    super( coercibleType, pointer, patterns, true );
+    }
+
+  /**
+   * Creates a new JSONRegexFilter instance.
+   *
+   * @param pointer           of String
+   * @param pattern           of Pattern
+   * @param failOnMissingNode of Boolean
+   */
+  @ConstructorProperties({"pointer", "pattern", "failOnMissingNode"})
+  public JSONRegexFilter( String pointer, Pattern pattern, boolean failOnMissingNode )
+    {
+    this( pointer, Collections.singletonList( pattern ), failOnMissingNode );
+    }
+
+  /**
+   * Creates a new JSONRegexFilter instance.
+   *
+   * @param pointer           of String
+   * @param patterns          of List
+   * @param failOnMissingNode of Boolean
+   */
+  @ConstructorProperties({"pointer", "patterns", "failOnMissingNode"})
+  public JSONRegexFilter( String pointer, List<Pattern> patterns, boolean failOnMissingNode )
+    {
+    super( JSONCoercibleType.TYPE, pointer, patterns, failOnMissingNode );
+    }
+
+  /**
+   * Creates a new JSONRegexFilter instance.
+   *
+   * @param coercibleType     of JSONCoercibleType
+   * @param pointer           of String
+   * @param pattern           of Pattern
+   * @param failOnMissingNode of Boolean
+   */
+  @ConstructorProperties({"coercibleType", "pointer", "pattern", "failOnMissingNode"})
+  public JSONRegexFilter( JSONCoercibleType coercibleType, String pointer, Pattern pattern, boolean failOnMissingNode )
+    {
+    this( coercibleType, pointer, Collections.singletonList( pattern ), failOnMissingNode );
+    }
+
+  /**
+   * Creates a new JSONRegexFilter instance.
+   *
+   * @param coercibleType     of JSONCoercibleType
+   * @param pointer           of String
+   * @param patterns          of List
+   * @param failOnMissingNode of Boolean
+   */
+  @ConstructorProperties({"coercibleType", "pointer", "patterns", "failOnMissingNode"})
+  public JSONRegexFilter( JSONCoercibleType coercibleType, String pointer, List<Pattern> patterns, boolean failOnMissingNode )
+    {
+    super( coercibleType, pointer, patterns, failOnMissingNode );
     }
   }

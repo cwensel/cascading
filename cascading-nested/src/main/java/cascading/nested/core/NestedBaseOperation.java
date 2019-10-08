@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -77,5 +77,10 @@ public class NestedBaseOperation<Node, Result, Context> extends BaseOperation<Co
   protected Iterable<Node> iterable( Result node )
     {
     return nestedCoercibleType.getNestedPointerCompiler().iterable( node );
+    }
+
+  protected int size( Result node )
+    {
+    return nestedCoercibleType.getNestedPointerCompiler().size( node );
     }
   }

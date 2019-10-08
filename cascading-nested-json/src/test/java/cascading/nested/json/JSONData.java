@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -86,6 +86,19 @@ public interface JSONData
     "}}" +
     "]" +
     "}";
+
+  String nestedArray = "{\n" +
+    "\"annotations\": [\n" +
+    "{\n" +
+    "\"name\": \"begin\",\n" +
+    "\"value\": 1570476797161000\n" +
+    "},\n" +
+    "{\n" +
+    "\"name\": \"end\",\n" +
+    "\"value\": 1570476797161001\n" +
+    "}\n" +
+    "]\n" +
+    "}\n";
 
   // values w/ no spaces to simplify test
   String[] objects = new String[]{

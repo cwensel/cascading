@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -29,7 +29,10 @@ import cascading.flow.FlowProcess;
 import cascading.operation.Filter;
 import cascading.operation.FilterCall;
 import cascading.operation.OperationCall;
-import heretical.pointer.path.Pointer;
+import cascading.operation.OperationException;
+import heretical.pointer.path.NestedPointer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class NestedRegexFilter is the base class for {@link Filter} implementations that want to filter a tuple stream
@@ -37,20 +40,30 @@ import heretical.pointer.path.Pointer;
  * <p>
  * {@link cascading.tuple.Tuple} instances are retained if any of the {@link Pattern} instances match.
  * <p>
- * Any {@code null} values will be converted to an empty string before being passed to a pattern for matching.
+ * By default a {@code null} value will throw an {@link OperationException} unless {@code failOnMissingNode} is true,
+ * the {@code null} will be converted to an empty string before being passed to a pattern for matching.
+ * <p>
+ * Note that a wildcard or descent pointer can be used which may return multiple elements, each of which will be tested,
+ * and any match will trigger the filter.
+ * <p>
+ * Use the {@link cascading.operation.filter.Not} filter to negate this filter.
  */
 public class NestedRegexFilter<Node, Results> extends NestedBaseOperation<Node, Results, Matcher[]> implements Filter<Matcher[]>
   {
+  private static final Logger LOG = LoggerFactory.getLogger( NestedRegexFilter.class );
+
   private static final String EMPTY = "";
 
-  final Pointer<Node> pointer;
+  final NestedPointer<Node, Results> pointer;
   final List<Pattern> patterns;
+  final boolean failOnMissingNode;
 
-  public NestedRegexFilter( NestedCoercibleType<Node, Results> nestedCoercibleType, String pointer, List<Pattern> patterns )
+  public NestedRegexFilter( NestedCoercibleType<Node, Results> nestedCoercibleType, String pointer, List<Pattern> patterns, boolean failOnMissingNode )
     {
     super( nestedCoercibleType );
-    this.pointer = getNestedPointerCompiler().compile( pointer );
+    this.pointer = getNestedPointerCompiler().nested( pointer );
     this.patterns = new ArrayList<>( patterns );
+    this.failOnMissingNode = failOnMissingNode;
     }
 
   @Override
@@ -68,19 +81,50 @@ public class NestedRegexFilter<Node, Results> extends NestedBaseOperation<Node, 
   public boolean isRemove( FlowProcess flowProcess, FilterCall<Matcher[]> filterCall )
     {
     Node node = (Node) filterCall.getArguments().getObject( 0, getCoercibleType() );
-    Node result = pointer.at( node );
+    Results results = pointer.allAt( node );
 
-    String value = getCoercibleType().coerce( result, String.class );
-
-    if( value == null )
-      value = EMPTY;
-
-    for( Matcher matcher : filterCall.getContext() )
+    if( size( results ) == 0 )
       {
-      matcher.reset( value );
+      if( failOnMissingNode )
+        throw new OperationException( "node missing from json node tree: " + pointer );
 
-      if( matcher.find() )
-        return false;
+      for( Matcher matcher : filterCall.getContext() )
+        {
+        matcher.reset( EMPTY );
+
+        boolean found = matcher.find();
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "pointer: {}, pattern: {}, matches: {}, on empty string, no json node found with ", pointer, matcher.pattern().pattern(), found );
+
+        if( found )
+          return false;
+        }
+
+      return true;
+      }
+
+    Iterable<Node> iterable = iterable( results );
+
+    for( Node result : iterable )
+      {
+      String value = getCoercibleType().coerce( result, String.class );
+
+      if( value == null )
+        value = EMPTY;
+
+      for( Matcher matcher : filterCall.getContext() )
+        {
+        matcher.reset( value );
+
+        boolean found = matcher.find();
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "pointer: {}, pattern: {}, matches: {}, element: {}", pointer, matcher.pattern().pattern(), found, value );
+
+        if( found )
+          return false;
+        }
       }
 
     return true;
