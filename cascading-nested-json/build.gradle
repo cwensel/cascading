@@ -25,23 +25,26 @@ ext.jacksonDatatypeGuavaVersion = jacksonDatabindVersion
 ext.jacksonDataFormatsVersion = jacksonDatabindVersion
 
 dependencies {
-  compile project( ':cascading-core' )
-  compile project( ':cascading-nested' )
+  api project( ':cascading-core' )
+  api project( ':cascading-nested' )
 
-  provided project( ':cascading-local' )
-  provided project( ':cascading-hadoop2-io' )
+  compileOnly project( ':cascading-local' )
 
-  compile group: 'io.heretical', name: 'pointer-path-json', version: '1.0.1'
+  compileOnly project( ':cascading-hadoop2-io' )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
 
-  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  api group: 'io.heretical', name: 'pointer-path-json', version: '1.0.1'
 
-  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-ion', version: jacksonDatabindVersion
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+
+  api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-ion', version: jacksonDatabindVersion
 
   // for serializers
-  provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
 
-  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
-  testCompile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatabindVersion
+  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatabindVersion
 }
 
 javadoc {
@@ -50,5 +53,3 @@ javadoc {
     links << "http://fasterxml.github.io/jackson-databind/javadoc/${jacksonDatabindVersion[ 0..-3 ]}/".toString()
   }
 }
-
-platformTest.enabled = false

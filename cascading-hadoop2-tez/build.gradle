@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -19,6 +19,8 @@
  * limitations under the License.
  */
 
+apply from: '../etc/testingPlatform.gradle'
+
 ext.hadoop2Version = '2.7.3'
 ext.tezVersion = '0.8.2'
 
@@ -26,49 +28,47 @@ if( System.properties[ 'hadoop2tez.release.final' ] )
   tezVersion = System.properties[ 'hadoop2tez.release.final' ]
 
 repositories {
-
   if( tezVersion.contains( 'SNAPSHOT' ) )
     maven {url = 'https://repository.apache.org/content/repositories/snapshots'}
 }
 
 dependencies {
 
-  compile project( ':cascading-core' )
-  compile project( ':cascading-hadoop2-common' )
-  compile project( ':cascading-hadoop2-io' )
-  compile project( ':cascading-hadoop2-tez-stats' )
+  api project( ':cascading-core' )
+  api project( ':cascading-hadoop2-common' )
+  api project( ':cascading-hadoop2-io' )
+  api project( ':cascading-hadoop2-tez-stats' )
 
-  provided group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.1'
+  compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.1'
 
   // forces update of yarn slf4j dependencies
-  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-  provided group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  compileOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
 
-  provided( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
-  provided( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
-  provided( group: 'org.apache.tez', name: 'tez-mapreduce', version: tezVersion )
+  compileOnly( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
+  compileOnly( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
+  compileOnly( group: 'org.apache.tez', name: 'tez-mapreduce', version: tezVersion )
 
-  provided( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
-  provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
-  provided( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop2Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop2Version )
 
-  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
-  testCompile project( path: ':cascading-hadoop2-common', configuration: 'testArtifacts' )
-  testCompile project( path: ':cascading-platform', configuration: 'testArtifacts' )
+  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
+  testImplementation project( path: ':cascading-hadoop2-common', configuration: 'testArtifacts' )
 
-  testCompile( group: 'org.apache.tez', name: 'tez-tests', version: tezVersion, classifier: 'tests' )
-  testCompile( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
-  testCompile( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
-  testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
+  testImplementation( group: 'org.apache.tez', name: 'tez-tests', version: tezVersion, classifier: 'tests' )
+  testImplementation( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
+  testImplementation( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version )
 
   if( hadoop2Version.startsWith( '2.4' ) ) // hadoop 2.4
     {
-    testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history', version: tezVersion )
+    testImplementation( group: 'org.apache.tez', name: 'tez-yarn-timeline-history', version: tezVersion )
     }
   else // hadoop 2.5 +
     {
-    provided( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop2Version )
-    testCompile( group: 'org.apache.tez', name: 'tez-yarn-timeline-history-with-acls', version: tezVersion )
+    compileOnly( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop2Version )
+    testImplementation( group: 'org.apache.tez', name: 'tez-yarn-timeline-history-with-acls', version: tezVersion )
     }
 }
 

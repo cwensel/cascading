@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -43,9 +43,9 @@ import static data.InputData.inputFileLhs;
  *
  */
 @PlatformRunner.Platform({Hadoop2MR1Platform.class})
-public class HadoopAdapterTapTest extends PlatformTestCase
+public class HadoopAdapterTapPlatformTest extends PlatformTestCase
   {
-  public HadoopAdapterTapTest()
+  public HadoopAdapterTapPlatformTest()
     {
     super( true, 5, 3 ); // leave cluster testing enabled
     }

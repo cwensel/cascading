@@ -35,8 +35,7 @@ import java.text.SimpleDateFormat
 */
 
 plugins {
-  id 'nebula.provided-base' version '3.0.3' // if you want provided-base
-  id "net.ltgt.errorprone" version "0.0.13"
+  id "io.spring.bintray" version "0.11.1" apply false
 }
 
 apply from: 'etc/version.gradle'
@@ -46,13 +45,12 @@ allprojects {
 
   apply plugin: 'idea'
   apply plugin: 'eclipse'
-  apply plugin: 'nebula.provided-base'
 
   repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven {url = 'http://conjars.org/repo/'}
+    maven {url = 'https://repo.superflow.io/'}
     maven {url = 'https://repository.apache.org'}
   }
 }
@@ -67,8 +65,9 @@ ext.copyright = '<i>Copyright &#169; 2007-2017 Cascading Maintainers. All Rights
 
 subprojects {
 
-  apply plugin: 'java'
-  apply plugin: 'maven'
+  apply plugin: "io.spring.bintray"
+  apply plugin: 'java-library'
+  apply plugin: 'maven-publish'
   apply from: '../etc/testing.gradle'
 
   sourceCompatibility = 1.8
@@ -81,10 +80,29 @@ subprojects {
   ext.moduleName = name.replaceAll( '-', '.' )
 
   configurations {
-
     testArtifacts {
-      extendsFrom testRuntime
+      extendsFrom testRuntimeClasspath
     }
+  }
+
+  bintray {
+    bintrayUser = repoUserName
+    bintrayKey = repoPassword
+
+    org = 'superflow'
+    repo =  isFinalRelease ? 'release' : 'wip'
+
+    overrideOnUpload = true
+
+    publication = 'maven'
+
+    licenses = ['Apache-2.0']
+    websiteUrl = 'http://cascading.org/'
+    issueTrackerUrl = 'https://github.com/Cascading/cascading/issues'
+    vcsUrl = 'https://github.com/Cascading/cascading.git'
+  }
+
+  task bintrayPublishBuild( dependsOn: [bintrayUpload, bintrayPublish]) {
   }
 
   jar {
@@ -127,22 +145,22 @@ subprojects {
 
   task sourcesJar( type: Jar, dependsOn: classes ) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
   }
 
   task javadocJar( type: Jar, dependsOn: javadoc ) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+    from javadoc
+    archiveClassifier = 'javadoc'
   }
 
   task testsJar( type: Jar, dependsOn: testClasses ) {
     from sourceSets.test.output
-    classifier = 'tests'
+    archiveClassifier = 'tests'
   }
 
   task testSourcesJar( type: Jar, dependsOn: classes ) {
     from sourceSets.test.allSource
-    classifier = 'test-sources'
+    archiveClassifier = 'test-sources'
   }
 
   artifacts {
@@ -156,12 +174,7 @@ subprojects {
   }
 
   dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-  }
-
-  test {
-    include '**/*Test.class'
-    ignoreFailures = !System.getProperty( 'test.haltonerror', "true" ).equals( "true" )
+    testImplementation group: 'junit', name: 'junit', version: '4.11'
   }
 
   assemble.dependsOn << prepareDist
@@ -186,36 +199,33 @@ subprojects {
     }
   }
 
-  uploadArchives {
+  publishing {
+    publications {
+      maven( MavenPublication ) {
+        artifact sourcesJar
+        artifact javadocJar
+        artifact testsJar
+        artifact testSourcesJar
 
-    def deployer = repositories.mavenDeployer {
-      configuration = configurations.archives
+        from components.java
 
-      repository( url: repoUrl ) {
-        authentication( userName: repoUserName, password: repoPassword )
-      }
-
-      pom.project {
-        description 'An API for data management, analytics, and machine learning on parallel computing clusters.'
-        inceptionYear '2007'
-        url 'http://cascading.org/'
-        scm {
-          url 'https://github.com/Cascading/cascading.git'
-        }
-        licenses {
-          license {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution 'repo'
+        pom {
+          name = 'cascading'
+          description = 'An API for data management, analytics, and machine learning on parallel computing clusters.'
+          url = 'http://cascading.org/'
+          inceptionYear = '2017'
+          licenses {
+            license {
+              name = 'The Apache Software License, Version 2.0'
+              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+              distribution = 'repo'
+            }
+          }
+          scm {
+            url = 'https://github.com/Cascading/cascading.git'
           }
         }
       }
-    }
-    // make sure test dependencies come first, so that maven isn't getting
-    // confused, when reading the generated pom
-    [install.repositories.mavenInstaller, deployer]*.pom*.whenConfigured {pom ->
-      def scopeOrder = [test: 1, runtime: 2, provided: 3, compile: 4].withDefault {100}
-      pom.dependencies = pom.dependencies.sort {scopeOrder[ it.scope ]}
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,28 +21,37 @@
 
 dependencies {
 
-  compile project( ':cascading-core' )
-  compile project( ':cascading-expression' )
-  compile project( ':cascading-nested-json' )
+  testImplementation project( ':cascading-core' )
+  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation project( ':cascading-expression' )
+  testImplementation project( ':cascading-nested-json' )
 
-  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-  testCompile group: 'commons-io', name: 'commons-io', version: '2.1'
-
-  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  testImplementation group: 'commons-io', name: 'commons-io', version: '2.1'
 
   testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
   testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
-test {
+task platformCompareTest( type: Test ) {
+  useJUnit()
+  maxHeapSize '1000m'
 
-  includes.clear()
+  filter {
+    includeTestsMatching "ComparePlatformsTest"
+  }
 
-  include '**/ComparePlatformsTest.class'
+  systemProperties = setTestingProperties()
 
   doFirst() {
     systemProperties[ 'test.output.roots' ] = rootProject.ext.testRoots.join( "," )
   }
+}
+
+platformCompareTest.shouldRunAfter test
+
+check {
+  dependsOn << platformCompareTest
 }
 
 javadoc {
@@ -59,5 +68,3 @@ javadoc {
 
   classpath = files( project.sourceSets.test.compileClasspath )
 }
-
-platformTest.enabled = false

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,37 +35,15 @@ project.ext.setTestingProperties = {
 }
 
 test {
+  useJUnit()
   maxHeapSize '1000m'
 
-  systemProperties = setTestingProperties()
-}
-
-task platformTest( type: Test ) {
-
-  if( System.properties[ 'platformTest.single' ] ) // test a single class from the command line
-    include "**/${System.properties[ 'platformTest.single' ]}.class"
-  else
-    include '**/*PlatformTest.class'
-
-  ignoreFailures = !System.getProperty( 'test.haltonerror', "true" ).equals( "true" )
+  filter {
+    includeTestsMatching "*Test"
+    excludeTestsMatching "*PlatformTest"
+    excludeTestsMatching "*PlatformsTest"
+    failOnNoMatchingTests = false
+  }
 
   systemProperties = setTestingProperties()
-
-  maxHeapSize '1000m'
-
-  doFirst() {
-    rootProject.ext.testRoots << systemProperties[ 'test.output.root' ]
-
-    setTestClassesDir( file( project( ':cascading-platform' ).sourceSets.test.output.classesDir ) )
-  }
-}
-
-project( ':cascading-platform' ) {
-  test {
-    dependsOn << platformTest
-  }
-}
-
-check {
-  dependsOn << platformTest
 }

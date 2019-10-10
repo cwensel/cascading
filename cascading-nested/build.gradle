@@ -20,13 +20,11 @@
 
 
 dependencies {
-  compile project( ':cascading-core' )
+  api project( ':cascading-core' )
 
-  compile group: 'io.heretical', name: 'pointer-path-core', version: '1.0.1'
+  api group: 'io.heretical', name: 'pointer-path-core', version: '1.0.1'
 
-  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
 
-  testCompile project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
 }
-
-platformTest.enabled = false

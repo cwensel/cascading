@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -20,14 +20,14 @@
  */
 
 dependencies {
-  compile group: 'org.jgrapht', name: 'jgrapht-core', version: '1.1.0'
-  compile group: 'riffle', name: 'riffle', version: '1.0.0'
+  implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.1.0'
+  api group: 'riffle', name: 'riffle', version: '1.0.0'
 
   // this prevents a transitive dependency until it is required downstream
-  provided group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
-  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
-  testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+  testRuntimeOnly group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
 jar.doFirst {
@@ -43,8 +43,6 @@ jar {
       from "${buildDir}/build.number.properties"
   }
 }
-
-platformTest.enabled = false
 
 javadoc {
 
