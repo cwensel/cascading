@@ -35,6 +35,11 @@ public abstract class Neo4jIntegrationTestCase
   {
   private static final Logger LOG = LoggerFactory.getLogger( Neo4jIntegrationTestCase.class );
 
+//  static
+//    {
+//    LogUtil.setLog4jLevel( Neo4jStatement.class.getName(), "debug" );
+//    }
+
   public static final int PORTAL_PORT = 7474;
   public static final int BOLT_PORT = 7687;
 
