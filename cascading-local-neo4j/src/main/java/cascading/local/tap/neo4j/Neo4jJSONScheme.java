@@ -80,7 +80,6 @@ public class Neo4jJSONScheme extends Neo4jScheme
   @Override
   public void sinkPrepare( FlowProcess<? extends Properties> flowProcess, SinkCall<Context, Session> sinkCall ) throws IOException
     {
-
     sinkCall.setContext( new Context<>( new Neo4jJSONStatement( graphSpec ) ) );
     }
 

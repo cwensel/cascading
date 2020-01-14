@@ -22,6 +22,7 @@ package cascading.local.tap.neo4j;
 
 import java.util.Map;
 
+import cascading.util.LogUtil;
 import iot.jcypher.database.util.QParamsUtil;
 import iot.jcypher.query.JcQuery;
 import iot.jcypher.query.writer.CypherWriter;
@@ -35,11 +36,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Base class for Neo4j query generation.
  */
 public abstract class Neo4jStatement<T>
   {
   private static final Logger LOG = LoggerFactory.getLogger( Neo4jStatement.class );
+
+  /**
+   * Method enableDebugLogging enables logging of the generated cypher query to the DEBUG log.
+   */
+  public static void enableDebugLogging()
+    {
+    LogUtil.setLog4jLevel( Neo4jStatement.class.getName(), "debug" );
+    }
 
   public abstract JcQuery getStatement( T node );
 

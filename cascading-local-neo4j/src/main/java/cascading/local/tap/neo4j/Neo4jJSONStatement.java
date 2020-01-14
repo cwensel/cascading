@@ -53,8 +53,8 @@ public class Neo4jJSONStatement extends Neo4jStatement<JsonNode>
   {
   private static final Logger LOG = LoggerFactory.getLogger( Neo4jJSONStatement.class );
 
-  JSONGraphSpec graphSpec;
   private ObjectMapper objectMapper = new ObjectMapper();
+  protected JSONGraphSpec graphSpec;
 
   public Neo4jJSONStatement( JSONGraphSpec graphSpec )
     {
