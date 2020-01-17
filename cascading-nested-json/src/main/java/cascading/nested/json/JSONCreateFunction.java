@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,9 +23,9 @@ package cascading.nested.json;
 import java.beans.ConstructorProperties;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import cascading.nested.core.NestedCreateFunction;
+import cascading.operation.SerPredicate;
 import cascading.tuple.Fields;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class JSONCreateFunction provides for the ability to simply set multiple tuple values onto a new JSON object.
  * <p>
- * If a {@link Predicate} is supplied, it will be tested on the current value, if {@code true}, the value
+ * If a {@link SerPredicate} is supplied, it will be tested on the current value, if {@code true}, the value
  * will be set on the final JSON object. This is useful for prevent null values from being set, artificially
  * increasing the size of the final object.
  *
@@ -163,7 +163,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param defaultValueFilter of Predicate
    */
   @ConstructorProperties({"fieldDeclaration", "defaultValueFilter"})
-  public JSONCreateFunction( Fields fieldDeclaration, Predicate<?> defaultValueFilter )
+  public JSONCreateFunction( Fields fieldDeclaration, SerPredicate<?> defaultValueFilter )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, defaultValueFilter );
     }
@@ -180,7 +180,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param defaultValueFilter of Predicate
    */
   @ConstructorProperties({"fieldDeclaration", "rootPointer", "defaultValueFilter"})
-  public JSONCreateFunction( Fields fieldDeclaration, String rootPointer, Predicate<?> defaultValueFilter )
+  public JSONCreateFunction( Fields fieldDeclaration, String rootPointer, SerPredicate<?> defaultValueFilter )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, rootPointer, defaultValueFilter );
     }
@@ -194,7 +194,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param defaultValueFilter of Predicate
    */
   @ConstructorProperties({"coercibleType", "fieldDeclaration", "defaultValueFilter"})
-  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter )
+  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, SerPredicate<?> defaultValueFilter )
     {
     super( coercibleType, fieldDeclaration, defaultValueFilter );
     }
@@ -212,7 +212,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param defaultValueFilter of Predicate
    */
   @ConstructorProperties({"coercibleType", "fieldDeclaration", "rootPointer", "defaultValueFilter"})
-  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, String rootPointer, Predicate<?> defaultValueFilter )
+  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, String rootPointer, SerPredicate<?> defaultValueFilter )
     {
     super( coercibleType, fieldDeclaration, rootPointer, defaultValueFilter );
     }
@@ -227,7 +227,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param stringPointer      of String
    */
   @ConstructorProperties({"fieldDeclaration", "defaultValueFilter", "fromFields", "stringPointer"})
-  public JSONCreateFunction( Fields fieldDeclaration, Predicate<?> defaultValueFilter, Fields fromFields, String stringPointer )
+  public JSONCreateFunction( Fields fieldDeclaration, SerPredicate<?> defaultValueFilter, Fields fromFields, String stringPointer )
     {
     this( fieldDeclaration, defaultValueFilter, Collections.singletonMap( fromFields, stringPointer ) );
     }
@@ -241,7 +241,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param pointerMap         of Map
    */
   @ConstructorProperties({"fieldDeclaration", "defaultValueFilter", "pointerMap"})
-  public JSONCreateFunction( Fields fieldDeclaration, Predicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
+  public JSONCreateFunction( Fields fieldDeclaration, SerPredicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
     {
     super( JSONCoercibleType.TYPE, fieldDeclaration, defaultValueFilter, pointerMap );
     }
@@ -257,7 +257,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param stringPointer      of String
    */
   @ConstructorProperties({"coercibleType", "fieldDeclaration", "defaultValueFilter", "fromFields", "stringPointer"})
-  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter, Fields fromFields, String stringPointer )
+  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, SerPredicate<?> defaultValueFilter, Fields fromFields, String stringPointer )
     {
     this( coercibleType, fieldDeclaration, defaultValueFilter, Collections.singletonMap( fromFields, stringPointer ) );
     }
@@ -272,7 +272,7 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
    * @param pointerMap         of Map
    */
   @ConstructorProperties({"coercibleType", "fieldDeclaration", "defaultValueFilter", "pointerMap"})
-  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
+  public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, SerPredicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
     {
     super( coercibleType, fieldDeclaration, defaultValueFilter, pointerMap );
     }

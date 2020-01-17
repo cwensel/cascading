@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,9 +21,9 @@
 package cascading.nested.core;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 import cascading.operation.Function;
+import cascading.operation.SerPredicate;
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
 
@@ -58,17 +58,17 @@ public abstract class NestedCreateFunction<Node, Result> extends NestedBaseFunct
     super( nestedCoercibleType, fieldDeclaration, pointerMap );
     }
 
-  public NestedCreateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter )
+  public NestedCreateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, SerPredicate<?> defaultValueFilter )
     {
     super( nestedCoercibleType, fieldDeclaration, defaultValueFilter );
     }
 
-  public NestedCreateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, String rootPointer, Predicate<?> defaultValueFilter )
+  public NestedCreateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration, String rootPointer, SerPredicate<?> defaultValueFilter )
     {
     super( nestedCoercibleType, fieldDeclaration, rootPointer, defaultValueFilter );
     }
 
-  public NestedCreateFunction( NestedCoercibleType nestedCoercibleType, Fields fieldDeclaration, Predicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
+  public NestedCreateFunction( NestedCoercibleType nestedCoercibleType, Fields fieldDeclaration, SerPredicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
     {
     super( nestedCoercibleType, fieldDeclaration, defaultValueFilter, pointerMap );
     }
