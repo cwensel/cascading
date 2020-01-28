@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2020 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -48,6 +48,9 @@ public class JSONTypeTest
     testCoercion( "Foo", JsonNodeType.STRING, "Foo", String.class );
     testCoercion( "100", JsonNodeType.NUMBER, 100, Integer.class );
     testCoercion( 100, JsonNodeType.NUMBER, 100, Integer.class );
+
+    // verify support for JsonNode sub-classes
+    testCoercion( "Foo", JsonNodeType.STRING, JSONCoercibleType.TYPE.canonical( "Foo" ), JsonNode.class );
     }
 
   private void testCoercion( Object value, JsonNodeType nodeType, Object resultValue, Class resultType )

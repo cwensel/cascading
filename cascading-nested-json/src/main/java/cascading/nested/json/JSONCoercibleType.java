@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2020 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -158,6 +158,10 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       actual = ( (CoercibleType) to ).getCanonicalType();
     else
       actual = (Class) to;
+
+    // support sub-classes of JsonNode
+    if( actual.isAssignableFrom( JsonNode.class ) )
+      return (Coerce) node;
 
     if( actual == String.class )
       return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) textOrWrite( node );
