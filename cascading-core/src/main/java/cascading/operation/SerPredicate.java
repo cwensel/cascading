@@ -38,4 +38,21 @@ public interface SerPredicate<T> extends Predicate<T>, Serializable
       ? Objects::isNull
       : targetRef::equals;
     }
+
+  default SerPredicate<T> and( SerPredicate<? super T> other )
+    {
+    Objects.requireNonNull( other );
+    return ( t ) -> test( t ) && other.test( t );
+    }
+
+  default SerPredicate<T> negate()
+    {
+    return ( t ) -> !test( t );
+    }
+
+  default SerPredicate<T> or( SerPredicate<? super T> other )
+    {
+    Objects.requireNonNull( other );
+    return ( t ) -> test( t ) || other.test( t );
+    }
   }

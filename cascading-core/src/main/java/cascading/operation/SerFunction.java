@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -21,6 +21,7 @@
 package cascading.operation;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -35,5 +36,17 @@ public interface SerFunction<T, R> extends Function<T, R>, Serializable
   static <T> SerFunction<T, T> identity()
     {
     return t -> t;
+    }
+
+  default <V> SerFunction<V, R> compose( SerFunction<? super V, ? extends T> before )
+    {
+    Objects.requireNonNull( before );
+    return ( V v ) -> apply( before.apply( v ) );
+    }
+
+  default <V> SerFunction<T, V> andThen( SerFunction<? super R, ? extends V> after )
+    {
+    Objects.requireNonNull( after );
+    return ( T t ) -> after.apply( apply( t ) );
     }
   }
