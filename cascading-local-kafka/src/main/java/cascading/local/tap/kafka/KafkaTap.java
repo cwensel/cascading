@@ -114,7 +114,7 @@ import org.slf4j.LoggerFactory;
  * @see #PRODUCE_ACK_ALL_NO_RETRY
  * @see PropertyUtil#merge(Properties...) for conveniently merging Property instances
  */
-public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V>>, Producer<K, V>>
+public class KafkaTap<K, V> extends Tap<Properties, KafkaConsumerRecordIterator<K, V>, Producer<K, V>>
   {
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( KafkaTap.class );
@@ -776,7 +776,7 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
     }
 
   @Override
-  public TupleEntryIterator openForRead( FlowProcess<? extends Properties> flowProcess, Iterator<ConsumerRecord<K, V>> consumerRecord ) throws IOException
+  public TupleEntryIterator openForRead( FlowProcess<? extends Properties> flowProcess, KafkaConsumerRecordIterator<K, V> consumerRecord ) throws IOException
     {
     Properties props = PropertyUtil.merge( flowProcess.getConfig(), defaultProperties );
 
@@ -843,10 +843,16 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
           {
           CloseableIterator<Iterator<ConsumerRecord<K, V>>> parent = this;
 
-          return new CloseableIterator<ConsumerRecord<K, V>>()
+          return new KafkaConsumerRecordIterator<K, V>()
             {
             Iterator<ConsumerRecord<K, V>> delegate = records.iterator();
             Supplier<Boolean> hasNext = () -> delegate.hasNext();
+
+            @Override
+            protected Consumer<K, V> getConsumer()
+              {
+              return consumer;
+              }
 
             @Override
             public void close() throws IOException

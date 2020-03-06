@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -101,21 +101,21 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
     }
 
   @Override
-  public void sourceConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, Iterator<ConsumerRecord<String, String>>, Producer<String, String>> tap, Properties conf )
+  public void sourceConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, KafkaConsumerRecordIterator<String, String>, Producer<String, String>> tap, Properties conf )
     {
     conf.setProperty( ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getCanonicalName() );
     conf.setProperty( ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getCanonicalName() );
     }
 
   @Override
-  public void sinkConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, Iterator<ConsumerRecord<String, String>>, Producer<String, String>> tap, Properties conf )
+  public void sinkConfInit( FlowProcess<? extends Properties> flowProcess, Tap<Properties, KafkaConsumerRecordIterator<String, String>, Producer<String, String>> tap, Properties conf )
     {
     conf.setProperty( ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName() );
     conf.setProperty( ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName() );
     }
 
   @Override
-  public void sourcePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<TextKafkaScheme.Context, Iterator<ConsumerRecord<String, String>>> sourceCall ) throws IOException
+  public void sourcePrepare( FlowProcess<? extends Properties> flowProcess, SourceCall<TextKafkaScheme.Context, KafkaConsumerRecordIterator<String, String>> sourceCall ) throws IOException
     {
     sourceCall.setContext( new Context( ( (KafkaTap) sourceCall.getTap() ).getTopics() ) );
     }
@@ -127,7 +127,7 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
     }
 
   @Override
-  public boolean source( FlowProcess<? extends Properties> flowProcess, SourceCall<TextKafkaScheme.Context, Iterator<ConsumerRecord<String, String>>> sourceCall ) throws IOException
+  public boolean source( FlowProcess<? extends Properties> flowProcess, SourceCall<TextKafkaScheme.Context, KafkaConsumerRecordIterator<String, String>> sourceCall ) throws IOException
     {
     Iterator<ConsumerRecord<String, String>> input = sourceCall.getInput();
 

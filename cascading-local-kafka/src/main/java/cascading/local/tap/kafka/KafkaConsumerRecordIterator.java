@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2018-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -20,24 +20,28 @@
 
 package cascading.local.tap.kafka;
 
-import java.util.Properties;
+import java.util.Collection;
+import java.util.Collections;
 
-import cascading.scheme.Scheme;
-import cascading.tuple.Fields;
-import org.apache.kafka.clients.producer.Producer;
+import cascading.util.CloseableIterator;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.TopicPartition;
 
 /**
- * Class KafkaScheme is the base class used for all Schemes that are to be used with the {@link KafkaTap}.
+ *
  */
-public abstract class KafkaScheme<K, V, SourceContext, SinkContext> extends Scheme<Properties, KafkaConsumerRecordIterator<K, V>, Producer<K, V>, SourceContext, SinkContext>
+public abstract class KafkaConsumerRecordIterator<K, V> implements CloseableIterator<ConsumerRecord<K, V>>
   {
-  public KafkaScheme( Fields sourceFields )
+  public void pausePartition( TopicPartition topicPartition )
     {
-    super( sourceFields );
+    pausePartition( Collections.singleton( topicPartition ) );
     }
 
-  public KafkaScheme( Fields sourceFields, Fields sinkFields )
+  public void pausePartition( Collection<TopicPartition> topicPartitions )
     {
-    super( sourceFields, sinkFields );
+    getConsumer().pause( topicPartitions );
     }
+
+  protected abstract Consumer<K, V> getConsumer();
   }
