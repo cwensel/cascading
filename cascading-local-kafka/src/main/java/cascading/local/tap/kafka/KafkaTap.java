@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -879,7 +879,14 @@ public class KafkaTap<K, V> extends Tap<Properties, Iterator<ConsumerRecord<K, V
         {
         try
           {
-          consumer.close();
+          try
+            {
+            consumer.close();
+            }
+          catch( IllegalStateException exception )
+            {
+            LOG.error( "ignoring exception on closing", exception );
+            }
           }
         finally
           {
