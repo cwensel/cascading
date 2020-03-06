@@ -24,7 +24,7 @@ configurations.all {
 
 ext.cascadingVersion = '4.0.0-wip-70'
 
-ext.pointerPathVersion = '1.0.0'
+ext.pointerPathVersion = '1.0.1'
 
 ext.awsVersion = '1.11.546'
 ext.awsS3Version = awsVersion
