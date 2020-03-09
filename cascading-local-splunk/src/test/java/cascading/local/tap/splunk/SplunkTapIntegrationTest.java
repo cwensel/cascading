@@ -54,7 +54,7 @@ public class SplunkTapIntegrationTest extends SDKTestCase
   public static final int PORT = 8000;
 
   @ClassRule
-  public static GenericContainer splunk = new GenericContainer( "splunk/splunk:7.2.0" )
+  public static GenericContainer splunk = new GenericContainer( "splunk/splunk:7.3.4" )
     .withExposedPorts( PORT )
     .withEnv( "SPLUNK_START_ARGS", "--accept-license" )
     .withEnv( "SPLUNK_PASSWORD", "helloworld" )

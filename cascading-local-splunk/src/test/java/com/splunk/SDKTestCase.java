@@ -26,6 +26,7 @@
 
 package com.splunk;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -523,9 +525,13 @@ public abstract class SDKTestCase
     {
     InputStream results = service.oneshotSearch( "search index=" + indexName );
 
+    BufferedInputStream stream = new BufferedInputStream( results );
+
     try
       {
-      ResultsReaderXml resultsReader = new ResultsReaderXml( results );
+      stream.mark( 2048 );
+
+      ResultsReaderXml resultsReader = new ResultsReaderXml( stream );
 
       int numEvents = 0;
 
@@ -534,8 +540,27 @@ public abstract class SDKTestCase
 
       return numEvents;
       }
-    catch( IOException e )
+    catch( Exception e )
       {
+      try
+        {
+        stream.reset();
+
+        BufferedReader r = new BufferedReader(
+          new InputStreamReader( stream, StandardCharsets.UTF_8 ) );
+
+        String line;
+
+        while( ( line = r.readLine() ) != null )
+          {
+          System.out.println( "line = " + line );
+          }
+        }
+      catch( IOException exception )
+        {
+        System.out.println( "exception = " + exception );
+        }
+
       throw new RuntimeException( e );
       }
     }
