@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,17 +45,17 @@ public class KafkaTapIntegrationTest extends CascadingTestCase
   @Test
   public void writeRead() throws Exception
     {
-    handle( new TextKafkaScheme(), tupleEntry -> tupleEntry.getObject( 2 ) instanceof String, "my-test-default" );
+    handle( new TextKafkaScheme(), tupleEntry -> tupleEntry.getObject( 3 ) instanceof String, "my-test-default" );
     }
 
   @Test
   public void writeReadTyped() throws Exception
     {
-    Fields sourceFields = new Fields( "topic", String.class ).append( new Fields( "offset", Long.class ) )
+    Fields sourceFields = new Fields( "topic", String.class ).append( new Fields( "partition", Integer.class ) ).append( new Fields( "offset", Long.class ) )
       .append( new Fields( "key", Integer.class ).append( new Fields( "value", Integer.class ) )
         .append( new Fields( "timestamp", Long.class ) ).append( new Fields( "tsType", String.class ) ) );
 
-    handle( new TextKafkaScheme( sourceFields ), tupleEntry -> tupleEntry.getObject( 2 ) instanceof Integer, "my-test-typed" );
+    handle( new TextKafkaScheme( sourceFields ), tupleEntry -> tupleEntry.getObject( 3 ) instanceof Integer, "my-test-typed" );
     }
 
   private void handle( TextKafkaScheme text, Predicate<TupleEntry> predicate, String topic ) throws IOException

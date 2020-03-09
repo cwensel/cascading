@@ -43,7 +43,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
  * <p>
  * It consumes and produces text/string based keys and values.
  * <p>
- * As a source, it produces six fields: {@link #TOPIC_FIELDS} typed String, {@link #OFFSET_FIELDS} typed long,
+ * As a source, it produces seven fields: {@link #TOPIC_FIELDS} typed String, {@link #PARTITION_FIELDS} typed int,
+ * {@link #OFFSET_FIELDS} typed long,
  * {@link #KEY_FIELDS} typed String, and {@link #VALUE_FIELDS} typed String,
  * {@link #TIMESTAMP_FIELDS} typed long, {@link #TIMESTAMP_TYPE_FIELDS} typed String
  * <p>
@@ -56,6 +57,8 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
   {
   /** Field TOPIC_FIELDS */
   public static final Fields TOPIC_FIELDS = new Fields( "topic", String.class );
+  /** Field PARTITION_FIELDS */
+  public static final Fields PARTITION_FIELDS = new Fields( "partition", int.class );
   /** Field OFFSET_FIELDS */
   public static final Fields OFFSET_FIELDS = new Fields( "offset", long.class );
   /** Field KEY_FIELDS */
@@ -67,7 +70,7 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
   /** Field TIMESTAMP_TYPE_FIELDS */
   public static final Fields TIMESTAMP_TYPE_FIELDS = new Fields( "timestampType", String.class );
   /** Field DEFAULT_SOURCE_FIELDS */
-  public static final Fields DEFAULT_SOURCE_FIELDS = TOPIC_FIELDS.append( OFFSET_FIELDS ).append( KEY_FIELDS ).append( VALUE_FIELDS ).append( TIMESTAMP_FIELDS ).append( TIMESTAMP_TYPE_FIELDS );
+  public static final Fields DEFAULT_SOURCE_FIELDS = TOPIC_FIELDS.append( PARTITION_FIELDS ).append( OFFSET_FIELDS ).append( KEY_FIELDS ).append( VALUE_FIELDS ).append( TIMESTAMP_FIELDS ).append( TIMESTAMP_TYPE_FIELDS );
 
   class Context
     {
@@ -96,7 +99,7 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
     {
     super( sourceFields );
 
-    if( sourceFields.size() != 6 )
+    if( sourceFields.size() != 7 )
       throw new IllegalArgumentException( "wrong number of source fields, requires 6, got: " + sourceFields );
     }
 
@@ -139,11 +142,12 @@ public class TextKafkaScheme extends KafkaScheme<String, String, TextKafkaScheme
 
     // honor declared type information via #setObject()
     incomingEntry.setObject( 0, record.topic() );
-    incomingEntry.setObject( 1, record.offset() );
-    incomingEntry.setObject( 2, record.key() );
-    incomingEntry.setObject( 3, record.value() );
-    incomingEntry.setObject( 4, record.timestamp() );
-    incomingEntry.setObject( 5, record.timestampType() );
+    incomingEntry.setObject( 1, record.partition() );
+    incomingEntry.setObject( 2, record.offset() );
+    incomingEntry.setObject( 3, record.key() );
+    incomingEntry.setObject( 4, record.value() );
+    incomingEntry.setObject( 5, record.timestamp() );
+    incomingEntry.setObject( 6, record.timestampType() );
 
     return true;
     }
