@@ -35,9 +35,10 @@ allprojects {
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven {url = 'https://dl.bintray.com/superflow/wip/'}
     maven {url = 'https://repo.superflow.io/'}
     maven {url = 'https://repository.apache.org'}
-    maven {url = 'http://splunk.jfrog.io/splunk/ext-releases-local'}
+    maven {url = 'https://repo.spring.io/plugins-release/'}
   }
 }
 

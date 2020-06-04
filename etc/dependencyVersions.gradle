@@ -22,7 +22,7 @@ configurations.all {
   resolutionStrategy.cacheDynamicVersionsFor 5, 'minutes'
 }
 
-ext.cascadingVersion = '4.0.0-wip-70'
+ext.cascadingVersion = '4.0.0-wip-81'
 
 ext.pointerPathVersion = '1.0.1'
 
@@ -32,7 +32,7 @@ ext.s3ProxyVersion = '1.6.0'
 
 ext.kafkaVersion = '2.1.1'
 
-ext.splunkVersion = '1.6.3.0'
+ext.splunkVersion = '1.6.5.0'
 
 ext.junitVersion = '4.12'
 ext.log4jVersion = '1.2.17'
