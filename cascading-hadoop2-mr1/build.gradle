@@ -21,7 +21,7 @@
 
 apply from: '../etc/testingPlatform.gradle'
 
-ext.hadoop2Version = '2.7.3'
+ext.hadoop2Version = '2.10.0'
 
 if( System.properties[ 'hadoop2mr1.release.final' ] )
   hadoop2Version = System.properties[ 'hadoop2mr1.release.final' ]

@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Update Apache Hadoop to version 2.10.0.
+
   Fixed issue where underlying coercion to a c.t.t.CoercibleType from a primitive type was not honored. This resolves
   issues with c.o.Identity and c.p.a.Coerce not properly coercing custom types.
 
@@ -83,8 +85,6 @@ Cascading Change Log
   c.t.TupleEntryStream and c.t.TupleStream helper classes.
 
   Update project to use JDK 1.8.
-
-  Update Apache Hadoop to version 2.7.3.
 
   Removed support for all Apache Hadoop 1.x and prior releases, subsequently removing all sub-project interdependencies
   via symlinks.
