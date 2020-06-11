@@ -1046,4 +1046,37 @@ public class TupleEntry
       };
     };
     }
+
+  public Iterable<String[]> asPairwiseIterable( )
+    {
+    return () ->
+    {
+    final Iterator<Comparable> fieldsIterator = fields.iterator();
+    final Iterator<String> valuesIterator = asIterableOf( String.class ).iterator();
+
+    return new Iterator<String[]>()
+          {
+          @Override
+          public boolean hasNext()
+            {
+            return valuesIterator.hasNext();
+            }
+
+          @Override
+          public String[] next()
+            {
+            String field = fieldsIterator.next().toString();
+            String next = valuesIterator.next();
+
+            return new String[]{field,next};
+            }
+
+          @Override
+          public void remove()
+            {
+            throw new UnsupportedOperationException("remove is unsupported");
+            }
+          };
+    };
+    }
   }

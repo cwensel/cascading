@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.t.p.NamedPartition providing support for key=value partition paths commonly found on Apache Hadoop.
+
   Update Apache Hadoop to version 2.10.0.
 
   Fixed issue where underlying coercion to a c.t.t.CoercibleType from a primitive type was not honored. This resolves

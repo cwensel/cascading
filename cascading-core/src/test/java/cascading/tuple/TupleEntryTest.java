@@ -385,6 +385,38 @@ public class TupleEntryTest extends CascadingTestCase
     }
 
   @Test
+  public void testPairwiseIterable()
+    {
+    final SimpleDateFormat dateFormat = new SimpleDateFormat( "dd/MMM/yyyy:HH:mm:ss:SSS Z" );
+
+    CoercibleType coercible = new DateType( "dd/MMM/yyyy:HH:mm:ss:SSS Z", TimeZone.getDefault() );
+
+    Date date = new Date();
+    String stringDate = dateFormat.format( date );
+    Tuple tuple = Tuple.size( 4 );
+
+    Fields fields = Fields.size( 4 ).applyTypes( coercible, coercible, coercible, String.class );
+    TupleEntry results = new TupleEntry( fields, tuple );
+
+    results.setObject( 0, date );
+    results.setLong( 1, date.getTime() );
+    results.setString( 2, stringDate );
+    results.setString( 3, stringDate );
+
+    Iterable<String[]> iterable = results.asPairwiseIterable( );
+
+    int count = 0;
+    for( String[] pair : iterable )
+      {
+      assertEquals( String.valueOf( count ), pair[0] );
+      assertEquals( stringDate, pair[1] );
+      count++;
+      }
+
+    assertEquals( count, results.size() );
+    }
+
+  @Test
   public void testSet()
     {
     TupleEntry entryA = new TupleEntry( new Fields( "a", "b", "c" ), new Tuple( "a", "b", "c" ) );

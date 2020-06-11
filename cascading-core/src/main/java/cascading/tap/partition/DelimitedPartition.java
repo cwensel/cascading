@@ -118,6 +118,11 @@ public class DelimitedPartition implements Partition
     if( partition.startsWith( delimiter ) )
       partition = partition.substring( 1 );
 
+    parsePartitionInto( partition, partitionFields, numSplits, tupleEntry );
+    }
+
+  protected void parsePartitionInto( String partition, Fields partitionFields, int numSplits, TupleEntry tupleEntry )
+    {
     String[] split = getPattern().split( partition, numSplits );
 
     tupleEntry.setCanonicalValues( split, 0, partitionFields.size() );
@@ -126,11 +131,16 @@ public class DelimitedPartition implements Partition
   @Override
   public String toPartition( TupleEntry tupleEntry )
     {
-    String partition = Util.join( tupleEntry.asIterableOf( String.class ), delimiter, true );
+    String partition = formatPartitionWith( tupleEntry, delimiter );
 
     if( postfix != null )
       partition = partition + postfix; // delimiter prefixed in ctor
 
     return partition;
+    }
+
+  protected String formatPartitionWith( TupleEntry tupleEntry, String delimiter )
+    {
+    return Util.join( tupleEntry.asIterableOf( String.class ), delimiter, true );
     }
   }
