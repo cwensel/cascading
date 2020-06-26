@@ -450,7 +450,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
    */
   public S3Tap( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, String bucketName, String key, SinkMode sinkMode )
     {
-    this( scheme, bucketName, key, DEFAULT_DELIMITER );
+    this( scheme, bucketName, key, DEFAULT_DELIMITER, sinkMode );
     }
 
   /**
@@ -1148,7 +1148,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     {
     AmazonS3 s3Client = getS3Client( flowProcess.getConfig() );
 
-    if( !s3Client.doesBucketExist( getBucketName() ) )
+    if( !s3Client.doesBucketExistV2( getBucketName() ) )
       s3Client.createBucket( getBucketName() );
 
     PipedInputStream pipedInputStream = new PipedInputStream();
@@ -1210,7 +1210,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
   public boolean resourceExists( Properties conf ) throws IOException
     {
     if( getKey() == null )
-      return getS3Client( conf ).doesBucketExist( getBucketName() );
+      return getS3Client( conf ).doesBucketExistV2( getBucketName() );
 
     return getKey().endsWith( "/" ) || getS3Client( conf ).doesObjectExist( getBucketName(), getKey() );
     }
