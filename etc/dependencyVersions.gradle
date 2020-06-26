@@ -28,7 +28,7 @@ ext.pointerPathVersion = '1.0.1'
 
 ext.awsVersion = '1.11.797'
 ext.awsS3Version = awsVersion
-ext.s3ProxyVersion = '1.6.0'
+ext.s3ProxyVersion = '1.7.1'
 
 ext.kafkaVersion = '2.1.1'
 
@@ -38,4 +38,3 @@ ext.junitVersion = '4.12'
 ext.log4jVersion = '1.2.17'
 ext.slf4jVersion = '1.7.5'
 ext.testContainersVersion = '1.11.2'
-
