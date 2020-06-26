@@ -54,6 +54,7 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -1035,7 +1036,14 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     {
     AmazonS3 s3Client = getS3Client( conf );
 
-    s3Client.deleteObject( getBucketName(), getKey() );
+    try
+      {
+      s3Client.deleteObject( getBucketName(), getKey() );
+      }
+    catch( AmazonS3Exception exception )
+      {
+      throw handleException( s3Client, exception );
+      }
 
     return true;
     }
@@ -1045,17 +1053,31 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     {
     AmazonS3 s3Client = getS3Client( conf );
 
-    s3Client.putObject( getBucketName(), getKey(), "" );
+    try
+      {
+      s3Client.putObject( getBucketName(), getKey(), "" );
+      }
+    catch( AmazonS3Exception exception )
+      {
+      throw handleException( s3Client, exception );
+      }
 
     return true;
     }
 
   protected ObjectMetadata getObjectMetadata( Properties conf )
     {
-    if( objectMetadata == null )
-      objectMetadata = getS3Client( conf ).getObjectMetadata( getBucketName(), getKey() );
+    try
+      {
+      if( objectMetadata == null )
+        objectMetadata = getS3Client( conf ).getObjectMetadata( getBucketName(), getKey() );
 
-    return objectMetadata;
+      return objectMetadata;
+      }
+    catch( AmazonS3Exception exception )
+      {
+      throw handleException( getS3Client( conf ), exception );
+      }
     }
 
   private class CheckedFilterInputStream extends FilterInputStream
@@ -1209,10 +1231,29 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
   @Override
   public boolean resourceExists( Properties conf ) throws IOException
     {
-    if( getKey() == null )
-      return getS3Client( conf ).doesBucketExistV2( getBucketName() );
+    AmazonS3 s3Client = getS3Client( conf );
 
-    return getS3Client( conf ).doesObjectExist( getBucketName(), getKey() );
+    try
+      {
+      if( getKey() == null )
+        return s3Client.doesBucketExistV2( getBucketName() );
+
+      return s3Client.doesObjectExist( getBucketName(), getKey() );
+      }
+    catch( AmazonS3Exception exception )
+      {
+      throw handleException( s3Client, exception );
+      }
+    }
+
+  protected AmazonS3Exception handleException( AmazonS3 s3Client, AmazonS3Exception exception )
+    {
+    if( exception.getStatusCode() == 400 )
+      {
+      LOG.error( "s3 request failed, try changing the AWS Region from: {}, using property: {}", s3Client.getRegionName(), S3TapProps.S3_REGION, exception );
+      }
+
+    return exception;
     }
 
   @Override
