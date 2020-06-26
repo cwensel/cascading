@@ -1212,7 +1212,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     if( getKey() == null )
       return getS3Client( conf ).doesBucketExistV2( getBucketName() );
 
-    return getKey().endsWith( "/" ) || getS3Client( conf ).doesObjectExist( getBucketName(), getKey() );
+    return getS3Client( conf ).doesObjectExist( getBucketName(), getKey() );
     }
 
   @Override
