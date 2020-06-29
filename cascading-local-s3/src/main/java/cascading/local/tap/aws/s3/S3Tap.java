@@ -35,12 +35,14 @@ import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.property.PropertyUtil;
 import cascading.scheme.FileFormat;
 import cascading.scheme.Scheme;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
+import cascading.tap.TapException;
 import cascading.tap.local.PartitionTap;
 import cascading.tap.type.FileType;
 import cascading.tap.type.TapWith;
@@ -109,11 +111,11 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
   public static final String DEFAULT_DELIMITER = "/";
 
   /** Field s3Client */
-  AmazonS3 s3Client = null;
+  AmazonS3 s3Client;
   /** Field bucketName */
-  String bucketName = null;
+  String bucketName;
   /** Field key */
-  String key = null;
+  String key;
   /** Field filter */
   Predicate<String> filter;
   /** Field delimiter */
@@ -122,6 +124,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
   S3Checkpointer checkpointer;
 
   private transient ObjectMetadata objectMetadata;
+  private transient TransferManager transferManager;
 
   /**
    * Method makeURI creates a new S3 URI from the given parameters.
@@ -879,7 +882,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
   public TapWith<Properties, InputStream, OutputStream> withScheme( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme )
     {
     // don't lazily create s3Client
-    return new S3Tap( scheme, s3Client, getBucketName(), getKey(), getDelimiter(), getFilter(), getSinkMode() );
+    return create( scheme, s3Client, getBucketName(), getKey(), getDelimiter(), getFilter(), getSinkMode() );
     }
 
   @Override
@@ -895,19 +898,43 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
       uri = makeURI( getBucketName(), getKey() + ( identifier.startsWith( delimiter ) ? identifier : delimiter + identifier ) );
 
     // don't lazily create s3Client
-    return new S3Tap( getScheme(), s3Client, uri, getSinkMode() );
+    return create( getScheme(), s3Client, uri, getSinkMode() );
+    }
+
+  protected TapWith<Properties, InputStream, OutputStream> create( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, URI identifier, SinkMode sinkMode )
+    {
+    try
+      {
+      return Util.newInstance( getClass(), scheme, s3Client, identifier, sinkMode );
+      }
+    catch( CascadingException exception )
+      {
+      throw new TapException( "unable to create a new instance of: " + getClass().getName(), exception );
+      }
     }
 
   @Override
   public TapWith<Properties, InputStream, OutputStream> withSinkMode( SinkMode sinkMode )
     {
     // don't lazily create s3Client
-    return new S3Tap( getScheme(), s3Client, getBucketName(), getKey(), getDelimiter(), getFilter(), sinkMode );
+    return create( getScheme(), s3Client, getBucketName(), getKey(), getDelimiter(), getFilter(), sinkMode );
+    }
+
+  protected TapWith<Properties, InputStream, OutputStream> create( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, String delimiter, Predicate<String> filter, SinkMode sinkMode )
+    {
+    try
+      {
+      return Util.newInstance( getClass(), scheme, s3Client, bucketName, key, delimiter, filter, sinkMode );
+      }
+    catch( CascadingException exception )
+      {
+      throw new TapException( "unable to create a new instance of: " + getClass().getName(), exception );
+      }
     }
 
   protected String cleanKey( URI identifier )
     {
-    String path = identifier.getPath();
+    String path = identifier.normalize().getPath();
 
     if( path.startsWith( "/" ) )
       path = path.substring( 1 );
@@ -1176,14 +1203,13 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     PipedInputStream pipedInputStream = new PipedInputStream();
     PipedOutputStream pipedOutputStream = new PipedOutputStream( pipedInputStream );
 
-    TransferManager transferManager = TransferManagerBuilder.standard().withS3Client( s3Client ).build();
+    TransferManager transferManager = getTransferManager( s3Client );
 
     ObjectMetadata metadata = new ObjectMetadata();
 
-    if( LOG.isDebugEnabled() )
-      LOG.debug( "starting upload: {}", getIdentifier() );
-
     final String key = resolveKey( flowProcess, getKey() );
+
+    LOG.info( "starting async upload: {}", makeStringIdentifier( getBucketName(), key ) );
 
     Upload upload = transferManager.upload( getBucketName(), key, pipedInputStream, metadata );
 
@@ -1192,7 +1218,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
       @Override
       public void close()
         {
-        super.close();
+        super.close(); // flushes and closes output
 
         try
           {
@@ -1214,6 +1240,14 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
           }
         }
       };
+    }
+
+  protected TransferManager getTransferManager( AmazonS3 s3Client )
+    {
+    if( transferManager == null )
+      transferManager = TransferManagerBuilder.standard().withS3Client( s3Client ).build();
+
+    return transferManager;
     }
 
   protected String resolveKey( FlowProcess<? extends Properties> flowProcess, String key )
