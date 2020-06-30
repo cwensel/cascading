@@ -29,6 +29,7 @@ ext.pointerPathVersion = '1.0.1'
 ext.awsVersion = '1.11.797'
 ext.awsS3Version = awsVersion
 ext.s3ProxyVersion = '1.7.1'
+ext.guavaVersion = '24.0-jre'
 
 ext.kafkaVersion = '2.1.1'
 

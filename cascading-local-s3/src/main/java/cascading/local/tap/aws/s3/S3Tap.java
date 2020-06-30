@@ -20,12 +20,11 @@
 
 package cascading.local.tap.aws.s3;
 
+import java.io.DataOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -53,16 +52,26 @@ import cascading.tuple.TupleEntrySchemeIterator;
 import cascading.util.CloseableIterator;
 import cascading.util.Util;
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.event.ProgressEvent;
+import com.amazonaws.event.ProgressEventType;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.PersistableTransfer;
+import com.amazonaws.services.s3.transfer.Transfer;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.services.s3.transfer.internal.S3ProgressListener;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
+import com.google.common.io.ByteSource;
+import com.google.common.io.FileBackedOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +133,6 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
   S3Checkpointer checkpointer;
 
   private transient ObjectMetadata objectMetadata;
-  private transient TransferManager transferManager;
 
   /**
    * Method makeURI creates a new S3 URI from the given parameters.
@@ -1200,35 +1208,42 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
     if( !s3Client.doesBucketExistV2( getBucketName() ) )
       s3Client.createBucket( getBucketName() );
 
-    PipedInputStream pipedInputStream = new PipedInputStream();
-    PipedOutputStream pipedOutputStream = new PipedOutputStream( pipedInputStream );
-
-    TransferManager transferManager = getTransferManager( s3Client );
-
-    ObjectMetadata metadata = new ObjectMetadata();
-
     final String key = resolveKey( flowProcess, getKey() );
 
-    LOG.info( "starting async upload: {}", makeStringIdentifier( getBucketName(), key ) );
+    FileBackedOutputStream fileBackedOutputStream = new FileBackedOutputStream( 512_000, true );
+    DataOutputStream dataOutputStream = new DataOutputStream( fileBackedOutputStream );
+    ByteSource byteSource = fileBackedOutputStream.asByteSource();
 
-    Upload upload = transferManager.upload( getBucketName(), key, pipedInputStream, metadata );
+    TransferManager transferManager = TransferManagerBuilder.standard().withS3Client( s3Client ).build();
 
-    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, this, getScheme(), pipedOutputStream, makeStringIdentifier( getBucketName(), key ) )
+    final String loggableIdentifier = makeStringIdentifier( getBucketName(), key );
+
+    return new TupleEntrySchemeCollector<Properties, OutputStream>( flowProcess, this, getScheme(), dataOutputStream, loggableIdentifier )
       {
       @Override
       public void close()
         {
         super.close(); // flushes and closes output
 
+        LOG.info( "s3 starting async upload: {}", loggableIdentifier );
+
+        InputStream inputStream = openInputStream( byteSource, loggableIdentifier );
+
         try
           {
-          UploadResult uploadResult = upload.waitForUploadResult();
+          ObjectMetadata metadata = new ObjectMetadata();
+          metadata.setHeader( Headers.CONTENT_LENGTH, (long) dataOutputStream.size() );
 
-          if( uploadResult != null )
-            {
-            if( LOG.isDebugEnabled() )
-              LOG.debug( "completed upload: {}, with key: {}", getIdentifier(), uploadResult.getKey() );
-            }
+          Upload upload = createUpload( key, transferManager, new PutObjectRequest( getBucketName(), key, inputStream, metadata ) );
+
+          UploadResult uploadResult = upload.waitForUploadResult(); // never return null, throws an exception
+
+          handleResult( upload, uploadResult, loggableIdentifier );
+          }
+        catch( SdkClientException exception )
+          {
+          LOG.error( "s3 upload failed on: " + loggableIdentifier, exception );
+          throw new TapException( "s3 upload failed on: " + loggableIdentifier, exception );
           }
         catch( InterruptedException exception )
           {
@@ -1242,12 +1257,65 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
       };
     }
 
-  protected TransferManager getTransferManager( AmazonS3 s3Client )
+  protected void handleResult( Upload upload, UploadResult uploadResult, String loggableIdentifier )
     {
-    if( transferManager == null )
-      transferManager = TransferManagerBuilder.standard().withS3Client( s3Client ).build();
+    Transfer.TransferState state = upload.getState();
 
-    return transferManager;
+    if( state == Transfer.TransferState.Canceled )
+      {
+      LOG.warn( "s3 canceled upload: {}, with key: {}", getIdentifier(), uploadResult.getKey() );
+      }
+    else if( state == Transfer.TransferState.Failed ) // can this happen?
+      {
+      LOG.error( "s3 failed upload: {}, with key: {}", getIdentifier(), uploadResult.getKey() );
+      throw new TapException( "s3 upload failed on: " + loggableIdentifier );
+      }
+    else
+      {
+      LOG.info( "s3 completed upload: {}, with key: {}", getIdentifier(), uploadResult.getKey() );
+      }
+    }
+
+  protected InputStream openInputStream( ByteSource byteSource, String loggableIdentifier )
+    {
+    InputStream inputStream;
+    try
+      {
+      inputStream = byteSource.openBufferedStream();
+      }
+    catch( IOException exception )
+      {
+      LOG.error( "s3 upload failed on: " + loggableIdentifier, exception );
+      throw new TapException( "s3 upload failed on: " + loggableIdentifier, exception );
+      }
+
+    return inputStream;
+    }
+
+  protected Upload createUpload( String key, TransferManager transferManager, PutObjectRequest request )
+    {
+    return transferManager.upload( request, new S3ProgressListener()
+      {
+      @Override
+      public void onPersistableTransfer( PersistableTransfer persistableTransfer )
+        {
+        if( LOG.isDebugEnabled() )
+          LOG.debug( "s3 for: {}, persistable transfer: {}", key, persistableTransfer );
+        }
+
+      @Override
+      public void progressChanged( ProgressEvent progressEvent )
+        {
+        if( progressEvent.getEventType() == ProgressEventType.TRANSFER_FAILED_EVENT )
+          LOG.error( "s3 for: {}, event: {}", key, progressEvent );
+        if( progressEvent.getEventType() == ProgressEventType.TRANSFER_CANCELED_EVENT )
+          LOG.warn( "s3 for: {}, event: {}", key, progressEvent );
+        if( progressEvent.getEventType() == ProgressEventType.TRANSFER_PART_FAILED_EVENT )
+          LOG.warn( "s3 for: {}, event: {}", key, progressEvent );
+        else if( LOG.isDebugEnabled() )
+          LOG.debug( "s3 for: {}, event: {}", key, progressEvent );
+        }
+      } );
     }
 
   protected String resolveKey( FlowProcess<? extends Properties> flowProcess, String key )

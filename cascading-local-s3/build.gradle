@@ -23,6 +23,7 @@ dependencies {
   compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
 
   compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsS3Version
+  compile group: 'com.google.guava', name: 'guava', version: guavaVersion
 
   compileOnly group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 
@@ -37,7 +38,7 @@ dependencies {
 // makes tests pass
 configurations.all {
   resolutionStrategy {
-    force 'com.google.guava:guava:24.0-jre'
+    force 'com.google.guava:guava:' + guavaVersion
   }
 }
 
