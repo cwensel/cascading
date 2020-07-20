@@ -34,7 +34,6 @@ import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.property.PropertyUtil;
 import cascading.scheme.FileFormat;
@@ -911,14 +910,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
 
   protected TapWith<Properties, InputStream, OutputStream> create( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, URI identifier, SinkMode sinkMode )
     {
-    try
-      {
-      return Util.newInstance( getClass(), scheme, s3Client, identifier, sinkMode );
-      }
-    catch( CascadingException exception )
-      {
-      throw new TapException( "unable to create a new instance of: " + getClass().getName(), exception );
-      }
+    return new S3Tap( scheme, s3Client, identifier, sinkMode );
     }
 
   @Override
@@ -930,14 +922,7 @@ public class S3Tap extends Tap<Properties, InputStream, OutputStream> implements
 
   protected TapWith<Properties, InputStream, OutputStream> create( Scheme<Properties, InputStream, OutputStream, ?, ?> scheme, AmazonS3 s3Client, String bucketName, String key, String delimiter, Predicate<String> filter, SinkMode sinkMode )
     {
-    try
-      {
-      return Util.newInstance( getClass(), scheme, s3Client, bucketName, key, delimiter, filter, sinkMode );
-      }
-    catch( CascadingException exception )
-      {
-      throw new TapException( "unable to create a new instance of: " + getClass().getName(), exception );
-      }
+    return new S3Tap( scheme, s3Client, bucketName, key, delimiter, filter, sinkMode );
     }
 
   protected String cleanKey( URI identifier )
