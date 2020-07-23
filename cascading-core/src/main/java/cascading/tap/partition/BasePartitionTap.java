@@ -208,16 +208,15 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
       catch( Exception exception )
         {
-        LOG.error( "exception while closing TupleEntryCollector {}", path, exception );
-
-        boolean failOnError = false;
-        Object failProperty = flowProcess.getProperty( PartitionTapProps.FAIL_ON_CLOSE );
-
-        if( failProperty != null )
-          failOnError = Boolean.parseBoolean( failProperty.toString() );
+        boolean failOnError = flowProcess.getBooleanProperty( PartitionTapProps.FAIL_ON_CLOSE, false );
 
         if( failOnError )
+          {
+          LOG.error( "exception while closing TupleEntryCollector {}", path, exception );
           throw new TapException( exception );
+          }
+
+        LOG.warn( "exception while closing TupleEntryCollector {}: {}", path, exception.getMessage() );
         }
       }
 
