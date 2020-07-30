@@ -6,15 +6,15 @@ Thanks for using Cascading.
 
 Cascading 4 includes a few major changes and additions from prior major releases:
 
+* Moved to JCenter and changed the Maven group name to `net.wensel` (from `cascading`)
 * Added native JSON support via the `cascading-nested-json` sub-project
 * Removed `cascading-xml` sub-project
 
 ## General Information:
 
-For project documentation and community support, visit: [cascading.org](http://cascading.org/)
+_Note: Everything is subject to change as we re-imagine Cascading 4 resources._
 
-To download a pre-built distribution, visit [http://cascading.org/downloads/](http://cascading.org/downloads/),
-or use Maven (described below).
+For project documentation and community support, visit: [cascading.org](http://cascading.org/)
 
 The project includes nine Cascading jar files:
 
@@ -30,7 +30,7 @@ The project includes nine Cascading jar files:
 * `cascading-hadoop2-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the
-[Conjars.org](http://conjars.org) Maven repository.
+JCenter Maven repository.
 
 Hadoop 2.x MR1 mode is the same as above but for Hadoop 2.x releases.
 
@@ -137,6 +137,8 @@ properties:
 See __CONTRIBUTING.md__ at https://github.com/Cascading/cascading.
 
 ## Using with Maven/Ivy
+
+_Note: Currently migrating to JCenter_
 
 It is strongly recommended developers pull Cascading from our Maven compatible jar repository
 [Conjars.org](http://conjars.org).

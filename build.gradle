@@ -73,7 +73,7 @@ subprojects {
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
 
-  group = 'cascading'
+  group = 'net.wensel'
   version = releaseVersion
 
   // generate Java 9 module names
@@ -89,7 +89,7 @@ subprojects {
     bintrayUser = repoUserName
     bintrayKey = repoPassword
 
-    org = 'superflow'
+    org = 'wensel'
     repo =  isFinalRelease ? 'release' : 'wip'
 
     overrideOnUpload = true
@@ -212,7 +212,7 @@ subprojects {
         pom {
           name = 'cascading'
           description = 'An API for data management, analytics, and machine learning on parallel computing clusters.'
-          url = 'http://cascading.org/'
+          url = 'http://cascading.wensel.net/'
           inceptionYear = '2017'
           licenses {
             license {
@@ -222,7 +222,7 @@ subprojects {
             }
           }
           scm {
-            url = 'https://github.com/Cascading/cascading.git'
+            url = 'https://github.com/cwensel/cascading.git'
           }
         }
       }
