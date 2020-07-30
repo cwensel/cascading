@@ -20,7 +20,7 @@
 
 dependencies {
 
-  compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
+  compile group: 'net.wensel', name: 'cascading-local', version: cascadingVersion, changing: true
 
   compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsS3Version
   compile group: 'com.google.guava', name: 'guava', version: guavaVersion
@@ -32,7 +32,7 @@ dependencies {
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
   testCompile group: 'org.gaul', name: 's3proxy', version: s3ProxyVersion
-  testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
+  testCompile group: 'net.wensel', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
 }
 
 // makes tests pass

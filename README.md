@@ -21,7 +21,7 @@ A full featured Tap that can both read and write data from, to, and between Apac
 
 See the `cascading-local-kafka` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/superflow/wip/cascading-local-kafka
+For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-kafka
 
 ### AWS S3 Tap
 
@@ -31,7 +31,7 @@ In addition, this tap can restart where it left off on a previous fetch, even ac
 
 See the `cascading-local-s3` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/superflow/wip/cascading-local-s3
+For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-s3
 
 ### Splunk Tap
 
@@ -39,7 +39,7 @@ A full featured Tap that can both read and write data from, to and between Splun
 
 See the `cascading-local-splunk` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/superflow/wip/cascading-local-splunk
+For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-splunk
 
 ### Neo4j Tap
 
@@ -47,7 +47,7 @@ An experimental Tap that can write JSON data to Neo4j Database instances.
 
 See the `cascading-local-neo4j` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/superflow/wip/cascading-local-neo4j
+For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-neo4j
 
 ### S3 Log Parser Example
 

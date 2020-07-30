@@ -20,7 +20,7 @@
 
 dependencies {
 
-  compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
+  compile group: 'net.wensel', name: 'cascading-local', version: cascadingVersion, changing: true
 
   compile group: 'com.splunk', name: 'splunk', version: splunkVersion
 
@@ -33,7 +33,7 @@ dependencies {
   testRuntime group: 'log4j', name: 'log4j', version: log4jVersion
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-  testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
+  testCompile group: 'net.wensel', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
 
   testCompile group: 'org.testcontainers', name: 'testcontainers', version: testContainersVersion
 

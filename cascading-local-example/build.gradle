@@ -29,7 +29,7 @@ dependencies {
   compile project( ':cascading-local-s3' )
   compile project( ':cascading-local-kafka' )
 
-  compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
+  compile group: 'net.wensel', name: 'cascading-local', version: cascadingVersion, changing: true
 
   compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 
