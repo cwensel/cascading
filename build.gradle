@@ -35,8 +35,6 @@ allprojects {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven {url = 'https://dl.bintray.com/superflow/wip/'}
-    maven {url = 'https://dl.bintray.com/wensel/wip/'}
     maven {url = 'https://repo.superflow.io/'}
     maven {url = 'https://repository.apache.org'}
     maven {url = 'https://repo.spring.io/plugins-release/'}
