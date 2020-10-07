@@ -213,7 +213,7 @@ subprojects {
           name = 'cascading'
           description = 'An API for data management, analytics, and machine learning on parallel computing clusters.'
           url = 'http://cascading.wensel.net/'
-          inceptionYear = '2017'
+          inceptionYear = '2007'
           licenses {
             license {
               name = 'The Apache Software License, Version 2.0'
