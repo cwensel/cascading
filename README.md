@@ -6,15 +6,17 @@ Thanks for using Cascading.
 
 Cascading 4 includes a few major changes and additions from prior major releases:
 
+* Moved the website to https://cascading.wensel.net/
 * Moved to JCenter and changed the Maven group name to `net.wensel` (from `cascading`)
 * Added native JSON support via the `cascading-nested-json` sub-project
 * Removed `cascading-xml` sub-project
+* Removed Apache Hadoop 1.x support
 
 ## General Information:
 
 _Note: Everything is subject to change as we re-imagine Cascading 4 resources._
 
-For project documentation and community support, visit: [cascading.org](http://cascading.org/)
+For project documentation and community support, visit: [cascading.wensel.net](https://cascading.wensel.net/)
 
 The project includes nine Cascading jar files:
 
@@ -46,25 +48,23 @@ against Java 1.7 and 1.6.
 
 There are a number of projects based on and extensions to Cascading available.
 
-Visit the [Cascading Extensions](http://cascading.org/extensions/) page for a current list.
-
-Or download the [Cascading SDK](http://cascading.org/sdk/) which includes many pre-built binaries.
+Visit the [Cascading Extensions](https://cascading.wensel.net/extensions/) page for a current list.
 
 Of note are three top level projects:
 
-* [Fluid](http://cascading.org/fluid/) - A fluent Java API for Cascading that is compatible with the default API.
-* [Lingual](http://cascading.org/lingual/) - ANSI SQL and JDBC on Cascading
-* [Pattern](http://cascading.org/pattern/) - Machine Learning scoring and [PMML](http://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
+* [Fluid](https://cascading.wensel.net/fluid/) - A fluent Java API for Cascading that is compatible with the default API.
+* [Lingual](https://cascading.wensel.net/lingual/) - ANSI SQL and JDBC on Cascading
+* [Pattern](https://cascading.wensel.net/pattern/) - Machine Learning scoring and [PMML](https://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
 
 And alternative languages:
 
-* [Scalding](http://cascading.org/projects/scalding/) - A Scala based DSL
-* [Cascalog](http://cascading.org/projects/cascalog/) - A Clojure based DSL
+* [Scalding](https://cascading.wensel.net/projects/scalding/) - A Scala based DSL
+* [Cascalog](https://cascading.wensel.net/projects/cascalog/) - A Clojure based DSL
 * [PigPen](https://github.com/Netflix/PigPen) - A Clojure based DSL
 
 And a third-party computing platform:
 
-* [Apache Flink](http://www.cascading.org/cascading-flink/) - Faster than MapReduce cluster computing
+* [Apache Flink](https://cascading.wensel.net/cascading-flink/) - Faster than MapReduce cluster computing
 
 ## Versioning
 
@@ -80,8 +80,11 @@ necessary.
 It is important to note that *we do reserve to make breaking changes to the new query planner API through the 4.x
 releases*. This allows us to respond to bugs and performance issues without issuing new major releases.
 
-The source and tags for all stable releases can be found here:
+The source and tags for all prior (to 4.x) stable releases can be found here:
 [https://github.com/Cascading/cascading](https://github.com/Cascading/cascading)
+
+All 4.x releases will be maintainted here:
+[https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 WIP (work in progress) releases are fully tested builds of code not yet deemed fully stable. On every build by our
 continuous integration servers, the WIP build number is increased. Successful builds are then tagged and published.
@@ -93,10 +96,10 @@ The source, working branches, and tags for all WIP releases can be found here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 Or downloaded from here:
-[http://cascading.org/wip/](http://cascading.org/wip/)
+[http://cascading.wensel.net/wip/](https://cascading.wensel.net/wip/)
 
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
-available from the [http://cascading.org/downloads/](http://cascading.org/downloads/) page.
+available from the [http://cascading.wensel.net/downloads/](http://cascading.wensel.net/downloads/) page.
 
 ## Writing and Running Tests
 
@@ -138,33 +141,21 @@ See __CONTRIBUTING.md__ at https://github.com/Cascading/cascading.
 
 ## Using with Maven/Ivy
 
-_Note: Currently migrating to JCenter_
+It is strongly recommended developers pull Cascading from Jcenter.
+[jcenter.bintray.com](https://jcenter.bintray.com/).
 
-It is strongly recommended developers pull Cascading from our Maven compatible jar repository
-[Conjars.org](http://conjars.org).
+Alternatively, see bintray for latest wip and final releases: 
 
-You can find the latest public and WIP (work in progress) releases here:
-
-*  http://conjars.org/cascading/cascading-core
-*  http://conjars.org/cascading/cascading-local
-*  http://conjars.org/cascading/cascading-hadoop2-common
-*  http://conjars.org/cascading/cascading-hadoop2-io
-*  http://conjars.org/cascading/cascading-hadoop2-mr1
-*  http://conjars.org/cascading/cascading-hadoop2-tez
-*  http://conjars.org/cascading/cascading-hadoop2-tez-stats
-*  http://conjars.org/cascading/cascading-expression
-*  http://conjars.org/cascading/cascading-nested-json
-*  http://conjars.org/cascading/cascading-nested
+* https://bintray.com/wensel/wip
+* https://bintray.com/wensel/release
 
 When creating tests, make sure to add any of the relevant above dependencies to your `test` scope or equivalent
 configuration along with the `cascading-platform` dependency.
 
-*  http://conjars.org/cascading/cascading-platform
-
 Note the `cascading-platform` compile dependency has no classes, you must pull the tests dependency with the
 `tests` classifier.
 
-See [http://cascading.org/downloads/#maven](http://cascading.org/downloads/#maven) for example Maven pom
+See [http://cascading.wensel.net/downloads/#maven](https://cascading.wensel.net/downloads/#maven) for example Maven pom
 dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
@@ -180,29 +171,14 @@ repository (above).
 To build Cascading, run the following in the shell:
 
 ```bash
-> git clone https://github.com/cascading/cascading.git
+> git clone https://github.com/cwensel/cascading.git
 > cd cascading
-> gradle build
+> ./gradlew build
 ```
-
-Cascading requires at least Gradle 3.4 and Java 1.8 to build.
-
-To use an IDE like IntelliJ, run the following to create IntelliJ project files:
-
-```bash
-> gradle idea
-```
-
-Similarly for Eclipse:
-
-```bash
-> gradle eclipse
-```
-
 ## Using with Apache Hadoop
 
 First confirm you are using a supported version of Apache Hadoop by checking the
-[Compatibility](http://cascading.org/support/compatibility/) page.
+[Compatibility](https://cascading.wensel.net/support/compatibility/) page.
 
 To use Cascading with Hadoop, we suggest stuffing `cascading-core` and `cascading-hadoop2-mr1`, jar files and all
 third-party libs into the `lib` folder of your job jar and executing your job via
