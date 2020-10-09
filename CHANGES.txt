@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Upgrade Riffle to version 1.1.0 so that all dependencies on Conjars are removed. Riffle is now hosted in Jcenter.
+
   Added c.t.p.NamedPartition providing support for key=value partition paths commonly found on Apache Hadoop.
 
   Update Apache Hadoop to version 2.10.0.
