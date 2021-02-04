@@ -83,6 +83,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
     {
+    Tuple context = functionCall.getContext();
     Node node = (Node) functionCall.getArguments().getObject( 0, getCoercibleType() );
 
     for( int i = 0; i < pointers.length; i++ )
@@ -95,10 +96,10 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
       Type declaredType = getFieldDeclaration().getType( i );
       Object value = getCoercibleType().coerce( result, declaredType );
 
-      functionCall.getContext().set( i, value );
+      context.set( i, value );
       }
 
-    functionCall.getOutputCollector().add( functionCall.getContext() );
+    functionCall.getOutputCollector().add( context );
     }
 
   protected static String[] asArray( Collection<String> values )

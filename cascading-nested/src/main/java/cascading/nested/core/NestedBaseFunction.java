@@ -134,9 +134,10 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<NestedBaseFunction.Context> functionCall )
     {
+    Context context = functionCall.getContext();
     Node node = getNode( functionCall.getArguments() );
 
-    Set<Map.Entry<Fields, Pair<SerPredicate<?>, Pointer<Node>>>> entries = functionCall.getContext().pointers.entrySet();
+    Set<Map.Entry<Fields, Pair<SerPredicate<?>, Pointer<Node>>>> entries = context.pointers.entrySet();
 
     for( Map.Entry<Fields, Pair<SerPredicate<?>, Pointer<Node>>> entry : entries )
       {
@@ -154,9 +155,9 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
         }
       }
 
-    functionCall.getContext().result.set( 0, node );
+    context.result.set( 0, node );
 
-    functionCall.getOutputCollector().add( functionCall.getContext().result );
+    functionCall.getOutputCollector().add( context.result );
     }
 
   protected abstract Node getNode( TupleEntry arguments );

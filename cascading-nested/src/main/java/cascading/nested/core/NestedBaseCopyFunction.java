@@ -21,6 +21,7 @@
 package cascading.nested.core;
 
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
@@ -60,11 +61,15 @@ public abstract class NestedBaseCopyFunction<Node, Result> extends NestedSpecBas
   {
   protected static class Context
     {
+    public BiConsumer<TupleEntry, Fields> resetTransform = ( t, f ) -> {};
     public Tuple result;
     public Fields fields;
 
-    public Context( Tuple result, Fields fields )
+    public Context( NestedBaseCopyFunction<?, ?> function, boolean resetTransform, Tuple result, Fields fields )
       {
+      if( resetTransform )
+        this.resetTransform = function::resetTransforms;
+
       this.result = result;
       this.fields = fields;
       }
@@ -84,23 +89,27 @@ public abstract class NestedBaseCopyFunction<Node, Result> extends NestedSpecBas
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
-    operationCall.setContext( new Context( Tuple.size( 1 ), operationCall.getArgumentFields().subtract( Fields.FIRST ) ) );
+    super.prepare( flowProcess, operationCall );
+
+    boolean resetTransform = operationCall.getArgumentFields().size() > ( isInto() ? 2 : 1 );
+    Tuple result = Tuple.size( 1 );
+    Fields fields = operationCall.getArgumentFields().subtract( Fields.FIRST );
+
+    operationCall.setContext( new Context( this, resetTransform, result, fields ) );
     }
 
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Context> functionCall )
     {
+    Context context = functionCall.getContext();
     TupleEntry arguments = functionCall.getArguments();
+
+    context.resetTransform.accept( arguments, context.fields );
+
     Node fromNode = (Node) arguments.getObject( 0, getCoercibleType() );
-
-    if( arguments.size() > ( isInto() ? 2 : 1 ) )
-      resetTransforms( arguments, functionCall.getContext().fields );
-
     Node resultNode = getResultNode( functionCall );
 
     copier.copy( fromNode, resultNode );
-
-    Context context = functionCall.getContext();
 
     context.result.set( 0, resultNode );
 

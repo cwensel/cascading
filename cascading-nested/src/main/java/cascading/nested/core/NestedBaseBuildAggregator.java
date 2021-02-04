@@ -55,7 +55,7 @@ public abstract class NestedBaseBuildAggregator<Node, Result> extends NestedSpec
 
     public void reset()
       {
-      rootNode = getResultNode( null );
+      rootNode = getRootNode();
       }
     }
 
@@ -70,6 +70,8 @@ public abstract class NestedBaseBuildAggregator<Node, Result> extends NestedSpec
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
+    super.prepare( flowProcess, operationCall );
+
     operationCall.setContext( new Context() );
     }
 

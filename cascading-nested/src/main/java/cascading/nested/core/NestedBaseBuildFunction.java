@@ -73,6 +73,8 @@ public abstract class NestedBaseBuildFunction<Node, Result> extends NestedSpecBa
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
+    super.prepare( flowProcess, operationCall );
+
     operationCall.setContext( new Context( Tuple.size( 1 ) ) );
     }
 

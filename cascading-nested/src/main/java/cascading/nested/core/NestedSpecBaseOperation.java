@@ -20,6 +20,9 @@
 
 package cascading.nested.core;
 
+import java.util.function.Function;
+
+import cascading.flow.FlowProcess;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.tuple.Fields;
@@ -30,6 +33,8 @@ import cascading.tuple.TupleEntry;
  */
 public abstract class NestedSpecBaseOperation<Node, Result, Context> extends NestedBaseOperation<Node, Result, Context>
   {
+  transient Function<OperationCall<Context>, Node> resultNodeFunction = null;
+
   public NestedSpecBaseOperation( NestedCoercibleType<Node, Result> nestedCoercibleType, Fields fieldDeclaration )
     {
     super( nestedCoercibleType, fieldDeclaration );
@@ -40,14 +45,20 @@ public abstract class NestedSpecBaseOperation<Node, Result, Context> extends Nes
     super( nestedCoercibleType, numArgs, fieldDeclaration );
     }
 
-  protected abstract boolean isInto();
-
-  protected Node getResultNode( OperationCall<?> operationCall )
+  @Override
+  public void prepare( FlowProcess flowProcess, OperationCall<Context> operationCall )
     {
     if( isInto() )
-      return getArgument( operationCall );
+      resultNodeFunction = this::getArgument;
     else
-      return getRootNode();
+      resultNodeFunction = o -> getRootNode();
+    }
+
+  protected abstract boolean isInto();
+
+  protected Node getResultNode( OperationCall<Context> operationCall )
+    {
+    return resultNodeFunction.apply( operationCall );
     }
 
   protected Node getArgument( OperationCall<?> operationCall )
