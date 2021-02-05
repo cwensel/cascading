@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -42,13 +42,16 @@ import heretical.pointer.path.NestedPointerCompiler;
  * For every field named in the fieldDeclaration {@link Fields} argument, there must be a corresponding
  * {@code stringPointer} value.
  * <p>
+ * If {@code failOnMissingNode} is {@code true} and the pointer returns a {@code null} value, the operation
+ * will fail.
+ * <p>
  * If the fieldDeclaration Fields instance declares a type information, the {@code nestedCoercibleType} will be used to coerce
  * any referenced child value to the expected field type.
  */
 public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, Result, Tuple> implements Function<Tuple>
   {
   protected NestedPointer<Node, Result>[] pointers;
-  protected boolean failOnMissingNode = true;
+  protected boolean failOnMissingNode;
 
   /**
    * Constructor NestedGetFunction creates a new NestedGetFunction instance.
@@ -66,7 +69,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
     if( fieldDeclaration.size() != stringPointers.length )
       throw new IllegalArgumentException( "pointers not same length as declared fields" );
 
-    NestedPointerCompiler compiler = getNestedPointerCompiler();
+    NestedPointerCompiler<Node, Result> compiler = getNestedPointerCompiler();
 
     this.pointers = new BaseNestedPointer[ stringPointers.length ];
 
@@ -83,9 +86,16 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
   @Override
   public void operate( FlowProcess flowProcess, FunctionCall<Tuple> functionCall )
     {
-    Tuple context = functionCall.getContext();
-    Node node = (Node) functionCall.getArguments().getObject( 0, getCoercibleType() );
+    Tuple resultTuple = functionCall.getContext();
+    Node argument = (Node) functionCall.getArguments().getObject( 0, getCoercibleType() );
 
+    extractResult( resultTuple, argument );
+
+    functionCall.getOutputCollector().add( resultTuple );
+    }
+
+  protected void extractResult( Tuple resultTuple, Node node )
+    {
     for( int i = 0; i < pointers.length; i++ )
       {
       Node result = pointers[ i ].at( node );
@@ -96,10 +106,8 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
       Type declaredType = getFieldDeclaration().getType( i );
       Object value = getCoercibleType().coerce( result, declaredType );
 
-      context.set( i, value );
+      resultTuple.set( i, value );
       }
-
-    functionCall.getOutputCollector().add( context );
     }
 
   protected static String[] asArray( Collection<String> values )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -30,6 +30,7 @@ import cascading.nested.core.NestedRegexFilter;
 /**
  * Class JSONRegexFilter provides for the ability to to filter a tuple stream based on the values in a JSON object.
  *
+ * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedRegexFilter for more details.
  */
 public class JSONRegexFilter extends NestedRegexFilter

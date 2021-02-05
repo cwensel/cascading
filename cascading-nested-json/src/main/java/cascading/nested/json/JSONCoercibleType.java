@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -45,8 +45,7 @@ import heretical.pointer.path.NestedPointerCompiler;
 import heretical.pointer.path.json.JSONNestedPointerCompiler;
 
 /**
- * Class JSONCoercibleType is a {@link NestedCoercibleType} that provides support
- * for JSON object types.
+ * Class JSONCoercibleType is a {@link NestedCoercibleType} that provides support for JSON object types.
  * <p>
  * Supported values will be maintained as a {@link JsonNode} canonical type within the {@link cascading.tuple.Tuple}.
  * <p>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * will be set on the final JSON object. This is useful for prevent null values from being set, artificially
  * increasing the size of the final object.
  *
+ * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedCreateFunction for more details.
  */
 public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode>

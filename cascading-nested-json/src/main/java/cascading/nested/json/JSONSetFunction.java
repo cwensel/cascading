@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class JSONSetFunction provides for the ability to simply set multiple tuple values onto an existing JSON object.
  *
+ * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedSetFunction for more details.
  */
 public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
