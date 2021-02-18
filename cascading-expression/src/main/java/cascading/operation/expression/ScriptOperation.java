@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -330,9 +331,13 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
       return context.scriptEvaluator.evaluate( arguments );
       }
+    catch( IllegalArgumentException exception )
+      {
+      throw new OperationException( "could not evaluate expression: " + block + ", typed: " + Arrays.toString( context.parameterTypes ) + " coerced by: " + Arrays.toString( context.parameterCoercions ), exception );
+      }
     catch( InvocationTargetException exception )
       {
-      throw new OperationException( "could not evaluate expression: " + block, exception.getTargetException() );
+      throw new OperationException( "could not evaluate expression: " + block + ", typed: " + Arrays.toString( context.parameterTypes ) + " coerced by: " + Arrays.toString( context.parameterCoercions ), exception.getTargetException() );
       }
     }
 
@@ -370,6 +375,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
 
   public static class Context
     {
+    protected Tuple result;
     private Class[] parameterTypes;
     private ScriptEvaluator scriptEvaluator;
     private Fields parameterFields;
@@ -377,6 +383,5 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     private String[] parameterNames;
     private Object[] parameterArray;
     private Tuple intermediate;
-    protected Tuple result;
     }
   }

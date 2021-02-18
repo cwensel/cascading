@@ -1,6 +1,8 @@
 Cascading Change Log
 
 4.0 [unreleased]
+  Fixed issue where c.o.e.ScriptOperation did not catch the underlying j.l.IllegalArgumentException and rethrow with
+  sufficient diagnostic information.
 
   Upgrade Riffle to version 1.1.0 so that all dependencies on Conjars are removed. Riffle is now hosted in Jcenter.
 
