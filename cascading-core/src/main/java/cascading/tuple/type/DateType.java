@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.TimeZone;
 
 import cascading.CascadingException;
+import cascading.tuple.coerce.Coercions;
 import cascading.util.Util;
 
 /**
@@ -132,14 +133,14 @@ public class DateType implements CoercibleType<Long>
 
     Class from = value.getClass();
 
+    if( from == Long.class )
+      return (Long) value;
+
     if( from == String.class )
       return parse( (String) value ).getTime();
 
     if( from == Date.class )
       return ( (Date) value ).getTime(); // in UTC
-
-    if( from == Long.class || from == long.class )
-      return (Long) value;
 
     throw new CascadingException( "unknown type coercion requested from: " + Util.getTypeName( from ) );
     }
@@ -147,16 +148,22 @@ public class DateType implements CoercibleType<Long>
   @Override
   public Object coerce( Object value, Type to )
     {
+    // we are expecting a Long, as its our canonical type
     if( value == null )
-      return null;
+      {
+      if( Coercions.primitives.containsKey( to ) )
+        return 0;
 
-    Class from = value.getClass();
+      return null;
+      }
+
+    Class<?> from = value.getClass();
 
     if( from != Long.class )
       throw new IllegalStateException( "was not normalized" );
 
     // no coercion, or already in canonical form
-    if( to == Long.class || to == long.class || to == Object.class || DateType.class == to.getClass() )
+    if( to == Long.class || to == Long.TYPE || to == Object.class || DateType.class == to.getClass() )
       return value;
 
     if( to == String.class )
@@ -167,6 +174,11 @@ public class DateType implements CoercibleType<Long>
 
       return getDateFormat().format( calendar.getTime() );
       }
+
+    Coercions.Coerce<?> coerce = Coercions.coercions.get( to );
+
+    if( coerce != null )
+      return coerce.coerce( value );
 
     throw new CascadingException( "unknown type coercion requested, from: " + Util.getTypeName( from ) + " to: " + Util.getTypeName( to ) );
     }
