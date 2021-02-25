@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Added c.o.CompositeFunction to allow for local or partial aggregation within a pipe assembly without a c.p.GroupBy
+  operation.
+
   Fixed issue where c.t.t.DateType would return null instead of 0 when coercing to a primitive long.
 
   Fixed issue where c.o.e.ScriptOperation did not catch the underlying j.l.IllegalArgumentException and rethrow with

@@ -22,40 +22,25 @@
 package cascading.pipe.assembly;
 
 import java.beans.ConstructorProperties;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
-import cascading.CascadingException;
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyConfigured;
 import cascading.management.annotation.PropertyDescription;
 import cascading.management.annotation.Visibility;
 import cascading.operation.Aggregator;
-import cascading.operation.BaseOperation;
 import cascading.operation.Function;
-import cascading.operation.FunctionCall;
-import cascading.operation.OperationCall;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.SubAssembly;
-import cascading.provider.FactoryLoader;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleEntryCollector;
-import cascading.tuple.util.TupleHasher;
-import cascading.tuple.util.TupleViews;
 import cascading.util.cache.BaseCacheFactory;
-import cascading.util.cache.CacheEvictionCallback;
-import cascading.util.cache.CascadingCache;
 
 /**
  * Class AggregateBy is a {@link SubAssembly} that serves two roles for handling aggregate operations.
@@ -120,14 +105,6 @@ public class AggregateBy extends SubAssembly
   {
   public static final int USE_DEFAULT_THRESHOLD = 0;
 
-  private String name;
-  private int capacity;
-  private Fields groupingFields;
-  private Fields[] argumentFields;
-  private Functor[] functors;
-  private Aggregator[] aggregators;
-  private transient GroupBy groupBy;
-
   public enum Cache
     {
       Num_Keys_Flushed,
@@ -140,293 +117,63 @@ public class AggregateBy extends SubAssembly
    * <p>
    * Note the {@link FlowProcess} argument provides access to the underlying properties and counter APIs.
    */
-  public interface Functor extends Serializable
+  public interface Functor extends cascading.operation.CompositeFunction.CoFunction
     {
-    /**
-     * Method getDeclaredFields returns the declaredFields of this Functor object.
-     *
-     * @return the declaredFields (type Fields) of this Functor object.
-     */
-    Fields getDeclaredFields();
-
-    /**
-     * Method aggregate operates on the given args in tandem (optionally) with the given context values.
-     * <p>
-     * The context argument is the result of the previous call to this method. Use it to store values between aggregate
-     * calls (the current count, or sum of the args).
-     * <p>
-     * On the very first invocation of aggregate for a given grouping key, context will be {@code null}. All subsequent
-     * invocations context will be the value returned on the previous invocation.
-     *
-     * @param flowProcess of type FlowProcess
-     * @param args        of type TupleEntry
-     * @param context     of type Tuple   @return Tuple
-     */
-    Tuple aggregate( FlowProcess flowProcess, TupleEntry args, Tuple context );
-
-    /**
-     * Method complete allows the final aggregate computation to be performed before the return value is collected.
-     * <p>
-     * The number of values in the returned {@link Tuple} instance must match the number of declaredFields.
-     * <p>
-     * It is safe to return the context object as the result value.
-     *
-     * @param flowProcess of type FlowProcess
-     * @param context     of type Tuple  @return Tuple
-     */
-    Tuple complete( FlowProcess flowProcess, Tuple context );
     }
 
   /**
    * Class CompositeFunction takes multiple Functor instances and manages them as a single {@link Function}.
    *
-   * @see Functor
+   * @see CoFunction
    */
-  public static class CompositeFunction extends BaseOperation<CompositeFunction.Context> implements Function<CompositeFunction.Context>
+  public static class CompositeFunction extends cascading.operation.CompositeFunction
     {
-    private int capacity = 0;
-    private final Fields groupingFields;
-    private final Fields[] argumentFields;
-    private final Fields[] functorFields;
-    private final Functor[] functors;
-    private final TupleHasher tupleHasher;
-
-    public static class Context
+    public CompositeFunction( Fields groupingFields, Fields argumentFields, CoFunction coFunction, int capacity )
       {
-      CascadingCache<Tuple, Tuple[]> lru;
-      TupleEntry[] arguments;
-      Tuple result;
+      super( groupingFields, argumentFields, coFunction, capacity );
       }
 
-    /**
-     * Constructor CompositeFunction creates a new CompositeFunction instance.
-     *
-     * @param groupingFields of type Fields
-     * @param argumentFields of type Fields
-     * @param functor        of type Functor
-     * @param capacity       of type int
-     */
-    public CompositeFunction( Fields groupingFields, Fields argumentFields, Functor functor, int capacity )
+    public CompositeFunction( Fields groupingFields, Fields[] argumentFields, CoFunction[] coFunctions, int capacity )
       {
-      this( groupingFields, Fields.fields( argumentFields ), new Functor[]{functor}, capacity );
+      super( groupingFields, argumentFields, coFunctions, capacity );
       }
 
-    /**
-     * Constructor CompositeFunction creates a new CompositeFunction instance.
-     *
-     * @param groupingFields of type Fields
-     * @param argumentFields of type Fields[]
-     * @param functors       of type Functor[]
-     * @param capacity       of type int
-     */
-    public CompositeFunction( Fields groupingFields, Fields[] argumentFields, Functor[] functors, int capacity )
+    protected void incrementNumKeysFlushed( FlowProcess flowProcess )
       {
-      super( getFields( groupingFields, functors ) ); // todo: groupingFields should lookup incoming type information
-      this.groupingFields = groupingFields;
-      this.argumentFields = argumentFields;
-      this.functors = functors;
-      this.capacity = capacity;
-
-      this.functorFields = new Fields[ functors.length ];
-
-      for( int i = 0; i < functors.length; i++ )
-        this.functorFields[ i ] = functors[ i ].getDeclaredFields();
-
-      Comparator[] hashers = TupleHasher.merge( functorFields );
-      if( !TupleHasher.isNull( hashers ) )
-        this.tupleHasher = new TupleHasher( null, hashers );
-      else
-        this.tupleHasher = null;
+      flowProcess.increment( AggregateBy.Cache.Num_Keys_Flushed, 1 );
       }
 
-    private static Fields getFields( Fields groupingFields, Functor[] functors )
+    protected void incrementNumKeysHit( FlowProcess flowProcess )
       {
-      Fields fields = groupingFields;
-
-      for( Functor functor : functors )
-        fields = fields.append( functor.getDeclaredFields() );
-
-      return fields;
+      flowProcess.increment( AggregateBy.Cache.Num_Keys_Hit, 1 );
       }
 
-    @Override
-    public void prepare( final FlowProcess flowProcess, final OperationCall<CompositeFunction.Context> operationCall )
+    protected void incrementNumKeysMissed( FlowProcess flowProcess )
       {
-      Fields[] fields = new Fields[ functors.length + 1 ];
-
-      fields[ 0 ] = groupingFields;
-
-      for( int i = 0; i < functors.length; i++ )
-        fields[ i + 1 ] = functors[ i ].getDeclaredFields();
-
-      final Context context = new Context();
-
-      context.arguments = new TupleEntry[ functors.length ];
-
-      for( int i = 0; i < context.arguments.length; i++ )
-        {
-        Fields resolvedArgumentFields = operationCall.getArgumentFields();
-
-        int[] pos;
-
-        if( argumentFields[ i ].isAll() )
-          pos = resolvedArgumentFields.getPos();
-        else
-          pos = resolvedArgumentFields.getPos( argumentFields[ i ] ); // returns null if selector is ALL
-
-        Tuple narrow = TupleViews.createNarrow( pos );
-
-        Fields currentFields;
-
-        if( this.argumentFields[ i ].isSubstitution() )
-          currentFields = resolvedArgumentFields.select( this.argumentFields[ i ] ); // attempt to retain comparator
-        else
-          currentFields = Fields.asDeclaration( this.argumentFields[ i ] );
-
-        context.arguments[ i ] = new TupleEntry( currentFields, narrow );
-        }
-
-      context.result = TupleViews.createComposite( fields );
-
-      class AggregateByEviction implements CacheEvictionCallback<Tuple, Tuple[]>
-        {
-        @Override
-        public void evict( Map.Entry<Tuple, Tuple[]> entry )
-          {
-          completeFunctors( flowProcess, ( (FunctionCall) operationCall ).getOutputCollector(), context.result, entry );
-          flowProcess.increment( Cache.Num_Keys_Flushed, 1 );
-          }
-        }
-
-      FactoryLoader loader = FactoryLoader.getInstance();
-
-      BaseCacheFactory<Tuple, Tuple[], ?> factory = loader.loadFactoryFrom( flowProcess, AggregateByProps.AGGREGATE_BY_CACHE_FACTORY, AggregateByProps.DEFAULT_CACHE_FACTORY_CLASS );
-
-      if( factory == null )
-        throw new CascadingException( "unable to load cache factory, please check your '" + AggregateByProps.AGGREGATE_BY_CACHE_FACTORY + "' setting." );
-
-      CascadingCache<Tuple, Tuple[]> cache = factory.create( flowProcess );
-
-      cache.setCacheEvictionCallback( new AggregateByEviction() );
-
-      Integer cacheCapacity = capacity;
-      if( capacity == 0 )
-        {
-        cacheCapacity = flowProcess.getIntegerProperty( AggregateByProps.AGGREGATE_BY_CAPACITY );
-
-        if( cacheCapacity == null )
-          cacheCapacity = AggregateByProps.AGGREGATE_BY_DEFAULT_CAPACITY;
-        }
-      cache.setCapacity( cacheCapacity.intValue() );
-      cache.initialize();
-
-      context.lru = cache;
-
-      operationCall.setContext( context );
+      flowProcess.increment( AggregateBy.Cache.Num_Keys_Missed, 1 );
       }
 
-    @Override
-    public void operate( FlowProcess flowProcess, FunctionCall<CompositeFunction.Context> functionCall )
+    protected Integer getCacheCapacity( FlowProcess flowProcess )
       {
-      TupleEntry arguments = functionCall.getArguments();
-      Tuple key = TupleHasher.wrapTuple( this.tupleHasher, arguments.selectTupleCopy( groupingFields ) );
-
-      Context context = functionCall.getContext();
-      Tuple[] functorContext = context.lru.get( key );
-
-      if( functorContext == null )
-        {
-        functorContext = new Tuple[ functors.length ];
-        context.lru.put( key, functorContext );
-        flowProcess.increment( Cache.Num_Keys_Missed, 1 );
-        }
-      else
-        {
-        flowProcess.increment( Cache.Num_Keys_Hit, 1 );
-        }
-
-      for( int i = 0; i < functors.length; i++ )
-        {
-        TupleViews.reset( context.arguments[ i ].getTuple(), arguments.getTuple() );
-        functorContext[ i ] = functors[ i ].aggregate( flowProcess, context.arguments[ i ], functorContext[ i ] );
-        }
+      return getCacheCapacity( flowProcess, AggregateByProps.AGGREGATE_BY_CAPACITY, AggregateByProps.AGGREGATE_BY_DEFAULT_CAPACITY );
       }
 
-    @Override
-    public void flush( FlowProcess flowProcess, OperationCall<CompositeFunction.Context> operationCall )
+    protected BaseCacheFactory<Tuple, Tuple[], ?> loadCacheFactory( FlowProcess flowProcess )
       {
-      // need to drain context
-      TupleEntryCollector collector = ( (FunctionCall) operationCall ).getOutputCollector();
-
-      Tuple result = operationCall.getContext().result;
-      Map<Tuple, Tuple[]> context = operationCall.getContext().lru;
-
-      for( Map.Entry<Tuple, Tuple[]> entry : context.entrySet() )
-        completeFunctors( flowProcess, collector, result, entry );
-
-      context.clear();
-      }
-
-    @Override
-    public void cleanup( FlowProcess flowProcess, OperationCall<Context> operationCall )
-      {
-      operationCall.setContext( null );
-      }
-
-    private void completeFunctors( FlowProcess flowProcess, TupleEntryCollector outputCollector, Tuple result, Map.Entry<Tuple, Tuple[]> entry )
-      {
-      Tuple[] results = new Tuple[ functors.length + 1 ];
-
-      results[ 0 ] = entry.getKey();
-
-      Tuple[] values = entry.getValue();
-
-      for( int i = 0; i < functors.length; i++ )
-        results[ i + 1 ] = functors[ i ].complete( flowProcess, values[ i ] );
-
-      TupleViews.reset( result, results );
-
-      outputCollector.add( result );
-      }
-
-    @Override
-    public boolean equals( Object object )
-      {
-      if( this == object )
-        return true;
-      if( !( object instanceof CompositeFunction ) )
-        return false;
-      if( !super.equals( object ) )
-        return false;
-
-      CompositeFunction that = (CompositeFunction) object;
-
-      if( !Arrays.equals( argumentFields, that.argumentFields ) )
-        return false;
-      if( !Arrays.equals( functorFields, that.functorFields ) )
-        return false;
-      if( !Arrays.equals( functors, that.functors ) )
-        return false;
-      if( groupingFields != null ? !groupingFields.equals( that.groupingFields ) : that.groupingFields != null )
-        return false;
-
-      return true;
-      }
-
-    @Override
-    public int hashCode()
-      {
-      int result = super.hashCode();
-      result = 31 * result + ( groupingFields != null ? groupingFields.hashCode() : 0 );
-      result = 31 * result + ( argumentFields != null ? Arrays.hashCode( argumentFields ) : 0 );
-      result = 31 * result + ( functorFields != null ? Arrays.hashCode( functorFields ) : 0 );
-      result = 31 * result + ( functors != null ? Arrays.hashCode( functors ) : 0 );
-      return result;
+      return loadCacheFactory( flowProcess, AggregateByProps.AGGREGATE_BY_CACHE_FACTORY, AggregateByProps.DEFAULT_CACHE_FACTORY_CLASS );
       }
     }
 
+  private String name;
+  private int capacity;
+  private Fields groupingFields;
+  private Fields[] argumentFields;
+  private Functor[] functors;
+  private Aggregator[] aggregators;
+  private transient GroupBy groupBy;
+
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param name     of type String
    * @param capacity of type int
@@ -438,7 +185,7 @@ public class AggregateBy extends SubAssembly
     }
 
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param argumentFields of type Fields
    * @param functor        of type Functor
@@ -452,11 +199,11 @@ public class AggregateBy extends SubAssembly
     }
 
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
-   * @param assemblies     of type CompositeAggregator...
+   * @param assemblies     of type AggregateBy...
    */
   @ConstructorProperties({"pipe", "groupingFields", "assemblies"})
   public AggregateBy( Pipe pipe, Fields groupingFields, AggregateBy... assemblies )
@@ -465,12 +212,12 @@ public class AggregateBy extends SubAssembly
     }
 
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
    * @param capacity       of type int
-   * @param assemblies     of type CompositeAggregator...
+   * @param assemblies     of type AggregateBy...
    */
   @ConstructorProperties({"pipe", "groupingFields", "capacity", "assemblies"})
   public AggregateBy( Pipe pipe, Fields groupingFields, int capacity, AggregateBy... assemblies )
@@ -479,12 +226,12 @@ public class AggregateBy extends SubAssembly
     }
 
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param pipe           of type Pipe
    * @param groupingFields of type Fields
    * @param capacity       of type int
-   * @param assemblies     of type CompositeAggregator...
+   * @param assemblies     of type AggregateBy...
    */
   @ConstructorProperties({"name", "pipe", "groupingFields", "capacity", "assemblies"})
   public AggregateBy( String name, Pipe pipe, Fields groupingFields, int capacity, AggregateBy... assemblies )
@@ -493,12 +240,12 @@ public class AggregateBy extends SubAssembly
     }
 
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param name           of type String
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
-   * @param assemblies     of type CompositeAggregator...
+   * @param assemblies     of type AggregateBy...
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "assemblies"})
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, AggregateBy... assemblies )
@@ -507,22 +254,22 @@ public class AggregateBy extends SubAssembly
     }
 
   /**
-   * Constructor CompositeAggregator creates a new CompositeAggregator instance.
+   * Constructor AggregateBy creates a new AggregateBy instance.
    *
    * @param name           of type String
    * @param pipes          of type Pipe[]
    * @param groupingFields of type Fields
    * @param capacity       of type int
-   * @param assemblies     of type CompositeAggregator...
+   * @param assemblies     of type AggregateBy...
    */
   @ConstructorProperties({"name", "pipes", "groupingFields", "capacity", "assemblies"})
   public AggregateBy( String name, Pipe[] pipes, Fields groupingFields, int capacity, AggregateBy... assemblies )
     {
     this( name, capacity );
 
-    List<Fields> arguments = new ArrayList<Fields>();
-    List<Functor> functors = new ArrayList<Functor>();
-    List<Aggregator> aggregators = new ArrayList<Aggregator>();
+    List<Fields> arguments = new ArrayList<>();
+    List<Functor> functors = new ArrayList<>();
+    List<Aggregator> aggregators = new ArrayList<>();
 
     for( int i = 0; i < assemblies.length; i++ )
       {
