@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -21,13 +22,10 @@
 package cascading.function;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import cascading.PlatformTestCase;
 import cascading.flow.Flow;
-import cascading.operation.Function;
 import cascading.operation.Insert;
 import cascading.operation.function.SetValue;
 import cascading.operation.regex.RegexFilter;
@@ -36,15 +34,10 @@ import cascading.operation.text.FieldFormatter;
 import cascading.pipe.Each;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
-import cascading.pipe.assembly.AggregateBy;
-import cascading.pipe.assembly.CountBy;
-import cascading.pipe.assembly.SumBy;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
-import cascading.tuple.TupleListCollector;
 import org.junit.Test;
 
 import static data.InputData.inputFileApache200;
@@ -137,92 +130,5 @@ public class FunctionPlatformTest extends PlatformTestCase
     assertTrue( results.contains( new Tuple( "true" ) ) );
     assertTrue( results.contains( new Tuple( "false" ) ) );
     assertTrue( results.contains( new Tuple( "false" ) ) );
-    }
-
-  @Test
-  public void testPartialCounts()
-    {
-    Function function = new AggregateBy.CompositeFunction( new Fields( "value" ), Fields.ALL, new CountBy.CountPartials( new Fields( "count" ) ), 2 );
-
-    Fields incoming = new Fields( "value" );
-    TupleEntry[] tuples = new TupleEntry[]{
-      new TupleEntry( incoming, new Tuple( "a" ) ),
-      new TupleEntry( incoming, new Tuple( "a" ) ),
-      new TupleEntry( incoming, new Tuple( "b" ) ),
-      new TupleEntry( incoming, new Tuple( "b" ) ),
-      new TupleEntry( incoming, new Tuple( "c" ) ),
-      new TupleEntry( incoming, new Tuple( "c" ) ),
-      new TupleEntry( incoming, new Tuple( "a" ) ),
-      new TupleEntry( incoming, new Tuple( "a" ) ),
-      new TupleEntry( incoming, new Tuple( "d" ) ),
-      new TupleEntry( incoming, new Tuple( "d" ) ),
-      };
-
-    List<Tuple> expected = new ArrayList<Tuple>();
-    expected.add( new Tuple( "a", 2L ) );
-    expected.add( new Tuple( "b", 2L ) );
-    expected.add( new Tuple( "c", 2L ) );
-    expected.add( new Tuple( "a", 2L ) );
-    expected.add( new Tuple( "d", 2L ) );
-
-    TupleListCollector collector = invokeFunction( function, tuples, new Fields( "value", "count" ) );
-
-    Iterator<Tuple> iterator = collector.iterator();
-
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      count++;
-      Tuple result = iterator.next();
-      int index = expected.indexOf( result );
-      assertTrue( index > -1 );
-      assertEquals( result, expected.get( index ) );
-      expected.remove( index );
-      }
-    assertEquals( 5, count );
-    }
-
-  @Test
-  public void testPartialSums()
-    {
-    Function function = new AggregateBy.CompositeFunction( new Fields( "key" ), new Fields( "value" ), new SumBy.SumPartials( new Fields( "sum" ), float.class ), 2 );
-
-    Fields incoming = new Fields( "key", "value" );
-    TupleEntry[] tuples = new TupleEntry[]{
-      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "b", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "b", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "c", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "c", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "a", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "d", 1 ) ),
-      new TupleEntry( incoming, new Tuple( "d", 1 ) ),
-      };
-
-    List<Tuple> expected = new ArrayList<Tuple>();
-    expected.add( new Tuple( "a", 2F ) );
-    expected.add( new Tuple( "b", 2F ) );
-    expected.add( new Tuple( "c", 2F ) );
-    expected.add( new Tuple( "a", 2F ) );
-    expected.add( new Tuple( "d", 2F ) );
-
-    TupleListCollector collector = invokeFunction( function, tuples, new Fields( "key", "sum" ) );
-
-    Iterator<Tuple> iterator = collector.iterator();
-
-    int count = 0;
-    while( iterator.hasNext() )
-      {
-      count++;
-      Tuple result = iterator.next();
-      int index = expected.indexOf( result );
-      assertTrue( index > -1 );
-      assertEquals( result, expected.get( index ) );
-      expected.remove( index );
-      }
-
-    assertEquals( 5, count );
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import cascading.PlatformTestCase;
@@ -62,6 +64,35 @@ import static data.InputData.*;
  */
 public class AssemblyHelpersPlatformTest extends PlatformTestCase
   {
+  /**
+   * inserts null values into the tuple stream.
+   */
+  class NullInsert extends BaseOperation implements Function
+    {
+    private final int number;
+
+    public NullInsert( int numberToFilter, Fields fieldDeclaration )
+      {
+      super( 2, fieldDeclaration );
+      this.number = numberToFilter;
+      }
+
+    @Override
+    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
+      {
+      TupleEntry argument = functionCall.getArguments();
+      int num = argument.getInteger( 0 );
+      String chr = argument.getString( 1 );
+      Tuple result;
+      if( num == number )
+        result = new Tuple( null, chr );
+      else
+        result = new Tuple( num, chr );
+
+      functionCall.getOutputCollector().add( result );
+      }
+    }
+
   public AssemblyHelpersPlatformTest()
     {
     }
@@ -1122,35 +1153,6 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     iterator.close();
     }
 
-  /**
-   * inserts null values into the tuple stream.
-   */
-  class NullInsert extends BaseOperation implements Function
-    {
-    private final int number;
-
-    public NullInsert( int numberToFilter, Fields fieldDeclaration )
-      {
-      super( 2, fieldDeclaration );
-      this.number = numberToFilter;
-      }
-
-    @Override
-    public void operate( FlowProcess flowProcess, FunctionCall functionCall )
-      {
-      TupleEntry argument = functionCall.getArguments();
-      int num = argument.getInteger( 0 );
-      String chr = argument.getString( 1 );
-      Tuple result;
-      if( num == number )
-        result = new Tuple( null, chr );
-      else
-        result = new Tuple( num, chr );
-
-      functionCall.getOutputCollector().add( result );
-      }
-    }
-
   @Test
   public void testMinByNullSafety() throws IOException
     {
@@ -1325,6 +1327,150 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( 4, "d" ),
       new Tuple( 5, "e" ),
       };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testSumByLocally() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "sum" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "sum" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "sum" );
+
+    pipe = new SumByLocally( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "sum" ), long.class, 500 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Set<Tuple> results = new HashSet<>();
+    Collections.addAll( results,
+      new Tuple( "a", 6 ),
+      new Tuple( "b", 12 ),
+      new Tuple( "c", 10 ),
+      new Tuple( "d", 6 ),
+      new Tuple( "e", 5 ) );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    while( iterator.hasNext() )
+      assertTrue( results.contains( iterator.next().getTuple() ) );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testCountByLocally() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "count" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "count" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    pipe = new CountByLocally( pipe, new Fields( "char" ), new Fields( "count" ), 1000 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Set<Tuple> results = new HashSet<>();
+    Collections.addAll( results,
+      new Tuple( "a", 2 ),
+      new Tuple( "b", 4 ),
+      new Tuple( "c", 4 ),
+      new Tuple( "d", 2 ),
+      new Tuple( "e", 1 )
+    );
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertTrue( results.contains( iterator.next().getTuple() ) );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testCountByLocallyAll() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "count" ), "\t",
+      new Class[]{Integer.TYPE}, getOutputPath( "countall" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    CountByLocally countBy = new CountByLocally( new Fields( "char" ), new Fields( "count" ) );
+
+    pipe = new AggregateByLocally( pipe, Fields.NONE, 1000, countBy );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, 1, Pattern.compile( "^\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 13 )
+    };
+
+    TupleEntryIterator iterator = flow.openSink();
+    int count = 0;
+
+    while( iterator.hasNext() )
+      assertEquals( results[ count++ ], iterator.next().getTuple() );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testCountByLocallyNullNotNull() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "notnull", "null" ), "\t",
+      new Class[]{Integer.TYPE, Integer.TYPE}, getOutputPath( "countnullnotnull" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "count" );
+
+    ExpressionFunction function = new ExpressionFunction( Fields.ARGS, "\"c\".equals($0) ? null : $0", String.class );
+    pipe = new Each( pipe, new Fields( "char" ), function, Fields.REPLACE );
+
+    CountByLocally countNotNull = new CountByLocally( new Fields( "char" ), new Fields( "notnull" ), CountByLocally.Include.NO_NULLS );
+    CountByLocally countNull = new CountByLocally( new Fields( "char" ), new Fields( "null" ), CountByLocally.Include.ONLY_NULLS );
+
+    pipe = new AggregateByLocally( pipe, Fields.NONE, 1000, countNotNull, countNull );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 1, 2, Pattern.compile( "^\\d+\t\\d+$" ) );
+
+    Tuple[] results = new Tuple[]{
+      new Tuple( 9, 4 )
+    };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
