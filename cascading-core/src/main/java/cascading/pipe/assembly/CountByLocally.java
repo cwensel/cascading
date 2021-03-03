@@ -91,6 +91,10 @@ public class CountByLocally extends AggregateByLocally
     public CountPartials( Fields declaredFields, Include include )
       {
       this.declaredFields = declaredFields;
+
+      if( include == null )
+        include = Include.ALL;
+
       this.include = include;
 
       if( !declaredFields.isDeclarator() || declaredFields.size() != 1 )
