@@ -77,6 +77,10 @@ import cascading.util.cache.BaseCacheFactory;
  * Note using a AggregateByLocally instance does not insert a {@link GroupBy} into the resulting {@link cascading.flow.Flow}.
  *
  * @see SumByLocally
+ * @see CountByLocally
+ * @see MinByLocally
+ * @see MaxByLocally
+ * @see AverageByLocally
  * @see cascading.util.cache.LRUHashMapCacheFactory
  * @see cascading.util.cache.DirectMappedCacheFactory
  * @see cascading.util.cache.LRUHashMapCache
@@ -266,7 +270,9 @@ public class AggregateByLocally extends SubAssembly
     setTails( pipe );
     }
 
-  /** Method verify should be overridden by sub-classes if any values must be tested before the calling constructor returns. */
+  /**
+   * Method verify should be overridden by sub-classes if any values must be tested before the calling constructor returns.
+   */
   protected void verify()
     {
 

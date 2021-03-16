@@ -2,8 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
-  Added c.p.a.AggregateByLocally, c.p.a.SumByLocally, and c.p.a.CountByLocally classes to provide aggregations against
-  locally ordered unique keys.
+  Added c.p.a.AggregateByLocally, c.p.a.SumByLocally, c.p.a.CountByLocally, c.p.a.MinByLocally, c.p.a.MaxByLocally,
+  and c.p.a.AverageByLocally classes to provide aggregations against locally ordered unique keys.
 
   Added c.o.CompositeFunction to allow for local or partial aggregation within a pipe assembly without a c.p.GroupBy
   operation.

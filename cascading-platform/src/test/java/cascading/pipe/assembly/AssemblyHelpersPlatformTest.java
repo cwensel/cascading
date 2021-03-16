@@ -1141,8 +1141,8 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "b", 1 ),
       new Tuple( "c", 1 ),
       new Tuple( "d", 2 ),
-      new Tuple( "e", 5 ),
-      };
+      new Tuple( "e", 5 )
+    };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1179,8 +1179,8 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       new Tuple( "b", 1 ),
       new Tuple( "c", 1 ),
       new Tuple( "d", 2 ),
-      new Tuple( "e", 5 ),
-      };
+      new Tuple( "e", 5 )
+    };
 
     TupleEntryIterator iterator = flow.openSink();
     int count = 0;
@@ -1479,5 +1479,119 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
       assertEquals( results[ count++ ], iterator.next().getTuple() );
 
     iterator.close();
+    }
+
+  @Test
+  public void testMinByLocallyNullSafety() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "min" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "minbynullsafety" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "min" );
+
+    pipe = new Each( pipe, new NullInsert( 3, new Fields( "num", "char" ) ), Fields.RESULTS );
+
+    pipe = new MinByLocally( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "min" ), 1000 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Set<Tuple> results = new HashSet<>();
+    Collections.addAll( results,
+      new Tuple( "a", 1 ),
+      new Tuple( "b", 1 ),
+      new Tuple( "c", 1 ),
+      new Tuple( "d", 2 ),
+      new Tuple( "e", 5 )
+    );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    while( iterator.hasNext() )
+      assertTrue( results.remove( iterator.next().getTuple() ) );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testMaxByLocallyNullSafety() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "max" ), "\t",
+      new Class[]{String.class, Integer.TYPE}, getOutputPath( "maxbylocallynullsafety" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "max" );
+
+    pipe = new Each( pipe, new NullInsert( 1, new Fields( "num", "char" ) ), Fields.RESULTS );
+
+    pipe = new MaxByLocally( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "max" ), 1000 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s\\d+$" ) );
+
+    Set<Tuple> results = new HashSet<>();
+    Collections.addAll( results,
+      new Tuple( "a", 5 ),
+      new Tuple( "b", 5 ),
+      new Tuple( "c", 4 ),
+      new Tuple( "d", 4 ),
+      new Tuple( "e", 5 )
+    );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    while( iterator.hasNext() )
+      assertTrue( results.remove( iterator.next().getTuple() ) );
+
+    iterator.close();
+    }
+
+  @Test
+  public void testAverageByLocally() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLhs );
+
+    Tap source = getPlatform().getDelimitedFile( new Fields( "num", "char" ), " ", inputFileLhs );
+    Tap sink = getPlatform().getDelimitedFile( new Fields( "char", "average" ), "\t",
+      new Class[]{String.class, Double.TYPE}, getOutputPath( "average" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "average" );
+
+    pipe = new AverageByLocally( pipe, new Fields( "char" ), new Fields( "num" ), new Fields( "average" ), 1000 );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 2, Pattern.compile( "^\\w+\\s[\\d.]+$" ) );
+
+    Set<Tuple> results = new HashSet<>();
+    Collections.addAll( results,
+      new Tuple( "a", (double) 6 / 2 ),
+      new Tuple( "b", (double) 12 / 4 ),
+      new Tuple( "c", (double) 10 / 4 ),
+      new Tuple( "d", (double) 6 / 2 ),
+      new Tuple( "e", (double) 5 / 1 )
+    );
+
+    TupleEntryIterator iterator = flow.openSink();
+
+    while( iterator.hasNext() )
+      assertTrue( results.remove( iterator.next().getTuple() ) );
+
+    iterator.close();
+
+    assertTrue( results.isEmpty() );
     }
   }

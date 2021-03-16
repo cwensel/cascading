@@ -175,7 +175,7 @@ public class FunctionsTest extends CascadingTestCase
     }
 
   @Test
-  public void testLoallyPartialCounts()
+  public void testLocallyPartialCounts()
     {
     Function function = new AggregateByLocally.CompositeFunction( new Fields( "value" ), Fields.ALL, new CountByLocally.CountPartials( new Fields( "count" ) ), 2 );
 
