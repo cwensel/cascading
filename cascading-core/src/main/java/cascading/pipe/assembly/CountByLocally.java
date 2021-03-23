@@ -30,6 +30,8 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.Tuples;
+import cascading.tuple.coerce.Coercions;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class CountByLocally is used to count duplicates in a tuple stream, where "duplicates" means all tuples with the same
@@ -77,6 +79,7 @@ public class CountByLocally extends AggregateByLocally
     {
     private final Fields declaredFields;
     private final Include include;
+    private final CoercibleType canonical;
 
     /**
      * Constructor CountPartials creates a new CountPartials instance.
@@ -90,15 +93,19 @@ public class CountByLocally extends AggregateByLocally
 
     public CountPartials( Fields declaredFields, Include include )
       {
+      if( !declaredFields.isDeclarator() || declaredFields.size() != 1 )
+        throw new IllegalArgumentException( "declaredFields should declare only one field name" );
+
+      if( declaredFields.getType( 0 ) == null )
+        declaredFields = declaredFields.applyTypes( Long.TYPE );
+
       this.declaredFields = declaredFields;
 
       if( include == null )
         include = Include.ALL;
 
       this.include = include;
-
-      if( !declaredFields.isDeclarator() || declaredFields.size() != 1 )
-        throw new IllegalArgumentException( "declaredFields should declare only one field name" );
+      this.canonical = Coercions.coercibleTypeFor( this.declaredFields.getType( 0 ) );
       }
 
     @Override
@@ -139,6 +146,8 @@ public class CountByLocally extends AggregateByLocally
     @Override
     public Tuple complete( FlowProcess flowProcess, Tuple context )
       {
+      context.set( 0, canonical.canonical( context.getObject( 0 ) ) );
+
       return context;
       }
     }
@@ -167,7 +176,7 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"countField", "include"})
   public CountByLocally( Fields countField, Include include )
     {
-    super( Fields.ALL, new CountPartials( countField.applyTypes( Long.TYPE ), include ) );
+    super( Fields.ALL, new CountPartials( countField, include ) );
     }
 
   /**
@@ -179,7 +188,7 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"valueFields", "countField"})
   public CountByLocally( Fields valueFields, Fields countField )
     {
-    super( valueFields, new CountPartials( countField.applyTypes( Long.TYPE ) ) );
+    super( valueFields, new CountPartials( countField ) );
     }
 
   /**
@@ -191,7 +200,7 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"valueFields", "countField", "include"})
   public CountByLocally( Fields valueFields, Fields countField, Include include )
     {
-    super( valueFields, new CountPartials( countField.applyTypes( Long.TYPE ), include ) );
+    super( valueFields, new CountPartials( countField, include ) );
     }
 
   ///////
@@ -249,7 +258,7 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "threshold"})
   public CountByLocally( String name, Pipe pipe, Fields groupingFields, Fields countField, int threshold )
     {
-    super( name, pipe, groupingFields, groupingFields, new CountPartials( countField.applyTypes( Long.TYPE ) ), threshold );
+    super( name, pipe, groupingFields, groupingFields, new CountPartials( countField ), threshold );
     }
 
   ///////
@@ -311,7 +320,7 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"name", "pipe", "groupingFields", "countField", "include", "threshold"})
   public CountByLocally( String name, Pipe pipe, Fields groupingFields, Fields countField, Include include, int threshold )
     {
-    super( name, pipe, groupingFields, groupingFields, new CountPartials( countField.applyTypes( Long.TYPE ), include ), threshold );
+    super( name, pipe, groupingFields, groupingFields, new CountPartials( countField, include ), threshold );
     }
 
 ////////////
@@ -373,7 +382,7 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueFields", "countField", "threshold"})
   public CountByLocally( String name, Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, int threshold )
     {
-    super( name, pipe, groupingFields, valueFields, new CountPartials( countField.applyTypes( Long.TYPE ) ), threshold );
+    super( name, pipe, groupingFields, valueFields, new CountPartials( countField ), threshold );
     }
 
 ////////////
@@ -439,6 +448,6 @@ public class CountByLocally extends AggregateByLocally
   @ConstructorProperties({"name", "pipe", "groupingFields", "valueFields", "countField", "include", "threshold"})
   public CountByLocally( String name, Pipe pipe, Fields groupingFields, Fields valueFields, Fields countField, Include include, int threshold )
     {
-    super( name, pipe, groupingFields, valueFields, new CountPartials( countField.applyTypes( Long.TYPE ), include ), threshold );
+    super( name, pipe, groupingFields, valueFields, new CountPartials( countField, include ), threshold );
     }
   }
