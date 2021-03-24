@@ -208,11 +208,26 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return parameterTypes;
     }
 
+  /**
+   * Return a Class that the expression or script should extend, allowing for direct access to methods.
+   *
+   * @return a Class to extend
+   */
+  public Class<?> getExtendedClass()
+    {
+    return null;
+    }
+
   protected Evaluator getEvaluator( Class returnType, String[] parameterNames, Class[] parameterTypes )
     {
     try
       {
-      ScriptEvaluator evaluator = new ScriptEvaluator( block, returnType, parameterNames, parameterTypes );
+      ScriptEvaluator evaluator = new ScriptEvaluator();
+
+      evaluator.setReturnType( returnType );
+      evaluator.setParameters( parameterNames, parameterTypes );
+      evaluator.setExtendedClass( getExtendedClass() );
+      evaluator.cook( block );
 
       return evaluator::evaluate;
       }

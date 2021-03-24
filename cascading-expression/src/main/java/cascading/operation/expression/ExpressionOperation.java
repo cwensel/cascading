@@ -91,7 +91,11 @@ public class ExpressionOperation extends ScriptOperation
     {
     try
       {
-      ExpressionEvaluator evaluator = new ExpressionEvaluator( block, getReturnType(), parameterNames, parameterTypes );
+      ExpressionEvaluator evaluator = new ExpressionEvaluator();
+      evaluator.setReturnType( returnType );
+      evaluator.setParameters( parameterNames, parameterTypes );
+      evaluator.setExtendedClass( getExtendedClass() );
+      evaluator.cook( block );
 
       return evaluator::evaluate;
       }

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -151,6 +152,28 @@ public class ExpressionTest extends CascadingTestCase
       {
       // ignore
       }
+    }
+
+  @Test
+  public void testExtendedClassExpression()
+    {
+    Fields fields = new Fields( "a", "b" ).applyTypes( String.class, double.class );
+    String expression = "returnValue(\"value\")";
+    ExpressionFunction result = new ExpressionFunction( new Fields( "result" ), expression )
+      {
+      @Override
+      public Class<?> getExtendedClass()
+        {
+        return Extended.class;
+        }
+      };
+
+    String value = (String) evaluate( result, getEntry( fields, "1", 2.0 ) );
+    assertNotNull( value );
+
+    // Fields.NONE as argument selector
+    value = (String) evaluate( result, TupleEntry.NULL );
+    assertNotNull( value );
     }
 
   private Object evaluate( ExpressionFunction function, TupleEntry tupleEntry )
