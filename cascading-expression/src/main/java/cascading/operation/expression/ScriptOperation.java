@@ -193,7 +193,7 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     if( !hasParameterNames() )
       return parameterTypes;
 
-    if( hasParameterNames() && parameterNames.length == parameterTypes.length )
+    if( parameterNames.length == parameterTypes.length )
       return parameterTypes;
 
     if( parameterNames.length > 0 && parameterTypes.length != 1 )
@@ -208,11 +208,13 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return parameterTypes;
     }
 
-  protected ScriptEvaluator getEvaluator( Class returnType, String[] parameterNames, Class[] parameterTypes )
+  protected Evaluator getEvaluator( Class returnType, String[] parameterNames, Class[] parameterTypes )
     {
     try
       {
-      return new ScriptEvaluator( block, returnType, parameterNames, parameterTypes );
+      ScriptEvaluator evaluator = new ScriptEvaluator( block, returnType, parameterNames, parameterTypes );
+
+      return evaluator::evaluate;
       }
     catch( CompileException exception )
       {
@@ -373,11 +375,16 @@ public abstract class ScriptOperation extends BaseOperation<ScriptOperation.Cont
     return result;
     }
 
+  protected interface Evaluator
+    {
+    Object evaluate( Object[] arguments ) throws InvocationTargetException;
+    }
+
   public static class Context
     {
     protected Tuple result;
     private Class[] parameterTypes;
-    private ScriptEvaluator scriptEvaluator;
+    private Evaluator scriptEvaluator;
     private Fields parameterFields;
     private CoercibleType[] parameterCoercions;
     private String[] parameterNames;

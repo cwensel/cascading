@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -29,7 +30,6 @@ import cascading.tuple.Fields;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ExpressionEvaluator;
 import org.codehaus.janino.Scanner;
-import org.codehaus.janino.ScriptEvaluator;
 
 import static cascading.tuple.coerce.Coercions.asClass;
 
@@ -87,11 +87,13 @@ public class ExpressionOperation extends ScriptOperation
     }
 
   @Override
-  protected ScriptEvaluator getEvaluator( Class returnType, String[] parameterNames, Class[] parameterTypes )
+  protected Evaluator getEvaluator( Class returnType, String[] parameterNames, Class[] parameterTypes )
     {
     try
       {
-      return new ExpressionEvaluator( block, getReturnType(), parameterNames, parameterTypes );
+      ExpressionEvaluator evaluator = new ExpressionEvaluator( block, getReturnType(), parameterNames, parameterTypes );
+
+      return evaluator::evaluate;
       }
     catch( CompileException exception )
       {

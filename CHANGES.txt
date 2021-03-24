@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Updated janino to version 3.1.3.
+
   Added c.p.a.AggregateByLocally, c.p.a.SumByLocally, c.p.a.CountByLocally, c.p.a.MinByLocally, c.p.a.MaxByLocally,
   and c.p.a.AverageByLocally classes to provide aggregations against locally ordered unique keys.
 
