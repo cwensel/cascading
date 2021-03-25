@@ -24,7 +24,7 @@ import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
 
 buildscript {
   repositories {
-    jcenter()
+    mavenCentral()
   }
 
   dependencies {

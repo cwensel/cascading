@@ -181,6 +181,15 @@ public class URISanitizerTest
     }
 
   @Test
+  public void testS3AGlob()
+      {
+      String uri = "s3a://some-bucket/2014/12/2[5-9]/*";
+      URISanitizer sanitizer = new URISanitizer();
+      String result = sanitizer.apply( Visibility.PROTECTED, uri );
+      assertEquals( "/2014/12/2[5-9]/*", result );
+      }
+
+  @Test
   public void testOpaqueURI()
     {
     String uri = "memory:driven.agent.driven.spark.SkewExampleTest.testSubmit(SkewExampleTest.scala:36)";

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-ext.hadoop2Version = '2.7.3'
+ext.hadoop3Version = '3.2.1'
 
 ext.jacksonDatabindVersion = '2.12.4'
 ext.jacksonDatatypeGuavaVersion = jacksonDatabindVersion
@@ -30,9 +30,9 @@ dependencies {
 
   compileOnly project( ':cascading-local' )
 
-  compileOnly project( ':cascading-hadoop2-io' )
-  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
-  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  compileOnly project( ':cascading-hadoop3-io' )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
 
   api group: 'io.heretical', name: 'pointer-path-json', version: '1.1.0'
 
@@ -41,7 +41,7 @@ dependencies {
   api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-ion', version: jacksonDatabindVersion
 
   // for serializers
-  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
 
   testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
   testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatabindVersion

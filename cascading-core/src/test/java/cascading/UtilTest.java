@@ -123,6 +123,7 @@ public class UtilTest
     "hadoop42.example.com",
     "hadoop42.example.com",
     "hadoop42.example.com",
+    "some-bucket",
     "some-bucket"
   };
 
@@ -139,7 +140,8 @@ public class UtilTest
     "hadoop42.example.com:8020/some/dataset", // hadoop leaves out the uri sometimes
     "foor:bar@hadoop42.example.com:8020/some/dataset",
     "foor:bar@hadoop42.example.com/some/dataset",
-    "s3n://some-bucket/2014/12/2[5-9]/*"
+    "s3n://some-bucket/2014/12/2[5-9]/*",
+     "s3a://some-bucket/2014/12/2[5-9]/*"
   };
 
   @Test

@@ -31,21 +31,21 @@ The project includes nine Cascading jar files:
 * `cascading-local-neo4j-x.y.z.jar`       - all Cascading Local support for Neo4j
 * `cascading-local-s3-x.y.z.jar`          - all Cascading Local support for AWS S3
 * `cascading-local-splunk-x.y.z.jar`      - all Cascading Local support for Splunk
-* `cascading-local-hadoop2-io-x.y.z.jar`  - all Cascading Local in-memory mode class files used with Hadoop
-* `cascading-hadoop2-common-x.y.z.jar`    - all Cascading Hadoop 2.x common class files
-* `cascading-hadoop2-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
-* `cascading-hadoop2-mr1-x.y.z.jar`       - all Cascading Hadoop 2.x MapReduce mode class files
-* `cascading-hadoop2-tez-x.y.z.jar`       - all Cascading Hadoop 2.x Tez mode class files
-* `cascading-hadoop2-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
+* `cascading-local-hadoop3-io-x.y.z.jar`  - all Cascading Local in-memory mode class files used with Hadoop
+* `cascading-hadoop3-common-x.y.z.jar`    - all Cascading Hadoop 2.x common class files
+* `cascading-hadoop3-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
+* `cascading-hadoop3-mr1-x.y.z.jar`       - all Cascading Hadoop 2.x MapReduce mode class files
+* `cascading-hadoop3-tez-x.y.z.jar`       - all Cascading Hadoop 2.x Tez mode class files
+* `cascading-hadoop3-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the Maven repository.
 
 Local mode is where the Cascading application will run locally in memory without cluster distribution. This
 implementation has minimal to no robustness in low memory situations, by design.
 
-Hadoop 2.x MR1 mode is for running on Hadoop 2.x releases.
+Hadoop 3.x MR1 mode is for running on Hadoop 3.x releases.
 
-Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
+Hadoop 3.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
 
 As of Cascading 4.x, all above jar files are built against Java 1.8. Prior versions of Cascading are built against Java
 1.7 and 1.6.
@@ -107,11 +107,11 @@ by setting:
 
 From Gradle, to run a single test case:
 
-    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i
+    > gradle :cascading-hadoop3-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i
 
 or a single test method:
 
-    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i
+    > gradle :cascading-hadoop3-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i
 
 ## Debugging the Planner
 
@@ -150,7 +150,7 @@ Note the `cascading-platform` compile dependency has no classes, you must pull t
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Maven.
 
-Note that `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the Hadoop jars so that
+Note that `cascading-hadoop3-mr1`, and `cascading-hadoop3-tez` have a `provided` dependency on the Hadoop jars so that
 it won't get sucked into any application packaging as a dependency, typically.
 
 ## Building and IDE Integration
@@ -171,7 +171,7 @@ To build Cascading, run the following in the shell:
 First confirm you are using a supported version of Apache Hadoop by checking the
 [Compatibility](https://cascading.wensel.net/support/compatibility/) page.
 
-To use Cascading with Hadoop, we suggest stuffing `cascading-core` and `cascading-hadoop2-mr1`, jar files and all
+To use Cascading with Hadoop, we suggest stuffing `cascading-core` and `cascading-hadoop3-mr1`, jar files and all
 third-party libs into the `lib` folder of your job jar and executing your job via
 `$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
 
@@ -180,9 +180,9 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 ```bash
 /<all your class and resource files>
 /lib/cascading-core-x.y.z.jar
-/lib/cascading-hadoop2-common-x.y.z.jar
-/lib/cascading-hadoop2-mr1-x.y.z.jar
-/lib/cascading-hadoop2-io-x.y.z.jar
+/lib/cascading-hadoop3-common-x.y.z.jar
+/lib/cascading-hadoop3-mr1-x.y.z.jar
+/lib/cascading-hadoop3-io-x.y.z.jar
 /lib/cascading-expression-x.y.z.jar
 /lib/cascading-nested-json-x.y.z.jar
 /lib/<cascading third-party jar files>
