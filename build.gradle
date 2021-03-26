@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 
 /*
- * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -34,10 +34,6 @@ import java.text.SimpleDateFormat
    -Dtest.debug
 */
 
-plugins {
-  id "io.spring.bintray" version "0.11.1" apply false
-}
-
 apply from: 'etc/version.gradle'
 apply from: "etc/s3Upload.gradle"
 
@@ -47,10 +43,9 @@ allprojects {
   apply plugin: 'eclipse'
 
   repositories {
-    mavenLocal()
     mavenCentral()
     jcenter()
-    maven {url = 'https://repository.apache.org'}
+    maven {url = 'https://repository.apache.org/'}
   }
 }
 
@@ -64,9 +59,9 @@ ext.copyright = '<i>Copyright &#169; 2007-2017 Cascading Maintainers. All Rights
 
 subprojects {
 
-  apply plugin: "io.spring.bintray"
   apply plugin: 'java-library'
   apply plugin: 'maven-publish'
+  apply plugin: 'signing'
   apply from: '../etc/testing.gradle'
 
   sourceCompatibility = 1.8
@@ -82,26 +77,6 @@ subprojects {
     testArtifacts {
       extendsFrom testRuntimeClasspath
     }
-  }
-
-  bintray {
-    bintrayUser = repoUserName
-    bintrayKey = repoPassword
-
-    org = 'wensel'
-    repo =  isFinalRelease ? 'release' : 'wip'
-
-    overrideOnUpload = true
-
-    publication = 'maven'
-
-    licenses = ['Apache-2.0']
-    websiteUrl = 'http://cascading.org/'
-    issueTrackerUrl = 'https://github.com/Cascading/cascading/issues'
-    vcsUrl = 'https://github.com/Cascading/cascading.git'
-  }
-
-  task bintrayPublishBuild( dependsOn: [bintrayUpload, bintrayPublish]) {
   }
 
   jar {
@@ -199,6 +174,17 @@ subprojects {
   }
 
   publishing {
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = uri( "https://maven.pkg.github.com/cwensel/cascading" )
+        credentials {
+          username = repoUserName ?: System.getenv( "GPR_USERNAME" )
+          password = repoPassword ?: System.getenv( "GPR_TOKEN" )
+        }
+      }
+    }
+
     publications {
       maven( MavenPublication ) {
         artifact sourcesJar
@@ -227,6 +213,8 @@ subprojects {
       }
     }
   }
+
+  publishAllPublicationsToGitHubPackagesRepository.enabled = !isFinalRelease
 }
 
 task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {

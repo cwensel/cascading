@@ -141,13 +141,13 @@ See __CONTRIBUTING.md__ at https://github.com/Cascading/cascading.
 
 ## Using with Maven/Ivy
 
-It is strongly recommended developers pull Cascading from Jcenter.
-[jcenter.bintray.com](https://jcenter.bintray.com/).
+It is strongly recommended developers pull Cascading from Maven Central.
 
-Alternatively, see bintray for latest wip and final releases: 
+_This won't be true until 4.0 is released!_
 
-* https://bintray.com/wensel/wip
-* https://bintray.com/wensel/release
+Alternatively, see GitHub Packages for latest WIP releases: 
+
+* https://maven.pkg.github.com/cwensel/cascading
 
 When creating tests, make sure to add any of the relevant above dependencies to your `test` scope or equivalent
 configuration along with the `cascading-platform` dependency.

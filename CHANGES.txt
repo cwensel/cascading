@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0 [unreleased]
 
+  Publish wip releases to GitHub Packages.
+
   Update Apache Hadoop to version 2.10.1.
 
   Updated janino to version 3.1.3.
