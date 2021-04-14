@@ -55,7 +55,7 @@ task prepareDist() {
   project.distDir = mkdir( "${rootDir}/build/dist" )
 }
 
-ext.copyright = '<i>Copyright &#169; 2007-2017 Cascading Maintainers. All Rights Reserved.</i>'
+ext.copyright = '<i>Copyright &#169; 2007-2021 Cascading Maintainers. All Rights Reserved.</i>'
 
 subprojects {
 
@@ -215,6 +215,10 @@ subprojects {
   }
 
   publishAllPublicationsToGitHubPackagesRepository.enabled = !isFinalRelease
+
+  signing {
+    sign publishing.publications.maven
+  }
 }
 
 task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {

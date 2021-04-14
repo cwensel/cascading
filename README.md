@@ -6,8 +6,8 @@ Thanks for using Cascading.
 
 Cascading 4 includes a few major changes and additions from prior major releases:
 
-* Moved the website to https://cascading.wensel.net/
-* Moved to JCenter and changed the Maven group name to `net.wensel` (from `cascading`)
+* Moved the website to https://cascading.wensel.net/ (__currently not up to date__)
+* Moved to GitHub Packages and Maven Central, and changed the Maven group name to `net.wensel` (from `cascading`)
 * Added native JSON support via the `cascading-nested-json` sub-project
 * Removed `cascading-xml` sub-project
 * Removed Apache Hadoop 1.x support
@@ -15,6 +15,8 @@ Cascading 4 includes a few major changes and additions from prior major releases
 ## General Information:
 
 _Note: Everything is subject to change as we re-imagine Cascading 4 resources._
+
+For current WIP releases, go to: https://github.com/cwensel?tab=packages&repo_name=cascading
 
 For project documentation and community support, visit: [cascading.wensel.net](https://cascading.wensel.net/)
 
@@ -83,7 +85,7 @@ releases*. This allows us to respond to bugs and performance issues without issu
 The source and tags for all prior (to 4.x) stable releases can be found here:
 [https://github.com/Cascading/cascading](https://github.com/Cascading/cascading)
 
-All 4.x releases will be maintainted here:
+All 4.x releases will be maintained here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 WIP (work in progress) releases are fully tested builds of code not yet deemed fully stable. On every build by our
