@@ -29,8 +29,8 @@ dependencies {
   testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
   testImplementation group: 'commons-io', name: 'commons-io', version: '2.1'
 
-  testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
-  testRuntime group: 'log4j', name: 'log4j', version: '1.2.16'
+  testRuntimeClasspath group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+  testRuntimeClasspath group: 'log4j', name: 'log4j', version: '1.2.16'
 }
 
 task platformCompareTest( type: Test ) {
