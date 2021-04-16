@@ -33,6 +33,9 @@ import java.text.SimpleDateFormat
  To remotely debug use
    -Dtest.debug
 */
+plugins {
+  id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+}
 
 apply from: 'etc/version.gradle'
 apply from: "etc/s3Upload.gradle"
@@ -173,6 +176,7 @@ subprojects {
     }
   }
 
+  // publish wips via publishAllPublicationsToGitHubPackagesRepository
   publishing {
     repositories {
       maven {
@@ -199,6 +203,13 @@ subprojects {
           description = 'An API for data management, analytics, and machine learning on parallel computing clusters.'
           url = 'http://cascading.wensel.net/'
           inceptionYear = '2007'
+          developers {
+            developer {
+              name = 'Chris K Wensel'
+              email = 'chris@wensel.net'
+              url = 'https://chris.wensel.net/'
+            }
+          }
           licenses {
             license {
               name = 'The Apache Software License, Version 2.0'
@@ -213,8 +224,6 @@ subprojects {
       }
     }
   }
-
-  publishAllPublicationsToGitHubPackagesRepository.enabled = !isFinalRelease
 
   signing {
     sign publishing.publications.maven
@@ -239,6 +248,19 @@ task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
       'http://docs.oracle.com/javase/8/docs/api/',
       'http://junit.sourceforge.net/javadoc/'
     ]
+  }
+}
+
+// publish releases via publishToSonatype closeAndReleaseSonatypeStagingRepository
+nexusPublishing {
+  repositories {
+    sonatype {
+      nexusUrl.set( uri( "https://s01.oss.sonatype.org/service/local/" ) )
+      snapshotRepositoryUrl.set( uri( "https://s01.oss.sonatype.org/content/repositories/snapshots/" ) )
+
+      username = repoUserName ?: System.getenv( "MCR_USERNAME" )
+      password = repoPassword ?: System.getenv( "MCR_PASSWORD" )
+    }
   }
 }
 

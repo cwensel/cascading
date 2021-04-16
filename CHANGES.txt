@@ -2,7 +2,9 @@ Cascading Change Log
 
 4.0 [unreleased]
 
-  Publish wip releases to GitHub Packages.
+  Added support for publishing final releases to Maven Central.
+
+  Added support for publishing wip releases to GitHub Packages.
 
   Update Apache Hadoop to version 2.10.1.
 

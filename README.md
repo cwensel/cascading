@@ -160,7 +160,7 @@ Note the `cascading-platform` compile dependency has no classes, you must pull t
 See [http://cascading.wensel.net/downloads/#maven](https://cascading.wensel.net/downloads/#maven) for example Maven pom
 dependency settings.
 
-Source and Javadoc artifacts (using the appropriate classifier) are also available through Conjars.
+Source and Javadoc artifacts (using the appropriate classifier) are also available through Maven.
 
 Note that `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the
 Hadoop jars so that it won't get sucked into any application packaging as a dependency, typically.
