@@ -19,7 +19,7 @@
  */
 
 plugins {
-  id "io.spring.bintray" version "0.11.1" apply false
+  id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
 }
 
 apply from: 'etc/dependencyVersions.gradle'
@@ -52,9 +52,9 @@ task prepareDist() {
 
 subprojects {
 
-  apply plugin: "io.spring.bintray"
   apply plugin: 'java-library'
   apply plugin: 'maven-publish'
+  apply plugin: 'signing'
   apply from: '../etc/testing.gradle'
 
   sourceCompatibility = 1.8
@@ -72,26 +72,6 @@ subprojects {
     }
   }
 
-  bintray {
-    bintrayUser = repoUserName
-    bintrayKey = repoPassword
-
-    org = 'wensel'
-    repo =  isFinalRelease ? 'release' : 'wip'
-
-    overrideOnUpload = true
-
-    publication = 'mavenJava'
-
-    licenses = ['Apache-2.0']
-    websiteUrl = 'http://cascading.org/'
-    issueTrackerUrl = 'https://github.com/cwensel/cascading-local/issues'
-    vcsUrl = 'https://github.com/cwensel/cascading-local.git'
-  }
-
-  task bintrayPublishBuild( dependsOn: [bintrayUpload, bintrayPublish]) {
-  }
-
   jar {
     inputs.property( "moduleName", moduleName )
     manifest {
@@ -102,7 +82,7 @@ subprojects {
   javadoc.dependsOn << prepareDist
 
   javadoc {
-    def copyright = '<i>Copyright &#169; 2017-2019 Chris K Wensel. All Rights Reserved.</i>'
+    def copyright = '<i>Copyright &#169; 2017-2021 Chris K Wensel. All Rights Reserved.</i>'
 
     title = "Cascading ${releaseVersion}"
     destinationDir = file( "${distDir}/javadoc/${project.name}" )
@@ -123,22 +103,22 @@ subprojects {
 
   task sourcesJar( type: Jar, dependsOn: classes ) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
   }
 
   task javadocJar( type: Jar, dependsOn: javadoc ) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
   }
 
   task testsJar( type: Jar, dependsOn: testClasses ) {
     from sourceSets.test.output
-    classifier = 'tests'
+    archiveClassifier = 'tests'
   }
 
   task testSourcesJar( type: Jar, dependsOn: classes ) {
     from sourceSets.test.allSource
-    classifier = 'test-sources'
+    archiveClassifier = 'test-sources'
   }
 
   artifacts {
@@ -179,9 +159,21 @@ subprojects {
     }
   }
 
+  // publish wips via publishAllPublicationsToGitHubPackagesRepository
   publishing {
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = uri( "https://maven.pkg.github.com/cwensel/cascading-local" )
+        credentials {
+          username = repoUserName ?: System.getenv( "GPR_USERNAME" )
+          password = repoPassword ?: System.getenv( "GPR_TOKEN" )
+        }
+      }
+    }
+
     publications {
-      mavenJava( MavenPublication ) {
+      maven( MavenPublication ) {
         artifact sourcesJar
         artifact javadocJar
 
@@ -213,6 +205,10 @@ subprojects {
       }
     }
   }
+
+  signing {
+    sign publishing.publications.maven
+  }
 }
 
 task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
@@ -235,6 +231,19 @@ task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {
       'http://docs.oracle.com/javase/7/docs/api/',
       'http://junit.sourceforge.net/javadoc/'
     ]
+  }
+}
+
+// publish releases via publishToSonatype closeAndReleaseSonatypeStagingRepository
+nexusPublishing {
+  repositories {
+    sonatype {
+      nexusUrl.set( uri( "https://s01.oss.sonatype.org/service/local/" ) )
+      snapshotRepositoryUrl.set( uri( "https://s01.oss.sonatype.org/content/repositories/snapshots/" ) )
+
+      username = repoUserName ?: System.getenv( "MCR_USERNAME" )
+      password = repoPassword ?: System.getenv( "MCR_PASSWORD" )
+    }
   }
 }
 
