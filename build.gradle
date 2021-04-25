@@ -32,10 +32,16 @@ allprojects {
   apply plugin: 'eclipse'
 
   repositories {
-    mavenLocal()
     mavenCentral()
     jcenter()
-    maven {url = 'https://repo.superflow.io/'}
+    maven {
+      url "https://maven.pkg.github.com/cwensel/*"
+      credentials {
+        username = project.findProperty('gpr.username') ?: System.getenv( "GPR_USERNAME" )
+        password = project.findProperty('gpr.password') ?: System.getenv( "GPR_TOKEN" )
+      }
+    }
+//    maven {url = 'https://repo.superflow.io/'}
     maven {url = 'https://repository.apache.org'}
     maven {url = 'https://splunk.jfrog.io/splunk/ext-releases-local'}
   }
