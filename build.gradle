@@ -41,7 +41,6 @@ allprojects {
         password = project.findProperty('gpr.password') ?: System.getenv( "GPR_TOKEN" )
       }
     }
-//    maven {url = 'https://repo.superflow.io/'}
     maven {url = 'https://repository.apache.org'}
     maven {url = 'https://splunk.jfrog.io/splunk/ext-releases-local'}
   }

@@ -21,33 +21,33 @@ A full featured Tap that can both read and write data from, to, and between Apac
 
 See the `cascading-local-kafka` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-kafka
+For maven coordinates, see: https://github.com/cwensel?tab=packages&repo_name=cascading-local
 
 ### AWS S3 Tap
 
 A full featured Tap that can both read and write data from, to and between AWS S3 buckets. 
 
-In addition, this tap can restart where it left off on a previous fetch, even across JVM executions. 
+In addition, this tap can restart where it left off on a previous fetch, even across JVM executions.
 
 See the `cascading-local-s3` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-s3
+For maven coordinates, see: https://github.com/cwensel?tab=packages&repo_name=cascading-local
 
 ### Splunk Tap
 
-A full featured Tap that can both read and write data from, to and between Splunk instances. 
+A full featured Tap that can both read and write data from, to and between Splunk instances.
 
 See the `cascading-local-splunk` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-splunk
+For maven coordinates, see: https://github.com/cwensel?tab=packages&repo_name=cascading-local
 
 ### Neo4j Tap
 
-An experimental Tap that can write JSON data to Neo4j Database instances. 
+An experimental Tap that can write JSON data to Neo4j Database instances.
 
 See the `cascading-local-neo4j` sub-project for details.
 
-For maven coordinates, see: https://bintray.com/wensel/wip/cascading-local-neo4j
+For maven coordinates, see: https://github.com/cwensel?tab=packages&repo_name=cascading-local
 
 ### S3 Log Parser Example
 
