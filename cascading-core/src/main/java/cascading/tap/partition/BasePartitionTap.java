@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -23,12 +23,13 @@ package cascading.tap.partition;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
@@ -53,7 +54,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * BasePartitionTap is the base class for all partitioning taps.
+ * <p>
+ * Partitioning taps create child taps for writing data into partition based layouts.
  */
 public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config, Input, Output> implements FileType<Config>
   {
@@ -159,24 +162,32 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
       if( LOG.isInfoEnabled() )
         LOG.info( "removing {} open Taps from cache of size {}", numToClose, collectors.size() );
 
-      Set<String> removeKeys = new HashSet<>();
-      Set<String> keys = collectors.keySet();
+      Map<String, TupleEntryCollector> purge = new HashMap<>();
+      Set<Map.Entry<String, TupleEntryCollector>> entries = collectors.entrySet();
 
-      for( String key : keys )
+      for( Map.Entry<String, TupleEntryCollector> entry : entries )
         {
         if( numToClose-- == 0 )
           break;
 
-        removeKeys.add( key );
+        purge.put( entry.getKey(), entry.getValue() );
         }
 
-      for( String removeKey : removeKeys )
-        {
-        closeCollector( removeKey );
-        collectors.remove( removeKey );
-        }
+      closeCollectors( purge, this::closeCollectorFor );
 
+      collectors.keySet().removeAll( purge.keySet() );
       flowProcess.increment( Counters.Path_Purges, 1 );
+      }
+
+    /**
+     * Override this method to parallelize close operations.
+     *
+     * @param collectorMap      a collection of collectors to close
+     * @param closeCollectorFor lambda back into the default close handler
+     */
+    protected void closeCollectors( Map<String, TupleEntryCollector> collectorMap, BiConsumer<String, TupleEntryCollector> closeCollectorFor )
+      {
+      collectorMap.forEach( closeCollectorFor );
       }
 
     @Override
@@ -186,8 +197,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
 
       try
         {
-        for( String path : new ArrayList<>( collectors.keySet() ) )
-          closeCollector( path );
+        closeCollectors( collectors, this::closeCollectorFor );
         }
       finally
         {
@@ -195,11 +205,11 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
         }
       }
 
-    public void closeCollector( String path )
+    protected void closeCollectorFor( String path, TupleEntryCollector collector )
       {
-      TupleEntryCollector collector = collectors.get( path );
       if( collector == null )
         return;
+
       try
         {
         collector.close();
