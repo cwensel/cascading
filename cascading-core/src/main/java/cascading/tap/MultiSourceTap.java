@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -56,12 +56,6 @@ import static java.util.Arrays.copyOf;
  */
 public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<Config, Input> implements CompositeTap<Child>
   {
-  private final String identifier = "__multisource_placeholder_" + Util.createUniqueID();
-  protected Child[] taps;
-
-  protected transient Trie<Child> prefixMap;
-  protected transient String commonPrefix;
-
   private class TupleIterator implements Iterator
     {
     final TupleEntryIterator iterator;
@@ -90,6 +84,11 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
       }
     }
 
+  private final String identifier = "__multisource_placeholder_" + Util.createUniqueID();
+  protected Child[] taps;
+  protected transient Trie<Child> prefixMap;
+  protected transient String commonPrefix;
+
   protected MultiSourceTap( Scheme<Config, Input, ?, ?, ?> scheme )
     {
     super( scheme );
@@ -110,16 +109,24 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
 
   private void verifyTaps()
     {
-    Tap tap = taps[ 0 ];
+    Tap tap = unwrap( taps[ 0 ] );
 
     for( int i = 1; i < taps.length; i++ )
       {
-      if( tap.getClass() != taps[ i ].getClass() )
+      if( tap.getClass() != unwrap( taps[ i ] ).getClass() )
         throw new TapException( "all taps must be of the same type" );
 
-      if( !tap.getScheme().equals( taps[ i ].getScheme() ) )
+      if( !tap.getScheme().equals( unwrap( taps[ i ] ).getScheme() ) )
         throw new TapException( "all tap schemes must be equivalent" );
       }
+    }
+
+  protected Tap unwrap( Tap tap )
+    {
+    if( tap instanceof AdaptorTap )
+      return unwrap( ( (AdaptorTap<?, ?, ?, ?, ?, ?>) tap ).getOriginal() );
+
+    return tap;
     }
 
   /**

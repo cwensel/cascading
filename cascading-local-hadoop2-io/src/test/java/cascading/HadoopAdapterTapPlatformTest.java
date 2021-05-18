@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -26,6 +26,7 @@ import cascading.pipe.Pipe;
 import cascading.platform.PlatformRunner;
 import cascading.platform.hadoop2.Hadoop2MR1Platform;
 import cascading.scheme.hadoop.TextDelimited;
+import cascading.tap.MultiSourceTap;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
@@ -72,6 +73,31 @@ public class HadoopAdapterTapPlatformTest extends PlatformTestCase
     second.complete();
 
     validateLength( second, 10 );
+    }
+
+  @Test
+  public void testWriteReadHDFSMultiSource() throws Exception
+    {
+    copyFromLocal( inputFileApache );
+
+    Tap source = new MultiSourceTap( new FileTap( new cascading.scheme.local.TextLine( new Fields( "offset", "line" ) ), inputFileApache ), new FileTap( new cascading.scheme.local.TextLine( new Fields( "offset", "line" ) ), inputFileApache ) ); // verify the adapter is unwrapped
+
+    Tap intermediate = new LocalHfsAdaptor( new Hfs( new cascading.scheme.hadoop.TextLine(), getOutputPath( "/intermediate" ), SinkMode.REPLACE ) );
+    Tap sink = new FileTap( new cascading.scheme.local.TextLine(), getOutputPath( "/final" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "test" );
+
+    Flow first = new LocalFlowConnector( getPlatform().getProperties() ).connect( source, intermediate, pipe );
+
+    first.complete();
+
+    validateLength( first, 20 );
+
+    Flow second = new LocalFlowConnector( getPlatform().getProperties() ).connect( intermediate, sink, pipe );
+
+    second.complete();
+
+    validateLength( second, 20 );
     }
 
   @Test
