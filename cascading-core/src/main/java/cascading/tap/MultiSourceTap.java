@@ -170,7 +170,7 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
     if( scheme != null )
       return scheme;
 
-    return taps[ 0 ].getScheme(); // they should all be equivalent per verifyTaps
+    return unwrap( taps[ 0 ] ).getScheme(); // they should all be equivalent per verifyTaps
     }
 
   @Override
@@ -292,8 +292,10 @@ public class MultiSourceTap<Child extends Tap, Config, Input> extends SourceTap<
 
   public int hashCode()
     {
-    int result = super.hashCode();
+    int result = getIdentifier() != null ? getIdentifier().hashCode() : 0;
+
     result = 31 * result + ( getTaps() != null ? Arrays.hashCode( getTaps() ) : 0 );
+
     return result;
     }
 
