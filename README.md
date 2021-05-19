@@ -1,20 +1,20 @@
 # Cascading
 
-Thanks for using Cascading.
+Thanks for using [Cascading](https://cascading.wensel.net/).
 
 ## Cascading 4.0
 
 Cascading 4 includes a few major changes and additions from prior major releases:
 
-* Moved the website to https://cascading.wensel.net/ (__currently not up to date__)
-* Moved to GitHub Packages and Maven Central, and changed the Maven group name to `net.wensel` (from `cascading`)
+* Local mode support improved for production use
+* Moved the website to https://cascading.wensel.net/
+* Changed the Maven group name to `net.wensel` (from `cascading`)
+* Moved to GitHub Packages (WIPs) and Maven Central (releases) 
 * Added native JSON support via the `cascading-nested-json` sub-project
 * Removed `cascading-xml` sub-project
 * Removed Apache Hadoop 1.x support
 
 ## General Information:
-
-_Note: Everything is subject to change as we re-imagine Cascading 4 resources._
 
 For current WIP releases, go to: https://github.com/cwensel?tab=packages&repo_name=cascading
 
@@ -27,46 +27,44 @@ The project includes nine Cascading jar files:
 * `cascading-nested-json-x.y.z.jar`       - all Cascading JSON operations
 * `cascading-nested-x.y.z.jar`            - all Cascading base classes for nested data-type operations
 * `cascading-local-x.y.z.jar`             - all Cascading Local in-memory mode class files
+* `cascading-local-hadoop2-io-x.y.z.jar`  - all Cascading Local in-memory mode class files used with Hadoop
 * `cascading-hadoop2-common-x.y.z.jar`    - all Cascading Hadoop 2.x common class files
 * `cascading-hadoop2-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
 * `cascading-hadoop2-mr1-x.y.z.jar`       - all Cascading Hadoop 2.x MapReduce mode class files
 * `cascading-hadoop2-tez-x.y.z.jar`       - all Cascading Hadoop 2.x Tez mode class files
 * `cascading-hadoop2-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
 
-These class jars, along with, tests, source and javadoc jars, are all available via the
-JCenter Maven repository.
+These class jars, along with, tests, source and javadoc jars, are all available via the Maven repository.
 
-Hadoop 2.x MR1 mode is the same as above but for Hadoop 2.x releases.
+Local mode is where the Cascading application will run locally in memory without cluster distribution. 
+This implementation has minimal to no robustness in low memory situations, by design.
+
+Hadoop 2.x MR1 mode is for running on Hadoop 2.x releases.
 
 Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
 
-Local mode is where the Cascading application will run locally in memory without any Hadoop dependencies or
-cluster distribution. This implementation has minimal to no robustness in low memory situations, by design.
-
 As of Cascading 4.x, all above jar files are built against Java 1.8. Prior versions of Cascading are built
 against Java 1.7 and 1.6.
+
+## Local Mode
+
+Local mode has been much improved for production use in applications that do not need to run
+distributed across a cluster. Specifically in applications that trivially parallelize
+and run within AWS Lambda or Batch applications.
+
+See https://github.com/cwensel/cascading-local for a collection of local mode integrations.
+
+Note this project will merge into Cascading in then next minor release.
 
 ## Extensions, the SDK, and DSLs
 
 There are a number of projects based on and extensions to Cascading available.
 
-Visit the [Cascading Extensions](https://cascading.wensel.net/extensions/) page for a current list.
+Visit https://cascading.org/ for links. As these projects are updated to depend on 4.x, we 
+will update the main site. 
 
-Of note are three top level projects:
-
-* [Fluid](https://cascading.wensel.net/fluid/) - A fluent Java API for Cascading that is compatible with the default API.
-* [Lingual](https://cascading.wensel.net/lingual/) - ANSI SQL and JDBC on Cascading
-* [Pattern](https://cascading.wensel.net/pattern/) - Machine Learning scoring and [PMML](https://en.wikipedia.org/wiki/Predictive_Model_Markup_Language) support with Cascading
-
-And alternative languages:
-
-* [Scalding](https://cascading.wensel.net/projects/scalding/) - A Scala based DSL
-* [Cascalog](https://cascading.wensel.net/projects/cascalog/) - A Clojure based DSL
-* [PigPen](https://github.com/Netflix/PigPen) - A Clojure based DSL
-
-And a third-party computing platform:
-
-* [Apache Flink](https://cascading.wensel.net/cascading-flink/) - Faster than MapReduce cluster computing
+Note many projects built and released against Cascading 3.x will work without modification
+with Cascading 4.x.
 
 ## Versioning
 
@@ -82,10 +80,7 @@ necessary.
 It is important to note that *we do reserve to make breaking changes to the new query planner API through the 4.x
 releases*. This allows us to respond to bugs and performance issues without issuing new major releases.
 
-The source and tags for all prior (to 4.x) stable releases can be found here:
-[https://github.com/Cascading/cascading](https://github.com/Cascading/cascading)
-
-All 4.x releases will be maintained here:
+All releases will be maintained here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
 WIP (work in progress) releases are fully tested builds of code not yet deemed fully stable. On every build by our
@@ -97,11 +92,8 @@ releases are leading up to. `n` is the current successfully tested build.
 The source, working branches, and tags for all WIP releases can be found here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
-Or downloaded from here:
-[http://cascading.wensel.net/wip/](https://cascading.wensel.net/wip/)
-
 When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
-available from the [http://cascading.wensel.net/downloads/](http://cascading.wensel.net/downloads/) page.
+available from Maven Central.
 
 ## Writing and Running Tests
 
@@ -145,8 +137,6 @@ See __CONTRIBUTING.md__ at https://github.com/Cascading/cascading.
 
 It is strongly recommended developers pull Cascading from Maven Central.
 
-_This won't be true until 4.0 is released!_
-
 Alternatively, see GitHub Packages for latest WIP releases: 
 
 * https://maven.pkg.github.com/cwensel/cascading
@@ -156,9 +146,6 @@ configuration along with the `cascading-platform` dependency.
 
 Note the `cascading-platform` compile dependency has no classes, you must pull the tests dependency with the
 `tests` classifier.
-
-See [http://cascading.wensel.net/downloads/#maven](https://cascading.wensel.net/downloads/#maven) for example Maven pom
-dependency settings.
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Maven.
 
@@ -201,3 +188,14 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 
 Hadoop will unpack the jar locally and remotely (in the cluster) and add any libraries in `lib` to the classpath. This
 is a feature specific to Hadoop.
+
+## History and Status
+
+Cascading was started in 2007 by Chris K Wensel.
+
+After a series of acquisitions, it was left unsupported and unmaintained by the copyright,
+domain name, and GitHub organization owners.
+
+Chris has since continued his noodling with Cascading and has been pushing changes to the original repo.
+
+Cascading remains under the Apache License v2.0.
