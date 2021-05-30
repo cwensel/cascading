@@ -49,7 +49,7 @@ ext.isFinalRelease = Boolean.getBoolean( "cascading.release.final" ) || currentB
 
 if( System.properties[ 'cascading.release.private' ] )
   buildNumber = "priv-${buildNumber}"
-else if( !System.properties[ 'cascading.release.final' ] )
+else if( !isFinalRelease )
   buildNumber = "wip-${buildNumber}"
 
 ext.releaseVersion = majorVersion
@@ -57,7 +57,7 @@ ext.releaseVersion = majorVersion
 if( minorVersion )
   releaseVersion = "${majorVersion}.${minorVersion}"
 
-if( !System.properties[ 'cascading.release.final' ] ) // is wip
+if( !isFinalRelease ) // is wip
   releaseVersion = "${releaseVersion}-${buildNumber}"
 
 ext.releaseTag = "${releaseVersion}"
@@ -65,5 +65,5 @@ ext.releaseTag = "${releaseVersion}"
 if( !System.properties[ 'build.number' ] ) // is dev
   releaseTag = "wip-${majorVersion}"
 
-if( !System.properties[ 'cascading.release.final' ] ) // is wip
+if( !isFinalRelease ) // is wip
   releaseTag = "${majorVersion}-${buildNumber}"
