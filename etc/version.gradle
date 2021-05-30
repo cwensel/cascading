@@ -45,7 +45,7 @@ ext.minorVersion = versionProperties[ 'cascading.release.minor' ]
 
 ext.buildNumber = System.getProperty( 'build.number', 'dev' ) // local dev or build server build
 
-ext.isFinalRelease = Boolean.getBoolean( "cascading.release.final" ) || currentBranch != null ? !currentBranch.contains('wip-') : false
+ext.isFinalRelease = Boolean.getBoolean( "cascading.release.final" )
 
 if( System.properties[ 'cascading.release.private' ] )
   buildNumber = "priv-${buildNumber}"
