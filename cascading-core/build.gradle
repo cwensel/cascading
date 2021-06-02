@@ -57,8 +57,11 @@ javadoc {
 }
 
 jmh {
+  excludes = ['.*DelimitedParserBench.*']
   warmupIterations = 2
   iterations = 5
   fork = 1
   duplicateClassesStrategy = DuplicatesStrategy.WARN
+  profilers = ['gc', 'stack']
+//  profilers = ['gc', 'stack', 'jfr']
 }

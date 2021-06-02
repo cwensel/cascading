@@ -19,3 +19,4 @@ target
 .metadata
 .settings/
 bench
+*.jfr
