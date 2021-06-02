@@ -30,7 +30,9 @@ import cascading.CascadingException;
 import cascading.nested.core.NestedCoercibleType;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.CoercionFrom;
 import cascading.tuple.type.SerializableType;
+import cascading.tuple.type.ToCanonical;
 import cascading.util.Util;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -93,6 +95,42 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     }
 
   @Override
+  public <T> ToCanonical<T, JsonNode> from( Type from )
+    {
+    if( from.getClass() == JSONCoercibleType.class )
+      return ( v ) -> (JsonNode) v;
+
+    if( from instanceof Class && JsonNode.class.isAssignableFrom( (Class<?>) from ) )
+      return ( v ) -> (JsonNode) v;
+
+    if( from == String.class )
+      return ( v ) -> v == null ? null : nodeOrParse( (String) v );
+
+    if( from == Short.class || from == Short.TYPE )
+      return ( v ) -> v == null ? null : JsonNodeFactory.instance.numberNode( (Short) v );
+
+    if( from == Integer.class || from == Integer.TYPE )
+      return ( v ) -> v == null ? null : JsonNodeFactory.instance.numberNode( (Integer) v );
+
+    if( from == Long.class || from == Long.TYPE )
+      return ( v ) -> v == null ? null : JsonNodeFactory.instance.numberNode( (Long) v );
+
+    if( from == Float.class || from == Float.TYPE )
+      return ( v ) -> v == null ? null : JsonNodeFactory.instance.numberNode( (Float) v );
+
+    if( from == Double.class || from == Double.TYPE )
+      return ( v ) -> v == null ? null : JsonNodeFactory.instance.numberNode( (Double) v );
+
+    if( from == Boolean.class || from == Boolean.TYPE )
+      return ( v ) -> v == null ? null : JsonNodeFactory.instance.booleanNode( (Boolean) v );
+
+    if( from instanceof Class && ( Collection.class.isAssignableFrom( (Class<?>) from ) || Map.class.isAssignableFrom( (Class<?>) from ) ) )
+      return ( v ) -> v == null ? null : mapper.valueToTree( v );
+
+    return ( v ) -> v == null ? null : JsonNodeFactory.instance.pojoNode( v );
+    }
+
+  @Override
   public JsonNode canonical( Object value )
     {
     if( value == null )
@@ -105,6 +143,9 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
 
     if( from == String.class )
       return nodeOrParse( (String) value );
+
+    if( from == Short.class || from == Short.TYPE )
+      return JsonNodeFactory.instance.numberNode( (Short) value );
 
     if( from == Integer.class || from == Integer.TYPE )
       return JsonNodeFactory.instance.numberNode( (Integer) value );
@@ -125,6 +166,55 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       return mapper.valueToTree( value );
 
     return JsonNodeFactory.instance.pojoNode( value );
+    }
+
+  @Override
+  public <T> CoercionFrom<JsonNode, T> to( Type to )
+    {
+    if( to == null || to.getClass() == JSONCoercibleType.class )
+      return t -> (T) t;
+
+    Class actualTo;
+
+    if( to instanceof CoercibleType )
+      actualTo = ( (CoercibleType) to ).getCanonicalType();
+    else
+      actualTo = (Class) to;
+
+    if( JsonNode.class.isAssignableFrom( actualTo ) )
+      return t -> (T) t;
+
+    if( actualTo == String.class )
+      return node -> node.getNodeType() == JsonNodeType.STRING ? (T) node.textValue() : (T) textOrWrite( node );
+
+    if( actualTo == Short.class || actualTo == Short.TYPE )
+      return node -> node.getNodeType() == JsonNodeType.NUMBER ? (T) Short.valueOf( node.shortValue() ) : (T) Coercions.coerce( textOrWrite( node ), to );
+
+    if( actualTo == Integer.class || actualTo == Integer.TYPE )
+      return node -> node.getNodeType() == JsonNodeType.NUMBER ? (T) Integer.valueOf( node.intValue() ) : (T) Coercions.coerce( textOrWrite( node ), to );
+
+    if( actualTo == Long.class || actualTo == Long.TYPE )
+      return node -> node.getNodeType() == JsonNodeType.NUMBER ? (T) Long.valueOf( node.longValue() ) : (T) Coercions.coerce( textOrWrite( node ), to );
+
+    if( actualTo == Float.class || actualTo == Float.TYPE )
+      return node -> node.getNodeType() == JsonNodeType.NUMBER ? (T) Float.valueOf( node.floatValue() ) : (T) Coercions.coerce( textOrWrite( node ), to );
+
+    if( actualTo == Double.class || actualTo == Double.TYPE )
+      return node -> node.getNodeType() == JsonNodeType.NUMBER ? (T) Double.valueOf( node.doubleValue() ) : (T) Coercions.coerce( textOrWrite( node ), to );
+
+    if( actualTo == Boolean.class || actualTo == Boolean.TYPE )
+      return node -> node.getNodeType() == JsonNodeType.BOOLEAN ? (T) Boolean.valueOf( node.booleanValue() ) : (T) Coercions.coerce( textOrWrite( node ), to );
+
+    if( Map.class.isAssignableFrom( (Class<?>) actualTo ) )
+      return node -> (T) convert( node, actualTo );
+
+    if( List.class.isAssignableFrom( (Class<?>) actualTo ) )
+      return node -> (T) convert( node, actualTo );
+
+    if( to instanceof CoercibleType )
+      return node -> (T) ( (CoercibleType) to ).canonical( textOrWrite( node ) );
+
+    throw new CascadingException( "unknown type coercion requested, from: " + Util.getTypeName( JsonNode.class ) + " to: " + Util.getTypeName( to ) );
     }
 
   @Override
@@ -151,40 +241,43 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     if( nodeType == JsonNodeType.NULL )
       return null;
 
-    Class actual;
+    Class actualTo;
 
     if( to instanceof CoercibleType )
-      actual = ( (CoercibleType) to ).getCanonicalType();
+      actualTo = ( (CoercibleType) to ).getCanonicalType();
     else
-      actual = (Class) to;
+      actualTo = (Class) to;
 
     // support sub-classes of JsonNode
-    if( actual.isAssignableFrom( JsonNode.class ) )
+    if( JsonNode.class.isAssignableFrom( actualTo ) )
       return (Coerce) node;
 
-    if( actual == String.class )
+    if( actualTo == String.class )
       return nodeType == JsonNodeType.STRING ? (Coerce) node.textValue() : (Coerce) textOrWrite( node );
 
-    if( actual == Integer.class || actual == Integer.TYPE )
+    if( actualTo == Short.class || actualTo == Short.TYPE )
+      return nodeType == JsonNodeType.NUMBER ? (Coerce) Short.valueOf( node.shortValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
+
+    if( actualTo == Integer.class || actualTo == Integer.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Integer.valueOf( node.intValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( actual == Long.class || actual == Long.TYPE )
+    if( actualTo == Long.class || actualTo == Long.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Long.valueOf( node.longValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( actual == Float.class || actual == Float.TYPE )
+    if( actualTo == Float.class || actualTo == Float.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Float.valueOf( node.floatValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( actual == Double.class || actual == Double.TYPE )
+    if( actualTo == Double.class || actualTo == Double.TYPE )
       return nodeType == JsonNodeType.NUMBER ? (Coerce) Double.valueOf( node.doubleValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( actual == Boolean.class || actual == Boolean.TYPE )
+    if( actualTo == Boolean.class || actualTo == Boolean.TYPE )
       return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
-    if( Map.class.isAssignableFrom( (Class<?>) actual ) )
-      return (Coerce) convert( value, actual );
+    if( Map.class.isAssignableFrom( (Class<?>) actualTo ) )
+      return (Coerce) convert( value, actualTo );
 
-    if( List.class.isAssignableFrom( (Class<?>) actual ) )
-      return (Coerce) convert( value, actual );
+    if( List.class.isAssignableFrom( (Class<?>) actualTo ) )
+      return (Coerce) convert( value, actualTo );
 
     if( to instanceof CoercibleType )
       return (Coerce) ( (CoercibleType) to ).canonical( textOrWrite( node ) );

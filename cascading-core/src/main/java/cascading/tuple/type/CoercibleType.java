@@ -28,6 +28,9 @@ import java.lang.reflect.Type;
  * Interface CoercibleType allows {@link cascading.tuple.Fields} instances to be extended with custom
  * type information.
  * <p>
+ * A CoercibleType is the logical type where the canonical type is the actual type of the value being
+ * maintained.
+ * <p>
  * It is the role of implementations of this interface to maintain a canonical representation of a given value
  * and to allow for coercions between some type representation to the canonical type and back.
  * <p>
@@ -51,15 +54,53 @@ public interface CoercibleType<Canonical> extends Type, Serializable
   Class<Canonical> getCanonicalType();
 
   /**
-   * @param value of type Object
+   * @param value a value to conform to the current canonical type
    * @return the value coerced into its canonical type
    */
   Canonical canonical( Object value );
 
   /**
-   * @param value of type Object
-   * @param to    of type Type
-   * @return the value coerced into the requested type
+   * Returns a {@link ToCanonical} instance that converts any given value from the given to a
+   * canonical representation.
+   * <p>
+   * This method is equivalent to {@link #canonical(Object)} but optimized when the 'from' type
+   * is known ahead of time.
+   *
+   * @param from the type of the value that will be coerced into its canonical representation
+   * @param <T>
+   * @return an instance of {@link ToCanonical} optimized for the given from type
+   */
+  default <T> ToCanonical<T, Canonical> from( Type from )
+    {
+    if( from == getCanonicalType() )
+      return f -> (Canonical) f;
+
+    return this::canonical;
+    }
+
+  /**
+   * @param value the canonical value
+   * @param to    the type to convert the cannonical value to
+   * @return the canonical value coerced into the requested type
    */
   <Coerce> Coerce coerce( Object value, Type to );
+
+  /**
+   * Returns a {@link CoercionFrom} instance that converts a given canonical value to the requested
+   * representation.
+   * <p>
+   * This method is equivalent to {@link #coerce(Object, Type)} but optimized when the 'to' type
+   * is known ahead of time.
+   *
+   * @param to  the type of the value that the canonical value will be coerced into
+   * @param <T>
+   * @return an instance of {@link CoercionFrom} optimized for the given from type
+   */
+  default <T> CoercionFrom<Canonical, T> to( Type to )
+    {
+    if( to == getCanonicalType() )
+      return t -> (T) t;
+
+    return ( t ) -> coerce( t, to );
+    }
   }

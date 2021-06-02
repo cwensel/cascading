@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  *
  */
-public class LongCoerce extends Coercions.Coerce<Long>
+public class LongCoerce extends NumberCoerce<Long>
   {
   protected LongCoerce( Map<Type, Coercions.Coerce> map )
     {
@@ -39,14 +39,18 @@ public class LongCoerce extends Coercions.Coerce<Long>
     return long.class;
     }
 
-  @Override
-  public Long coerce( Object value )
+  protected Long forNull()
     {
-    if( value instanceof Number )
-      return ( (Number) value ).longValue();
-    else if( value == null )
-      return 0L;
-    else
-      return Long.parseLong( value.toString() );
+    return 0L;
+    }
+
+  protected <T> Long parseType( T f )
+    {
+    return Long.parseLong( f.toString() );
+    }
+
+  protected Long asType( Number f )
+    {
+    return f.longValue();
     }
   }

@@ -25,48 +25,125 @@ import java.util.concurrent.TimeUnit;
 
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.ToCanonical;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 /**
  *
  */
-@State(Scope.Benchmark)
+@State(Scope.Thread)
+@Warmup(iterations = 1, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 250, timeUnit = TimeUnit.MILLISECONDS)
+@Fork(1)
+@BenchmarkMode({Mode.AverageTime})
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class CanonicalBench
   {
+  public enum Canonical
+    {
+      String,
+      Short,
+      Short_TYPE,
+      Integer,
+      Integer_TYPE,
+      Long,
+      Long_TYPE,
+      Float,
+      Float_TYPE,
+      Double,
+      Double_TYPE
+    }
+
+  @Param
+  Canonical to = Canonical.String;
+
   Type[] canonicalTypes = new Type[]{
     String.class,
+    Short.class,
+    Short.TYPE,
     Integer.class,
     Integer.TYPE,
+    Long.class,
+    Long.TYPE,
+    Float.class,
+    Float.TYPE,
     Double.class,
     Double.TYPE
   };
 
-  CoercibleType[] coercibleTypes = Coercions.coercibleArray( canonicalTypes.length, canonicalTypes );
+  @Param({"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"})
+  int from = 0;
 
-  Object[][] values = new Object[][]{
-    {null, null, null, null, null},
-    {1000.000f, "1000", "1000", "1000.000", "1000.000"},
-    {"1000.000", 1000, 1000, 1000.000D, 1000.000D},
-    {10000, 1000D, 1000D, 1000.000F, 1000.000F}
+  Object[] fromValues = new Object[]{
+    null,
+    "1000",
+    (short) 1000,
+    (short) 1000,
+    1000,
+    1000,
+    1000L,
+    1000L,
+    1000.000F,
+    1000.000F,
+    1000.000D,
+    1000.000D
   };
 
-  @BenchmarkMode({Mode.Throughput})
-  @OutputTimeUnit(TimeUnit.MICROSECONDS)
+  Class[] fromTypes = new Class[]{
+    String.class,
+    String.class,
+    Short.class,
+    Short.TYPE,
+    Integer.class,
+    Integer.TYPE,
+    Long.class,
+    Long.TYPE,
+    Float.class,
+    Float.TYPE,
+    Double.class,
+    Double.TYPE
+  };
+
+  CoercibleType coercibleType;
+  ToCanonical canonical;
+  Object fromValue;
+  Class fromType;
+
+  @Setup
+  public void setup()
+    {
+    coercibleType = Coercions.coercibleTypeFor( canonicalTypes[ to.ordinal() ] );
+    fromType = fromTypes[ from ];
+    canonical = coercibleType.from( fromType );
+    fromValue = fromValues[ from ];
+    }
+
   @Benchmark
   public void baseline( Blackhole bh )
     {
-    for( Object[] list : values )
-      {
-      for( int i = 0; i < coercibleTypes.length; i++ )
-        {
-        bh.consume( coercibleTypes[ i ].canonical( list[ i ] ) );
-        }
-      }
+    bh.consume( coercibleType.canonical( fromValue ) );
+    }
+
+  @Benchmark
+  public void toCanonical( Blackhole bh )
+    {
+    bh.consume( coercibleType.from( fromType ).canonical( fromValue ) );
+    }
+
+  @Benchmark
+  public void toCanonicalFixed( Blackhole bh )
+    {
+    bh.consume( canonical.canonical( fromValue ) );
     }
   }

@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  *
  */
-public class DoubleCoerce extends Coercions.Coerce<Double>
+public class DoubleCoerce extends NumberCoerce<Double>
   {
   protected DoubleCoerce( Map<Type, Coercions.Coerce> map )
     {
@@ -39,14 +39,18 @@ public class DoubleCoerce extends Coercions.Coerce<Double>
     return double.class;
     }
 
-  @Override
-  public Double coerce( Object value )
+  protected Double forNull()
     {
-    if( value instanceof Number )
-      return ( (Number) value ).doubleValue();
-    else if( value == null )
-      return 0D;
-    else
-      return Double.parseDouble( value.toString() );
+    return 0D;
+    }
+
+  protected <T> Double parseType( T f )
+    {
+    return Double.parseDouble( f.toString() );
+    }
+
+  protected Double asType( Number f )
+    {
+    return f.doubleValue();
     }
   }
