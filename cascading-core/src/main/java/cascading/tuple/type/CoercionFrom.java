@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -18,39 +18,13 @@
  * limitations under the License.
  */
 
-package cascading.tuple.coerce;
-
-import java.lang.reflect.Type;
-import java.util.Map;
+package cascading.tuple.type;
 
 /**
  *
  */
-public class LongObjectCoerce extends NumberCoerce<Long>
+@FunctionalInterface
+public interface CoercionFrom<From,To>
   {
-  protected LongObjectCoerce( Map<Type, Coercions.Coerce> map )
-    {
-    super( map );
-    }
-
-  @Override
-  public Class<Long> getCanonicalType()
-    {
-    return Long.class;
-    }
-
-  protected Long forNull()
-    {
-    return null;
-    }
-
-  protected <T> Long parseType( T f )
-    {
-    return Long.parseLong( f.toString() );
-    }
-
-  protected Long asType( Number f )
-    {
-    return f.longValue();
-    }
+  To coerce( From from);
   }

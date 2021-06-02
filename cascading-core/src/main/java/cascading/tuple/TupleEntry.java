@@ -24,10 +24,13 @@ package cascading.tuple;
 import java.beans.ConstructorProperties;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.CoercionFrom;
 import cascading.util.ForeverValueIterator;
 
 /**
@@ -54,7 +57,6 @@ import cascading.util.ForeverValueIterator;
 public class TupleEntry
   {
   private static final CoercibleType[] EMPTY_COERCIONS = new CoercibleType[ 0 ];
-  private static final ForeverValueIterator<CoercibleType> OBJECT_ITERATOR = new ForeverValueIterator<CoercibleType>( Coercions.OBJECT );
 
   /** An EMPTY TupleEntry instance for use as a stand in instead of a {@code null}. */
   public static final TupleEntry NULL = new TupleEntry( Fields.NONE, Tuple.NULL );
@@ -62,6 +64,7 @@ public class TupleEntry
   /** Field fields */
   private Fields fields;
 
+  private Map<Class, CoercionFrom[]> iterableCache;
   private CoercibleType[] coercions = EMPTY_COERCIONS;
 
   /** Field isUnmodifiable */
@@ -1017,12 +1020,48 @@ public class TupleEntry
    */
   public <T> Iterable<T> asIterableOf( final Class<T> type )
     {
+    if( iterableCache == null )
+      iterableCache = new IdentityHashMap<>();
+
+    final CoercionFrom<Object, T>[] coerce = coercions.length == 0 ? null :
+      iterableCache.computeIfAbsent( type, t -> Coercions.coercionsArray( type, coercions ) );
+
+    return () ->
+      new Iterator<T>()
+        {
+        final Iterator<CoercionFrom<Object, T>> coercionsIterator = coerce == null ? new ForeverValueIterator<>( Coercions.OBJECT.to( type ) ) : Arrays.asList( coerce ).iterator();
+        final Iterator valuesIterator = tuple.iterator();
+
+        @Override
+        public boolean hasNext()
+          {
+          return valuesIterator.hasNext();
+          }
+
+        @Override
+        public T next()
+          {
+          Object next = valuesIterator.next();
+
+          return coercionsIterator.next().coerce( next );
+          }
+
+        @Override
+        public void remove()
+          {
+          valuesIterator.remove();
+          }
+        };
+    }
+
+  public Iterable<String[]> asPairwiseIterable()
+    {
     return () ->
     {
-    final Iterator<CoercibleType> coercibleIterator = coercions.length == 0 ? OBJECT_ITERATOR : Arrays.asList( coercions ).iterator();
-    final Iterator valuesIterator = tuple.iterator();
+    final Iterator<Comparable> fieldsIterator = fields.iterator();
+    final Iterator<String> valuesIterator = asIterableOf( String.class ).iterator();
 
-    return new Iterator<T>()
+    return new Iterator<String[]>()
       {
       @Override
       public boolean hasNext()
@@ -1031,52 +1070,20 @@ public class TupleEntry
         }
 
       @Override
-      public T next()
+      public String[] next()
         {
-        Object next = valuesIterator.next();
+        String field = fieldsIterator.next().toString();
+        String next = valuesIterator.next();
 
-        return (T) coercibleIterator.next().coerce( next, type );
+        return new String[]{field, next};
         }
 
       @Override
       public void remove()
         {
-        valuesIterator.remove();
+        throw new UnsupportedOperationException( "remove is unsupported" );
         }
       };
-    };
-    }
-
-  public Iterable<String[]> asPairwiseIterable( )
-    {
-    return () ->
-    {
-    final Iterator<Comparable> fieldsIterator = fields.iterator();
-    final Iterator<String> valuesIterator = asIterableOf( String.class ).iterator();
-
-    return new Iterator<String[]>()
-          {
-          @Override
-          public boolean hasNext()
-            {
-            return valuesIterator.hasNext();
-            }
-
-          @Override
-          public String[] next()
-            {
-            String field = fieldsIterator.next().toString();
-            String next = valuesIterator.next();
-
-            return new String[]{field,next};
-            }
-
-          @Override
-          public void remove()
-            {
-            throw new UnsupportedOperationException("remove is unsupported");
-            }
-          };
     };
     }
   }

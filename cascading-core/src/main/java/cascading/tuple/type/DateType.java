@@ -126,6 +126,21 @@ public class DateType implements CoercibleType<Long>
     }
 
   @Override
+  public <T> ToCanonical<T, Long> from( Type from )
+    {
+    if( from == Long.class )
+      return ( v ) -> (Long) v;
+
+    if( from == String.class )
+      return ( v ) -> v == null ? null : parse( (String) v ).getTime();
+
+    if( from == Date.class )
+      return ( v ) -> v == null ? null : ( (Date) v ).getTime(); // in UTC
+
+    return this::canonical;
+    }
+
+  @Override
   public Long canonical( Object value )
     {
     if( value == null )
@@ -146,16 +161,25 @@ public class DateType implements CoercibleType<Long>
     }
 
   @Override
+  public <T> CoercionFrom<Long, T> to( Type to )
+    {
+    boolean returnZero = Coercions.primitives.containsKey( to );
+
+    if( to == Long.class || to == Long.TYPE || to == Object.class || DateType.class == to.getClass() )
+      return ( v ) -> v == null ? (T) nullCoercion( returnZero ) : (T) v;
+
+    if( to == String.class )
+      return ( v ) -> v == null ? (T) nullCoercion( returnZero ) : (T) toString( v );
+
+    return CoercibleType.super.to( to );
+    }
+
+  @Override
   public Object coerce( Object value, Type to )
     {
     // we are expecting a Long, as its our canonical type
     if( value == null )
-      {
-      if( Coercions.primitives.containsKey( to ) )
-        return 0;
-
-      return null;
-      }
+      return nullCoercion( Coercions.primitives.containsKey( to ) );
 
     Class<?> from = value.getClass();
 
@@ -167,13 +191,7 @@ public class DateType implements CoercibleType<Long>
       return value;
 
     if( to == String.class )
-      {
-      Calendar calendar = getCalendar();
-
-      calendar.setTimeInMillis( (Long) value );
-
-      return getDateFormat().format( calendar.getTime() );
-      }
+      return toString( (Long) value );
 
     Coercions.Coerce<?> coerce = Coercions.coercions.get( to );
 
@@ -183,7 +201,24 @@ public class DateType implements CoercibleType<Long>
     throw new CascadingException( "unknown type coercion requested, from: " + Util.getTypeName( from ) + " to: " + Util.getTypeName( to ) );
     }
 
-  private Date parse( String value )
+  private Object nullCoercion( boolean returnZero )
+    {
+    if( returnZero )
+      return 0;
+
+    return null;
+    }
+
+  protected String toString( Long value )
+    {
+    Calendar calendar = getCalendar();
+
+    calendar.setTimeInMillis( value );
+
+    return getDateFormat().format( calendar.getTime() );
+    }
+
+  protected Date parse( String value )
     {
     try
       {

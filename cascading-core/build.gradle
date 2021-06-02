@@ -19,10 +19,6 @@
  * limitations under the License.
  */
 
-plugins {
-  id "me.champeau.jmh" version "0.6.5"
-}
-
 dependencies {
   implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.1.0'
   api group: 'net.wensel', name: 'riffle', version: '1.1.0'
@@ -58,10 +54,7 @@ javadoc {
 
 jmh {
   excludes = ['.*DelimitedParserBench.*']
-  warmupIterations = 2
-  iterations = 5
-  fork = 1
-  duplicateClassesStrategy = DuplicatesStrategy.WARN
-  profilers = ['gc', 'stack']
-//  profilers = ['gc', 'stack', 'jfr']
 }
+
+tasks.jmh.enabled = true
+tasks.jmhReport.enabled = true

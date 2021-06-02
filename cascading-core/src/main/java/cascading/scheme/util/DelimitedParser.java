@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -37,7 +37,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleEntryIterator;
 import cascading.tuple.coerce.Coercions;
-import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.ToCanonical;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +86,7 @@ public class DelimitedParser implements Serializable
   /** Field types */
   protected Type[] types;
   /** Fields coercibles */
-  protected CoercibleType[] coercibles;
+  protected ToCanonical<String, ?>[] canonicals;
   /** Field safe */
   protected boolean safe = true;
   /** fieldTypeResolver */
@@ -176,7 +176,7 @@ public class DelimitedParser implements Serializable
     if( this.types != null && this.types.length != sinkFields.size() )
       throw new IllegalArgumentException( "num of types must equal number of fields: " + sinkFields.printVerbose() + ", found: " + this.types.length );
 
-    coercibles = Coercions.coercibleArray( this.numValues, this.types );
+    canonicals = (ToCanonical<String, ?>[]) Coercions.canonicalArray( String.class, this.numValues, this.types );
     }
 
   public String getDelimiter()
@@ -265,20 +265,20 @@ public class DelimitedParser implements Serializable
    * @param quote         of type String
    * @return Object[] as a convenience
    */
-  public Object[] cleanSplit( Object[] split, Pattern cleanPattern, Pattern escapePattern, String quote )
+  public String[] cleanSplit( String[] split, Pattern cleanPattern, Pattern escapePattern, String quote )
     {
     if( cleanPattern != null )
       {
       for( int i = 0; i < split.length; i++ )
         {
-        split[ i ] = cleanPattern.matcher( (String) split[ i ] ).replaceAll( "$1" );
-        split[ i ] = escapePattern.matcher( (String) split[ i ] ).replaceAll( quote );
+        split[ i ] = cleanPattern.matcher( split[ i ] ).replaceAll( "$1" );
+        split[ i ] = escapePattern.matcher( split[ i ] ).replaceAll( quote );
         }
       }
 
     for( int i = 0; i < split.length; i++ )
       {
-      if( ( (String) split[ i ] ).isEmpty() )
+      if( split[ i ].isEmpty() )
         split[ i ] = null;
       }
 
@@ -302,7 +302,7 @@ public class DelimitedParser implements Serializable
       if( entry == null )
         throw new TapException( "unable to read fields from tap: " + tap + ", is empty" );
 
-      Object[] result = onlyParseLine( entry.getTuple().getString( 0 ) ); // don't coerce if type info is avail
+      String[] result = onlyParseLine( entry.getTuple().getString( 0 ) ); // don't coerce if type info is avail
 
       result = cleanParsedLine( result );
 
@@ -339,46 +339,44 @@ public class DelimitedParser implements Serializable
 
   public Object[] parseLine( String line )
     {
-    Object[] split = onlyParseLine( line );
+    String[] split = onlyParseLine( line );
 
     split = cleanParsedLine( split );
 
     return coerceParsedLine( line, split );
     }
 
-  protected Object[] cleanParsedLine( Object[] split )
+  protected String[] cleanParsedLine( String[] split )
     {
     return cleanSplit( split, cleanPattern, escapePattern, quote );
     }
 
-  protected Object[] coerceParsedLine( String line, Object[] split )
+  protected Object[] coerceParsedLine( String line, String[] split )
     {
-    if( types != null ) // forced null in ctor
+    if( types == null ) // forced null in ctor
+      return split;
+
+    Object[] result = new Object[ split.length ];
+
+    for( int i = 0; i < split.length; i++ )
       {
-      Object[] result = new Object[ split.length ];
-
-      for( int i = 0; i < split.length; i++ )
+      try
         {
-        try
-          {
-          result[ i ] = coercibles[ i ].canonical( split[ i ] );
-          }
-        catch( Exception exception )
-          {
-          result[ i ] = null;
-
-          if( !safe )
-            throw new TapException( getSafeMessage( split[ i ], i ), exception, new Tuple( line ) ); // trap actual line data
-
-          if( LOG.isDebugEnabled() )
-            LOG.debug( getSafeMessage( split[ i ], i ), exception );
-          }
+        result[ i ] = canonicals[ i ].canonical( split[ i ] );
         }
+      catch( Exception exception )
+        {
+        result[ i ] = null;
 
-      split = result;
+        if( !safe )
+          throw new TapException( getSafeMessage( split[ i ], i ), exception, new Tuple( line ) ); // trap actual line data
+
+        if( LOG.isDebugEnabled() )
+          LOG.debug( getSafeMessage( split[ i ], i ), exception );
+        }
       }
 
-    return split;
+    return result;
     }
 
   private String getSafeMessage( Object object, int i )
@@ -395,9 +393,9 @@ public class DelimitedParser implements Serializable
       }
     }
 
-  protected Object[] onlyParseLine( String line )
+  protected String[] onlyParseLine( String line )
     {
-    Object[] split = createSplit( line, splitPattern, numValues == 0 ? 0 : -1 );
+    String[] split = createSplit( line, splitPattern, numValues == 0 ? 0 : -1 );
 
     if( numValues != 0 && split.length != numValues )
       {
@@ -407,7 +405,7 @@ public class DelimitedParser implements Serializable
       if( LOG.isDebugEnabled() )
         LOG.debug( getParseMessage( split ) );
 
-      Object[] array = new Object[ numValues ];
+      String[] array = new String[ numValues ];
       Arrays.fill( array, "" );
       System.arraycopy( split, 0, array, 0, Math.min( numValues, split.length ) );
 
@@ -529,7 +527,7 @@ public class DelimitedParser implements Serializable
     return result;
     }
 
-  protected Object[] cleanFields( Object[] result )
+  protected String[] cleanFields( String[] result )
     {
     if( fieldTypeResolver == null )
       return result;

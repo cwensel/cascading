@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  *
  */
-public class IntegerCoerce extends Coercions.Coerce<Integer>
+public class IntegerCoerce extends NumberCoerce<Integer>
   {
   protected IntegerCoerce( Map<Type, Coercions.Coerce> map )
     {
@@ -39,14 +39,18 @@ public class IntegerCoerce extends Coercions.Coerce<Integer>
     return int.class;
     }
 
-  @Override
-  public Integer coerce( Object value )
+  protected Integer forNull()
     {
-    if( value instanceof Number )
-      return ( (Number) value ).intValue();
-    else if( value == null )
-      return 0;
-    else
-      return Integer.parseInt( value.toString() );
+    return 0;
+    }
+
+  protected <T> Integer parseType( T f )
+    {
+    return Integer.parseInt( f.toString() );
+    }
+
+  protected Integer asType( Number f )
+    {
+    return f.intValue();
     }
   }

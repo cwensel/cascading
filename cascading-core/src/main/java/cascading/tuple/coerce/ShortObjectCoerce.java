@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  *
  */
-public class ShortObjectCoerce extends Coercions.Coerce<Short>
+public class ShortObjectCoerce extends NumberCoerce<Short>
   {
   protected ShortObjectCoerce( Map<Type, Coercions.Coerce> map )
     {
@@ -39,14 +39,18 @@ public class ShortObjectCoerce extends Coercions.Coerce<Short>
     return Short.class;
     }
 
-  @Override
-  public Short coerce( Object value )
+  protected Short forNull()
     {
-    if( value instanceof Number )
-      return ( (Number) value ).shortValue();
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Short.parseShort( value.toString() );
+    return null;
+    }
+
+  protected <T> Short parseType( T f )
+    {
+    return Short.parseShort( f.toString() );
+    }
+
+  protected Short asType( Number f )
+    {
+    return f.shortValue();
     }
   }

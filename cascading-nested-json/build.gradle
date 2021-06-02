@@ -53,3 +53,6 @@ javadoc {
     links << "http://fasterxml.github.io/jackson-databind/javadoc/${jacksonDatabindVersion[ 0..-3 ]}/".toString()
   }
 }
+
+tasks.jmh.enabled = true
+tasks.jmhReport.enabled = true

@@ -18,14 +18,14 @@
  * limitations under the License.
  */
 
-package cascading.tuple;
+package cascading.nested.json;
 
-import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
-import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
-import cascading.tuple.type.CoercionFrom;
+import cascading.tuple.type.ToCanonical;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -43,49 +43,28 @@ import org.openjdk.jmh.infra.Blackhole;
  *
  */
 @State(Scope.Thread)
-@Warmup(iterations = 1, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 250, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 2, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(1)
 @BenchmarkMode({Mode.AverageTime})
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-public class CoerceBench
+public class CanonicalBench
   {
-  public enum Canonical
-    {
-      String,
-      Short,
-      Short_TYPE,
-      Integer,
-      Integer_TYPE,
-      Long,
-      Long_TYPE,
-      Float,
-      Float_TYPE,
-      Double,
-      Double_TYPE
-    }
+  @Param({"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+          "11", "12", "13", "14", "15", "16", "17"})
+  int from = 0;
 
-  @Param
-  Canonical from = Canonical.String;
-
-  Type[] canonicalTypes = new Type[]{
-    String.class,
-    Short.class,
-    Short.TYPE,
-    Integer.class,
-    Integer.TYPE,
-    Long.class,
-    Long.TYPE,
-    Float.class,
-    Float.TYPE,
-    Double.class,
-    Double.TYPE
-  };
-
-  Object[] canonicalValues = new Object[]{
+  Object[] fromValues = new Object[]{
+    JsonNodeFactory.instance.textNode( "1000" ),
+    JsonNodeFactory.instance.numberNode( 1000 ),
+    JSONCoercibleType.TYPE.canonical( "{ \"name\":\"John\", \"age\":50, \"car\":null }" ),
+    null,
     "1000",
-    1000,
-    1000,
+    "{ \"sale\":true }",
+    "{\n\"person\":{ \"name\":\"John\", \"age\":50, \"city\":\"Houston\" }\n}",
+    "[ \"Ford\", \"BMW\", \"Fiat\" ]",
+    (short) 1000,
+    (short) 1000,
     1000,
     1000,
     1000L,
@@ -96,10 +75,14 @@ public class CoerceBench
     1000.000D
   };
 
-  @Param({"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"})
-  int to = 0;
-
-  Class[] toTypes = new Class[]{
+  Class[] fromTypes = new Class[]{
+    JsonNode.class,
+    JsonNode.class,
+    JsonNode.class,
+    String.class,
+    String.class,
+    String.class,
+    String.class,
     String.class,
     Short.class,
     Short.TYPE,
@@ -113,35 +96,34 @@ public class CoerceBench
     Double.TYPE
   };
 
-  CoercibleType coercibleType;
-  Object canonicalValue;
-  CoercionFrom coercion;
-  Class toType;
+  CoercibleType coercibleType = JSONCoercibleType.TYPE;
+  ToCanonical canonical;
+  Object fromValue;
+  Class fromType;
 
   @Setup
   public void setup()
     {
-    coercibleType = Coercions.coercibleTypeFor( canonicalTypes[ from.ordinal() ] );
-    canonicalValue = canonicalValues[ from.ordinal() ];
-    toType = toTypes[ to ];
-    coercion = coercibleType.to( toType );
+    fromType = fromTypes[ from ];
+    canonical = coercibleType.from( fromType );
+    fromValue = fromValues[ from ];
     }
 
   @Benchmark
   public void baseline( Blackhole bh )
     {
-    bh.consume( coercibleType.coerce( canonicalValue, toType ) );
+    bh.consume( coercibleType.canonical( fromValue ) );
     }
 
   @Benchmark
-  public void coercionFrom( Blackhole bh )
+  public void toCanonical( Blackhole bh )
     {
-    bh.consume( coercibleType.to( toType ).coerce( canonicalValue ) );
+    bh.consume( coercibleType.from( fromType ).canonical( fromValue ) );
     }
 
   @Benchmark
-  public void coercionFromFixed( Blackhole bh )
+  public void toCanonicalFixed( Blackhole bh )
     {
-    bh.consume( coercion.coerce( canonicalValue ) );
+    bh.consume( canonical.canonical( fromValue ) );
     }
   }

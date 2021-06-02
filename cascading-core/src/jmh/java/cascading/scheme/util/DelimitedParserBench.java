@@ -92,6 +92,7 @@ public abstract class DelimitedParserBench
 
   /**
    * DelimitedParserBench.PrimitivesDelimitedParserBench.measureReaderWriter  thrpt    5  44.454 ± 0.336  ops/min
+   * DelimitedParserBench.PrimitivesDelimitedParserBench.measureReaderWriter  thrpt    5  45.654 ± 0.487  ops/min
    */
   public static class PrimitivesDelimitedParserBench extends DelimitedParserBench
     {
@@ -117,6 +118,7 @@ public abstract class DelimitedParserBench
 
   /**
    * DelimitedParserBench.DatesDelimitedParserBench.measureReaderWriter       thrpt    5  27.684 ± 1.025  ops/min
+   * DelimitedParserBench.DatesDelimitedParserBench.measureReaderWriter       thrpt    5  27.601 ± 0.991  ops/min
    */
   public static class DatesDelimitedParserBench extends DelimitedParserBench
     {

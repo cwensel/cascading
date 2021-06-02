@@ -32,6 +32,8 @@ import java.util.Map;
 import cascading.cascade.CascadeException;
 import cascading.tuple.Fields;
 import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.CoercionFrom;
+import cascading.tuple.type.ToCanonical;
 import cascading.util.Util;
 
 /**
@@ -49,7 +51,7 @@ import cascading.util.Util;
  */
 public final class Coercions
   {
-  public static abstract class Coerce<T> implements CoercibleType<T>
+  public static abstract class Coerce<Canonical> implements CoercibleType<Canonical>
     {
     protected Coerce( Map<Type, Coerce> map )
       {
@@ -60,7 +62,7 @@ public final class Coercions
       }
 
     @Override
-    public T canonical( Object value )
+    public Canonical canonical( Object value )
       {
       return coerce( value );
       }
@@ -71,7 +73,23 @@ public final class Coercions
       return Coercions.coerce( value, to );
       }
 
-    public abstract T coerce( Object value );
+    public abstract Canonical coerce( Object value );
+
+    @Override
+    public <T> CoercionFrom<Canonical, T> to( Type to )
+      {
+      if( to == getCanonicalType() )
+        return t -> (T) t;
+
+      CoercibleType<T> coercibleType = Coercions.coercibleTypeFor( to );
+
+      if( coercibleType == null )
+        return ( t ) -> coerce( t, to );
+
+      ToCanonical<Object, T> from = coercibleType.from( getCanonicalType() );
+
+      return ( t ) -> (T) from.canonical( t );
+      }
 
     @Override
     public int hashCode()
@@ -92,7 +110,7 @@ public final class Coercions
       }
     }
 
-  private static final Map<Type, Coerce> coercionsPrivate = new IdentityHashMap<Type, Coerce>();
+  private static final Map<Type, Coerce> coercionsPrivate = new IdentityHashMap<>();
   public static final Map<Type, Coerce> coercions = Collections.unmodifiableMap( coercionsPrivate );
 
   private static final Map<String, Type> typesPrivate = new HashMap<String, Type>();
@@ -143,6 +161,14 @@ public final class Coercions
    * @param type of type Class
    * @return a Class
    */
+  public static Class asNonPrimitiveOrNull( Type type )
+    {
+    if( type instanceof Class )
+      return asNonPrimitive( (Class) type );
+
+    return null;
+    }
+
   public static Class asNonPrimitive( Class type )
     {
     if( type.isPrimitive() )
@@ -259,7 +285,7 @@ public final class Coercions
     {
     CoercibleType[] coercions = new CoercibleType[ size ];
 
-    if( types == null )
+    if( types == null || types.length == 0 )
       {
       Arrays.fill( coercions, OBJECT );
       return coercions;
@@ -269,6 +295,43 @@ public final class Coercions
       coercions[ i ] = coercibleTypeFor( types[ i ] );
 
     return coercions;
+    }
+
+  public static ToCanonical<?, ?>[] canonicalArray( Type from, int size, Type[] types )
+    {
+    ToCanonical<?, ?>[] canonicals = new ToCanonical[ size ];
+
+    if( types == null || types.length == 0 )
+      {
+      Arrays.fill( canonicals, OBJECT.from( from ) );
+      return canonicals;
+      }
+
+    for( int i = 0; i < types.length; i++ )
+      canonicals[ i ] = coercibleTypeFor( types[ i ] ).from( from );
+
+    return canonicals;
+    }
+
+  public static CoercionFrom<?, ?>[] coercionsArray( Type to, Type[] types )
+    {
+    return coercionsArray( to, types.length, types );
+    }
+
+  public static CoercionFrom<?, ?>[] coercionsArray( Type to, int size, Type[] types )
+    {
+    CoercionFrom<?, ?>[] canonicals = new CoercionFrom[ size ];
+
+    if( types == null || types.length == 0 )
+      {
+      Arrays.fill( canonicals, OBJECT.to( to ) );
+      return canonicals;
+      }
+
+    for( int i = 0; i < types.length; i++ )
+      canonicals[ i ] = coercibleTypeFor( types[ i ] ).to( to );
+
+    return canonicals;
     }
 
   /**

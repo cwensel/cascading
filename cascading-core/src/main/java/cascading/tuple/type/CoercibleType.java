@@ -56,10 +56,26 @@ public interface CoercibleType<Canonical> extends Type, Serializable
    */
   Canonical canonical( Object value );
 
+  default <T> ToCanonical<T, Canonical> from( Type from )
+    {
+    if( from == getCanonicalType() )
+      return f -> (Canonical) f;
+
+    return this::canonical;
+    }
+
   /**
    * @param value of type Object
    * @param to    of type Type
    * @return the value coerced into the requested type
    */
   <Coerce> Coerce coerce( Object value, Type to );
+
+  default <T> CoercionFrom<Canonical, T> to( Type to )
+    {
+    if( to == getCanonicalType() )
+      return t -> (T) t;
+
+    return ( t ) -> coerce( t, to );
+    }
   }

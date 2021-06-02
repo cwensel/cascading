@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  *
  */
-public class FloatObjectCoerce extends Coercions.Coerce<Float>
+public class FloatObjectCoerce extends NumberCoerce<Float>
   {
   protected FloatObjectCoerce( Map<Type, Coercions.Coerce> map )
     {
@@ -39,14 +39,18 @@ public class FloatObjectCoerce extends Coercions.Coerce<Float>
     return Float.class;
     }
 
-  @Override
-  public Float coerce( Object value )
+  protected Float forNull()
     {
-    if( value instanceof Number )
-      return ( (Number) value ).floatValue();
-    else if( value == null || value.toString().isEmpty() )
-      return null;
-    else
-      return Float.parseFloat( value.toString() );
+    return null;
+    }
+
+  protected <T> Float parseType( T f )
+    {
+    return Float.parseFloat( f.toString() );
+    }
+
+  protected Float asType( Number f )
+    {
+    return f.floatValue();
     }
   }

@@ -18,14 +18,15 @@
  * limitations under the License.
  */
 
-package cascading.tuple;
+package cascading.nested.json;
 
-import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 import cascading.tuple.type.CoercionFrom;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -43,64 +44,41 @@ import org.openjdk.jmh.infra.Blackhole;
  *
  */
 @State(Scope.Thread)
-@Warmup(iterations = 1, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 250, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 2, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(1)
 @BenchmarkMode({Mode.AverageTime})
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class CoerceBench
   {
-  public enum Canonical
-    {
-      String,
-      Short,
-      Short_TYPE,
-      Integer,
-      Integer_TYPE,
-      Long,
-      Long_TYPE,
-      Float,
-      Float_TYPE,
-      Double,
-      Double_TYPE
-    }
-
-  @Param
-  Canonical from = Canonical.String;
-
-  Type[] canonicalTypes = new Type[]{
-    String.class,
-    Short.class,
-    Short.TYPE,
-    Integer.class,
-    Integer.TYPE,
-    Long.class,
-    Long.TYPE,
-    Float.class,
-    Float.TYPE,
-    Double.class,
-    Double.TYPE
-  };
+  @Param({"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+          "11", "12", "13", "14"})
+  int to = 0;
 
   Object[] canonicalValues = new Object[]{
-    "1000",
-    1000,
-    1000,
-    1000,
-    1000,
-    1000L,
-    1000L,
-    1000.000F,
-    1000.000F,
-    1000.000D,
-    1000.000D
+    JsonNodeFactory.instance.nullNode(),
+    JSONCoercibleType.TYPE.canonical( "{ \"name\":\"John\", \"age\":50, \"car\":null }" ),
+    JSONCoercibleType.TYPE.canonical( "{ \"name\":\"John\", \"age\":50, \"car\":null }" ),
+    JSONCoercibleType.TYPE.canonical( "[ \"Ford\", \"BMW\", \"Fiat\" ]" ),
+    JsonNodeFactory.instance.textNode( "1000" ),
+    JsonNodeFactory.instance.numberNode( (short) 1000 ),
+    JsonNodeFactory.instance.numberNode( (short) 1000 ),
+    JsonNodeFactory.instance.numberNode( 1000 ),
+    JsonNodeFactory.instance.numberNode( 1000 ),
+    JsonNodeFactory.instance.numberNode( 1000L ),
+    JsonNodeFactory.instance.numberNode( 1000L ),
+    JsonNodeFactory.instance.numberNode( 1000.000F ),
+    JsonNodeFactory.instance.numberNode( 1000.000F ),
+    JsonNodeFactory.instance.numberNode( 1000.000D ),
+    JsonNodeFactory.instance.numberNode( 1000.000D )
   };
-
-  @Param({"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"})
-  int to = 0;
 
   Class[] toTypes = new Class[]{
     String.class,
+    String.class,
+    Map.class,
+    List.class,
+    String.class,
     Short.class,
     Short.TYPE,
     Integer.class,
@@ -113,7 +91,7 @@ public class CoerceBench
     Double.TYPE
   };
 
-  CoercibleType coercibleType;
+  CoercibleType coercibleType = JSONCoercibleType.TYPE;
   Object canonicalValue;
   CoercionFrom coercion;
   Class toType;
@@ -121,8 +99,7 @@ public class CoerceBench
   @Setup
   public void setup()
     {
-    coercibleType = Coercions.coercibleTypeFor( canonicalTypes[ from.ordinal() ] );
-    canonicalValue = canonicalValues[ from.ordinal() ];
+    canonicalValue = canonicalValues[ to ];
     toType = toTypes[ to ];
     coercion = coercibleType.to( toType );
     }

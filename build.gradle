@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat
 */
 plugins {
   id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+  id 'me.champeau.jmh' version '0.6.5' apply false
+  id 'io.morethan.jmhreport' version '0.9.0' apply false
 }
 
 apply from: 'etc/version.gradle'
@@ -69,6 +71,8 @@ subprojects {
   apply plugin: 'java-library'
   apply plugin: 'maven-publish'
   apply plugin: 'signing'
+  apply plugin: 'me.champeau.jmh'
+  apply plugin: 'io.morethan.jmhreport'
   apply from: "../etc/dependencyVersions.gradle"
   apply from: '../etc/testing.gradle'
 
@@ -230,6 +234,26 @@ subprojects {
   signing {
     sign publishing.publications.maven
   }
+
+  jmh {
+    jmhVersion = '1.32'
+    duplicateClassesStrategy = DuplicatesStrategy.WARN
+    resultFormat = 'JSON'
+    humanOutputFile = project.file( "${project.buildDir}/reports/jmh/human.txt" )
+    resultsFile = project.file( "${project.buildDir}/reports/jmh/results.json" )
+    profilers = ['stack']
+    //  profilers = ['gc', 'stack']
+    //  profilers = ['gc', 'stack', 'jfr']
+  }
+
+  jmhReport {
+    jmhResultPath = project.file( "${project.buildDir}/reports/jmh/results.json" )
+    jmhReportOutput = project.file( "${project.buildDir}/reports/jmh/" )
+  }
+
+  tasks.jmh.finalizedBy tasks.jmhReport
+  tasks.jmh.enabled = false
+  tasks.jmhReport.enabled = false
 }
 
 task allJavadoc( type: Javadoc, dependsOn: subprojects.javadoc ) {

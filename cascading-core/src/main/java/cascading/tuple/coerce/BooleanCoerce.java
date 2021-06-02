@@ -23,6 +23,8 @@ package cascading.tuple.coerce;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import cascading.tuple.type.ToCanonical;
+
 /**
  *
  */
@@ -40,11 +42,23 @@ public class BooleanCoerce extends Coercions.Coerce<Boolean>
     }
 
   @Override
+  public <T> ToCanonical<T, Boolean> from( Type from )
+    {
+    if( from == getCanonicalType() )
+      return f -> f != null && (Boolean) f;
+
+    if( from instanceof Class && Number.class.isAssignableFrom( (Class<?>) from ) )
+      return f -> f != null && ( (Boolean) f );
+
+    return f -> f != null && Boolean.parseBoolean( f.toString() );
+    }
+
+  @Override
   public Boolean coerce( Object value )
     {
     if( value instanceof Boolean )
       return (Boolean) value;
-    else if( value == null )
+    else if( value == null || value.toString().isEmpty())
       return false;
     else
       return Boolean.parseBoolean( value.toString() );
