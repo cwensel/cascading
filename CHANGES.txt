@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Added jmh in order baseline and evaluate changes.
+
 4.0
 
   Added support for publishing final releases to Maven Central.
