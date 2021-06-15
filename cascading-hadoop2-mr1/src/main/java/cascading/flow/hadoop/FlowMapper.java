@@ -30,6 +30,7 @@ import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.Flows;
 import cascading.flow.SliceCounters;
+import cascading.flow.StepCounters;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.stream.graph.HadoopMapStreamGraph;
 import cascading.flow.hadoop.util.HadoopUtil;
@@ -123,6 +124,7 @@ public class FlowMapper implements MapRunnable
     long processBeginTime = System.currentTimeMillis();
 
     currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+    currentProcess.increment( StepCounters.Process_Begin_Time, processBeginTime );
 
     SourceStage streamedHead = streamGraph.getStreamedHead();
     Iterator<Duct> iterator = streamGraph.getHeads().iterator();
@@ -172,6 +174,8 @@ public class FlowMapper implements MapRunnable
 
         currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
         currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+        currentProcess.increment( StepCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( StepCounters.Process_Duration, processEndTime - processBeginTime );
 
         String message = "flow node id: " + flowNode.getID();
         logMemory( LOG, message + ", mem on close" );

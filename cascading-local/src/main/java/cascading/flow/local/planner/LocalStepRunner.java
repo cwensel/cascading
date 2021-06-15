@@ -36,6 +36,7 @@ import java.util.concurrent.Semaphore;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowProcess;
 import cascading.flow.SliceCounters;
+import cascading.flow.StepCounters;
 import cascading.flow.local.LocalFlowStep;
 import cascading.flow.local.stream.graph.LocalStepStreamGraph;
 import cascading.flow.stream.duct.Duct;
@@ -166,6 +167,7 @@ public class LocalStepRunner implements Callable<Throwable>
       processBeginTime = System.currentTimeMillis();
 
       currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+      currentProcess.increment( StepCounters.Process_Begin_Time, processBeginTime );
 
       try
         {
@@ -240,6 +242,8 @@ public class LocalStepRunner implements Callable<Throwable>
 
         currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
         currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+        currentProcess.increment( StepCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( StepCounters.Process_Duration, processEndTime - processBeginTime );
 
         markComplete.release();
         }

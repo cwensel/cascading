@@ -30,6 +30,7 @@ import cascading.flow.FlowNode;
 import cascading.flow.FlowSession;
 import cascading.flow.FlowStep;
 import cascading.flow.SliceCounters;
+import cascading.flow.StepCounters;
 import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.hadoop.stream.HadoopGroupGate;
 import cascading.flow.hadoop.stream.graph.HadoopReduceStreamGraph;
@@ -140,6 +141,7 @@ public class FlowReducer extends MapReduceBase implements Reducer
 
       processBeginTime = System.currentTimeMillis();
       currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+      currentProcess.increment( StepCounters.Process_Begin_Time, processBeginTime );
 
       group.start( group );
       }
@@ -188,6 +190,8 @@ public class FlowReducer extends MapReduceBase implements Reducer
         long processEndTime = System.currentTimeMillis();
         currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
         currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+        currentProcess.increment( StepCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( StepCounters.Process_Duration, processEndTime - processBeginTime );
         }
 
       String message = "flow node id: " + flowNode.getID();

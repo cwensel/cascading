@@ -33,6 +33,7 @@ import cascading.flow.FlowException;
 import cascading.flow.FlowNode;
 import cascading.flow.FlowSession;
 import cascading.flow.SliceCounters;
+import cascading.flow.StepCounters;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.planner.BaseFlowNode;
 import cascading.flow.stream.duct.Duct;
@@ -143,6 +144,7 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
     long processBeginTime = System.currentTimeMillis();
 
     currentProcess.increment( SliceCounters.Process_Begin_Time, processBeginTime );
+    currentProcess.increment( StepCounters.Process_Begin_Time, processBeginTime );
 
     Iterator<Duct> iterator = allHeads.iterator();
 
@@ -187,6 +189,8 @@ public class FlowProcessor extends AbstractLogicalIOProcessor
         long processEndTime = System.currentTimeMillis();
         currentProcess.increment( SliceCounters.Process_End_Time, processEndTime );
         currentProcess.increment( SliceCounters.Process_Duration, processEndTime - processBeginTime );
+        currentProcess.increment( StepCounters.Process_End_Time, processEndTime );
+        currentProcess.increment( StepCounters.Process_Duration, processEndTime - processBeginTime );
         }
       }
     }
