@@ -41,12 +41,10 @@ import static cascading.flow.hadoop.util.HadoopUtil.asJobConfInstance;
 
 public class Hadoop18TapUtil
   {
-  /** Field LOG */
-  private static final Logger LOG = LoggerFactory.getLogger( Hadoop18TapUtil.class );
-
   /** The Hadoop temporary path used to prevent collisions */
   public static final String TEMPORARY_PATH = "_temporary";
-
+  /** Field LOG */
+  private static final Logger LOG = LoggerFactory.getLogger( Hadoop18TapUtil.class );
   private static final Map<String, AtomicInteger> pathCounts = new HashMap<String, AtomicInteger>();
 
   /**
@@ -298,6 +296,10 @@ public class Hadoop18TapUtil
       Path tmpDir = new Path( outputPath, TEMPORARY_PATH );
       FileSystem fileSys = tmpDir.getFileSystem( conf );
 
+      // do not create the temp dir if write direct
+      if( isOutputWriteDirect( conf, fileSys ) )
+        return;
+
       if( !fileSys.exists( tmpDir ) && !fileSys.mkdirs( tmpDir ) )
         LOG.error( "mkdirs failed to create {}", tmpDir );
       }
@@ -360,11 +362,16 @@ public class Hadoop18TapUtil
     if( fs == null )
       return false;
 
-    boolean result = conf.getBoolean( "mapred.output.direct." + fs.getClass().getSimpleName(), false );
+    boolean result = isOutputWriteDirect( conf, fs );
 
     if( result )
       LOG.info( "output direct is enabled for this fs: " + fs.getName() );
 
     return result;
+    }
+
+  protected static boolean isOutputWriteDirect( Configuration conf, FileSystem fs )
+    {
+    return conf.getBoolean( "mapred.output.direct." + fs.getClass().getSimpleName(), false );
     }
   }
