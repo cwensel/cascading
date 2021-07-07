@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.0.1 [unreleased]
 
+  Updated c.t.p.BasePartitionTap to close partititions in parallel.
+
   Updated c.t.h.u.Hadoop18TapUtil to not create temporary folders when writing 'direct' to a filesystem.
 
   Updated c.f.StepCounters to include process level metrics.

@@ -187,7 +187,7 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
      */
     protected void closeCollectors( Map<String, TupleEntryCollector> collectorMap, BiConsumer<String, TupleEntryCollector> closeCollectorFor )
       {
-      collectorMap.forEach( closeCollectorFor );
+      collectorMap.entrySet().parallelStream().forEach( entry -> closeCollectorFor(entry.getKey(), entry.getValue()) );
       }
 
     @Override
