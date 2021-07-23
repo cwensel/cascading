@@ -4,7 +4,13 @@ Cascading Change Log
 
   Added jmh in order baseline and evaluate changes.
 
-4.0
+4.0.1 [unreleased]
+
+  Updated c.t.h.u.Hadoop18TapUtil to not create temporary folders when writing 'direct' to a filesystem.
+
+  Updated c.f.StepCounters to include process level metrics.
+
+4.0.0
 
   Added support for publishing final releases to Maven Central.
 
