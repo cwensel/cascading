@@ -2,7 +2,7 @@
 
 Thanks for using [Cascading](https://cascading.wensel.net/).
 
-## Cascading 4.0
+## Cascading 4.1
 
 Cascading 4 includes a few major changes and additions from prior major releases:
 
