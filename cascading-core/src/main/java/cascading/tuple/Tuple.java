@@ -80,6 +80,40 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   /** Field elements */
   protected List<Object> elements;
 
+  protected Tuple( List<Object> elements )
+    {
+    this.elements = elements;
+    }
+
+  /** Constructor Tuple creates a new Tuple instance. */
+  public Tuple()
+    {
+    this( new ArrayList<>() );
+    }
+
+  /**
+   * Copy constructor. Does not nest the given Tuple instance within this new instance. Use {@link #add(Object)}.
+   *
+   * @param tuple of type Tuple
+   */
+  @ConstructorProperties({"tuple"})
+  public Tuple( Tuple tuple )
+    {
+    this( new ArrayList<>( tuple.elements ) );
+    }
+
+  /**
+   * Constructor Tuple creates a new Tuple instance with all the given values.
+   *
+   * @param values of type Object...
+   */
+  @ConstructorProperties({"values"})
+  public Tuple( Object... values )
+    {
+    this( new ArrayList<>( values.length ) );
+    Collections.addAll( elements, values );
+    }
+
   /**
    * Method size returns a new Tuple instance of the given size with nulls as its element values.
    *
@@ -119,40 +153,6 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
   public static List<Object> elements( Tuple tuple )
     {
     return tuple.elements;
-    }
-
-  protected Tuple( List<Object> elements )
-    {
-    this.elements = elements;
-    }
-
-  /** Constructor Tuple creates a new Tuple instance. */
-  public Tuple()
-    {
-    this( new ArrayList<>() );
-    }
-
-  /**
-   * Copy constructor. Does not nest the given Tuple instance within this new instance. Use {@link #add(Object)}.
-   *
-   * @param tuple of type Tuple
-   */
-  @ConstructorProperties({"tuple"})
-  public Tuple( Tuple tuple )
-    {
-    this( new ArrayList<>( tuple.elements ) );
-    }
-
-  /**
-   * Constructor Tuple creates a new Tuple instance with all the given values.
-   *
-   * @param values of type Object...
-   */
-  @ConstructorProperties({"values"})
-  public Tuple( Object... values )
-    {
-    this( new ArrayList<>( values.length ) );
-    Collections.addAll( elements, values );
     }
 
   /**
@@ -521,6 +521,45 @@ public class Tuple implements Comparable<Object>, Iterable<Object>, Serializable
       for( int j = 0; j < tuple.elements.size(); j++ )
         internalSet( pos++, tuple.elements.get( j ) );
       }
+    }
+
+  /**
+   * Method setAll sets each element value of the given Tuple instances into the corresponding
+   * position of this instance.
+   * <p>
+   * All given tuple instances after the first will be offset by the length of the prior tuple instances.
+   *
+   * @param tuples of type Iterable<Tuple>
+   */
+  public void setAll( Iterable<Tuple> tuples )
+    {
+    verifyModifiable();
+
+    int pos = 0;
+
+    for( Tuple tuple : tuples )
+      {
+      if( tuple == null ) // being defensive
+        continue;
+
+      for( int j = 0; j < tuple.elements.size(); j++ )
+        internalSet( pos++, tuple.elements.get( j ) );
+      }
+    }
+
+  /**
+   * Method setAll sets the given Object instance into all the positions of this Tuple.
+   * <p>
+   * Use this method to make all positions in the current tuple null.
+   *
+   * @param value of type Object
+   */
+  public void setAllTo( Object value )
+    {
+    verifyModifiable();
+
+    for( int i = 0; i < elements.size(); i++ )
+      internalSet( i, value );
     }
 
   /**
