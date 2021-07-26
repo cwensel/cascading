@@ -54,9 +54,9 @@ public class NestedGetAllFunction<Node, Result> extends NestedGetFunction<Node, 
    *
    * @param nestedCoercibleType of NestedCoercibleType
    * @param stringRootPointer   of type String
-   * @param fieldDeclaration    of Fields
-   * @param failOnMissingNode   of boolean
-   * @param stringPointers      of String...
+   * @param fieldDeclaration    of type Fields
+   * @param failOnMissingNode   of type boolean
+   * @param stringPointers      of type String...
    */
   public NestedGetAllFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, String stringRootPointer, Fields fieldDeclaration, boolean failOnMissingNode, String... stringPointers )
     {

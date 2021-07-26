@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -83,6 +83,45 @@ public interface JSONData
     "\"female\":true," +
     "\"city\":\"Houston\"," +
     "\"ssn\":\"123-45-6789\"" +
+    "}}" +
+    "]" +
+    "}";
+
+  String peopleWithNulls = "{" +
+    "\"people\":" +
+    "[ " +
+    "{" +
+    "\"person\":" +
+    "{" +
+    "\"name\":\"John Doe\"," +
+    "\"firstName\":\"John\"," +
+    "\"lastName\":\"Doe\"," +
+    "\"age\":50," +
+    "\"female\":false," +
+    "\"city\":\"Houston\"," +
+    "\"ssn\":\"123-45-6789\"" +
+    "}}," +
+    "{" +
+    "\"person\":" +
+    "{" +
+    "\"name\":\"Jane Doe\"," +
+    "\"firstName\":\"Jane\"," +
+    "\"lastName\":\"Doe\"," +
+    "\"age\":49," +
+    "\"female\":true," +
+    "\"city\":\"Houston\"," +
+    "\"ssn\":\"123-45-6789\"" +
+    "}}," +
+    "{" +
+    "\"person\":" +
+    "{" +
+    "\"name\":\"Jane Null\"," +
+    "\"firstName\":\"Jane\"," +
+    "\"lastName\":\"Null\"," +
+    "\"age\":null," +
+    "\"female\":true," +
+    "\"city\":\"Houston\"," +
+    "\"ssn\":null" +
     "}}" +
     "]" +
     "}";

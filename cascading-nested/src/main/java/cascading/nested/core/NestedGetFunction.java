@@ -50,8 +50,13 @@ import heretical.pointer.path.NestedPointerCompiler;
  */
 public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, Result, Tuple> implements Function<Tuple>
   {
-  protected NestedPointer<Node, Result>[] pointers;
-  protected boolean failOnMissingNode;
+  protected final NestedPointer<Node, Result>[] pointers;
+  protected final boolean failOnMissingNode;
+
+  protected interface Setter<Node>
+    {
+    void set( int i, Node value );
+    }
 
   /**
    * Constructor NestedGetFunction creates a new NestedGetFunction instance.
@@ -66,8 +71,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
     super( nestedCoercibleType, fieldDeclaration );
     this.failOnMissingNode = failOnMissingNode;
 
-    if( fieldDeclaration.size() != stringPointers.length )
-      throw new IllegalArgumentException( "pointers not same length as declared fields" );
+    verify( stringPointers );
 
     NestedPointerCompiler<Node, Result> compiler = getNestedPointerCompiler();
 
@@ -75,6 +79,12 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
 
     for( int i = 0; i < stringPointers.length; i++ )
       this.pointers[ i ] = compiler.nested( stringPointers[ i ] );
+    }
+
+  protected void verify( String[] stringPointers )
+    {
+    if( getFieldDeclaration().size() != stringPointers.length )
+      throw new IllegalArgumentException( "pointers not same length as declared fields" );
     }
 
   @Override
@@ -96,6 +106,19 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
 
   protected void extractResult( Tuple resultTuple, Node node )
     {
+    extractResult( ( i, result ) -> setInto( resultTuple, i, result ), node );
+    }
+
+  protected void setInto( Tuple resultTuple, int i, Node result )
+    {
+    Type declaredType = getFieldDeclaration().getType( i );
+    Object value = getCoercibleType().coerce( result, declaredType );
+
+    resultTuple.set( i, value );
+    }
+
+  protected void extractResult( Setter<Node> resultSetter, Node node )
+    {
     for( int i = 0; i < pointers.length; i++ )
       {
       Node result = pointers[ i ].at( node );
@@ -103,10 +126,7 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
       if( failOnMissingNode && result == null )
         throw new OperationException( "node missing from json node tree: " + pointers[ i ] );
 
-      Type declaredType = getFieldDeclaration().getType( i );
-      Object value = getCoercibleType().coerce( result, declaredType );
-
-      resultTuple.set( i, value );
+      resultSetter.set( i, result );
       }
     }
 
