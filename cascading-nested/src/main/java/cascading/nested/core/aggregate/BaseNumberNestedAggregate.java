@@ -23,7 +23,7 @@ package cascading.nested.core.aggregate;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import cascading.nested.core.NestedAggregateFunction;
+import cascading.nested.core.NestedAggregate;
 import cascading.operation.SerPredicate;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
@@ -31,7 +31,7 @@ import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
 
 /**
- * Class BaseNumberNestedAggregateFunction is the base class used to create number oriented aggregation operations.
+ * Class BaseNumberNestedAggregate is the base class used to create number oriented aggregation operations.
  * <p>
  * Subclasses can optimize based on an expected primitive type while still honoring the {@code Long.class} and
  * {@code Long.TYPE} semantics around {@code null} or {@code 0} empty values.
@@ -39,11 +39,11 @@ import cascading.tuple.type.CoercibleType;
  * Note that subclasses can also be independent of the {@code Node} type (JSON etc). All Node specific operations
  * are passed back to the {@link cascading.nested.core.NestedCoercibleType} instance.
  *
- * @see SumLongNestedAggregateFunction
- * @see SumDoubleNestedAggregateFunction
- * @see AverageDoubleNestedAggregateFunction
+ * @see SumLongNestedAggregate
+ * @see SumDoubleNestedAggregate
+ * @see AverageDoubleNestedAggregate
  */
-public abstract class BaseNumberNestedAggregateFunction<Node, Type, Context extends BaseNumberNestedAggregateFunction.BaseContext<Type, Node>> implements NestedAggregateFunction<Node, Context>
+public abstract class BaseNumberNestedAggregate<Node, Type, Context extends BaseNumberNestedAggregate.BaseContext<Type, Node>> implements NestedAggregate<Node, Context>
   {
   public abstract static class BaseContext<Type, Node>
     {
@@ -52,7 +52,7 @@ public abstract class BaseNumberNestedAggregateFunction<Node, Type, Context exte
     final Supplier<Tuple> complete;
     boolean allValuesDiscarded = true;
 
-    public BaseContext( BaseNumberNestedAggregateFunction<Node, Type, BaseContext<Type, Node>> aggregateFunction )
+    public BaseContext( BaseNumberNestedAggregate<Node, Type, BaseContext<Type, Node>> aggregateFunction )
       {
       results = createResultTuple( aggregateFunction );
 
@@ -67,7 +67,7 @@ public abstract class BaseNumberNestedAggregateFunction<Node, Type, Context exte
         complete = this::valueIfDiscard;
       }
 
-    protected Tuple createResultTuple( BaseNumberNestedAggregateFunction<Node, Type, BaseContext<Type, Node>> aggregateFunction )
+    protected Tuple createResultTuple( BaseNumberNestedAggregate<Node, Type, BaseContext<Type, Node>> aggregateFunction )
       {
       return Tuple.size( aggregateFunction.getFieldDeclaration().size() );
       }
@@ -128,11 +128,11 @@ public abstract class BaseNumberNestedAggregateFunction<Node, Type, Context exte
   protected Fields fieldDeclaration;
   protected Class<Type> aggregateType;
 
-  protected BaseNumberNestedAggregateFunction()
+  protected BaseNumberNestedAggregate()
     {
     }
 
-  protected BaseNumberNestedAggregateFunction( Fields fieldDeclaration, Class<Type> defaultType )
+  protected BaseNumberNestedAggregate( Fields fieldDeclaration, Class<Type> defaultType )
     {
     if( !fieldDeclaration.hasTypes() )
       fieldDeclaration = fieldDeclaration.applyTypeToAll( defaultType );

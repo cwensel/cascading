@@ -24,21 +24,27 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
- *
+ * Class SumLongNestedAggregate is a {@link cascading.nested.core.NestedAggregate} implementation for summing
+ * long values collected from the parent container object.
  */
-public class SumDoubleNestedAggregateFunction<Node> extends BaseNumberNestedAggregateFunction<Node, Double, BaseNumberNestedAggregateFunction.BaseContext<Double, Node>>
+public class SumLongNestedAggregate<Node> extends BaseNumberNestedAggregate<Node, Long, BaseNumberNestedAggregate.BaseContext<Long, Node>>
   {
-  public static class Context<Node> extends BaseContext<Double, Node>
+  public static class Context<Node> extends BaseContext<Long, Node>
     {
-    double sum = 0D;
+    long sum = 0L;
 
-    public Context( BaseNumberNestedAggregateFunction<Node, Double, BaseContext<Double, Node>> aggregateFunction )
+    public Context( BaseNumberNestedAggregate<Node, Long, BaseContext<Long, Node>> aggregateFunction )
+      {
+      super( aggregateFunction );
+      }
+
+    public Context( SumLongNestedAggregate<Node> aggregateFunction )
       {
       super( aggregateFunction );
       }
 
     @Override
-    protected void aggregateFilteredValue( Double value )
+    protected void aggregateFilteredValue( Long value )
       {
       if( value == null )
         return;
@@ -55,14 +61,14 @@ public class SumDoubleNestedAggregateFunction<Node> extends BaseNumberNestedAggr
     @Override
     public void reset()
       {
-      sum = 0D;
+      sum = 0L;
       super.reset();
       }
     }
 
-  public SumDoubleNestedAggregateFunction( Fields declaredFields )
+  public SumLongNestedAggregate( Fields declaredFields )
     {
-    super( declaredFields, Double.TYPE );
+    super( declaredFields, Long.TYPE );
     }
 
   @Override

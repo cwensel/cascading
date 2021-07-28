@@ -27,14 +27,14 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 
 /**
- * Class AverageDoubleNestedAggregateFunction will calculate the average of all the elements collected from the parent
- * container object.
+ * Class AverageDoubleNestedAggregate is a @{link cascading.nested.core.NestedAggregate} implementation for averaging
+ * the elements collected from the parent container object.
  * <p>
  * Optionally null values can be ignored or counted against the average.
  *
  * @param <Node>
  */
-public class AverageDoubleNestedAggregateFunction<Node> extends BaseNumberNestedAggregateFunction<Node, Double, BaseNumberNestedAggregateFunction.BaseContext<Double, Node>>
+public class AverageDoubleNestedAggregate<Node> extends BaseNumberNestedAggregate<Node, Double, BaseNumberNestedAggregate.BaseContext<Double, Node>>
   {
   public enum Include
     {
@@ -49,7 +49,7 @@ public class AverageDoubleNestedAggregateFunction<Node> extends BaseNumberNested
     int count = 0;
     double sum = 0D;
 
-    public Context( BaseNumberNestedAggregateFunction<Node, Double, BaseContext<Double, Node>> aggregateFunction, Include include )
+    public Context( BaseNumberNestedAggregate<Node, Double, BaseContext<Double, Node>> aggregateFunction, Include include )
       {
       super( aggregateFunction );
 
@@ -112,13 +112,13 @@ public class AverageDoubleNestedAggregateFunction<Node> extends BaseNumberNested
    * @param declaredFields
    */
   @ConstructorProperties({"declaredFields"})
-  public AverageDoubleNestedAggregateFunction( Fields declaredFields )
+  public AverageDoubleNestedAggregate( Fields declaredFields )
     {
     this( declaredFields, Include.ALL );
     }
 
   @ConstructorProperties({"declaredFields", "include"})
-  public AverageDoubleNestedAggregateFunction( Fields declaredFields, Include include )
+  public AverageDoubleNestedAggregate( Fields declaredFields, Include include )
     {
     super( declaredFields, Double.TYPE );
     this.include = include;

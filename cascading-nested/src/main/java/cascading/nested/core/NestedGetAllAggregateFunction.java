@@ -44,7 +44,7 @@ import heretical.pointer.path.NestedPointerCompiler;
  * <p>
  * The {@code stringRootPointer} value must point to a container node with one or more child elements or objects.
  * <p>
- * The {@code pointerMap} maps a child node or property found in the child object to a {@link NestedAggregateFunction}
+ * The {@code pointerMap} maps a child node or property found in the child object to a {@link NestedAggregate}
  * implementation that implements the required aggregation algorithm.
  * <p>
  * If {@code failOnMissingNode} is {@code true} and the root pointer is empty or the field pointer returns a
@@ -53,7 +53,7 @@ import heretical.pointer.path.NestedPointerCompiler;
 public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFunction<Node, Result>
   {
   protected final NestedPointer<Node, Result> rootPointer;
-  protected final NestedAggregateFunction<Node, ?>[] nestedAggregateFunctions;
+  protected final NestedAggregate<Node, Object>[] nestedAggregates;
 
   /**
    * Constructor NestedGetAllAggregateFunction creates a new NestedGetAllAggregateFunction instance.
@@ -63,19 +63,19 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
    * @param failOnMissingNode   of type boolean
    * @param pointerMap          of type Map
    */
-  public NestedGetAllAggregateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregateFunction<Node, ?>> pointerMap )
+  public NestedGetAllAggregateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregate<Node, ?>> pointerMap )
     {
     super( nestedCoercibleType, declared( pointerMap.values() ), failOnMissingNode, asArray( pointerMap.keySet() ) );
 
     NestedPointerCompiler<Node, Result> compiler = getNestedPointerCompiler();
 
     this.rootPointer = compiler.nested( stringRootPointer );
-    this.nestedAggregateFunctions = pointerMap.values().toArray( new NestedAggregateFunction[ 0 ] );
+    this.nestedAggregates = pointerMap.values().toArray( new NestedAggregate[ 0 ] );
     }
 
-  protected static <Node> Fields declared( Collection<NestedAggregateFunction<Node, ?>> nestedAggregateFunctions )
+  protected static <Node> Fields declared( Collection<NestedAggregate<Node, ?>> nestedAggregates )
     {
-    return nestedAggregateFunctions.stream().map( NestedAggregateFunction::getFieldDeclaration ).reduce( Fields.NONE, Fields::append );
+    return nestedAggregates.stream().map( NestedAggregate::getFieldDeclaration ).reduce( Fields.NONE, Fields::append );
     }
 
   @Override
@@ -87,12 +87,21 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
   @Override
   public void prepare( FlowProcess flowProcess, OperationCall<Tuple> operationCall )
     {
-    Pair<NestedAggregateFunction<Node, ?>, Object>[] pairs = new Pair[ nestedAggregateFunctions.length ];
+    Pair<NestedAggregate<Node, Object>, Object>[] pairs = new Pair[ nestedAggregates.length ];
 
-    for( int i = 0; i < nestedAggregateFunctions.length; i++ )
-      pairs[ i ] = new Pair<>( nestedAggregateFunctions[ i ], nestedAggregateFunctions[ i ].createContext() );
+    for( int i = 0; i < nestedAggregates.length; i++ )
+      pairs[ i ] = new Pair<>( nestedAggregates[ i ], nestedAggregates[ i ].createContext() );
 
-    operationCall.setContext( new Tuple( Tuple.size( getFieldDeclaration().size() ), pairs ) );
+    LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple> tupleIterator = new LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple>( pairs )
+      {
+      @Override
+      protected Tuple convert( Pair<NestedAggregate<Node, Object>, Object> next )
+        {
+        return next.getLhs().complete( next.getRhs() );
+        }
+      };
+
+    operationCall.setContext( new Tuple( Tuple.size( getFieldDeclaration().size() ), pairs, tupleIterator ) );
     }
 
   @Override
@@ -106,36 +115,43 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
       throw new OperationException( "nodes missing from json node tree: " + rootPointer );
 
     Tuple resultTuple = (Tuple) functionCall.getContext().getObject( 0 );
-    Pair<NestedAggregateFunction<Node, Object>, Object>[] pairs = (Pair<NestedAggregateFunction<Node, Object>, Object>[]) functionCall.getContext().getObject( 1 );
+    Pair<NestedAggregate<Node, Object>, Object>[] pairs = (Pair<NestedAggregate<Node, Object>, Object>[]) functionCall.getContext().getObject( 1 );
+    LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple> tupleIterator = (LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple>) functionCall.getContext().getObject( 2 );
 
-    for( Pair<NestedAggregateFunction<Node, Object>, Object> pair : pairs )
+    for( Pair<NestedAggregate<Node, Object>, Object> pair : pairs )
       pair.setRhs( pair.getLhs().resetContext( pair.getRhs() ) );
 
-    for( Node node : getNestedPointerCompiler().iterable( result ) )
+    Iterable<Node> iterable = filterIterable( result );
+
+    for( Node node : iterable )
       aggregateNode( pairs, node );
 
-    resultTuple.setAll( new LazyIterable<Pair<NestedAggregateFunction<Node, Object>, Object>, Tuple>( pairs )
-      {
-      @Override
-      protected Tuple convert( Pair<NestedAggregateFunction<Node, Object>, Object> next )
-        {
-        return next.getLhs().complete( next.getRhs() );
-        }
-      } );
+    resultTuple.setAll( tupleIterator );
 
     functionCall.getOutputCollector().add( resultTuple );
     }
 
-  protected void aggregateNode( Pair<NestedAggregateFunction<Node, Object>, Object>[] pairs, Node node )
+  /**
+   * Provides an opportunity to apply a filter on the collection represented by the {@code allAt} Node.
+   *
+   * @param allAt
+   * @return
+   */
+  protected Iterable<Node> filterIterable( Result allAt )
+    {
+    return iterable( allAt );
+    }
+
+  protected void aggregateNode( Pair<NestedAggregate<Node, Object>, Object>[] pairs, Node node )
     {
     extractResult( ( i, value ) -> setInto( pairs, i, value ), node );
     }
 
-  protected void setInto( Pair<NestedAggregateFunction<Node, Object>, Object>[] pairs, int i, Node result )
+  protected void setInto( Pair<NestedAggregate<Node, Object>, Object>[] pairs, int i, Node result )
     {
-    NestedAggregateFunction<Node, Object> nestedAggregateFunction = pairs[ i ].getLhs();
+    NestedAggregate<Node, Object> nestedAggregate = pairs[ i ].getLhs();
     Object context = pairs[ i ].getRhs();
 
-    nestedAggregateFunction.aggregate( context, getCoercibleType(), result );
+    nestedAggregate.aggregate( context, getCoercibleType(), result );
     }
   }

@@ -27,12 +27,12 @@ import cascading.tuple.Tuple;
 import cascading.tuple.type.CoercibleType;
 
 /**
- * Interface NestedAggregateFunction provides a basic abstraction for aggregating set of values collected from
+ * Interface NestedAggregate provides a basic abstraction for aggregating set of values collected from
  * a set of parent objects.
  *
  * @see NestedGetAllAggregateFunction
  */
-public interface NestedAggregateFunction<Node, Context> extends Serializable
+public interface NestedAggregate<Node, Context> extends Serializable
   {
   /**
    * @return the fields this aggregate function will return

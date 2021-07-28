@@ -23,47 +23,45 @@ package cascading.nested.json;
 import java.beans.ConstructorProperties;
 import java.util.Map;
 
-import cascading.nested.core.NestedAggregateFunction;
+import cascading.nested.core.NestedAggregate;
 import cascading.nested.core.NestedGetAllAggregateFunction;
-import cascading.nested.core.NestedGetAllFunction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
  * Class JSONGetAllAggregateFunction provides the ability to retrieve a list of child nodes and
  * convert the specified property of each JSON object into a new aggregate value rendered by the given implementation
- * of {@link NestedAggregateFunction}.
+ * of {@link NestedAggregate}.
  * <p>
  * Note the {@code stringRootPointer} may reference a JSON Array, {@code /person/*}, or it may be a pointer-path
  * descent reference, {@code /person/**}{@code /name}. In the later case, use an empty pointer, {@code ""}, to reference
  * the value of the array.
  *
  * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
- * @see NestedGetAllFunction for more details.
+ * @see NestedGetAllAggregateFunction for more details.
  */
 public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<JsonNode, ArrayNode>
   {
   @ConstructorProperties({"stringRootPointer", "pointerMap"})
-  public JSONGetAllAggregateFunction( String stringRootPointer, Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap )
+  public JSONGetAllAggregateFunction( String stringRootPointer, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     this( stringRootPointer, false, pointerMap );
     }
 
   @ConstructorProperties({"stringRootPointer", "failOnMissingNode", "pointerMap"})
-  public JSONGetAllAggregateFunction( String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap )
+  public JSONGetAllAggregateFunction( String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     super( JSONCoercibleType.TYPE, stringRootPointer, failOnMissingNode, pointerMap );
     }
 
   @ConstructorProperties({"coercibleType", "stringRootPointer", "pointerMap"})
-  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap )
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     this( coercibleType, stringRootPointer, false, pointerMap );
     }
 
-  @ConstructorProperties({"coercibleType", "stringRootPointer", "failOnMissingNode",
-                          "pointerMap"})
-  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap )
+  @ConstructorProperties({"coercibleType", "stringRootPointer", "failOnMissingNode", "pointerMap"})
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     super( coercibleType, stringRootPointer, failOnMissingNode, pointerMap );
     }

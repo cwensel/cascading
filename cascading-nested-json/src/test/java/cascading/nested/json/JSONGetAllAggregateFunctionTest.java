@@ -24,10 +24,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import cascading.CascadingTestCase;
-import cascading.nested.core.NestedAggregateFunction;
-import cascading.nested.core.aggregate.AverageDoubleNestedAggregateFunction;
-import cascading.nested.core.aggregate.SumDoubleNestedAggregateFunction;
-import cascading.nested.core.aggregate.SumLongNestedAggregateFunction;
+import cascading.nested.core.NestedAggregate;
+import cascading.nested.core.aggregate.AverageDoubleNestedAggregate;
+import cascading.nested.core.aggregate.SumDoubleNestedAggregate;
+import cascading.nested.core.aggregate.SumLongNestedAggregate;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
@@ -47,9 +47,9 @@ public class JSONGetAllAggregateFunctionTest extends CascadingTestCase
 
     entry.setObject( 0, JSONData.peopleWithNulls );
 
-    Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
+    Map<String, NestedAggregate<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
 
-    pointerMap.put( "/person/age", new SumLongNestedAggregateFunction<>( new Fields( "sum", Long.TYPE ) ) );
+    pointerMap.put( "/person/age", new SumLongNestedAggregate<>( new Fields( "sum", Long.TYPE ) ) );
 
     JSONGetAllAggregateFunction function = new JSONGetAllAggregateFunction( "/people/*", pointerMap );
 
@@ -66,9 +66,9 @@ public class JSONGetAllAggregateFunctionTest extends CascadingTestCase
 
     entry.setObject( 0, JSONData.peopleWithNulls );
 
-    Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
+    Map<String, NestedAggregate<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
 
-    pointerMap.put( "/person/age", new SumDoubleNestedAggregateFunction<>( new Fields( "sum", Double.class ) ) );
+    pointerMap.put( "/person/age", new SumDoubleNestedAggregate<>( new Fields( "sum", Double.class ) ) );
 
     JSONGetAllAggregateFunction function = new JSONGetAllAggregateFunction( "/people/*", pointerMap );
 
@@ -81,34 +81,34 @@ public class JSONGetAllAggregateFunctionTest extends CascadingTestCase
   @Test
   public void testGetAggregateAverageDoubleAll()
     {
-    runAverage( new AverageDoubleNestedAggregateFunction<>( new Fields( "avg", Double.class ) ), 33.0 );
+    runAverage( new AverageDoubleNestedAggregate<>( new Fields( "avg", Double.class ) ), 33.0 );
     }
 
   @Test
   public void testGetAggregateAverageDoubleAllPrimitive()
     {
-    runAverage( new AverageDoubleNestedAggregateFunction<>( new Fields( "avg", Double.TYPE ) ), 33.0 );
+    runAverage( new AverageDoubleNestedAggregate<>( new Fields( "avg", Double.TYPE ) ), 33.0 );
     }
 
   @Test
   public void testGetAggregateAverageDoubleNonNull()
     {
-    runAverage( new AverageDoubleNestedAggregateFunction<>( new Fields( "avg", Double.class ), AverageDoubleNestedAggregateFunction.Include.NO_NULLS ), 49.5 );
+    runAverage( new AverageDoubleNestedAggregate<>( new Fields( "avg", Double.class ), AverageDoubleNestedAggregate.Include.NO_NULLS ), 49.5 );
     }
 
   @Test
   public void testGetAggregateAverageDoubleNonNullPrimitive()
     {
-    runAverage( new AverageDoubleNestedAggregateFunction<>( new Fields( "avg", Double.TYPE ), AverageDoubleNestedAggregateFunction.Include.NO_NULLS ), 49.5 );
+    runAverage( new AverageDoubleNestedAggregate<>( new Fields( "avg", Double.TYPE ), AverageDoubleNestedAggregate.Include.NO_NULLS ), 49.5 );
     }
 
-  private void runAverage( AverageDoubleNestedAggregateFunction<JsonNode> avg, double expected )
+  private void runAverage( AverageDoubleNestedAggregate<JsonNode> avg, double expected )
     {
     TupleEntry entry = new TupleEntry( new Fields( "json", JSONCoercibleType.TYPE ), Tuple.size( 1 ) );
 
     entry.setObject( 0, JSONData.peopleWithNulls );
 
-    Map<String, NestedAggregateFunction<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
+    Map<String, NestedAggregate<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
 
     pointerMap.put( "/person/age", avg );
 
