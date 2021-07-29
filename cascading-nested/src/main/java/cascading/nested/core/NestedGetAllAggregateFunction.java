@@ -22,12 +22,15 @@ package cascading.nested.core;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
+import cascading.operation.SerFunction;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.util.LazyIterable;
@@ -53,6 +56,7 @@ import heretical.pointer.path.NestedPointerCompiler;
 public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFunction<Node, Result>
   {
   protected final NestedPointer<Node, Result> rootPointer;
+  protected final SerFunction<Stream<Node>, Stream<Node>> streamWrapper;
   protected final NestedAggregate<Node, Object>[] nestedAggregates;
 
   /**
@@ -65,7 +69,13 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
    */
   public NestedGetAllAggregateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregate<Node, ?>> pointerMap )
     {
+    this( nestedCoercibleType, stringRootPointer, null, failOnMissingNode, pointerMap );
+    }
+
+  public NestedGetAllAggregateFunction( NestedCoercibleType<Node, Result> nestedCoercibleType, String stringRootPointer, SerFunction<Stream<Node>, Stream<Node>> streamWrapper, boolean failOnMissingNode, Map<String, NestedAggregate<Node, ?>> pointerMap )
+    {
     super( nestedCoercibleType, declared( pointerMap.values() ), failOnMissingNode, asArray( pointerMap.keySet() ) );
+    this.streamWrapper = streamWrapper == null ? s -> s : streamWrapper;
 
     NestedPointerCompiler<Node, Result> compiler = getNestedPointerCompiler();
 
@@ -92,7 +102,7 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
     for( int i = 0; i < nestedAggregates.length; i++ )
       pairs[ i ] = new Pair<>( nestedAggregates[ i ], nestedAggregates[ i ].createContext() );
 
-    LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple> tupleIterator = new LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple>( pairs )
+    LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple> tupleIterator = new LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple>( false, pairs )
       {
       @Override
       protected Tuple convert( Pair<NestedAggregate<Node, Object>, Object> next )
@@ -112,7 +122,7 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
     Result result = rootPointer.allAt( argument );
 
     if( failOnMissingNode && getNestedPointerCompiler().size( result ) == 0 )
-      throw new OperationException( "nodes missing from json node tree: " + rootPointer );
+      throw new OperationException( "nodes missing from json node tree at: " + rootPointer );
 
     Tuple resultTuple = (Tuple) functionCall.getContext().getObject( 0 );
     Pair<NestedAggregate<Node, Object>, Object>[] pairs = (Pair<NestedAggregate<Node, Object>, Object>[]) functionCall.getContext().getObject( 1 );
@@ -121,10 +131,7 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
     for( Pair<NestedAggregate<Node, Object>, Object> pair : pairs )
       pair.setRhs( pair.getLhs().resetContext( pair.getRhs() ) );
 
-    Iterable<Node> iterable = filterIterable( result );
-
-    for( Node node : iterable )
-      aggregateNode( pairs, node );
+    stream( result ).forEach( node -> aggregateNode( pairs, node ) );
 
     resultTuple.setAll( tupleIterator );
 
@@ -132,14 +139,14 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
     }
 
   /**
-   * Provides an opportunity to apply a filter on the collection represented by the {@code allAt} Node.
+   * Applies the given stream wrapper function
    *
    * @param allAt
    * @return
    */
-  protected Iterable<Node> filterIterable( Result allAt )
+  protected Stream<Node> stream( Result allAt )
     {
-    return iterable( allAt );
+    return streamWrapper.apply( StreamSupport.stream( iterable( allAt ).spliterator(), false ) );
     }
 
   protected void aggregateNode( Pair<NestedAggregate<Node, Object>, Object>[] pairs, Node node )

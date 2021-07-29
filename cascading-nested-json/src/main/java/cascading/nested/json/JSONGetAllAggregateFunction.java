@@ -22,9 +22,11 @@ package cascading.nested.json;
 
 import java.beans.ConstructorProperties;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import cascading.nested.core.NestedAggregate;
 import cascading.nested.core.NestedGetAllAggregateFunction;
+import cascading.operation.SerFunction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -42,27 +44,111 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  */
 public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<JsonNode, ArrayNode>
   {
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param stringRootPointer of type String
+   * @param pointerMap        of type Map
+   */
   @ConstructorProperties({"stringRootPointer", "pointerMap"})
   public JSONGetAllAggregateFunction( String stringRootPointer, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     this( stringRootPointer, false, pointerMap );
     }
 
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param stringRootPointer of type String
+   * @param failOnMissingNode of type boolean
+   * @param pointerMap        of type Map
+   */
   @ConstructorProperties({"stringRootPointer", "failOnMissingNode", "pointerMap"})
   public JSONGetAllAggregateFunction( String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     super( JSONCoercibleType.TYPE, stringRootPointer, failOnMissingNode, pointerMap );
     }
 
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param coercibleType     of type JSONCoercibleType
+   * @param stringRootPointer of type String
+   * @param pointerMap        of type Map
+   */
   @ConstructorProperties({"coercibleType", "stringRootPointer", "pointerMap"})
   public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     this( coercibleType, stringRootPointer, false, pointerMap );
     }
 
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param coercibleType     of type JSONCoercibleType
+   * @param stringRootPointer of type String
+   * @param failOnMissingNode of type boolean
+   * @param pointerMap        of type Map
+   */
   @ConstructorProperties({"coercibleType", "stringRootPointer", "failOnMissingNode", "pointerMap"})
   public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, boolean failOnMissingNode, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
     {
     super( coercibleType, stringRootPointer, failOnMissingNode, pointerMap );
+    }
+
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param stringRootPointer of type String
+   * @param streamWrapper     of type SerFunction
+   * @param pointerMap        of type Map
+   */
+  @ConstructorProperties({"stringRootPointer", "streamWrapper", "pointerMap"})
+  public JSONGetAllAggregateFunction( String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
+    {
+    this( stringRootPointer, streamWrapper, false, pointerMap );
+    }
+
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param stringRootPointer of type String
+   * @param streamWrapper     of type SerFunction
+   * @param failOnMissingNode of type boolean
+   * @param pointerMap        of type Map
+   */
+  @ConstructorProperties({"stringRootPointer", "streamWrapper", "failOnMissingNode", "pointerMap"})
+  public JSONGetAllAggregateFunction( String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, boolean failOnMissingNode, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
+    {
+    super( JSONCoercibleType.TYPE, stringRootPointer, streamWrapper, failOnMissingNode, pointerMap );
+    }
+
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param coercibleType     of type JSONCoercibleType
+   * @param stringRootPointer of type String
+   * @param streamWrapper     of type SerFunction
+   * @param pointerMap        of type Map
+   */
+  @ConstructorProperties({"coercibleType", "stringRootPointer", "streamWrapper", "pointerMap"})
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
+    {
+    this( coercibleType, stringRootPointer, streamWrapper, false, pointerMap );
+    }
+
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param coercibleType     of type JSONCoercibleType
+   * @param stringRootPointer of type String
+   * @param streamWrapper     of type SerFunction
+   * @param failOnMissingNode of type boolean
+   * @param pointerMap        of type Map
+   */
+  @ConstructorProperties({"coercibleType", "stringRootPointer", "streamWrapper", "failOnMissingNode", "pointerMap"})
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, boolean failOnMissingNode, Map<String, NestedAggregate<JsonNode, ?>> pointerMap )
+    {
+    super( coercibleType, stringRootPointer, streamWrapper, failOnMissingNode, pointerMap );
     }
   }

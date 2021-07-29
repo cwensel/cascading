@@ -119,5 +119,4 @@ public class JSONGetAllAggregateFunctionTest extends CascadingTestCase
     assertEquals( 1, result.size() );
     assertEquals( expected, result.iterator().next().getObject( 0 ) );
     }
-
   }
