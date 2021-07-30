@@ -64,8 +64,7 @@ guidelines.
 * **Email the list with your feature or bug fix proposal**
   * Clearly describe the issue
   * Make sure you note the earliest version that you know has the issue
-* Fork the repository on GitHub from [Cascading/cascading](https://github.com/Cascading/cascading)
-  * If resolving an issue with a current pre-release WIP, fork from [cwensel/cascading](https://github.com/cwensel/cascading)
+* Fork the repository on GitHub from [cwensel/cascading](https://github.com/cwensel/cascading)
 * Create a topic branch from where you want to base your work
   * This is usually the release branch (2.5) or release tag (2.5.5). Or wip releases (wip-2.6) 
   * Only target release branches if you are certain your fix must be on that branch
@@ -86,8 +85,8 @@ will run all tests for the Cascading local mode platform. This works for other s
 
 ### Submitting Changes
 
-* Sign the [Xplenty Contributor License Agreement](https://s3.amazonaws.com/xplenty-assets/agreements/xplenty_contributor_agreement.doc)
-  and email as a PDF to support@cascading.org
+* Sign the [Contributor License Agreement](https://files.cascading.wensel.net.s3.us-east-1.amazonaws.com/documents/Wensel_Contributor_Agreement.doc)
+  and email as a PDF to cascading@wensel.net
 * Push your changes to a topic branch in your fork of the repository
 * Submit a pull request to the repository in the Cascading organization
 * Follow up on the original email thread with a link to the pull request
@@ -104,7 +103,8 @@ release. We prefer to push large changes into major or minor releases, and small
 releases. This decision is based on the level and quality of changes that need to be acknowledged and absorbed, if at 
 all, by the end-users.
 
-We will not merge a pull request directly from GitHub. We find the resulting git history complicated and unnecessary. 
+We will likely not merge a pull request directly from GitHub. We find the resulting git history complicated and 
+unnecessary. 
 
-Subsequently most commits are rebased and cleaned up on our side, and all are committed with full attribution of the 
+Subsequently, most commits are rebased and cleaned up on our side, and all are committed with full attribution of the 
 original author.

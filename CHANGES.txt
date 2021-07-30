@@ -7,7 +7,7 @@ Cascading Change Log
 
   Added jmh in order baseline and evaluate changes.
 
-4.0.1 [unreleased]
+4.0.1
 
   Updated c.t.h.u.Hadoop18TapUtil to not create temporary folders when writing 'direct' to a filesystem.
 
