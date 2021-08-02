@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
+ * Copyright (c) 2018-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -19,21 +18,11 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-expression'
-include 'cascading-nested'
-include 'cascading-nested-json'
-include 'cascading-local'
-include 'cascading-hadoop2-common'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-hadoop2-tez-stats'
-include 'cascading-local-hadoop2-io'
-include 'cascading-local-s3'
-include 'cascading-local-kafka'
-include 'cascading-local-splunk'
-include 'cascading-local-neo4j'
-include 'cascading-platform'
+package cascading.local.tap.neo4j;
 
-rootProject.name = 'cascading'
+/**
+ *
+ */
+public interface GraphSpec
+  {
+  }

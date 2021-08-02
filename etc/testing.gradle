@@ -42,6 +42,7 @@ test {
     includeTestsMatching "*Test"
     excludeTestsMatching "*PlatformTest"
     excludeTestsMatching "*PlatformsTest"
+    excludeTestsMatching "**/*IntegrationTest"
     failOnNoMatchingTests = false
   }
 

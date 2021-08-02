@@ -49,6 +49,7 @@ allprojects {
     mavenCentral()
     jcenter()
     maven {url = 'https://repository.apache.org/'}
+    maven {url = 'https://splunk.jfrog.io/splunk/ext-releases-local'}
   }
 
   group = 'net.wensel'
@@ -68,6 +69,7 @@ subprojects {
   apply plugin: 'java-library'
   apply plugin: 'maven-publish'
   apply plugin: 'signing'
+  apply from: "../etc/dependencyVersions.gradle"
   apply from: '../etc/testing.gradle'
 
   sourceCompatibility = 1.8
@@ -151,7 +153,7 @@ subprojects {
   }
 
   dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.11'
+    testImplementation group: 'junit', name: 'junit', version: junitVersion
   }
 
   assemble.dependsOn << prepareDist
