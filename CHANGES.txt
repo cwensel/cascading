@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Added local mode support for Apache Kafka, Neo4j, Splunk, and AWS S3 by merging with the cascading-local project.
+
   Added support for aggregating child elements in a collection of objects, e.g. given a JSON list of People objects,
   calculate the average age in the list.
 

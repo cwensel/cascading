@@ -9,7 +9,7 @@ Cascading 4 includes a few major changes and additions from prior major releases
 * Local mode support improved for production use
 * Moved the website to https://cascading.wensel.net/
 * Changed the Maven group name to `net.wensel` (from `cascading`)
-* Moved to GitHub Packages (WIPs) and Maven Central (releases) 
+* Moved to GitHub Packages (WIPs) and Maven Central (releases)
 * Added native JSON support via the `cascading-nested-json` sub-project
 * Removed `cascading-xml` sub-project
 * Removed Apache Hadoop 1.x support
@@ -27,6 +27,10 @@ The project includes nine Cascading jar files:
 * `cascading-nested-json-x.y.z.jar`       - all Cascading JSON operations
 * `cascading-nested-x.y.z.jar`            - all Cascading base classes for nested data-type operations
 * `cascading-local-x.y.z.jar`             - all Cascading Local in-memory mode class files
+* `cascading-local-kafka-x.y.z.jar`       - all Cascading Local support for Apache Kafka
+* `cascading-local-neo4j-x.y.z.jar`       - all Cascading Local support for Neo4j
+* `cascading-local-s3-x.y.z.jar`          - all Cascading Local support for AWS S3
+* `cascading-local-splunk-x.y.z.jar`      - all Cascading Local support for Splunk
 * `cascading-local-hadoop2-io-x.y.z.jar`  - all Cascading Local in-memory mode class files used with Hadoop
 * `cascading-hadoop2-common-x.y.z.jar`    - all Cascading Hadoop 2.x common class files
 * `cascading-hadoop2-io-x.y.z.jar`        - all Cascading Hadoop 2.x HDFS and IO related class files
@@ -36,21 +40,20 @@ The project includes nine Cascading jar files:
 
 These class jars, along with, tests, source and javadoc jars, are all available via the Maven repository.
 
-Local mode is where the Cascading application will run locally in memory without cluster distribution. 
-This implementation has minimal to no robustness in low memory situations, by design.
+Local mode is where the Cascading application will run locally in memory without cluster distribution. This
+implementation has minimal to no robustness in low memory situations, by design.
 
 Hadoop 2.x MR1 mode is for running on Hadoop 2.x releases.
 
 Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
 
-As of Cascading 4.x, all above jar files are built against Java 1.8. Prior versions of Cascading are built
-against Java 1.7 and 1.6.
+As of Cascading 4.x, all above jar files are built against Java 1.8. Prior versions of Cascading are built against Java
+1.7 and 1.6.
 
 ## Local Mode
 
-Local mode has been much improved for production use in applications that do not need to run
-distributed across a cluster. Specifically in applications that trivially parallelize
-and run within AWS Lambda or Batch applications.
+Local mode has been much improved for production use in applications that do not need to run distributed across a
+cluster. Specifically in applications that trivially parallelize and run within AWS Lambda or Batch applications.
 
 See https://github.com/cwensel/cascading-local for a collection of local mode integrations.
 
@@ -60,11 +63,9 @@ Note this project will merge into Cascading in then next minor release.
 
 There are a number of projects based on and extensions to Cascading available.
 
-Visit https://cascading.org/ for links. As these projects are updated to depend on 4.x, we 
-will update the main site. 
+Visit https://cascading.org/ for links. As these projects are updated to depend on 4.x, we will update the main site.
 
-Note many projects built and released against Cascading 3.x will work without modification
-with Cascading 4.x.
+Note many projects built and released against Cascading 3.x will work without modification with Cascading 4.x.
 
 ## Versioning
 
@@ -73,8 +74,8 @@ Cascading stable releases are always of the form `x.y.z`, where `z` is the curre
 `x.y.z` releases are maintenance releases. No public incompatible API changes will be made, but in an effort to fix
 bugs, remediation may entail throwing new Exceptions.
 
-`x.y` releases are minor releases. New features are added. No public incompatible API changes will be made on the
-core processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be
+`x.y` releases are minor releases. New features are added. No public incompatible API changes will be made on the core
+processing APIs (Pipes, Functions, etc), but in an effort to resolve inconsistencies, minor semantic changes may be
 necessary.
 
 It is important to note that *we do reserve to make breaking changes to the new query planner API through the 4.x
@@ -92,8 +93,8 @@ releases are leading up to. `n` is the current successfully tested build.
 The source, working branches, and tags for all WIP releases can be found here:
 [https://github.com/cwensel/cascading](https://github.com/cwensel/cascading)
 
-When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made
-available from Maven Central.
+When a WIP is deemed stable and ready for production use, it will be published as a `x.y.z` release, and made available
+from Maven Central.
 
 ## Writing and Running Tests
 
@@ -137,7 +138,7 @@ See __CONTRIBUTING.md__ at https://github.com/Cascading/cascading.
 
 It is strongly recommended developers pull Cascading from Maven Central.
 
-Alternatively, see GitHub Packages for latest WIP releases: 
+Alternatively, see GitHub Packages for latest WIP releases:
 
 * https://maven.pkg.github.com/cwensel/cascading
 
@@ -149,8 +150,8 @@ Note the `cascading-platform` compile dependency has no classes, you must pull t
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Maven.
 
-Note that `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the
-Hadoop jars so that it won't get sucked into any application packaging as a dependency, typically.
+Note that `cascading-hadoop2-mr1`, and `cascading-hadoop2-tez` have a `provided` dependency on the Hadoop jars so that
+it won't get sucked into any application packaging as a dependency, typically.
 
 ## Building and IDE Integration
 
@@ -164,6 +165,7 @@ To build Cascading, run the following in the shell:
 > cd cascading
 > ./gradlew build
 ```
+
 ## Using with Apache Hadoop
 
 First confirm you are using a supported version of Apache Hadoop by checking the
@@ -193,8 +195,8 @@ is a feature specific to Hadoop.
 
 Cascading was started in 2007 by Chris K Wensel.
 
-After a series of acquisitions, it was left unsupported and unmaintained by the copyright,
-domain name, and GitHub organization owners.
+After a series of acquisitions, it was left unsupported and unmaintained by the copyright, domain name, and GitHub
+organization owners.
 
 Chris has since continued his noodling with Cascading and has been pushing changes to the original repo.
 
