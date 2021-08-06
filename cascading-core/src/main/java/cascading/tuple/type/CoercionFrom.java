@@ -20,12 +20,14 @@
 
 package cascading.tuple.type;
 
+import java.io.Serializable;
+
 /**
  * Interface CoercionFrom represents a mapping function that coerces a canonical value (of type {@code From})
  * to an expected value (of type {@code To}).
  */
 @FunctionalInterface
-public interface CoercionFrom<From, To>
+public interface CoercionFrom<From, To> extends Serializable
   {
   To coerce( From from );
   }

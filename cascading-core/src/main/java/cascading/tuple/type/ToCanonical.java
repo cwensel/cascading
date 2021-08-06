@@ -20,12 +20,14 @@
 
 package cascading.tuple.type;
 
+import java.io.Serializable;
+
 /**
  * Interface ToCanonical represents a mapping function that coerces a value (of type {@code From})
  * to a canonical value (of type {@code To}).
  */
 @FunctionalInterface
-public interface ToCanonical<From, To>
+public interface ToCanonical<From, To> extends Serializable
   {
   To canonical( From from );
   }
