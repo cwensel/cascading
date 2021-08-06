@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class AverageDoubleNestedAggregate is a @{link cascading.nested.core.NestedAggregate} implementation for averaging
@@ -49,9 +50,9 @@ public class AverageDoubleNestedAggregate<Node> extends BaseNumberNestedAggregat
     int count = 0;
     double sum = 0D;
 
-    public Context( BaseNumberNestedAggregate<Node, Double, BaseContext<Double, Node>> aggregateFunction, Include include )
+    public Context( BaseNumberNestedAggregate<Node, Double, BaseContext<Double, Node>> aggregateFunction, CoercibleType<Node> coercibleType, Include include )
       {
-      super( aggregateFunction );
+      super( aggregateFunction, coercibleType );
 
       switch( include )
         {
@@ -131,8 +132,8 @@ public class AverageDoubleNestedAggregate<Node> extends BaseNumberNestedAggregat
     }
 
   @Override
-  public Context<Node> createContext()
+  public Context<Node> createContext( CoercibleType<Node> coercibleType )
     {
-    return new Context<>( this, include );
+    return new Context<>( this, coercibleType, include );
     }
   }
