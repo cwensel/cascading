@@ -42,23 +42,22 @@ public interface NestedAggregate<Node, Context> extends Serializable
   /**
    * @return a new function specific context object
    */
-  Context createContext();
+  Context createContext( CoercibleType<Node> coercibleType );
 
   /**
    * This method receives each collected value to be applied to the current aggregation.
    *
-   * @param context       the context object created by {@link #createContext()}
-   * @param coercibleType the {@link CoercibleType} used to manage the given Node
-   * @param node          the Node container object that should be aggregated
+   * @param context the context object created by {@link #createContext(CoercibleType)}
+   * @param node    the Node container object that should be aggregated
    */
-  void aggregate( Context context, CoercibleType<Node> coercibleType, Node node );
+  void aggregate( Context context, Node node );
 
   /**
    * This method completes the aggregate operation and insert the results into a Tuple instance.
    * <p>
-   * Note the Tuple may be created (indirectly) by the {@link #createContext()} method and reused.
+   * Note the Tuple may be created (indirectly) by the {@link #createContext(CoercibleType)} method and reused.
    *
-   * @param context the context object created by {@link #createContext()}
+   * @param context the context object created by {@link #createContext(CoercibleType)}
    * @return a Tuple containing the aggregate value(s), the Tuple may be reused
    */
   Tuple complete( Context context );
@@ -67,7 +66,7 @@ public interface NestedAggregate<Node, Context> extends Serializable
    * This method is called after {@link #complete(Object)} so that any resources can be freed and the result
    * context instance can be used in the next aggregation.
    *
-   * @param context the context object created by {@link #createContext()}
+   * @param context the context object created by {@link #createContext(CoercibleType)}
    * @return either a cleared or new context instance to be used in further aggregations
    */
   Context resetContext( Context context );

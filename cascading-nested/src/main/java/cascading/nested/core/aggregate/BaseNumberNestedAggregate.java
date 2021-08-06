@@ -29,6 +29,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.CoercibleType;
+import cascading.tuple.type.CoercionFrom;
 
 /**
  * Class BaseNumberNestedAggregate is the base class used to create number oriented aggregation operations.
@@ -47,24 +48,27 @@ public abstract class BaseNumberNestedAggregate<Node, Type, Context extends Base
   {
   public abstract static class BaseContext<Type, Node>
     {
+    final CoercionFrom<Node, Type> to;
     final Tuple results;
     final SerPredicate<Type> discardValue;
     final Supplier<Tuple> complete;
     boolean allValuesDiscarded = true;
 
-    public BaseContext( BaseNumberNestedAggregate<Node, Type, BaseContext<Type, Node>> aggregateFunction )
+    public BaseContext( BaseNumberNestedAggregate<Node, Type, BaseContext<Type, Node>> aggregateFunction, CoercibleType<Node> coercibleType )
       {
-      results = createResultTuple( aggregateFunction );
+      this.to = coercibleType.to( aggregateFunction.aggregateType );
+
+      this.results = createResultTuple( aggregateFunction );
 
       if( aggregateFunction.discardNullValues() )
-        discardValue = Objects::isNull;
+        this.discardValue = Objects::isNull;
       else
-        discardValue = v -> false;
+        this.discardValue = v -> false;
 
       if( aggregateFunction.returnNullForEmpty() )
-        complete = this::nullIfDiscard;
+        this.complete = this::nullIfDiscard;
       else
-        complete = this::valueIfDiscard;
+        this.complete = this::valueIfDiscard;
       }
 
     protected Tuple createResultTuple( BaseNumberNestedAggregate<Node, Type, BaseContext<Type, Node>> aggregateFunction )
@@ -89,13 +93,13 @@ public abstract class BaseNumberNestedAggregate<Node, Type, Context extends Base
       return results;
       }
 
-    public void aggregate( CoercibleType<Node> coercibleType, Node node, Class<Type> aggregateType )
+    public void aggregate( Node node )
       {
       // if node is missing, always return null
       if( node == null )
         return;
 
-      Type value = coercibleType.coerce( node, aggregateType );
+      Type value = to.coerce( node );
 
       addAggregateValue( value );
       }
@@ -161,9 +165,9 @@ public abstract class BaseNumberNestedAggregate<Node, Type, Context extends Base
     }
 
   @Override
-  public void aggregate( Context context, CoercibleType<Node> coercibleType, Node node )
+  public void aggregate( Context context, Node node )
     {
-    context.aggregate( coercibleType, node, aggregateType );
+    context.aggregate( node );
     }
 
   @Override

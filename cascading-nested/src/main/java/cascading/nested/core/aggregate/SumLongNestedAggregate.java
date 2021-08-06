@@ -22,6 +22,7 @@ package cascading.nested.core.aggregate;
 
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.tuple.type.CoercibleType;
 
 /**
  * Class SumLongNestedAggregate is a {@link cascading.nested.core.NestedAggregate} implementation for summing
@@ -33,14 +34,9 @@ public class SumLongNestedAggregate<Node> extends BaseNumberNestedAggregate<Node
     {
     long sum = 0L;
 
-    public Context( BaseNumberNestedAggregate<Node, Long, BaseContext<Long, Node>> aggregateFunction )
+    public Context( SumLongNestedAggregate<Node> aggregateFunction, CoercibleType<Node> coercibleType )
       {
-      super( aggregateFunction );
-      }
-
-    public Context( SumLongNestedAggregate<Node> aggregateFunction )
-      {
-      super( aggregateFunction );
+      super( aggregateFunction, coercibleType );
       }
 
     @Override
@@ -72,8 +68,8 @@ public class SumLongNestedAggregate<Node> extends BaseNumberNestedAggregate<Node
     }
 
   @Override
-  public Context<Node> createContext()
+  public Context<Node> createContext( CoercibleType<Node> coercibleType )
     {
-    return new Context<>( this );
+    return new Context<>( this, coercibleType );
     }
   }

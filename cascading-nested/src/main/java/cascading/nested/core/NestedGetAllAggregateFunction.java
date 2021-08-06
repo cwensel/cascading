@@ -100,7 +100,7 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
     Pair<NestedAggregate<Node, Object>, Object>[] pairs = new Pair[ nestedAggregates.length ];
 
     for( int i = 0; i < nestedAggregates.length; i++ )
-      pairs[ i ] = new Pair<>( nestedAggregates[ i ], nestedAggregates[ i ].createContext() );
+      pairs[ i ] = new Pair<>( nestedAggregates[ i ], nestedAggregates[ i ].createContext( nestedCoercibleType ) );
 
     LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple> tupleIterator = new LazyIterable<Pair<NestedAggregate<Node, Object>, Object>, Tuple>( false, pairs )
       {
@@ -159,6 +159,6 @@ public class NestedGetAllAggregateFunction<Node, Result> extends NestedGetFuncti
     NestedAggregate<Node, Object> nestedAggregate = pairs[ i ].getLhs();
     Object context = pairs[ i ].getRhs();
 
-    nestedAggregate.aggregate( context, getCoercibleType(), result );
+    nestedAggregate.aggregate( context, result );
     }
   }
