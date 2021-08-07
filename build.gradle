@@ -73,7 +73,6 @@ subprojects {
   apply plugin: 'signing'
   apply plugin: 'me.champeau.jmh'
   apply plugin: 'io.morethan.jmhreport'
-  apply from: "../etc/dependencyVersions.gradle"
   apply from: '../etc/testing.gradle'
 
   sourceCompatibility = 1.8
@@ -157,7 +156,7 @@ subprojects {
   }
 
   dependencies {
-    testImplementation group: 'junit', name: 'junit', version: junitVersion
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
   }
 
   assemble.dependsOn << prepareDist

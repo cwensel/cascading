@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2018-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -24,7 +24,7 @@ dependencies {
 
   implementation project( ':cascading-local' )
 
-  implementation group: 'io.heretical', name: 'pointer-path-json', version: pointerPathVersion
+  implementation group: 'io.heretical', name: 'pointer-path-json', version: '1.1.0'
 
   implementation 'org.neo4j.driver:neo4j-java-driver:1.7.2'
   implementation (group: 'net.iot-solutions.graphdb', name: 'jcypher', version: '4.1.1') {
@@ -32,14 +32,14 @@ dependencies {
     exclude group: 'org.neo4j'
   }
 
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
 
-  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-  testRuntimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
+  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
+  testRuntimeOnly group: 'log4j', name: 'log4j', version: '1.2.17'
 
-  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
   testImplementation project(':cascading-nested-json')
   testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
 
-  testCompile group: 'org.testcontainers', name: 'testcontainers', version: testContainersVersion
+  testCompile group: 'org.testcontainers', name: 'testcontainers', version: '1.16.0'
 }

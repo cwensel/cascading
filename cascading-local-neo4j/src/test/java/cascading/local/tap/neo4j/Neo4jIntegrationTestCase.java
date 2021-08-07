@@ -53,6 +53,6 @@ public abstract class Neo4jIntegrationTestCase
 
   protected String getContainerHost()
     {
-    return String.format( "%s:%d", neo4jRule.getContainerIpAddress(), neo4jRule.getMappedPort( 7687 ) );
+    return String.format( "%s:%d", neo4jRule.getContainerIpAddress(), neo4jRule.getMappedPort( BOLT_PORT ) );
     }
   }

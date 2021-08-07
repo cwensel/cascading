@@ -282,6 +282,11 @@ public class JSONGraphSpec implements GraphSpec
     }
 
   @JsonSetter("properties")
+  public void addProperties( Map<String, Ref> properties )
+    {
+    this.properties.putAll( properties );
+    }
+
   public JSONGraphSpec addProperty( String property, Ref ref )
     {
     if( properties.put( property, ref ) != null )

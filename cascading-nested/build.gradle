@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,9 +22,9 @@
 dependencies {
   api project( ':cascading-core' )
 
-  api group: 'io.heretical', name: 'pointer-path-core', version: '1.0.1'
+  api group: 'io.heretical', name: 'pointer-path-core', version: '1.1.0'
 
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
 
   testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
 }

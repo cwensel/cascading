@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2017-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -22,23 +22,23 @@ dependencies {
 
   implementation project( ':cascading-local' )
 
-  implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsS3Version
-  implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
+  implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.39'
+  implementation group: 'com.google.guava', name: 'guava', version: '24.0-jre'
 
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
 
-  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
-  testRuntimeOnly group: 'log4j', name: 'log4j', version: log4jVersion
+  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
+  testRuntimeOnly group: 'log4j', name: 'log4j', version: '1.2.17'
 
-  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-  testImplementation group: 'org.gaul', name: 's3proxy', version: s3ProxyVersion
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  testImplementation group: 'org.gaul', name: 's3proxy', version: '1.8.0'
   testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
 }
 
 // makes tests pass
 configurations.all {
   resolutionStrategy {
-    force 'com.google.guava:guava:' + guavaVersion
+    force 'com.google.guava:guava:' + '24.0-jre'
   }
 }
 

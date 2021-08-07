@@ -30,35 +30,37 @@ import static org.junit.Assert.assertEquals;
 /**
  *
  */
-public class GraphSpecTest {
-    @Test
-    public void serialization() throws IOException {
+public class GraphSpecTest
+  {
+  @Test
+  public void serialization() throws IOException
+    {
 
-        JSONGraphSpec graphSpec = new JSONGraphSpec("Span");
+    JSONGraphSpec graphSpec = new JSONGraphSpec( "Span" );
 
-        graphSpec
-                .setValuesPointer("/0")
-                .addProperty("trace_id", "/trace_id", null)
-                .addProperty("id", "/id", null);
+    graphSpec
+      .setValuesPointer( "/0" )
+      .addProperty( "trace_id", "/trace_id", null )
+      .addProperty( "id", "/id", null );
 
-        // only add one edge or the test will flip flop
-        graphSpec
-                .addEdge("PARENT")
-                .addTargetLabel("Span")
-                .addTargetProperty("id", "/parent_id", null);
+    // only add one edge or the test will flip flop
+    graphSpec
+      .addEdge( "PARENT" )
+      .addTargetLabel( "Span" )
+      .addTargetProperty( "id", "/parent_id", null );
 
-        ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = new ObjectMapper();
 
-        String initJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(graphSpec);
+    String initJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString( graphSpec );
 
 //        System.out.println("json = " + initJson);
 
-        JSONGraphSpec result = mapper.readerFor( JSONGraphSpec.class).readValue(initJson);
+    JSONGraphSpec result = mapper.readerFor( JSONGraphSpec.class ).readValue( initJson );
 
-        String resultJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+    String resultJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString( result );
 
 //        System.out.println("resultJson = " + resultJson);
 
-        assertEquals(initJson, resultJson);
+    assertEquals( initJson, resultJson );
     }
-}
+  }

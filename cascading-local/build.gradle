@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -25,9 +25,9 @@ dependencies {
   api project( ':cascading-core' )
 
   implementation group: 'com.google.guava', name: 'guava', version: '14.0.1'
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
 
-  api group: 'org.apache.commons', name: 'commons-compress', version: '1.15'
+  api group: 'org.apache.commons', name: 'commons-compress', version: '1.21'
 
   testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
 }
