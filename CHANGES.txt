@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Updated c.n.j.JSONCoercibleType to support java.time.temporal.Temporal and java.time.temporal.TemporalAmount types
+  if the underlying ObjectMapper has supporting modules. Also now leverages ObjectMapper#treeToValue.
+
   Added c.t.t.CoercionFrom and c.t.t.ToCanonical interfaces to support faster type coercions.
 
   Added local mode support for Apache Kafka, Neo4j, Splunk, and AWS S3 by merging with the cascading-local project.

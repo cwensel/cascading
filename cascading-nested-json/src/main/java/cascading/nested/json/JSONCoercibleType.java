@@ -22,6 +22,8 @@ package cascading.nested.json;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -215,10 +217,16 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       return node -> ifNull( node, n -> n.getNodeType() == JsonNodeType.BOOLEAN ? (T) Boolean.valueOf( n.booleanValue() ) : Coercions.coerce( textOrWrite( n ), to ) );
 
     if( Map.class.isAssignableFrom( actualTo ) )
-      return node -> ifNull( node, n -> (T) convert( n, actualTo ) );
+      return node -> ifNull( node, n -> (T) convertTree( n, actualTo ) );
 
     if( List.class.isAssignableFrom( actualTo ) )
-      return node -> ifNull( node, n -> (T) convert( n, actualTo ) );
+      return node -> ifNull( node, n -> (T) convertTree( n, actualTo ) );
+
+    if( Temporal.class.isAssignableFrom( actualTo ) )
+      return node -> ifNull( node, n -> (T) convertTree( n, actualTo ) );
+
+    if( TemporalAmount.class.isAssignableFrom( actualTo ) )
+      return node -> ifNull( node, n -> (T) convertTree( n, actualTo ) );
 
     if( to instanceof CoercibleType )
       return node -> ifNull( node, n -> (T) ( (CoercibleType<?>) to ).canonical( textOrWrite( n ) ) );
@@ -283,10 +291,16 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
       return nodeType == JsonNodeType.BOOLEAN ? (Coerce) Boolean.valueOf( node.booleanValue() ) : (Coerce) Coercions.coerce( textOrWrite( node ), to );
 
     if( Map.class.isAssignableFrom( actualTo ) )
-      return (Coerce) convert( value, actualTo );
+      return (Coerce) convertTree( node, actualTo );
 
     if( List.class.isAssignableFrom( actualTo ) )
-      return (Coerce) convert( value, actualTo );
+      return (Coerce) convertTree( node, actualTo );
+
+    if( Temporal.class.isAssignableFrom( actualTo ) )
+      return (Coerce) convertTree( node, actualTo );
+
+    if( TemporalAmount.class.isAssignableFrom( actualTo ) )
+      return (Coerce) convertTree( node, actualTo );
 
     if( to instanceof CoercibleType )
       return (Coerce) ( (CoercibleType<?>) to ).canonical( textOrWrite( node ) );
@@ -294,9 +308,16 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     throw new CascadingException( "unknown type coercion requested, from: " + Util.getTypeName( from ) + " to: " + Util.getTypeName( to ) );
     }
 
-  private Object convert( Object value, Class to )
+  private Object convertTree( JsonNode value, Class<?> to )
     {
-    return mapper.convertValue( value, to );
+    try
+      {
+      return mapper.treeToValue( value, to );
+      }
+    catch( JsonProcessingException exception )
+      {
+      throw new CascadingException( "unable to coerce json node into " + to.getName(), exception );
+      }
     }
 
   private String textOrWrite( JsonNode value )
