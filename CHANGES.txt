@@ -1,5 +1,8 @@
 Cascading Change Log
 
+4.5 [unreleased]
+
+
 4.1 [unreleased]
 
   Added c.t.t.CoercionFrom and c.t.t.ToCanonical interfaces to support faster type coercions.
