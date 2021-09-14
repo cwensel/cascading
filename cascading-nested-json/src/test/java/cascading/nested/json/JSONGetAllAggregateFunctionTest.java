@@ -26,13 +26,17 @@ import java.util.Map;
 import cascading.CascadingTestCase;
 import cascading.nested.core.NestedAggregate;
 import cascading.nested.core.aggregate.AverageDoubleNestedAggregate;
+import cascading.nested.core.aggregate.SimpleNestedAggregate;
 import cascading.nested.core.aggregate.SumDoubleNestedAggregate;
 import cascading.nested.core.aggregate.SumLongNestedAggregate;
+import cascading.operation.SerFunction;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import cascading.tuple.TupleListCollector;
+import cascading.tuple.type.CoercibleType;
 import com.fasterxml.jackson.databind.JsonNode;
+import heretical.pointer.path.Pointer;
 import org.junit.Test;
 
 /**
@@ -118,5 +122,61 @@ public class JSONGetAllAggregateFunctionTest extends CascadingTestCase
 
     assertEquals( 1, result.size() );
     assertEquals( expected, result.iterator().next().getObject( 0 ) );
+    }
+
+  @Test
+  public void testGetAggregateFunction()
+    {
+    TupleEntry entry = new TupleEntry( new Fields( "json", JSONCoercibleType.TYPE ), Tuple.size( 1 ) );
+
+    entry.setObject( 0, JSONData.peopleWithNulls );
+
+    Map<String, NestedAggregate<JsonNode, ?>> pointerMap = new LinkedHashMap<>();
+
+    SerFunction<CoercibleType<JsonNode>, SimpleNestedAggregate.AggregateContext<JsonNode>> factory = ( c ) -> new SimpleNestedAggregate.AggregateContext<JsonNode>()
+      {
+      final Pointer<JsonNode> weightPointer = ( (JSONCoercibleType) c ).getNestedPointerCompiler().compile( "/weight" );
+      final Pointer<JsonNode> heightPointer = ( (JSONCoercibleType) c ).getNestedPointerCompiler().compile( "/height" );
+
+      final Tuple result = Tuple.size( 1 );
+      int count = 0;
+      double sum = 0;
+
+      @Override
+      public void aggregate( JsonNode jsonNode )
+        {
+        long weight = weightPointer.at( jsonNode ).asLong( -1 );
+        long height = heightPointer.at( jsonNode ).asLong( -1 );
+
+        if( weight == -1 || height == -1 )
+          return;
+
+        count++;
+        sum += (double) height / (double) weight;
+        }
+
+      @Override
+      public Tuple complete()
+        {
+        result.set( 0, sum / count );
+        return result;
+        }
+
+      @Override
+      public void reset()
+        {
+        count = 0;
+        sum = 0;
+        }
+      };
+
+    pointerMap.put( "/person/measures", new SimpleNestedAggregate<JsonNode>( new Fields( "ratio", Long.TYPE ), factory ) );
+
+    JSONGetAllAggregateFunction function = new JSONGetAllAggregateFunction( "/people/*", pointerMap );
+
+    TupleListCollector result = invokeFunction( function, entry, new Fields( "result" ) );
+
+    assertEquals( 1, result.size() );
+    assertEquals( 0.55d, result.iterator().next().getObject( 0 ) );
     }
   }

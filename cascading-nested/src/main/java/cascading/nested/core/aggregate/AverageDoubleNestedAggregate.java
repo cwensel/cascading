@@ -132,8 +132,8 @@ public class AverageDoubleNestedAggregate<Node> extends BaseNumberNestedAggregat
     }
 
   @Override
-  public Context<Node> createContext( CoercibleType<Node> coercibleType )
+  public Context<Node> createContext( CoercibleType<Node> nestedCoercibleType )
     {
-    return new Context<>( this, coercibleType, include );
+    return new Context<>( this, nestedCoercibleType, include );
     }
   }

@@ -29,6 +29,8 @@ import cascading.tuple.type.CoercibleType;
 /**
  * Interface NestedAggregate provides a basic abstraction for aggregating set of values collected from
  * a set of parent objects.
+ * <p>
+ * See {@link cascading.nested.core.aggregate.SimpleNestedAggregate} for a convenient base implementation.
  *
  * @see NestedGetAllAggregateFunction
  */
@@ -42,7 +44,7 @@ public interface NestedAggregate<Node, Context> extends Serializable
   /**
    * @return a new function specific context object
    */
-  Context createContext( CoercibleType<Node> coercibleType );
+  Context createContext( CoercibleType<Node> nestedCoercibleType );
 
   /**
    * This method receives each collected value to be applied to the current aggregation.

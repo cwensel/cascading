@@ -99,7 +99,11 @@ public interface JSONData
     "\"age\":50," +
     "\"female\":false," +
     "\"city\":\"Houston\"," +
-    "\"ssn\":\"123-45-6789\"" +
+    "\"ssn\":\"123-45-6789\"," +
+    "\"measures\": {\n" +
+    "    \"height\": 66,\n" +
+    "    \"weight\": 120\n" +
+    "}\n" +
     "}}," +
     "{" +
     "\"person\":" +
@@ -110,7 +114,11 @@ public interface JSONData
     "\"age\":49," +
     "\"female\":true," +
     "\"city\":\"Houston\"," +
-    "\"ssn\":\"123-45-6789\"" +
+    "\"ssn\":\"123-45-6789\"," +
+    "\"measures\": {\n" +
+    "    \"height\": 66,\n" +
+    "    \"weight\": 120\n" +
+    "}\n" +
     "}}," +
     "{" +
     "\"person\":" +
@@ -121,7 +129,11 @@ public interface JSONData
     "\"age\":null," +
     "\"female\":true," +
     "\"city\":\"Houston\"," +
-    "\"ssn\":null" +
+    "\"ssn\":null," +
+    "\"measures\": {\n" +
+    "    \"height\": 66,\n" +
+    "    \"weight\": 120\n" +
+    "}\n" +
     "}}" +
     "]" +
     "}";
