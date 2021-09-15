@@ -170,7 +170,7 @@ public class JSONGetAllAggregateFunctionTest extends CascadingTestCase
         }
       };
 
-    pointerMap.put( "/person/measures", new SimpleNestedAggregate<JsonNode>( new Fields( "ratio", Long.TYPE ), factory ) );
+    pointerMap.put( "/person/measures", new SimpleNestedAggregate<>( new Fields( "ratio", Long.TYPE ), factory ) );
 
     JSONGetAllAggregateFunction function = new JSONGetAllAggregateFunction( "/people/*", pointerMap );
 

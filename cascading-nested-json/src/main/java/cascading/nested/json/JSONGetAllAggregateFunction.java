@@ -165,7 +165,7 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    */
   @ConstructorProperties({"stringRootPointer", "streamWrapper", "fieldDeclaration",
                           "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( String stringRootPointer, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( String stringRootPointer, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     this( stringRootPointer, fieldDeclaration, false, stringPointers, nestedAggregates );
     }
@@ -180,9 +180,9 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    * @param stringPointers    of type String[]
    * @param nestedAggregates  of type NestedAggregate[]
    */
-  @ConstructorProperties({"stringRootPointer", "streamWrapper", "fieldDeclaration",
+  @ConstructorProperties({"stringRootPointer", "fieldDeclaration",
                           "failOnMissingNode", "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( String stringRootPointer, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( String stringRootPointer, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     super( JSONCoercibleType.TYPE, stringRootPointer, fieldDeclaration, failOnMissingNode, stringPointers, nestedAggregates );
     }
@@ -196,9 +196,9 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    * @param stringPointers    of type String[]
    * @param nestedAggregates  of type NestedAggregate[]
    */
-  @ConstructorProperties({"coercibleType", "stringRootPointer", "streamWrapper", "fieldDeclaration",
+  @ConstructorProperties({"coercibleType", "stringRootPointer", "fieldDeclaration",
                           "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     this( coercibleType, stringRootPointer, fieldDeclaration, false, stringPointers, nestedAggregates );
     }
@@ -216,7 +216,7 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    */
   @ConstructorProperties({"coercibleType", "stringRootPointer", "fieldDeclaration",
                           "failOnMissingNode", "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     super( coercibleType, stringRootPointer, fieldDeclaration, failOnMissingNode, stringPointers, nestedAggregates );
     }
@@ -232,7 +232,7 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    */
   @ConstructorProperties({"stringRootPointer", "streamWrapper", "fieldDeclaration",
                           "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     this( stringRootPointer, streamWrapper, fieldDeclaration, false, stringPointers, nestedAggregates );
     }
@@ -250,7 +250,7 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    */
   @ConstructorProperties({"stringRootPointer", "streamWrapper", "fieldDeclaration",
                           "failOnMissingNode", "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     this( JSONCoercibleType.TYPE, stringRootPointer, streamWrapper, fieldDeclaration, failOnMissingNode, stringPointers, nestedAggregates );
     }
@@ -267,9 +267,26 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    */
   @ConstructorProperties({"coercibleType", "stringRootPointer", "streamWrapper", "fieldDeclaration",
                           "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     this( coercibleType, stringRootPointer, streamWrapper, fieldDeclaration, false, stringPointers, nestedAggregates );
+    }
+
+  /**
+   * Constructor JSONGetAllAggregateFunction creates a new instance.
+   *
+   * @param coercibleType     of type JSONCoercibleType
+   * @param stringRootPointer of type String
+   * @param streamWrapper     of type SerFunction
+   * @param failOnMissingNode of type boolean
+   * @param stringPointers    of type String[]
+   * @param nestedAggregates  of type NestedAggregate[]
+   */
+  @ConstructorProperties({"coercibleType", "stringRootPointer", "streamWrapper",
+                          "failOnMissingNode", "stringPointers", "nestedAggregates"})
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
+    {
+    super( coercibleType, stringRootPointer, streamWrapper, failOnMissingNode, stringPointers, nestedAggregates );
     }
 
   /**
@@ -285,7 +302,7 @@ public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<J
    */
   @ConstructorProperties({"coercibleType", "stringRootPointer", "streamWrapper", "fieldDeclaration",
                           "failOnMissingNode", "stringPointers", "nestedAggregates"})
-  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, Object>[] nestedAggregates )
+  public JSONGetAllAggregateFunction( JSONCoercibleType coercibleType, String stringRootPointer, SerFunction<Stream<JsonNode>, Stream<JsonNode>> streamWrapper, Fields fieldDeclaration, boolean failOnMissingNode, String[] stringPointers, NestedAggregate<JsonNode, ?>[] nestedAggregates )
     {
     super( coercibleType, stringRootPointer, streamWrapper, fieldDeclaration, failOnMissingNode, stringPointers, nestedAggregates );
     }
