@@ -31,6 +31,7 @@ import cascading.operation.OperationCall;
 import cascading.operation.OperationException;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
+import cascading.util.Util;
 import heretical.pointer.path.BaseNestedPointer;
 import heretical.pointer.path.NestedPointer;
 import heretical.pointer.path.NestedPointerCompiler;
@@ -50,13 +51,12 @@ import heretical.pointer.path.NestedPointerCompiler;
  */
 public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, Result, Tuple> implements Function<Tuple>
   {
-  protected final NestedPointer<Node, Result>[] pointers;
-  protected final boolean failOnMissingNode;
-
   protected interface Setter<Node>
     {
     void set( int i, Node value );
     }
+  protected final NestedPointer<Node, Result>[] pointers;
+  protected final boolean failOnMissingNode;
 
   /**
    * Constructor NestedGetFunction creates a new NestedGetFunction instance.
@@ -79,6 +79,16 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
 
     for( int i = 0; i < stringPointers.length; i++ )
       this.pointers[ i ] = compiler.nested( stringPointers[ i ] );
+    }
+
+  protected static String[] asArray( Collection<String> values )
+    {
+    return values.toArray( new String[ values.size() ] );
+    }
+
+  protected static Fields asFields( Set<Fields> fields )
+    {
+    return fields.stream().reduce( Fields.NONE, Fields::append );
     }
 
   protected void verify( String[] stringPointers )
@@ -126,17 +136,14 @@ public class NestedGetFunction<Node, Result> extends NestedBaseOperation<Node, R
       if( failOnMissingNode && result == null )
         throw new OperationException( "node missing from json node tree: " + pointers[ i ] );
 
-      resultSetter.set( i, result );
+      try
+        {
+        resultSetter.set( i, result );
+        }
+      catch( Exception exception )
+        {
+        throw new OperationException( "value at: " + pointers[ i ] + ", cannot be handled, got: " + Util.truncate( result.toString(), 25 ), exception );
+        }
       }
-    }
-
-  protected static String[] asArray( Collection<String> values )
-    {
-    return values.toArray( new String[ values.size() ] );
-    }
-
-  protected static Fields asFields( Set<Fields> fields )
-    {
-    return fields.stream().reduce( Fields.NONE, Fields::append );
     }
   }
