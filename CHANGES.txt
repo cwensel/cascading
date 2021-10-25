@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Update c.t.p.NamedPartition to allow for easier translation of field and partition names.
+
   Updated c.n.j.JSONCoercibleType to support java.time.temporal.Temporal and java.time.temporal.TemporalAmount types
   if the underlying ObjectMapper has supporting modules. Also now leverages ObjectMapper#treeToValue.
 
