@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Added the c.p.a.Copy sub-assembly to simplify copying and optionally coercing values into new fields.
+
   Update c.t.p.NamedPartition to allow for easier translation of field and partition names.
 
   Updated c.n.j.JSONCoercibleType to support java.time.temporal.Temporal and java.time.temporal.TemporalAmount types

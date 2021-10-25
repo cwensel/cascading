@@ -170,6 +170,28 @@ public class AssemblyHelpersPlatformTest extends PlatformTestCase
     }
 
   @Test
+  public void testCopyNamed() throws IOException
+    {
+    getPlatform().copyFromLocal( inputFileLower );
+
+    Tap source = getPlatform().getTextFile( inputFileLower );
+    Tap sink = getPlatform().getTextFile( new Fields( "line" ), new Fields( "num", "char", "item", "element" ), getOutputPath( "copy" ), SinkMode.REPLACE );
+
+    Pipe pipe = new Pipe( "shape" );
+
+    Function splitter = new RegexSplitter( new Fields( "num", "char" ), " " );
+    pipe = new Each( pipe, new Fields( "line" ), splitter );
+
+    pipe = new Copy( pipe, new Fields( "num", "char" ), new Fields( "item", "element" ) );
+
+    Flow flow = getPlatform().getFlowConnector().connect( source, sink, pipe );
+
+    flow.complete();
+
+    validateLength( flow, 5, 1, Pattern.compile( "^\\d+\\s\\w+\\s\\d+\\s\\w+$" ) );
+    }
+
+  @Test
   public void testDiscardNarrow() throws IOException
     {
     getPlatform().copyFromLocal( inputFileLower );
