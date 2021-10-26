@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -47,7 +48,7 @@ public class BooleanCoerce extends Coercions.Coerce<Boolean>
     if( from == getCanonicalType() )
       return f -> f != null && (Boolean) f;
 
-    if( from instanceof Class && Number.class.isAssignableFrom( (Class<?>) from ) )
+    if( from instanceof Class && Boolean.class.isAssignableFrom( (Class<?>) from ) )
       return f -> f != null && ( (Boolean) f );
 
     return f -> f != null && Boolean.parseBoolean( f.toString() );
@@ -58,7 +59,7 @@ public class BooleanCoerce extends Coercions.Coerce<Boolean>
     {
     if( value instanceof Boolean )
       return (Boolean) value;
-    else if( value == null || value.toString().isEmpty())
+    else if( value == null || value.toString().isEmpty() )
       return false;
     else
       return Boolean.parseBoolean( value.toString() );

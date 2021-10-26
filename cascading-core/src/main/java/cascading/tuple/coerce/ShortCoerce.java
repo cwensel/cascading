@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,16 +40,25 @@ public class ShortCoerce extends NumberCoerce<Short>
     return short.class;
     }
 
+  @Override
   protected Short forNull()
     {
     return 0;
     }
 
+  @Override
+  protected Short forBoolean( Boolean f )
+    {
+    return f ? (short) 1 : (short) 0;
+    }
+
+  @Override
   protected <T> Short parseType( T f )
     {
     return Short.parseShort( f.toString() );
     }
 
+  @Override
   protected Short asType( Number f )
     {
     return f.shortValue();

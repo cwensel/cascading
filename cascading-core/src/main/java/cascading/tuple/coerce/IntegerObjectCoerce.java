@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,16 +40,25 @@ public class IntegerObjectCoerce extends NumberCoerce<Integer>
     return Integer.class;
     }
 
+  @Override
   protected Integer forNull()
     {
     return null;
     }
 
+  @Override
+  protected Integer forBoolean( Boolean f )
+    {
+    return f ? 1 : 0;
+    }
+
+  @Override
   protected <T> Integer parseType( T f )
     {
     return Integer.parseInt( f.toString() );
     }
 
+  @Override
   protected Integer asType( Number f )
     {
     return f.intValue();

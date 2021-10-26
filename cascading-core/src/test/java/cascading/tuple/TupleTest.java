@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -291,6 +292,7 @@ public class TupleTest extends CascadingTestCase
       assertEquals( "wrong value on: " + count, tuple.getObject( i ), result.getObject( count++ ) );
     }
 
+  @Test
   public void testSetCoerce()
     {
     Fields fieldsA = new Fields( "a", "b", "c" ).applyTypes( String.class, String.class, String.class );
@@ -305,5 +307,22 @@ public class TupleTest extends CascadingTestCase
     assertEquals( "not equal: tuple.get(0)", "0", tupleA.getObject( 0 ) );
     assertEquals( "not equal: tuple.get(1)", "-1", tupleA.getObject( 1 ) );
     assertEquals( "not equal: tuple.get(2)", "-2", tupleA.getObject( 2 ) );
+    }
+
+  @Test
+  public void testSetCoerce2()
+    {
+    Fields fieldsA = new Fields( "a", "b", "c" ).applyTypes( Long.class, String.class, Integer.class );
+    Tuple tupleA = new Tuple( 0L, "1", 1 );
+
+    Fields fieldsB = new Fields( "c", "b", "a" ).applyTypes( Boolean.class, Integer.class, Float.class );
+    Tuple tupleB = new Tuple( true, -2, -1F );
+
+    tupleA.set( fieldsA, fieldsB, tupleB );
+
+    assertEquals( "wrong size", 3, tupleA.size() );
+    assertEquals( "not equal: tuple.get(0)", -1L, tupleA.getObject( 0 ) );
+    assertEquals( "not equal: tuple.get(1)", "-2", tupleA.getObject( 1 ) );
+    assertEquals( "not equal: tuple.get(2)", 1, tupleA.getObject( 2 ) );
     }
   }

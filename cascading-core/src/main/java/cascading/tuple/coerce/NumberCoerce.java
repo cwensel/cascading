@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -65,6 +66,16 @@ public abstract class NumberCoerce<Canonical> extends Coercions.Coerce<Canonical
           }
         };
 
+    if( fromAsNonPrimitive != null && Boolean.class.isAssignableFrom( fromAsNonPrimitive ) )
+      return new ToCanonical<T, Canonical>()
+        {
+        @Override
+        public Canonical canonical( T f )
+          {
+          return f == null ? NumberCoerce.this.forNull() : NumberCoerce.this.forBoolean( (Boolean) f );
+          }
+        };
+
     if( from instanceof CoercibleType )
       {
       CoercionFrom<T, Object> to = ( (CoercibleType<T>) from ).to( getCanonicalType() );
@@ -95,6 +106,8 @@ public abstract class NumberCoerce<Canonical> extends Coercions.Coerce<Canonical
       return asType( (Number) value );
     else if( value == null || value.toString().isEmpty() )
       return forNull();
+    else if( value instanceof Boolean )
+      return forBoolean( (Boolean) value );
     else
       return parseType( value );
     }
@@ -104,4 +117,6 @@ public abstract class NumberCoerce<Canonical> extends Coercions.Coerce<Canonical
   protected abstract <T> Canonical parseType( T f );
 
   protected abstract <T> Canonical asType( Number f );
+
+  protected abstract Canonical forBoolean( Boolean f );
   }
