@@ -366,7 +366,7 @@ public class JSONCoercibleType implements NestedCoercibleType<JsonNode, ArrayNod
     {
     // required to defer classloading
     if( base == org.apache.hadoop.io.serializer.Serialization.class )
-      return cascading.nested.json.hadoop2.JSONHadoopSerialization.class;
+      return cascading.nested.json.hadoop3.JSONHadoopSerialization.class;
 
     return null;
     }

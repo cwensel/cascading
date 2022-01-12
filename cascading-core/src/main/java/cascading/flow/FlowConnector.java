@@ -54,7 +54,7 @@ import static cascading.flow.FlowDef.flowDef;
  * <p>
  * For executing Flows in local memory against local files, see {@link cascading.flow.local.LocalFlowConnector}.
  * <p>
- * For Apache Hadoop, see the {@link cascading.flow.hadoop.Hadoop2MR1FlowConnector}.
+ * For Apache Hadoop, see the {@link cascading.flow.hadoop.Hadoop3MRFlowConnector}.
  * Or if you have a pre-existing custom Hadoop job to execute, see {@link cascading.flow.hadoop.MapReduceFlow}, which
  * doesn't require a planner.
  * <p>
@@ -104,8 +104,8 @@ import static cascading.flow.FlowDef.flowDef;
  * a given planner.
  *
  * @see cascading.flow.local.LocalFlowConnector
- * @see cascading.flow.hadoop2.Hadoop2MR1FlowConnector
- * @see cascading.flow.tez.Hadoop2TezFlowConnector
+ * @see cascading.flow.hadoop3.Hadoop3MRFlowConnector
+ * @see cascading.flow.tez.Hadoop3TezFlowConnector
  */
 public abstract class FlowConnector
   {

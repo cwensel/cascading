@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -23,39 +24,31 @@ ext.hadoop3Version = '3.3.1'
 if ( System.properties [ 'hadoop3.release.final'] )
   hadoop3Version = System.properties[ 'hadoop3.release.final' ]
 
-ext.jacksonDatabindVersion = '2.12.4'
-ext.jacksonDatatypeGuavaVersion = jacksonDatabindVersion
-ext.jacksonDataFormatsVersion = jacksonDatabindVersion
-
 dependencies {
+
   api project( ':cascading-core' )
-  api project( ':cascading-nested' )
+  api project( ':cascading-hadoop3-io' )
 
-  compileOnly project( ':cascading-local' )
+  // forces update of yarn slf4j dependencies
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  compileOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
 
-  compileOnly project( ':cascading-hadoop3-io' )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
 
-  api group: 'io.heretical', name: 'pointer-path-json', version: '1.1.0'
-
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-
-  api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-ion', version: jacksonDatabindVersion
-
-  // for serializers
-  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
-
   testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
-  testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatabindVersion
+  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
+  testImplementation project( path: ':cascading-nested-json' )
+  testImplementation project( path: ':cascading-expression' )
+
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop3Version )
 }
 
 javadoc {
+
+  classpath = files( project.sourceSets.test.compileClasspath )
+
   configure( options ) {
-    links << "http://fasterxml.github.io/jackson-core/javadoc/${jacksonDatabindVersion[ 0..-3 ]}/".toString()
-    links << "http://fasterxml.github.io/jackson-databind/javadoc/${jacksonDatabindVersion[ 0..-3 ]}/".toString()
+    links << "http://hadoop.apache.org/docs/r${hadoop3Version}/api/".toString()
   }
 }
-
-tasks.jmh.enabled = true
-tasks.jmhReport.enabled = true

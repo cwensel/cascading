@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -19,21 +18,27 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-expression'
-include 'cascading-nested'
-include 'cascading-nested-json'
-include 'cascading-local'
-include 'cascading-hadoop3-common'
-include 'cascading-hadoop3-io'
-include 'cascading-hadoop3-mr'
-include 'cascading-hadoop3-tez'
-include 'cascading-hadoop3-tez-stats'
-include 'cascading-local-hadoop3-io'
-include 'cascading-local-s3'
-include 'cascading-local-kafka'
-include 'cascading-local-splunk'
-include 'cascading-local-neo4j'
-include 'cascading-platform'
+package cascading.tuple.hadoop.util;
 
-rootProject.name = 'cascading'
+import static org.apache.hadoop.io.WritableComparator.compareBytes;
+
+// compare bytes is only Hadoop3
+public class TupleComparator extends BaseTupleComparator
+  {
+  static RawComparison BYTE_COMPARISON = new ByteComparison();
+
+  @Override
+  protected RawComparison getByteComparison()
+    {
+    return BYTE_COMPARISON;
+    }
+
+  static class ByteComparison implements RawComparison
+    {
+    @Override
+    public int compare( byte[] buffer1, int offset1, int length1, byte[] buffer2, int offset2, int length2 )
+      {
+      return compareBytes( buffer1, offset1, length1, buffer2, offset2, length2 );
+      }
+    }
+  }
