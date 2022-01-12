@@ -4,6 +4,11 @@ Thanks for using [Cascading](https://cascading.wensel.net/).
 
 ## Cascading 4.5
 
+Cascading 4.5 includes a few major changes and additions from prior major releases:
+
+* Support for Apache Hadoop 3. and Apache Tez 0.10.x
+* Removed Apache Hadoop 2.x and Apache Tez 0.8.x support
+
 Cascading 4 includes a few major changes and additions from prior major releases:
 
 * Local mode support improved for production use
@@ -43,9 +48,9 @@ These class jars, along with, tests, source and javadoc jars, are all available 
 Local mode is where the Cascading application will run locally in memory without cluster distribution. This
 implementation has minimal to no robustness in low memory situations, by design.
 
-Hadoop 2.x MR1 mode is for running on Hadoop 2.x releases.
+Hadoop 3.x MR1 mode is for running on Hadoop 3.x releases.
 
-Hadoop 2.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
+Hadoop 3.x Tez mode is where the Cascading application should run on an Apache Tez *DAG* cluster.
 
 As of Cascading 4.x, all above jar files are built against Java 1.8. Prior versions of Cascading are built against Java
 1.7 and 1.6.

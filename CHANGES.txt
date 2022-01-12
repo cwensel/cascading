@@ -2,6 +2,11 @@ Cascading Change Log
 
 4.5 [unreleased]
 
+  Removed support for Apache Hadoop 2.x and Apache Tez 0.8.x.
+
+  Updated Apache Tez to version 0.10.1.
+
+  Updated Apache Hadoop to version 3.3.1.
 
 4.1 [unreleased]
 
