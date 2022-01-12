@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -19,21 +18,21 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-expression'
-include 'cascading-nested'
-include 'cascading-nested-json'
-include 'cascading-local'
-include 'cascading-hadoop3-common'
-include 'cascading-hadoop3-io'
-include 'cascading-hadoop3-mr'
-include 'cascading-hadoop3-tez'
-include 'cascading-hadoop3-tez-stats'
-include 'cascading-local-hadoop3-io'
-include 'cascading-local-s3'
-include 'cascading-local-kafka'
-include 'cascading-local-splunk'
-include 'cascading-local-neo4j'
-include 'cascading-platform'
+package cascading.stats.tez.util;
 
-rootProject.name = 'cascading'
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.tez.dag.api.TezException;
+
+/**
+ * This interface can be removed in completion of TEZ-3369
+ */
+public interface TimelineClient
+  {
+  String getVertexID( String vertexName ) throws IOException, TezException;
+
+  Iterator<TaskStatus> getVertexChildren( String vertexID, int limit, String startTaskID ) throws IOException, TezException;
+
+  TaskStatus getVertexChild( String taskID ) throws TezException;
+  }
