@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,19 +40,27 @@ public class DoubleObjectCoerce extends NumberCoerce<Double>
     return Double.class;
     }
 
+  @Override
   protected Double forNull()
     {
     return null;
     }
 
+  @Override
+  protected Double forBoolean( Boolean f )
+    {
+    return f ? 1D : 0D;
+    }
+
+  @Override
   protected <T> Double parseType( T f )
     {
     return Double.parseDouble( f.toString() );
     }
 
+  @Override
   protected Double asType( Number f )
     {
     return f.doubleValue();
     }
-
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -58,6 +58,7 @@ import cascading.pipe.Group;
 import cascading.pipe.Operator;
 import cascading.pipe.Pipe;
 import cascading.pipe.Splice;
+import cascading.tap.AdaptorTap;
 import cascading.tap.Tap;
 import cascading.util.DOTProcessGraphWriter;
 import cascading.util.EnumMultiMap;
@@ -335,6 +336,8 @@ public class ElementGraphs
 
     if( flowElement instanceof Operator && ( (Operator) flowElement ).getOperation() != null )
       rhs = ( (Operator) flowElement ).getOperation().getClass().getName().hashCode();
+    else if( flowElement instanceof AdaptorTap && ( (AdaptorTap) flowElement ).getOriginal().getScheme() != null )
+      rhs = ( (AdaptorTap) flowElement ).getOriginal().getScheme().getClass().getName().hashCode();
     else if( flowElement instanceof Tap && ( (Tap) flowElement ).getScheme() != null )
       rhs = ( (Tap) flowElement ).getScheme().getClass().getName().hashCode();
     else if( flowElement instanceof Splice )

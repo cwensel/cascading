@@ -10,6 +10,17 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Updated c.t.c.Coercions to support coercions from a Boolean value into a Number type. TRUE becomes 1, and FALSE
+  becomes 0, in the expected numeric type. The reverse isn't supported and may need specialized c.t.t.CoercibleType
+  implementations to support values other than 'true' to become TRUE.
+
+  Added the c.p.a.Copy sub-assembly to simplify copying and optionally coercing values into new fields.
+
+  Updated c.t.p.NamedPartition to allow for easier translation of field and partition names.
+
+  Updated c.n.j.JSONCoercibleType to support java.time.temporal.Temporal and java.time.temporal.TemporalAmount types
+  if the underlying ObjectMapper has supporting modules. Also now leverages ObjectMapper#treeToValue.
+
   Added c.t.t.CoercionFrom and c.t.t.ToCanonical interfaces to support faster type coercions.
 
   Added local mode support for Apache Kafka, Neo4j, Splunk, and AWS S3 by merging with the cascading-local project.

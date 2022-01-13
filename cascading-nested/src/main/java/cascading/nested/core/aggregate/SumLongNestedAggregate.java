@@ -20,6 +20,8 @@
 
 package cascading.nested.core.aggregate;
 
+import java.beans.ConstructorProperties;
+
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.type.CoercibleType;
@@ -62,14 +64,15 @@ public class SumLongNestedAggregate<Node> extends BaseNumberNestedAggregate<Node
       }
     }
 
+  @ConstructorProperties({"declaredFields"})
   public SumLongNestedAggregate( Fields declaredFields )
     {
     super( declaredFields, Long.TYPE );
     }
 
   @Override
-  public Context<Node> createContext( CoercibleType<Node> coercibleType )
+  public Context<Node> createContext( CoercibleType<Node> nestedCoercibleType )
     {
-    return new Context<>( this, coercibleType );
+    return new Context<>( this, nestedCoercibleType );
     }
   }

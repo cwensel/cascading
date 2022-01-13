@@ -48,14 +48,16 @@ public abstract class BaseNumberNestedAggregate<Node, Type, Context extends Base
   {
   public abstract static class BaseContext<Type, Node>
     {
-    final CoercionFrom<Node, Type> to;
-    final Tuple results;
-    final SerPredicate<Type> discardValue;
-    final Supplier<Tuple> complete;
-    boolean allValuesDiscarded = true;
+    protected final CoercibleType<Node> coercibleType;
+    protected final CoercionFrom<Node, Type> to;
+    protected final Tuple results;
+    protected final SerPredicate<Type> discardValue;
+    protected final Supplier<Tuple> complete;
+    protected boolean allValuesDiscarded = true;
 
     public BaseContext( BaseNumberNestedAggregate<Node, Type, BaseContext<Type, Node>> aggregateFunction, CoercibleType<Node> coercibleType )
       {
+      this.coercibleType = coercibleType;
       this.to = coercibleType.to( aggregateFunction.aggregateType );
 
       this.results = createResultTuple( aggregateFunction );
@@ -99,9 +101,14 @@ public abstract class BaseNumberNestedAggregate<Node, Type, Context extends Base
       if( node == null )
         return;
 
-      Type value = to.coerce( node );
+      Type value = coerceFrom( node );
 
       addAggregateValue( value );
+      }
+
+    protected Type coerceFrom( Node node )
+      {
+      return to.coerce( node );
       }
 
     protected void addAggregateValue( Type value )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -128,7 +128,7 @@ public class NamedPartition extends DelimitedPartition
       {
       String[] keyValue = getKeyValuePattern().split( entry, 2 );
 
-      tupleEntry.setString( posMap.get( keyValue[ 0 ] ), keyValue[ 1 ] );
+      tupleEntry.setString( posMap.get( mapPartitionNameToFieldName( keyValue[ 0 ] ) ), keyValue[ 1 ] );
       }
     }
 
@@ -145,7 +145,7 @@ public class NamedPartition extends DelimitedPartition
       if( count != 0 )
         buffer.append( delimiter );
 
-      buffer.append( s[ 0 ] );
+      buffer.append( mapFieldNameToPartitionName( s[ 0 ] ) );
       buffer.append( keyValueDelimiter );
 
       if( printNull || s[ 1 ] != null )
@@ -155,5 +155,31 @@ public class NamedPartition extends DelimitedPartition
       }
 
     return buffer.toString();
+    }
+
+  /**
+   * Allow for simple translation of a partitionName to a desired fieldName.
+   * <p>
+   * By default the partitionName is returned.
+   *
+   * @param partitionName the parsed partition name from the path
+   * @return an expected fieldName
+   */
+  protected String mapPartitionNameToFieldName( String partitionName )
+    {
+    return partitionName;
+    }
+
+  /**
+   * Allow for a simple translation of a fieldName to a desired partitionName.
+   * <p>
+   * By default the fieldName is returned.
+   *
+   * @param fieldName the current field name
+   * @return an expected partitionName
+   */
+  protected String mapFieldNameToPartitionName( String fieldName )
+    {
+    return fieldName;
     }
   }

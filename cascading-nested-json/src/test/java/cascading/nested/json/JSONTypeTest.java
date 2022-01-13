@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Chris K Wensel. All Rights Reserved.
+ * Copyright (c) 2016-2021 Chris K Wensel. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -119,6 +119,24 @@ public class JSONTypeTest
     String coerce = type.coerce( canonical, String.class );
 
     assertEquals( "1525456424.337000000", coerce );
+    }
+
+  @Test
+  public void pojoCoercionsReversed()
+    {
+    ObjectMapper mapper = new ObjectMapper();
+
+    mapper.registerModule( new JavaTimeModule() );
+
+    JSONCoercibleType type = new JSONCoercibleType( mapper );
+
+    Instant instant = Instant.ofEpochSecond( 1525456424, 337000000 );
+
+    JsonNode canonical = type.canonical( instant );
+
+    Instant coerce = type.coerce( canonical, Instant.class );
+
+    assertEquals( instant, coerce );
     }
 
   private void testContainerCoercion( String value, JsonNodeType nodeType, Class resultType )

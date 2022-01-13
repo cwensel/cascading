@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016-2021 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -39,16 +40,25 @@ public class LongCoerce extends NumberCoerce<Long>
     return long.class;
     }
 
+  @Override
   protected Long forNull()
     {
     return 0L;
     }
 
+  @Override
+  protected Long forBoolean( Boolean f )
+    {
+    return f ? 1L : 0L;
+    }
+
+  @Override
   protected <T> Long parseType( T f )
     {
     return Long.parseLong( f.toString() );
     }
 
+  @Override
   protected Long asType( Number f )
     {
     return f.longValue();
