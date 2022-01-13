@@ -41,5 +41,5 @@ dependencies {
   testImplementation project(':cascading-nested-json')
   testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
 
-  testCompile group: 'org.testcontainers', name: 'testcontainers', version: '1.16.0'
+  testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.16.0'
 }
