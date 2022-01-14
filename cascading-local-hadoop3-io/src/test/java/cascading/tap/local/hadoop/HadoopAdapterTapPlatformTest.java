@@ -18,8 +18,9 @@
  * limitations under the License.
  */
 
-package cascading;
+package cascading.tap.local.hadoop;
 
+import cascading.PlatformTestCase;
 import cascading.flow.Flow;
 import cascading.flow.local.LocalFlowConnector;
 import cascading.pipe.Pipe;
@@ -32,7 +33,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.PartitionTap;
 import cascading.tap.local.FileTap;
-import cascading.tap.local.hadoop.LocalHfsAdaptor;
 import cascading.tap.partition.DelimitedPartition;
 import cascading.tuple.Fields;
 import org.junit.Test;

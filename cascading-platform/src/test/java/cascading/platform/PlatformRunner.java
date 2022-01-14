@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+ * Copyright (c) 2016-2022 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
  * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
@@ -112,15 +112,7 @@ public class PlatformRunner extends ParentRunner<Runner>
       {
       return type.newInstance();
       }
-    catch( NoClassDefFoundError exception )
-      {
-      return null;
-      }
-    catch( InstantiationException exception )
-      {
-      throw new RuntimeException( exception );
-      }
-    catch( IllegalAccessException exception )
+    catch( NoClassDefFoundError | InstantiationException | IllegalAccessException exception )
       {
       throw new RuntimeException( exception );
       }
