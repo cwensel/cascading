@@ -1,0 +1,18 @@
+
+Authors:
+
+  The Cascading project Copyright is held by these authors unless
+  otherwise specified in the header of any given file.
+
+  For files created between 2007 and May 2016:
+
+    Copyright (c) 2007-2016 Xplenty, Inc. All Rights Reserved.
+
+  For files created after 2007 and modified on or after May 2016:
+
+    Copyright (c) 2016-2022 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
+    Copyright (c) 2007-2016 Xplenty, Inc. All Rights Reserved.
+
+  For files created between May 2016 and 2022:
+
+    Copyright (c) 2016-2022 Chris K Wensel <chris@wensel.net>. All Rights Reserved.

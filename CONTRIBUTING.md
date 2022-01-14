@@ -43,16 +43,7 @@ Also call out any changes to the Cascading core API that would be necessary to s
 We are happy to quickly add new well thought out API calls in minor (or maintenance releases if trivial). Changes to 
 existing APIs must be made against major releases.
 
-The [Conjars](http://conjars.org) Maven repository is available to ease the distribution of Cascading extensions. 
-Creating an account is simple, uploads are possible via SSH or HTTP. 
-
-Pushing artifacts to Conjars is not an expectation, but do consider making any extensions available via Maven to 
-simplify inclusion by end-users.
-
-When a new extension is available, please notify the mail list and/or email support@cascading.org to be included
-on the extensions page.
-
-## Enhancing Cascading Core
+****## Enhancing Cascading Core
 
 If the proposed enhancement will not fit neatly as a simple extension to Cascading (see above), please follow these
 guidelines.
