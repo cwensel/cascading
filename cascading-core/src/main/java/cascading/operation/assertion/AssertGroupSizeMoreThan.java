@@ -1,8 +1,7 @@
 /*
- * Copyright (c) 2016-2017 Chris K Wensel <chris@wensel.net>. All Rights Reserved.
- * Copyright (c) 2007-2017 Xplenty, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
  *
- * Project and contact information: http://www.cascading.org/
+ * Project and contact information: https://cascading.wensel.net/
  *
  * This file is part of the Cascading project.
  *
