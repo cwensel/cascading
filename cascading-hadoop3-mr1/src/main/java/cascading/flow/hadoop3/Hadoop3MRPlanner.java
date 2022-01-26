@@ -52,7 +52,7 @@ public class Hadoop3MRPlanner extends HadoopPlanner
   /** Field LOG */
   private static final Logger LOG = LoggerFactory.getLogger( Hadoop3MRPlanner.class );
 
-  public static final String PLATFORM_NAME = "hadoop3-mr";
+  public static final String PLATFORM_NAME = "hadoop3-mr1";
 
   /**
    * Method copyJobConf adds the given JobConf values to the given properties object. Use this method to pass

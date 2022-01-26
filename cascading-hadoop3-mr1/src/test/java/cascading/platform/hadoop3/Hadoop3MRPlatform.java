@@ -61,7 +61,7 @@ public class Hadoop3MRPlatform extends BaseHadoopPlatform<JobConf>
   @Override
   public String getName()
     {
-    return "hadoop3-mr";
+    return "hadoop3-mr1";
     }
 
   @Override

@@ -193,7 +193,7 @@ public class HadoopPlanner extends FlowPlanner<HadoopFlow, JobConf>
   protected void checkPlatform( Configuration conf )
     {
     if( HadoopUtil.isYARN( conf ) )
-      LOG.warn( "running YARN based flows on Hadoop 1.x may cause problems, please use the 'cascading-hadoop3-mr' dependencies" );
+      LOG.warn( "running YARN based flows on Hadoop 1.x may cause problems, please use the 'cascading-hadoop3-mr1' dependencies" );
     }
 
   @Override

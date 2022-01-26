@@ -155,7 +155,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     String platform = conf.get( "cascading.flow.platform", "" );
 
     // only supported by these platforms
-    if( platform.equals( "hadoop" ) || platform.equals( "hadoop3-mr" ) )
+    if( platform.equals( "hadoop" ) || platform.equals( "hadoop3-mr1" ) )
       return combineEnabled;
 
     // we are on a platform that supports combining, just not through the combiner

@@ -61,16 +61,16 @@ public class ComparePlatformsTest extends CascadingTestCase
     String[] roots = root.split( "," );
 
     File localRoot = new File( find( roots, "/cascading-local/" ), "local" );
-    File hadoop3Root = new File( find( roots, "/cascading-hadoop3-mr/" ), "hadoop3-mr" );
+    File hadoop3Root = new File( find( roots, "/cascading-hadoop3-mr1/" ), "hadoop3-mr1" );
     File hadoop3TezRoot = new File( find( roots, "/cascading-hadoop3-tez/" ), "hadoop3-tez" );
 
     LOG.info( "local path: {}", localRoot );
-    LOG.info( "hadoop3-mr path: {}", hadoop3Root );
+    LOG.info( "hadoop3-mr1 path: {}", hadoop3Root );
     LOG.info( "hadoop3-tez path: {}", hadoop3TezRoot );
 
     TestSuite suite = new TestSuite();
 
-    createComparisons( "local~hadoop3-mr", localRoot, hadoop3Root, suite );
+    createComparisons( "local~hadoop3-mr1", localRoot, hadoop3Root, suite );
     createComparisons( "local~hadoop3-tez", localRoot, hadoop3TezRoot, suite );
 
     return suite;

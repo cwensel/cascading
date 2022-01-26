@@ -39,7 +39,7 @@ The project includes nine Cascading jar files:
 * `cascading-local-hadoop3-io-x.y.z.jar`  - all Cascading Local in-memory mode class files used with Hadoop
 * `cascading-hadoop3-common-x.y.z.jar`    - all Cascading Hadoop 3.x common class files
 * `cascading-hadoop3-io-x.y.z.jar`        - all Cascading Hadoop 3.x HDFS and IO related class files
-* `cascading-hadoop3-mr-x.y.z.jar`        - all Cascading Hadoop 3.x MapReduce mode class files
+* `cascading-hadoop3-mr1-x.y.z.jar`        - all Cascading Hadoop 3.x MapReduce mode class files
 * `cascading-hadoop3-tez-x.y.z.jar`       - all Cascading Hadoop 3.x Tez mode class files
 * `cascading-hadoop3-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
 
@@ -155,7 +155,7 @@ Note the `cascading-platform` compile dependency has no classes, you must pull t
 
 Source and Javadoc artifacts (using the appropriate classifier) are also available through Maven.
 
-Note that `cascading-hadoop3-mr`, and `cascading-hadoop3-tez` have a `provided` dependency on the Hadoop jars so that
+Note that `cascading-hadoop3-mr1`, and `cascading-hadoop3-tez` have a `provided` dependency on the Hadoop jars so that
 it won't get sucked into any application packaging as a dependency, typically.
 
 ## Building and IDE Integration
@@ -176,7 +176,7 @@ To build Cascading, run the following in the shell:
 First confirm you are using a supported version of Apache Hadoop by checking the
 [Compatibility](https://cascading.wensel.net/support/compatibility/) page.
 
-To use Cascading with Hadoop, we suggest stuffing `cascading-core` and `cascading-hadoop3-mr`, jar files and all
+To use Cascading with Hadoop, we suggest stuffing `cascading-core` and `cascading-hadoop3-mr1`, jar files and all
 third-party libs into the `lib` folder of your job jar and executing your job via
 `$HADOOP_HOME/bin/hadoop jar your.jar <your args>`.
 
@@ -186,7 +186,7 @@ For example, your job jar would look like this (via: `jar -t your.jar`)
 /<all your class and resource files>
 /lib/cascading-core-x.y.z.jar
 /lib/cascading-hadoop3-common-x.y.z.jar
-/lib/cascading-hadoop3-mr-x.y.z.jar
+/lib/cascading-hadoop3-mr1-x.y.z.jar
 /lib/cascading-hadoop3-io-x.y.z.jar
 /lib/cascading-expression-x.y.z.jar
 /lib/cascading-nested-json-x.y.z.jar
