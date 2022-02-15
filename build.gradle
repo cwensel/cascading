@@ -166,7 +166,7 @@ subprojects {
 
     copy {
       into "${distDir}/lib/${archivesBaseName}"
-      from( configurations.compile.resolvedConfiguration.firstLevelModuleDependencies.findAll {dep ->
+      from( configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies.findAll {dep ->
         !dep.name.contains( 'cascading' )
       }.collect {dep ->
         dep.moduleArtifacts.collect {it.file}
