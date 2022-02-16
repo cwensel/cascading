@@ -2,8 +2,6 @@ Cascading Change Log
 
 4.5 [unreleased]
 
-  Updated build to target Java 11.
-
   Removed support for Apache Hadoop 2.x and Apache Tez 0.8.x.
 
   Updated Apache Tez to version 0.10.1.

@@ -73,8 +73,8 @@ subprojects {
   apply plugin: 'io.morethan.jmhreport'
   apply from: '../etc/testing.gradle'
 
-  sourceCompatibility = 11
-  targetCompatibility = 11
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
 
   // generate Java 9 module names
   ext.moduleName = name.replaceAll( '-', '.' )
