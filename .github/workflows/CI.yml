@@ -12,30 +12,6 @@ on:
 jobs:
   run-base-tests:
     runs-on: ubuntu-latest
-    strategy:
-      # it's helpful to see exactly which test modules passed/failed
-      # this finishes all matrix nodes even if one fails along the way
-      fail-fast: false
-
-      # all combinations that we will run in parallel to increase throughput
-      matrix:
-        include:
-          - BUILD: "cascading-core"
-          - BUILD: "cascading-expression"
-          - BUILD: "cascading-hadoop3-common"
-          - BUILD: "cascading-hadoop3-io"
-          - BUILD: "cascading-hadoop3-mr1"
-          - BUILD: "cascading-hadoop3-tez"
-          - BUILD: "cascading-hadoop3-tez-stats"
-          - BUILD: "cascading-local"
-          - BUILD: "cascading-local-hadoop3-io"
-          - BUILD: "cascading-local-kafka"
-          - BUILD: "cascading-local-neo4j"
-          - BUILD: "cascading-local-s3"
-          - BUILD: "cascading-local-splunk"
-          - BUILD: "cascading-nested"
-          - BUILD: "cascading-nested-json"
-          - BUILD: "cascading-platform"
 
     steps:
       - name: Checkout Repo
@@ -46,11 +22,6 @@ jobs:
           distribution: 'adopt-openj9'
           java-version: 8
 
-
-      - name: "Run Full Module Build"
-        env:
-          BUILD: ${{ matrix.BUILD }}
-
+      - name: Run Full Tests
         run: |
-          cd $BUILD
-          ../gradlew build
+          ./gradlew clean check -i
