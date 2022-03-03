@@ -1,11 +1,8 @@
 name: CI
 
-# run on all branches
+# run on all branches for PRs opened
 on:
   pull_request:
-    branches:
-      - '**'
-  push:
     branches:
       - '**'
 
