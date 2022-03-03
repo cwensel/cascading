@@ -24,4 +24,4 @@ jobs:
 
       - name: Run Full Tests
         run: |
-          ./gradlew clean check -i
+          ./gradlew clean check
