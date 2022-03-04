@@ -7,7 +7,7 @@ on:
       - '**'
 
 jobs:
-  run-base-tests:
+  run-all-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,9 +16,13 @@ jobs:
 
       - uses: actions/setup-java@v2
         with:
-          distribution: 'adopt-openj9'
+          distribution: zulu
+          # java 11 does not support expected jvm arguments
           java-version: 8
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
       - name: Run Full Tests
         run: |
-          ./gradlew clean check
+          ./gradlew clean check -i
