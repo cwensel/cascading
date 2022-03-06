@@ -18,7 +18,31 @@
  * limitations under the License.
  */
 
-task platformTest( type: Test ) {
+task stopPlatforms( type: Exec ) {
+  def killFile = new File( buildDir, 'stopPlatforms.sh' )
+  doFirst {
+    killFile.getParentFile().mkdirs()
+    killFile.write( """\
+XARGS=xargs
+type gxargs >/dev/null 2>&1 && XARGS=gxargs 
+echo found: 
+echo `jps | grep -e MRAppMaster -e DAGApp -e TezChild -e YarnChild`
+jps | grep -e MRAppMaster -e DAGApp -e TezChild -e YarnChild | cut -f1 -d" " | \$XARGS -r kill -9
+"""
+    )
+    println "killing hung daemons"
+  }
+
+  standardOutput = new ByteArrayOutputStream();
+  commandLine 'bash', killFile
+
+  doLast{
+    println "stop results:"
+    println standardOutput.toString()
+  }
+}
+
+task platformTest( type: Test, dependsOn: stopPlatforms ) {
   ext.runPlatformTests = true
   useJUnit()
   maxHeapSize '1000m'
