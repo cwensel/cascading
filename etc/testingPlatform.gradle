@@ -27,7 +27,7 @@ XARGS=xargs
 type gxargs >/dev/null 2>&1 && XARGS=gxargs 
 echo found: 
 echo `jps | grep -e MRAppMaster -e DAGApp -e TezChild -e YarnChild`
-jps | grep -e MRAppMaster -e DAGApp -e TezChild -e YarnChild | cut -f1 -d" " | \$XARGS -r kill -9
+jps | grep -e MRAppMaster -e DAGAppMaster -e DAGApp -e TezChild -e YarnChild | cut -f1 -d" " | \$XARGS -r kill -9
 """
     )
     println "killing hung daemons"
