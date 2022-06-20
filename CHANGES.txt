@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.1 [unreleased]
 
+  Updated c.t.h.Hfs to honor any declared 'input paths' in the configuration object when calling
+  Hfs#getChildIdentifiers. The main tap identifier should be a common path to all input paths.
+
   Updated c.t.c.Coercions to support coercions from a Boolean value into a Number type. TRUE becomes 1, and FALSE
   becomes 0, in the expected numeric type. The reverse isn't supported and may need specialized c.t.t.CoercibleType
   implementations to support values other than 'true' to become TRUE.
