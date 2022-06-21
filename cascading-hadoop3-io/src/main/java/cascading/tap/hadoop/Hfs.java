@@ -71,10 +71,13 @@ import org.slf4j.LoggerFactory;
  * instances.
  * <p>
  * Paths typically should point to a directory, where in turn all the "part" files immediately in that directory will
- * be included. This is the practice Hadoop expects. Sub-directories are not included and typically result in a failure.
+ * be included. This is the practice Hadoop expects. Subdirectories are not included and typically result in a failure.
  * <p>
- * To include sub-directories, Hadoop supports "globing". Globing is a frustrating feature and is supported more
+ * To include subdirectories, Hadoop supports "globing". Globing is a frustrating feature and is supported more
  * robustly by {@link GlobHfs} and less so by Hfs.
+ * <p>
+ * Or in later versions of Hadoop (2.x+), set this property to {@code true}:
+ * {@code "mapreduce.input.fileinputformat.input.dir.recursive"}
  * <p>
  * Hfs will accept {@code /*} (wildcard) paths, but not all convenience methods like
  * {@code jobConf.getSize} will behave properly or reliably. Nor can the Hfs instance
@@ -91,9 +94,9 @@ import org.slf4j.LoggerFactory;
  * Call {@link HfsProps#setTemporaryDirectory(java.util.Map, String)} to use a different temporary file directory path
  * other than the current Hadoop default path.
  * <p>
- * By default Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
+ * By default, Cascading on Hadoop will assume any source or sink Tap using the {@code file://} URI scheme
  * intends to read files from the local client filesystem (for example when using the {@code Lfs} Tap) where the Hadoop
- * job jar is started. Subsequently Cascading will force any MapReduce jobs reading or writing to {@code file://} resources
+ * job jar is started. Subsequently, Cascading will force any MapReduce jobs reading or writing to {@code file://} resources
  * to run in Hadoop "standalone mode" so that the file can be read.
  * <p>
  * To change this behavior, {@link HfsProps#setLocalModeScheme(java.util.Map, String)} to set a different scheme value,
@@ -108,6 +111,10 @@ import org.slf4j.LoggerFactory;
  * or combining splits into large ones is disabled.
  * <p>
  * Apache Tez planner does not require this setting, it is supported by default and enabled by the application manager.
+ * <p>
+ * If Hfs is overridden and sets multiple input paths directly against the configuration object, some methods will
+ * attempt to honor this property. But the primary path (returned by {@link #getIdentifier()}, must be a common directory
+ * to all the 'child' input paths added directly.
  */
 public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> implements FileType<Configuration>, TapWith<Configuration, RecordReader, OutputCollector>
   {
@@ -126,16 +133,16 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
   private transient String cachedPath = null;
 
   private static final PathFilter HIDDEN_FILES_FILTER = path ->
-  {
-  String name = path.getName();
+    {
+    String name = path.getName();
 
-  if( name.isEmpty() ) // should never happen
-    return true;
+    if( name.isEmpty() ) // should never happen
+      return true;
 
-  char first = name.charAt( 0 );
+    char first = name.charAt( 0 );
 
-  return first != '_' && first != '.';
-  };
+    return first != '_' && first != '.';
+    };
 
   protected static String getLocalModeScheme( Configuration conf, String defaultValue )
     {
@@ -404,7 +411,7 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
 
   protected static void verifyNoDuplicates( Configuration conf )
     {
-    Path[] inputPaths = FileInputFormat.getInputPaths( HadoopUtil.asJobConfInstance( conf ) );
+    Path[] inputPaths = getDeclaredInputPaths( conf );
     Set<Path> paths = new HashSet<Path>( (int) ( inputPaths.length / .75f ) );
 
     for( Path inputPath : inputPaths )
@@ -412,6 +419,11 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
       if( !paths.add( inputPath ) )
         throw new TapException( "may not add duplicate paths, found: " + inputPath );
       }
+    }
+
+  protected static Path[] getDeclaredInputPaths( Configuration conf )
+    {
+    return FileInputFormat.getInputPaths( HadoopUtil.asJobConfInstance( conf ) );
     }
 
   protected void applySourceConfInitIdentifiers( FlowProcess<? extends Configuration> process, Configuration conf, final String... fullIdentifiers )
@@ -754,15 +766,22 @@ public class Hfs extends Tap<Configuration, RecordReader, OutputCollector> imple
     if( depth == 0 && !fullyQualified )
       return new String[]{getIdentifier()};
 
-    String fullIdentifier = getFullIdentifier( conf );
+    // we are assuming the identifier is a root of the declared input paths, if any
+    String rootIdentifier = getFullIdentifier( conf );
+    int trim = fullyQualified ? 0 : rootIdentifier.length() + 1;
 
-    int trim = fullyQualified ? 0 : fullIdentifier.length() + 1;
+    // if set, expected to be the children of the rootIdentifier
+    Path[] inputPaths = getDeclaredInputPaths( conf );
 
-    Set<String> results = new LinkedHashSet<String>();
+    if( inputPaths.length == 0 )
+      inputPaths = new Path[]{new Path( rootIdentifier )};
 
-    getChildPaths( conf, results, trim, new Path( fullIdentifier ), depth );
+    Set<String> results = new LinkedHashSet<>();
 
-    return results.toArray( new String[ results.size() ] );
+    for( Path identifier : inputPaths )
+      getChildPaths( conf, results, trim, identifier, depth );
+
+    return results.toArray( new String[ 0 ] );
     }
 
   private void getChildPaths( Configuration conf, Set<String> results, int trim, Path path, int depth ) throws IOException
