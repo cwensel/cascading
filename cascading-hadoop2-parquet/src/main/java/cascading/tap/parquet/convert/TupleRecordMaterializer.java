@@ -18,23 +18,33 @@
  * limitations under the License.
  */
 
-include 'cascading-core'
-include 'cascading-expression'
-include 'cascading-nested'
-include 'cascading-nested-json'
-include 'cascading-local'
-include 'cascading-hadoop2-common'
-include 'cascading-hadoop2-io'
-include 'cascading-hadoop2-mr1'
-include 'cascading-hadoop2-tez'
-include 'cascading-hadoop2-tez-stats'
-include 'cascading-local-hadoop2-io'
-include 'cascading-local-s3'
-include 'cascading-local-kafka'
-include 'cascading-local-splunk'
-include 'cascading-local-neo4j'
-include 'cascading-hadoop2-parquet'
-include 'cascading-hadoop2-parquet-thrift'
-include 'cascading-platform'
+package cascading.tap.parquet.convert;
 
-rootProject.name = 'cascading'
+import cascading.tuple.Tuple;
+import org.apache.parquet.io.api.GroupConverter;
+import org.apache.parquet.io.api.RecordMaterializer;
+import org.apache.parquet.schema.GroupType;
+
+public class TupleRecordMaterializer extends RecordMaterializer<Tuple>
+  {
+
+  private TupleConverter root;
+
+  public TupleRecordMaterializer( GroupType parquetSchema )
+    {
+    this.root = new TupleConverter( parquetSchema );
+    }
+
+  @Override
+  public Tuple getCurrentRecord()
+    {
+    return root.getCurrentTuple();
+    }
+
+  @Override
+  public GroupConverter getRootConverter()
+    {
+    return root;
+    }
+
+  }

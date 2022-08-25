@@ -1,0 +1,14 @@
+
+git filter-repo --path parquet_cascading.md --path parquet-cascading-common23 --path parquet-cascading --path parquet-cascading3
+git filter-repo --use-base-name --path pom.xml --invert-paths
+git filter-repo --use-base-name --path .cache --invert-paths
+git filter-repo --use-base-name --path REVIEWERS.md --invert-paths
+
+merge branch parquet-1.11.x into wip-4.1
+
+This is an import of the deprecated Cascading support in Apache Parquet.
+
+This merge allows the Cascading community to retain and maintain support
+for Parquet.
+
+All files in this commit retain their original copyright.
