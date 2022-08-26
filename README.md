@@ -13,6 +13,7 @@ Cascading 4 includes a few major changes and additions from prior major releases
 * Added native JSON support via the `cascading-nested-json` sub-project
 * Removed `cascading-xml` sub-project
 * Removed Apache Hadoop 1.x support
+* Imported deprecated Apache Parquet classes to retain support and provide enhancements
 
 ## General Information:
 
