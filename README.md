@@ -108,11 +108,11 @@ by setting:
 
 From Gradle, to run a single test case:
 
-    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i
+    > ./gradlew :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest -i
 
 or a single test method:
 
-    > gradle :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i
+    > ./gradlew :cascading-hadoop2-mr1:platformTest --tests=*.FieldedPipesPlatformTest.testNoGroup -i
 
 ## Debugging the Planner
 

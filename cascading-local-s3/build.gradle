@@ -32,7 +32,7 @@ dependencies {
 
   testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
   testImplementation group: 'org.gaul', name: 's3proxy', version: '1.8.0'
-  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
 }
 
 // makes tests pass

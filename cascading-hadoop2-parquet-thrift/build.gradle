@@ -38,8 +38,11 @@ dependencies {
   // this prevents a transitive dependency until it is required downstream
   compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
 
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  testImplementation group: 'commons-io', name: 'commons-io', version: '2.1'
   testImplementation project( ':cascading-hadoop2-mr1' )
-  testImplementation project( path: ':cascading-hadoop2-mr1', configuration: 'testArtifacts' )
+  testImplementation( resolveTests( project( ':cascading-hadoop2-mr1' ) ) )
   // 0.14.1
   testImplementation group: 'org.apache.thrift', name: 'libthrift', version: '0.13.0'
   testImplementation group: 'org.apache.parquet', name: 'parquet-column', version: '1.12.0'

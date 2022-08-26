@@ -21,7 +21,7 @@
 dependencies {
 
   testImplementation project( ':cascading-core' )
-  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
   testImplementation project( ':cascading-expression' )
   testImplementation project( ':cascading-nested-json' )
 

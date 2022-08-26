@@ -32,8 +32,13 @@ dependencies {
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
 
-  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
-  testImplementation project( path: ':cascading-hadoop2-mr1', configuration: 'testArtifacts' )
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
+  testImplementation( project( ':cascading-hadoop2-common' ) )
+  testImplementation( project( ':cascading-hadoop2-mr1' ) )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
+  testImplementation( resolveTests( project( ':cascading-platform' ) ) )
+  testImplementation( resolveTests( project( ':cascading-hadoop2-common' ) ) )
+  testImplementation( resolveTests( project( ':cascading-hadoop2-mr1' ) ) )
 }
 
 configurations.all {
