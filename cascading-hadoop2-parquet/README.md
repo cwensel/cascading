@@ -3,7 +3,7 @@
 The Apache Parquet project deprecated and removed Cascading support. 
 
 This package, `cascading-hadoop2-parquet` and `cascading-hadoop2-parquet-thrift` are imports of the deprecated classes
-into the Cascading project. 
+into the Cascading project. The files imported retain their original Apache Foundation copyright.
 
 We hope to retain and improve Cascading Parquet support over time.
 
