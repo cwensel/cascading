@@ -64,7 +64,6 @@ import cascading.scheme.Scheme;
 import cascading.tap.Tap;
 import cascading.tap.TapException;
 import cascading.tuple.Fields;
-import cascading.util.Update;
 import cascading.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,10 +137,6 @@ public abstract class FlowPlanner<F extends BaseFlow, Config>
 
     return DebugLevel.valueOf( debugLevel );
     }
-
-  {
-  Update.registerPlanner( getClass() );
-  }
 
   public Map<Object, Object> getDefaultProperties()
     {

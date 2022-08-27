@@ -64,7 +64,6 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import cascading.util.ProcessLogger;
 import cascading.util.ShutdownUtil;
-import cascading.util.Update;
 import cascading.util.Util;
 import cascading.util.Version;
 import org.slf4j.Logger;
@@ -1269,7 +1268,6 @@ public abstract class BaseFlow<Config> implements Flow<Config>, ProcessLogger
       throw new IllegalStateException( "to start a Flow call start() or complete(), not Runnable#run()" );
 
     Version.printBanner();
-    Update.checkForUpdate( getPlatformInfo() );
 
     try
       {
