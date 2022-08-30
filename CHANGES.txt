@@ -6,7 +6,7 @@ Cascading Change Log
 
   Updated Apache Tez to version 0.10.1.
 
-  Updated Apache Hadoop to version 3.3.1.
+  Updated Apache Hadoop to version 3.3.4.
 
 4.1 [unreleased]
 

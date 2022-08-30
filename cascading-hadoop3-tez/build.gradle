@@ -20,7 +20,7 @@
 
 apply from: '../etc/testingPlatform.gradle'
 
-ext.hadoop3Version = '3.3.1'
+ext.hadoop3Version = '3.3.4'
 ext.tezVersion = '0.10.1'
 
 if ( System.properties [ 'hadoop3.release.final'] )
