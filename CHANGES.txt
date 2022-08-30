@@ -1,6 +1,6 @@
 Cascading Change Log
 
-4.1 [unreleased]
+4.1
 
   Imported deprecated Parquet Cascading classes from the Apache Parquet project. All files retain their original
   license, copyright, and author attribution.
