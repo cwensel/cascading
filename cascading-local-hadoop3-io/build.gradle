@@ -22,7 +22,7 @@ apply from: '../etc/testingPlatform.gradle'
 
 ext.hadoop3Version = '3.3.4'
 
-if ( System.properties [ 'hadoop3.release.final'] )
+if( System.properties[ 'hadoop3.release.final' ] )
   hadoop3Version = System.properties[ 'hadoop3.release.final' ]
 
 dependencies {
@@ -32,9 +32,13 @@ dependencies {
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
 
-  testImplementation project( ':cascading-hadoop3-mr1' )
-  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
-  testImplementation project( path: ':cascading-hadoop3-mr1', configuration: 'testArtifacts' )
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
+  testImplementation( project( ':cascading-hadoop3-common' ) )
+  testImplementation( project( ':cascading-hadoop3-mr1' ) )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
+  testImplementation( resolveTests( project( ':cascading-platform' ) ) )
+  testImplementation( resolveTests( project( ':cascading-hadoop3-common' ) ) )
+  testImplementation( resolveTests( project( ':cascading-hadoop3-mr1' ) ) )
 }
 
 test {

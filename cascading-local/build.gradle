@@ -28,7 +28,10 @@ dependencies {
 
   api group: 'org.apache.commons', name: 'commons-compress', version: '1.21'
 
-  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
+  testImplementation group: 'commons-io', name: 'commons-io', version: '2.1'
+  testImplementation( project( ':cascading-nested-json' ) )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
+  testImplementation( resolveTests( project( ':cascading-platform' ) ) )
 }
 
 javadoc {

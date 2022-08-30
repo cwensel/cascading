@@ -46,7 +46,7 @@ dependencies {
   // for serializers
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
 
-  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
   testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatabindVersion
 }
 

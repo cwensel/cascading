@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ *
+ * Project and contact information: https://cascading.wensel.net/
+ *
+ * This file is part of the Cascading project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ext.hadoop3Version = '3.3.4'
+
+if ( System.properties [ 'hadoop3.release.final'] )
+  hadoop3Version = System.properties[ 'hadoop3.release.final' ]
+
+dependencies {
+  api project( ':cascading-core' )
+  implementation project( ':cascading-hadoop3-io' )
+  implementation project( ':cascading-nested-json' )
+
+  implementation group: 'org.apache.parquet', name: 'parquet-common', version: '1.12.0'
+  implementation group: 'org.apache.parquet', name: 'parquet-column', version: '1.12.0'
+  implementation group: 'org.apache.parquet', name: 'parquet-hadoop', version: '1.12.0'
+
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
+  compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
+
+  // this prevents a transitive dependency until it is required downstream
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
+  testImplementation( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
+  testImplementation group: 'commons-io', name: 'commons-io', version: '2.1'
+  testImplementation project( ':cascading-hadoop3-mr1' )
+  testImplementation( resolveTests( project( ':cascading-hadoop3-mr1' ) ) )
+  testImplementation group: 'org.apache.parquet', name: 'parquet-column', version: '1.12.0'
+
+  testImplementation group: 'org.apache.thrift', name: 'libthrift', version: '0.13.0'
+  testImplementation group: 'org.apache.parquet', name: 'parquet-column', version: '1.12.0'
+  testImplementation group: 'org.apache.parquet', name: 'parquet-thrift', version: '1.12.0'
+  testImplementation group: 'org.apache.parquet', name: 'parquet-thrift', version: '1.12.0', classifier: 'tests'
+
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'
+  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
+  testRuntimeOnly group: 'log4j', name: 'log4j', version: '1.2.16'
+}

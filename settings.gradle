@@ -33,6 +33,8 @@ include 'cascading-local-s3'
 include 'cascading-local-kafka'
 include 'cascading-local-splunk'
 include 'cascading-local-neo4j'
+include 'cascading-hadoop3-parquet'
+include 'cascading-hadoop3-parquet-thrift'
 include 'cascading-platform'
 
 rootProject.name = 'cascading'

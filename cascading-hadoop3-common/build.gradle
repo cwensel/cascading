@@ -35,8 +35,8 @@ dependencies {
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )
 
-  testImplementation project( path: ':cascading-core', configuration: 'testArtifacts' )
-  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
+  testImplementation( resolveTests( project( ':cascading-platform' ) ) )
   testImplementation project( path: ':cascading-nested-json' )
   testImplementation project( path: ':cascading-expression' )
 

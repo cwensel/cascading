@@ -85,6 +85,12 @@ subprojects {
     }
   }
 
+  plugins.withType( JavaLibraryPlugin ) {
+    java {
+      registerFeature( 'test' ) {usingSourceSet( sourceSets.test )}
+    }
+  }
+
   jar {
     inputs.property( "moduleName", moduleName )
     manifest {
@@ -425,3 +431,10 @@ buildLatestMeta.doLast {
 }"""
   )
 }
+
+def resolveTests( Project project )
+  {
+  dependencies.create( project ) {
+    capabilities {requireCapability( "$project.group:$project.name-test" )}
+  }
+  }

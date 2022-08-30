@@ -57,8 +57,9 @@ dependencies {
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop3Version )
 
 
-  testImplementation project( path: ':cascading-platform', configuration: 'testArtifacts' )
-  testImplementation project( path: ':cascading-hadoop3-common', configuration: 'testArtifacts' )
+  testImplementation( resolveTests( project( ':cascading-core' ) ) )
+  testImplementation( resolveTests( project( ':cascading-platform' ) ) )
+  testImplementation( resolveTests( project( ':cascading-hadoop3-common' ) ) )
 
   testImplementation( group: 'org.apache.tez', name: 'tez-tests', version: tezVersion, classifier: 'tests' )
   testImplementation( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )

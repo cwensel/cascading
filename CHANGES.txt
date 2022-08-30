@@ -8,7 +8,10 @@ Cascading Change Log
 
   Updated Apache Hadoop to version 3.3.4.
 
-4.1 [unreleased]
+4.1
+
+  Imported deprecated Parquet Cascading classes from the Apache Parquet project. All files retain their original
+  license, copyright, and author attribution.
 
   Updated c.t.h.Hfs to honor any declared 'input paths' in the configuration object when calling
   Hfs#getChildIdentifiers. The main tap identifier should be a common path to all input paths.
