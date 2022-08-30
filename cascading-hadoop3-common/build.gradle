@@ -20,7 +20,7 @@
 
 ext.hadoop3Version = '3.3.4'
 
-if ( System.properties [ 'hadoop3.release.final'] )
+if( System.properties[ 'hadoop3.release.final' ] )
   hadoop3Version = System.properties[ 'hadoop3.release.final' ]
 
 dependencies {
@@ -41,6 +41,7 @@ dependencies {
   testImplementation project( path: ':cascading-expression' )
 
   testImplementation( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop3Version )
+  testImplementation( group: 'org.mockito', name: 'mockito-core', version: '4.7.0' )
 }
 
 javadoc {
