@@ -1,6 +1,6 @@
 Cascading Change Log
 
-4.5 [unreleased]
+4.5
 
   Removed support for Apache Hadoop 2.x and Apache Tez 0.8.x.
 

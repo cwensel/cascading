@@ -28,21 +28,23 @@ For project documentation and community support, visit: [cascading.wensel.net](h
 
 The project includes nine Cascading jar files:
 
-* `cascading-core-x.y.z.jar`              - all Cascading Core class files
-* `cascading-expression-x.y.z.jar`        - all Cascading Janino expression operations class files
-* `cascading-nested-json-x.y.z.jar`       - all Cascading JSON operations
-* `cascading-nested-x.y.z.jar`            - all Cascading base classes for nested data-type operations
-* `cascading-local-x.y.z.jar`             - all Cascading Local in-memory mode class files
-* `cascading-local-kafka-x.y.z.jar`       - all Cascading Local support for Apache Kafka
-* `cascading-local-neo4j-x.y.z.jar`       - all Cascading Local support for Neo4j
-* `cascading-local-s3-x.y.z.jar`          - all Cascading Local support for AWS S3
-* `cascading-local-splunk-x.y.z.jar`      - all Cascading Local support for Splunk
-* `cascading-local-hadoop3-io-x.y.z.jar`  - all Cascading Local in-memory mode class files used with Hadoop
-* `cascading-hadoop3-common-x.y.z.jar`    - all Cascading Hadoop 3.x common class files
-* `cascading-hadoop3-io-x.y.z.jar`        - all Cascading Hadoop 3.x HDFS and IO related class files
-* `cascading-hadoop3-mr1-x.y.z.jar`        - all Cascading Hadoop 3.x MapReduce mode class files
-* `cascading-hadoop3-tez-x.y.z.jar`       - all Cascading Hadoop 3.x Tez mode class files
-* `cascading-hadoop3-tez-stats-x.y.z.jar` - all Cascading Tez YARN timeline server class files
+* `cascading-core-x.y.z.jar`                   - all Cascading Core class files
+* `cascading-expression-x.y.z.jar`             - all Cascading Janino expression operations class files
+* `cascading-nested-json-x.y.z.jar`            - all Cascading JSON operations
+* `cascading-nested-x.y.z.jar`                 - all Cascading base classes for nested data-type operations
+* `cascading-local-x.y.z.jar`                  - all Cascading Local in-memory mode class files
+* `cascading-local-kafka-x.y.z.jar`            - all Cascading Local support for Apache Kafka
+* `cascading-local-neo4j-x.y.z.jar`            - all Cascading Local support for Neo4j
+* `cascading-local-s3-x.y.z.jar`               - all Cascading Local support for AWS S3
+* `cascading-local-splunk-x.y.z.jar`           - all Cascading Local support for Splunk
+* `cascading-local-hadoop3-io-x.y.z.jar`       - all Cascading Local in-memory mode class files used with Hadoop
+* `cascading-hadoop3-common-x.y.z.jar`         - all Cascading Hadoop 3.x common class files
+* `cascading-hadoop3-io-x.y.z.jar`             - all Cascading Hadoop 3.x HDFS and IO related class files
+* `cascading-hadoop3-mr1-x.y.z.jar`            - all Cascading Hadoop 3.x MapReduce mode class files
+* `cascading-hadoop3-tez-x.y.z.jar`            - all Cascading Hadoop 3.x Tez mode class files
+* `cascading-hadoop3-tez-stats-x.y.z.jar`      - all Cascading Tez YARN timeline server class files
+* `cascading-hadoop3-parquet-x.y.z.jar`        - all Cascading Parquet class files
+* `cascading-hadoop3-parquet-thrift-x.y.z.jar` - all Cascading Parquet Thrift class files
 
 These class jars, along with, tests, source and javadoc jars, are all available via the Maven repository.
 
