@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -19,10 +19,6 @@
  */
 
 package cascading.scheme.hadoop;
-
-import java.beans.ConstructorProperties;
-import java.io.IOException;
-import java.nio.charset.Charset;
 
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
@@ -45,6 +41,10 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.RecordReader;
+
+import java.beans.ConstructorProperties;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * Class TextDelimited is a sub-class of {@link TextLine}. It provides direct support for delimited text files, like
@@ -1077,7 +1077,7 @@ public class TextDelimited extends TextLine
   @Override
   public String getExtension()
     {
-    switch( getDelimiter().trim() )
+    switch( getDelimiter() )
       {
       case "\t":
         return "tsv";

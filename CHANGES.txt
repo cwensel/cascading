@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.5.1 [unreleased]
 
+  Fix for '.tsv' extension on TextDelimited implementations being unused.
+
 4.5.0
 
   Removed support for Apache Hadoop 2.x and Apache Tez 0.8.x.
