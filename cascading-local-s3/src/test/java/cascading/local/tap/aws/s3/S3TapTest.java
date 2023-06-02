@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -225,7 +225,7 @@ public class S3TapTest extends CascadingTestCase
       assertEquals( IntStream.range( 51, 100 ).sum(), sum );
       }
 
-    assertEquals( "write-read-checkpoint/0099.txt", checkpoint.key );
+    assertEquals( "write-read-checkpoint/0099.tsv", checkpoint.key );
     assertTrue( checkpoint.committed );
     }
 
