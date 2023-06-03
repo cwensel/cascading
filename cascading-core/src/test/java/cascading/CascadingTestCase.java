@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -23,12 +23,9 @@ package cascading;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +37,6 @@ import cascading.flow.planner.FlowPlanner;
 import cascading.flow.stream.graph.StreamGraph;
 import cascading.operation.Aggregator;
 import cascading.operation.Buffer;
-import cascading.operation.ConcreteCall;
 import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.tap.Tap;
@@ -246,319 +242,191 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
 
   public static TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields )
     {
-    return invokeFunction( function, new TupleEntry( arguments ), resultFields );
+    return CascadingTesting.invokeFunction( function, new TupleEntry( arguments ), resultFields );
     }
 
   public static TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields, Map<Object, Object> properties )
     {
-    return invokeFunction( function, new TupleEntry( arguments ), resultFields, properties );
+    return CascadingTesting.invokeFunction( function, new TupleEntry( arguments ), resultFields, properties );
     }
 
   public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields )
     {
-    return invokeFunction( function, arguments, resultFields, new HashMap<Object, Object>() );
+    return CascadingTesting.invokeFunction( function, arguments, resultFields, new HashMap<Object, Object>() );
     }
 
   public static TupleListCollector invokeFunction( Function function, TupleEntry arguments, Fields resultFields, Map<Object, Object> properties )
     {
-    FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( arguments.getFields(), function.getFieldDeclaration() );
-    TupleListCollector collector = new TupleListCollector( resultFields, true );
-
-    operationCall.setArguments( arguments );
-    operationCall.setOutputCollector( collector );
-
-    function.prepare( flowProcess, operationCall );
-    function.operate( flowProcess, operationCall );
-    function.cleanup( flowProcess, operationCall );
-
-    return collector;
+    return CascadingTesting.invokeFunction( function, arguments, resultFields, properties );
     }
 
   public static TupleListCollector invokeFunction( Function function, Tuple[] argumentsArray, Fields resultFields )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeFunction( function, entries, resultFields );
+    return CascadingTesting.invokeFunction( function, argumentsArray, resultFields );
     }
 
   public static TupleListCollector invokeFunction( Function function, Tuple[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeFunction( function, entries, resultFields, properties );
+    return CascadingTesting.invokeFunction( function, argumentsArray, resultFields, properties );
     }
 
   public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    return invokeFunction( function, argumentsArray, resultFields, new HashMap<Object, Object>() );
+    return CascadingTesting.invokeFunction( function, argumentsArray, resultFields, new HashMap<>() );
     }
 
   public static TupleListCollector invokeFunction( Function function, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields(), function.getFieldDeclaration() );
-    TupleListCollector collector = new TupleListCollector( resultFields, true );
-
-    function.prepare( flowProcess, operationCall );
-    operationCall.setOutputCollector( collector );
-
-    for( TupleEntry arguments : argumentsArray )
-      {
-      operationCall.setArguments( arguments );
-      function.operate( flowProcess, operationCall );
-      }
-
-    function.flush( flowProcess, operationCall );
-    function.cleanup( flowProcess, operationCall );
-
-    return collector;
+    return CascadingTesting.invokeFunction( function, argumentsArray, resultFields, properties );
     }
 
   public static boolean invokeFilter( Filter filter, Tuple arguments )
     {
-    return invokeFilter( filter, new TupleEntry( arguments ) );
+    return CascadingTesting.invokeFilter( filter, new TupleEntry( arguments ) );
     }
 
   public static boolean invokeFilter( Filter filter, Tuple arguments, Map<Object, Object> properties )
     {
-    return invokeFilter( filter, new TupleEntry( arguments ), properties );
+    return CascadingTesting.invokeFilter( filter, new TupleEntry( arguments ), properties );
     }
 
   public static boolean invokeFilter( Filter filter, TupleEntry arguments )
     {
-    return invokeFilter( filter, arguments, new HashMap<Object, Object>() );
+    return CascadingTesting.invokeFilter( filter, arguments, new HashMap<Object, Object>() );
     }
 
   public static boolean invokeFilter( Filter filter, TupleEntry arguments, Map<Object, Object> properties )
     {
-    FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( arguments.getFields() );
-
-    operationCall.setArguments( arguments );
-
-    filter.prepare( flowProcess, operationCall );
-
-    boolean isRemove = filter.isRemove( flowProcess, operationCall );
-
-    filter.cleanup( flowProcess, operationCall );
-
-    return isRemove;
+    return CascadingTesting.invokeFilter( filter, arguments, properties );
     }
 
   public static boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeFilter( filter, entries, Collections.emptyMap() );
+    return CascadingTesting.invokeFilter( filter, argumentsArray);
     }
 
   public static boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray, Map<Object, Object> properties )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeFilter( filter, entries, properties );
+    return CascadingTesting.invokeFilter( filter, argumentsArray, properties );
     }
 
   public static boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray )
     {
-    return invokeFilter( filter, argumentsArray, Collections.emptyMap() );
+    return CascadingTesting.invokeFilter( filter, argumentsArray, Collections.emptyMap() );
     }
 
   public static boolean[] invokeFilter( Filter filter, TupleEntry[] argumentsArray, Map<Object, Object> properties )
     {
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields() );
-
-    FlowProcess flowProcess = new TestFlowProcess( properties );
-
-    filter.prepare( flowProcess, operationCall );
-
-    boolean[] results = new boolean[ argumentsArray.length ];
-
-    for( int i = 0; i < argumentsArray.length; i++ )
-      {
-      operationCall.setArguments( argumentsArray[ i ] );
-
-      results[ i ] = filter.isRemove( flowProcess, operationCall );
-      }
-
-    filter.flush( flowProcess, operationCall );
-    filter.cleanup( flowProcess, operationCall );
-
-    return results;
+    return CascadingTesting.invokeFilter( filter, argumentsArray, properties );
     }
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeAggregator( aggregator, entries, resultFields );
+    return CascadingTesting.invokeAggregator( aggregator, argumentsArray, resultFields );
     }
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, Tuple[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeAggregator( aggregator, entries, resultFields, properties );
+    return CascadingTesting.invokeAggregator( aggregator, argumentsArray, resultFields, properties );
     }
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    return invokeAggregator( aggregator, null, argumentsArray, resultFields );
+    return CascadingTesting.invokeAggregator( aggregator, null, argumentsArray, resultFields );
     }
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    return invokeAggregator( aggregator, null, argumentsArray, resultFields, properties );
+    return CascadingTesting.invokeAggregator( aggregator, null, argumentsArray, resultFields, properties );
     }
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    return invokeAggregator( aggregator, group, argumentsArray, resultFields, Collections.emptyMap() );
+    return CascadingTesting.invokeAggregator( aggregator, group, argumentsArray, resultFields, Collections.emptyMap() );
     }
 
   public static TupleListCollector invokeAggregator( Aggregator aggregator, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields(), aggregator.getFieldDeclaration() );
-
-    operationCall.setGroup( group );
-
-    aggregator.prepare( flowProcess, operationCall );
-
-    aggregator.start( flowProcess, operationCall );
-
-    for( TupleEntry arguments : argumentsArray )
-      {
-      operationCall.setArguments( arguments );
-      aggregator.aggregate( flowProcess, operationCall );
-      }
-
-    TupleListCollector collector = new TupleListCollector( resultFields, true );
-    operationCall.setOutputCollector( collector );
-
-    aggregator.complete( flowProcess, operationCall );
-
-    aggregator.cleanup( null, operationCall );
-
-    return collector;
+    return CascadingTesting.invokeAggregator( aggregator, group, argumentsArray, resultFields, properties );
     }
 
   public static TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeBuffer( buffer, entries, resultFields );
+    return CascadingTesting.invokeBuffer( buffer, argumentsArray, resultFields );
     }
 
   public static TupleListCollector invokeBuffer( Buffer buffer, Tuple[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    TupleEntry[] entries = makeArgumentsArray( argumentsArray );
-
-    return invokeBuffer( buffer, entries, resultFields, properties );
+    return CascadingTesting.invokeBuffer( buffer, argumentsArray, resultFields, properties );
     }
 
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    return invokeBuffer( buffer, null, argumentsArray, resultFields );
+    return CascadingTesting.invokeBuffer( buffer, null, argumentsArray, resultFields );
     }
 
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    return invokeBuffer( buffer, null, argumentsArray, resultFields, properties );
+    return CascadingTesting.invokeBuffer( buffer, null, argumentsArray, resultFields, properties );
     }
 
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields )
     {
-    return invokeBuffer( buffer, group, argumentsArray, resultFields, Collections.emptyMap() );
+    return CascadingTesting.invokeBuffer( buffer, group, argumentsArray, resultFields, Collections.emptyMap() );
     }
 
   public static TupleListCollector invokeBuffer( Buffer buffer, TupleEntry group, TupleEntry[] argumentsArray, Fields resultFields, Map<Object, Object> properties )
     {
-    FlowProcess flowProcess = new TestFlowProcess( properties );
-    ConcreteCall operationCall = new ConcreteCall( argumentsArray[ 0 ].getFields(), buffer.getFieldDeclaration() );
-
-    operationCall.setGroup( group );
-
-    buffer.prepare( flowProcess, operationCall );
-    TupleListCollector collector = new TupleListCollector( resultFields, true );
-    operationCall.setOutputCollector( collector );
-
-    operationCall.setArgumentsIterator( Arrays.asList( argumentsArray ).iterator() );
-
-    buffer.operate( flowProcess, operationCall );
-
-    buffer.cleanup( null, operationCall );
-
-    return collector;
-    }
-
-  private static TupleEntry[] makeArgumentsArray( Tuple[] argumentsArray )
-    {
-    TupleEntry[] entries = new TupleEntry[ argumentsArray.length ];
-
-    for( int i = 0; i < argumentsArray.length; i++ )
-      entries[ i ] = new TupleEntry( argumentsArray[ i ] );
-
-    return entries;
+    return CascadingTesting.invokeBuffer( buffer, group, argumentsArray, resultFields, properties );
     }
 
   public static List<Tuple> getSourceAsList( Flow flow ) throws IOException
     {
-    return asCollection( flow, (Tap) flow.getSourcesCollection().iterator().next(), Fields.ALL, new ArrayList<Tuple>() );
+    return CascadingTesting.getSourceAsList( flow );
     }
 
   public static List<Tuple> getSinkAsList( Flow flow ) throws IOException
     {
-    return asCollection( flow, flow.getSink(), Fields.ALL, new ArrayList<Tuple>() );
+    return CascadingTesting.getSinkAsList( flow );
     }
 
   public static List<Tuple> asList( Flow flow, Tap tap ) throws IOException
     {
-    return asCollection( flow, tap, Fields.ALL, new ArrayList<Tuple>() );
+    return CascadingTesting.asList( flow, tap );
     }
 
   public static List<Tuple> asList( Flow flow, Tap tap, Fields selector ) throws IOException
     {
-    return asCollection( flow, tap, selector, new ArrayList<Tuple>() );
+    return CascadingTesting.asList( flow, tap, selector );
     }
 
   public static Set<Tuple> asSet( Flow flow, Tap tap ) throws IOException
     {
-    return asCollection( flow, tap, Fields.ALL, new HashSet<Tuple>() );
+    return CascadingTesting.asSet( flow, tap );
     }
 
   public static Set<Tuple> asSet( Flow flow, Tap tap, Fields selector ) throws IOException
     {
-    return asCollection( flow, tap, selector, new HashSet<Tuple>() );
+    return CascadingTesting.asSet( flow, tap, selector );
     }
 
   public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, C collection ) throws IOException
     {
-    return asCollection( flow, tap, Fields.ALL, collection );
+    return CascadingTesting.asCollection( flow, tap, Fields.ALL, collection );
     }
 
   public static <C extends Collection<Tuple>> C asCollection( Flow flow, Tap tap, Fields selector, C collection ) throws IOException
     {
-    try( TupleEntryIterator iterator = flow.openTapForRead( tap ) )
-      {
-      return asCollection( iterator, selector, collection );
-      }
+    return CascadingTesting.asCollection( flow, tap, selector, collection );
     }
 
   public static <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, C result )
     {
-    while( iterator.hasNext() )
-      result.add( iterator.next().getTupleCopy() );
-
-    return result;
+    return CascadingTesting.asCollection( iterator, Fields.ALL, result );
     }
 
   public static <C extends Collection<Tuple>> C asCollection( TupleEntryIterator iterator, Fields selector, C result )
     {
-    while( iterator.hasNext() )
-      result.add( iterator.next().selectTupleCopy( selector ) );
-
-    return result;
+    return CascadingTesting.asCollection( iterator, selector, result );
     }
   }

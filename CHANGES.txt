@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.5.1 [unreleased]
 
+  Created c.CascadingTesting to provide common utilties to all tests without Junit dependencies.
+
   Fix for '.tsv' extension on TextDelimited implementations being unused.
 
 4.5.0
