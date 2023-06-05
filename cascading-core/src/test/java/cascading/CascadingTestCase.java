@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import cascading.flow.Flow;
@@ -213,31 +214,21 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
 
   public static void validateLength( TupleEntryIterator iterator, int numTuples, int tupleSize, Pattern regex )
     {
-    int count = 0;
+    Consumer<Integer> wrongNumberOfLines = c -> assertEquals( "wrong number of lines", numTuples, (int) c );
 
-    while( iterator.hasNext() )
+    Consumer<Integer> wrongNumberOfElements = tupleSize != -1 ? t -> assertEquals( "wrong number of elements", tupleSize, (int) t ) : t ->
       {
-      TupleEntry tupleEntry = iterator.next();
+      };
 
-      if( tupleSize != -1 )
-        assertEquals( "wrong number of elements", tupleSize, tupleEntry.size() );
-
-      if( regex != null )
-        assertTrue( "regex: " + regex + " does not match: " + tupleEntry.getTuple().toString(), regex.matcher( tupleEntry.getTuple().toString() ).matches() );
-
-      count++;
-      }
-
-    try
+    Consumer<Tuple> verifyTuple = regex != null ? t -> assertTrue( "regex: " + regex + " does not match: " + t.toString(), regex.matcher( t.toString() ).matches() ) : t ->
       {
-      iterator.close();
-      }
-    catch( IOException exception )
-      {
-      throw new RuntimeException( exception );
-      }
+      };
 
-    assertEquals( "wrong number of lines", numTuples, count );
+    CascadingTesting.validateEntries( iterator,
+      wrongNumberOfLines,
+      wrongNumberOfElements,
+      verifyTuple
+    );
     }
 
   public static TupleListCollector invokeFunction( Function function, Tuple arguments, Fields resultFields )
@@ -302,7 +293,7 @@ public abstract class CascadingTestCase extends TestCase implements Serializable
 
   public static boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray )
     {
-    return CascadingTesting.invokeFilter( filter, argumentsArray);
+    return CascadingTesting.invokeFilter( filter, argumentsArray );
     }
 
   public static boolean[] invokeFilter( Filter filter, Tuple[] argumentsArray, Map<Object, Object> properties )

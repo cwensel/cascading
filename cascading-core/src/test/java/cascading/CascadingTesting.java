@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowProcess;
@@ -54,6 +55,33 @@ import cascading.tuple.TupleListCollector;
  */
 public class CascadingTesting implements Serializable
   {
+  public static void validateEntries( TupleEntryIterator iterator, Consumer<Integer> verifyLength, Consumer<Integer> verifyTupleSize, Consumer<Tuple> verifyTuple )
+    {
+    int count = 0;
+
+    while( iterator.hasNext() )
+      {
+      TupleEntry tupleEntry = iterator.next();
+
+      verifyTupleSize.accept( tupleEntry.size() );
+
+      verifyTuple.accept( tupleEntry.getTuple() );
+
+      count++;
+      }
+
+    try
+      {
+      iterator.close();
+      }
+    catch( IOException exception )
+      {
+      throw new RuntimeException( exception );
+      }
+
+    verifyLength.accept( count );
+    }
+
   static class TestFlowProcess extends FlowProcess.NullFlowProcess
     {
     private final Map<Object, Object> properties;
