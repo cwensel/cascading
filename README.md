@@ -2,9 +2,9 @@
 
 Thanks for using [Cascading](https://cascading.wensel.net/).
 
-## Cascading 4.5
+## Cascading 4.6
 
-Cascading 4.5 includes a few major changes and additions from prior major releases:
+Cascading 4.6 includes a few major changes and additions from prior major releases:
 
 * Support for Apache Hadoop 3. and Apache Tez 0.10.x
 * Removed Apache Hadoop 2.x and Apache Tez 0.8.x support
