@@ -23,10 +23,10 @@ apply from: '../etc/testingPlatform.gradle'
 ext.hadoop3Version = '3.3.4'
 ext.tezVersion = '0.10.1'
 
-if ( System.properties [ 'hadoop3.release.final'] )
+if( System.properties[ 'hadoop3.release.final' ] )
   hadoop3Version = System.properties[ 'hadoop3.release.final' ]
 
-if ( System.properties [ 'tez.release.final'] )
+if( System.properties[ 'tez.release.final' ] )
   tezVersion = System.properties[ 'tez.release.final' ]
 
 repositories {
@@ -41,11 +41,11 @@ dependencies {
   api project( ':cascading-hadoop3-io' )
   api project( ':cascading-hadoop3-tez-stats' )
 
-  compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.1'
+  compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
 
   // forces update of yarn slf4j dependencies
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-  compileOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+  compileOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: '1.7.36'
 
   compileOnly( group: 'org.apache.tez', name: 'tez-api', version: tezVersion )
   compileOnly( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
@@ -56,7 +56,6 @@ dependencies {
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-hdfs', version: hadoop3Version )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-aws', version: hadoop3Version )
 
-
   testImplementation( resolveTests( project( ':cascading-core' ) ) )
   testImplementation( resolveTests( project( ':cascading-platform' ) ) )
   testImplementation( resolveTests( project( ':cascading-hadoop3-common' ) ) )
@@ -66,6 +65,7 @@ dependencies {
   testImplementation( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion )
   testImplementation( group: 'org.apache.tez', name: 'tez-yarn-timeline-history-with-acls', version: tezVersion )
   testImplementation( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop3Version )
+  testImplementation( group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1' )
 }
 
 configurations.all {

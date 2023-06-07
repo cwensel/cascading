@@ -26,12 +26,12 @@ dependencies {
 
   implementation group: 'org.apache.kafka', name: 'kafka-clients', version: '2.1.1'
 
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 
-  testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
-  testImplementation group: 'log4j', name: 'log4j', version: '1.2.17'
+  testImplementation group: 'org.slf4j', name: 'slf4j-reload4j', version: '1.7.36'
+  testImplementation group: 'ch.qos.reload4j', name: 'reload4j', version: '1.2.25'
 
-  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
   testImplementation( resolveTests( project( ':cascading-core' ) ) )
 
   testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.16.0'
@@ -39,7 +39,7 @@ dependencies {
 
   testImplementation( group: 'org.apache.kafka', name: 'kafka_2.11', version: '2.1.1' ) {
     exclude module: 'slf4j-simple'
-    exclude module: 'slf4j-log4j12'
+    exclude module: 'slf4j-reload4j'
     exclude module: 'jmxtools'
     exclude module: 'jmxri'
     exclude module: 'jms'
