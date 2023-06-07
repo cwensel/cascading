@@ -23,10 +23,11 @@ dependencies {
   api group: 'net.wensel', name: 'riffle', version: '1.2.0'
 
   // this prevents a transitive dependency until it is required downstream
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
-  testRuntimeOnly group: 'log4j', name: 'log4j', version: '1.2.17'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: '1.7.36'
+
+  testRuntimeOnly group: 'ch.qos.reload4j', name: 'reload4j', version: '1.2.25'
 }
 
 jar.doFirst {

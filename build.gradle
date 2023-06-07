@@ -161,6 +161,11 @@ subprojects {
 
   dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+
+    configurations.configureEach {
+        exclude group: "org.slf4j", module: "slf4j-log4j12"
+        exclude group: "log4j", module: "log4j"
+    }
   }
 
   assemble.dependsOn << prepareDist
