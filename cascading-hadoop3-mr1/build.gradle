@@ -32,8 +32,8 @@ dependencies {
   api project( ':cascading-hadoop3-io' )
 
   // forces update of yarn slf4j dependencies
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-  compileOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+  compileOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: '1.7.36'
 
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop3Version )
   compileOnly( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop3Version )

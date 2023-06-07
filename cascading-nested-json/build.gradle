@@ -23,7 +23,7 @@ ext.hadoop3Version = '3.3.4'
 if ( System.properties [ 'hadoop3.release.final'] )
   hadoop3Version = System.properties[ 'hadoop3.release.final' ]
 
-ext.jacksonDatabindVersion = '2.12.4'
+ext.jacksonDatabindVersion = '2.15.2'
 ext.jacksonDatatypeGuavaVersion = jacksonDatabindVersion
 ext.jacksonDataFormatsVersion = jacksonDatabindVersion
 
@@ -39,7 +39,7 @@ dependencies {
 
   api group: 'io.heretical', name: 'pointer-path-json', version: '1.1.0'
 
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 
   api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-ion', version: jacksonDatabindVersion
 

@@ -24,7 +24,7 @@ dependencies {
   api project( ':cascading-core' )
 
   implementation group: 'com.google.guava', name: 'guava', version: '14.0.1'
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 
   api group: 'org.apache.commons', name: 'commons-compress', version: '1.21'
 

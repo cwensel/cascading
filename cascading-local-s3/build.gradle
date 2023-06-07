@@ -22,16 +22,16 @@ dependencies {
 
   implementation project( ':cascading-local' )
 
-  implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.39'
+  implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.232'
   implementation group: 'com.google.guava', name: 'guava', version: '24.0-jre'
 
-  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+  compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 
-  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
-  testRuntimeOnly group: 'log4j', name: 'log4j', version: '1.2.17'
+  testRuntimeOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: '1.7.36'
+  testRuntimeOnly group: 'ch.qos.reload4j', name: 'reload4j', version: '1.2.25'
 
-  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
-  testImplementation group: 'org.gaul', name: 's3proxy', version: '1.8.0'
+  testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+  testImplementation group: 'org.gaul', name: 's3proxy', version: '1.9.0'
   testImplementation( resolveTests( project( ':cascading-core' ) ) )
 }
 
