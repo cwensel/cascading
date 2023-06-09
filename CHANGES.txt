@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.6.0 [unreleased]
 
+  Update Apache Tez to version 0.10.2. Add missing method to c.s.t.u.TezTimelineClient.
+
   Update slf4j to version 1.7.36 and replace log4j with reload4j.
 
   Updated jackson to 2.15.2
