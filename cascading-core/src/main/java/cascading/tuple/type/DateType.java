@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -34,7 +34,7 @@ import cascading.tuple.coerce.Coercions;
 import cascading.util.Util;
 
 /**
- * Class DateCoercibleType is an implementation of {@link CoercibleType}.
+ * Class DateType is an implementation of {@link CoercibleType}.
  * <p>
  * Given a {@code dateFormatString}, using the {@link SimpleDateFormat} format, this CoercibleType
  * will convert a value from the formatted string to a {@code Long} canonical type and back.
