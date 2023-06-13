@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -23,6 +23,7 @@ package cascading.tap;
 import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import cascading.flow.Flow;
@@ -45,9 +46,18 @@ public class AdaptorTap<TConfig, TInput, TOutput, OConfig, OInput, OOutput> exte
   protected Tap<OConfig, OInput, OOutput> original;
   protected Function<FlowProcess<? extends TConfig>, FlowProcess<? extends OConfig>> processProvider;
   protected Function<TConfig, OConfig> configProvider;
+  protected BiConsumer<OConfig, TConfig> configReturn;
 
   @ConstructorProperties({"original", "processProvider", "configProvider"})
   public AdaptorTap( Tap<OConfig, OInput, OOutput> original, Function<FlowProcess<? extends TConfig>, FlowProcess<? extends OConfig>> processProvider, Function<TConfig, OConfig> configProvider )
+    {
+    this( original, processProvider, configProvider, ( a, b ) ->
+      {
+      } );
+    }
+
+  @ConstructorProperties({"original", "processProvider", "configProvider", "configReturn"})
+  public AdaptorTap( Tap<OConfig, OInput, OOutput> original, Function<FlowProcess<? extends TConfig>, FlowProcess<? extends OConfig>> processProvider, Function<TConfig, OConfig> configProvider, BiConsumer<OConfig, TConfig> configReturn )
     {
     setOriginal( original );
 
@@ -59,6 +69,7 @@ public class AdaptorTap<TConfig, TInput, TOutput, OConfig, OInput, OOutput> exte
 
     this.processProvider = processProvider;
     this.configProvider = configProvider;
+    this.configReturn = configReturn;
     }
 
   public Tap<OConfig, OInput, OOutput> getOriginal()
@@ -95,13 +106,17 @@ public class AdaptorTap<TConfig, TInput, TOutput, OConfig, OInput, OOutput> exte
   @Override
   public void sourceConfInit( FlowProcess<? extends TConfig> flowProcess, TConfig conf )
     {
-    original.sourceConfInit( processProvider.apply( flowProcess ), configProvider.apply( conf ) );
+    OConfig apply = configProvider.apply( conf );
+    original.sourceConfInit( processProvider.apply( flowProcess ), apply );
+    configReturn.accept( apply, conf );
     }
 
   @Override
   public void sinkConfInit( FlowProcess<? extends TConfig> flowProcess, TConfig conf )
     {
-    original.sinkConfInit( processProvider.apply( flowProcess ), configProvider.apply( conf ) );
+    OConfig apply = configProvider.apply( conf );
+    original.sinkConfInit( processProvider.apply( flowProcess ), apply );
+    configReturn.accept( apply, conf );
     }
 
   @Override

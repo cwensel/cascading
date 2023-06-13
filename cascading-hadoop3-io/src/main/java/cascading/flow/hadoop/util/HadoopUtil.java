@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -194,7 +194,8 @@ public class HadoopUtil
 
       return constructor.newInstance( parent );
       }
-    catch( NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException exception )
+    catch( NoSuchMethodException | InvocationTargetException | InstantiationException |
+           IllegalAccessException exception )
       {
       throw new CascadingException( "unable to create copy of: " + type );
       }
@@ -235,10 +236,15 @@ public class HadoopUtil
     if( jobConf == null )
       return properties;
 
-    for( Map.Entry<String, String> entry : jobConf )
-      properties.put( entry.getKey(), entry.getValue() );
+    copyConfigurationInto( jobConf, properties );
 
     return properties;
+    }
+
+  public static void copyConfigurationInto( Configuration jobConf, Map<Object, Object> properties )
+    {
+    for( Map.Entry<String, String> entry : jobConf )
+      properties.put( entry.getKey(), entry.getValue() );
     }
 
   public static Thread getHDFSShutdownHook()

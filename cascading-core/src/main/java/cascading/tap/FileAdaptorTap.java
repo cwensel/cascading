@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -22,6 +22,7 @@ package cascading.tap;
 
 import java.beans.ConstructorProperties;
 import java.io.IOException;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import cascading.flow.FlowProcess;
@@ -38,6 +39,15 @@ public class FileAdaptorTap<TConfig, TInput, TOutput, OConfig, OInput, OOutput> 
   public FileAdaptorTap( Tap<OConfig, OInput, OOutput> original, Function<FlowProcess<? extends TConfig>, FlowProcess<? extends OConfig>> processProvider, Function<TConfig, OConfig> configProvider )
     {
     super( original, processProvider, configProvider );
+
+    if( !( original instanceof FileType ) )
+      throw new IllegalArgumentException( "original Tap must be of type: " + FileType.class.getName() );
+    }
+
+  @ConstructorProperties({"original", "processProvider", "configProvider", "configReturn"})
+  public FileAdaptorTap( Tap<OConfig, OInput, OOutput> original, Function<FlowProcess<? extends TConfig>, FlowProcess<? extends OConfig>> processProvider, Function<TConfig, OConfig> configProvider, BiConsumer<OConfig, TConfig> configReturn )
+    {
+    super( original, processProvider, configProvider, configReturn );
 
     if( !( original instanceof FileType ) )
       throw new IllegalArgumentException( "original Tap must be of type: " + FileType.class.getName() );
