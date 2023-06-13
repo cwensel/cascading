@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -48,6 +48,6 @@ public class LocalHfsAdaptor extends FileAdaptorTap<Properties, InputStream, Out
   @ConstructorProperties("original")
   public LocalHfsAdaptor( Tap<Configuration, RecordReader, OutputCollector> original )
     {
-    super( original, LocalHadoopFlowProcess::new, HadoopUtil::createJobConf );
+    super( original, LocalHadoopFlowProcess::new, HadoopUtil::createJobConf, HadoopUtil::copyConfigurationInto );
     }
   }
