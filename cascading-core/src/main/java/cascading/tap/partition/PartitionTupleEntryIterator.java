@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -50,7 +50,7 @@ public class PartitionTupleEntryIterator implements Iterator<Tuple>
       }
     catch( Exception exception )
       {
-      throw new TapException( "unable to parse partition given parent: " + parentIdentifier + " and child: " + childIdentifier );
+      throw new TapException( "unable to parse partition given parent: " + parentIdentifier + " and child: " + childIdentifier, exception );
       }
 
     base = TupleViews.createOverride( sourceFields, partitionEntry.getFields() );
