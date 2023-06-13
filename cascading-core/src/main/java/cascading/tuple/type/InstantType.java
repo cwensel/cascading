@@ -184,7 +184,7 @@ public final class InstantType implements CoercibleType<Instant>
     if( from != Instant.class )
       throw new IllegalStateException( "was not normalized" );
 
-    if( to == Instant.class || to.getClass() == InstantType.class )
+    if( to == Instant.class || to instanceof InstantType )
       return (Coerce) value;
 
     if( to == Long.class || to == long.class )
@@ -192,6 +192,9 @@ public final class InstantType implements CoercibleType<Instant>
 
     if( to == String.class )
       return (Coerce) getDateTimeFormatter().format( (Instant) value );
+
+    if( to instanceof DateType )
+      return (Coerce) (Long) ( (Instant) value ).toEpochMilli();
 
     throw new CascadingException( "unknown type coercion requested, from: " + Util.getTypeName( from ) + " to: " + Util.getTypeName( to ) );
     }

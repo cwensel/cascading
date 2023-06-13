@@ -23,6 +23,7 @@ package cascading.tuple.type;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -191,6 +192,9 @@ public class DateType implements CoercibleType<Long>
 
     if( to == String.class )
       return toString( (Long) value );
+
+    if( to == Instant.class || to instanceof InstantType  )
+      return Instant.ofEpochMilli( (Long) value );
 
     Coercions.Coerce<?> coerce = Coercions.coercions.get( to );
 
