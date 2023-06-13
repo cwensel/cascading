@@ -28,10 +28,11 @@ dependencies {
   api project( ':cascading-hadoop3-parquet' )
   implementation project( ':cascading-hadoop3-io' )
 
-  implementation group: 'org.apache.parquet', name: 'parquet-common', version: '1.12.0'
-  implementation group: 'org.apache.parquet', name: 'parquet-column', version: '1.12.0'
-  implementation group: 'org.apache.parquet', name: 'parquet-thrift', version: '1.12.0'
-  implementation group: 'org.apache.parquet', name: 'parquet-hadoop', version: '1.12.0'
+  def parquetVersion = '1.12.0'
+  implementation group: 'org.apache.parquet', name: 'parquet-common', version: parquetVersion
+  implementation group: 'org.apache.parquet', name: 'parquet-column', version: parquetVersion
+  implementation group: 'org.apache.parquet', name: 'parquet-thrift', version: parquetVersion
+  implementation group: 'org.apache.parquet', name: 'parquet-hadoop', version: parquetVersion
 
   compileOnly group: 'org.apache.thrift', name: 'libthrift', version: '0.13.0'
 
@@ -48,8 +49,8 @@ dependencies {
   testImplementation( resolveTests( project( ':cascading-hadoop3-mr1' ) ) )
   // 0.14.1
   testImplementation group: 'org.apache.thrift', name: 'libthrift', version: '0.13.0'
-  testImplementation group: 'org.apache.parquet', name: 'parquet-column', version: '1.12.0'
-  testImplementation group: 'org.apache.parquet', name: 'parquet-thrift', version: '1.12.0', classifier: 'tests'
+  testImplementation group: 'org.apache.parquet', name: 'parquet-column', version: parquetVersion
+  testImplementation group: 'org.apache.parquet', name: 'parquet-thrift', version: parquetVersion, classifier: 'tests'
 
   testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
   testRuntimeOnly group: 'org.slf4j', name: 'slf4j-reload4j', version: '1.7.36'
