@@ -28,7 +28,7 @@ dependencies {
   api project( ':cascading-hadoop3-parquet' )
   implementation project( ':cascading-hadoop3-io' )
 
-  def parquetVersion = '1.12.0'
+  def parquetVersion = '1.13.1'
   implementation group: 'org.apache.parquet', name: 'parquet-common', version: parquetVersion
   implementation group: 'org.apache.parquet', name: 'parquet-column', version: parquetVersion
   implementation group: 'org.apache.parquet', name: 'parquet-thrift', version: parquetVersion
