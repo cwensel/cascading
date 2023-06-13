@@ -28,7 +28,7 @@ dependencies {
   implementation project( ':cascading-hadoop3-io' )
   implementation project( ':cascading-nested-json' )
 
-  def parquetVersion = '1.12.0'
+  def parquetVersion = '1.13.1'
   implementation group: 'org.apache.parquet', name: 'parquet-common', version: parquetVersion
   implementation group: 'org.apache.parquet', name: 'parquet-column', version: parquetVersion
   implementation group: 'org.apache.parquet', name: 'parquet-hadoop', version: parquetVersion
