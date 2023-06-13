@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -34,6 +34,7 @@ import org.apache.parquet.hadoop.thrift.ThriftReadSupport;
 import org.apache.parquet.thrift.TBaseRecordConverter;
 import org.apache.thrift.TBase;
 
+@Deprecated
 public class ParquetTBaseScheme<T extends TBase<?, ?>> extends ParquetValueScheme<T>
   {
 

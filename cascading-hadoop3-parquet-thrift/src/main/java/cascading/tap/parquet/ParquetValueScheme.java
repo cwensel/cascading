@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -48,6 +48,7 @@ import static org.apache.parquet.Preconditions.checkNotNull;
  * This is an abstract class; implementations are expected to set up their Input/Output Formats
  * correctly in the respective Init methods.
  */
+@Deprecated
 public abstract class ParquetValueScheme<T> extends Scheme<JobConf, RecordReader, OutputCollector, Object[], Object[]>
   {
 

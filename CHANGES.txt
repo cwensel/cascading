@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.6.0 [unreleased]
 
+  Added c.t.p.TypedParquetScheme to support reading and writing Parquet files while honoring type information.
+  Deprecated c.t.p.ParquetScheme and c.t.p.ParquetTBaseScheme.
+
   Added c.t.t.InstantType to support java.time.Instant canonical type.
 
   Updated Apache Tez to version 0.10.2. Add missing method to c.s.t.u.TezTimelineClient.
