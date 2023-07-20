@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.6.0 [unreleased]
 
+  Updated c.t.h.i.TapOutputCollector to initialize the filenamePattern after Tap#sinkConfInit has been called.
+
   Fixed issue where c.t.l.h.LocalHfsAdaptor would not copy back applied properties during source/sink init phase.
 
   Updated Apache Parquet to version 1.13.1.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -87,7 +87,6 @@ public class TapOutputCollector implements OutputCollector, Closeable
     this.prefix = prefix == null || prefix.length() == 0 ? null : prefix;
     this.flowProcess = flowProcess;
     this.conf = this.flowProcess.getConfigCopy();
-    this.filenamePattern = this.conf.get( "cascading.tapcollector.partname", sequence == -1 ? PART_TASK_PATTERN : PART_TASK_SEQ_PATTERN );
 
     initialize();
     }
@@ -95,6 +94,9 @@ public class TapOutputCollector implements OutputCollector, Closeable
   protected void initialize() throws IOException
     {
     tap.sinkConfInit( flowProcess, conf );
+
+    // initialize after sinkConfInit so it may be overriden per tap
+    filenamePattern = conf.get( "cascading.tapcollector.partname", sequence == -1 ? PART_TASK_PATTERN : PART_TASK_SEQ_PATTERN );
 
     OutputFormat outputFormat = asJobConfInstance( conf ).getOutputFormat();
 
