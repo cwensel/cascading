@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2023 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -100,9 +100,18 @@ public class AppProps extends Props
    * @param properties of type Map
    * @return Class
    */
-  public static Class getApplicationJarClass( Map<Object, Object> properties )
+  public static Class<?> getApplicationJarClass( Map<Object, Object> properties )
     {
-    String className = PropertyUtil.getProperty( properties, DEP_APP_JAR_CLASS, (String) null );
+    // updated to retain compatibility with older versions
+    Object type = PropertyUtil.getProperty( properties, DEP_APP_JAR_CLASS, null );
+
+    if( type instanceof Class )
+      {
+      LOG.warn( "using deprecated property: {}, use instead: {}", DEP_APP_JAR_CLASS, APP_JAR_CLASS );
+      return (Class<?>) type;
+      }
+
+    String className = (String) type;
 
     if( className != null )
       {
@@ -110,9 +119,16 @@ public class AppProps extends Props
       return Util.loadClassSafe( className );
       }
 
-    className = PropertyUtil.getProperty( properties, APP_JAR_CLASS, (String) null );
+    type = PropertyUtil.getProperty( properties, APP_JAR_CLASS, null );
+
+    if( type instanceof Class )
+      return (Class<?>) type;
+
+    className = (String) type;
+
     if( className == null )
       return null;
+
     return Util.loadClassSafe( className );
     }
 
@@ -180,7 +196,9 @@ public class AppProps extends Props
     return appID;
     }
 
-  /** Sets the static appID value to null. For debugging purposes. */
+  /**
+   * Sets the static appID value to null. For debugging purposes.
+   */
   public static void resetAppID()
     {
     appID = null;

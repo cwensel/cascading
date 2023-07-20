@@ -2,9 +2,12 @@ Cascading Change Log
 
 4.5.1 [unreleased]
 
+  Updated c.p.AppProps#getApplicationJarClass to test if property is a j.l.Class instance in order to retain
+  backwards compatibility.
+
   Created c.CascadingTesting to provide common utilities to all tests without Junit dependencies.
 
-  Fix for '.tsv' extension on TextDelimited implementations being unused.
+  Fixed '.tsv' extension on TextDelimited implementations being unused.
 
 4.5.0
 
