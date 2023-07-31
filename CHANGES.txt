@@ -1,6 +1,6 @@
 Cascading Change Log
 
-4.5.1 [unreleased]
+4.5.1
 
   Updated Apache Tez to version 0.10.2.
 
