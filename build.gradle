@@ -1,7 +1,5 @@
-import java.text.SimpleDateFormat
-
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2024 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -19,6 +17,10 @@ import java.text.SimpleDateFormat
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import java.text.SimpleDateFormat
+
+
 
 /*
  Using:
@@ -235,6 +237,7 @@ subprojects {
   }
 
   signing {
+    useGpgCmd()
     sign publishing.publications.maven
   }
 
