@@ -36,8 +36,8 @@ import java.text.SimpleDateFormat
 */
 plugins {
   id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
-  id 'me.champeau.jmh' version '0.6.5' apply false
-  id 'io.morethan.jmhreport' version '0.9.0' apply false
+  id 'me.champeau.jmh' version '0.7.2' apply false
+  id 'io.morethan.jmhreport' version '0.9.6' apply false
 }
 
 apply from: 'etc/version.gradle'

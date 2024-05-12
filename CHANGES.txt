@@ -2,6 +2,9 @@ Cascading Change Log
 
 4.5.2 [unreleased]
 
+  Fixed issue in c.t.Fields where the pos map was the source of a memory leak under certain conditions.
+  The IdentityHashMap was replaced with a WeakHashMap to prevent the leak.
+
 4.5.1
 
   Updated Apache Tez to version 0.10.2.
