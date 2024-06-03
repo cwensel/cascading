@@ -48,7 +48,7 @@ jobs:
       - name: Publish Release to Maven Central
         if: ${{ !contains( github.ref, 'wip-' ) }}
         env:
-          GRADLE_OPTS: -Dbuild.number=${{ env.BUILD_NUMBER }} -Dbuild.vcs.number=${{ github.sha }} -Dbuild.vcs.branch=${{ github.ref }}
+          GRADLE_OPTS: -Dcascading.release.final=true -Dbuild.number=${{ env.BUILD_NUMBER }} -Dbuild.vcs.number=${{ github.sha }} -Dbuild.vcs.branch=${{ github.ref }}
           MCR_USERNAME: ${{ secrets.MCR_USERNAME }}
           MCR_PASSWORD: ${{ secrets.MCR_PASSWORD }}
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -Psigning.gnupg.keyName=${{ secrets.GPG_SECRET_KEY_ID }} -Psigning.gnupg.passphrase=${{ secrets.GPG_SECRET_KEY_PASSWORD }}
