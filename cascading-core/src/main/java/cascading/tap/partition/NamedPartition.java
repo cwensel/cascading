@@ -107,7 +107,7 @@ public class NamedPartition extends DelimitedPartition
     return keyValuePattern;
     }
 
-  private Map<String, Integer> getPosMap()
+  protected Map<String, Integer> getPosMap()
     {
     if( posMap != null )
       return posMap;
