@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-ext.hadoop3Version = '3.3.4'
+ext.hadoop3Version = '3.3.6'
 
 if( System.properties[ 'hadoop3.release.final' ] )
   hadoop3Version = System.properties[ 'hadoop3.release.final' ]

@@ -44,7 +44,6 @@ import org.apache.tez.dag.api.client.VertexStatus;
  */
 public class TezTimelineClient extends DAGClient implements TimelineClient
   {
-
   private final String dagId;
   private final FrameworkClient frameworkClient;
   private final DAGClient dagClient;

@@ -19,11 +19,23 @@ Cascading Change Log
 
   Updated jackson to 2.15.2
 
-4.5.1 [unreleased]
+4.5.2
+
+  Fixed issue in c.t.Fields where the pos map was the source of a memory leak under certain conditions.
+  The IdentityHashMap was replaced with a WeakHashMap to prevent the leak.
+
+4.5.1
+
+  Updated Apache Tez to version 0.10.2.
+
+  Updated Apache Hadoop to version 3.3.6.
+
+  Updated c.p.AppProps#getApplicationJarClass to test if property is a j.l.Class instance in order to retain
+  backwards compatibility.
 
   Created c.CascadingTesting to provide common utilities to all tests without Junit dependencies.
 
-  Fix for '.tsv' extension on TextDelimited implementations being unused.
+  Fixed '.tsv' extension on TextDelimited implementations being unused.
 
 4.5.0
 
