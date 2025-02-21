@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * Class JSONCopyIntoFunction provides for the ability to update an existing JSON objects from an existing
  * JSON object.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedBaseCopyFunction for more details.
  */
 public class JSONCopyIntoFunction extends NestedBaseCopyFunction<JsonNode, ArrayNode>

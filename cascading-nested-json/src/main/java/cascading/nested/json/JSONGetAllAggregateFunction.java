@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * <p>
  * See {@link cascading.nested.core.aggregate.SimpleNestedAggregate} for a convenient base implementation.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedGetAllAggregateFunction for more details.
  */
 public class JSONGetAllAggregateFunction extends NestedGetAllAggregateFunction<JsonNode, ArrayNode>

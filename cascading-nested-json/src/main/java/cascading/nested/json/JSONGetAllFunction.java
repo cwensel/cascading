@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * descent reference, {@code /person/**}{@code /name}. In the later case, use an empty pointer, {@code ""}, to reference
  * the value of the array. Rely on the {@code fieldDeclaration} to coerce this value appropriately.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedGetAllFunction for more details.
  */
 public class JSONGetAllFunction extends NestedGetAllFunction<JsonNode, ArrayNode>

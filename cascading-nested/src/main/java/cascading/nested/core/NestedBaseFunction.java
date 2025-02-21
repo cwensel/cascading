@@ -123,12 +123,17 @@ public abstract class NestedBaseFunction<Node, Result> extends NestedBaseOperati
         {
         Fields argument = iterator.next();
 
-        Pointer<Node> pointer = compiler.compile( rootPointer + "/" + argument.get( 0 ).toString() );
+        Pointer<Node> pointer = compiler.compile( rootPointer + "/" + escapePointerElement( argument.get( 0 ).toString() ) );
         resolvedPointers.put( argument, new Pair<>( defaultValueFilter, pointer ) );
         }
       }
 
     operationCall.setContext( new Context( resolvedPointers, Tuple.size( 1 ) ) );
+    }
+
+  protected String escapePointerElement( String element )
+    {
+    return element;
     }
 
   @Override

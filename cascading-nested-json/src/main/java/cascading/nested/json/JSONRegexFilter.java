@@ -30,7 +30,7 @@ import cascading.nested.core.NestedRegexFilter;
 /**
  * Class JSONRegexFilter provides for the ability to to filter a tuple stream based on the values in a JSON object.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedRegexFilter for more details.
  */
 public class JSONRegexFilter extends NestedRegexFilter

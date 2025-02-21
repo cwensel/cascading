@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.6.0 [unreleased]
 
+  Updated JSON nested operations to properly escape any dynamically created JSONPointer instances.
+
   Updated c.t.h.i.TapOutputCollector to initialize the filenamePattern after Tap#sinkConfInit has been called.
 
   Fixed issue where c.t.l.h.LocalHfsAdaptor would not copy back applied properties during source/sink init phase.

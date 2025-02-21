@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class JSONSetFunction provides for the ability to simply set multiple tuple values onto an existing JSON object.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedSetFunction for more details.
  */
 public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
@@ -144,5 +144,12 @@ public class JSONSetFunction extends NestedSetFunction<JsonNode, ArrayNode>
   public JSONSetFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, Map<Fields, String> pointerMap )
     {
     super( coercibleType, fieldDeclaration, pointerMap );
+    }
+
+  @Override
+  protected String escapePointerElement( String element )
+    {
+    // https://datatracker.ietf.org/doc/html/draft-ietf-appsawg-json-pointer-03#section-3
+    return element.replace( "~", "~0" ).replace( "/", "~1" );
     }
   }

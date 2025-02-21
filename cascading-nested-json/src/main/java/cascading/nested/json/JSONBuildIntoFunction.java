@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 /**
  * Class JSONBuildIntoFunction provides for the ability to update existing JSON objects from streamed tuple values.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedBaseBuildFunction for more details.
  */
 public class JSONBuildIntoFunction extends NestedBaseBuildFunction<JsonNode, ArrayNode>

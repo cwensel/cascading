@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * Class JSONGetFunction provides the ability to convert a JSON object into a single tuple where each
  * field value is referenced by a Json pointer in the object.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedGetFunction for more details.
  */
 public class JSONGetFunction extends NestedGetFunction<JsonNode, ArrayNode>

@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * will be set on the final JSON object. This is useful for prevent null values from being set, artificially
  * increasing the size of the final object.
  *
- * @see <a href=https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-03">draft-ietf-appsawg-json-pointer-03</a>
  * @see NestedCreateFunction for more details.
  */
 public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode>
@@ -276,5 +276,12 @@ public class JSONCreateFunction extends NestedCreateFunction<JsonNode, ArrayNode
   public JSONCreateFunction( JSONCoercibleType coercibleType, Fields fieldDeclaration, SerPredicate<?> defaultValueFilter, Map<Fields, String> pointerMap )
     {
     super( coercibleType, fieldDeclaration, defaultValueFilter, pointerMap );
+    }
+
+  @Override
+  protected String escapePointerElement( String element )
+    {
+    // https://datatracker.ietf.org/doc/html/draft-ietf-appsawg-json-pointer-03#section-3
+    return element.replace( "~", "~0" ).replace( "/", "~1" );
     }
   }
