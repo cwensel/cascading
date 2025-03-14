@@ -506,6 +506,30 @@ public abstract class BasePartitionTap<Config, Input, Output> extends Tap<Config
     }
 
   @Override
+  public Fields retrieveSourceFields( FlowProcess<? extends Config> flowProcess )
+    {
+    return parent.retrieveSourceFields( flowProcess );
+    }
+
+  @Override
+  public void presentSourceFields( FlowProcess<? extends Config> flowProcess, Fields fields )
+    {
+    parent.presentSourceFields( flowProcess, fields );
+    }
+
+  @Override
+  public Fields retrieveSinkFields( FlowProcess<? extends Config> flowProcess )
+    {
+    return parent.retrieveSinkFields( flowProcess );
+    }
+
+  @Override
+  public void presentSinkFields( FlowProcess<? extends Config> flowProcess, Fields fields )
+    {
+    parent.presentSinkFields( flowProcess, fields );
+    }
+
+  @Override
   public long getSize( FlowProcess<? extends Config> flowProcess ) throws IOException
     {
     return castFileType().getSize( flowProcess );
