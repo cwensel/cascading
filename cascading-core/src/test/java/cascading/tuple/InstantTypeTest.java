@@ -23,6 +23,7 @@ package cascading.tuple;
 import java.time.Instant;
 
 import cascading.CascadingTestCase;
+import cascading.tuple.coerce.Coercions;
 import cascading.tuple.type.InstantType;
 import org.junit.Test;
 
