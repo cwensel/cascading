@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2022 The Cascading Authors. All Rights Reserved.
+ * Copyright (c) 2007-2025 The Cascading Authors. All Rights Reserved.
  *
  * Project and contact information: https://cascading.wensel.net/
  *
@@ -51,44 +51,80 @@ import org.slf4j.LoggerFactory;
  */
 public class DelimitedParser implements Serializable
   {
-  /** Field LOG */
+  /**
+   * Field LOG
+   */
   private static final Logger LOG = LoggerFactory.getLogger( DelimitedParser.class );
 
-  /** Field SPECIAL_REGEX_CHARS */
+  /**
+   * Field SPECIAL_REGEX_CHARS
+   */
   static final String SPECIAL_REGEX_CHARS = "([\\]\\[|.*<>\\\\$^?()=!+])";
-  /** Field QUOTED_REGEX_FORMAT */
+  /**
+   * Field QUOTED_REGEX_FORMAT
+   */
   static final String QUOTED_REGEX_FORMAT = "%2$s(?=(?:[^%1$s]*%1$s[^%1$s]*[^%1$s%2$s]*%1$s)*(?![^%1$s]*%1$s))";
-  /** Field CLEAN_REGEX_FORMAT */
+  /**
+   * Field CLEAN_REGEX_FORMAT
+   */
   static final String CLEAN_REGEX_FORMAT = "^(?:%1$s)(.*)(?:%1$s)$";
-  /** Field ESCAPE_REGEX_FORMAT */
+  /**
+   * Field ESCAPE_REGEX_FORMAT
+   */
   static final String ESCAPE_REGEX_FORMAT = "(%1$s%1$s)";
 
-  /** Field sourceFields */
+  /**
+   * Field sourceFields
+   */
   protected Fields sourceFields;
 
-  /** Field splitPattern */
+  /**
+   * Field splitPattern
+   */
   protected Pattern splitPattern;
-  /** Field cleanPattern */
+  /**
+   * Field cleanPattern
+   */
   protected Pattern cleanPattern;
-  /** Field escapePattern */
+  /**
+   * Field escapePattern
+   */
   protected Pattern escapePattern;
-  /** Field delimiter * */
+  /**
+   * Field delimiter *
+   */
   protected String delimiter;
-  /** Field quote */
+  /**
+   * Field quote
+   */
   protected String quote;
-  /** Field strict */
+  /**
+   * Field strict
+   */
   protected boolean strict = true; // need to cache value across resets
-  /** Field enforceStrict */
+  /**
+   * Field enforceStrict
+   */
   protected boolean enforceStrict = true;
-  /** Field numValues */
+  /**
+   * Field numValues
+   */
   protected int numValues;
-  /** Field types */
+  /**
+   * Field types
+   */
   protected Type[] types;
-  /** Fields coercibles */
+  /**
+   * Fields coercibles
+   */
   protected ToCanonical<String, ?>[] canonicals;
-  /** Field safe */
+  /**
+   * Field safe
+   */
   protected boolean safe = true;
-  /** fieldTypeResolver */
+  /**
+   * fieldTypeResolver
+   */
   protected FieldTypeResolver fieldTypeResolver;
 
   public DelimitedParser( String delimiter, String quote, Class[] types )
@@ -454,10 +490,13 @@ public class DelimitedParser implements Serializable
         {
         String valueString = value.toString();
 
-        if( valueString.contains( quote ) )
+        boolean hasQuote = valueString.contains( quote );
+        boolean hasDelimiter = valueString.contains( delimiter );
+
+        if( hasQuote )
           valueString = valueString.replaceAll( quote, quote + quote );
 
-        if( valueString.contains( delimiter ) )
+        if( hasDelimiter || hasQuote )
           valueString = quote + valueString + quote;
 
         buffer.append( valueString );

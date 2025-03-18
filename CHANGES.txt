@@ -2,6 +2,8 @@ Cascading Change Log
 
 4.6.0 [unreleased]
 
+  Fixed issue in c.s.u.DelimitedParser where the joiner would not properly quote fields with escaped quotes on write.
+
   Fixed issue where c.t.p.BasePartitionTap would not forward some methods to the parent c.t.Tap instance.
 
   Updated JSON nested operations to properly escape any dynamically created JSONPointer instances.
